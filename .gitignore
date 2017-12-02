@@ -36,3 +36,4 @@
 *.vcxproj
 /lib
 *.sln
+.vs

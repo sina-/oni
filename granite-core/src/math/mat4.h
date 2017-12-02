@@ -4,12 +4,18 @@
 #include <array>
 #include "functions.h"
 #include "vec3.h"
+#include "vec4.h"
 
 namespace granite {
 	namespace math {
 		struct mat4 {
-			// Column major ordering
-			std::array<float, 4 * 4> elements;
+			union
+			{
+				// Column major ordering
+				std::array<float, 4 * 4> elements;
+				vec4 columns;
+			};
+
 			mat4();
 			mat4(float diag);
 

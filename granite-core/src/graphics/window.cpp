@@ -29,7 +29,7 @@ namespace granite {
 
 			/* 
 			Final solution for accessing (Window*) from C callback function.
-			(Inspired from this SO: https://codereview.stackexchange.com/a/119374)
+			(Inspired from: https://codereview.stackexchange.com/a/119374)
 			Generally do this:
 				1) call glfwSetWindowUserPointer to assosiate a pointer to user object and a window;
 				2) define a static callback function and register it as a call back;

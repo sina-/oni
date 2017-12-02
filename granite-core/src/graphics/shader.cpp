@@ -55,5 +55,11 @@ namespace granite {
 
 			return program;
 		}
+
+		GLint Shader::getUniformLocation(const GLchar * name)
+		{
+			// TODO: Slow operation, need caching
+			return glGetUniformLocation(m_ShaderID, name);
+		}
 	}
 }

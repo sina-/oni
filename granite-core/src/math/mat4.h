@@ -19,6 +19,8 @@ namespace granite {
 			mat4();
 			mat4(float diag);
 
+			const float * getArray() const { return &elements.front(); };
+
 			static mat4 identity();
 
 			static mat4 orthographic(float left, float right, float bottom, float top, float near, float far);

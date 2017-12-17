@@ -2,6 +2,7 @@
 
 #include <glew.h>
 #include <vector>
+#include <string>
 
 #include "../utils/file.h"
 #include "../math/math.h"
@@ -10,15 +11,15 @@ namespace granite {
 	namespace graphics {
 		class Shader {
 			GLuint m_ShaderID;
-			const char* m_VertPath;
-			const char* m_FragPath;
+			const std::string m_VertPath;
+			const std::string m_FragPath;
 
 			GLuint load();
 
 			GLint getUniformLocation(const GLchar * name);
 
 		public:
-			Shader(const char* vertPath, const char* fragPath);
+			Shader(const std::string vertPath, const std::string fragPath);
 			~Shader() { glDeleteProgram(m_ShaderID); };
 
 			inline void enable() const { glUseProgram(m_ShaderID); }

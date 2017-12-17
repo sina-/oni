@@ -2,7 +2,7 @@
 
 namespace granite {
 	namespace graphics {
-		Shader::Shader(const char* vertPath, const char* fragPath) :
+		Shader::Shader(const std::string vertPath, const std::string fragPath) :
 			m_VertPath(vertPath), m_FragPath(fragPath)
 		{
 			m_ShaderID = load();

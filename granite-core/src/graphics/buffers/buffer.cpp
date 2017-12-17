@@ -2,7 +2,7 @@
 
 namespace granite {
 	namespace graphics {
-		Buffer::Buffer(std::vector<GLfloat> data, GLuint componentCount, GLsizei size)
+		Buffer::Buffer(const std::vector<GLfloat>& data, GLuint componentCount, GLsizei size)
 			: m_Size(size), m_ComponentCount(componentCount)
 		{
 			auto dataSize = data.size() * sizeof(GLfloat);

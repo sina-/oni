@@ -12,7 +12,7 @@ namespace granite {
 			GLsizei m_Size;
 
 		public:
-			Buffer(std::vector<GLfloat> data, GLuint componentCount, GLsizei size = 1);
+			Buffer(const std::vector<GLfloat>& data, GLuint componentCount, GLsizei size = 1);
 			~Buffer() { glDeleteBuffers(m_Size, &m_BufferID); }
 
 			inline void bind() const { glBindBuffer(GL_ARRAY_BUFFER, m_BufferID); }

@@ -17,13 +17,13 @@ int main() {
 
 	Window window("Granite", 800, 600);
 
-	std::vector<GLfloat>vertices = {
+	const std::vector<GLfloat>vertices = {
 		0, 0, 0,
 		0, 3, 0,
 		8, 3, 0,
 		8, 0, 0
 	};
-	std::vector<GLushort> indices = {
+	const std::vector<GLushort> indices = {
 		0, 1, 2,
 		2, 3, 0
 	};

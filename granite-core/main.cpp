@@ -5,7 +5,7 @@
 #include "src/utils/file.h"
 #include "src/math/math.h"
 #include "src/graphics/buffers/indexbuffer.h"
-#include "src/graphics/buffers/vertarray.h"
+#include "src/graphics/buffers/vertexarray.h"
 
 
 int main() {
@@ -17,23 +17,20 @@ int main() {
 
 	Window window("Granite", 800, 600);
 
-	//system("PAUSE");
-	//return 0;
-
-	GLfloat vertices[] = {
+	std::vector<GLfloat>vertices = {
 		0, 0, 0,
 		0, 3, 0,
 		8, 3, 0,
 		8, 0, 0
 	};
-	GLushort indices[] = {
+	std::vector<GLushort> indices = {
 		0, 1, 2,
 		2, 3, 0
 	};
-	VertexBuffer* vbo = new VertexBuffer(vertices, 4 * 3, 3);
+	std::shared_ptr<Buffer> vbo = std::make_shared<Buffer>(vertices, 3);
 	IndexBuffer ibo(indices, 6);
 
-	VertArray vao;
+	VertexArray vao;
 	vao.addBuffer(vbo, 0);
 
 	mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
@@ -46,7 +43,6 @@ int main() {
 
 	while (!window.closed()) {
 		window.clear();
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		shader.setUniformMat4("ml_matrix", mat4::rotation(window.getCursorX(), vec3(0, 0, 1)));
 		vao.bind();
 		ibo.bind();
@@ -63,8 +59,6 @@ int main() {
 		ibo.unbind();
 		window.update();
 
-		//printl(window.getKeyPressed());
-		//printl(window.getCursorX());
 	}
 
 	return 0;

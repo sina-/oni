@@ -1,20 +1,16 @@
-#include "vertarray.h"
+#include "vertexarray.h"
 
 namespace granite {
 	namespace graphics {
-		VertArray::VertArray()
+		VertexArray::VertexArray()
 		{
 			glGenVertexArrays(1, &m_ArrayID);
 		}
 
-		VertArray::~VertArray()
+		void VertexArray::addBuffer(std::shared_ptr<Buffer> vertexBuffer, GLuint index)
 		{
-			for (auto buffer: m_VertexBuffers) 
-				delete buffer;
-		}
+			m_VertexBuffers.push_back(vertexBuffer);
 
-		void VertArray::addBuffer(VertexBuffer * vertexBuffer, GLuint index)
-		{
 			bind();
 			vertexBuffer->bind();
 

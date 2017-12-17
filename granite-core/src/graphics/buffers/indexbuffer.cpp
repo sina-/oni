@@ -2,13 +2,13 @@
 
 namespace granite {
 	namespace graphics {
-		IndexBuffer::IndexBuffer(GLushort * data, GLsizei count, GLsizei size): m_Count(count), m_Size(size)
+		IndexBuffer::IndexBuffer(std::vector<GLushort> data, GLsizei count, GLsizei size): m_Count(count), m_Size(size)
 		{
 			auto dataSize = count * sizeof(GLushort);
 
 			glGenBuffers(size, &m_BufferID);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, data, GL_STATIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, data.data(), GL_STATIC_DRAW);
 
 			GLint actualSize = 0;
 			glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);

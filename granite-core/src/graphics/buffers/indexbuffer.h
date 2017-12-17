@@ -1,6 +1,7 @@
 #pragma once
 #include <glew.h>
 #include <stdexcept>
+#include <vector>
 
 namespace granite {
 	namespace graphics {
@@ -10,7 +11,7 @@ namespace granite {
 			GLsizei m_Size;
 
 		public:
-			IndexBuffer(GLushort* data, GLsizei count, GLsizei size = 1);
+			IndexBuffer(std::vector<GLushort> data, GLsizei count, GLsizei size = 1);
 			~IndexBuffer() { glDeleteBuffers(m_Size, &m_BufferID); }
 
 			inline void bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID); }

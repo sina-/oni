@@ -7,7 +7,7 @@ namespace granite {
 			glGenVertexArrays(1, &m_ArrayID);
 		}
 
-		void VertexArray::addBuffer(std::shared_ptr<Buffer> vertexBuffer, GLuint index)
+		void VertexArray::addBuffer(const std::shared_ptr<Buffer> vertexBuffer, GLuint index)
 		{
 			m_VertexBuffers.push_back(vertexBuffer);
 

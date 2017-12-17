@@ -16,9 +16,9 @@ namespace granite {
 		public:
 			VertexArray();
 
-			void addBuffer(std::shared_ptr<Buffer> vertexBuffer, GLuint index);
-			inline void bind() { glBindVertexArray(m_ArrayID); }
-			inline void unbind() { glBindVertexArray(0);  }
+			void addBuffer(const std::shared_ptr<Buffer> vertexBuffer, GLuint index);
+			inline void bind() const { glBindVertexArray(m_ArrayID); }
+			inline void unbind() const { glBindVertexArray(0);  }
 
 		};
 

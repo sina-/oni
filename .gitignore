@@ -34,6 +34,5 @@
 **/Debug
 *.vcxproj.*
 *.vcxproj
-/lib
 *.sln
 .vs

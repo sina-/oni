@@ -36,3 +36,4 @@
 *.vcxproj
 *.sln
 .vs
+build

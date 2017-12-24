@@ -6,10 +6,13 @@ set (Granite_VERSION_MAJOR 0)
 set (Granite_VERSION_MINOR 1)
 
 # Project wide dependencies
+
+# OpenGL is available through graphic cards driver
 find_package(OpenGL REQUIRED)
 
 set(DEPENDS "${granite_SOURCE_DIR}/lib")
 
+# TODO hardcoded to WIN32
 set(GLFW_DIR "${DEPENDS}/glfw-3.2.1.bin.WIN32")
 set(GLEW_DIR "${DEPENDS}/glew-2.1.0")
 

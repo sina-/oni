@@ -1,4 +1,4 @@
-#include "vec2.h"
+#include "math/vec2.h"
 
 namespace granite {
 	namespace math {

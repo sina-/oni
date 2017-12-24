@@ -1,4 +1,4 @@
-#include "vertexarray.h"
+#include "buffers/vertexarray.h"
 
 namespace granite {
 	namespace graphics {

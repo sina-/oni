@@ -1,4 +1,4 @@
-#include "window.h"
+#include "graphics/window.h"
 
 namespace granite {
 	namespace graphics {

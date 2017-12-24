@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "graphics/shader.h"
 
 namespace granite {
 	namespace graphics {

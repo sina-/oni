@@ -1,4 +1,4 @@
-#include "buffer.h"
+#include "buffers/buffer.h"
 
 namespace granite {
 	namespace graphics {

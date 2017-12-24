@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderable2d.h"
+#include "graphics/renderable2d.h"
 
 namespace granite {
 	namespace graphics {

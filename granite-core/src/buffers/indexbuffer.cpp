@@ -1,4 +1,4 @@
-#include "indexbuffer.h"
+#include "buffers/indexbuffer.h"
 
 namespace granite {
 	namespace graphics {

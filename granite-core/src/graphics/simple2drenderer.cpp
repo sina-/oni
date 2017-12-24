@@ -1,4 +1,4 @@
-#include "simple2drenderer.h"
+#include "graphics/simple2drenderer.h"
 
 namespace granite {
 	namespace graphics {

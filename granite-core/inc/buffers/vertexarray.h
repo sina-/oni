@@ -1,10 +1,10 @@
 #pragma once
 
-#include <glew.h>
+#include <GL/glew.h>
 #include <vector>
 #include <memory>
 #include <utility>
-#include "buffer.h"
+#include "buffers/buffer.h"
 
 namespace granite {
 	namespace graphics {

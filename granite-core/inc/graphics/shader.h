@@ -1,11 +1,14 @@
 #pragma once
 
-#include <glew.h>
+#include <GL/glew.h>
 #include <vector>
 #include <string>
 
-#include "../utils/file.h"
-#include "../math/math.h"
+#include "utils/file.h"
+#include "math/vec2.h"
+#include "math/vec3.h"
+#include "math/vec4.h"
+#include "math/mat4.h"
 
 namespace granite {
 	namespace graphics {

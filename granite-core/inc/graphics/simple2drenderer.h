@@ -1,9 +1,9 @@
 #pragma once
 
 #include <deque>
-#include <glew.h>
-#include "renderer2d.h"
-#include "renderable2d.h"
+#include <GL/glew.h>
+#include "graphics/renderer2d.h"
+#include "graphics/renderable2d.h"
 
 
 namespace granite {

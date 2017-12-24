@@ -1,14 +1,16 @@
 #include <iostream>
-#include "src/graphics/window.h"
-#include "src/graphics/shader.h"
-#include "src/utils/io.h"
-#include "src/utils/file.h"
-#include "src/math/math.h"
-#include "src/graphics/buffers/indexbuffer.h"
-#include "src/graphics/buffers/vertexarray.h"
-#include "src/graphics/renderable2d.h"
-#include "src/graphics/simple2drenderer.h"
-#include "src/graphics/renderer2d.h"
+#include "graphics/window.h"
+#include "graphics/shader.h"
+#include "utils/io.h"
+#include "utils/file.h"
+#include "math/mat4.h"
+#include "math/vec2.h"
+#include "math/vec3.h"
+#include "buffers/indexbuffer.h"
+#include "buffers/vertexarray.h"
+#include "graphics/renderable2d.h"
+#include "graphics/simple2drenderer.h"
+#include "graphics/renderer2d.h"
 
 
 int main() {
@@ -20,7 +22,7 @@ int main() {
 
 	Window window("Granite", 800, 600);
 
-	Shader shader("src/shaders/basic.vert", "src/shaders/basic.frag");
+	Shader shader("shaders/basic.vert", "shaders/basic.frag");
 	shader.enable();
 	shader.setUniformMat4("pr_matrix", mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f));
 	shader.setUniformMat4("vw_matrix", mat4::translation(vec3(2, 2, 0)));

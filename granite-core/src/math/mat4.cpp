@@ -1,4 +1,4 @@
-#include "mat4.h"
+#include "math/mat4.h"
 
 namespace granite {
 	namespace math{

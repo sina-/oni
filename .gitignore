@@ -37,3 +37,4 @@
 *.sln
 .vs
 build
+cmake-build-debug

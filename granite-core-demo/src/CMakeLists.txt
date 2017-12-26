@@ -3,9 +3,11 @@ link_directories(${granite_SOURCE_DIR}/granite-core/src)
 
 add_executable(granite-core-demo main.cpp)
 target_link_libraries(granite-core-demo
+    ${X11_LIBRARY}
 	glfw3
 	${OPENGL_LIBRARY}
-	glew32s
+    glew
+    #${GLEW_LIBRARIES}
 	granite-core-buffers
 	granite-core-graphics
 	granite-core-math
@@ -20,10 +22,10 @@ add_custom_command(TARGET granite-core-demo POST_BUILD COMMAND
 	)
 
 
-IF (WIN32)
+IF (MSVC)
 	# To pick up the working directory to where the executable is located.
 	# Otherwise default working directory is one level above where it should be
 	# https://stackoverflow.com/a/40937362
 	set_target_properties(granite-core-demo PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY 
 		${CMAKE_CURRENT_BINARY_DIR}/Debug)
-ENDIF (WIN32)
+ENDIF ()

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <windef.h>
 #include <GL/glew.h>
 #include "graphics/renderer2d.h"
 #include "graphics/renderable2d.h"

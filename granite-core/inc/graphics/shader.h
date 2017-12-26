@@ -1,5 +1,6 @@
 #pragma once
 
+#include <windef.h>
 #include <GL/glew.h>
 #include <vector>
 #include <string>

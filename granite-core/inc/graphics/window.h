@@ -3,6 +3,7 @@
 #include <functional>
 
 #define GLEW_STATIC
+#include <windef.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 

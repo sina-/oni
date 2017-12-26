@@ -3,20 +3,21 @@ link_directories(${granite_SOURCE_DIR}/granite-core/src)
 
 add_executable(granite-core-demo main.cpp)
 target_link_libraries(granite-core-demo
+    # TODO: Not sure why this is needed, but bunch of GLFW linking fails without it
     ${CMAKE_DL_LIBS}
     ${X11_LIBRARY}
     ${GLFW_STATIC_LIBRARIES}
 	${OPENGL_LIBRARY}
-    glew
-    #${GLEW_LIBRARIES}
+    ${GLEW_STATIC_LIBRARIES}
 	granite-core-buffers
 	granite-core-graphics
 	granite-core-math
 	granite-core-utils)
 
+# TODO: This solution requires manual re-build if shaders are updated
 # Copy the shaders from source tree to build tree
 # https://stackoverflow.com/a/18047175
-add_custom_command(TARGET granite-core-demo POST_BUILD COMMAND 
+add_custom_command(TARGET granite-core-demo POST_BUILD COMMAND
 	${CMAKE_COMMAND} -E copy_directory
 	${granite_SOURCE_DIR}/granite-core/inc/shaders
 	$<TARGET_FILE_DIR:granite-core-demo>/shaders

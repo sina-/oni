@@ -11,16 +11,25 @@ include(ExternalProject)
 
 # Project wide dependencies
 
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lglfw3 -ldl -lGL -lm -lXrandr -lXi -lX11 -lXxf86vm -lpthread")
+#SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lglfw3 -ldl -lGL -lm -lXrandr -lXi -lX11 -lXxf86vm -lpthread")
 
 # Build dependencies
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/dep")
-include(glfw)
+#include(glfw)
 include(glew)
+
+find_package(PkgConfig REQUIRED)
+pkg_search_module(GLFW REQUIRED glfw3)
 
 # OpenGL is available through graphic cards driver
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
+#find_package(glfw3 REQUIRED)
+#if(${GLFW3_FOUND})
+    #message("Found GLFW3")
+#else()
+    #message("GLFW3 not found")
+#endif()
 #find_package(XRandr REQUIRED)
 #find_package(xi REQUIRED)
 #find_package(xxf86vm REQUIRED)
@@ -29,7 +38,8 @@ link_libraries(${X11_LIBRARIES})
 include_directories(${X11_INCLUDE_DIR})
 link_libraries(${OPENGL_LIBRARIES})
 include_directories(${OPENGL_INCLUDE_DIR})
-
+#link_libraries(${GLFW3_LIBRARIES})
+include_directories(${GLFW_INCLUDE_DIR})
 
 #find_package(GLEW REQUIRED)
 #if(GLEW_FOUND)

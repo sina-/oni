@@ -18,12 +18,12 @@ ExternalProject_Add(${GLEW_LIB}
         CMAKE_ARGS
             ${PLATFORM_CMAKE_ARGS}
             ${TOOLCHAIN_CMAKE_ARGS}
-            -DBUILD_UTILS=off
+            -DBUILD_UTILS=OFF
             -DBUILD_EXAMPLES=OFF
         "-DCMAKE_INSTALL_PREFIX=${GLEW_INSTALL_DIR}"
         )
 
 add_library(glew STATIC IMPORTED)
-set_property(TARGET glew PROPERTY IMPORTED_LOCATION "${granite_SOURCE_DIR}/lib/glew/usr/lib/libGLEW.a")
+set_property(TARGET glew PROPERTY IMPORTED_LOCATION "${granite_SOURCE_DIR}/lib/glew/usr/lib64/libGLEW.a")
 add_dependencies(glew ${GLEW_LIB})
 include_directories(${granite_SOURCE_DIR}/lib/glew/usr/include)

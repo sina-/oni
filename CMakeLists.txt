@@ -11,6 +11,8 @@ include(ExternalProject)
 
 # Project wide dependencies
 
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lglfw3 -ldl -lGL -lm -lXrandr -lXi -lX11 -lXxf86vm -lpthread")
+
 # Build dependencies
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/dep")
 include(glfw)
@@ -19,14 +21,15 @@ include(glew)
 # OpenGL is available through graphic cards driver
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
-find_package(XRandr REQUIRED)
-find_package(xi REQUIRED)
-find_package(xxf86vm REQUIRED)
+#find_package(XRandr REQUIRED)
+#find_package(xi REQUIRED)
+#find_package(xxf86vm REQUIRED)
 
 link_libraries(${X11_LIBRARIES})
 include_directories(${X11_INCLUDE_DIR})
 link_libraries(${OPENGL_LIBRARIES})
 include_directories(${OPENGL_INCLUDE_DIR})
+
 
 #find_package(GLEW REQUIRED)
 #if(GLEW_FOUND)

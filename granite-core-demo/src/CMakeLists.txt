@@ -3,8 +3,9 @@ link_directories(${granite_SOURCE_DIR}/granite-core/src)
 
 add_executable(granite-core-demo main.cpp)
 target_link_libraries(granite-core-demo
+    glfw3
+    ${CMAKE_DL_LIBS}
     ${X11_LIBRARY}
-	glfw3
 	${OPENGL_LIBRARY}
     glew
     #${GLEW_LIBRARIES}

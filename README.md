@@ -5,11 +5,7 @@ cd build
 cmake -G "Visual Studio 15 2017" ..
 ```
 
-# Cygwin
+# Linux Debian/Ubuntu
 ```
-cmake
-gcc-g++
-gdb
-make
-xorg-server
+sudo apt install libgl1-mesa-dev libglu1-mesa-dev libglfw3-dev libglew-dev
 ```

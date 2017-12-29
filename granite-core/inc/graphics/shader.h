@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <windef.h>
 #include <GL/glew.h>
 #include <vector>
 #include <string>
@@ -18,6 +17,9 @@ namespace granite {
 			const std::string m_VertPath;
 			const std::string m_FragPath;
 
+            /*
+             * Main work to setup a shader and return a program.
+             */
 			GLuint load();
 
 			GLint getUniformLocation(const GLchar * name);
@@ -26,6 +28,9 @@ namespace granite {
 			Shader(const std::string vertPath, const std::string fragPath);
 			~Shader() { glDeleteProgram(m_ShaderID); };
 
+            /*
+             * Have to call this before using a shader.
+             */
 			inline void enable() const { glUseProgram(m_ShaderID); }
 			void disable() const { glUseProgram(0); }
 

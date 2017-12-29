@@ -14,9 +14,9 @@ namespace granite {
 			m_CursorY = 0.0;
 
 			if (!glfwInit())
-				throw std::runtime_error("Failed to init glfw!");
+				throw std::runtime_error("Failed to init GLFW!");
 
-			m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, NULL, NULL);
+			m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, nullptr, nullptr);
 			if (!m_Window) {
 				glfwTerminate();
 				throw std::runtime_error("Failed to create window!");
@@ -31,7 +31,7 @@ namespace granite {
 			Final solution for accessing (Window*) from C callback function.
 			(Inspired from: https://codereview.stackexchange.com/a/119374)
 			Generally do this:
-				1) call glfwSetWindowUserPointer to assosiate a pointer to user object and a window;
+				1) call glfwSetWindowUserPointer to associate a pointer to user object and a window;
 				2) define a static callback function and register it as a call back;
 				3) gain access to Window instance by casting GLFWWindow* to a pointer to user object!
 			*/

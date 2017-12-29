@@ -11,6 +11,9 @@
 
 namespace granite {
 	namespace graphics {
+		/*
+		 * Its really just a sprite.
+		 */
 		class Renderable2D {
 			math::vec2 m_Size;
 			math::vec3 m_Position;

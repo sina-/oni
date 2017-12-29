@@ -1,12 +1,14 @@
 #pragma once
 
-//#include <windef.h>
 #include <GL/glew.h>
 #include <stdexcept>
 #include <vector>
 
 namespace granite {
 	namespace graphics {
+		/*
+		 * Great tutorial on OpenGL buffers: https://open.gl/drawing
+		 */
 		class Buffer {
 			GLuint m_BufferID;
 			GLuint m_ComponentCount;

@@ -15,7 +15,7 @@ namespace granite {
 			vertexBuffer->bind();
 
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, vertexBuffer->getComponentCount(), GL_FLOAT, GL_FALSE, 0, 0);
+			glVertexAttribPointer(index, vertexBuffer->getComponentCount(), GL_FLOAT, GL_FALSE, 0, nullptr);
 
 			vertexBuffer->unbind();
 			unbind();

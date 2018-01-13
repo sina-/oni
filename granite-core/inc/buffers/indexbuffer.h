@@ -12,7 +12,7 @@ namespace granite {
 			GLsizei m_Size;
 
 		public:
-			IndexBuffer(const std::vector<GLushort>& data, GLsizei count, GLsizei size = 1);
+			IndexBuffer(const std::vector<GLushort>& data, GLuint count, GLsizei size = 1);
 			~IndexBuffer() { glDeleteBuffers(m_Size, &m_BufferID); }
 
 			inline void bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID); }

@@ -2,7 +2,7 @@
 
 namespace granite {
 	namespace graphics {
-		IndexBuffer::IndexBuffer(const std::vector<GLushort>& data, GLsizei count, GLsizei size): m_Count(count), m_Size(size)
+		IndexBuffer::IndexBuffer(const std::vector<GLushort>& data, GLuint count, GLsizei size): m_Count(count), m_Size(size)
 		{
 			auto dataSize = count * sizeof(GLushort);
 

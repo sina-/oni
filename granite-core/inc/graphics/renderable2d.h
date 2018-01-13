@@ -58,7 +58,7 @@ namespace granite {
 			}
 
 			inline const math::vec2 & getSize() const { return m_Size; }
-			inline const math::vec3 & getPoision() const { return m_Position; }
+			inline const math::vec3 & getPosition() const { return m_Position; }
 			inline const math::vec4 & getColor() const { return m_Color; }
 			inline const math::mat4 & getModelMatrix() const { return m_ModelMatrix; }
 

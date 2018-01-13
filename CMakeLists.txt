@@ -2,26 +2,24 @@
 cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 project (granite)
 
-set (Granite_VERSION_MAJOR 0)
-set (Granite_VERSION_MINOR 1)
+set(CMAKE_CXX_STANDARD 14)
+set(Granite_VERSION_MAJOR 0)
+set(Granite_VERSION_MINOR 1)
+#set(LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # Project wide dependencies
+
+find_package(PkgConfig REQUIRED)
+pkg_search_module(GLFW REQUIRED glfw3)
+pkg_search_module(GLEW REQUIRED glew)
+include_directories(${GLFW_INCLUDE_DIR})
+include_directories(${GLEW_INCLUDE_DIR})
 
 # OpenGL is available through graphic cards driver
 find_package(OpenGL REQUIRED)
 
-set(DEPENDS "${granite_SOURCE_DIR}/lib")
+find_package(X11 REQUIRED)
+link_libraries(${X11_LIBRARIES})
 
-# TODO hardcoded to WIN32
-set(GLFW_DIR "${DEPENDS}/glfw-3.2.1.bin.WIN32")
-set(GLEW_DIR "${DEPENDS}/glew-2.1.0")
-
-include_directories(${GLFW_DIR}/include)
-link_directories(${GLFW_DIR}/lib-vc2015)
-
-include_directories(${GLEW_DIR}/include)
-add_definitions(-DGLEW_STATIC)
-link_directories(${GLEW_DIR}/lib/Release/Win32)
-
-# Prject files
+# Project files
 subdirs(granite-core granite-core-demo)

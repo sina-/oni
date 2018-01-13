@@ -37,3 +37,5 @@
 *.sln
 .vs
 build
+cmake-build-debug
+.idea

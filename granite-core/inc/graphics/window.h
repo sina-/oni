@@ -12,6 +12,13 @@ namespace granite {
 	namespace graphics {
 
 
+		/*
+		 * Creates a windows of given name and size. Currently handles:
+		 *  - Resize
+		 *  - Key, or button, -press
+		 *  - Mouse position
+		 *  by registering a call-back that is called on such events.
+		 */
 		class Window {
 			const char * m_Title;
 			int m_Width, m_Height;

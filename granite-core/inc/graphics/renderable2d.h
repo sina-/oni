@@ -10,64 +10,73 @@
 #include "graphics/shader.h"
 
 namespace granite {
-	namespace graphics {
-		/*
-		 * Its really just a sprite.
-		 */
-		class Renderable2D {
-			math::vec2 m_Size;
-			math::vec3 m_Position;
-			math::vec4 m_Color;
+    namespace graphics {
 
-			math::mat4 m_ModelMatrix;
+        struct VertexData {
+            math::vec3 vertex;
+            math::vec4 color;
+        };
 
-			std::unique_ptr<VertexArray> m_VertexArray;
-			std::unique_ptr<IndexBuffer> m_IndexBuffer;
+        /*
+         * Its really just a sprite.
+         */
+        class Renderable2D {
+            math::vec2 m_Size;
+            math::vec3 m_Position;
+            math::vec4 m_Color;
 
-			Shader & m_Shader;
+            math::mat4 m_ModelMatrix;
 
-		public:
-			Renderable2D(const math::vec2& size, const math::vec3& pos, const math::vec4& color, Shader& shader)
-				: m_Size(size), m_Position(pos), m_Color(color), m_Shader(shader)
-			{
-				m_ModelMatrix = math::mat4::translation(m_Position);
+            std::unique_ptr<VertexArray> m_VertexArray;
+            std::unique_ptr<IndexBuffer> m_IndexBuffer;
 
-				auto vertices = std::vector<GLfloat>{
-					0, 0, 0,
-					0, size.y, 0,
-					size.x, size.y, 0,
-					size.x, 0, 0
-				};
-				auto vertexBuffer = std::make_shared<Buffer>(vertices, 3);
+            Shader &m_Shader;
 
-				auto colors = std::vector<GLfloat>{
-					color.x, color.y, color.z, color.w,
-					color.x, color.y, color.z, color.w,
-					color.x, color.y, color.z, color.w,
-					color.x, color.y, color.z, color.w
-				};
-				auto colorBuffer = std::make_shared<Buffer>(colors, 4);
+        public:
+            Renderable2D(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color, Shader &shader)
+                    : m_Size(size), m_Position(pos), m_Color(color), m_Shader(shader) {
+                m_ModelMatrix = math::mat4::translation(m_Position);
 
-				m_VertexArray = std::make_unique<VertexArray>();
+                auto vertices = std::vector<GLfloat>{
+                        0, 0, 0,
+                        0, size.y, 0,
+                        size.x, size.y, 0,
+                        size.x, 0, 0
+                };
+                auto vertexBuffer = std::make_shared<Buffer>(vertices, 3);
 
-				m_VertexArray->addBuffer(vertexBuffer, 0);
-				m_VertexArray->addBuffer(colorBuffer, 1);
+                auto colors = std::vector<GLfloat>{
+                        color.x, color.y, color.z, color.w,
+                        color.x, color.y, color.z, color.w,
+                        color.x, color.y, color.z, color.w,
+                        color.x, color.y, color.z, color.w
+                };
+                auto colorBuffer = std::make_shared<Buffer>(colors, 4);
 
-				auto indices = std::vector<GLushort>{ 0, 1, 2, 2, 3, 0};
-				m_IndexBuffer = std::make_unique<IndexBuffer>(indices, indices.size());
-			}
+                m_VertexArray = std::make_unique<VertexArray>();
 
-			inline const math::vec2 & getSize() const { return m_Size; }
-			inline const math::vec3 & getPosition() const { return m_Position; }
-			inline const math::vec4 & getColor() const { return m_Color; }
-			inline const math::mat4 & getModelMatrix() const { return m_ModelMatrix; }
+                m_VertexArray->addBuffer(vertexBuffer, 0);
+                m_VertexArray->addBuffer(colorBuffer, 1);
 
-			inline Shader& getShader() const { return m_Shader; }
+                auto indices = std::vector<GLushort>{0, 1, 2, 2, 3, 0};
+                m_IndexBuffer = std::make_unique<IndexBuffer>(indices, indices.size());
+            }
 
-			// https://stackoverflow.com/questions/15648844/using-smart-pointers-for-class-members
-			inline const VertexArray* getVAO() const { return m_VertexArray.get(); }
-			inline const IndexBuffer* getIBO() const { return m_IndexBuffer.get(); }
+            inline const math::vec2 &getSize() const { return m_Size; }
 
-		};
-	}
+            inline const math::vec3 &getPosition() const { return m_Position; }
+
+            inline const math::vec4 &getColor() const { return m_Color; }
+
+            inline const math::mat4 &getModelMatrix() const { return m_ModelMatrix; }
+
+            inline Shader &getShader() const { return m_Shader; }
+
+            // https://stackoverflow.com/questions/15648844/using-smart-pointers-for-class-members
+            inline const VertexArray *getVAO() const { return m_VertexArray.get(); }
+
+            inline const IndexBuffer *getIBO() const { return m_IndexBuffer.get(); }
+
+        };
+    }
 }

@@ -9,6 +9,7 @@
 namespace granite {
 	namespace math {
 		struct mat4 {
+			// https://stackoverflow.com/a/18177444
 			union
 			{
 				// Column major ordering

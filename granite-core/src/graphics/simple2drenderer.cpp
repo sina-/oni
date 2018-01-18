@@ -2,7 +2,7 @@
 
 namespace granite {
 	namespace graphics {
-		void Simple2DRenderer::submit(const Renderable2D * renderable)
+		void Simple2DRenderer::submit(std::shared_ptr<Renderable2D> renderable)
 		{
 			m_RenderQueue.push_back(renderable);
 		}
@@ -11,7 +11,7 @@ namespace granite {
 		{
             // TODO: One draw call per object. Quite bad. Better batch draw bunch of them.
 			while (!m_RenderQueue.empty()) {
-				const Renderable2D * renderable = m_RenderQueue.front();
+				auto renderable = m_RenderQueue.front().get();
 
 				auto vao = renderable->getVAO();
 				auto ibo = renderable->getIBO();

@@ -9,7 +9,10 @@ namespace granite {
 		 */
 		class Renderer2D {
 		protected:
-			virtual void submit(const Renderable2D* renderable) = 0;
+            // renderable has to be shared_ptr if we are to use for multiple frames
+            // if it is unique_ptr then renderer needs to own it and retain it
+			// across frames.
+			virtual void submit(const std::shared_ptr<Renderable2D> renderable) = 0;
 			virtual void flush() = 0;
 		};
 	}

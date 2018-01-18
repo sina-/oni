@@ -1,4 +1,5 @@
 #include <iostream>
+#include <graphics/batchrenderer2d.h>
 #include "graphics/window.h"
 #include "graphics/shader.h"
 #include "utils/io.h"
@@ -27,10 +28,11 @@ int main() {
 	shader.setUniformMat4("pr_matrix", mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f));
 	shader.setUniformMat4("vw_matrix", mat4::translation(vec3(2, 2, 0)));
 
-	Renderable2D sprite1(math::vec2(4, 4), math::vec3(5, 5, 0), math::vec4(1, 0, 1, 1), shader);
-	Renderable2D sprite2(math::vec2(1, 2), math::vec3(0, 1, 1), math::vec4(0, 1, 1, 1), shader);
+    auto sprite1 = std::make_shared<Renderable2D>(math::vec2(4, 4), math::vec3(5, 5, 0), math::vec4(1, 0, 1, 1), shader);
+    auto sprite2 = std::make_shared<Renderable2D>(math::vec2(1, 2), math::vec3(0, 1, 1), math::vec4(0, 1, 1, 1), shader);
 
 	Simple2DRenderer renderer;
+	//auto renderer2D = std::make_unique<BatchRenderer2D>();
 
 	while (!window.closed()) {
 		window.clear();
@@ -42,8 +44,8 @@ int main() {
 		}
 		*/
 		
-		renderer.submit(&sprite1);
-		renderer.submit(&sprite2);
+		renderer.submit(sprite1);
+		renderer.submit(sprite2);
 		renderer.flush();
 		window.update();
 

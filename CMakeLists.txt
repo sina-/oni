@@ -2,7 +2,7 @@
 cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 project (granite)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(Granite_VERSION_MAJOR 0)
 set(Granite_VERSION_MINOR 1)
 #set(LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)

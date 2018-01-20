@@ -2,7 +2,7 @@
 
 namespace granite {
 	namespace graphics {
-		void Simple2DRenderer::submit(std::shared_ptr<Renderable2D> renderable)
+		void Simple2DRenderer::submit(std::shared_ptr<const Renderable2D> renderable)
 		{
 			m_RenderQueue.push_back(renderable);
 		}

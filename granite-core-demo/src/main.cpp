@@ -32,7 +32,7 @@ int main() {
     auto sprite2 = std::make_shared<Renderable2D>(math::vec2(1, 2), math::vec3(0, 1, 1), math::vec4(0, 1, 1, 1), shader);
 
 	Simple2DRenderer renderer;
-	//auto renderer2D = std::make_unique<BatchRenderer2D>();
+	auto renderer2D = std::make_unique<BatchRenderer2D>();
 
 	while (!window.closed()) {
 		window.clear();
@@ -43,7 +43,7 @@ int main() {
 			std::cout << "OpenGL error: " << err << std::endl;
 		}
 		*/
-		
+
 		renderer.submit(sprite1);
 		renderer.submit(sprite2);
 		renderer.flush();

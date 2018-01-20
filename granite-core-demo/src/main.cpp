@@ -1,55 +1,49 @@
 #include <iostream>
 #include <graphics/batchrenderer2d.h>
 #include "graphics/window.h"
-#include "graphics/shader.h"
-#include "utils/io.h"
-#include "utils/file.h"
-#include "math/mat4.h"
-#include "math/vec2.h"
-#include "math/vec3.h"
-#include "buffers/indexbuffer.h"
-#include "buffers/vertexarray.h"
-#include "graphics/renderable2d.h"
 #include "graphics/simple2drenderer.h"
-#include "graphics/renderer2d.h"
 
 
 int main() {
-	 
-	using namespace granite;
-	using namespace graphics;
-	using namespace math;
-	using namespace std;
 
-	Window window("Granite", 800, 600);
+    using namespace granite;
+    using namespace graphics;
+    using namespace math;
+    using namespace std;
 
-	Shader shader("shaders/basic.vert", "shaders/basic.frag");
-	shader.enable();
-	shader.setUniformMat4("pr_matrix", mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f));
-	shader.setUniformMat4("vw_matrix", mat4::translation(vec3(2, 2, 0)));
+    Window window("Granite", 800, 600);
 
-    auto sprite1 = std::make_shared<Renderable2D>(math::vec2(4, 4), math::vec3(5, 5, 0), math::vec4(1, 0, 1, 1), shader);
-    auto sprite2 = std::make_shared<Renderable2D>(math::vec2(1, 2), math::vec3(0, 1, 1), math::vec4(0, 1, 1, 1), shader);
+    Shader shader("shaders/basic.vert", "shaders/basic.frag");
+    shader.enable();
+    shader.setUniformMat4("pr_matrix", mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f));
+    shader.setUniformMat4("vw_matrix", mat4::translation(vec3(2, 2, 0)));
 
-	Simple2DRenderer renderer;
-	auto renderer2D = std::make_unique<BatchRenderer2D>();
+    auto sprite1 = std::make_shared<Renderable2D>(math::vec2(4, 4), math::vec3(5, 5, 0), math::vec4(1, 0, 1, 1),
+                                                  shader);
+    auto sprite2 = std::make_shared<Renderable2D>(math::vec2(1, 2), math::vec3(0, 1, 1), math::vec4(0, 1, 1, 1),
+                                                  shader);
 
-	while (!window.closed()) {
-		window.clear();
+    BatchRenderer2D renderer;
 
-		/*
-		GLenum err;
-		while ((err = glGetError()) != GL_NO_ERROR) {
-			std::cout << "OpenGL error: " << err << std::endl;
-		}
-		*/
+    auto renderer2D = std::make_unique<BatchRenderer2D>();
 
-		renderer.submit(sprite1);
-		renderer.submit(sprite2);
-		renderer.flush();
-		window.update();
+    while (!window.closed()) {
+        window.clear();
 
-	}
+        /*
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            std::cout << "OpenGL error: " << err << std::endl;
+        }
+        */
+        renderer.begin();
+        renderer.submit(sprite1);
+        renderer.submit(sprite2);
+        renderer.end();
+        renderer.flush();
+        window.update();
 
-	return 0;
+    }
+
+    return 0;
 }

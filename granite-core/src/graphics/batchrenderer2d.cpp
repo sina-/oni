@@ -1,12 +1,13 @@
 #include <graphics/batchrenderer2d.h>
 #include <graphics/utils/indexbuffergen.h>
+#include <graphics/utils/checkoglerrors.h>
 
 namespace granite {
     namespace graphics {
         // TODO: This function needs to reuse what buffers packages has to offer
         // instead of reimplementing.
-        BatchRenderer2D::BatchRenderer2D() {
-            glGenBuffers(1, &m_VAO);
+        BatchRenderer2D::BatchRenderer2D() : m_IndexCount(0) {
+            glGenVertexArrays(1, &m_VAO);
             glGenBuffers(1, &m_VBO);
 
             glBindVertexArray(m_VAO);
@@ -47,6 +48,8 @@ namespace granite {
 
             m_IBO = std::make_unique<IndexBuffer>(indices, MAX_INDICES_COUNT);
             glBindVertexArray(0);
+
+            CHECK_OGL_ERRORS
 
         }
 

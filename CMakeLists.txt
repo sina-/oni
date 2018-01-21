@@ -1,10 +1,10 @@
 # Partly inspired by https://stackoverflow.com/a/8304850
 cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
-project (granite)
+project (oni)
 
 set(CMAKE_CXX_STANDARD 17)
-set(Granite_VERSION_MAJOR 0)
-set(Granite_VERSION_MINOR 1)
+set(Oni_VERSION_MAJOR 0)
+set(Oni_VERSION_MINOR 1)
 #set(LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # Project wide dependencies
@@ -22,4 +22,4 @@ find_package(X11 REQUIRED)
 link_libraries(${X11_LIBRARIES})
 
 # Project files
-subdirs(granite-core granite-core-demo)
+subdirs(oni-core oni-core-demo)

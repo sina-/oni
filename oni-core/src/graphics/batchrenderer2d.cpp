@@ -26,11 +26,15 @@ namespace oni {
             glBindVertexArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            /***
+            std::vector<GLushort> indices(MAX_INDICES_COUNT);
+
+            /**
              * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
              * more fun and educational.
+             */
+            /*
             GLushort offset = 0;
-            for (auto i = 0; i < MAX_INDICES_SIZE; i += 6) {
+            for (auto i = 0; i < MAX_INDICES_COUNT; i += 6) {
                 indices[i + 0] = offset + 0;
                 indices[i + 1] = offset + 1;
                 indices[i + 2] = offset + 2;
@@ -40,9 +44,7 @@ namespace oni {
                 indices[i + 6] = offset + 0;
 
                 offset += 4;
-            }
-             ***/
-            std::vector<GLushort> indices(MAX_INDICES_COUNT);
+            }*/
             IndexBufferGen gen;
             std::generate(indices.begin(), indices.end(), gen);
 

@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace oni {
-    namespace graphics {
+    namespace buffers {
         class IndexBuffer {
             GLuint m_BufferID;
             GLuint m_Count;
@@ -13,6 +13,8 @@ namespace oni {
 
         public:
             IndexBuffer(const std::vector<GLushort> &data, GLuint count, GLsizei size = 1);
+
+            IndexBuffer();
 
             ~IndexBuffer() { glDeleteBuffers(m_Size, &m_BufferID); }
 

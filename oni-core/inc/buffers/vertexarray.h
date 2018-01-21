@@ -7,7 +7,7 @@
 #include "buffers/buffer.h"
 
 namespace oni {
-    namespace graphics {
+    namespace buffers {
 
         class VertexArray {
             GLuint m_ArrayID;

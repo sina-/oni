@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace oni {
-	namespace graphics {
+	namespace buffers {
 		/*
 		 * Great tutorial on OpenGL buffers: https://open.gl/drawing
 		 */

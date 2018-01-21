@@ -1,7 +1,7 @@
 #include "buffers/buffer.h"
 
 namespace oni {
-    namespace graphics {
+    namespace buffers {
         Buffer::Buffer(const std::vector<GLfloat> &data, GLuint componentCount, GLsizei size)
                 : m_Size(size), m_ComponentCount(componentCount) {
             auto dataSize = data.size() * sizeof(GLfloat);

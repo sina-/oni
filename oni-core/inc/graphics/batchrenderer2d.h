@@ -1,9 +1,8 @@
 #pragma once
 
-
+#include "buffers/indexbuffer.h"
 #include "renderer2d.h"
 #include "renderable2d.h"
-#include "buffers/indexbuffer.h"
 
 
 namespace oni {
@@ -19,7 +18,7 @@ namespace oni {
             const unsigned long MAX_SPRITE_SIZE = static_cast<const unsigned long>(MAX_VERTEX_SIZE * 4);
             const unsigned long MAX_BUFFER_SIZE = MAX_SPRITE_SIZE * MAX_SPRITE_COUNT;
 
-            std::unique_ptr<IndexBuffer> m_IBO;
+            std::unique_ptr<buffers::IndexBuffer> m_IBO;
 
             // Actual number of indices used.
             GLsizei m_IndexCount;

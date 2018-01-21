@@ -1,7 +1,7 @@
 #include "buffers/indexbuffer.h"
 
 namespace oni {
-	namespace graphics {
+	namespace buffers {
 		IndexBuffer::IndexBuffer(const std::vector<GLushort>& data, GLuint count, GLsizei size): m_Count(count), m_Size(size)
 		{
 			auto dataSize = count * sizeof(GLushort);
@@ -19,6 +19,10 @@ namespace oni {
 			}
 
 			unbind();
+
+		}
+
+		IndexBuffer::IndexBuffer() {
 
 		}
 

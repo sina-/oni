@@ -1,7 +1,7 @@
 #include "buffers/vertexarray.h"
 
 namespace oni {
-	namespace graphics {
+	namespace buffers {
 		VertexArray::VertexArray()
 		{
 			glGenVertexArrays(1, &m_ArrayID);

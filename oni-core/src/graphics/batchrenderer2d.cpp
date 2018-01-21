@@ -46,8 +46,7 @@ namespace oni {
             IndexBufferGen gen;
             std::generate(indices.begin(), indices.end(), gen);
 
-            m_IBO = std::make_unique<IndexBuffer>(indices, MAX_INDICES_COUNT);
-            glBindVertexArray(0);
+            m_IBO = std::make_unique<buffers::IndexBuffer>(indices, MAX_INDICES_COUNT);
 
             CHECK_OGL_ERRORS
 

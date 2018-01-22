@@ -69,8 +69,8 @@ namespace oni {
 		{
 			mat4 result(1.0f);
 			float r = toRadians(angle);
-			float c = cos(r);
-			float s = sin(r);
+			float c = std::cos(r);
+			float s = std::sin(r);
 			float omc = 1.0f - c;
 			
 			float x = axis.x;

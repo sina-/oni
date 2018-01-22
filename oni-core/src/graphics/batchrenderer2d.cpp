@@ -50,6 +50,7 @@ namespace oni {
 
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, MAX_INDICES_COUNT);
 
+            // TODO: ~BatchRenderer2D wont be called if this check throws.
             CHECK_OGL_ERRORS
 
         }

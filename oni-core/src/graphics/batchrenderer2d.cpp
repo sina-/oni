@@ -20,7 +20,8 @@ namespace oni {
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE, static_cast<const GLvoid *>(nullptr));
             // Color data as in Renderable2D::VertexData.color
             // First three elements are vertex data, then comes colors (as specified by offset)
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE,
+            // Notice stride is equal for both components as together they make up a vertex.
+            glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE,
                                   reinterpret_cast<const GLvoid *>(3 * sizeof(GLfloat)));
 
             glBindVertexArray(0);

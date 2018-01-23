@@ -16,7 +16,7 @@ target_link_libraries(oni-core-demo
 
 if (UNIX)
     add_custom_command(TARGET oni-core-demo POST_BUILD
-            COMMAND ln -s ${oni_SOURCE_DIR}/oni-core/inc/shaders $<TARGET_FILE_DIR:oni-core-demo>)
+            COMMAND ln -sf ${oni_SOURCE_DIR}/oni-core/inc/shaders $<TARGET_FILE_DIR:oni-core-demo>)
 else ()
     # TODO: This solution requires manual re-build if shaders are updated
     # Copy the shaders from source tree to build tree

@@ -26,8 +26,7 @@ namespace oni {
             // TODO: refactor VertexArray to use it here, the problem with VertexArray is that it can
             // only hold 1 sprite.
             GLuint m_VAO;
-            // TODO: better name this as its not only holding vertex data but all the data.
-            GLuint m_VBO;
+            GLuint m_VDO;
 
             // The buffer that will hold all the VertexData in the batch.
             VertexData *m_Buffer;
@@ -35,7 +34,7 @@ namespace oni {
         public:
             BatchRenderer2D();
 
-            ~BatchRenderer2D() { glDeleteBuffers(1, &m_VBO); };
+            ~BatchRenderer2D() { glDeleteBuffers(1, &m_VDO); };
 
             void begin();
 

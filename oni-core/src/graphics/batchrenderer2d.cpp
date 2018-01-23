@@ -8,10 +8,10 @@ namespace oni {
         // instead of reimplementing.
         BatchRenderer2D::BatchRenderer2D() : m_IndexCount(0) {
             glGenVertexArrays(1, &m_VAO);
-            glGenBuffers(1, &m_VBO);
+            glGenBuffers(1, &m_VDO);
 
             glBindVertexArray(m_VAO);
-            glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+            glBindBuffer(GL_ARRAY_BUFFER, m_VDO);
 
             glBufferData(GL_ARRAY_BUFFER, MAX_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
             glEnableVertexAttribArray(0);
@@ -56,7 +56,7 @@ namespace oni {
         }
 
         void BatchRenderer2D::begin() {
-            glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+            glBindBuffer(GL_ARRAY_BUFFER, m_VDO);
             /***
              * If you want to use smart pointers, you need to supply custom deleter:
              * struct custom_deleter
@@ -75,7 +75,6 @@ namespace oni {
             m_Buffer = (VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
         }
 
-        // TODO make sure renderable is not copied in each invocation.
         void BatchRenderer2D::submit(const std::shared_ptr<const Renderable2D> renderable) {
             if (m_IndexCount + 6 >= MAX_INDICES_COUNT) {
                 throw std::runtime_error("Too many objects to render!");
@@ -85,9 +84,6 @@ namespace oni {
             auto position = renderable->getPosition();
             auto size = renderable->getSize();
             auto color = renderable->getColor();
-
-            // TODO make sure such assignments increase the reference count to renderable
-            // otherwise if renderable is de-allocated m_Buffer will point to garbage.
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c

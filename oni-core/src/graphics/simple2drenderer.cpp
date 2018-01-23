@@ -9,7 +9,6 @@ namespace oni {
 
 		void Simple2DRenderer::flush() 
 		{
-            // TODO: One draw call per object. Quite bad. Better batch draw bunch of them.
 			while (!m_RenderQueue.empty()) {
 				auto renderable = m_RenderQueue.front().get();
 

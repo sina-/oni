@@ -39,6 +39,9 @@ namespace oni {
                 };*/
             }
 
+            Renderable2D & operator=(const Renderable2D&) = delete;
+            Renderable2D & operator=(Renderable2D&) = delete;
+
             inline const math::vec2 &getSize() const { return m_Size; }
 
             inline const math::vec3 &getPosition() const { return m_Position; }

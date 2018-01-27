@@ -10,10 +10,26 @@
 namespace oni {
     namespace graphics {
 
+        // TODO: move this out
         struct VertexData {
             math::vec3 vertex;
             math::vec4 color;
         };
+
+        // TODO: move this out
+        struct BufferStructure {
+            BufferStructure(GLuint index, GLuint componentCount, GLenum componentType, GLboolean normalized,
+                            GLsizei stride, const void *offset) : index(index), componentCount(componentCount),
+                                                                  componentType(componentType), normalized(normalized),
+                                                                  stride(stride), offset(offset) {}
+            GLuint index;
+            GLuint componentCount;
+            GLenum componentType;
+            GLboolean normalized;
+            GLsizei stride;
+            const GLvoid * offset;
+        };
+        typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
         class Renderable2D {
             math::vec2 m_Size;

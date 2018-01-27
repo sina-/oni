@@ -1,18 +1,25 @@
-#include "buffers/buffer.h"
+#include <utils/oni_assert.h>
+#include <buffers/buffer.h>
+
+#include <utility>
 
 namespace oni {
     namespace buffers {
-        Buffer::Buffer(const std::vector<GLfloat> &data, GLuint componentCount, GLsizei size)
-                : m_Size(size), m_ComponentCount(componentCount) {
-            auto dataSize = data.size() * sizeof(GLfloat);
-            glGenBuffers(size, &m_BufferID);
-            glBindBuffer(GL_ARRAY_BUFFER, m_BufferID);
-            glBufferData(GL_ARRAY_BUFFER, dataSize, data.data(), GL_STATIC_DRAW);
+        Buffer::Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
+                       BufferStructures bufferStructures)
+                : m_BufferStructures(std::move(bufferStructures)) {
+            // Check for supported usages.
+            ONI_DEBUG_ASSERT(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)
+
+            glGenBuffers(1, &m_BufferID);
+            bind();
+            auto dataPtr = !data.empty() ? data.data() : nullptr;
+            glBufferData(GL_ARRAY_BUFFER, dataSize, dataPtr, usage);
 
             GLint actualSize = 0;
             glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);
             if (dataSize != actualSize) {
-                glDeleteBuffers(m_Size, &m_BufferID);
+                glDeleteBuffers(1, &m_BufferID);
                 throw std::runtime_error("Could not allocate vertex buffer!");
             }
 

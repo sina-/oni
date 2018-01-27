@@ -2,8 +2,8 @@
 #include <graphics/batchrenderer2d.h>
 #include <graphics/shader.h>
 #include <graphics/staticsprite.h>
-#include "graphics/window.h"
-
+#include <graphics/window.h>
+#include <buffers/buffer.h>
 
 int main() {
 
@@ -11,11 +11,14 @@ int main() {
     using namespace graphics;
     using namespace math;
     using namespace std;
+    using namespace buffers;
 
     int width = 960;
     int height = 540;
 
+    // NOTE: any call to GLEW functions will fail with Segfault if GLFW is uninitialized (initialization happens in Window).
     Window window("Oni Demo", width, height);
+
 
     Shader shader("shaders/basic.vert", "shaders/basic.frag");
     shader.enable();

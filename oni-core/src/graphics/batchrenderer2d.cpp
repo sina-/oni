@@ -1,31 +1,21 @@
 #include <graphics/batchrenderer2d.h>
-#include <graphics/utils/indexbuffergen.h>
-#include <graphics/utils/checkoglerrors.h>
 
 namespace oni {
     namespace graphics {
-        // TODO: This function needs to reuse what buffers packages has to offer
-        // instead of reimplementing.
         BatchRenderer2D::BatchRenderer2D() : m_IndexCount(0) {
-            glGenVertexArrays(1, &m_VAO);
-            glGenBuffers(1, &m_VDO);
+            auto vertexBuffer = std::make_unique<const BufferStructure>(
+                    0, 3, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE, static_cast<const GLvoid *>(nullptr));
+            auto colorBuffer = std::make_unique<const BufferStructure>
+                    (1, 4, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE, reinterpret_cast<const GLvoid *>(3 * sizeof(GLfloat)));
 
-            glBindVertexArray(m_VAO);
-            glBindBuffer(GL_ARRAY_BUFFER, m_VDO);
+            auto bufferStructures = BufferStructures();
+            bufferStructures.push_back(std::move(vertexBuffer));
+            bufferStructures.push_back(std::move(colorBuffer));
 
-            glBufferData(GL_ARRAY_BUFFER, MAX_BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            // Vertex data as in Renderable2D::VertexData.vertex
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE, static_cast<const GLvoid *>(nullptr));
-            // Color data as in Renderable2D::VertexData.color
-            // First three elements are vertex data, then comes colors (as specified by offset)
-            // Notice stride is equal for both components as together they make up a vertex.
-            glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE,
-                                  reinterpret_cast<const GLvoid *>(3 * sizeof(GLfloat)));
-
-            glBindVertexArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), MAX_BUFFER_SIZE, GL_STATIC_DRAW,
+                                                         std::move(bufferStructures));
+            m_VAO = std::make_unique<buffers::VertexArray>();
+            m_VAO->addBuffer(std::move(vbo));
 
             std::vector<GLushort> indices(MAX_INDICES_COUNT);
 
@@ -57,7 +47,7 @@ namespace oni {
         }
 
         void BatchRenderer2D::begin() {
-            glBindBuffer(GL_ARRAY_BUFFER, m_VDO);
+            m_VAO->bindVBO();
             /***
              * If you want to use smart pointers, you need to supply custom deleter:
              * struct custom_deleter
@@ -74,6 +64,7 @@ namespace oni {
              * For more details: https://github.com/sina-/ehgl/blob/master/eg/buffer_target.hpp#L159
              ***/
             m_Buffer = (VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+            CHECK_OGL_ERRORS
         }
 
         void BatchRenderer2D::submit(const std::shared_ptr<const Renderable2D> renderable) {
@@ -126,20 +117,20 @@ namespace oni {
         }
 
         void BatchRenderer2D::flush() {
-            glBindVertexArray(m_VAO);
+            m_VAO->bindVAO();
             m_IBO->bind();
 
-            glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_SHORT, 0);
+            glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_SHORT, nullptr);
 
             m_IBO->unbind();
-            glBindVertexArray(0);
+            m_VAO->unbindVAO();
 
             m_IndexCount = 0;
         }
 
         void BatchRenderer2D::end() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            m_VAO->unbindVBO();
 
         }
 

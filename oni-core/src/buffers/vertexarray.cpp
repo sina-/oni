@@ -1,25 +1,27 @@
+#include <graphics/renderable2d.h>
 #include "buffers/vertexarray.h"
 
 namespace oni {
-	namespace buffers {
-		VertexArray::VertexArray()
-		{
-			glGenVertexArrays(1, &m_ArrayID);
-		}
+    namespace buffers {
+        VertexArray::VertexArray() {
+            glGenVertexArrays(1, &m_ArrayID);
+        }
 
-		void VertexArray::addBuffer(const std::shared_ptr<Buffer> vertexBuffer, GLuint index)
-		{
-			m_VertexBuffers.push_back(vertexBuffer);
+        void VertexArray::addBuffer(std::unique_ptr<const Buffer> vertexBuffer) {
+            m_VertexBuffers = std::move(vertexBuffer);
 
-			bind();
-			vertexBuffer->bind();
+            bindVAO();
+            m_VertexBuffers->bind();
 
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, vertexBuffer->getComponentCount(), GL_FLOAT, GL_FALSE, 0, nullptr);
+            for (const auto &vertex: *(m_VertexBuffers->getBufferStructure())) {
+                glEnableVertexAttribArray(vertex->index);
+                glVertexAttribPointer(vertex->index, vertex->componentCount, vertex->componentType, vertex->normalized,
+                                      vertex->stride, vertex->offset);
+            }
 
-			vertexBuffer->unbind();
-			unbind();
-		}
+            m_VertexBuffers->unbind();
+            unbindVAO();
+        }
 
-	}
+    }
 }

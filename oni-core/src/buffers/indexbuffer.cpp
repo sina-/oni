@@ -22,9 +22,5 @@ namespace oni {
 
 		}
 
-		IndexBuffer::IndexBuffer() {
-
-		}
-
 	}
 }

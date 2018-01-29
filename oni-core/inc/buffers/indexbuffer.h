@@ -14,7 +14,7 @@ namespace oni {
         public:
             IndexBuffer(const std::vector<GLushort> &data, GLuint count, GLsizei size = 1);
 
-            IndexBuffer();
+            IndexBuffer() = default;
 
             ~IndexBuffer() { glDeleteBuffers(m_Size, &m_BufferID); }
 

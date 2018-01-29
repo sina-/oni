@@ -3,6 +3,7 @@
 #include <graphics/shader.h>
 #include <graphics/staticsprite.h>
 #include <graphics/window.h>
+#include <chrono>
 
 int main() {
 
@@ -43,6 +44,8 @@ int main() {
     auto renderer = std::make_unique<BatchRenderer2D>();
 
     while (!window.closed()) {
+        auto start = std::chrono::steady_clock::now();
+
         window.clear();
 
         auto mouseX = window.getCursorX();
@@ -63,6 +66,11 @@ int main() {
         renderer->flush();
         window.update();
 
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<float> diff = end - start;
+        auto fps = 1.0f / diff.count();
+
+        printl(fps);
     }
 
     return 0;

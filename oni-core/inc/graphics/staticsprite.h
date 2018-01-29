@@ -19,7 +19,7 @@ namespace oni {
         public:
             StaticSprite(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color, Shader &shader);
 
-            ~StaticSprite() = default;
+            ~StaticSprite() override = default;
 
             // https://stackoverflow.com/questions/15648844/using-smart-pointers-for-class-members
             inline const buffers::VertexArray *getVAO() const { return m_VertexArray.get(); }

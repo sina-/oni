@@ -3,7 +3,6 @@
 #include <graphics/shader.h>
 #include <graphics/staticsprite.h>
 #include <graphics/window.h>
-#include <buffers/buffer.h>
 
 int main() {
 
@@ -41,9 +40,7 @@ int main() {
         }
     }
 
-    BatchRenderer2D renderer;
-
-    auto renderer2D = std::make_unique<BatchRenderer2D>();
+    auto renderer = std::make_unique<BatchRenderer2D>();
 
     while (!window.closed()) {
         window.clear();
@@ -58,14 +55,12 @@ int main() {
                                               static_cast<float>(9.0f - mouseY * 9.0f / height)));
 
 
-        renderer.begin();
+        renderer->begin();
         for (const auto &sprite: sprites) {
-            renderer.submit(sprite);
+            renderer->submit(sprite);
         }
-/*        renderer.submit(sprite1);
-        renderer.submit(sprite2);*/
-        renderer.end();
-        renderer.flush();
+        renderer->end();
+        renderer->flush();
         window.update();
 
     }

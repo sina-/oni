@@ -55,6 +55,8 @@ namespace oni {
                 };*/
             }
 
+            virtual ~Renderable2D() = default;
+
             Renderable2D & operator=(const Renderable2D&) = delete;
             Renderable2D & operator=(Renderable2D&) = delete;
 

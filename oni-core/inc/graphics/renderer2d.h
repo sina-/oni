@@ -15,7 +15,7 @@ namespace oni {
 			 * if it is unique_ptr then renderer needs to own it and retain it
 			 * across frames.
              */
-            virtual void submit(const std::shared_ptr<const Renderable2D> renderable) = 0;
+            virtual void submit(const std::unique_ptr<Renderable2D> &renderable) = 0;
 
             /**
              * Draw the element(s).

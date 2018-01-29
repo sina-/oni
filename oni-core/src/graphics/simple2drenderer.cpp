@@ -2,17 +2,18 @@
 
 namespace oni {
 	namespace graphics {
-		void Simple2DRenderer::submit(std::shared_ptr<const Renderable2D> renderable)
+		void Simple2DRenderer::submit(const std::unique_ptr<Renderable2D> &renderable)
 		{
-			m_RenderQueue.push_back(renderable);
+//			m_RenderQueue.push_back(renderable);
 		}
 
 		void Simple2DRenderer::flush() 
 		{
+            /*
 			while (!m_RenderQueue.empty()) {
 				auto renderable = m_RenderQueue.front().get();
 
-/*				auto vao = renderable->getVAO();
+				auto vao = renderable->getVAO();
 				auto ibo = renderable->getIBO();
 
 				vao->bind();
@@ -25,10 +26,12 @@ namespace oni {
 /*				ibo->unbind();
 				vao->unbind();*/
 
+				/*
 				// Odd, but queue has no method to remove and return the front element, therefore
                 // have to remove it manually after use.
 				m_RenderQueue.pop_front();
 			}
+				*/
 		}
 
 	}

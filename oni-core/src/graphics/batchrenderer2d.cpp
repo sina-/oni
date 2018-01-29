@@ -67,7 +67,7 @@ namespace oni {
             CHECK_OGL_ERRORS
         }
 
-        void BatchRenderer2D::submit(const std::shared_ptr<const Renderable2D> renderable) {
+        void BatchRenderer2D::submit(const std::unique_ptr<Renderable2D> &renderable){
             if (m_IndexCount + 6 >= MAX_INDICES_COUNT) {
                 throw std::runtime_error("Too many objects to render!");
             }

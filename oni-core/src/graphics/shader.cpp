@@ -5,11 +5,6 @@ namespace oni {
 		Shader::Shader(const std::string vertPath, const std::string fragPath) :
 			m_VertPath(vertPath), m_FragPath(fragPath)
 		{
-			m_ShaderID = load();
-		}
-
-		GLuint Shader::load()
-		{
 			GLuint program = glCreateProgram();
 			GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
 			GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -53,7 +48,7 @@ namespace oni {
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
 
-			return program;
+			m_ShaderID =  program;
 		}
 
 		GLint Shader::getUniformLocation(const GLchar * name)

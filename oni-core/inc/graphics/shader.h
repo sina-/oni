@@ -17,11 +17,6 @@ namespace oni {
 			const std::string m_VertPath;
 			const std::string m_FragPath;
 
-            /*
-             * Main work to setup a shader and return a program.
-             */
-			GLuint load();
-
 			GLint getUniformLocation(const GLchar * name);
 
 		public:

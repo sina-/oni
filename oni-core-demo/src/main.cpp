@@ -19,7 +19,6 @@ int main() {
     // NOTE: any call to GLEW functions will fail with Segfault if GLFW is uninitialized (initialization happens in Window).
     Window window("Oni Demo", width, height);
 
-
     Shader shader("shaders/basic.vert", "shaders/basic.frag");
     shader.enable();
 //    shader.setUniformMat4("vw_matrix", mat4::translation(vec3(2, 2, 0)));

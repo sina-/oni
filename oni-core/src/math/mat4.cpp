@@ -125,7 +125,7 @@ namespace oni {
 		mat4 operator*(const mat4 & left, const mat4 & right)
 		{
 			mat4 result = left;
-			return result.multiply(left);
+			return result.multiply(right);
 		}
 
 	}

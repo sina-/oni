@@ -36,9 +36,26 @@ namespace oni {
             math::vec3 m_Position;
             math::vec4 m_Color;
 
+            /**
+             *    b    c
+             *    +----+
+             *    |    |
+             *    +----+
+             *    a    d
+             */
+            math::vec3 m_PositionA;
+            math::vec3 m_PositionB;
+            math::vec3 m_PositionC;
+            math::vec3 m_PositionD;
+
         public:
             Renderable2D(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color)
                     : m_Size(size), m_Position(pos), m_Color(color) {
+
+                m_PositionA = pos;
+                m_PositionB = math::vec3(pos.x, pos.y + size.y, pos.z);
+                m_PositionC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
+                m_PositionD = math::vec3(pos.x + size.x, pos.y, pos.z);
 
 /*                auto vertices = std::vector<GLfloat>{
                         0, 0, 0,
@@ -55,6 +72,7 @@ namespace oni {
                 };*/
             }
 
+
             virtual ~Renderable2D() = default;
 
             Renderable2D & operator=(const Renderable2D&) = delete;
@@ -65,6 +83,14 @@ namespace oni {
             inline const math::vec3 &getPosition() const { return m_Position; }
 
             inline const math::vec4 &getColor() const { return m_Color; }
+
+            inline const math::vec3 &getPositionA() const { return m_PositionA; }
+
+            inline const math::vec3 &getPositionB() const { return m_PositionB; }
+
+            inline const math::vec3 &getPositionC() const { return m_PositionC; }
+
+            inline const math::vec3 &getPositionD() const { return m_PositionD; }
         };
     }
 }

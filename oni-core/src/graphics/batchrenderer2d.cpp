@@ -73,8 +73,6 @@ namespace oni {
             }
 
             // First vertex.
-            auto position = renderable->getPosition();
-            auto size = renderable->getSize();
             auto color = renderable->getColor();
 
             /** The vertices are absolute coordinates, there is no model matrix.
@@ -85,25 +83,24 @@ namespace oni {
              *    a    d
              */
             // a.
-            m_Buffer->vertex = position;
+            m_Buffer->vertex = renderable->getPositionA();
             m_Buffer->color = color;
             m_Buffer++;
 
             // b.
-            m_Buffer->vertex = math::vec3(position.x, position.y + size.y, position.z);
+            m_Buffer->vertex = renderable->getPositionB();
             m_Buffer->color = color;
             m_Buffer++;
 
             // c.
-            m_Buffer->vertex = math::vec3(position.x + size.x, position.y + size.y, position.z);
+            m_Buffer->vertex = renderable->getPositionC();
             m_Buffer->color = color;
             m_Buffer++;
 
             // d.
-            m_Buffer->vertex = math::vec3(position.x + size.x, position.y, position.z);
+            m_Buffer->vertex = renderable->getPositionD();
             m_Buffer->color = color;
             m_Buffer++;
-
 
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
             // defined by 4 vertices only.

@@ -2,22 +2,30 @@
 
 namespace oni {
     namespace graphics {
-        BatchRenderer2D::BatchRenderer2D() : m_IndexCount(0) {
+        BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount) : m_IndexCount(0),
+                                                                               m_MaxSpriteCount(maxSpriteCount) {
+            // Each sprite has 6 indices.
+            m_MaxIndicesCount = m_MaxSpriteCount * 6;
+            m_MaxVertexSize = sizeof(VertexData);
+            // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
+            m_MaxSpriteSize = static_cast<const unsigned long>(m_MaxVertexSize * 4);
+            m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
+
             auto vertexBuffer = std::make_unique<const BufferStructure>(
-                    0, 3, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE, static_cast<const GLvoid *>(nullptr));
+                    0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
             auto colorBuffer = std::make_unique<const BufferStructure>
-                    (1, 4, GL_FLOAT, GL_FALSE, MAX_VERTEX_SIZE, reinterpret_cast<const GLvoid *>(3 * sizeof(GLfloat)));
+                    (1, 4, GL_FLOAT, GL_FALSE, m_MaxVertexSize, reinterpret_cast<const GLvoid *>(3 * sizeof(GLfloat)));
 
             auto bufferStructures = BufferStructures();
             bufferStructures.push_back(std::move(vertexBuffer));
             bufferStructures.push_back(std::move(colorBuffer));
 
-            auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), MAX_BUFFER_SIZE, GL_STATIC_DRAW,
+            auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), m_MaxBufferSize, GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
             m_VAO = std::make_unique<buffers::VertexArray>();
             m_VAO->addBuffer(std::move(vbo));
 
-            std::vector<GLushort> indices(MAX_INDICES_COUNT);
+            std::vector<GLushort> indices(m_MaxIndicesCount);
 
             /**
              * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
@@ -25,7 +33,7 @@ namespace oni {
              */
             /*
             GLushort offset = 0;
-            for (auto i = 0; i < MAX_INDICES_COUNT; i += 6) {
+            for (auto i = 0; i < m_MaxIndicesCount; i += 6) {
                 indices[i + 0] = offset + 0;
                 indices[i + 1] = offset + 1;
                 indices[i + 2] = offset + 2;
@@ -39,7 +47,7 @@ namespace oni {
             IndexBufferGen gen;
             std::generate(indices.begin(), indices.end(), gen);
 
-            m_IBO = std::make_unique<buffers::IndexBuffer>(indices, MAX_INDICES_COUNT);
+            m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
 
             // TODO: ~BatchRenderer2D wont be called if this check throws.
             CHECK_OGL_ERRORS
@@ -67,8 +75,8 @@ namespace oni {
             CHECK_OGL_ERRORS
         }
 
-        void BatchRenderer2D::submit(const std::unique_ptr<Renderable2D> &renderable){
-            if (m_IndexCount + 6 >= MAX_INDICES_COUNT) {
+        void BatchRenderer2D::submit(const std::unique_ptr<Renderable2D> &renderable) {
+            if (m_IndexCount + 6 >= m_MaxIndicesCount) {
                 throw std::runtime_error("Too many objects to render!");
             }
 

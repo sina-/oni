@@ -42,7 +42,7 @@ int main() {
         }
     }
 
-    auto renderer = std::make_unique<BatchRenderer2D>();
+    auto renderer = std::make_unique<BatchRenderer2D>(500000);
     float frameTime = 0.0f;
 
     while (!window.closed()) {

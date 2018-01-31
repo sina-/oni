@@ -15,15 +15,12 @@ namespace oni {
 
         class BatchRenderer2D : public Renderer2D {
 
-            // TODO: move them to constructor
-            const unsigned long MAX_SPRITE_COUNT = 10000;
-            // Each sprite has 6 indices.
-            const unsigned long MAX_INDICES_COUNT = MAX_SPRITE_COUNT * 6;
+            unsigned long m_MaxSpriteCount;
+            unsigned long m_MaxIndicesCount;
 
-            const GLsizei MAX_VERTEX_SIZE = sizeof(VertexData);
-            // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
-            const unsigned long MAX_SPRITE_SIZE = static_cast<const unsigned long>(MAX_VERTEX_SIZE * 4);
-            const unsigned long MAX_BUFFER_SIZE = MAX_SPRITE_SIZE * MAX_SPRITE_COUNT;
+            unsigned long m_MaxSpriteSize;
+            unsigned long m_MaxBufferSize;
+            GLsizei m_MaxVertexSize;
 
             std::unique_ptr<IndexBuffer> m_IBO;
 
@@ -37,7 +34,7 @@ namespace oni {
             VertexData *m_Buffer;
 
         public:
-            BatchRenderer2D();
+            BatchRenderer2D(const unsigned long maxSpriteCount);
 
             ~BatchRenderer2D() { glDeleteBuffers(1, &m_VDO); };
 

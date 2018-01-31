@@ -43,6 +43,7 @@ int main() {
     }
 
     auto renderer = std::make_unique<BatchRenderer2D>();
+    float frameTime = 0.0f;
 
     while (!window.closed()) {
         auto start = std::chrono::steady_clock::now();
@@ -59,7 +60,7 @@ int main() {
                                               static_cast<float>(9.0f - mouseY * 9.0f / height)));
 
         renderer->begin();
-        for (const auto & sprite: sprites) {
+        for (const auto &sprite: sprites) {
             renderer->submit(sprite);
         }
         renderer->end();
@@ -68,9 +69,11 @@ int main() {
 
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<float> diff = end - start;
-        auto fps = 1.0f / diff.count();
-
-        printl(fps);
+        frameTime += diff.count();
+        if (frameTime > 1.0f) {
+            printl(1.0f / diff.count());
+            frameTime = 0;
+        }
     }
 
     return 0;

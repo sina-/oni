@@ -51,6 +51,8 @@ namespace oni {
 			glfwSetKeyCallback(m_Window, keyCallback);
 			glfwSetMouseButtonCallback(m_Window, mouseCallback);
 			glfwSetCursorPosCallback(m_Window, cursorPosCallback);
+			// This will disable v-sync.
+            glfwSwapInterval(0.0);
 		}
 
 		Window::~Window()

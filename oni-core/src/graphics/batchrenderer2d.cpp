@@ -1,4 +1,5 @@
 #include <graphics/batchrenderer2d.h>
+#include <utils/oni_assert.h>
 
 namespace oni {
     namespace graphics {
@@ -7,6 +8,10 @@ namespace oni {
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
             m_MaxVertexSize = sizeof(VertexData);
+
+            auto maxUIntSize = std::numeric_limits<unsigned int>::max();
+            ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize)
+
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
             m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;

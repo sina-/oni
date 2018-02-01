@@ -8,6 +8,8 @@ namespace oni {
 
 			glGenBuffers(size, &m_BufferID);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
+            // NOTE: dataSize type should match the enum passed to draw call!
+            // Otherwise its UB and you get garbage rendered.
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, data.data(), GL_STATIC_DRAW);
 
 			GLint actualSize = 0;

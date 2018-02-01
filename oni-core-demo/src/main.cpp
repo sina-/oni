@@ -34,8 +34,8 @@ int main() {
 
     std::vector<unique_ptr<Renderable2D>> sprites;
 
-    float yStep = 0.10f;
-    float xStep = 0.04f;
+    float yStep = 0.05f;
+    float xStep = 0.02f;
 
     for (float y = 1; y < 8.0f; y += yStep) {
         for (float x = 1; x < 15.0f; x += xStep) {

@@ -18,9 +18,9 @@ namespace oni {
             unsigned long m_MaxSpriteCount;
             unsigned long m_MaxIndicesCount;
 
-            unsigned long m_MaxSpriteSize;
             unsigned long m_MaxBufferSize;
             GLsizei m_MaxVertexSize;
+            GLsizei m_MaxSpriteSize;
 
             std::unique_ptr<IndexBuffer> m_IBO;
 
@@ -34,7 +34,7 @@ namespace oni {
             VertexData *m_Buffer;
 
         public:
-            BatchRenderer2D(const unsigned long maxSpriteCount);
+            explicit BatchRenderer2D(const unsigned long maxSpriteCount);
 
             ~BatchRenderer2D() { glDeleteBuffers(1, &m_VDO); };
 

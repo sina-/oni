@@ -13,7 +13,7 @@ namespace oni {
          */
         class Buffer {
             GLuint m_BufferID;
-            std::vector<std::unique_ptr<const BufferStructure>> m_BufferStructures;
+            BufferStructures m_BufferStructures;
 
         public:
             Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,

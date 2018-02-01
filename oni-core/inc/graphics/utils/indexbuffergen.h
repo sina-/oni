@@ -50,7 +50,7 @@ namespace oni {
 
                 m_Counter++;
 
-                if(m_Counter % 6 == 0){
+                if (m_Counter % 6 == 0) {
                     m_Offset += 4;
                 }
 

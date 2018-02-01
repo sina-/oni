@@ -8,7 +8,7 @@ namespace oni {
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
             m_MaxVertexSize = sizeof(VertexData);
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
-            m_MaxSpriteSize = static_cast<const unsigned long>(m_MaxVertexSize * 4);
+            m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
 
             auto vertexBuffer = std::make_unique<const BufferStructure>(
@@ -131,6 +131,8 @@ namespace oni {
             m_VAO->unbindVAO();
 
             m_IndexCount = 0;
+
+            CHECK_OGL_ERRORS
         }
 
         void BatchRenderer2D::end() {

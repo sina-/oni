@@ -34,15 +34,18 @@ int main() {
 
     std::vector<unique_ptr<Renderable2D>> sprites;
 
-    for (float y = 0; y < 9.0f; y += 0.13) {
-        for (float x = 0; x < 16.0f; x += 0.13) {
+    float yStep = 0.13f;
+    float xStep = 0.08f;
+
+    for (float y = 1; y < 8.0f; y += yStep) {
+        for (float x = 1; x < 15.0f; x += xStep) {
             sprites.push_back(
-                    make_unique<StaticSprite>(math::vec2(0.07f, 0.1f), math::vec3(x, y, 0.6f),
-                                              math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1), shader));
+                    make_unique<Renderable2D>(math::vec2(xStep, yStep), math::vec3(x, y, 0.0f),
+                                              math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
         }
     }
 
-    auto renderer = std::make_unique<BatchRenderer2D>(500000);
+    auto renderer = std::make_unique<BatchRenderer2D>(50000);
     float frameTime = 0.0f;
 
     while (!window.closed()) {

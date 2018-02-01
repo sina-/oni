@@ -16,14 +16,15 @@ namespace oni {
             std::generate(indices.begin(), indices.end(), gen);
          *
          */
+        template<class T>
         class IndexBufferGen {
-            GLuint m_Counter = 0;
-            GLuint m_Offset = 0;
+            T m_Counter = 0;
+            T m_Offset = 0;
         public:
             IndexBufferGen() = default;
 
-            GLuint getValue() {
-                GLuint current = m_Offset;
+            T getValue() {
+                T current = m_Offset;
 
                 switch (m_Counter % 6) {
                     case 0:
@@ -57,7 +58,7 @@ namespace oni {
                 return current;
             }
 
-            GLuint operator()() {
+            T operator()() {
                 return getValue();
             }
 

@@ -44,7 +44,7 @@ namespace oni {
 
                 offset += 4;
             }*/
-            IndexBufferGen gen;
+            IndexBufferGen<GLuint> gen;
             std::generate(indices.begin(), indices.end(), gen);
 
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);

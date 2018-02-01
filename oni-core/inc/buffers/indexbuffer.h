@@ -12,7 +12,7 @@ namespace oni {
             GLsizei m_Size;
 
         public:
-            IndexBuffer(const std::vector<GLushort> &data, GLuint count, GLsizei size = 1);
+            IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size = 1);
 
             IndexBuffer() = default;
 

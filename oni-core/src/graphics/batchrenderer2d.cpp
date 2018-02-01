@@ -25,7 +25,7 @@ namespace oni {
             m_VAO = std::make_unique<buffers::VertexArray>();
             m_VAO->addBuffer(std::move(vbo));
 
-            std::vector<GLushort> indices(m_MaxIndicesCount);
+            std::vector<GLuint> indices(m_MaxIndicesCount);
 
             /**
              * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
@@ -125,7 +125,7 @@ namespace oni {
             m_VAO->bindVAO();
             m_IBO->bind();
 
-            glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_SHORT, nullptr);
+            glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, nullptr);
 
             m_IBO->unbind();
             m_VAO->unbindVAO();

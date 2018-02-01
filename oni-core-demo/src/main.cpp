@@ -34,8 +34,8 @@ int main() {
 
     std::vector<unique_ptr<Renderable2D>> sprites;
 
-    float yStep = 0.13f;
-    float xStep = 0.08f;
+    float yStep = 0.10f;
+    float xStep = 0.04f;
 
     for (float y = 1; y < 8.0f; y += yStep) {
         for (float x = 1; x < 15.0f; x += xStep) {
@@ -45,7 +45,7 @@ int main() {
         }
     }
 
-    auto renderer = std::make_unique<BatchRenderer2D>(50000);
+    auto renderer = std::make_unique<BatchRenderer2D>(sprites.size() + 1);
     float frameTime = 0.0f;
 
     while (!window.closed()) {

@@ -2,9 +2,9 @@
 
 namespace oni {
 	namespace buffers {
-		IndexBuffer::IndexBuffer(const std::vector<GLushort>& data, GLuint count, GLsizei size): m_Count(count), m_Size(size)
+		IndexBuffer::IndexBuffer(const std::vector<GLuint>& data, GLuint count, GLsizei size): m_Count(count), m_Size(size)
 		{
-			auto dataSize = count * sizeof(GLushort);
+			auto dataSize = count * sizeof(GLuint);
 
 			glGenBuffers(size, &m_BufferID);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);

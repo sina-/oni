@@ -11,19 +11,19 @@ namespace oni {
          * to pre-populate a big buffer.
          *
          * Example:
-            std::vector<GLushort> indices(10000);
+            std::vector<GLuint> indices(10000);
             IndexBufferGen gen;
             std::generate(indices.begin(), indices.end(), gen);
          *
          */
         class IndexBufferGen {
-            GLushort m_Counter = 0;
-            GLushort m_Offset = 0;
+            GLuint m_Counter = 0;
+            GLuint m_Offset = 0;
         public:
             IndexBufferGen() = default;
 
-            GLushort getValue() {
-                GLushort current = m_Offset;
+            GLuint getValue() {
+                GLuint current = m_Offset;
 
                 switch (m_Counter % 6) {
                     case 0:
@@ -57,7 +57,7 @@ namespace oni {
                 return current;
             }
 
-            GLushort operator()() {
+            GLuint operator()() {
                 return getValue();
             }
 

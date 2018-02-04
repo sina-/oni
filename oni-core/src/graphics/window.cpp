@@ -9,7 +9,7 @@ namespace oni {
 			m_Width = width;
 			m_Height = height;
 			m_KeyPressed = GLFW_KEY_UNKNOWN;
-			m_MouseButton = 0;
+			m_MouseButton = GLFW_KEY_UNKNOWN;
 			m_CursorX = 0.0;
 			m_CursorY = 0.0;
 

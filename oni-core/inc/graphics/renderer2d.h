@@ -5,7 +5,7 @@
 namespace oni {
     namespace graphics {
         class Renderer2D {
-        protected:
+        public:
             /**
              * Preparation work, if needed.
              */

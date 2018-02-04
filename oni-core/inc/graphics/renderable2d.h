@@ -22,26 +22,29 @@ namespace oni {
                             GLsizei stride, const void *offset) : index(index), componentCount(componentCount),
                                                                   componentType(componentType), normalized(normalized),
                                                                   stride(stride), offset(offset) {}
+
             GLuint index;
             GLuint componentCount;
             GLenum componentType;
             GLboolean normalized;
             GLsizei stride;
-            const GLvoid * offset;
+            const GLvoid *offset;
         };
+
         typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
+        // TODO: make this an interface and sprite what this class is now.
         class Renderable2D {
             math::vec2 m_Size;
             math::vec3 m_Position;
             math::vec4 m_Color;
 
             /**
-             *    b    c
+             *    B    C
              *    +----+
              *    |    |
              *    +----+
-             *    a    d
+             *    A    D
              */
             math::vec3 m_PositionA;
             math::vec3 m_PositionB;
@@ -57,26 +60,14 @@ namespace oni {
                 m_PositionC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
                 m_PositionD = math::vec3(pos.x + size.x, pos.y, pos.z);
 
-/*                auto vertices = std::vector<GLfloat>{
-                        0, 0, 0,
-                        0, size.y, 0,
-                        size.x, size.y, 0,
-                        size.x, 0, 0
-                };
-
-                auto colors = std::vector<GLfloat>{
-                        color.x, color.y, color.z, color.w,
-                        color.x, color.y, color.z, color.w,
-                        color.x, color.y, color.z, color.w,
-                        color.x, color.y, color.z, color.w
-                };*/
             }
 
 
             virtual ~Renderable2D() = default;
 
-            Renderable2D & operator=(const Renderable2D&) = delete;
-            Renderable2D & operator=(Renderable2D&) = delete;
+            Renderable2D &operator=(const Renderable2D &) = delete;
+
+            Renderable2D &operator=(Renderable2D &) = delete;
 
             inline const math::vec2 &getSize() const { return m_Size; }
 
@@ -92,5 +83,8 @@ namespace oni {
 
             inline const math::vec3 &getPositionD() const { return m_PositionD; }
         };
+
+        typedef std::vector<const std::unique_ptr<Renderable2D> &> RenderableReferences;
+        typedef std::vector<std::unique_ptr<Renderable2D>> Renderables;
     }
 }

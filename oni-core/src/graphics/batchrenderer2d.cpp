@@ -1,4 +1,5 @@
 #include <graphics/batchrenderer2d.h>
+#include <graphics/utils/indexbuffergen.h>
 #include <utils/oni_assert.h>
 
 namespace oni {
@@ -19,7 +20,8 @@ namespace oni {
             auto vertexBuffer = std::make_unique<const BufferStructure>(
                     0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
             auto colorBuffer = std::make_unique<const BufferStructure>
-                    (1, 4, GL_FLOAT, GL_FALSE, m_MaxVertexSize, reinterpret_cast<const GLvoid *>(3 * sizeof(GLfloat)));
+                    (1, 4, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
+                     reinterpret_cast<const GLvoid *>(offsetof(VertexData, VertexData::color)));
 
             auto bufferStructures = BufferStructures();
             bufferStructures.push_back(std::move(vertexBuffer));

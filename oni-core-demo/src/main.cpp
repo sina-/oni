@@ -13,8 +13,8 @@ int main() {
     using namespace std;
     using namespace buffers;
 
-    int width = 960;
-    int height = 540;
+    int width = 1600;
+    int height = 900;
 
     // NOTE: any call to GLEW functions will fail with Segfault if GLFW is uninitialized (initialization happens in Window).
     Window window("Oni Demo", width, height);
@@ -34,11 +34,11 @@ int main() {
 
     std::vector<unique_ptr<Renderable2D>> sprites;
 
-    float yStep = 0.05f;
-    float xStep = 0.02f;
+    float yStep = 0.03f;
+    float xStep = 0.01f;
 
-    for (float y = 1; y < 8.0f; y += yStep) {
-        for (float x = 1; x < 15.0f; x += xStep) {
+    for (float y = 0.5; y < 8.5f; y += yStep) {
+        for (float x = 0.5; x < 15.5f; x += xStep) {
             sprites.push_back(
                     make_unique<Renderable2D>(math::vec2(xStep, yStep), math::vec3(x, y, 0.0f),
                                               math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));

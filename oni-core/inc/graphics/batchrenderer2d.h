@@ -1,13 +1,9 @@
 #pragma once
 
 #include <buffers/indexbuffer.h>
-#include <graphics/renderable2d.h>
 #include <graphics/renderer2d.h>
-#include <graphics/utils/indexbuffergen.h>
 #include <graphics/utils/checkoglerrors.h>
-#include <buffers/buffer.h>
 #include <buffers/vertexarray.h>
-
 
 namespace oni {
     namespace graphics {

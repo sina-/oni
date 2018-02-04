@@ -16,7 +16,7 @@ If mesa installation doesn't work, try https://askubuntu.com/questions/61396/how
 ## CPU
 ```
 valgrind --tool=callgrind --callgrind-out-file=valgrind.out ./oni-core-demo
-kcachegrind valigrind.out
+kcachegrind valgrind.out
 ```
 ## Time measurement using gpprof
 ```

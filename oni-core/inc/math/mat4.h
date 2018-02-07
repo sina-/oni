@@ -14,8 +14,7 @@ namespace oni {
 			{
 				// Column major ordering
 				std::array<float, 4 * 4> elements;
-                // TODO: This makes no sense, vec4 aliased to 16 elements!
-				vec4 columns;
+				vec4 columns[4];
 			};
 
 			mat4();

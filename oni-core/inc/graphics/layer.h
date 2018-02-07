@@ -20,6 +20,9 @@ namespace oni {
             math::mat4 m_ProjectionMatrix;
 
         public:
+            /**
+             * Initialize shader's pr_matrix with projectionMatrix.
+             */
             Layer(std::unique_ptr<Renderer2D> renderer, std::unique_ptr<Shader> shader, math::mat4 projectionMatrix);
 
             virtual ~Layer() = default;

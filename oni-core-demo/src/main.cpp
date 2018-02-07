@@ -4,6 +4,8 @@
 #include <graphics/window.h>
 #include <chrono>
 #include <graphics/tilelayer.h>
+#include <graphics/car.h>
+#include <graphics/dynamictilelayer.h>
 
 int main() {
 
@@ -24,11 +26,18 @@ int main() {
 
     auto lightLayerShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/spotlight.frag");
 
+    auto carLayerShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/basic.frag");
+
     auto drawLayer = std::make_unique<TileLayer>(std::move(drawLayerShader), 10000);
     auto backGroundLayer = std::make_unique<TileLayer>(std::move(backGroundLayerShader), 500000);
     auto lightLayer = std::make_unique<TileLayer>(std::move(lightLayerShader), 10);
-    lightLayer->add(make_unique<Renderable2D>(math::vec2(16.0f, 9.0f), math::vec3(0.0f, 0.0f, 0.0f),
-                                                           math::vec4(1, 1, 1, 0)));
+    lightLayer->add(make_unique<StaticSprite>(vec2(16.0f, 9.0f), vec3(0.0f, 0.0f, 0.0f),
+                                              vec4(1, 1, 1, 0)));
+
+    auto car = std::make_unique<Car>(vec2(0.5f, 1.0f), vec3(1.0f, 1.0f, 0.0f), vec4(0.5f, 0.5f, 0.5f, 1.0f),
+                                     0.0f, 0.003f);
+    auto carLayer = std::make_unique<DynamicTileLayer>(std::move(carLayerShader), 2);
+    carLayer->add(std::move(car));
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -37,8 +46,8 @@ int main() {
 
     for (float y = 0.5; y < 8.5f; y += yStep) {
         for (float x = 0.5; x < 15.5f; x += xStep) {
-            backGroundLayer->add(make_unique<Renderable2D>(math::vec2(xStep, yStep), math::vec3(x, y, 0.0f),
-                                                           math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
+            backGroundLayer->add(make_unique<StaticSprite>(vec2(xStep, yStep), vec3(x, y, 0.0f),
+                                                           vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
         }
     }
     float frameTime = 0.0f;
@@ -55,16 +64,17 @@ int main() {
         height = window.getHeight();
 
 
+        auto keyPressed = window.getKeyPressed();
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             drawLayer->add(
-                    std::move(make_unique<Renderable2D>(math::vec2(0.05f, 0.07f),
-                                                        math::vec3(((const float) mouseX) * 16.0f / width,
-                                                                   9.0f - ((const float) mouseY) * 9.0f / height, 0.0f),
-                                                        math::vec4(rand() % 1000 / 1000.0f, 0, 0, 1))));
+                    std::move(make_unique<StaticSprite>(vec2(0.05f, 0.07f),
+                                                        vec3(((const float) mouseX) * 16.0f / width,
+                                                             9.0f - ((const float) mouseY) * 9.0f / height, 0.0f),
+                                                        vec4(rand() % 1000 / 1000.0f, 0, 0, 1))));
         }
 
 
-        const auto & lightShader = lightLayer->getShader();
+        const auto &lightShader = lightLayer->getShader();
         lightShader->enable();
         lightShader->setUniform2f("light_pos", vec2(static_cast<float>(mouseX * 16.0f / width),
                                                     static_cast<float>(9.0f - mouseY * 9.0f / height)));
@@ -73,7 +83,8 @@ int main() {
         lightLayer->render();
         backGroundLayer->render();
         drawLayer->render();
-
+//        carLayer->update(keyPressed);
+//        carLayer->render();
 
         window.update();
 

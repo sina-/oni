@@ -14,6 +14,7 @@ namespace oni {
 			{
 				// Column major ordering
 				std::array<float, 4 * 4> elements;
+                // TODO: This makes no sense, vec4 aliased to 16 elements!
 				vec4 columns;
 			};
 
@@ -32,8 +33,11 @@ namespace oni {
 			static mat4 scale(const vec3& scale);
 
 			mat4 & multiply(const mat4 & other);
+			vec4 multiply(const vec4 & other);
 			friend mat4 operator*(const mat4& left, const mat4& right);
 			mat4& operator*=(const mat4& other);
+
+            vec3 getTranslation();
 
 
 		};

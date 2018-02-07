@@ -118,17 +118,11 @@ namespace oni {
         }
 
         vec4 operator*(const mat4 &left, const vec4 &right) {
-            mat4 result = left;
-            return result.multiply(right);
+            return left.multiply(right);
         }
 
         vec3 operator*(const mat4 &left, const vec3 &right) {
-            mat4 result = left;
-            return result.multiply(right);
-        }
-
-        vec3 mat4::getTranslation() {
-            return vec3(elements[0 + 3 * 4], elements[1 + 3 * 4], elements[2 + 3 * 4]);
+            return left.multiply(right);
         }
 
         vec4 mat4::multiply(const vec4 &other) const {

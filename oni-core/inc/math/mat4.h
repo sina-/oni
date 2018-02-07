@@ -39,8 +39,6 @@ namespace oni {
 			friend vec3 operator*(const mat4& left, const vec3& right);
 			mat4& operator*=(const mat4& other);
 
-            vec3 getTranslation();
-
 
 		};
 	}

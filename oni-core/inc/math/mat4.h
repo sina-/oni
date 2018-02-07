@@ -32,8 +32,11 @@ namespace oni {
 			static mat4 scale(const vec3& scale);
 
 			mat4 & multiply(const mat4 & other);
-			vec4 multiply(const vec4 & other);
+			vec4 multiply(const vec4 & other) const;
+			vec3 multiply(const vec3 & other) const;
 			friend mat4 operator*(const mat4& left, const mat4& right);
+			friend vec4 operator*(const mat4& left, const vec4& right);
+			friend vec3 operator*(const mat4& left, const vec3& right);
 			mat4& operator*=(const mat4& other);
 
             vec3 getTranslation();

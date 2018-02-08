@@ -7,7 +7,7 @@ namespace oni {
         Car::Car(math::vec2 size, vec3 position,
                  math::vec4 color,
                  float rotation, float rotationSpeed)
-                : DynamicRenderable2D(size, position, color), m_Rotation(rotation),
+                : DynamicSprite(size, position, color), m_Rotation(rotation),
                   m_RotationSpeed(rotationSpeed) {
 
         }

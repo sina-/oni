@@ -7,6 +7,9 @@
 namespace oni {
     namespace graphics {
 
+        /**
+         * A Layer with top-down projection matrix.
+         */
         class TileLayer : public Layer {
         public:
             TileLayer(std::unique_ptr<Shader> shader, unsigned long maxSpriteCount);

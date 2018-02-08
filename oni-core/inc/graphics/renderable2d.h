@@ -63,10 +63,6 @@ namespace oni {
 
             virtual ~Renderable2D() = default;
 
-            // TODO: Re-think the use the definition of this function. Do you really need Renderable2D
-            // to define this?
-            virtual void update(int key, const std::unique_ptr<Shader> &shader) = 0;
-
             Renderable2D &operator=(const Renderable2D &) = delete;
 
             Renderable2D &operator=(Renderable2D &) = delete;
@@ -93,24 +89,20 @@ namespace oni {
             }
         };
 
-        typedef std::vector<const std::unique_ptr<Renderable2D> &> RenderableReferences;
         typedef std::vector<std::unique_ptr<Renderable2D>> Renderables;
 
         class StaticSprite : public Renderable2D {
         public:
             StaticSprite(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color) : Renderable2D(
                     size, pos, color) {}
-
-            void update(int key, const std::unique_ptr<Shader> &shader) override {};
-
         };
 
-        class DynamicRenderable2D : public Renderable2D {
+        class DynamicSprite : public Renderable2D {
         public:
-            DynamicRenderable2D(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color) : Renderable2D(
+            DynamicSprite(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color) : Renderable2D(
                     size, pos, color) {}
 
-            virtual void update(int key, const std::unique_ptr<Shader> &shader) override = 0;
+            virtual void update(int key, const std::unique_ptr<Shader> &shader) = 0;
         };
     }
 }

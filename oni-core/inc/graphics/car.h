@@ -9,7 +9,7 @@ namespace oni {
     namespace graphics {
         using namespace math;
 
-        class Car : public graphics::DynamicRenderable2D {
+        class Car : public graphics::DynamicSprite {
             float m_Rotation;
             float m_RotationSpeed;
 

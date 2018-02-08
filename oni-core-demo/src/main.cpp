@@ -83,8 +83,8 @@ int main() {
         lightLayer->render();
         backGroundLayer->render();
         drawLayer->render();
-//        carLayer->update(keyPressed);
-//        carLayer->render();
+        carLayer->update(keyPressed);
+        carLayer->render();
 
         window.update();
 

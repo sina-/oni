@@ -22,6 +22,6 @@ kcachegrind valgrind.out
 ```
 CPUPROFILE=$(pwd)/cpu.profile CPUPROFILE_FREQUENCY=10000 CPUPROFILE_REALTIME=1 LD_PRELOAD=/usr/lib/libprofiler.so ./oni-core-demo
 google-pprof --callgrind ./oni-core-demo cpu.profile > gpprof.callgrind.out
-kcachegrind ggprof.callgrind.out
+kcachegrind gpprof.callgrind.out
 
 ```

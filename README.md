@@ -15,9 +15,16 @@ If mesa installation doesn't work, try https://askubuntu.com/questions/61396/how
 # Profiling
 ## CPU
 ```
-valgrind --tool=callgrind --callgrind-out-file=valgrind.out ./oni-core-demo
-kcachegrind valgrind.out
+valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./oni-core-demo
+kcachegrind callgrind.out
 ```
+
+## CPU Cache
+```
+valgrind --tool=cachegrind --cachegrind-out-file=cachegrind.out ./oni-core-demo
+kcachegrind cachegrind.out
+```
+
 ## Time measurement using gpprof
 ```
 CPUPROFILE=$(pwd)/cpu.profile CPUPROFILE_FREQUENCY=10000 CPUPROFILE_REALTIME=1 LD_PRELOAD=/usr/lib/libprofiler.so ./oni-core-demo

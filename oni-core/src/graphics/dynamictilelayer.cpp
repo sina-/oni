@@ -13,7 +13,7 @@ namespace oni {
                 // TODO: Maybe there is a better way to model DynamicTile and DynamicSprite
                 // to avoid the need for down-casting.
                 const auto d = dynamic_cast<DynamicSprite *>(renderable.get());
-                d->update(key, m_Shader);
+                d->update(key, *m_Shader);
             }
         }
     }

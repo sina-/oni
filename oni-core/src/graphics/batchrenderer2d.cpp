@@ -82,13 +82,13 @@ namespace oni {
             CHECK_OGL_ERRORS
         }
 
-        void BatchRenderer2D::submit(const std::unique_ptr<Renderable2D> &renderable) {
+        void BatchRenderer2D::submit(const Renderable2D &renderable) {
             if (m_IndexCount + 6 >= m_MaxIndicesCount) {
                 throw std::runtime_error("Too many objects to render!");
             }
 
             // First vertex.
-            auto color = renderable->getColor();
+            auto color = renderable.getColor();
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -98,22 +98,22 @@ namespace oni {
              *    a    d
              */
             // a.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable->getPositionA();
+            m_Buffer->vertex = m_TransformationStack.back() * renderable.getPositionA();
             m_Buffer->color = color;
             m_Buffer++;
 
             // b.
-            m_Buffer->vertex = m_TransformationStack.back() *renderable->getPositionB();
+            m_Buffer->vertex = m_TransformationStack.back() *renderable.getPositionB();
             m_Buffer->color = color;
             m_Buffer++;
 
             // c.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable->getPositionC();
+            m_Buffer->vertex = m_TransformationStack.back() * renderable.getPositionC();
             m_Buffer->color = color;
             m_Buffer++;
 
             // d.
-            m_Buffer->vertex =m_TransformationStack.back() * renderable->getPositionD();
+            m_Buffer->vertex =m_TransformationStack.back() * renderable.getPositionD();
             m_Buffer->color = color;
             m_Buffer++;
 

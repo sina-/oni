@@ -18,7 +18,7 @@ namespace oni {
 
             ~Car() override = default;
 
-            void update(int key, const std::unique_ptr<Shader> &shader) override;
+            void update(int key, const Shader &shader) override;
         };
     }
 }

@@ -13,7 +13,7 @@ namespace oni {
 
 		public:
 			void begin() {}
-			void submit(const std::unique_ptr<Renderable2D> &renderable) override;
+			void submit(const Renderable2D &renderable) override;
 			void flush() override;
 			void end() {}
 

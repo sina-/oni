@@ -36,7 +36,7 @@ namespace oni {
 
             void begin() override;
 
-            void submit(const std::unique_ptr<Renderable2D> &renderable) override;
+            void submit(const Renderable2D &renderable) override;
 
             void flush() override;
 

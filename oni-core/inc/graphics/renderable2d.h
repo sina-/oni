@@ -102,7 +102,7 @@ namespace oni {
             DynamicSprite(const math::vec2 &size, const math::vec3 &pos, const math::vec4 &color) : Renderable2D(
                     size, pos, color) {}
 
-            virtual void update(int key, const std::unique_ptr<Shader> &shader) = 0;
+            virtual void update(int key, const Shader &shader) = 0;
         };
     }
 }

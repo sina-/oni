@@ -12,7 +12,7 @@ namespace oni {
 
         }
 
-        void Car::update(int key, const std::unique_ptr<Shader> &shader) {
+        void Car::update(int key, const Shader &shader) {
             switch (key) {
                 case GLFW_KEY_W: {
                     m_Position += math::vec3(0.0f, 0.001f, 0.0f);

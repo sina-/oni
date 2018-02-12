@@ -40,12 +40,7 @@ namespace oni {
              */
             virtual void begin() = 0;
 
-            /**
-			 * Renderable has to be shared_ptr if we are to use for multiple frames
-			 * if it is unique_ptr then renderer needs to own it and retain it
-			 * across frames.
-             */
-            virtual void submit(const std::unique_ptr<Renderable2D> &renderable) = 0;
+            virtual void submit(const Renderable2D &renderable) = 0;
 
             /**
              * Draw the element(s).

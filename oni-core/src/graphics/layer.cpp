@@ -14,7 +14,7 @@ namespace oni {
             m_Shader->enable();
             m_Renderer2D->begin();
             for (const auto &renderable: m_Renderables) {
-                m_Renderer2D->submit(renderable);
+                m_Renderer2D->submit(*renderable);
             }
             m_Renderer2D->end();
             m_Renderer2D->flush();

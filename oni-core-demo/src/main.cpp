@@ -9,6 +9,8 @@
 
 int main() {
 
+    // TODO: Check function cache misses on the most called functions.
+
     using namespace oni;
     using namespace graphics;
     using namespace math;

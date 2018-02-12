@@ -9,10 +9,6 @@ namespace oni {
          * Same as TileLayer but every DynamicSprite can be updated.
          */
         class DynamicTileLayer : public TileLayer {
-            // Hide it, to make sure only DynamicSprite objects are
-            // added to this tile.
-            void add(std::unique_ptr<Renderable2D>) override { ONI_DEBUG_ASSERT(false); };
-
         public:
             DynamicTileLayer(std::unique_ptr<Shader> shader, unsigned long maxSprintCount) : TileLayer(
                     std::move(shader), maxSprintCount) {}

@@ -4,6 +4,7 @@
 #include <graphics/renderer2d.h>
 #include <graphics/utils/checkoglerrors.h>
 #include <buffers/vertexarray.h>
+#include <components/renderables.h>
 
 namespace oni {
     namespace graphics {
@@ -27,7 +28,7 @@ namespace oni {
             std::unique_ptr<VertexArray> m_VAO;
 
             // The buffer that will hold all the VertexData in the batch.
-            VertexData *m_Buffer;
+            components::VertexData *m_Buffer;
 
         public:
             explicit BatchRenderer2D(const unsigned long maxSpriteCount);

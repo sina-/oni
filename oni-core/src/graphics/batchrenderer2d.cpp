@@ -1,6 +1,7 @@
 #include <graphics/batchrenderer2d.h>
 #include <graphics/utils/indexbuffergen.h>
 #include <utils/oni_assert.h>
+#include <components/renderables.h>
 
 namespace oni {
     namespace graphics {
@@ -8,7 +9,7 @@ namespace oni {
                                                                                m_MaxSpriteCount(maxSpriteCount) {
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
-            m_MaxVertexSize = sizeof(VertexData);
+            m_MaxVertexSize = sizeof(components::VertexData);
 
             auto maxUIntSize = std::numeric_limits<unsigned int>::max();
             ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize)
@@ -17,13 +18,13 @@ namespace oni {
             m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
 
-            auto vertexBuffer = std::make_unique<const BufferStructure>(
+            auto vertexBuffer = std::make_unique<const components::BufferStructure>(
                     0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
-            auto colorBuffer = std::make_unique<const BufferStructure>
+            auto colorBuffer = std::make_unique<const components::BufferStructure>
                     (1, 4, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
-                     reinterpret_cast<const GLvoid *>(offsetof(VertexData, VertexData::color)));
+                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::color)));
 
-            auto bufferStructures = BufferStructures();
+            auto bufferStructures = components::BufferStructures();
             bufferStructures.push_back(std::move(vertexBuffer));
             bufferStructures.push_back(std::move(colorBuffer));
 
@@ -78,7 +79,7 @@ namespace oni {
                     custom_deleter(GL_ARRAY_BUFFER) );
              * For more details: https://github.com/sina-/ehgl/blob/master/eg/buffer_target.hpp#L159
              ***/
-            m_Buffer = (VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+            m_Buffer = (components::VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
             CHECK_OGL_ERRORS
         }
 

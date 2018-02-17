@@ -1,12 +1,10 @@
 #include <utils/oni_assert.h>
 #include <buffers/buffer.h>
 
-#include <utility>
-
 namespace oni {
     namespace buffers {
         Buffer::Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
-                       BufferStructures bufferStructures)
+                       components::BufferStructures bufferStructures)
                 : m_BufferStructures(std::move(bufferStructures)) {
             // Check for supported usages.
             ONI_DEBUG_ASSERT(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)

@@ -1,5 +1,5 @@
 #include <graphics/batch-renderer2d.h>
-#include <graphics/utils/indexbuffergen.h>
+#include <graphics/utils/index-buffer-gen.h>
 #include <utils/oni-assert.h>
 
 namespace oni {
@@ -88,7 +88,7 @@ namespace oni {
             }
 
             // First vertex.
-            auto color = renderable.m_Color;
+            auto color = renderable.color;
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -98,22 +98,22 @@ namespace oni {
              *    a    d
              */
             // a.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable.m_PositionA;
+            m_Buffer->vertex = m_TransformationStack.back() * renderable.positionA;
             m_Buffer->color = color;
             m_Buffer++;
 
             // b.
-            m_Buffer->vertex = m_TransformationStack.back() *renderable.m_PositionB;
+            m_Buffer->vertex = m_TransformationStack.back() *renderable.positionB;
             m_Buffer->color = color;
             m_Buffer++;
 
             // c.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable.m_PositionC;
+            m_Buffer->vertex = m_TransformationStack.back() * renderable.positionC;
             m_Buffer->color = color;
             m_Buffer++;
 
             // d.
-            m_Buffer->vertex =m_TransformationStack.back() * renderable.m_PositionD;
+            m_Buffer->vertex =m_TransformationStack.back() * renderable.positionD;
             m_Buffer->color = color;
             m_Buffer++;
 

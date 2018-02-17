@@ -33,7 +33,7 @@ namespace oni {
         typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
         struct Renderable2D {
-            math::vec4 m_Color;
+            math::vec4 color;
             /**
              *    B    C
              *    +----+
@@ -41,17 +41,17 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            math::vec3 m_PositionA;
-            math::vec3 m_PositionB;
-            math::vec3 m_PositionC;
-            math::vec3 m_PositionD;
+            math::vec3 positionA;
+            math::vec3 positionB;
+            math::vec3 positionC;
+            math::vec3 positionD;
 
             Renderable2D(const math::vec4 &m_Color, const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
-                         const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) : m_Color(m_Color),
-                                                                                         m_PositionA(m_PositionA),
-                                                                                         m_PositionB(m_PositionB),
-                                                                                         m_PositionC(m_PositionC),
-                                                                                         m_PositionD(m_PositionD) {}
+                         const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) : color(m_Color),
+                                                                                         positionA(m_PositionA),
+                                                                                         positionB(m_PositionB),
+                                                                                         positionC(m_PositionC),
+                                                                                         positionD(m_PositionD) {}
 
             Renderable2D &operator=(const Renderable2D &) = delete;
 
@@ -59,9 +59,9 @@ namespace oni {
 
 /*            void setVertexPositions(const math::vec2 &size, const math::vec3 &pos) {
                 m_PositionA = pos;
-                m_PositionB = math::vec3(pos.x, pos.y + size.y, pos.z);
-                m_PositionC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
-                m_PositionD = math::vec3(pos.x + size.x, pos.y, pos.z);
+                positionB = math::vec3(pos.x, pos.y + size.y, pos.z);
+                positionC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
+                positionD = math::vec3(pos.x + size.x, pos.y, pos.z);
             }*/
         };
 

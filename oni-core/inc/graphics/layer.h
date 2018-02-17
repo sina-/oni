@@ -4,6 +4,7 @@
 #include <graphics/renderable2d.h>
 #include <graphics/shader.h>
 #include <math/mat4.h>
+#include <components/render-components.h>
 
 namespace oni {
     namespace graphics {
@@ -15,7 +16,7 @@ namespace oni {
         class Layer {
         protected:
             std::unique_ptr<Renderer2D> m_Renderer2D;
-            Renderables m_Renderables;
+            components::Renderables m_Renderables;
             std::unique_ptr<Shader> m_Shader;
             math::mat4 m_ProjectionMatrix;
 
@@ -27,7 +28,7 @@ namespace oni {
 
             virtual ~Layer() = default;
 
-            virtual void add(std::unique_ptr<Renderable2D> renderable) {
+            virtual void add(std::unique_ptr<components::Renderable2D> renderable) {
                 m_Renderables.push_back(std::move(renderable));
             }
 

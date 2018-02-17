@@ -9,7 +9,7 @@ namespace oni {
     namespace graphics {
         using namespace math;
 
-        class Car : public graphics::DynamicSprite {
+/*        class Car : public graphics::DynamicSprite {
             float m_Rotation;
             float m_RotationSpeed;
 
@@ -19,6 +19,6 @@ namespace oni {
             ~Car() override = default;
 
             void update(int key, const Shader &shader) override;
-        };
+        };*/
     }
 }

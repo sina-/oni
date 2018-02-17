@@ -4,7 +4,7 @@
 namespace oni {
     namespace graphics {
 
-        Car::Car(math::vec2 size, vec3 position,
+/*        Car::Car(math::vec2 size, vec3 position,
                  math::vec4 color,
                  float rotation, float rotationSpeed)
                 : DynamicSprite(size, position, color), m_Rotation(rotation),
@@ -37,6 +37,6 @@ namespace oni {
                 default:
                     break;
             }
-        }
+        }*/
     }
 }

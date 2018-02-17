@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/renderable2d.h"
+#include <components/render-components.h>
 
 namespace oni {
     namespace graphics {
@@ -40,7 +40,7 @@ namespace oni {
              */
             virtual void begin() = 0;
 
-            virtual void submit(const Renderable2D &renderable) = 0;
+            virtual void submit(const components::Renderable2D &renderable) = 0;
 
             /**
              * Draw the element(s).

@@ -2,7 +2,7 @@
 
 namespace oni {
 	namespace graphics {
-		void Simple2DRenderer::submit(const Renderable2D &renderable)
+		void Simple2DRenderer::submit(const components::Renderable2D &renderable)
 		{
 //			m_RenderQueue.push_back(renderable);
 		}

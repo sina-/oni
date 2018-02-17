@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <graphics/renderable2d.h>
-#include <components/renderables.h>
+#include <components/render-components.h>
 
 namespace oni {
     namespace buffers {

@@ -1,21 +1,17 @@
 #include <iostream>
 #include <graphics/batchrenderer2d.h>
-#include <graphics/shader.h>
 #include <graphics/window.h>
 #include <chrono>
 #include <graphics/tilelayer.h>
-#include <graphics/car.h>
 #include <graphics/dynamictilelayer.h>
 
 int main() {
-
-    // TODO: Check function cache misses on the most called functions.
-
     using namespace oni;
     using namespace graphics;
     using namespace math;
     using namespace std;
     using namespace buffers;
+    using namespace components;
 
     int width = 1600;
     int height = 900;
@@ -33,11 +29,11 @@ int main() {
     auto drawLayer = std::make_unique<TileLayer>(std::move(drawLayerShader), 10000);
     auto backGroundLayer = std::make_unique<TileLayer>(std::move(backGroundLayerShader), 500000);
     auto lightLayer = std::make_unique<TileLayer>(std::move(lightLayerShader), 10);
-    lightLayer->add(make_unique<StaticSprite>(vec2(16.0f, 9.0f), vec3(0.0f, 0.0f, 0.0f),
-                                              vec4(1, 1, 1, 0)));
+    lightLayer->add(make_unique<Renderable2D>(vec4(1, 1, 1, 0), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 9.0f, 0.0f),
+                                              vec3(16.0f, 9.0f, 0.0f), vec3(16.0f, 0.0f, 0.0f)));
 
-    auto car = std::make_unique<Car>(vec2(0.5f, 1.0f), vec3(1.0f, 1.0f, 0.0f), vec4(0.5f, 0.5f, 0.5f, 1.0f),
-                                     0.0f, 0.003f);
+    auto car = std::make_unique<Renderable2D>(vec4(0.2f, 0.5f, 1, 0), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
+                                              vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f));
     auto carLayer = std::make_unique<DynamicTileLayer>(std::move(carLayerShader), 2);
     carLayer->add(std::move(car));
 
@@ -48,8 +44,10 @@ int main() {
 
     for (float y = 0.5; y < 8.5f; y += yStep) {
         for (float x = 0.5; x < 15.5f; x += xStep) {
-            backGroundLayer->add(make_unique<StaticSprite>(vec2(xStep, yStep), vec3(x, y, 0.0f),
-                                                           vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
+            backGroundLayer->add(make_unique<Renderable2D>(vec4(rand() % 1000 / 1000.0f, 0, 1, 1),
+                                                           vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
+                                                           vec3(x + xStep, y + yStep, 0.0f),
+                                                           vec3(x + xStep, y, 0.0f)));
         }
     }
     float frameTime = 0.0f;
@@ -71,11 +69,15 @@ int main() {
 
         auto keyPressed = window.getKeyPressed();
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
+            auto _x = ((const float) mouseX) * 16.0f / width;
+            auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
             drawLayer->add(
-                    std::move(make_unique<StaticSprite>(vec2(0.05f, 0.07f),
-                                                        vec3(((const float) mouseX) * 16.0f / width,
-                                                             9.0f - ((const float) mouseY) * 9.0f / height, 0.0f),
-                                                        vec4(rand() % 1000 / 1000.0f, 0, 0, 1))));
+                    std::move(make_unique<Renderable2D>(
+                            vec4(rand() % 1000 / 1000.0f, 0, 0, 1),
+                            vec3(_x, _y, 0.0f),
+                            vec3(_x, _y + 0.07f, 0.0f),
+                            vec3(_x + 0.05f, _y + 0.07f, 0.0f),
+                            vec3(_x + 0.05f, _y, 0.0f))));
         }
 
 

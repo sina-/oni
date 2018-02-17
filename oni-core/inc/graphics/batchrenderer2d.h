@@ -4,7 +4,7 @@
 #include <graphics/renderer2d.h>
 #include <graphics/utils/checkoglerrors.h>
 #include <buffers/vertexarray.h>
-#include <components/renderables.h>
+#include <components/render-components.h>
 
 namespace oni {
     namespace graphics {
@@ -37,7 +37,7 @@ namespace oni {
 
             void begin() override;
 
-            void submit(const Renderable2D &renderable) override;
+            void submit(const components::Renderable2D &renderable) override;
 
             void flush() override;
 

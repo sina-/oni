@@ -18,6 +18,8 @@ namespace oni {
 
             ~VertexArray() { glDeleteVertexArrays(1, &m_ArrayID); };
 
+            // TODO: At its current form, it makes no sense to have addBuffer. This operation
+            // should be handled in constructor.
             void addBuffer(std::unique_ptr<const Buffer> vertexBuffer);
 
             inline void bindVAO() const { glBindVertexArray(m_ArrayID); }

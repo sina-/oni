@@ -20,7 +20,7 @@ int main() {
     int width = 1600;
     int height = 900;
 
-    // NOTE: any call to GLEW functions will fail with Segfault if GLFW is uninitialized (initialization happens in Window).
+    // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     Window window("Oni Demo", width, height);
 
     auto drawLayerShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/basic.frag");
@@ -53,6 +53,9 @@ int main() {
         }
     }
     float frameTime = 0.0f;
+
+    float totalFPS = 0.0f;
+    int secondsPassed = 0;
 
     while (!window.closed()) {
         auto start = std::chrono::steady_clock::now();
@@ -94,10 +97,17 @@ int main() {
         std::chrono::duration<float> diff = end - start;
         frameTime += diff.count();
         if (frameTime > 1.0f) {
-            printl(1.0f / diff.count());
+            auto fps = 1.0f / diff.count();
+            totalFPS += fps;
+            secondsPassed++;
+            printl(fps);
             frameTime = 0;
         }
+
     }
+    printl("Average FPS: ");
+    printl(totalFPS / secondsPassed);
+
 
     return 0;
 }

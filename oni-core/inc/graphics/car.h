@@ -1,6 +1,5 @@
 #pragma once
 
-#include <graphics/renderable2d.h>
 #include <math/vec3.h>
 #include <math/vec2.h>
 #include <math/vec4.h>

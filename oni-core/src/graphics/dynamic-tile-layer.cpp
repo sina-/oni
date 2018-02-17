@@ -1,5 +1,5 @@
 
-#include <graphics/dynamictilelayer.h>
+#include <graphics/dynamic-tile-layer.h>
 
 namespace oni {
     namespace graphics {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <buffers/indexbuffer.h>
-#include <graphics/renderer2d.h>
+#include <buffers/index-buffer.h>
+#include <graphics/renderer-2d.h>
 #include <graphics/utils/checkoglerrors.h>
-#include <buffers/vertexarray.h>
+#include <buffers/vertex-array.h>
 #include <components/render-components.h>
 
 namespace oni {

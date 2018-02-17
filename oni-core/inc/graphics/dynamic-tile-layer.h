@@ -1,7 +1,6 @@
 #pragma once
 
 #include <graphics/tilelayer.h>
-#include <utils/oni_assert.h>
 
 namespace oni {
     namespace graphics {

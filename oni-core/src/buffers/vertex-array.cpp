@@ -1,5 +1,4 @@
-#include <graphics/renderable2d.h>
-#include "buffers/vertexarray.h"
+#include "buffers/vertex-array.h"
 
 namespace oni {
     namespace buffers {

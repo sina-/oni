@@ -1,7 +1,6 @@
 #pragma once
 
-#include <graphics/renderer2d.h>
-#include <graphics/renderable2d.h>
+#include <graphics/renderer-2d.h>
 #include <graphics/shader.h>
 #include <math/mat4.h>
 #include <components/render-components.h>

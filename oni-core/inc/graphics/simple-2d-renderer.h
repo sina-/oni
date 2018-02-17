@@ -2,8 +2,7 @@
 
 #include <deque>
 #include <GL/glew.h>
-#include "graphics/renderer2d.h"
-#include "graphics/renderable2d.h"
+#include "graphics/renderer-2d.h"
 
 
 namespace oni {

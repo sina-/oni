@@ -1,5 +1,5 @@
 #include <graphics/tilelayer.h>
-#include <graphics/batchrenderer2d.h>
+#include <graphics/batch-renderer2d.h>
 
 namespace oni {
     namespace graphics {

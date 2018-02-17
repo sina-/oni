@@ -1,6 +1,5 @@
 #pragma once
 
-#include <graphics/renderable2d.h>
 #include <graphics/shader.h>
 #include <graphics/layer.h>
 

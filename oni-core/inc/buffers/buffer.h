@@ -3,12 +3,10 @@
 #include <GL/glew.h>
 #include <stdexcept>
 #include <vector>
-#include <graphics/renderable2d.h>
 #include <components/render-components.h>
 
 namespace oni {
     namespace buffers {
-        using namespace graphics;
 
         /*
          * Great tutorial on OpenGL buffers: https://open.gl/drawing

@@ -1,7 +1,6 @@
-#include <graphics/batchrenderer2d.h>
+#include <graphics/batch-renderer2d.h>
 #include <graphics/utils/indexbuffergen.h>
-#include <utils/oni_assert.h>
-#include <components/render-components.h>
+#include <utils/oni-assert.h>
 
 namespace oni {
     namespace graphics {

@@ -1,9 +1,9 @@
 #include <iostream>
-#include <graphics/batchrenderer2d.h>
+#include <graphics/batch-renderer2d.h>
 #include <graphics/window.h>
 #include <chrono>
 #include <graphics/tilelayer.h>
-#include <graphics/dynamictilelayer.h>
+#include <graphics/dynamic-tile-layer.h>
 
 int main() {
     using namespace oni;

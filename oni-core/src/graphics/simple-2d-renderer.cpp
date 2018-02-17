@@ -1,4 +1,4 @@
-#include "graphics/simple2drenderer.h"
+#include "graphics/simple-2d-renderer.h"
 
 namespace oni {
 	namespace graphics {

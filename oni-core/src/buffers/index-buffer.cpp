@@ -1,4 +1,4 @@
-#include "buffers/indexbuffer.h"
+#include "buffers/index-buffer.h"
 
 namespace oni {
 	namespace buffers {

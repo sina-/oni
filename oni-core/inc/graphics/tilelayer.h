@@ -19,8 +19,6 @@ namespace oni {
                 m_Renderables.push_back(std::move(renderable));
             }*/
 
-            void render() override;
-
         };
 
     }

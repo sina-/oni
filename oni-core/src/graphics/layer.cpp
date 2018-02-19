@@ -21,5 +21,24 @@ namespace oni {
             m_Shader->disable();
 
         }
+
+        void Layer::render(const entities::World &world) {
+            m_Shader->enable();
+            m_Renderer2D->begin();
+
+            auto spriteMask = components::Mask().set(components::SPRITE);
+
+            unsigned long entityIndex = 0;
+            for (const auto &entity: world.getEntities()) {
+                if((entity & spriteMask) == spriteMask){
+                    m_Renderer2D->submit(world.getRenderable2D(entityIndex));
+                }
+                ++entityIndex;
+            }
+            m_Renderer2D->end();
+            m_Renderer2D->flush();
+            m_Shader->disable();
+
+        }
     }
 }

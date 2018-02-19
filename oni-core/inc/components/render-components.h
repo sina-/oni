@@ -46,6 +46,9 @@ namespace oni {
             math::vec3 positionC;
             math::vec3 positionD;
 
+            Renderable2D() : color(math::vec4()), positionA(math::vec3()), positionB(math::vec3()),
+                             positionC(math::vec3()), positionD(math::vec3()) {}
+
             Renderable2D(const math::vec4 &m_Color, const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
                          const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) : color(m_Color),
                                                                                          positionA(m_PositionA),
@@ -53,9 +56,8 @@ namespace oni {
                                                                                          positionC(m_PositionC),
                                                                                          positionD(m_PositionD) {}
 
-            Renderable2D &operator=(const Renderable2D &) = delete;
+            Renderable2D(const Renderable2D &other) = default;
 
-            Renderable2D &operator=(Renderable2D &) = delete;
 
 /*            void setVertexPositions(const math::vec2 &size, const math::vec3 &pos) {
                 m_PositionA = pos;

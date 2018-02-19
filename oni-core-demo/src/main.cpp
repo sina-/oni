@@ -4,6 +4,7 @@
 #include <chrono>
 #include <graphics/tilelayer.h>
 #include <graphics/dynamic-tile-layer.h>
+#include <entities/world.h>
 
 int main() {
     using namespace oni;
@@ -15,6 +16,8 @@ int main() {
 
     int width = 1600;
     int height = 900;
+
+    entities::World world(128);
 
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     Window window("Oni Demo", width, height);
@@ -44,16 +47,21 @@ int main() {
 
     for (float y = 0.5; y < 8.5f; y += yStep) {
         for (float x = 0.5; x < 15.5f; x += xStep) {
-            backGroundLayer->add(make_unique<Renderable2D>(vec4(rand() % 1000 / 1000.0f, 0, 1, 1),
+/*            backGroundLayer->add(make_unique<Renderable2D>(vec4(rand() % 1000 / 1000.0f, 0, 1, 1),
                                                            vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
                                                            vec3(x + xStep, y + yStep, 0.0f),
-                                                           vec3(x + xStep, y, 0.0f)));
+                                                           vec3(x + xStep, y, 0.0f)));*/
+            world.addCar(Renderable2D(vec4(rand() % 1000 / 1000.0f, 0, 1, 1),
+                                      vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
+                                      vec3(x + xStep, y + yStep, 0.0f),
+                                      vec3(x + xStep, y, 0.0f)));
         }
     }
     float frameTime = 0.0f;
 
     float totalFPS = 0.0f;
     int secondsPassed = 0;
+
 
     while (!window.closed()) {
         auto start = std::chrono::steady_clock::now();
@@ -71,13 +79,19 @@ int main() {
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
-            drawLayer->add(
+/*            drawLayer->add(
                     std::move(make_unique<Renderable2D>(
                             vec4(rand() % 1000 / 1000.0f, 0, 0, 1),
                             vec3(_x, _y, 0.0f),
                             vec3(_x, _y + 0.07f, 0.0f),
                             vec3(_x + 0.05f, _y + 0.07f, 0.0f),
-                            vec3(_x + 0.05f, _y, 0.0f))));
+                            vec3(_x + 0.05f, _y, 0.0f))));*/
+            world.addCar(Renderable2D(
+                            vec4(rand() % 1000 / 1000.0f, 0, 0, 1),
+                            vec3(_x, _y, 0.0f),
+                            vec3(_x, _y + 0.07f, 0.0f),
+                            vec3(_x + 0.05f, _y + 0.07f, 0.0f),
+                            vec3(_x + 0.05f, _y, 0.0f)));
         }
 
 
@@ -88,8 +102,8 @@ int main() {
         lightShader->disable();
 
         lightLayer->render();
-        backGroundLayer->render();
-        drawLayer->render();
+        backGroundLayer->render(world);
+//        drawLayer->render();
         carLayer->update(keyPressed);
         carLayer->render();
 
@@ -109,7 +123,6 @@ int main() {
     }
     printl("Average FPS: ");
     printl(totalFPS / secondsPassed);
-
 
     return 0;
 }

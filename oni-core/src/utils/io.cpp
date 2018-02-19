@@ -3,7 +3,7 @@
 
 
 namespace oni {
-	void printl(char * text) {
+	void printl(const std::string &text) {
 		std::cout << text << std::endl;
 	}
 

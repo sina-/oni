@@ -3,8 +3,7 @@
 #include <graphics/window.h>
 #include <chrono>
 #include <graphics/tilelayer.h>
-#include <graphics/dynamic-tile-layer.h>
-#include <entities/world.h>
+#include <physics/movement.h>
 
 int main() {
     using namespace oni;
@@ -18,6 +17,7 @@ int main() {
     int height = 900;
 
     entities::World world;
+    physics::Movement movement;
 
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     Window window("Oni Demo", width, height);
@@ -27,18 +27,13 @@ int main() {
 
     auto lightLayerShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/spotlight.frag");
 
-    auto carLayerShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/basic.frag");
+//    auto carLayerShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/basic.frag");
 
     auto drawLayer = std::make_unique<TileLayer>(std::move(drawLayerShader), 10000);
-    auto backGroundLayer = std::make_unique<TileLayer>(std::move(backGroundLayerShader), 500000);
+    auto spriteLayer = std::make_unique<TileLayer>(std::move(backGroundLayerShader), 500000);
 /*    auto lightLayer = std::make_unique<TileLayer>(std::move(lightLayerShader), 10);
     lightLayer->add(make_unique<Sprite>(vec4(1, 1, 1, 0), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 9.0f, 0.0f),
                                         vec3(16.0f, 9.0f, 0.0f), vec3(16.0f, 0.0f, 0.0f)));*/
-
-/*    auto car = std::make_unique<Sprite>(vec4(0.2f, 0.5f, 1, 0), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
-                                        vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f));*/
-//    auto carLayer = std::make_unique<DynamicTileLayer>(std::move(carLayerShader), 2);
-//    carLayer->add(std::move(car));
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -56,12 +51,21 @@ int main() {
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
-            world.addSprite(Position(
-                    vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
-                    vec3(x + xStep, y + yStep, 0.0f),
-                    vec3(x + xStep, y, 0.0f)), Appearance(math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
+            auto sprite = world.createEntity(components::Mask().set(components::POSITION).set(components::APPEARANCE));
+            world.setPosition(sprite, Position(vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
+                                               vec3(x + xStep, y + yStep, 0.0f),
+                                               vec3(x + xStep, y, 0.0f)));
+            world.setAppearance(sprite, Appearance(math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
         }
     }
+
+//    auto carLayer = std::make_unique<TileLayer>(std::move(carLayerShader), 2);
+    auto car = world.createEntity(
+            components::Mask().set(components::POSITION).set(components::APPEARANCE).set(components::DYNAMIC));
+    world.setPosition(car, Position(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
+                                    vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)));
+    world.setAppearance(car, Appearance(vec4(0.5f, 0.5f, 0.0f, 1.0f)));
+
 
     float frameTime = 0.0f;
 
@@ -83,11 +87,12 @@ int main() {
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
-            world.addSprite(Position(
-                    vec3(_x, _y, 0.0f),
-                    vec3(_x, _y + 0.07f, 0.0f),
-                    vec3(_x + 0.05f, _y + 0.07f, 0.0f),
-                    vec3(_x + 0.05f, _y, 0.0f)), Appearance(vec4(rand() % 1000 / 1000.0f, 0, 0, 1)));
+            auto sprite = world.createEntity(components::Mask().set(components::POSITION).set(components::APPEARANCE));
+            world.setPosition(sprite, Position(vec3(_x, _y, 0.0f),
+                                               vec3(_x, _y + 0.07f, 0.0f),
+                                               vec3(_x + 0.05f, _y + 0.07f, 0.0f),
+                                               vec3(_x + 0.05f, _y, 0.0f)));
+            world.setAppearance(sprite, Appearance(vec4(rand() % 1000 / 1000.0f, 0, 0, 1)));
         }
 
 
@@ -98,7 +103,8 @@ int main() {
         lightShader->disable();
 
         lightLayer->render();*/
-        backGroundLayer->render(world);
+        movement.update(world, window);
+        spriteLayer->render(world);
 //        drawLayer->render();
 //        carLayer->update(keyPressed);
 //        carLayer->render();

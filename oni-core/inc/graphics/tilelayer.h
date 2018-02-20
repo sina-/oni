@@ -14,11 +14,6 @@ namespace oni {
             TileLayer(std::unique_ptr<Shader> shader, unsigned long maxSpriteCount);
 
             ~TileLayer() override = default;
-
-/*            void add(std::unique_ptr<Sprite> renderable) override {
-                m_Positions.push_back(std::move(renderable));
-            }*/
-
         };
 
     }

@@ -4,7 +4,7 @@
 namespace oni {
     namespace entities {
 
-        auto World::createEntity() {
+        auto World::_createEntity() {
             if (!m_FreeEntitySlots.empty()) {
                 auto entity = m_FreeEntitySlots.top();
                 m_FreeEntitySlots.pop();
@@ -31,14 +31,6 @@ namespace oni {
             m_FreeEntitySlots.push(entity);
         }
 
-        unsigned long World::addSprite(const components::Position &position, const components::Appearance &color) {
-            auto entity = createEntity();
-            m_Entities[entity] = entities::Sprite;
-            m_Positions[entity] = position;
-            m_Appearances[entity] = color;
-            return entity;
-        }
-
         const components::EntityMask &World::getEntities() const {
             return m_Entities;
         }
@@ -53,6 +45,20 @@ namespace oni {
 
         const components::Appearance &World::getAppearance(unsigned long entity) const {
             return m_Appearances[entity];
+        }
+
+        unsigned long World::createEntity(components::Mask mask) {
+            auto entity =_createEntity();
+            m_Entities[entity] = mask;
+            return entity;
+        }
+
+        void World::setPosition(unsigned long entity, components::Position position) {
+            m_Positions[entity] = position;
+        }
+
+        void World::setAppearance(unsigned long entity, components::Appearance appearance) {
+            m_Appearances[entity] = appearance;
         }
 
 

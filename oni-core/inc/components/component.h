@@ -11,13 +11,18 @@ namespace oni {
 
             POSITION,
             APPEARANCE,
+            DYNAMIC,
 
             // NOTE: Always keep it last to determine size.
             MAX
         };
 
         typedef std::bitset<MAX> Mask;
-        typedef std::vector<std::bitset<components::Component::MAX>> EntityMask;
+        typedef std::vector<std::bitset<MAX>> EntityMask;
+
+        const static components::Mask PositionComponent = components::Mask().set(components::POSITION);
+        const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);
+        const static components::Mask DynamicComponent = components::Mask().set(components::DYNAMIC);
 
     }
 

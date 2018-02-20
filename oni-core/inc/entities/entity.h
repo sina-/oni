@@ -4,6 +4,7 @@
 
 namespace oni {
     namespace entities {
-        const static components::Mask Sprite = components::Mask().set(components::POSITION).set(components::APPEARANCE);
+//        const static components::Mask Sprite = components::Mask().set(components::POSITION).set(components::APPEARANCE);
+//        const static components::Mask DynamicSprite = components::Mask().set(components::POSITION).set(components::APPEARANCE).set(components::DYNAMIC);
     }
 }

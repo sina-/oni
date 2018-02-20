@@ -78,10 +78,7 @@ namespace oni {
                 color.z = other.color.z;
                 color.w = other.color.w;
             }
-
         };
-
-        typedef std::vector<std::unique_ptr<Position>> Renderables;
 
     }
 }

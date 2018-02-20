@@ -10,25 +10,13 @@ namespace oni {
             m_Shader->disable();
         }
 
-        void Layer::render() {
-/*            m_Shader->enable();
-            m_Renderer2D->begin();
-            for (const auto &renderable: m_Renderables) {
-                m_Renderer2D->submit(*renderable);
-            }
-            m_Renderer2D->end();
-            m_Renderer2D->flush();
-            m_Shader->disable();*/
-
-        }
-
         void Layer::render(const entities::World &world) {
             m_Shader->enable();
             m_Renderer2D->begin();
 
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
-                if ((entity & entities::Sprite) == entities::Sprite) {
+                if ((entity & components::AppearanceComponent) == components::AppearanceComponent) {
                     m_Renderer2D->submit(world.getPosition(entityIndex), world.getAppearance(entityIndex));
                 }
                 ++entityIndex;

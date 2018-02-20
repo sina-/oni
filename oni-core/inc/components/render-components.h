@@ -32,8 +32,7 @@ namespace oni {
 
         typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
-        struct Renderable2D {
-            math::vec4 color;
+        struct Position {
             /**
              *    B    C
              *    +----+
@@ -41,33 +40,48 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            math::vec3 positionA;
-            math::vec3 positionB;
-            math::vec3 positionC;
-            math::vec3 positionD;
+            math::vec3 vertexA;
+            math::vec3 vertexB;
+            math::vec3 vertexC;
+            math::vec3 vertexD;
 
-            Renderable2D() : color(math::vec4()), positionA(math::vec3()), positionB(math::vec3()),
-                             positionC(math::vec3()), positionD(math::vec3()) {}
+            Position() : vertexA(math::vec3()), vertexB(math::vec3()),
+                       vertexC(math::vec3()), vertexD(math::vec3()) {}
 
-            Renderable2D(const math::vec4 &m_Color, const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
-                         const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) : color(m_Color),
-                                                                                         positionA(m_PositionA),
-                                                                                         positionB(m_PositionB),
-                                                                                         positionC(m_PositionC),
-                                                                                         positionD(m_PositionD) {}
+            Position(const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
+                   const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) :
+                    vertexA(m_PositionA),
+                    vertexB(m_PositionB),
+                    vertexC(m_PositionC),
+                    vertexD(m_PositionD) {}
 
-            Renderable2D(const Renderable2D &other) = default;
-
+            Position(const Position &other) = default;
 
 /*            void setVertexPositions(const math::vec2 &size, const math::vec3 &pos) {
                 m_PositionA = pos;
-                positionB = math::vec3(pos.x, pos.y + size.y, pos.z);
-                positionC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
-                positionD = math::vec3(pos.x + size.x, pos.y, pos.z);
+                vertexB = math::vec3(pos.x, pos.y + size.y, pos.z);
+                vertexC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
+                vertexD = math::vec3(pos.x + size.x, pos.y, pos.z);
             }*/
         };
 
-        typedef std::vector<std::unique_ptr<Renderable2D>> Renderables;
+        struct Appearance {
+            math::vec4 color;
+
+            Appearance() : color(math::vec4()) {}
+
+            explicit Appearance(const math::vec4 &col) : color(col) {}
+
+            Appearance(const Appearance &other) {
+                color.x = other.color.x;
+                color.y = other.color.y;
+                color.z = other.color.z;
+                color.w = other.color.w;
+            }
+
+        };
+
+        typedef std::vector<std::unique_ptr<Position>> Renderables;
 
     }
 }

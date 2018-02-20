@@ -40,7 +40,7 @@ namespace oni {
              */
             virtual void begin() = 0;
 
-            virtual void submit(const components::Renderable2D &renderable) = 0;
+            virtual void submit(const components::Position &position, const components::Appearance &color) = 0;
 
             /**
              * Draw the element(s).

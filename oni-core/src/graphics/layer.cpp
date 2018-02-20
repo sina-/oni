@@ -11,14 +11,14 @@ namespace oni {
         }
 
         void Layer::render() {
-            m_Shader->enable();
+/*            m_Shader->enable();
             m_Renderer2D->begin();
             for (const auto &renderable: m_Renderables) {
                 m_Renderer2D->submit(*renderable);
             }
             m_Renderer2D->end();
             m_Renderer2D->flush();
-            m_Shader->disable();
+            m_Shader->disable();*/
 
         }
 
@@ -26,12 +26,10 @@ namespace oni {
             m_Shader->enable();
             m_Renderer2D->begin();
 
-            auto spriteMask = components::Mask().set(components::SPRITE);
-
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
-                if((entity & spriteMask) == spriteMask){
-                    m_Renderer2D->submit(world.getRenderable2D(entityIndex));
+                if ((entity & entities::Sprite) == entities::Sprite) {
+                    m_Renderer2D->submit(world.getPosition(entityIndex), world.getAppearance(entityIndex));
                 }
                 ++entityIndex;
             }

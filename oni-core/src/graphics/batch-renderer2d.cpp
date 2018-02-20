@@ -82,13 +82,12 @@ namespace oni {
             CHECK_OGL_ERRORS
         }
 
-        void BatchRenderer2D::submit(const components::Renderable2D &renderable) {
+        void BatchRenderer2D::submit(const components::Position &position, const components::Appearance &appearance) {
             if (m_IndexCount + 6 >= m_MaxIndicesCount) {
                 throw std::runtime_error("Too many objects to render!");
             }
 
             // First vertex.
-            auto color = renderable.color;
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -98,23 +97,23 @@ namespace oni {
              *    a    d
              */
             // a.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable.positionA;
-            m_Buffer->color = color;
+            m_Buffer->vertex = m_TransformationStack.back() * position.vertexA;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // b.
-            m_Buffer->vertex = m_TransformationStack.back() *renderable.positionB;
-            m_Buffer->color = color;
+            m_Buffer->vertex = m_TransformationStack.back() *position.vertexB;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // c.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable.positionC;
-            m_Buffer->color = color;
+            m_Buffer->vertex = m_TransformationStack.back() * position.vertexC;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // d.
-            m_Buffer->vertex =m_TransformationStack.back() * renderable.positionD;
-            m_Buffer->color = color;
+            m_Buffer->vertex =m_TransformationStack.back() * position.vertexD;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are

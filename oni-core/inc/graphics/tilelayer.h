@@ -15,8 +15,8 @@ namespace oni {
 
             ~TileLayer() override = default;
 
-/*            void add(std::unique_ptr<Renderable2D> renderable) override {
-                m_Renderables.push_back(std::move(renderable));
+/*            void add(std::unique_ptr<Sprite> renderable) override {
+                m_Positions.push_back(std::move(renderable));
             }*/
 
         };

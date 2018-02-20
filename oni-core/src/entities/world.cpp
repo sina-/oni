@@ -4,31 +4,26 @@
 namespace oni {
     namespace entities {
 
-        entities::World::World(unsigned long initialEntityCount) {
-            m_Entities.reserve(initialEntityCount);
-            m_Renderables.reserve(initialEntityCount);
-        }
-
         auto World::createEntity() {
             if (!m_FreeEntitySlots.empty()) {
                 auto entity = m_FreeEntitySlots.top();
                 m_FreeEntitySlots.pop();
                 // Mark the memory location as free to over-write.
-                m_Entities[entity].set(components::RESERVED);
+                m_Entities[entity].set(components::READY);
                 return entity;
             }
 
-            // Reserve big chunk to avoid reallocation.
-            // NOTE: This should reserve every type of entity
-            if (m_Entities.size() + 1 >= m_Entities.capacity()) {
-                m_Entities.reserve(m_Entities.size() + EXPANSION_FACTOR);
-                m_Renderables.reserve(m_Renderables.size() + EXPANSION_FACTOR);
-            }
-
-            m_Entities.emplace_back(components::Mask().set(components::RESERVED));
-            m_Renderables.emplace_back(components::Renderable2D());
+            m_Entities.emplace_back(components::Mask().set(components::READY));
+            m_Positions.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
+            m_Appearances.emplace_back(math::vec4());
 
             return m_Entities.size() - 1;
+        }
+
+        void World::reserveEntity(unsigned long size) {
+            m_Entities.reserve(m_Entities.size() + size);
+            m_Positions.reserve(m_Positions.size() + size);
+            m_Appearances.reserve(m_Appearances.size() + size);
         }
 
         void World::destroyEntity(unsigned long entity) {
@@ -36,10 +31,11 @@ namespace oni {
             m_FreeEntitySlots.push(entity);
         }
 
-        unsigned long World::addCar(const components::Renderable2D &renderable2D) {
+        unsigned long World::addSprite(const components::Position &position, const components::Appearance &color) {
             auto entity = createEntity();
-            m_Entities[entity] = components::Mask().set(components::SPRITE);
-            m_Renderables[entity] = renderable2D;
+            m_Entities[entity] = entities::Sprite;
+            m_Positions[entity] = position;
+            m_Appearances[entity] = color;
             return entity;
         }
 
@@ -51,9 +47,14 @@ namespace oni {
             return m_Entities[entity];
         }
 
-        const components::Renderable2D &World::getRenderable2D(unsigned long entity) const {
-            return m_Renderables[entity];
+        const components::Position &World::getPosition(unsigned long entity) const {
+            return m_Positions[entity];
         }
+
+        const components::Appearance &World::getAppearance(unsigned long entity) const {
+            return m_Appearances[entity];
+        }
+
 
     }
 }

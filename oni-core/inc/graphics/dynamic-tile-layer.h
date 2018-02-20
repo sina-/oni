@@ -12,7 +12,7 @@ namespace oni {
             DynamicTileLayer(std::unique_ptr<Shader> shader, unsigned long maxSprintCount) : TileLayer(
                     std::move(shader), maxSprintCount) {}
 
-            void add(std::unique_ptr<components::Renderable2D> renderable);
+            void add(std::unique_ptr<components::Position> position);
 
             void update(int key);
 

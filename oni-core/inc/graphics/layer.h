@@ -10,7 +10,7 @@ namespace oni {
     namespace graphics {
 
         /**
-         * Encapsulation of renderer, shader, and list of renderables, depicting layers such as
+         * Encapsulation of renderer, shader, and list of position, depicting layers such as
          * UI, game objects, text, etc.
          */
         class Layer {
@@ -29,7 +29,7 @@ namespace oni {
 
             virtual ~Layer() = default;
 
-            virtual void add(std::unique_ptr<components::Renderable2D> renderable) {
+            virtual void add(std::unique_ptr<components::Position> renderable) {
                 m_Renderables.push_back(std::move(renderable));
             }
 

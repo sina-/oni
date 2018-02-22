@@ -46,24 +46,24 @@ int main() {
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
-            auto sprite = world.createEntity(components::Mask().set(components::POSITION).set(components::APPEARANCE));
-            world.setEntityPos(sprite, Position(vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
-                                                vec3(x + xStep, y + yStep, 0.0f),
-                                                vec3(x + xStep, y, 0.0f)));
+            auto sprite = world.createEntity(components::Mask().set(components::PLACEMENT).set(components::APPEARANCE));
+            world.setEntityPlacement(sprite, Placement(vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
+                                                       vec3(x + xStep, y + yStep, 0.0f),
+                                                       vec3(x + xStep, y, 0.0f)));
             world.setEntityAppearance(sprite, Appearance(math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
         }
     }
 
     auto car = world.createEntity(
             components::Mask().set(components::APPEARANCE).set(components::DYNAMIC));
-    world.setEntityPos(car, Position(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
-                                     vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)));
+    world.setEntityPlacement(car, Placement(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
+                                            vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)));
     world.setEntityAppearance(car, Appearance(vec4(0.3f, 0.1f, 0.2f, 1.0f)));
 
     auto light = world.createEntity(
             components::Mask().set(components::LIGHTNING));
-    world.setEntityPos(light, Position(vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 8.0f, 0.0f),
-                                       vec3(15.0f, 8.0f, 0.0f), vec3(15.0f, 1.0f, 0.0f)));
+    world.setEntityPlacement(light, Placement(vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 8.0f, 0.0f),
+                                              vec3(15.0f, 8.0f, 0.0f), vec3(15.0f, 1.0f, 0.0f)));
     world.setEntityAppearance(light, Appearance(vec4(0, 0.6f, 0.5f, 0.0f)));
 
     float frameTime = 0.0f;
@@ -85,11 +85,11 @@ int main() {
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
-            auto sprite = world.createEntity(components::Mask().set(components::POSITION).set(components::APPEARANCE));
-            world.setEntityPos(sprite, Position(vec3(_x, _y, 0.0f),
-                                                vec3(_x, _y + 0.07f, 0.0f),
-                                                vec3(_x + 0.05f, _y + 0.07f, 0.0f),
-                                                vec3(_x + 0.05f, _y, 0.0f)));
+            auto sprite = world.createEntity(components::Mask().set(components::PLACEMENT).set(components::APPEARANCE));
+            world.setEntityPlacement(sprite, Placement(vec3(_x, _y, 0.0f),
+                                                       vec3(_x, _y + 0.07f, 0.0f),
+                                                       vec3(_x + 0.05f, _y + 0.07f, 0.0f),
+                                                       vec3(_x + 0.05f, _y, 0.0f)));
             world.setEntityAppearance(sprite, Appearance(vec4(rand() % 1000 / 1000.0f, 0, 0, 1)));
         }
 

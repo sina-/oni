@@ -17,7 +17,7 @@ namespace oni {
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
                 if ((entity & mask) == mask) {
-                    m_Renderer2D->submit(world.getEntityPos(entityIndex), world.getEntityAppearance(entityIndex));
+                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex));
                 }
                 ++entityIndex;
             }

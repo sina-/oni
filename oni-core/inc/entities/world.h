@@ -39,7 +39,7 @@ namespace oni {
 
             unsigned long createEntity(components::Mask mask);
 
-            void setEntityPos(unsigned long entity, components::Position position);
+            void setEntityPlacement(unsigned long entity, components::Placement placement);
 
             void setEntityAppearance(unsigned long entity, components::Appearance appearance);
 
@@ -47,7 +47,7 @@ namespace oni {
 
             const components::Mask &getEntity(unsigned long entity) const;
 
-            const components::Position &getEntityPos(unsigned long entity) const;
+            const components::Placement &getEntityPlacement(unsigned long entity) const;
 
             const components::Appearance &getEntityAppearance(unsigned long entity) const;
 
@@ -60,7 +60,7 @@ namespace oni {
              */
             components::EntityMask m_Entities;
 
-            std::vector<components::Position> m_Positions;
+            std::vector<components::Placement> m_Placements;
             std::vector<components::Appearance> m_Appearances;
 
         };

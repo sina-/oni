@@ -32,7 +32,7 @@ namespace oni {
 
         typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
-        struct Position {
+        struct Placement {
             /**
              *    B    C
              *    +----+
@@ -45,17 +45,17 @@ namespace oni {
             math::vec3 vertexC;
             math::vec3 vertexD;
 
-            Position() : vertexA(math::vec3()), vertexB(math::vec3()),
+            Placement() : vertexA(math::vec3()), vertexB(math::vec3()),
                        vertexC(math::vec3()), vertexD(math::vec3()) {}
 
-            Position(const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
+            Placement(const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
                    const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) :
                     vertexA(m_PositionA),
                     vertexB(m_PositionB),
                     vertexC(m_PositionC),
                     vertexD(m_PositionD) {}
 
-            Position(const Position &other) = default;
+            Placement(const Placement &other) = default;
 
 /*            void setVertexPositions(const math::vec2 &size, const math::vec3 &pos) {
                 m_PositionA = pos;

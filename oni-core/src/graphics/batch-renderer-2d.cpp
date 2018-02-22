@@ -82,7 +82,7 @@ namespace oni {
             CHECK_OGL_ERRORS
         }
 
-        void BatchRenderer2D::submit(const components::Position &position, const components::Appearance &appearance) {
+        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance) {
             if (m_IndexCount + 6 >= m_MaxIndicesCount) {
                 throw std::runtime_error("Too many objects to render!");
             }

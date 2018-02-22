@@ -9,7 +9,7 @@ namespace oni {
             // initialized.
             READY,
 
-            POSITION,   // 8
+            PLACEMENT,   // 8
             APPEARANCE, // 16
             DYNAMIC,    // 32
             LIGHTNING,  // ...
@@ -21,7 +21,7 @@ namespace oni {
         typedef std::bitset<MAX> Mask;
         typedef std::vector<std::bitset<MAX>> EntityMask;
 
-        const static components::Mask PositionComponent = components::Mask().set(components::POSITION);
+        const static components::Mask PlacementComponent = components::Mask().set(components::PLACEMENT);
         const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);
         const static components::Mask DynamicComponent = components::Mask().set(components::DYNAMIC);
         const static components::Mask LightningComponent = components::Mask().set(components::LIGHTNING);

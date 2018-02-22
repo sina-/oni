@@ -37,7 +37,7 @@ namespace oni {
 
             void begin() override;
 
-            void submit(const components::Position &position, const components::Appearance &appearance) override;
+            void submit(const components::Placement &position, const components::Appearance &appearance) override;
 
             void flush() override;
 

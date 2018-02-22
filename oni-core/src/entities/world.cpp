@@ -14,7 +14,7 @@ namespace oni {
             }
 
             m_Entities.emplace_back(components::Mask().set(components::READY));
-            m_Positions.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
+            m_Placements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
             m_Appearances.emplace_back(math::vec4());
 
             return m_Entities.size() - 1;
@@ -22,7 +22,7 @@ namespace oni {
 
         void World::reserveEntity(unsigned long size) {
             m_Entities.reserve(m_Entities.size() + size);
-            m_Positions.reserve(m_Positions.size() + size);
+            m_Placements.reserve(m_Placements.size() + size);
             m_Appearances.reserve(m_Appearances.size() + size);
         }
 
@@ -39,8 +39,8 @@ namespace oni {
             return m_Entities[entity];
         }
 
-        const components::Position &World::getEntityPos(unsigned long entity) const {
-            return m_Positions[entity];
+        const components::Placement &World::getEntityPlacement(unsigned long entity) const {
+            return m_Placements[entity];
         }
 
         const components::Appearance &World::getEntityAppearance(unsigned long entity) const {
@@ -53,8 +53,8 @@ namespace oni {
             return entity;
         }
 
-        void World::setEntityPos(unsigned long entity, components::Position position) {
-            m_Positions[entity] = position;
+        void World::setEntityPlacement(unsigned long entity, components::Placement placement) {
+            m_Placements[entity] = placement;
         }
 
         void World::setEntityAppearance(unsigned long entity, components::Appearance appearance) {

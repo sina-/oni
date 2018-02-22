@@ -8,7 +8,7 @@ namespace oni {
 
             for (const auto &entity: world.getEntities()) {
                 if ((entity & components::DynamicComponent) == components::DynamicComponent) {
-                    auto position = world.getEntityPos(entityIndex);
+                    auto position = world.getEntityPlacement(entityIndex);
 
                     // TODO: Internals of IO, such as GLFW_KEY_..., should not
                     // be exposed outside.
@@ -32,7 +32,7 @@ namespace oni {
                         default:
                             break;
                     }
-                    world.setEntityPos(entityIndex, position);
+                    world.setEntityPlacement(entityIndex, position);
 
                 }
                 ++entityIndex;
@@ -40,7 +40,7 @@ namespace oni {
 
         }
 
-        void Movement::updatePosition(components::Position &position, const math::vec3 &direction) {
+        void Movement::updatePosition(components::Placement &position, const math::vec3 &direction) {
             position.vertexA += direction;
             position.vertexB += direction;
             position.vertexC += direction;

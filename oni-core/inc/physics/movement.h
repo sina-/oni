@@ -9,7 +9,7 @@ namespace oni {
             void update(entities::World &world, const graphics::Window &window) override;
 
         private:
-            void updatePosition(components::Position & position, const math::vec3 &direction);
+            void updatePosition(components::Placement & position, const math::vec3 &direction);
         };
     }
 }

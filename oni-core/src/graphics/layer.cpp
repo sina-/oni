@@ -10,14 +10,14 @@ namespace oni {
             m_Shader->disable();
         }
 
-        void Layer::render(const entities::World &world) {
+        void Layer::render(const entities::World &world, const components::Mask &mask) {
             m_Shader->enable();
             m_Renderer2D->begin();
 
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
-                if ((entity & components::AppearanceComponent) == components::AppearanceComponent) {
-                    m_Renderer2D->submit(world.getPosition(entityIndex), world.getAppearance(entityIndex));
+                if ((entity & mask) == mask) {
+                    m_Renderer2D->submit(world.getEntityPos(entityIndex), world.getEntityAppearance(entityIndex));
                 }
                 ++entityIndex;
             }

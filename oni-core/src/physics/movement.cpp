@@ -8,7 +8,7 @@ namespace oni {
 
             for (const auto &entity: world.getEntities()) {
                 if ((entity & components::DynamicComponent) == components::DynamicComponent) {
-                    auto position = world.getPosition(entityIndex);
+                    auto position = world.getEntityPos(entityIndex);
 
                     // TODO: Internals of IO, such as GLFW_KEY_..., should not
                     // be exposed outside.
@@ -32,7 +32,7 @@ namespace oni {
                         default:
                             break;
                     }
-                    world.setPosition(entityIndex, position);
+                    world.setEntityPos(entityIndex, position);
 
                 }
                 ++entityIndex;

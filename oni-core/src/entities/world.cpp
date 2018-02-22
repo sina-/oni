@@ -39,11 +39,11 @@ namespace oni {
             return m_Entities[entity];
         }
 
-        const components::Position &World::getPosition(unsigned long entity) const {
+        const components::Position &World::getEntityPos(unsigned long entity) const {
             return m_Positions[entity];
         }
 
-        const components::Appearance &World::getAppearance(unsigned long entity) const {
+        const components::Appearance &World::getEntityAppearance(unsigned long entity) const {
             return m_Appearances[entity];
         }
 
@@ -53,11 +53,11 @@ namespace oni {
             return entity;
         }
 
-        void World::setPosition(unsigned long entity, components::Position position) {
+        void World::setEntityPos(unsigned long entity, components::Position position) {
             m_Positions[entity] = position;
         }
 
-        void World::setAppearance(unsigned long entity, components::Appearance appearance) {
+        void World::setEntityAppearance(unsigned long entity, components::Appearance appearance) {
             m_Appearances[entity] = appearance;
         }
 

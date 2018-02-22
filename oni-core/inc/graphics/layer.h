@@ -23,7 +23,7 @@ namespace oni {
 
             virtual ~Layer() = default;
 
-            virtual void render(const entities::World &world);
+            virtual void render(const entities::World &world, const components::Mask &mask);
 
             virtual const std::unique_ptr<Shader> &getShader() { return m_Shader; }
 

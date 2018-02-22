@@ -39,17 +39,17 @@ namespace oni {
 
             unsigned long createEntity(components::Mask mask);
 
-            void setPosition(unsigned long entity, components::Position position);
+            void setEntityPos(unsigned long entity, components::Position position);
 
-            void setAppearance(unsigned long entity, components::Appearance appearance);
+            void setEntityAppearance(unsigned long entity, components::Appearance appearance);
 
             const components::EntityMask &getEntities() const;
 
             const components::Mask &getEntity(unsigned long entity) const;
 
-            const components::Position &getPosition(unsigned long entity) const;
+            const components::Position &getEntityPos(unsigned long entity) const;
 
-            const components::Appearance &getAppearance(unsigned long entity) const;
+            const components::Appearance &getEntityAppearance(unsigned long entity) const;
 
         private:
             std::stack<unsigned long> m_FreeEntitySlots;

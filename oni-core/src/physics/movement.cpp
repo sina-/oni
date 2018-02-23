@@ -7,7 +7,7 @@ namespace oni {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((entity & components::DynamicComponent) == components::DynamicComponent) {
+                if ((entity & entities::DynamicSprite) == entities::DynamicSprite) {
                     auto position = world.getEntityPlacement(entityIndex);
 
                     // TODO: Internals of IO, such as GLFW_KEY_..., should not

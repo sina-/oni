@@ -55,7 +55,7 @@ int main() {
     }
 
     auto car = world.createEntity(
-            components::Mask().set(components::APPEARANCE).set(components::DYNAMIC));
+            components::Mask().set(components::PLACEMENT).set(components::APPEARANCE).set(components::DYNAMIC));
     world.setEntityPlacement(car, Placement(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
                                             vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)));
     world.setEntityAppearance(car, Appearance(vec4(0.3f, 0.1f, 0.2f, 1.0f)));
@@ -82,6 +82,7 @@ int main() {
         width = window.getWidth();
         height = window.getHeight();
 
+        // TODO: Creating new entities should be part of a new system
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
@@ -93,6 +94,7 @@ int main() {
             world.setEntityAppearance(sprite, Appearance(vec4(rand() % 1000 / 1000.0f, 0, 0, 1)));
         }
 
+        // TODO: This update logic should be part of Layer or world if shader is to be a component.
         const auto &lightShader = lightLayer->getShader();
         lightShader->enable();
         lightShader->setUniform2f("light_pos", vec2(static_cast<float>(mouseX * 16.0f / width),

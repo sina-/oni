@@ -1,6 +1,7 @@
-#include <graphics/batchrenderer2d.h>
-#include <graphics/utils/indexbuffergen.h>
-#include <utils/oni_assert.h>
+#include <graphics/batch-renderer-2d.h>
+#include <graphics/utils/index-buffer-gen.h>
+#include <utils/oni-assert.h>
+#include <components/physical.h>
 
 namespace oni {
     namespace graphics {
@@ -8,7 +9,7 @@ namespace oni {
                                                                                m_MaxSpriteCount(maxSpriteCount) {
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
-            m_MaxVertexSize = sizeof(VertexData);
+            m_MaxVertexSize = sizeof(components::VertexData);
 
             auto maxUIntSize = std::numeric_limits<unsigned int>::max();
             ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize)
@@ -17,13 +18,13 @@ namespace oni {
             m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
 
-            auto vertexBuffer = std::make_unique<const BufferStructure>(
+            auto vertexBuffer = std::make_unique<const components::BufferStructure>(
                     0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
-            auto colorBuffer = std::make_unique<const BufferStructure>
+            auto colorBuffer = std::make_unique<const components::BufferStructure>
                     (1, 4, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
-                     reinterpret_cast<const GLvoid *>(offsetof(VertexData, VertexData::color)));
+                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::color)));
 
-            auto bufferStructures = BufferStructures();
+            auto bufferStructures = components::BufferStructures();
             bufferStructures.push_back(std::move(vertexBuffer));
             bufferStructures.push_back(std::move(colorBuffer));
 
@@ -78,17 +79,16 @@ namespace oni {
                     custom_deleter(GL_ARRAY_BUFFER) );
              * For more details: https://github.com/sina-/ehgl/blob/master/eg/buffer_target.hpp#L159
              ***/
-            m_Buffer = (VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+            m_Buffer = (components::VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
             CHECK_OGL_ERRORS
         }
 
-        void BatchRenderer2D::submit(const Renderable2D &renderable) {
+        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance) {
             if (m_IndexCount + 6 >= m_MaxIndicesCount) {
                 throw std::runtime_error("Too many objects to render!");
             }
 
             // First vertex.
-            auto color = renderable.getColor();
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -98,23 +98,27 @@ namespace oni {
              *    a    d
              */
             // a.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable.getPositionA();
-            m_Buffer->color = color;
+//            m_Buffer->vertex = m_TransformationStack.back() * position.vertexA;
+            m_Buffer->vertex = position.vertexA;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // b.
-            m_Buffer->vertex = m_TransformationStack.back() *renderable.getPositionB();
-            m_Buffer->color = color;
+//            m_Buffer->vertex = m_TransformationStack.back() *position.vertexB;
+            m_Buffer->vertex = position.vertexB;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // c.
-            m_Buffer->vertex = m_TransformationStack.back() * renderable.getPositionC();
-            m_Buffer->color = color;
+//            m_Buffer->vertex = m_TransformationStack.back() * position.vertexC;
+            m_Buffer->vertex = position.vertexC;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // d.
-            m_Buffer->vertex =m_TransformationStack.back() * renderable.getPositionD();
-            m_Buffer->color = color;
+//            m_Buffer->vertex =m_TransformationStack.back() * position.vertexD;
+            m_Buffer->vertex = position.vertexD;
+            m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are

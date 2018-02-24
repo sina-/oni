@@ -1,21 +1,17 @@
 #pragma once
 
-#include <graphics/renderer2d.h>
-#include <graphics/renderable2d.h>
+#include <graphics/renderer-2d.h>
 #include <graphics/shader.h>
 #include <math/mat4.h>
+#include <components/visual.h>
+#include <entities/world.h>
 
 namespace oni {
     namespace graphics {
 
-        /**
-         * Encapsulation of renderer, shader, and list of renderables, depicting layers such as
-         * UI, game objects, text, etc.
-         */
         class Layer {
         protected:
             std::unique_ptr<Renderer2D> m_Renderer2D;
-            Renderables m_Renderables;
             std::unique_ptr<Shader> m_Shader;
             math::mat4 m_ProjectionMatrix;
 
@@ -27,11 +23,7 @@ namespace oni {
 
             virtual ~Layer() = default;
 
-            virtual void add(std::unique_ptr<Renderable2D> renderable) {
-                m_Renderables.push_back(std::move(renderable));
-            }
-
-            virtual void render();
+            virtual void render(const entities::World &world, const components::Mask &mask);
 
             virtual const std::unique_ptr<Shader> &getShader() { return m_Shader; }
 

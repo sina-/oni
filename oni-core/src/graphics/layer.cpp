@@ -10,11 +10,19 @@ namespace oni {
             m_Shader->disable();
         }
 
-        void Layer::render() {
+        void Layer::render(const entities::World &world, const components::Mask &mask) {
             m_Shader->enable();
             m_Renderer2D->begin();
-            for (const auto &renderable: m_Renderables) {
-                m_Renderer2D->submit(*renderable);
+
+            unsigned long entityIndex = 0;
+            for (const auto &entity: world.getEntities()) {
+                // TODO: Define an entity with PLACEMENT and APPEARANCE componant, as those are needed
+                // to render an entity. Can not just rely on single component definition that is passed
+                // to this function. Before such refactoring, have to figure out how to render light source.
+                if ((entity & mask) == mask) {
+                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex));
+                }
+                ++entityIndex;
             }
             m_Renderer2D->end();
             m_Renderer2D->flush();

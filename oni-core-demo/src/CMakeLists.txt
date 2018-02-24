@@ -10,8 +10,10 @@ target_link_libraries(oni-core-demo
         ${OPENGL_LIBRARY}
         ${GLEW_STATIC_LIBRARIES}
         oni-core-buffers
+        oni-core-entities
         oni-core-graphics
         oni-core-math
+        oni-core-physics
         oni-core-utils)
 
 if (UNIX)

@@ -1,9 +1,11 @@
 #pragma once
 
-#include <buffers/indexbuffer.h>
-#include <graphics/renderer2d.h>
-#include <graphics/utils/checkoglerrors.h>
-#include <buffers/vertexarray.h>
+#include <buffers/index-buffer.h>
+#include <graphics/renderer-2d.h>
+#include <graphics/utils/check-ogl-errors.h>
+#include <buffers/vertex-array.h>
+#include <components/visual.h>
+#include <components/physical.h>
 
 namespace oni {
     namespace graphics {
@@ -27,7 +29,7 @@ namespace oni {
             std::unique_ptr<VertexArray> m_VAO;
 
             // The buffer that will hold all the VertexData in the batch.
-            VertexData *m_Buffer;
+            components::VertexData *m_Buffer;
 
         public:
             explicit BatchRenderer2D(const unsigned long maxSpriteCount);
@@ -36,7 +38,7 @@ namespace oni {
 
             void begin() override;
 
-            void submit(const Renderable2D &renderable) override;
+            void submit(const components::Placement &position, const components::Appearance &appearance) override;
 
             void flush() override;
 

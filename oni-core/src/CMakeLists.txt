@@ -1,1 +1,1 @@
-subdirs(buffers graphics math utils)
+subdirs(buffers entities graphics math physics utils)

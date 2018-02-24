@@ -97,22 +97,26 @@ namespace oni {
              *    a    d
              */
             // a.
-            m_Buffer->vertex = m_TransformationStack.back() * position.vertexA;
+//            m_Buffer->vertex = m_TransformationStack.back() * position.vertexA;
+            m_Buffer->vertex = position.vertexA;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // b.
-            m_Buffer->vertex = m_TransformationStack.back() *position.vertexB;
+//            m_Buffer->vertex = m_TransformationStack.back() *position.vertexB;
+            m_Buffer->vertex = position.vertexB;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // c.
-            m_Buffer->vertex = m_TransformationStack.back() * position.vertexC;
+//            m_Buffer->vertex = m_TransformationStack.back() * position.vertexC;
+            m_Buffer->vertex = position.vertexC;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // d.
-            m_Buffer->vertex =m_TransformationStack.back() * position.vertexD;
+//            m_Buffer->vertex =m_TransformationStack.back() * position.vertexD;
+            m_Buffer->vertex = position.vertexD;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 

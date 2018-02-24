@@ -5,9 +5,10 @@
 #include <limits>
 #include <stack>
 
-#include <components/render-components.h>
+#include <components/visual.h>
 #include <components/component.h>
 #include <entities/entity.h>
+#include <components/physical.h>
 
 namespace oni {
     namespace entities {
@@ -43,6 +44,8 @@ namespace oni {
 
             void setEntityAppearance(unsigned long entity, components::Appearance appearance);
 
+            void setEntityVelocity(unsigned long entity, components::Velocity velocity);
+
             const components::EntityMask &getEntities() const;
 
             const components::Mask &getEntity(unsigned long entity) const;
@@ -50,6 +53,8 @@ namespace oni {
             const components::Placement &getEntityPlacement(unsigned long entity) const;
 
             const components::Appearance &getEntityAppearance(unsigned long entity) const;
+
+            const components::Velocity &getEntityVelocity(unsigned long entity) const;
 
         private:
             std::stack<unsigned long> m_FreeEntitySlots;
@@ -62,6 +67,7 @@ namespace oni {
 
             std::vector<components::Placement> m_Placements;
             std::vector<components::Appearance> m_Appearances;
+            std::vector<components::Velocity> m_Velocities;
 
         };
     }

@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <stdexcept>
 #include <vector>
-#include <components/render-components.h>
+#include <components/visual.h>
 
 namespace oni {
     namespace buffers {

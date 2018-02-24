@@ -1,6 +1,7 @@
 #pragma once
 
-#include <components/render-components.h>
+#include <components/visual.h>
+#include <components/physical.h>
 
 namespace oni {
     namespace graphics {

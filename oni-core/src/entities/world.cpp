@@ -1,5 +1,4 @@
 #include <entities/world.h>
-#include <utils/io.h>
 
 namespace oni {
     namespace entities {
@@ -14,9 +13,10 @@ namespace oni {
             }
 
             m_Entities.emplace_back(components::Mask().set(components::READY));
+            // NOTE: This type of initialization will avoid copy construction.
             m_Placements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
             m_Appearances.emplace_back(math::vec4());
-
+            m_Velocities.emplace_back(math::vec3(), 0.0f);
             return m_Entities.size() - 1;
         }
 
@@ -24,6 +24,7 @@ namespace oni {
             m_Entities.reserve(m_Entities.size() + size);
             m_Placements.reserve(m_Placements.size() + size);
             m_Appearances.reserve(m_Appearances.size() + size);
+            m_Velocities.reserve(m_Velocities.size() + size);
         }
 
         void World::destroyEntity(unsigned long entity) {
@@ -48,7 +49,7 @@ namespace oni {
         }
 
         unsigned long World::createEntity(components::Mask mask) {
-            auto entity =_createEntity();
+            auto entity = _createEntity();
             m_Entities[entity] = mask;
             return entity;
         }
@@ -61,6 +62,12 @@ namespace oni {
             m_Appearances[entity] = appearance;
         }
 
+        const components::Velocity &World::getEntityVelocity(unsigned long entity) const {
+            return m_Velocities[entity];
+        }
 
+        void World::setEntityVelocity(unsigned long entity, components::Velocity velocity) {
+            m_Velocities[entity] = velocity;
+        }
     }
 }

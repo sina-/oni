@@ -32,39 +32,6 @@ namespace oni {
 
         typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
-        struct Placement {
-            /**
-             *    B    C
-             *    +----+
-             *    |    |
-             *    +----+
-             *    A    D
-             */
-            math::vec3 vertexA;
-            math::vec3 vertexB;
-            math::vec3 vertexC;
-            math::vec3 vertexD;
-
-            Placement() : vertexA(math::vec3()), vertexB(math::vec3()),
-                       vertexC(math::vec3()), vertexD(math::vec3()) {}
-
-            Placement(const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
-                   const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) :
-                    vertexA(m_PositionA),
-                    vertexB(m_PositionB),
-                    vertexC(m_PositionC),
-                    vertexD(m_PositionD) {}
-
-            Placement(const Placement &other) = default;
-
-/*            void setVertexPositions(const math::vec2 &size, const math::vec3 &pos) {
-                m_PositionA = pos;
-                vertexB = math::vec3(pos.x, pos.y + size.y, pos.z);
-                vertexC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
-                vertexD = math::vec3(pos.x + size.x, pos.y, pos.z);
-            }*/
-        };
-
         struct Appearance {
             math::vec4 color;
 

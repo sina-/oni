@@ -5,6 +5,7 @@
 #include <graphics/window.h>
 #include <graphics/tilelayer.h>
 #include <physics/movement.h>
+#include <components/physical.h>
 
 int main() {
     using namespace oni;
@@ -47,24 +48,52 @@ int main() {
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
             auto sprite = world.createEntity(components::Mask().set(components::PLACEMENT).set(components::APPEARANCE));
-            world.setEntityPlacement(sprite, Placement(vec3(x, y, 0.0f), vec3(x, y + yStep, 0.0f),
-                                                       vec3(x + xStep, y + yStep, 0.0f),
-                                                       vec3(x + xStep, y, 0.0f)));
-            world.setEntityAppearance(sprite, Appearance(math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1)));
+
+            auto spritePlacement = Placement();
+            spritePlacement.vertexA = vec3(x, y, 0.0f);
+            spritePlacement.vertexB = vec3(x, y + yStep, 0.0f);
+            spritePlacement.vertexC = vec3(x + xStep, y + yStep, 0.0f);
+            spritePlacement.vertexD = vec3(x + xStep, y, 0.0f);
+
+            auto spriteAppearance = Appearance();
+            spriteAppearance.color = math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1);
+
+            world.setEntityPlacement(sprite, spritePlacement);
+            world.setEntityAppearance(sprite, spriteAppearance);
         }
     }
 
     auto car = world.createEntity(
-            components::Mask().set(components::PLACEMENT).set(components::APPEARANCE).set(components::DYNAMIC));
-    world.setEntityPlacement(car, Placement(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 3.0f, 0.0f),
-                                            vec3(1.0f, 3.0f, 0.0f), vec3(1.0f, 0.0f, 0.0f)));
-    world.setEntityAppearance(car, Appearance(vec4(0.3f, 0.1f, 0.2f, 1.0f)));
+            components::Mask().set(components::PLACEMENT).set(components::APPEARANCE).set(components::VELOCITY));
 
-    auto light = world.createEntity(
-            components::Mask().set(components::LIGHTNING));
-    world.setEntityPlacement(light, Placement(vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, 8.0f, 0.0f),
-                                              vec3(15.0f, 8.0f, 0.0f), vec3(15.0f, 1.0f, 0.0f)));
-    world.setEntityAppearance(light, Appearance(vec4(0, 0.6f, 0.5f, 0.0f)));
+    auto carPlacement = Placement();
+    carPlacement.vertexA = vec3(0.0f, 0.0f, 0.0f);
+    carPlacement.vertexB = vec3(0.0f, 3.0f, 0.0f);
+    carPlacement.vertexC = vec3(1.0f, 3.0f, 0.0f);
+    carPlacement.vertexD = vec3(1.0f, 0.0f, 0.0f);
+
+    auto carAppearance = Appearance();
+    carAppearance.color = vec4(0.3f, 0.1f, 0.2f, 1.0f);
+
+    auto carVelocity = Velocity();
+    carVelocity.magnitude = 0.0005f;
+    carVelocity.direction = vec3();
+
+    world.setEntityPlacement(car, carPlacement);
+    world.setEntityAppearance(car, carAppearance);
+    world.setEntityVelocity(car, carVelocity);
+
+    auto lightPlacement = Placement();
+    lightPlacement.vertexA = vec3(1.0f, 1.0f, 0.0f);
+    lightPlacement.vertexB = vec3(1.0f, 8.0f, 0.0f);
+    lightPlacement.vertexC = vec3(15.0f, 8.0f, 0.0f);
+    lightPlacement.vertexD = vec3(15.0f, 1.0f, 0.0f);
+    auto lightAppearance = Appearance();
+    lightAppearance.color = vec4(0, 0.6f, 0.5f, 0.0f);
+
+    auto light = world.createEntity(components::Mask().set(components::LIGHTNING));
+    world.setEntityPlacement(light, lightPlacement);
+    world.setEntityAppearance(light, lightAppearance);
 
     float frameTime = 0.0f;
 
@@ -87,18 +116,25 @@ int main() {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
             auto sprite = world.createEntity(components::Mask().set(components::PLACEMENT).set(components::APPEARANCE));
-            world.setEntityPlacement(sprite, Placement(vec3(_x, _y, 0.0f),
-                                                       vec3(_x, _y + 0.07f, 0.0f),
-                                                       vec3(_x + 0.05f, _y + 0.07f, 0.0f),
-                                                       vec3(_x + 0.05f, _y, 0.0f)));
-            world.setEntityAppearance(sprite, Appearance(vec4(rand() % 1000 / 1000.0f, 0, 0, 1)));
+
+            auto spritePlacement = Placement();
+            spritePlacement.vertexA = vec3(_x, _y, 0.0f);
+            spritePlacement.vertexB = vec3(_x, _y + 0.07f, 0.0f);
+            spritePlacement.vertexC = vec3(_x + 0.05f, _y + 0.07f, 0.0f);
+            spritePlacement.vertexD = vec3(_x + 0.05f, _y, 0.0f);
+
+            auto spriteAppearance = Appearance();
+            spriteAppearance.color = vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
+
+            world.setEntityPlacement(sprite, spritePlacement);
+            world.setEntityAppearance(sprite, spriteAppearance);
         }
 
         // TODO: This update logic should be part of Layer or world if shader is to be a component.
         const auto &lightShader = lightLayer->getShader();
         lightShader->enable();
         lightShader->setUniform2f("light_pos", vec2(static_cast<float>(mouseX * 16.0f / width),
-                                                     static_cast<float>(9.0f - mouseY * 9.0f / height)));
+                                                    static_cast<float>(9.0f - mouseY * 9.0f / height)));
         lightShader->disable();
 
         // TODO: This is awkward way to handle different shaders. One way to solve the problem

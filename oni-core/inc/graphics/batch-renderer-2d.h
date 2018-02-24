@@ -4,7 +4,8 @@
 #include <graphics/renderer-2d.h>
 #include <graphics/utils/check-ogl-errors.h>
 #include <buffers/vertex-array.h>
-#include <components/render-components.h>
+#include <components/visual.h>
+#include <components/physical.h>
 
 namespace oni {
     namespace graphics {

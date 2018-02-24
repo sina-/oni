@@ -11,7 +11,7 @@ namespace oni {
 
             PLACEMENT,   // 8
             APPEARANCE, // 16
-            DYNAMIC,    // 32
+            VELOCITY,    // 32
             LIGHTNING,  // ...
 
             // NOTE: Always keep it last to determine size.
@@ -23,7 +23,7 @@ namespace oni {
 
         const static components::Mask PlacementComponent = components::Mask().set(components::PLACEMENT);
         const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);
-        const static components::Mask DynamicComponent = components::Mask().set(components::DYNAMIC);
+        const static components::Mask DynamicComponent = components::Mask().set(components::VELOCITY);
         const static components::Mask LightningComponent = components::Mask().set(components::LIGHTNING);
     }
 

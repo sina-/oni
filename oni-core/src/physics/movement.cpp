@@ -9,30 +9,34 @@ namespace oni {
             for (const auto &entity: world.getEntities()) {
                 if ((entity & entities::DynamicSprite) == entities::DynamicSprite) {
                     auto position = world.getEntityPlacement(entityIndex);
+                    auto velocity = world.getEntityVelocity(entityIndex);
+                    auto magnitude = velocity.magnitude;
 
                     // TODO: Internals of IO, such as GLFW_KEY_..., should not
                     // be exposed outside.
                     switch (window.getKeyPressed()) {
                         case GLFW_KEY_W: {
-                            updatePosition(position, math::vec3(0.0f, 0.001f, 0.0f));
+                            velocity.direction += math::vec3(0.0f, magnitude, 0.0f);
                             break;
                         }
                         case GLFW_KEY_A: {
-                            updatePosition(position, math::vec3(-0.001f, 0.0f, 0.0f));
+                            velocity.direction += math::vec3(-magnitude, 0.0f, 0.0f);
                             break;
                         }
                         case GLFW_KEY_S: {
-                            updatePosition(position, math::vec3(0.0f, -0.001f, 0.0f));
+                            velocity.direction += math::vec3(0.0f, -magnitude, 0.0f);
                             break;
                         }
                         case GLFW_KEY_D:
-                            updatePosition(position, math::vec3(0.001f, 0.0f, 0.0f));
+                            velocity.direction += math::vec3(magnitude, 0.0f, 0.0f);
                             break;
 
                         default:
                             break;
                     }
+                    updatePosition(position, velocity.direction);
                     world.setEntityPlacement(entityIndex, position);
+                    world.setEntityVelocity(entityIndex, velocity);
 
                 }
                 ++entityIndex;

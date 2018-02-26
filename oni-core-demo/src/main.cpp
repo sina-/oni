@@ -4,6 +4,7 @@
 #include <graphics/batch-renderer-2d.h>
 #include <graphics/window.h>
 #include <graphics/tilelayer.h>
+#include <graphics/texture.h>
 #include <physics/movement.h>
 #include <components/physical.h>
 
@@ -47,7 +48,7 @@ int main() {
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
-            auto sprite = world.createEntity(components::Mask().set(components::PLACEMENT).set(components::APPEARANCE));
+            auto sprite = world.createEntity(entities::Sprite);
 
             auto spritePlacement = Placement();
             spritePlacement.vertexA = vec3(x, y, 0.0f);
@@ -63,8 +64,7 @@ int main() {
         }
     }
 
-    auto car = world.createEntity(
-            components::Mask().set(components::PLACEMENT).set(components::APPEARANCE).set(components::VELOCITY));
+    auto car = world.createEntity(entities::DynamicSprite);
 
     auto carPlacement = Placement();
     carPlacement.vertexA = vec3(0.0f, 0.0f, 0.0f);
@@ -91,9 +91,13 @@ int main() {
     auto lightAppearance = Appearance();
     lightAppearance.color = vec4(0, 0.6f, 0.5f, 0.0f);
 
-    auto light = world.createEntity(components::Mask().set(components::LIGHTNING));
+    auto light = world.createEntity(components::LightningComponent);
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
+
+    auto texture = LoadTexture::load("resources/images/test.png");
+    auto textureEntity = world.createEntity(components::TextureComponent);
+    world.setEntityTexture(textureEntity, texture);
 
     float frameTime = 0.0f;
 

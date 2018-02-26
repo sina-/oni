@@ -40,11 +40,13 @@ namespace oni {
 
             unsigned long createEntity(components::Mask mask);
 
-            void setEntityPlacement(unsigned long entity, components::Placement placement);
+            void setEntityPlacement(unsigned long entity, const components::Placement &placement);
 
-            void setEntityAppearance(unsigned long entity, components::Appearance appearance);
+            void setEntityAppearance(unsigned long entity, const components::Appearance &appearance);
 
-            void setEntityVelocity(unsigned long entity, components::Velocity velocity);
+            void setEntityVelocity(unsigned long entity, const components::Velocity &velocity);
+
+            void setEntityTexture(unsigned long entity, const components::Texture &texture);
 
             const components::EntityMask &getEntities() const;
 
@@ -55,6 +57,8 @@ namespace oni {
             const components::Appearance &getEntityAppearance(unsigned long entity) const;
 
             const components::Velocity &getEntityVelocity(unsigned long entity) const;
+
+            const components::Texture &getEntityTexture(unsigned long entity) const;
 
         private:
             std::stack<unsigned long> m_FreeEntitySlots;
@@ -68,6 +72,7 @@ namespace oni {
             std::vector<components::Placement> m_Placements;
             std::vector<components::Appearance> m_Appearances;
             std::vector<components::Velocity> m_Velocities;
+            std::vector<components::Texture> m_Textures;
 
         };
     }

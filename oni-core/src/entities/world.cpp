@@ -17,6 +17,7 @@ namespace oni {
             m_Placements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
             m_Appearances.emplace_back(math::vec4());
             m_Velocities.emplace_back(math::vec3(), 0.0f);
+            m_Textures.emplace_back("", 0, 0, 0);
             return m_Entities.size() - 1;
         }
 
@@ -25,6 +26,13 @@ namespace oni {
             m_Placements.reserve(m_Placements.size() + size);
             m_Appearances.reserve(m_Appearances.size() + size);
             m_Velocities.reserve(m_Velocities.size() + size);
+            m_Velocities.reserve(m_Textures.size() + size);
+        }
+
+        unsigned long World::createEntity(components::Mask mask) {
+            auto entity = _createEntity();
+            m_Entities[entity] = mask;
+            return entity;
         }
 
         void World::destroyEntity(unsigned long entity) {
@@ -48,26 +56,28 @@ namespace oni {
             return m_Appearances[entity];
         }
 
-        unsigned long World::createEntity(components::Mask mask) {
-            auto entity = _createEntity();
-            m_Entities[entity] = mask;
-            return entity;
-        }
-
-        void World::setEntityPlacement(unsigned long entity, components::Placement placement) {
-            m_Placements[entity] = placement;
-        }
-
-        void World::setEntityAppearance(unsigned long entity, components::Appearance appearance) {
-            m_Appearances[entity] = appearance;
-        }
-
         const components::Velocity &World::getEntityVelocity(unsigned long entity) const {
             return m_Velocities[entity];
         }
 
-        void World::setEntityVelocity(unsigned long entity, components::Velocity velocity) {
+        const components::Texture &World::getEntityTexture(unsigned long entity) const {
+            return m_Textures[entity];
+        }
+
+        void World::setEntityPlacement(unsigned long entity, const components::Placement &placement) {
+            m_Placements[entity] = placement;
+        }
+
+        void World::setEntityAppearance(unsigned long entity, const components::Appearance &appearance) {
+            m_Appearances[entity] = appearance;
+        }
+
+        void World::setEntityVelocity(unsigned long entity, const components::Velocity &velocity) {
             m_Velocities[entity] = velocity;
+        }
+
+        void World::setEntityTexture(unsigned long entity, const components::Texture &texture) {
+            m_Textures[entity] = texture;
         }
     }
 }

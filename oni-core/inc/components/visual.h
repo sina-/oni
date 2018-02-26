@@ -7,6 +7,7 @@
 
 #include <GL/glew.h>
 #include <memory>
+#include <utility>
 
 namespace oni {
     namespace components {
@@ -44,6 +45,26 @@ namespace oni {
                 color.y = other.color.y;
                 color.z = other.color.z;
                 color.w = other.color.w;
+            }
+        };
+
+        struct Texture {
+            // TODO: This might need re ordering for better caching.
+            GLsizei width;
+            GLsizei height;
+            GLuint textureID;
+            std::string filePath;
+
+            Texture() : filePath(std::string()), textureID(0), width(0), height(0) {};
+
+            Texture(std::string _filePath, GLuint _textureID, GLsizei _width, GLsizei _height) : filePath(
+                    std::move(_filePath)), textureID(_textureID), width(_width), height(_height) {};
+
+            Texture(const Texture &other) {
+                filePath = other.filePath;
+                textureID = other.textureID;
+                width = other.width;
+                height = other.width;
             }
         };
 

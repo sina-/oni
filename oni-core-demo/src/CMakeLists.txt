@@ -9,6 +9,7 @@ target_link_libraries(oni-core-demo
         ${GLFW_STATIC_LIBRARIES}
         ${OPENGL_LIBRARY}
         ${GLEW_STATIC_LIBRARIES}
+        ${FREEIMAGE_LIBRARY}
         oni-core-buffers
         oni-core-entities
         oni-core-graphics
@@ -19,6 +20,9 @@ target_link_libraries(oni-core-demo
 if (UNIX)
     add_custom_command(TARGET oni-core-demo POST_BUILD
             COMMAND ln -sf ${oni_SOURCE_DIR}/oni-core/inc/shaders $<TARGET_FILE_DIR:oni-core-demo>)
+
+    add_custom_command(TARGET oni-core-demo POST_BUILD
+            COMMAND ln -sf ${oni_SOURCE_DIR}/resources $<TARGET_FILE_DIR:oni-core-demo>)
 else ()
     # TODO: This solution requires manual re-build if shaders are updated
     # Copy the shaders from source tree to build tree

@@ -24,7 +24,7 @@ namespace oni {
 
         const static components::Mask PlacementComponent = components::Mask().set(components::PLACEMENT);
         const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);
-        const static components::Mask DynamicComponent = components::Mask().set(components::VELOCITY);
+        const static components::Mask VelocityComponent = components::Mask().set(components::VELOCITY);
         const static components::Mask LightningComponent = components::Mask().set(components::LIGHTNING);
         const static components::Mask TextureComponent = components::Mask().set(components::TEXTURE);
     }

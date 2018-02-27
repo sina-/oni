@@ -43,7 +43,9 @@ namespace oni {
 
             FreeImage_Unload(dib);
 
-            return components::Texture(path, textureID, width, height);
+            std::vector<math::vec2> uv {math::vec2(0,0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+
+            return components::Texture(path, textureID, width, height, uv);
         }
 
         void LoadTexture::bind(GLuint textureID) {

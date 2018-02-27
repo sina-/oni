@@ -17,7 +17,7 @@ namespace oni {
             m_Placements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
             m_Appearances.emplace_back(math::vec4());
             m_Velocities.emplace_back(math::vec3(), 0.0f);
-            m_Textures.emplace_back("", 0, 0, 0);
+            m_Textures.emplace_back("", 0, 0, 0, std::vector<math::vec2>());
             return m_Entities.size() - 1;
         }
 

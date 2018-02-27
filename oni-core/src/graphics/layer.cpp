@@ -29,5 +29,26 @@ namespace oni {
             m_Shader->disable();
 
         }
+
+        void Layer::renderTexturedSprite(const entities::World &world) {
+            m_Shader->enable();
+            m_Renderer2D->begin();
+
+            unsigned long entityIndex = 0;
+            for (const auto &entity: world.getEntities()) {
+                if (((entity & components::PlacementComponent) == components::PlacementComponent)
+                    && ((entity & components::TextureComponent) == components::TextureComponent)
+                        ) {
+
+                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex),
+                                         world.getEntityTexture(entityIndex));
+                }
+                ++entityIndex;
+            }
+            m_Renderer2D->end();
+            m_Renderer2D->flush();
+            m_Shader->disable();
+
+        }
     }
 }

@@ -7,7 +7,8 @@ namespace oni {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((entity & entities::DynamicSprite) == entities::DynamicSprite) {
+                if ((entity & components::VelocityComponent) == components::VelocityComponent
+                        && (entity & components::PlacementComponent) == components::PlacementComponent) {
                     auto position = world.getEntityPlacement(entityIndex);
                     auto velocity = world.getEntityVelocity(entityIndex);
                     auto magnitude = velocity.magnitude;

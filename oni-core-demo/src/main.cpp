@@ -26,16 +26,17 @@ int main() {
     Window window("Oni Demo", width, height);
 
     auto spriteShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/basic.frag");
-
     auto lightShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/spotlight.frag");
+    auto carShader = std::make_unique<Shader>("shaders/texture.vert", "shaders/texture.frag");
 
     auto spriteLayer = std::make_unique<TileLayer>(std::move(spriteShader), 500000);
     auto lightLayer = std::make_unique<TileLayer>(std::move(lightShader), 10);
+    auto carLayer = std::make_unique<TileLayer>(std::move(carShader), 10);
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    float yStep = 0.06f;
-    float xStep = 0.04f;
+    float yStep = 0.6f;
+    float xStep = 0.4f;
 
     float xStart = 0.5f;
     float xEnd = 15.5f;
@@ -64,7 +65,7 @@ int main() {
         }
     }
 
-    auto car = world.createEntity(entities::DynamicSprite);
+    auto car = world.createEntity(entities::DynamicTexturedSprite);
 
     auto carPlacement = Placement();
     carPlacement.vertexA = vec3(0.0f, 0.0f, 0.0f);
@@ -79,9 +80,12 @@ int main() {
     carVelocity.magnitude = 0.0005f;
     carVelocity.direction = vec3();
 
+    auto carTexture = LoadTexture::load("resources/images/test.png");
+
     world.setEntityPlacement(car, carPlacement);
     world.setEntityAppearance(car, carAppearance);
     world.setEntityVelocity(car, carVelocity);
+    world.setEntityTexture(car, carTexture);
 
     auto lightPlacement = Placement();
     lightPlacement.vertexA = vec3(1.0f, 1.0f, 0.0f);
@@ -95,9 +99,12 @@ int main() {
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
 
-    auto texture = LoadTexture::load("resources/images/test.png");
-    auto textureEntity = world.createEntity(components::TextureComponent);
-    world.setEntityTexture(textureEntity, texture);
+    glActiveTexture(GL_TEXTURE0);
+    LoadTexture::bind(carTexture.textureID);
+    spriteLayer->getShader()->enable();
+    spriteLayer->getShader()->setUniform1i("tex", 0);
+    spriteLayer->getShader()->disable();
+
 
     float frameTime = 0.0f;
 
@@ -119,7 +126,7 @@ int main() {
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
-            auto sprite = world.createEntity(components::Mask().set(components::PLACEMENT).set(components::APPEARANCE));
+            auto sprite = world.createEntity(entities::Sprite);
 
             auto spritePlacement = Placement();
             spritePlacement.vertexA = vec3(_x, _y, 0.0f);
@@ -146,7 +153,9 @@ int main() {
         // shader between rendering of each entity if render() is naive. A more sophisticated
         // rendered could batch the entities with based on shader type and render them together.
         // but then entities should be renderable regardless of their order.
+
         spriteLayer->render(world, components::AppearanceComponent);
+        carLayer->renderTexturedSprite(world);
         lightLayer->render(world, components::LightningComponent);
 
         movement.update(world, window);

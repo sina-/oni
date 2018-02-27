@@ -15,6 +15,7 @@ namespace oni {
         struct VertexData {
             oni::math::vec3 vertex;
             oni::math::vec4 color;
+            oni::math::vec2 uv;
         };
 
         struct BufferStructure {
@@ -54,17 +55,20 @@ namespace oni {
             GLsizei height;
             GLuint textureID;
             std::string filePath;
+            std::vector<math::vec2> uv;
 
-            Texture() : filePath(std::string()), textureID(0), width(0), height(0) {};
+            Texture() : filePath(std::string()), textureID(0), width(0), height(0), uv(std::vector<math::vec2>()) {};
 
-            Texture(std::string _filePath, GLuint _textureID, GLsizei _width, GLsizei _height) : filePath(
-                    std::move(_filePath)), textureID(_textureID), width(_width), height(_height) {};
+            Texture(std::string _filePath, GLuint _textureID, GLsizei _width, GLsizei _height,
+                    std::vector<math::vec2> _uv) : filePath(
+                    std::move(_filePath)), textureID(_textureID), width(_width), height(_height), uv(std::move(_uv)) {};
 
             Texture(const Texture &other) {
                 filePath = other.filePath;
                 textureID = other.textureID;
                 width = other.width;
                 height = other.width;
+                uv = other.uv;
             }
         };
 

@@ -18,15 +18,19 @@ namespace oni {
             m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
 
-            auto vertexBuffer = std::make_unique<const components::BufferStructure>(
-                    0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
+            auto vertexBuffer = std::make_unique<const components::BufferStructure>
+                    (0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
             auto colorBuffer = std::make_unique<const components::BufferStructure>
-                    (1, 4, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
+                    (1, 4, GL_FLOAT, GL_TRUE, m_MaxVertexSize,
                      reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::color)));
+            auto textureBuffer = std::make_unique<const components::BufferStructure>
+                    (2, 2, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
+                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::uv)));
 
             auto bufferStructures = components::BufferStructures();
             bufferStructures.push_back(std::move(vertexBuffer));
             bufferStructures.push_back(std::move(colorBuffer));
+            bufferStructures.push_back(std::move(textureBuffer));
 
             auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), m_MaxBufferSize, GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
@@ -130,6 +134,32 @@ namespace oni {
              *    2 +---+ 3
              **/
             m_IndexCount += 6;
+        }
+
+        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance,
+                                     const components::Texture &texture) {
+            if (m_IndexCount + 6 >= m_MaxIndicesCount) {
+                throw std::runtime_error("Too many objects to render!");
+            }
+
+            m_Buffer->vertex = position.vertexA;
+            m_Buffer->uv = texture.uv[0];
+            m_Buffer++;
+
+            m_Buffer->vertex = position.vertexB;
+            m_Buffer->uv = texture.uv[1];
+            m_Buffer++;
+
+            m_Buffer->vertex = position.vertexC;
+            m_Buffer->uv = texture.uv[2];
+            m_Buffer++;
+
+            m_Buffer->vertex = position.vertexD;
+            m_Buffer->uv = texture.uv[3];
+            m_Buffer++;
+
+            m_IndexCount += 6;
+
         }
 
         void BatchRenderer2D::flush() {

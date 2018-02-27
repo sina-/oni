@@ -26,7 +26,7 @@ namespace oni {
             m_Placements.reserve(m_Placements.size() + size);
             m_Appearances.reserve(m_Appearances.size() + size);
             m_Velocities.reserve(m_Velocities.size() + size);
-            m_Velocities.reserve(m_Textures.size() + size);
+            m_Textures.reserve(m_Textures.size() + size);
         }
 
         unsigned long World::createEntity(components::Mask mask) {

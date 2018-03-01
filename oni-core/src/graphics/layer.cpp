@@ -10,45 +10,51 @@ namespace oni {
             m_Shader->disable();
         }
 
-        void Layer::render(const entities::World &world, const components::Mask &mask) {
-            m_Shader->enable();
-            m_Renderer2D->begin();
+        void Layer::renderSprites(const entities::World &world) {
+            begin();
 
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
-                // TODO: Define an entity with PLACEMENT and APPEARANCE componant, as those are needed
-                // to render an entity. Can not just rely on single component definition that is passed
-                // to this function. Before such refactoring, have to figure out how to render light source.
-                if ((entity & mask) == mask) {
+                if (((entity & components::AppearanceComponent) == components::AppearanceComponent)
+                    && (entity & components::PlacementComponent) == components::PlacementComponent
+                    && world.getEntityShaderID(entityIndex).shaderID == m_Shader->getShaderID()) {
+
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex));
                 }
                 ++entityIndex;
             }
-            m_Renderer2D->end();
-            m_Renderer2D->flush();
-            m_Shader->disable();
 
+            end();
         }
 
-        void Layer::renderTexturedSprite(const entities::World &world) {
-            m_Shader->enable();
-            m_Renderer2D->begin();
+        void Layer::renderTexturedSprites(const entities::World &world) {
+            begin();
 
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
                 if (((entity & components::PlacementComponent) == components::PlacementComponent)
                     && ((entity & components::TextureComponent) == components::TextureComponent)
-                        ) {
+                    && world.getEntityShaderID(entityIndex).shaderID == m_Shader->getShaderID()) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex),
                                          world.getEntityTexture(entityIndex));
                 }
                 ++entityIndex;
             }
+
+            end();
+
+        }
+
+        const void Layer::begin() const {
+            m_Shader->enable();
+            m_Renderer2D->begin();
+        }
+
+        const void Layer::end() const {
             m_Renderer2D->end();
             m_Renderer2D->flush();
             m_Shader->disable();
-
         }
     }
 }

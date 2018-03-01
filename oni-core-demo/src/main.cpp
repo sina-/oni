@@ -10,7 +10,6 @@
 
 int main() {
     using namespace oni;
-    using namespace graphics;
     using namespace math;
     using namespace std;
     using namespace buffers;
@@ -23,15 +22,17 @@ int main() {
     physics::Movement movement;
 
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
-    Window window("Oni Demo", width, height);
+    graphics::Window window("Oni Demo", width, height);
 
-    auto spriteShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/basic.frag");
-    auto lightShader = std::make_unique<Shader>("shaders/basic.vert", "shaders/spotlight.frag");
-    auto carShader = std::make_unique<Shader>("shaders/texture.vert", "shaders/texture.frag");
+    auto spriteShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
+    auto particleShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
+    auto lightShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/spotlight.frag");
+    auto carShader = std::make_unique<graphics::Shader>("shaders/texture.vert", "shaders/texture.frag");
 
-    auto spriteLayer = std::make_unique<TileLayer>(std::move(spriteShader), 500000);
-    auto lightLayer = std::make_unique<TileLayer>(std::move(lightShader), 10);
-    auto carLayer = std::make_unique<TileLayer>(std::move(carShader), 10);
+    auto spriteLayer = std::make_unique<graphics::TileLayer>(std::move(spriteShader), 500000);
+    auto particleLayer = std::make_unique<graphics::TileLayer>(std::move(particleShader), 10000);
+    auto lightLayer = std::make_unique<graphics::TileLayer>(std::move(lightShader), 10);
+    auto carLayer = std::make_unique<graphics::TileLayer>(std::move(carShader), 10);
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -46,6 +47,8 @@ int main() {
 
     auto batchSize = static_cast<unsigned long>(((yEnd - yStart + 1) / yStep) * ((xEnd - xStart + 1) / xStep));
     world.reserveEntity(batchSize);
+
+    auto spriteShaderID = ShaderID(spriteLayer->getShader()->getShaderID());
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
@@ -62,6 +65,7 @@ int main() {
 
             world.setEntityPlacement(sprite, spritePlacement);
             world.setEntityAppearance(sprite, spriteAppearance);
+            world.setEntityShaderID(sprite, spriteShaderID);
         }
     }
 
@@ -80,27 +84,36 @@ int main() {
     carVelocity.magnitude = 0.0005f;
     carVelocity.direction = vec3();
 
-    auto carTexture = LoadTexture::load("resources/images/test.png");
+    auto carTexture = graphics::LoadTexture::load("resources/images/test.png");
+
+    auto carShaderID = ShaderID(carLayer->getShader()->getShaderID());
 
     world.setEntityPlacement(car, carPlacement);
     world.setEntityAppearance(car, carAppearance);
     world.setEntityVelocity(car, carVelocity);
     world.setEntityTexture(car, carTexture);
+    world.setEntityShaderID(car, carShaderID);
+
+    auto light = world.createEntity(entities::Sprite);
 
     auto lightPlacement = Placement();
     lightPlacement.vertexA = vec3(1.0f, 1.0f, 0.0f);
     lightPlacement.vertexB = vec3(1.0f, 8.0f, 0.0f);
     lightPlacement.vertexC = vec3(15.0f, 8.0f, 0.0f);
     lightPlacement.vertexD = vec3(15.0f, 1.0f, 0.0f);
+
     auto lightAppearance = Appearance();
     lightAppearance.color = vec4(0, 0.6f, 0.5f, 0.0f);
 
-    auto light = world.createEntity(components::LightningComponent);
+    auto lightShaderID = ShaderID(lightLayer->getShader()->getShaderID());
+
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
+    world.setEntityShaderID(light, lightShaderID);
 
+    // TODO: This should be part of the renderer.
     glActiveTexture(GL_TEXTURE0);
-    LoadTexture::bind(carTexture.textureID);
+    graphics::LoadTexture::bind(carTexture.textureID);
     spriteLayer->getShader()->enable();
     spriteLayer->getShader()->setUniform1i("tex", 0);
     spriteLayer->getShader()->disable();
@@ -126,19 +139,22 @@ int main() {
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
-            auto sprite = world.createEntity(entities::Sprite);
+            auto particle = world.createEntity(entities::Sprite);
 
-            auto spritePlacement = Placement();
-            spritePlacement.vertexA = vec3(_x, _y, 0.0f);
-            spritePlacement.vertexB = vec3(_x, _y + 0.07f, 0.0f);
-            spritePlacement.vertexC = vec3(_x + 0.05f, _y + 0.07f, 0.0f);
-            spritePlacement.vertexD = vec3(_x + 0.05f, _y, 0.0f);
+            auto particlePlacement = Placement();
+            particlePlacement.vertexA = vec3(_x, _y, 0.0f);
+            particlePlacement.vertexB = vec3(_x, _y + 0.07f, 0.0f);
+            particlePlacement.vertexC = vec3(_x + 0.05f, _y + 0.07f, 0.0f);
+            particlePlacement.vertexD = vec3(_x + 0.05f, _y, 0.0f);
 
-            auto spriteAppearance = Appearance();
-            spriteAppearance.color = vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
+            auto particleAppearance = Appearance();
+            particleAppearance.color = vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
 
-            world.setEntityPlacement(sprite, spritePlacement);
-            world.setEntityAppearance(sprite, spriteAppearance);
+            auto particleShaderID = ShaderID(particleLayer->getShader()->getShaderID());
+
+            world.setEntityPlacement(particle, particlePlacement);
+            world.setEntityAppearance(particle, particleAppearance);
+            world.setEntityShaderID(particle, particleShaderID);
         }
 
         // TODO: This update logic should be part of Layer or world if shader is to be a component.
@@ -148,15 +164,10 @@ int main() {
                                                     static_cast<float>(9.0f - mouseY * 9.0f / height)));
         lightShader->disable();
 
-        // TODO: This is awkward way to handle different shaders. One way to solve the problem
-        // is to make the shader a component of each entity, but that would require to switch
-        // shader between rendering of each entity if render() is naive. A more sophisticated
-        // rendered could batch the entities with based on shader type and render them together.
-        // but then entities should be renderable regardless of their order.
-
-        spriteLayer->render(world, components::AppearanceComponent);
-        carLayer->renderTexturedSprite(world);
-        lightLayer->render(world, components::LightningComponent);
+        spriteLayer->renderSprites(world);
+        carLayer->renderTexturedSprites(world);
+        lightLayer->renderSprites(world);
+        particleLayer->renderSprites(world);
 
         movement.update(world, window);
 

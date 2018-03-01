@@ -49,6 +49,19 @@ namespace oni {
             }
         };
 
+        struct ShaderID {
+            /* Determines which shader will render it. Which effectively clusters entities based on
+             * shader and helps renderer to only switch shader per cluster of entities.
+             */
+            GLuint shaderID;
+
+            ShaderID() : shaderID(0) {}
+
+            explicit ShaderID(GLuint _id) : shaderID(_id) {}
+
+            ShaderID(const ShaderID &) = default;
+        };
+
         struct Texture {
             // TODO: This might need re ordering for better caching.
             GLsizei width;

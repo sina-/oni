@@ -118,7 +118,6 @@ int main() {
     spriteLayer->getShader()->setUniform1i("tex", 0);
     spriteLayer->getShader()->disable();
 
-
     float frameTime = 0.0f;
 
     float totalFPS = 0.0f;

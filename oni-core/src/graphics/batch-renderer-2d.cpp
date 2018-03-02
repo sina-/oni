@@ -34,8 +34,7 @@ namespace oni {
 
             auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), m_MaxBufferSize, GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
-            m_VAO = std::make_unique<buffers::VertexArray>();
-            m_VAO->addBuffer(std::move(vbo));
+            m_VAO = std::make_unique<buffers::VertexArray>(std::move(vbo));
 
             std::vector<GLuint> indices(m_MaxIndicesCount);
 
@@ -63,7 +62,6 @@ namespace oni {
 
             // TODO: ~BatchRenderer2D wont be called if this check throws.
             CHECK_OGL_ERRORS
-
         }
 
         void BatchRenderer2D::begin() {

@@ -13,7 +13,6 @@ namespace oni {
 			vec4& multiply(const vec4& other);
 			vec4& divide(const vec4& other);
 
-			// TODO: is friend necessary?
 			friend vec4 operator+(const vec4& left, const vec4& right);
 			friend vec4 operator-(const vec4& left, const vec4& right);
 			friend vec4 operator*(const vec4& left, const vec4& right);

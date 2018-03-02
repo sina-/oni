@@ -13,8 +13,6 @@ namespace oni {
                     auto velocity = world.getEntityVelocity(entityIndex);
                     auto magnitude = velocity.magnitude;
 
-                    // TODO: Internals of IO, such as GLFW_KEY_..., should not
-                    // be exposed outside.
                     switch (window.getKeyPressed()) {
                         case GLFW_KEY_W: {
                             velocity.direction += math::vec3(0.0f, magnitude, 0.0f);

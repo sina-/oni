@@ -14,21 +14,17 @@ namespace oni {
             std::unique_ptr<const Buffer> m_VertexBuffers;
 
         public:
-            VertexArray();
+            explicit VertexArray(std::unique_ptr<const Buffer> vertexBuffer);
 
             ~VertexArray() { glDeleteVertexArrays(1, &m_ArrayID); };
 
-            // TODO: At its current form, it makes no sense to have addBuffer. This operation
-            // should be handled in constructor.
-            void addBuffer(std::unique_ptr<const Buffer> vertexBuffer);
+            void bindVAO() const { glBindVertexArray(m_ArrayID); }
 
-            inline void bindVAO() const { glBindVertexArray(m_ArrayID); }
+            void unbindVAO() const { glBindVertexArray(0); }
 
-            inline void unbindVAO() const { glBindVertexArray(0); }
+            void bindVBO() const { m_VertexBuffers->bind(); }
 
-            inline void bindVBO() const { m_VertexBuffers->bind(); }
-
-            inline void unbindVBO() const { m_VertexBuffers->unbind(); }
+            void unbindVBO() const { m_VertexBuffers->unbind(); }
 
         };
 

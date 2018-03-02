@@ -1,4 +1,6 @@
 #include <graphics/texture.h>
+#include <graphics/utils/check-ogl-errors.h>
+
 #include <FreeImage.h>
 
 namespace oni {
@@ -39,11 +41,11 @@ namespace oni {
 
             unbind();
 
-            // TODO: Check for errors on loading texture
-
             FreeImage_Unload(dib);
 
             std::vector<math::vec2> uv {math::vec2(0,0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+
+            CHECK_OGL_ERRORS
 
             return components::Texture(path, textureID, width, height, uv);
         }

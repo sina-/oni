@@ -2,11 +2,9 @@
 
 namespace oni {
     namespace buffers {
-        VertexArray::VertexArray() {
+        VertexArray::VertexArray(std::unique_ptr<const Buffer> vertexBuffer) {
             glGenVertexArrays(1, &m_ArrayID);
-        }
 
-        void VertexArray::addBuffer(std::unique_ptr<const Buffer> vertexBuffer) {
             m_VertexBuffers = std::move(vertexBuffer);
 
             bindVAO();

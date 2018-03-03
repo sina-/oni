@@ -29,6 +29,8 @@ namespace oni {
                 std::runtime_error("Image loaded with no data: " + path);
             }
 
+            CHECK_OGL_ERRORS
+
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
 

@@ -2,6 +2,7 @@
 #include <graphics/utils/index-buffer-gen.h>
 #include <utils/oni-assert.h>
 #include <components/physical.h>
+#include <graphics/texture.h>
 
 namespace oni {
     namespace graphics {
@@ -12,25 +13,42 @@ namespace oni {
             m_MaxVertexSize = sizeof(components::VertexData);
 
             auto maxUIntSize = std::numeric_limits<unsigned int>::max();
-            ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize)
+            ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize);
 
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
             m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
 
+            // TODO: This has to match the shader layout. Can it be used to initialize shader layout?
+            const int vertexBufferIndex = 0;
+            const int colorBufferIndex = 1;
+            const int textureIDBufferIndex = 2;
+            const int textureCoordBufferIndex = 3;
+
+            // TODO: I have assumed that every vertex uses every attribute in VertexData, however, if a Layer renders
+            // un-textured vertices, for example, the memory is wasted. It makes sense for the Layer to be responsible for
+            // creating the necessary BufferStructures that it requires. At that point I also have to figure out
+            // how to use appropriate VertexBuffer structure that only has necessary attributes. One solution could be
+            // to define, by inheritance, a new type of Layer that uses a new type of VertexBuffer created specially
+            // to support that Layer. For example, TextureLayer could have TextureVertexBuffer. Plain TileLayer can
+            // have ColorVertexBuffer.
             auto vertexBuffer = std::make_unique<const components::BufferStructure>
-                    (0, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
+                    (vertexBufferIndex, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
             auto colorBuffer = std::make_unique<const components::BufferStructure>
-                    (1, 4, GL_FLOAT, GL_TRUE, m_MaxVertexSize,
+                    (colorBufferIndex, 4, GL_FLOAT, GL_TRUE, m_MaxVertexSize,
                      reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::color)));
-            auto textureBuffer = std::make_unique<const components::BufferStructure>
-                    (2, 2, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
+            auto textureIDBuffer = std::make_unique<const components::BufferStructure>
+                    (textureIDBufferIndex, 1, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
+                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::tid)));
+            auto textureCoordBuffer = std::make_unique<const components::BufferStructure>
+                    (textureCoordBufferIndex, 2, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
                      reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::uv)));
 
             auto bufferStructures = components::BufferStructures();
             bufferStructures.push_back(std::move(vertexBuffer));
             bufferStructures.push_back(std::move(colorBuffer));
-            bufferStructures.push_back(std::move(textureBuffer));
+            bufferStructures.push_back(std::move(textureIDBuffer));
+            bufferStructures.push_back(std::move(textureCoordBuffer));
 
             auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), m_MaxBufferSize, GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
@@ -60,8 +78,8 @@ namespace oni {
 
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
 
-            // TODO: ~BatchRenderer2D wont be called if this check throws.
-            CHECK_OGL_ERRORS
+            m_Samplers.assign(32, 0);
+            std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
         }
 
         void BatchRenderer2D::begin() {
@@ -82,13 +100,12 @@ namespace oni {
              * For more details: https://github.com/sina-/ehgl/blob/master/eg/buffer_target.hpp#L159
              ***/
             m_Buffer = (components::VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-            CHECK_OGL_ERRORS
         }
 
         void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance) {
-            if (m_IndexCount + 6 >= m_MaxIndicesCount) {
-                throw std::runtime_error("Too many objects to render!");
-            }
+            // Check if Buffer can handle the number of vertices.
+            // TODO: This seems to trigger even in none-debug mode
+            ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
             // First vertex.
 
@@ -100,25 +117,21 @@ namespace oni {
              *    a    d
              */
             // a.
-//            m_Buffer->vertex = m_TransformationStack.back() * position.vertexA;
             m_Buffer->vertex = position.vertexA;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // b.
-//            m_Buffer->vertex = m_TransformationStack.back() *position.vertexB;
             m_Buffer->vertex = position.vertexB;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // c.
-//            m_Buffer->vertex = m_TransformationStack.back() * position.vertexC;
             m_Buffer->vertex = position.vertexC;
             m_Buffer->color = appearance.color;
             m_Buffer++;
 
             // d.
-//            m_Buffer->vertex =m_TransformationStack.back() * position.vertexD;
             m_Buffer->vertex = position.vertexD;
             m_Buffer->color = appearance.color;
             m_Buffer++;
@@ -136,24 +149,65 @@ namespace oni {
 
         void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance,
                                      const components::Texture &texture) {
-            if (m_IndexCount + 6 >= m_MaxIndicesCount) {
-                throw std::runtime_error("Too many objects to render!");
+            // Check if Buffer can handle the number of vertices.
+            ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
+
+            auto textureID = texture.textureID;
+            GLuint samplerID = 0;
+
+            auto it = m_TextureToSampler.find(textureID);
+            if (it == m_TextureToSampler.end()) {
+                if (m_TextureToSampler.size() >= m_MaxTextureIDSupport) {
+                    reset();
+                }
+
+                samplerID = m_Samplers.back();
+                m_TextureToSampler[textureID] = samplerID;
+                m_Samplers.pop_back();
+            } else {
+                samplerID = (*it).second;
             }
+
+            /*
+            GLuint tid = 0;
+
+            auto it = std::find(m_SamplerTextureIDs.begin(), m_SamplerTextureIDs.end(), textureID);
+            if (it != m_SamplerTextureIDs.end()) {
+                tid = static_cast<GLuint>(std::distance(m_SamplerTextureIDs.begin(), it));
+            } else {
+                if (m_SamplerTextureIDs.size() >= m_MaxTextureIDSupport) {
+                    // This means we have reached maximum number of texture IDs OpenGL can support
+                    end();
+                    flush();
+                    begin();
+                    m_SamplerTextureIDs.clear();
+                }
+                m_SamplerTextureIDs.push_back(textureID);
+
+                // Texture id starts from 0. size() starts from 1.
+                tid = static_cast<GLuint>(m_SamplerTextureIDs.size() - 1);
+
+            }
+             */
 
             m_Buffer->vertex = position.vertexA;
             m_Buffer->uv = texture.uv[0];
+            m_Buffer->tid = samplerID;
             m_Buffer++;
 
             m_Buffer->vertex = position.vertexB;
             m_Buffer->uv = texture.uv[1];
+            m_Buffer->tid = samplerID;
             m_Buffer++;
 
             m_Buffer->vertex = position.vertexC;
             m_Buffer->uv = texture.uv[2];
+            m_Buffer->tid = samplerID;
             m_Buffer++;
 
             m_Buffer->vertex = position.vertexD;
             m_Buffer->uv = texture.uv[3];
+            m_Buffer->tid = samplerID;
             m_Buffer++;
 
             m_IndexCount += 6;
@@ -161,6 +215,21 @@ namespace oni {
         }
 
         void BatchRenderer2D::flush() {
+/*            int index = 0;
+            for (auto tid: m_SamplerTextureIDs) {
+                // This means in the shader "uniform sampler2D textureIDs[index]"
+                // corresponds to tid. For example if textureIDs[0] = 5, then
+                // to assign a vertex textureID 5 you need to select sampler 0.
+                glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
+                LoadTexture::bind(tid);
+
+                index++;
+            }*/
+            for (const auto & tid2s: m_TextureToSampler) {
+                glActiveTexture(GL_TEXTURE0 + tid2s.second);
+                LoadTexture::bind(tid2s.first);
+            }
+
             m_VAO->bindVAO();
             m_IBO->bind();
 
@@ -169,9 +238,10 @@ namespace oni {
             m_IBO->unbind();
             m_VAO->unbindVAO();
 
+            LoadTexture::unbind();
+
             m_IndexCount = 0;
 
-            CHECK_OGL_ERRORS
         }
 
         void BatchRenderer2D::end() {

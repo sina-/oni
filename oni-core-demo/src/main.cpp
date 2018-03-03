@@ -24,15 +24,31 @@ int main() {
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     graphics::Window window("Oni Demo", width, height);
 
-    auto spriteShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
+    //auto spriteShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
+    auto spriteShader = std::make_unique<graphics::Shader>("shaders/texture.vert", "shaders/texture.frag");
     auto particleShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
     auto lightShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/spotlight.frag");
     auto carShader = std::make_unique<graphics::Shader>("shaders/texture.vert", "shaders/texture.frag");
+
+    // TODO: Magic number 32
+    // TODO: This should be part of Layers responsibility. Layers know about what type of shader is used.
+    std::vector<GLint> textureIDs(32);
+    std::iota(textureIDs.begin(), textureIDs.end(), 0);
+    carShader->enable();
+    carShader->setUniformiv("textureSamplers", textureIDs);
+    carShader->disable();
+
+    spriteShader->enable();
+    spriteShader->setUniformiv("textureSamplers", textureIDs);
+    spriteShader->disable();
 
     auto spriteLayer = std::make_unique<graphics::TileLayer>(std::move(spriteShader), 500000);
     auto particleLayer = std::make_unique<graphics::TileLayer>(std::move(particleShader), 10000);
     auto lightLayer = std::make_unique<graphics::TileLayer>(std::move(lightShader), 10);
     auto carLayer = std::make_unique<graphics::TileLayer>(std::move(carShader), 10);
+
+    // TODO: Remove all such checks, there is callback registered that throws on error.
+    CHECK_OGL_ERRORS
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -49,10 +65,13 @@ int main() {
     world.reserveEntity(batchSize);
 
     auto spriteShaderID = ShaderID(spriteLayer->getShader()->getShaderID());
+    auto spriteTexture = graphics::LoadTexture::load("resources/images/test.png");
+    auto spriteTexture2 = graphics::LoadTexture::load("resources/images/test2.png");
+    auto spriteTexture3 = graphics::LoadTexture::load("resources/images/test3.png");
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
-            auto sprite = world.createEntity(entities::Sprite);
+            auto sprite = world.createEntity(entities::TexturedSprite);
 
             auto spritePlacement = Placement();
             spritePlacement.vertexA = vec3(x, y, 0.0f);
@@ -65,6 +84,14 @@ int main() {
 
             world.setEntityPlacement(sprite, spritePlacement);
             world.setEntityAppearance(sprite, spriteAppearance);
+            auto i = rand() % 3;
+            if (i == 0) {
+                world.setEntityTexture(sprite, spriteTexture);
+            } else if (i == 1) {
+                world.setEntityTexture(sprite, spriteTexture2);
+            } else {
+                world.setEntityTexture(sprite, spriteTexture3);
+            }
             world.setEntityShaderID(sprite, spriteShaderID);
         }
     }
@@ -111,12 +138,11 @@ int main() {
     world.setEntityAppearance(light, lightAppearance);
     world.setEntityShaderID(light, lightShaderID);
 
-    // TODO: This should be part of the renderer.
-    glActiveTexture(GL_TEXTURE0);
-    graphics::LoadTexture::bind(carTexture.textureID);
-    spriteLayer->getShader()->enable();
-    spriteLayer->getShader()->setUniform1i("tex", 0);
-    spriteLayer->getShader()->disable();
+    //glActiveTexture(GL_TEXTURE0);
+    //graphics::LoadTexture::bind(carTexture.textureID);
+    //spriteLayer->getShader()->enable();
+    //spriteLayer->getShader()->setUniform1i("tex", 0);
+    //spriteLayer->getShader()->disable();
 
     float frameTime = 0.0f;
 
@@ -163,9 +189,9 @@ int main() {
                                                     static_cast<float>(9.0f - mouseY * 9.0f / height)));
         lightShader->disable();
 
-        spriteLayer->renderSprites(world);
-        carLayer->renderTexturedSprites(world);
-        lightLayer->renderSprites(world);
+        spriteLayer->renderTexturedSprites(world);
+//        carLayer->renderTexturedSprites(world);
+//        lightLayer->renderSprites(world);
         particleLayer->renderSprites(world);
 
         movement.update(world, window);

@@ -1,60 +1,91 @@
+#include <graphics/utils/check-ogl-errors.h>
+#include <utils/io.h>
 #include "graphics/shader.h"
 
 namespace oni {
-	namespace graphics {
-		Shader::Shader(const std::string vertPath, const std::string fragPath) :
-			m_VertPath(vertPath), m_FragPath(fragPath)
-		{
-			GLuint program = glCreateProgram();
-			GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-			GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    namespace graphics {
+        Shader::Shader(const std::string vertPath, const std::string fragPath) :
+                m_VertPath(vertPath), m_FragPath(fragPath) {
 
-			auto vertSource = read_file(m_VertPath);
-			auto fragSource = read_file(m_FragPath);
+            glEnable(GL_DEBUG_OUTPUT);
+            glDebugMessageCallback((GLDEBUGPROC) &messageCallback, nullptr);
 
-			auto vertSourceChar = vertSource.c_str();
-			auto fragSourceChar = fragSource.c_str();
+            GLuint program = glCreateProgram();
+            GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+            GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-			glShaderSource(vertex, 1, &vertSourceChar, NULL);
-			glCompileShader(vertex);
+            auto vertSource = read_file(m_VertPath);
+            auto fragSource = read_file(m_FragPath);
 
-			glShaderSource(fragment, 1, &fragSourceChar, NULL);
-			glCompileShader(fragment);
+            auto vertSourceChar = vertSource.c_str();
+            auto fragSourceChar = fragSource.c_str();
 
-			auto checkStatusOrThrow = [](GLuint shaderID) {
-				GLint status;
-				glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
+            glShaderSource(vertex, 1, &vertSourceChar, NULL);
+            glCompileShader(vertex);
 
-				if (status == GL_FALSE) {
-					GLint length;
-					glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
-					std::vector<char> error(length);
-					glGetShaderInfoLog(shaderID, length, &length, &error[0]);
-					glDeleteShader(shaderID);
-					throw std::runtime_error(&error[0]);
-				}
+            glShaderSource(fragment, 1, &fragSourceChar, NULL);
+            glCompileShader(fragment);
 
-			};
+            auto checkStatusOrThrow = [](GLuint shaderID) {
+                GLint status;
+                glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
 
-			checkStatusOrThrow(vertex);
-			checkStatusOrThrow(fragment);
+                if (status == GL_FALSE) {
+                    GLint length;
+                    glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
+                    std::vector<char> error(length);
+                    glGetShaderInfoLog(shaderID, length, &length, &error[0]);
+                    glDeleteShader(shaderID);
+                    throw std::runtime_error(&error[0]);
+                }
+            };
 
-			glAttachShader(program, vertex);
-			glAttachShader(program, fragment);
+            checkStatusOrThrow(vertex);
+            checkStatusOrThrow(fragment);
 
-			glLinkProgram(program);
-			glValidateProgram(program);
+            glAttachShader(program, vertex);
+            glAttachShader(program, fragment);
 
-			glDeleteShader(vertex);
-			glDeleteShader(fragment);
+            glLinkProgram(program);
+            glValidateProgram(program);
 
-			m_ShaderID =  program;
-		}
+            glDeleteShader(vertex);
+            glDeleteShader(fragment);
 
-		GLint Shader::getUniformLocation(const GLchar * name)
-		{
-			// TODO: Slow operation, need caching
-			return glGetUniformLocation(m_ShaderID, name);
-		}
-	}
+            m_ShaderID = program;
+
+            // Test if the shader can be linked.
+            enable();
+            disable();
+
+        }
+
+        GLint Shader::getUniformLocation(const GLchar *name) {
+            // TODO: Slow operation, need caching
+            auto location = glGetUniformLocation(m_ShaderID, name);
+            if (location == -1) {
+                throw std::runtime_error("Invalid uniform name.");
+            }
+            return location;
+        }
+
+
+        void Shader::messageCallback(GLenum source,
+                                     GLenum type,
+                                     GLuint id,
+                                     GLenum severity,
+                                     GLsizei length,
+                                     const GLchar *message,
+                                     const void *userParam) {
+            if (type == GL_DEBUG_TYPE_ERROR) {
+                fprintf(stderr, "GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n",
+                        type, severity, message);
+                throw std::runtime_error("OpenGL error!");
+            }
+            else {
+                // TODO: Other type of errors can be logged depending on logging level.
+            }
+        }
+
+    }
 }

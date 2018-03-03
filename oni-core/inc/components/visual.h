@@ -12,10 +12,14 @@
 namespace oni {
     namespace components {
 
+        // NOTE: Layout of this struct maps to shader layout
         struct VertexData {
-            oni::math::vec3 vertex;
-            oni::math::vec4 color;
+            math::vec3 vertex;
+            math::vec4 color;
+            GLint tid;
             oni::math::vec2 uv;
+
+            VertexData() : vertex(math::vec3()), color(math::vec4()), tid(0), uv(math::vec2()) {}
         };
 
         struct BufferStructure {
@@ -34,6 +38,7 @@ namespace oni {
 
         typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
 
+        // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
         struct Appearance {
             math::vec4 color;
 

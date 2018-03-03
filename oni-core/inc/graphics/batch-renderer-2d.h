@@ -6,6 +6,8 @@
 #include <buffers/vertex-array.h>
 #include <components/visual.h>
 #include <components/physical.h>
+#include <map>
+#include <stack>
 
 namespace oni {
     namespace graphics {
@@ -31,6 +33,12 @@ namespace oni {
             // The buffer that will hold all the VertexData in the batch.
             components::VertexData *m_Buffer;
 
+            std::vector<GLuint> m_SamplerTextureIDs;
+            std::map<GLuint, GLuint> m_TextureToSampler;
+            std::vector<GLuint> m_Samplers;
+
+            const short m_MaxTextureIDSupport = 32;
+
         public:
             explicit BatchRenderer2D(const unsigned long maxSpriteCount);
 
@@ -46,6 +54,16 @@ namespace oni {
             void flush() override;
 
             void end() override;
+
+        private:
+            void reset() {
+                end();
+                flush();
+                begin();
+                // Fill the vector with 0, 1, 2, 3, ...
+                std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
+            }
+
 
         };
 

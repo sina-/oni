@@ -15,6 +15,7 @@ namespace oni {
 
             unsigned long entityIndex = 0;
             for (const auto &entity: world.getEntities()) {
+                // TODO: Use entities instead for faster calculations
                 if (((entity & components::AppearanceComponent) == components::AppearanceComponent)
                     && (entity & components::PlacementComponent) == components::PlacementComponent
                     && world.getEntityShaderID(entityIndex).shaderID == m_Shader->getShaderID()) {

@@ -4,11 +4,12 @@
 #include <vector>
 #include <string>
 
-#include "utils/file.h"
-#include "math/vec2.h"
-#include "math/vec3.h"
-#include "math/vec4.h"
-#include "math/mat4.h"
+#include <utils/file.h>
+#include <math/vec2.h>
+#include <math/vec3.h>
+#include <math/vec4.h>
+#include <math/mat4.h>
+#include <graphics/utils/check-ogl-errors.h>
 
 namespace oni {
     namespace graphics {
@@ -16,6 +17,14 @@ namespace oni {
             GLuint m_ShaderID;
             const std::string m_VertPath;
             const std::string m_FragPath;
+
+            static void messageCallback(GLenum source,
+                                        GLenum type,
+                                        GLuint id,
+                                        GLenum severity,
+                                        GLsizei length,
+                                        const GLchar *message,
+                                        const void *userParam);
 
             GLint getUniformLocation(const GLchar *name);
 
@@ -27,35 +36,40 @@ namespace oni {
             /*
              * Have to call this before using a shader.
              */
-            inline void enable() const { glUseProgram(m_ShaderID); }
+            void enable() const { glUseProgram(m_ShaderID); }
 
             void disable() const { glUseProgram(0); }
 
             const GLuint getShaderID() const { return m_ShaderID; }
 
-            inline void setUniform1f(const GLchar *name, float value) {
+            void setUniform1f(const GLchar *name, float value) {
                 glUniform1f(getUniformLocation(name), value);
             };
 
-            inline void setUniform2f(const GLchar *name, const math::vec2 &vector) {
+            void setUniform2f(const GLchar *name, const math::vec2 &vector) {
                 glUniform2f(getUniformLocation(name), vector.x, vector.y);
             };
 
-            inline void setUniform3f(const GLchar *name, const math::vec3 &vector) {
+            void setUniform3f(const GLchar *name, const math::vec3 &vector) {
                 glUniform3f(getUniformLocation(name), vector.x, vector.y, vector.z);
             };
 
-            inline void setUniform4f(const GLchar *name, const math::vec4 &vector) {
+            void setUniform4f(const GLchar *name, const math::vec4 &vector) {
                 glUniform4f(getUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
             };
 
-            inline void setUniform1i(const GLchar *name, int value) {
+            void setUniform1i(const GLchar *name, int value) {
                 glUniform1i(getUniformLocation(name), value);
             };
 
-            inline void setUniformMat4(const GLchar *name, const math::mat4 &matrix) {
+            void setUniformMat4(const GLchar *name, const math::mat4 &matrix) {
                 glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, matrix.getArray());
             };
+
+            void setUniformiv(const GLchar *name, const std::vector<GLint> &textureIDs) {
+                glUniform1iv(getUniformLocation(name), static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
+            }
+
         };
     }
 }

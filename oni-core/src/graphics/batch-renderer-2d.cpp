@@ -78,7 +78,7 @@ namespace oni {
 
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
 
-            m_Samplers.assign(32, 0);
+            m_Samplers.assign(m_MaxNumTextureSamplers, 0);
             std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
         }
 
@@ -155,9 +155,10 @@ namespace oni {
             auto textureID = texture.textureID;
             GLuint samplerID = 0;
 
+            // TODO: checkout texture arrays.
             auto it = m_TextureToSampler.find(textureID);
             if (it == m_TextureToSampler.end()) {
-                if (m_TextureToSampler.size() >= m_MaxTextureIDSupport) {
+                if (m_TextureToSampler.size() >= m_MaxNumTextureSamplers) {
                     reset();
                 }
 
@@ -167,28 +168,6 @@ namespace oni {
             } else {
                 samplerID = (*it).second;
             }
-
-            /*
-            GLuint tid = 0;
-
-            auto it = std::find(m_SamplerTextureIDs.begin(), m_SamplerTextureIDs.end(), textureID);
-            if (it != m_SamplerTextureIDs.end()) {
-                tid = static_cast<GLuint>(std::distance(m_SamplerTextureIDs.begin(), it));
-            } else {
-                if (m_SamplerTextureIDs.size() >= m_MaxTextureIDSupport) {
-                    // This means we have reached maximum number of texture IDs OpenGL can support
-                    end();
-                    flush();
-                    begin();
-                    m_SamplerTextureIDs.clear();
-                }
-                m_SamplerTextureIDs.push_back(textureID);
-
-                // Texture id starts from 0. size() starts from 1.
-                tid = static_cast<GLuint>(m_SamplerTextureIDs.size() - 1);
-
-            }
-             */
 
             m_Buffer->vertex = position.vertexA;
             m_Buffer->uv = texture.uv[0];
@@ -215,19 +194,9 @@ namespace oni {
         }
 
         void BatchRenderer2D::flush() {
-/*            int index = 0;
-            for (auto tid: m_SamplerTextureIDs) {
-                // This means in the shader "uniform sampler2D textureIDs[index]"
-                // corresponds to tid. For example if textureIDs[0] = 5, then
-                // to assign a vertex textureID 5 you need to select sampler 0.
-                glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + index));
-                LoadTexture::bind(tid);
-
-                index++;
-            }*/
-            for (const auto & tid2s: m_TextureToSampler) {
-                glActiveTexture(GL_TEXTURE0 + tid2s.second);
-                LoadTexture::bind(tid2s.first);
+            for (const auto &t2s: m_TextureToSampler) {
+                glActiveTexture(GL_TEXTURE0 + t2s.second);
+                LoadTexture::bind(t2s.first);
             }
 
             m_VAO->bindVAO();
@@ -248,6 +217,16 @@ namespace oni {
             glUnmapBuffer(GL_ARRAY_BUFFER);
             m_VAO->unbindVBO();
 
+        }
+
+        void BatchRenderer2D::reset() {
+            end();
+            flush();
+            begin();
+            m_Samplers.assign(m_MaxNumTextureSamplers, 0);
+            // Fill the vector with 0, 1, 2, 3, ...
+            std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
+            m_TextureToSampler.clear();
         }
 
     }

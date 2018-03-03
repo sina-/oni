@@ -35,11 +35,11 @@ int main() {
     std::vector<GLint> textureIDs(32);
     std::iota(textureIDs.begin(), textureIDs.end(), 0);
     carShader->enable();
-    carShader->setUniformiv("textureSamplers", textureIDs);
+    carShader->setUniformiv("samplers", textureIDs);
     carShader->disable();
 
     spriteShader->enable();
-    spriteShader->setUniformiv("textureSamplers", textureIDs);
+    spriteShader->setUniformiv("samplers", textureIDs);
     spriteShader->disable();
 
     auto spriteLayer = std::make_unique<graphics::TileLayer>(std::move(spriteShader), 500000);
@@ -190,8 +190,8 @@ int main() {
         lightShader->disable();
 
         spriteLayer->renderTexturedSprites(world);
-//        carLayer->renderTexturedSprites(world);
-//        lightLayer->renderSprites(world);
+        carLayer->renderTexturedSprites(world);
+        lightLayer->renderSprites(world);
         particleLayer->renderSprites(world);
 
         movement.update(world, window);

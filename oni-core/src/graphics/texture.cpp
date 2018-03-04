@@ -29,8 +29,6 @@ namespace oni {
                 std::runtime_error("Image loaded with no data: " + path);
             }
 
-            CHECK_OGL_ERRORS
-
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
 
@@ -46,8 +44,6 @@ namespace oni {
             FreeImage_Unload(dib);
 
             std::vector<math::vec2> uv {math::vec2(0,0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
-
-            CHECK_OGL_ERRORS
 
             return components::Texture(path, textureID, width, height, uv);
         }

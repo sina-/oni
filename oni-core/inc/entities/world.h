@@ -48,7 +48,7 @@ namespace oni {
 
             void setEntityTexture(unsigned long entity, const components::Texture &texture);
 
-            void setEntityShaderID(unsigned long entity, const components::ShaderID & shader);
+            void setEntityLayerID(unsigned long entity, const components::LayerID &tileID);
 
             const components::EntityMask &getEntities() const;
 
@@ -62,7 +62,7 @@ namespace oni {
 
             const components::Texture &getEntityTexture(unsigned long entity) const;
 
-            const components::ShaderID &getEntityShaderID(unsigned long entity) const;
+            const components::LayerID &getEntityLayerID(unsigned long entity) const;
 
         private:
             std::stack<unsigned long> m_FreeEntitySlots;
@@ -77,7 +77,7 @@ namespace oni {
             std::vector<components::Appearance> m_Appearances;
             std::vector<components::Velocity> m_Velocities;
             std::vector<components::Texture> m_Textures;
-            std::vector<components::ShaderID> m_Shaders;
+            std::vector<components::LayerID> m_LayerIDs;
 
         };
     }

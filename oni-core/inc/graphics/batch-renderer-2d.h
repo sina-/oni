@@ -33,14 +33,13 @@ namespace oni {
             // The buffer that will hold all the VertexData in the batch.
             components::VertexData *m_Buffer;
 
-            std::vector<GLuint> m_SamplerTextureIDs;
             std::map<GLuint, GLuint> m_TextureToSampler;
             std::vector<GLuint> m_Samplers;
 
-            const unsigned long m_MaxNumTextureSamplers = 32;
+            const unsigned long m_MaxNumTextureSamplers;
 
         public:
-            explicit BatchRenderer2D(const unsigned long maxSpriteCount);
+            BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers);
 
             ~BatchRenderer2D() { glDeleteBuffers(1, &m_VDO); };
 

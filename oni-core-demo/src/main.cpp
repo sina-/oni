@@ -3,10 +3,10 @@
 
 #include <graphics/batch-renderer-2d.h>
 #include <graphics/window.h>
-#include <graphics/tilelayer.h>
 #include <graphics/texture.h>
+#include <graphics/layer.h>
+#include <graphics/light.h>
 #include <physics/movement.h>
-#include <components/physical.h>
 
 int main() {
     using namespace oni;
@@ -24,31 +24,10 @@ int main() {
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     graphics::Window window("Oni Demo", width, height);
 
-    //auto spriteShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
-    auto spriteShader = std::make_unique<graphics::Shader>("shaders/texture.vert", "shaders/texture.frag");
-    auto particleShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
-    auto lightShader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/spotlight.frag");
-    auto carShader = std::make_unique<graphics::Shader>("shaders/texture.vert", "shaders/texture.frag");
-
-    // TODO: Magic number 32
-    // TODO: This should be part of Layers responsibility. Layers know about what type of shader is used.
-    std::vector<GLint> textureIDs(32);
-    std::iota(textureIDs.begin(), textureIDs.end(), 0);
-    carShader->enable();
-    carShader->setUniformiv("samplers", textureIDs);
-    carShader->disable();
-
-    spriteShader->enable();
-    spriteShader->setUniformiv("samplers", textureIDs);
-    spriteShader->disable();
-
-    auto spriteLayer = std::make_unique<graphics::TileLayer>(std::move(spriteShader), 500000);
-    auto particleLayer = std::make_unique<graphics::TileLayer>(std::move(particleShader), 10000);
-    auto lightLayer = std::make_unique<graphics::TileLayer>(std::move(lightShader), 10);
-    auto carLayer = std::make_unique<graphics::TileLayer>(std::move(carShader), 10);
-
-    // TODO: Remove all such checks, there is callback registered that throws on error.
-    CHECK_OGL_ERRORS
+    auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000);
+    auto particleLayer = graphics::Layer::createTileLayer(10000);
+    auto lightLayer = graphics::Layer::createLitTileLayer(10);
+    auto carLayer = graphics::Layer::createTexturedTileLayer(10);
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
@@ -64,10 +43,11 @@ int main() {
     auto batchSize = static_cast<unsigned long>(((yEnd - yStart + 1) / yStep) * ((xEnd - xStart + 1) / xStep));
     world.reserveEntity(batchSize);
 
-    auto spriteShaderID = ShaderID(spriteLayer->getShader()->getShaderID());
     auto spriteTexture = graphics::LoadTexture::load("resources/images/test.png");
     auto spriteTexture2 = graphics::LoadTexture::load("resources/images/test2.png");
     auto spriteTexture3 = graphics::LoadTexture::load("resources/images/test3.png");
+
+    auto spriteLayerID = LayerID(spriteLayer->getLayerID());
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
@@ -92,7 +72,7 @@ int main() {
             } else {
                 world.setEntityTexture(sprite, spriteTexture3);
             }
-            world.setEntityShaderID(sprite, spriteShaderID);
+            world.setEntityLayerID(sprite, spriteLayerID);
         }
     }
 
@@ -113,13 +93,13 @@ int main() {
 
     auto carTexture = graphics::LoadTexture::load("resources/images/test.png");
 
-    auto carShaderID = ShaderID(carLayer->getShader()->getShaderID());
+    auto carLayerID = LayerID(carLayer->getLayerID());
 
     world.setEntityPlacement(car, carPlacement);
     world.setEntityAppearance(car, carAppearance);
     world.setEntityVelocity(car, carVelocity);
     world.setEntityTexture(car, carTexture);
-    world.setEntityShaderID(car, carShaderID);
+    world.setEntityLayerID(car, carLayerID);
 
     auto light = world.createEntity(entities::Sprite);
 
@@ -132,17 +112,11 @@ int main() {
     auto lightAppearance = Appearance();
     lightAppearance.color = vec4(0, 0.6f, 0.5f, 0.0f);
 
-    auto lightShaderID = ShaderID(lightLayer->getShader()->getShaderID());
+    auto lightLayerID = LayerID(lightLayer->getLayerID());
 
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
-    world.setEntityShaderID(light, lightShaderID);
-
-    //glActiveTexture(GL_TEXTURE0);
-    //graphics::LoadTexture::bind(carTexture.textureID);
-    //spriteLayer->getShader()->enable();
-    //spriteLayer->getShader()->setUniform1i("tex", 0);
-    //spriteLayer->getShader()->disable();
+    world.setEntityLayerID(light, lightLayerID);
 
     float frameTime = 0.0f;
 
@@ -175,26 +149,20 @@ int main() {
             auto particleAppearance = Appearance();
             particleAppearance.color = vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
 
-            auto particleShaderID = ShaderID(particleLayer->getShader()->getShaderID());
+            auto particleLayerID = LayerID(particleLayer->getLayerID());
 
             world.setEntityPlacement(particle, particlePlacement);
             world.setEntityAppearance(particle, particleAppearance);
-            world.setEntityShaderID(particle, particleShaderID);
+            world.setEntityLayerID(particle, particleLayerID);
         }
 
-        // TODO: This update logic should be part of Layer or world if shader is to be a component.
-        const auto &lightShader = lightLayer->getShader();
-        lightShader->enable();
-        lightShader->setUniform2f("light_pos", vec2(static_cast<float>(mouseX * 16.0f / width),
-                                                    static_cast<float>(9.0f - mouseY * 9.0f / height)));
-        lightShader->disable();
+        movement.update(world, window);
+        graphics::Light::update(*lightLayer, mouseX, mouseY, width, height);
 
         spriteLayer->renderTexturedSprites(world);
-        carLayer->renderTexturedSprites(world);
         lightLayer->renderSprites(world);
+        carLayer->renderTexturedSprites(world);
         particleLayer->renderSprites(world);
-
-        movement.update(world, window);
 
         window.update();
 

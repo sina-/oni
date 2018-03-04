@@ -1,10 +1,12 @@
 #include <graphics/layer.h>
+#include <graphics/batch-renderer-2d.h>
 
 namespace oni {
     namespace graphics {
-        Layer::Layer(std::unique_ptr<Renderer2D> renderer, std::unique_ptr<Shader> shader, math::mat4 projectionMatrix)
-                : m_Shader(std::move(shader)), m_Renderer2D(std::move(renderer)), m_ProjectionMatrix(projectionMatrix) {
 
+        Layer::Layer(std::unique_ptr<Renderer2D> renderer, std::unique_ptr<Shader> shader,
+                     const math::mat4 &projMatrix) : m_Renderer2D(std::move(renderer)), m_Shader(std::move(shader)),
+                                                     m_ProjectionMatrix(projMatrix) {
             m_Shader->enable();
             m_Shader->setUniformMat4("pr_matrix", m_ProjectionMatrix);
             m_Shader->disable();
@@ -18,7 +20,7 @@ namespace oni {
                 // TODO: Use entities instead for faster calculations
                 if (((entity & components::AppearanceComponent) == components::AppearanceComponent)
                     && (entity & components::PlacementComponent) == components::PlacementComponent
-                    && world.getEntityShaderID(entityIndex).shaderID == m_Shader->getShaderID()) {
+                    && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex));
                 }
@@ -35,7 +37,7 @@ namespace oni {
             for (const auto &entity: world.getEntities()) {
                 if (((entity & components::PlacementComponent) == components::PlacementComponent)
                     && ((entity & components::TextureComponent) == components::TextureComponent)
-                    && world.getEntityShaderID(entityIndex).shaderID == m_Shader->getShaderID()) {
+                    && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityAppearance(entityIndex),
                                          world.getEntityTexture(entityIndex));
@@ -47,15 +49,44 @@ namespace oni {
 
         }
 
-        const void Layer::begin() const {
+        void Layer::begin() const {
             m_Shader->enable();
             m_Renderer2D->begin();
         }
 
-        const void Layer::end() const {
+        void Layer::end() const {
             m_Renderer2D->end();
             m_Renderer2D->flush();
             m_Shader->disable();
+        }
+
+        std::unique_ptr<Layer> Layer::createTileLayer(unsigned long maxSpriteCount) {
+            auto shader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/basic.frag");
+            auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount, m_MaxNumTextureSamplers);
+            auto projMatrix = math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), projMatrix);
+        }
+
+        std::unique_ptr<Layer> Layer::createLitTileLayer(unsigned long maxSpriteCount) {
+            auto shader = std::make_unique<graphics::Shader>("shaders/basic.vert", "shaders/spotlight.frag");
+            auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount, m_MaxNumTextureSamplers);
+            auto projMatrix = math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), projMatrix);
+        }
+
+        std::unique_ptr<Layer> Layer::createTexturedTileLayer(unsigned long maxSpriteCount) {
+            auto shader = std::make_unique<graphics::Shader>("shaders/texture.vert", "shaders/texture.frag");
+            auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount, m_MaxNumTextureSamplers);
+            auto projMatrix = math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
+
+            std::vector<GLint> textureIDs(m_MaxNumTextureSamplers);
+            std::iota(textureIDs.begin(), textureIDs.end(), 0);
+
+            shader->enable();
+            shader->setUniformiv("samplers", textureIDs);
+            shader->disable();
+
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), projMatrix);
         }
     }
 }

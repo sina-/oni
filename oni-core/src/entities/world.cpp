@@ -18,7 +18,7 @@ namespace oni {
             m_Appearances.emplace_back(math::vec4());
             m_Velocities.emplace_back(math::vec3(), 0.0f);
             m_Textures.emplace_back("", 0, 0, 0, std::vector<math::vec2>());
-            m_Shaders.emplace_back(0);
+            m_LayerIDs.emplace_back(0);
             return m_Entities.size() - 1;
         }
 
@@ -28,7 +28,7 @@ namespace oni {
             m_Appearances.reserve(m_Appearances.size() + size);
             m_Velocities.reserve(m_Velocities.size() + size);
             m_Textures.reserve(m_Textures.size() + size);
-            m_Shaders.reserve(m_Shaders.size() + size);
+            m_LayerIDs.reserve(m_LayerIDs.size() + size);
         }
 
         unsigned long World::createEntity(components::Mask mask) {
@@ -66,8 +66,8 @@ namespace oni {
             return m_Textures[entity];
         }
 
-        const components::ShaderID &World::getEntityShaderID(unsigned long entity) const {
-            return m_Shaders[entity];
+        const components::LayerID &World::getEntityLayerID(unsigned long entity) const {
+            return m_LayerIDs[entity];
         }
 
         void World::setEntityPlacement(unsigned long entity, const components::Placement &placement) {
@@ -86,8 +86,8 @@ namespace oni {
             m_Textures[entity] = texture;
         }
 
-        void World::setEntityShaderID(unsigned long entity, const components::ShaderID &shader) {
-            m_Shaders[entity] = shader;
+        void World::setEntityLayerID(unsigned long entity, const components::LayerID &layerID) {
+            m_LayerIDs[entity] = layerID;
 
         }
     }

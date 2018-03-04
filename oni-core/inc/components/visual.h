@@ -16,10 +16,10 @@ namespace oni {
         struct VertexData {
             math::vec3 vertex;
             math::vec4 color;
-            GLint tid;
+            GLint samplerID;
             oni::math::vec2 uv;
 
-            VertexData() : vertex(math::vec3()), color(math::vec4()), tid(0), uv(math::vec2()) {}
+            VertexData() : vertex(math::vec3()), color(math::vec4()), samplerID(0), uv(math::vec2()) {}
         };
 
         struct BufferStructure {
@@ -54,17 +54,17 @@ namespace oni {
             }
         };
 
-        struct ShaderID {
+        struct LayerID {
             /* Determines which shader will render it. Which effectively clusters entities based on
              * shader and helps renderer to only switch shader per cluster of entities.
              */
-            GLuint shaderID;
+            GLuint layerID;
 
-            ShaderID() : shaderID(0) {}
+            LayerID() : layerID(0) {}
 
-            explicit ShaderID(GLuint _id) : shaderID(_id) {}
+            explicit LayerID(GLuint _id) : layerID(_id) {}
 
-            ShaderID(const ShaderID &) = default;
+            LayerID(const LayerID &) = default;
         };
 
         struct Texture {

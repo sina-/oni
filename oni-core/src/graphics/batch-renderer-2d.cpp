@@ -6,8 +6,11 @@
 
 namespace oni {
     namespace graphics {
-        BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount) : m_IndexCount(0),
-                                                                               m_MaxSpriteCount(maxSpriteCount) {
+        BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers)
+                : m_IndexCount(0),
+                  m_MaxSpriteCount(maxSpriteCount),
+                  m_MaxNumTextureSamplers(maxNumTextureSamplers) {
+
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
             m_MaxVertexSize = sizeof(components::VertexData);
@@ -39,7 +42,7 @@ namespace oni {
                      reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::color)));
             auto textureIDBuffer = std::make_unique<const components::BufferStructure>
                     (textureIDBufferIndex, 1, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::tid)));
+                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::samplerID)));
             auto textureCoordBuffer = std::make_unique<const components::BufferStructure>
                     (textureCoordBufferIndex, 2, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
                      reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::uv)));
@@ -79,6 +82,7 @@ namespace oni {
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
 
             m_Samplers.assign(m_MaxNumTextureSamplers, 0);
+            // Fill the vector with 0, 1, 2, 3, ...
             std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
         }
 
@@ -158,9 +162,15 @@ namespace oni {
             // TODO: checkout texture arrays.
             auto it = m_TextureToSampler.find(textureID);
             if (it == m_TextureToSampler.end()) {
+                ONI_DEBUG_ASSERT(m_TextureToSampler.size() < m_MaxNumTextureSamplers);
+
+                /*
+                 * This operation is very expensive. A Layer should not needed more than
+                 * maximum number of texture samplers.
                 if (m_TextureToSampler.size() >= m_MaxNumTextureSamplers) {
                     reset();
                 }
+                */
 
                 samplerID = m_Samplers.back();
                 m_TextureToSampler[textureID] = samplerID;
@@ -171,22 +181,22 @@ namespace oni {
 
             m_Buffer->vertex = position.vertexA;
             m_Buffer->uv = texture.uv[0];
-            m_Buffer->tid = samplerID;
+            m_Buffer->samplerID = samplerID;
             m_Buffer++;
 
             m_Buffer->vertex = position.vertexB;
             m_Buffer->uv = texture.uv[1];
-            m_Buffer->tid = samplerID;
+            m_Buffer->samplerID = samplerID;
             m_Buffer++;
 
             m_Buffer->vertex = position.vertexC;
             m_Buffer->uv = texture.uv[2];
-            m_Buffer->tid = samplerID;
+            m_Buffer->samplerID = samplerID;
             m_Buffer++;
 
             m_Buffer->vertex = position.vertexD;
             m_Buffer->uv = texture.uv[3];
-            m_Buffer->tid = samplerID;
+            m_Buffer->samplerID = samplerID;
             m_Buffer++;
 
             m_IndexCount += 6;

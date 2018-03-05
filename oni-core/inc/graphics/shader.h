@@ -29,7 +29,7 @@ namespace oni {
             GLint getUniformLocation(const GLchar *name);
 
         public:
-            Shader(const std::string vertPath, const std::string fragPath);
+            Shader(std::string &&vertPath, std::string &&fragPath);
 
             ~Shader() { glDeleteProgram(m_ShaderID); };
 
@@ -40,6 +40,7 @@ namespace oni {
 
             void disable() const { glUseProgram(0); }
 
+            // TODO: call this program
             const GLuint getShaderID() const { return m_ShaderID; }
 
             void setUniform1f(const GLchar *name, float value) {

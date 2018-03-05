@@ -6,14 +6,16 @@
 
 namespace oni {
     namespace graphics {
-        BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers)
+        BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
+                                         GLsizei maxVertexSize,
+                                         components::BufferStructures bufferStructures)
                 : m_IndexCount(0),
                   m_MaxSpriteCount(maxSpriteCount),
+                  m_MaxVertexSize(maxVertexSize),
                   m_MaxNumTextureSamplers(maxNumTextureSamplers) {
 
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
-            m_MaxVertexSize = sizeof(components::VertexData);
 
             auto maxUIntSize = std::numeric_limits<unsigned int>::max();
             ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize);
@@ -21,37 +23,6 @@ namespace oni {
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
             m_MaxSpriteSize = m_MaxVertexSize * 4;
             m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
-
-            // TODO: This has to match the shader layout. Can it be used to initialize shader layout?
-            const int vertexBufferIndex = 0;
-            const int colorBufferIndex = 1;
-            const int textureIDBufferIndex = 2;
-            const int textureCoordBufferIndex = 3;
-
-            // TODO: I have assumed that every vertex uses every attribute in VertexData, however, if a Layer renders
-            // un-textured vertices, for example, the memory is wasted. It makes sense for the Layer to be responsible for
-            // creating the necessary BufferStructures that it requires. At that point I also have to figure out
-            // how to use appropriate VertexBuffer structure that only has necessary attributes. One solution could be
-            // to define, by inheritance, a new type of Layer that uses a new type of VertexBuffer created specially
-            // to support that Layer. For example, TextureLayer could have TextureVertexBuffer. Plain TileLayer can
-            // have ColorVertexBuffer.
-            auto vertexBuffer = std::make_unique<const components::BufferStructure>
-                    (vertexBufferIndex, 3, GL_FLOAT, GL_FALSE, m_MaxVertexSize, static_cast<const GLvoid *>(nullptr));
-            auto colorBuffer = std::make_unique<const components::BufferStructure>
-                    (colorBufferIndex, 4, GL_FLOAT, GL_TRUE, m_MaxVertexSize,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::color)));
-            auto textureIDBuffer = std::make_unique<const components::BufferStructure>
-                    (textureIDBufferIndex, 1, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::samplerID)));
-            auto textureCoordBuffer = std::make_unique<const components::BufferStructure>
-                    (textureCoordBufferIndex, 2, GL_FLOAT, GL_FALSE, m_MaxVertexSize,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::VertexData, components::VertexData::uv)));
-
-            auto bufferStructures = components::BufferStructures();
-            bufferStructures.push_back(std::move(vertexBuffer));
-            bufferStructures.push_back(std::move(colorBuffer));
-            bufferStructures.push_back(std::move(textureIDBuffer));
-            bufferStructures.push_back(std::move(textureCoordBuffer));
 
             auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), m_MaxBufferSize, GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
@@ -103,7 +74,7 @@ namespace oni {
                     custom_deleter(GL_ARRAY_BUFFER) );
              * For more details: https://github.com/sina-/ehgl/blob/master/eg/buffer_target.hpp#L159
              ***/
-            m_Buffer = (components::VertexData *) (glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+            m_Buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
 
         void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance) {
@@ -111,7 +82,7 @@ namespace oni {
             // TODO: This seems to trigger even in none-debug mode
             ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
-            // First vertex.
+            auto buffer = static_cast<components::ColoredVertex *>(m_Buffer);
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -120,25 +91,28 @@ namespace oni {
              *    +----+
              *    a    d
              */
+
             // a.
-            m_Buffer->vertex = position.vertexA;
-            m_Buffer->color = appearance.color;
-            m_Buffer++;
+            buffer->position = position.vertexA;
+            buffer->color = appearance.color;
+            buffer++;
 
             // b.
-            m_Buffer->vertex = position.vertexB;
-            m_Buffer->color = appearance.color;
-            m_Buffer++;
+            buffer->position = position.vertexB;
+            buffer->color = appearance.color;
+            buffer++;
 
             // c.
-            m_Buffer->vertex = position.vertexC;
-            m_Buffer->color = appearance.color;
-            m_Buffer++;
+            buffer->position = position.vertexC;
+            buffer->color = appearance.color;
+            buffer++;
 
             // d.
-            m_Buffer->vertex = position.vertexD;
-            m_Buffer->color = appearance.color;
-            m_Buffer++;
+            buffer->position = position.vertexD;
+            buffer->color = appearance.color;
+            buffer++;
+
+            m_Buffer = static_cast<void *>(buffer);
 
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
             // defined by 4 vertices only.
@@ -179,25 +153,29 @@ namespace oni {
                 samplerID = (*it).second;
             }
 
-            m_Buffer->vertex = position.vertexA;
-            m_Buffer->uv = texture.uv[0];
-            m_Buffer->samplerID = samplerID;
-            m_Buffer++;
+            auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
 
-            m_Buffer->vertex = position.vertexB;
-            m_Buffer->uv = texture.uv[1];
-            m_Buffer->samplerID = samplerID;
-            m_Buffer++;
+            buffer->position = position.vertexA;
+            buffer->uv = texture.uv[0];
+            buffer->samplerID = samplerID;
+            buffer++;
 
-            m_Buffer->vertex = position.vertexC;
-            m_Buffer->uv = texture.uv[2];
-            m_Buffer->samplerID = samplerID;
-            m_Buffer++;
+            buffer->position = position.vertexB;
+            buffer->uv = texture.uv[1];
+            buffer->samplerID = samplerID;
+            buffer++;
 
-            m_Buffer->vertex = position.vertexD;
-            m_Buffer->uv = texture.uv[3];
-            m_Buffer->samplerID = samplerID;
-            m_Buffer++;
+            buffer->position = position.vertexC;
+            buffer->uv = texture.uv[2];
+            buffer->samplerID = samplerID;
+            buffer++;
+
+            buffer->position = position.vertexD;
+            buffer->uv = texture.uv[3];
+            buffer->samplerID = samplerID;
+            buffer++;
+
+            m_Buffer = static_cast<void *>(buffer);
 
             m_IndexCount += 6;
 
@@ -238,6 +216,5 @@ namespace oni {
             std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
             m_TextureToSampler.clear();
         }
-
     }
 }

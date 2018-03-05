@@ -8,6 +8,7 @@
 #include <components/physical.h>
 #include <map>
 #include <stack>
+#include <utils/oni-assert.h>
 
 namespace oni {
     namespace graphics {
@@ -30,8 +31,8 @@ namespace oni {
             GLuint m_VDO;
             std::unique_ptr<VertexArray> m_VAO;
 
-            // The buffer that will hold all the VertexData in the batch.
-            components::VertexData *m_Buffer;
+            // The buffer that will hold components::Vertex data in the batch.
+            void *m_Buffer;
 
             std::map<GLuint, GLuint> m_TextureToSampler;
             std::vector<GLuint> m_Samplers;
@@ -39,15 +40,17 @@ namespace oni {
             const unsigned long m_MaxNumTextureSamplers;
 
         public:
-            BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers);
+            BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
+                            GLsizei maxVertexSize,
+                            components::BufferStructures bufferStructures);
 
             ~BatchRenderer2D() { glDeleteBuffers(1, &m_VDO); };
 
             void begin() override;
 
-            void submit(const components::Placement &position, const components::Appearance &appearance) override;
+            void submit(const components::Placement &position, const components::Appearance &color) override;
 
-            void submit(const components::Placement &position, const components::Appearance &appearance,
+            void submit(const components::Placement &position, const components::Appearance &color,
                         const components::Texture &texture) override;
 
             void flush() override;
@@ -56,8 +59,6 @@ namespace oni {
 
         private:
             void reset();
-
-
         };
 
     }

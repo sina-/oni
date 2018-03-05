@@ -4,8 +4,8 @@
 
 namespace oni {
     namespace graphics {
-        Shader::Shader(const std::string vertPath, const std::string fragPath) :
-                m_VertPath(vertPath), m_FragPath(fragPath) {
+        Shader::Shader(std::string &&vertPath, std::string &&fragPath) :
+                m_VertPath(std::move(vertPath)), m_FragPath(std::move(fragPath)) {
 
             glEnable(GL_DEBUG_OUTPUT);
             glDebugMessageCallback((GLDEBUGPROC) &messageCallback, nullptr);
@@ -20,10 +20,10 @@ namespace oni {
             auto vertSourceChar = vertSource.c_str();
             auto fragSourceChar = fragSource.c_str();
 
-            glShaderSource(vertex, 1, &vertSourceChar, NULL);
+            glShaderSource(vertex, 1, &vertSourceChar, nullptr);
             glCompileShader(vertex);
 
-            glShaderSource(fragment, 1, &fragSourceChar, NULL);
+            glShaderSource(fragment, 1, &fragSourceChar, nullptr);
             glCompileShader(fragment);
 
             auto checkStatusOrThrow = [](GLuint shaderID) {

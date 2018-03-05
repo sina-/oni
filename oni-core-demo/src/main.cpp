@@ -24,10 +24,10 @@ int main() {
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     graphics::Window window("Oni Demo", width, height);
 
-    auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000);
-    auto particleLayer = graphics::Layer::createTileLayer(10000);
-    auto lightLayer = graphics::Layer::createLitTileLayer(10);
-    auto carLayer = graphics::Layer::createTexturedTileLayer(10);
+    auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000, "shaders/texture.vert", "shaders/texture.frag");
+    auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
+    auto lightLayer = graphics::Layer::createTileLayer(10, "shaders/basic.vert", "shaders/spotlight.frag");
+    auto carLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
 
     srand(static_cast<unsigned int>(time(nullptr)));
 

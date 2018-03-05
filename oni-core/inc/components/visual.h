@@ -12,14 +12,26 @@
 namespace oni {
     namespace components {
 
-        // NOTE: Layout of this struct maps to shader layout
-        struct VertexData {
-            math::vec3 vertex;
+        struct Vertex {
+            math::vec3 position;
+
+            Vertex() : position(math::vec3()) {}
+        };
+
+        struct ColoredVertex {
+            math::vec3 position;
             math::vec4 color;
+
+            ColoredVertex() : position(math::vec3()), color(math::vec4()) {}
+        };
+
+        struct TexturedVertex {
+            math::vec3 position;
             GLint samplerID;
+            // TODO: use UNSIGNED_SHORT
             oni::math::vec2 uv;
 
-            VertexData() : vertex(math::vec3()), color(math::vec4()), samplerID(0), uv(math::vec2()) {}
+            TexturedVertex() : position(math::vec3()), samplerID(0), uv(math::vec2()) {}
         };
 
         struct BufferStructure {

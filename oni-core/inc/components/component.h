@@ -9,10 +9,10 @@ namespace oni {
             // initialized.
             READY,
 
-            PLACEMENT,      // 8
-            APPEARANCE,     // 16
-            VELOCITY,       // 32
-            TEXTURE,
+            PLACEMENT,      // 2 -> 8
+            APPEARANCE,     // 3 -> 16
+            VELOCITY,       // 4 -> 32
+            TEXTURE,        // ...
             SHADER,
 
             // NOTE: Always keep it last to determine size.

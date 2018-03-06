@@ -14,7 +14,7 @@
 namespace oni {
     namespace graphics {
         class Shader {
-            GLuint m_ShaderID;
+            GLuint m_Program;
             const std::string m_VertPath;
             const std::string m_FragPath;
 
@@ -31,17 +31,16 @@ namespace oni {
         public:
             Shader(std::string &&vertPath, std::string &&fragPath);
 
-            ~Shader() { glDeleteProgram(m_ShaderID); };
+            ~Shader() { glDeleteProgram(m_Program); };
 
             /*
              * Have to call this before using a shader.
              */
-            void enable() const { glUseProgram(m_ShaderID); }
+            void enable() const { glUseProgram(m_Program); }
 
             void disable() const { glUseProgram(0); }
 
-            // TODO: call this program
-            const GLuint getShaderID() const { return m_ShaderID; }
+            const GLuint getProgram() const { return m_Program; }
 
             void setUniform1f(const GLchar *name, float value) {
                 glUniform1f(getUniformLocation(name), value);

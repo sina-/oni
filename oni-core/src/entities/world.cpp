@@ -37,6 +37,10 @@ namespace oni {
             return entity;
         }
 
+        void World::addComponent(unsigned long entity, const components::Component component) {
+            m_Entities[entity].set(component);
+        }
+
         void World::destroyEntity(unsigned long entity) {
             m_Entities[entity] = components::Component::NONE;
             m_FreeEntitySlots.push(entity);

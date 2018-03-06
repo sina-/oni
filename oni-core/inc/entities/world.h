@@ -40,6 +40,8 @@ namespace oni {
 
             unsigned long createEntity(components::Mask mask);
 
+            void addComponent(unsigned long entity, const components::Component component);
+
             void setEntityPlacement(unsigned long entity, const components::Placement &placement);
 
             void setEntityAppearance(unsigned long entity, const components::Appearance &appearance);

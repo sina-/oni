@@ -52,7 +52,7 @@ namespace oni {
             glDeleteShader(vertex);
             glDeleteShader(fragment);
 
-            m_ShaderID = program;
+            m_Program = program;
 
             // Test if the shader can be linked.
             enable();
@@ -62,7 +62,7 @@ namespace oni {
 
         GLint Shader::getUniformLocation(const GLchar *name) {
             // TODO: Slow operation, need caching
-            auto location = glGetUniformLocation(m_ShaderID, name);
+            auto location = glGetUniformLocation(m_Program, name);
             if (location == -1) {
                 throw std::runtime_error("Invalid uniform name.");
             }

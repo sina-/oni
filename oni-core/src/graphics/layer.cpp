@@ -66,7 +66,7 @@ namespace oni {
                                                       std::string &&fragmentShader) {
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
 
-            auto program = shader->getShaderID();
+            auto program = shader->getProgram();
 
             auto stride = sizeof(components::ColoredVertex);
             auto positionIndex = glGetAttribLocation(program, "position");
@@ -100,7 +100,7 @@ namespace oni {
                                                               std::string &&fragmentShader) {
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
 
-            auto program = shader->getShaderID();
+            auto program = shader->getProgram();
 
             auto stride = sizeof(components::TexturedVertex);
             auto positionIndex = glGetAttribLocation(program, "position");

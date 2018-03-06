@@ -44,7 +44,7 @@ namespace oni {
              *
              * @return unique ID
              */
-            GLuint getLayerID() { return m_Shader->getShaderID(); }
+            GLuint getLayerID() { return m_Shader->getProgram(); }
 
             /**
              * A tile layer is a layer with top down projection matrix.

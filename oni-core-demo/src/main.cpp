@@ -10,11 +10,6 @@
 
 int main() {
     using namespace oni;
-    using namespace math;
-    using namespace std;
-    using namespace buffers;
-    using namespace components;
-
     int width = 1600;
     int height = 900;
 
@@ -47,19 +42,19 @@ int main() {
     auto spriteTexture2 = graphics::LoadTexture::load("resources/images/test2.png");
     auto spriteTexture3 = graphics::LoadTexture::load("resources/images/test3.png");
 
-    auto spriteLayerID = LayerID(spriteLayer->getLayerID());
+    auto spriteLayerID = components::LayerID(spriteLayer->getLayerID());
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
             auto sprite = world.createEntity(entities::TexturedSprite);
 
-            auto spritePlacement = Placement();
-            spritePlacement.vertexA = vec3(x, y, 0.0f);
-            spritePlacement.vertexB = vec3(x, y + yStep, 0.0f);
-            spritePlacement.vertexC = vec3(x + xStep, y + yStep, 0.0f);
-            spritePlacement.vertexD = vec3(x + xStep, y, 0.0f);
+            auto spritePlacement = components::Placement();
+            spritePlacement.vertexA = math::vec3(x, y, 0.0f);
+            spritePlacement.vertexB = math::vec3(x, y + yStep, 0.0f);
+            spritePlacement.vertexC = math::vec3(x + xStep, y + yStep, 0.0f);
+            spritePlacement.vertexD = math::vec3(x + xStep, y, 0.0f);
 
-            auto spriteAppearance = Appearance();
+            auto spriteAppearance = components::Appearance();
             spriteAppearance.color = math::vec4(rand() % 1000 / 1000.0f, 0, 1, 1);
 
             world.setEntityPlacement(sprite, spritePlacement);
@@ -78,22 +73,22 @@ int main() {
 
     auto car = world.createEntity(entities::DynamicTexturedSprite);
 
-    auto carPlacement = Placement();
-    carPlacement.vertexA = vec3(0.0f, 0.0f, 0.0f);
-    carPlacement.vertexB = vec3(0.0f, 3.0f, 0.0f);
-    carPlacement.vertexC = vec3(1.0f, 3.0f, 0.0f);
-    carPlacement.vertexD = vec3(1.0f, 0.0f, 0.0f);
+    auto carPlacement = components::Placement();
+    carPlacement.vertexA = math::vec3(0.0f, 0.0f, 0.0f);
+    carPlacement.vertexB = math::vec3(0.0f, 3.0f, 0.0f);
+    carPlacement.vertexC = math::vec3(1.0f, 3.0f, 0.0f);
+    carPlacement.vertexD = math::vec3(1.0f, 0.0f, 0.0f);
 
-    auto carAppearance = Appearance();
-    carAppearance.color = vec4(0.3f, 0.1f, 0.2f, 1.0f);
+    auto carAppearance = components::Appearance();
+    carAppearance.color = math::vec4(0.3f, 0.1f, 0.2f, 1.0f);
 
-    auto carVelocity = Velocity();
+    auto carVelocity = components::Velocity();
     carVelocity.magnitude = 0.0005f;
-    carVelocity.direction = vec3();
+    carVelocity.direction = math::vec3();
 
     auto carTexture = graphics::LoadTexture::load("resources/images/test.png");
 
-    auto carLayerID = LayerID(carLayer->getLayerID());
+    auto carLayerID = components::LayerID(carLayer->getLayerID());
 
     world.setEntityPlacement(car, carPlacement);
     world.setEntityAppearance(car, carAppearance);
@@ -103,16 +98,16 @@ int main() {
 
     auto light = world.createEntity(entities::Sprite);
 
-    auto lightPlacement = Placement();
-    lightPlacement.vertexA = vec3(1.0f, 1.0f, 0.0f);
-    lightPlacement.vertexB = vec3(1.0f, 8.0f, 0.0f);
-    lightPlacement.vertexC = vec3(15.0f, 8.0f, 0.0f);
-    lightPlacement.vertexD = vec3(15.0f, 1.0f, 0.0f);
+    auto lightPlacement = components::Placement();
+    lightPlacement.vertexA = math::vec3(1.0f, 1.0f, 0.0f);
+    lightPlacement.vertexB = math::vec3(1.0f, 8.0f, 0.0f);
+    lightPlacement.vertexC = math::vec3(15.0f, 8.0f, 0.0f);
+    lightPlacement.vertexD = math::vec3(15.0f, 1.0f, 0.0f);
 
-    auto lightAppearance = Appearance();
-    lightAppearance.color = vec4(0, 0.6f, 0.5f, 0.0f);
+    auto lightAppearance = components::Appearance();
+    lightAppearance.color = math::vec4(0, 0.6f, 0.5f, 0.0f);
 
-    auto lightLayerID = LayerID(lightLayer->getLayerID());
+    auto lightLayerID = components::LayerID(lightLayer->getLayerID());
 
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
@@ -140,16 +135,16 @@ int main() {
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
             auto particle = world.createEntity(entities::Sprite);
 
-            auto particlePlacement = Placement();
-            particlePlacement.vertexA = vec3(_x, _y, 0.0f);
-            particlePlacement.vertexB = vec3(_x, _y + 0.07f, 0.0f);
-            particlePlacement.vertexC = vec3(_x + 0.05f, _y + 0.07f, 0.0f);
-            particlePlacement.vertexD = vec3(_x + 0.05f, _y, 0.0f);
+            auto particlePlacement = components::Placement();
+            particlePlacement.vertexA = math::vec3(_x, _y, 0.0f);
+            particlePlacement.vertexB = math::vec3(_x, _y + 0.07f, 0.0f);
+            particlePlacement.vertexC = math::vec3(_x + 0.05f, _y + 0.07f, 0.0f);
+            particlePlacement.vertexD = math::vec3(_x + 0.05f, _y, 0.0f);
 
-            auto particleAppearance = Appearance();
-            particleAppearance.color = vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
+            auto particleAppearance = components::Appearance();
+            particleAppearance.color = math::vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
 
-            auto particleLayerID = LayerID(particleLayer->getLayerID());
+            auto particleLayerID = components::LayerID(particleLayer->getLayerID());
 
             world.setEntityPlacement(particle, particlePlacement);
             world.setEntityAppearance(particle, particleAppearance);

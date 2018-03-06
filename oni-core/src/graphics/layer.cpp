@@ -16,11 +16,9 @@ namespace oni {
             begin();
 
             unsigned long entityIndex = 0;
+            auto mask = components::Mask().set(components::APPEARANCE).set(components::PLACEMENT);
             for (const auto &entity: world.getEntities()) {
-                // TODO: Use entities instead for faster calculations
-                if (((entity & components::AppearanceComponent) == components::AppearanceComponent)
-                    && (entity & components::PlacementComponent) == components::PlacementComponent
-                    && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
+                if (((entity & mask) == mask) && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
                                          world.getEntityAppearance(entityIndex));
@@ -35,10 +33,9 @@ namespace oni {
             begin();
 
             unsigned long entityIndex = 0;
+            auto mask = components::Mask().set(components::TEXTURE).set(components::PLACEMENT);
             for (const auto &entity: world.getEntities()) {
-                if (((entity & components::PlacementComponent) == components::PlacementComponent)
-                    && ((entity & components::TextureComponent) == components::TextureComponent)
-                    && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
+                if (((entity & mask) == mask) && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
                                          world.getEntityAppearance(entityIndex),

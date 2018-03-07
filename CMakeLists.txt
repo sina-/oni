@@ -12,6 +12,8 @@ set(Oni_VERSION_MINOR 1)
 
 # Project wide dependencies
 
+# TODO: Statically link the dependencies by adding the lib to the repo together
+# with headers
 find_package(PkgConfig REQUIRED)
 #  sudo apt install libglfw3-dev
 pkg_search_module(GLFW REQUIRED glfw3)
@@ -53,6 +55,11 @@ if(FREETYPE_INCLUDE_DIRS)
 else()
     message(FATAL_ERROR "Could not find FreeType header")
 endif()
+
+set(LIB_DEP "${oni_SOURCE_DIR}/lib")
+
+include_directories(${LIB_DEP}/freetype-gl/include)
+link_directories(${LIB_DEP}/freetype-gl/bin/)
 
 # OpenGL is available through graphic cards driver
 find_package(OpenGL REQUIRED)

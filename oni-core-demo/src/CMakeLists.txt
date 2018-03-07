@@ -11,6 +11,7 @@ target_link_libraries(oni-core-demo
         ${GLEW_STATIC_LIBRARIES}
         ${FREEIMAGE_LIBRARY}
         ${FREETYPE_LIBRARY}
+        freetype-gl
         oni-core-buffers
         oni-core-entities
         oni-core-graphics

@@ -37,6 +37,23 @@ else()
     message(FATAL_ERROR "Could not find FreeImage header")
 endif()
 
+#  sudo apt install libfreetype6 libfreetype6-dev
+find_library(FREETYPE_LIBRARY NAMES freetype)
+
+if(FREETYPE_LIBRARY)
+    message("Found FreeTypw at: ${FREETYPE_LIBRARY}")
+else()
+    message(FATAL_ERROR "Could not find FreeType")
+endif()
+
+find_path(FREETYPE_INCLUDE_DIRS NAMES ft2build.h PATH_SUFFIXES include/freetype2 include)
+if(FREETYPE_INCLUDE_DIRS)
+    message("Found FreeType header at: ${FREETYPE_INCLUDE_DIRS}")
+    include_directories(${FREETYPE_INCLUDE_DIRS})
+else()
+    message(FATAL_ERROR "Could not find FreeType header")
+endif()
+
 # OpenGL is available through graphic cards driver
 find_package(OpenGL REQUIRED)
 

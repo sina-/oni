@@ -13,6 +13,8 @@ int main() {
     int width = 1600;
     int height = 900;
 
+    srand(static_cast<unsigned int>(time(nullptr)));
+
     entities::World world;
     physics::Movement movement;
 
@@ -23,8 +25,7 @@ int main() {
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
     auto lightLayer = graphics::Layer::createTileLayer(10, "shaders/basic.vert", "shaders/spotlight.frag");
     auto carLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
-
-    srand(static_cast<unsigned int>(time(nullptr)));
+    auto textLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
 
     float yStep = 0.6f;
     float xStep = 0.4f;
@@ -46,7 +47,7 @@ int main() {
 
     for (float y = yStart; y < yEnd; y += yStep) {
         for (float x = xStart; x < xEnd; x += xStep) {
-            auto sprite = world.createEntity(entities::TexturedSprite);
+            auto sprite = world.createEntity(entities::TexturedSprite, spriteLayerID);
 
             auto spritePlacement = components::Placement();
             spritePlacement.vertexA = math::vec3(x, y, 0.0f);
@@ -67,11 +68,11 @@ int main() {
             } else {
                 world.setEntityTexture(sprite, spriteTexture3);
             }
-            world.setEntityLayerID(sprite, spriteLayerID);
         }
     }
 
-    auto car = world.createEntity(entities::DynamicTexturedSprite);
+    auto carLayerID = components::LayerID(carLayer->getLayerID());
+    auto car = world.createEntity(entities::DynamicTexturedSprite, carLayerID);
 
     auto carPlacement = components::Placement();
     carPlacement.vertexA = math::vec3(0.0f, 0.0f, 0.0f);
@@ -88,15 +89,14 @@ int main() {
 
     auto carTexture = graphics::LoadTexture::load("resources/images/test.png");
 
-    auto carLayerID = components::LayerID(carLayer->getLayerID());
-
     world.setEntityPlacement(car, carPlacement);
     world.setEntityAppearance(car, carAppearance);
     world.setEntityVelocity(car, carVelocity);
     world.setEntityTexture(car, carTexture);
-    world.setEntityLayerID(car, carLayerID);
 
-    auto light = world.createEntity(entities::Sprite);
+    auto lightLayerID = components::LayerID(lightLayer->getLayerID());
+
+    auto light = world.createEntity(entities::Sprite, lightLayerID);
 
     auto lightPlacement = components::Placement();
     lightPlacement.vertexA = math::vec3(1.0f, 1.0f, 0.0f);
@@ -107,11 +107,12 @@ int main() {
     auto lightAppearance = components::Appearance();
     lightAppearance.color = math::vec4(0, 0.6f, 0.5f, 0.0f);
 
-    auto lightLayerID = components::LayerID(lightLayer->getLayerID());
 
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
-    world.setEntityLayerID(light, lightLayerID);
+
+    auto textLayerID = components::LayerID(textLayer->getLayerID());
+    auto text = world.createEntity(entities::TextSprite, textLayerID);
 
     float frameTime = 0.0f;
 
@@ -133,7 +134,8 @@ int main() {
         if (window.getMouseButton() != GLFW_KEY_UNKNOWN) {
             auto _x = ((const float) mouseX) * 16.0f / width;
             auto _y = 9.0f - ((const float) mouseY) * 9.0f / height;
-            auto particle = world.createEntity(entities::Sprite);
+            auto particleLayerID = components::LayerID(particleLayer->getLayerID());
+            auto particle = world.createEntity(entities::Sprite, particleLayerID);
 
             auto particlePlacement = components::Placement();
             particlePlacement.vertexA = math::vec3(_x, _y, 0.0f);
@@ -144,11 +146,9 @@ int main() {
             auto particleAppearance = components::Appearance();
             particleAppearance.color = math::vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
 
-            auto particleLayerID = components::LayerID(particleLayer->getLayerID());
 
             world.setEntityPlacement(particle, particlePlacement);
             world.setEntityAppearance(particle, particleAppearance);
-            world.setEntityLayerID(particle, particleLayerID);
         }
 
         movement.update(world, window);

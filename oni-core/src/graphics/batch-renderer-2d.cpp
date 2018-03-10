@@ -123,8 +123,7 @@ namespace oni {
             m_IndexCount += 6;
         }
 
-        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance,
-                                     const components::Texture &texture) {
+        void BatchRenderer2D::submit(const components::Placement &position, const components::Texture &texture) {
             // Check if Buffer can handle the number of vertices.
             ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
@@ -159,8 +158,7 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &color,
-                                     const components::Text &text) {
+        void BatchRenderer2D::submit(const components::Placement &position, const components::Text &text) {
             ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
             auto samplerID = getSamplerID(m_FTAtlas->id);

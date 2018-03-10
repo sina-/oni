@@ -38,9 +38,9 @@ namespace oni {
 
             void destroyEntity(unsigned long entity);
 
-            unsigned long createEntity(components::Mask mask);
+            unsigned long createEntity(const components::Mask &mask, const components::LayerID &layerID);
 
-            void addComponent(unsigned long entity, const components::Component component);
+            void addComponent(unsigned long entity, const components::Component &component);
 
             void setEntityPlacement(unsigned long entity, const components::Placement &placement);
 

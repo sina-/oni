@@ -48,6 +48,7 @@ namespace oni {
              */
             GLuint getLayerID() { return m_Shader->getProgram(); }
 
+        public:
             /**
              * A tile layer is a layer with top down projection matrix.
              * @param maxSpriteCount tile layer uses batch rendering, specify maximum number of sprite that the layer will

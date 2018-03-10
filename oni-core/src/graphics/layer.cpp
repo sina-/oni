@@ -14,13 +14,13 @@ namespace oni {
         void Layer::renderSprites(const entities::World &world) {
             begin();
 
-            auto mask = components::Mask().set(components::APPEARANCE).set(components::PLACEMENT);
             auto layerID = getLayerID();
 
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex).layerID == layerID && (entity & mask) == mask)) {
+                if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
+                     (entity & entities::Sprite) == entities::Sprite)) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
                                          world.getEntityAppearance(entityIndex));
@@ -34,17 +34,15 @@ namespace oni {
         void Layer::renderTexturedSprites(const entities::World &world) {
             begin();
 
-            auto mask = components::Mask().set(components::TEXTURE).set(components::PLACEMENT);
             auto layerID = getLayerID();
 
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex).layerID == layerID && (entity & mask) == mask)) {
+                if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
+                     (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
-                                         world.getEntityAppearance(entityIndex),
-                                         world.getEntityTexture(entityIndex));
+                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityTexture(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -56,16 +54,15 @@ namespace oni {
         void Layer::renderText(const entities::World &world) {
             begin();
 
-            auto mask = components::Mask().set(components::TEXT).set(components::PLACEMENT);
             auto layerID = getLayerID();
 
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex).layerID == layerID && (entity & mask) == mask)) {
+                if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
+                     (entity & entities::TextSprite) == entities::TextSprite)) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
-                                         world.getEntityAppearance(entityIndex),
                                          world.getEntityText(entityIndex));
                 }
                 ++entityIndex;

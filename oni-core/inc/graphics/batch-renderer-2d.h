@@ -58,11 +58,9 @@ namespace oni {
 
             void submit(const components::Placement &position, const components::Appearance &color) override;
 
-            void submit(const components::Placement &position, const components::Appearance &color,
-                        const components::Texture &texture) override;
+            void submit(const components::Placement &position, const components::Texture &texture) override;
 
-            void submit(const components::Placement &position, const components::Appearance &color,
-                        const components::Text &text) override;
+            void submit(const components::Placement &position, const components::Text &text) override;
 
             void flush() override;
 

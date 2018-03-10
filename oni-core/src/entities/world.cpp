@@ -33,13 +33,14 @@ namespace oni {
             m_Texts.reserve(m_Texts.size() + size);
         }
 
-        unsigned long World::createEntity(components::Mask mask) {
+        unsigned long World::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
             auto entity = _createEntity();
             m_Entities[entity] = mask;
+            m_LayerIDs[entity] = layerID;
             return entity;
         }
 
-        void World::addComponent(unsigned long entity, const components::Component component) {
+        void World::addComponent(unsigned long entity, const components::Component &component) {
             m_Entities[entity].set(component);
         }
 

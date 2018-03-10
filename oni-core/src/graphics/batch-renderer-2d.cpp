@@ -1,7 +1,5 @@
 #include <graphics/batch-renderer-2d.h>
 #include <graphics/utils/index-buffer-gen.h>
-#include <utils/oni-assert.h>
-#include <components/physical.h>
 #include <graphics/texture.h>
 
 namespace oni {
@@ -12,7 +10,9 @@ namespace oni {
                 : m_IndexCount(0),
                   m_MaxSpriteCount(maxSpriteCount),
                   m_MaxVertexSize(maxVertexSize),
-                  m_MaxNumTextureSamplers(maxNumTextureSamplers) {
+                  m_MaxNumTextureSamplers(maxNumTextureSamplers),
+                  m_FTAtlas(ftgl::texture_atlas_new(512, 512, 1), ftgl::texture_atlas_delete),
+                  m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 20, "arial"), ftgl::texture_font_delete) {
 
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
@@ -130,30 +130,10 @@ namespace oni {
             // Check if Buffer can handle the number of vertices.
             ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
-            auto textureID = texture.textureID;
-            GLuint samplerID = 0;
-
-            // TODO: checkout texture arrays.
-            auto it = m_TextureToSampler.find(textureID);
-            if (it == m_TextureToSampler.end()) {
-                ONI_DEBUG_ASSERT(m_TextureToSampler.size() < m_MaxNumTextureSamplers);
-
-                /*
-                 * This operation is very expensive. A Layer should not needed more than
-                 * maximum number of texture samplers.
-                if (m_TextureToSampler.size() >= m_MaxNumTextureSamplers) {
-                    reset();
-                }
-                */
-
-                samplerID = m_Samplers.back();
-                m_TextureToSampler[textureID] = samplerID;
-                m_Samplers.pop_back();
-            } else {
-                samplerID = (*it).second;
-            }
+            auto samplerID = getSamplerID(texture.textureID);
 
             auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
+
 
             buffer->position = position.vertexA;
             buffer->uv = texture.uv[0];
@@ -179,6 +159,11 @@ namespace oni {
 
             m_IndexCount += 6;
 
+        }
+
+        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &color,
+                                     const components::Text &text) {
+            auto samplerID = getSamplerID(m_FTAtlas->id);
         }
 
         void BatchRenderer2D::flush() {
@@ -215,6 +200,31 @@ namespace oni {
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
             m_TextureToSampler.clear();
+        }
+
+        GLuint BatchRenderer2D::getSamplerID(GLuint textureID) {
+            auto it = m_TextureToSampler.find(textureID);
+            GLuint samplerID = 0;
+
+            if (it == m_TextureToSampler.end()) {
+                ONI_DEBUG_ASSERT(m_TextureToSampler.size() < m_MaxNumTextureSamplers);
+
+                /*
+                 * To support more than m_MaxNumTextureSamplers following can be used. But,
+                 * this operation is very expensive. Instead create more layers if needed.
+                if (m_TextureToSampler.size() >= m_MaxNumTextureSamplers) {
+                    reset();
+                }
+                */
+
+                samplerID = m_Samplers.back();
+                m_TextureToSampler[textureID] = samplerID;
+                m_Samplers.pop_back();
+            } else {
+                samplerID = (*it).second;
+            }
+
+            return samplerID;
         }
     }
 }

@@ -10,8 +10,9 @@ target_link_libraries(oni-core-demo
         ${OPENGL_LIBRARY}
         ${GLEW_STATIC_LIBRARIES}
         ${FREEIMAGE_LIBRARY}
-        ${FREETYPE_LIBRARY}
         freetype-gl
+        # NOTE: FreeType must be linked after freetype-gl because fucking G++
+        ${FREETYPE_LIBRARY}
         oni-core-buffers
         oni-core-entities
         oni-core-graphics

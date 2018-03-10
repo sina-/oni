@@ -52,6 +52,8 @@ namespace oni {
 
             void setEntityLayerID(unsigned long entity, const components::LayerID &tileID);
 
+            void setEntityText(unsigned long entity, const components::Text &text);
+
             const components::EntityMask &getEntities() const;
 
             const components::Mask &getEntity(unsigned long entity) const;
@@ -66,12 +68,14 @@ namespace oni {
 
             const components::LayerID &getEntityLayerID(unsigned long entity) const;
 
+            const components::Text &getEntityText(unsigned long entity) const;
+
         private:
             std::stack<unsigned long> m_FreeEntitySlots;
             /**
              * For each entity, define a bitset showing
              * which components are enabled. For example, a simple static
-             * game object could be defined by (Components:SPRITE | Components:NAME).
+             * game object could be defined by (Components:Vertex | Components:Appearance).
              */
             components::EntityMask m_Entities;
 
@@ -80,6 +84,7 @@ namespace oni {
             std::vector<components::Velocity> m_Velocities;
             std::vector<components::Texture> m_Textures;
             std::vector<components::LayerID> m_LayerIDs;
+            std::vector<components::Text> m_Texts;
 
         };
     }

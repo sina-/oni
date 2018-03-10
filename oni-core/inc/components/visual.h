@@ -11,45 +11,6 @@
 
 namespace oni {
     namespace components {
-
-        struct Vertex {
-            math::vec3 position;
-
-            Vertex() : position(math::vec3()) {}
-        };
-
-        struct ColoredVertex {
-            math::vec3 position;
-            math::vec4 color;
-
-            ColoredVertex() : position(math::vec3()), color(math::vec4()) {}
-        };
-
-        struct TexturedVertex {
-            math::vec3 position;
-            GLint samplerID;
-            // TODO: use UNSIGNED_SHORT
-            oni::math::vec2 uv;
-
-            TexturedVertex() : position(math::vec3()), samplerID(0), uv(math::vec2()) {}
-        };
-
-        struct BufferStructure {
-            GLuint index;
-            GLuint componentCount;
-            GLenum componentType;
-            GLboolean normalized;
-            GLsizei stride;
-            const GLvoid *offset;
-
-            BufferStructure(GLuint index, GLuint componentCount, GLenum componentType, GLboolean normalized,
-                            GLsizei stride, const void *offset) : index(index), componentCount(componentCount),
-                                                                  componentType(componentType), normalized(normalized),
-                                                                  stride(stride), offset(offset) {}
-        };
-
-        typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
-
         // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
         struct Appearance {
             math::vec4 color;
@@ -67,7 +28,7 @@ namespace oni {
         };
 
         struct LayerID {
-            /* Determines which shader will render it. Which effectively clusters entities based on
+            /** Determines the shader. And that effectively clusters entities based on
              * shader and helps renderer to only switch shader per cluster of entities.
              */
             GLuint layerID;
@@ -100,6 +61,14 @@ namespace oni {
                 height = other.width;
                 uv = other.uv;
             }
+        };
+
+        struct Text {
+            std::string text;
+
+            Text() : text(std::string()) {}
+
+            explicit Text(std::string _text) : text(std::move(_text)) {}
         };
 
     }

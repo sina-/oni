@@ -14,6 +14,7 @@ namespace oni {
             VELOCITY,       // 4 -> 32
             TEXTURE,        // ...
             SHADER,
+            TEXT,
 
             // NOTE: Always keep it last to determine size.
             MAX
@@ -27,6 +28,7 @@ namespace oni {
         const static components::Mask VelocityComponent = components::Mask().set(components::VELOCITY);
         const static components::Mask TextureComponent = components::Mask().set(components::TEXTURE);
         const static components::Mask ShaderComponent = components::Mask().set(components::SHADER);
+        const static components::Mask TextComponent = components::Mask().set(components::TEXT);
     }
 
 }

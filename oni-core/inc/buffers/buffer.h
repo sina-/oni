@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <components/visual.h>
+#include <components/buffer.h>
 
 namespace oni {
     namespace buffers {

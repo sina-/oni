@@ -8,8 +8,6 @@ set(Oni_VERSION_MINOR 1)
 
 #set(CMAKE_CXX_FLAGS "-O3")
 
-#set(LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-
 # Project wide dependencies
 
 # TODO: Statically link the dependencies by adding the lib to the repo together
@@ -24,7 +22,6 @@ include_directories(${GLEW_INCLUDE_DIR})
 
 #  sudo apt install libfreeimage3 libfreeimage-dev
 find_library(FREEIMAGE_LIBRARY NAMES freeimage)
-
 if(FREEIMAGE_LIBRARY)
     message("Found FreeImage at: ${FREEIMAGE_LIBRARY}")
 else()
@@ -41,9 +38,8 @@ endif()
 
 #  sudo apt install libfreetype6 libfreetype6-dev
 find_library(FREETYPE_LIBRARY NAMES freetype)
-
 if(FREETYPE_LIBRARY)
-    message("Found FreeTypw at: ${FREETYPE_LIBRARY}")
+    message("Found FreeType at: ${FREETYPE_LIBRARY}")
 else()
     message(FATAL_ERROR "Could not find FreeType")
 endif()

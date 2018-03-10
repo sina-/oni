@@ -19,6 +19,7 @@ namespace oni {
             m_Velocities.emplace_back(math::vec3(), 0.0f);
             m_Textures.emplace_back("", 0, 0, 0, std::vector<math::vec2>());
             m_LayerIDs.emplace_back(0);
+            m_Texts.emplace_back(std::string());
             return m_Entities.size() - 1;
         }
 
@@ -29,6 +30,7 @@ namespace oni {
             m_Velocities.reserve(m_Velocities.size() + size);
             m_Textures.reserve(m_Textures.size() + size);
             m_LayerIDs.reserve(m_LayerIDs.size() + size);
+            m_Texts.reserve(m_Texts.size() + size);
         }
 
         unsigned long World::createEntity(components::Mask mask) {
@@ -74,6 +76,10 @@ namespace oni {
             return m_LayerIDs[entity];
         }
 
+        const components::Text &World::getEntityText(unsigned long entity) const {
+            return m_Texts[entity];
+        }
+
         void World::setEntityPlacement(unsigned long entity, const components::Placement &placement) {
             m_Placements[entity] = placement;
         }
@@ -92,6 +98,11 @@ namespace oni {
 
         void World::setEntityLayerID(unsigned long entity, const components::LayerID &layerID) {
             m_LayerIDs[entity] = layerID;
+
+        }
+
+        void World::setEntityText(unsigned long entity, const components::Text &text) {
+            m_Texts[entity] = text;
 
         }
     }

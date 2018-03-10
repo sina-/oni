@@ -12,7 +12,6 @@ namespace oni {
                 .set(components::TEXTURE);
         const static components::Mask DynamicTexturedSprite = components::Mask().set(components::PLACEMENT)
                 .set(components::TEXTURE).set(components::VELOCITY);
-        const static components::Mask TextSprite = components::Mask().set(components::PLACEMENT)
-                .set(components::TEXT);
+        const static components::Mask TextSprite = components::Mask().set(components::TEXT);
     }
 }

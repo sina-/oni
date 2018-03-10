@@ -12,7 +12,9 @@ namespace oni {
                   m_MaxVertexSize(maxVertexSize),
                   m_MaxNumTextureSamplers(maxNumTextureSamplers),
                   m_FTAtlas(ftgl::texture_atlas_new(512, 512, 1), ftgl::texture_atlas_delete),
-                  m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 20, "arial"), ftgl::texture_font_delete) {
+                  m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/FreeMonoBold.ttf"),
+                           ftgl::texture_font_delete)
+        {
 
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
@@ -53,6 +55,7 @@ namespace oni {
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
 
             m_Samplers = generateSamplerIDs();
+
         }
 
         void BatchRenderer2D::begin() {
@@ -131,7 +134,6 @@ namespace oni {
 
             auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
 
-
             buffer->position = position.vertexA;
             buffer->uv = texture.uv[0];
             buffer->samplerID = samplerID;
@@ -158,36 +160,55 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::submit(const components::Placement &position, const components::Text &text) {
-            ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
-
+        void BatchRenderer2D::submit(const components::Text &text) {
             auto samplerID = getSamplerID(m_FTAtlas->id);
 
             auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
 
-            buffer->position = position.vertexA;
-//            buffer->uv = texture.uv[0];
-            buffer->samplerID = samplerID;
-            buffer++;
+            for (auto character: text.text) {
+                ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
-            buffer->position = position.vertexB;
-//            buffer->uv = texture.uv[1];
-            buffer->samplerID = samplerID;
-            buffer++;
+                auto glyph = ftgl::texture_font_get_glyph(m_FTFont.get(), &character);
 
-            buffer->position = position.vertexC;
-//            buffer->uv = texture.uv[2];
-            buffer->samplerID = samplerID;
-            buffer++;
+                if (glyph) {
+                    auto x0 = text.position.x + glyph->offset_x;
+                    auto y0 = text.position.y + glyph->offset_y;
+                    auto x1 = x0 + glyph->width;
+                    auto y1 = y0 + glyph->height;
 
-            buffer->position = position.vertexD;
-//            buffer->uv = texture.uv[3];
-            buffer->samplerID = samplerID;
-            buffer++;
+                    auto u0 = glyph->s0;
+                    auto v0 = glyph->t0;
+                    auto u1 = glyph->s1;
+                    auto v1 = glyph->t1;
+
+                    buffer->position = math::vec3(x0, y0, 0);
+                    buffer->uv = math::vec2(u0, v0);
+                    buffer->samplerID = samplerID;
+                    buffer++;
+
+                    buffer->position = math::vec3(x0, y1, 0);
+                    buffer->uv = math::vec2(u0, v1);
+                    buffer->samplerID = samplerID;
+                    buffer++;
+
+                    buffer->position = math::vec3(x1, y1, 0);
+                    buffer->uv = math::vec2(u1, v1);
+                    buffer->samplerID = samplerID;
+                    buffer++;
+
+                    buffer->position = math::vec3(x1, y0, 0);
+                    buffer->uv = math::vec2(u1, v0);
+                    buffer->samplerID = samplerID;
+                    buffer++;
+
+                    m_IndexCount += 6;
+                } else {
+                    throw std::runtime_error("Invalid character");
+                }
+            }
 
             m_Buffer = static_cast<void *>(buffer);
 
-            m_IndexCount += 6;
         }
 
         void BatchRenderer2D::flush() {

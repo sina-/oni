@@ -44,7 +44,7 @@ namespace oni {
             virtual void submit(const components::Placement &position, const components::Appearance &color) = 0;
 
             virtual void submit(const components::Placement &position, const components::Texture &texture) = 0;
-            virtual void submit(const components::Placement &position, const components::Text &text) = 0;
+            virtual void submit(const components::Text &text) = 0;
 
             /**
              * Draw the element(s).

@@ -62,8 +62,7 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
-                                         world.getEntityText(entityIndex));
+                    m_Renderer2D->submit(world.getEntityText(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -152,6 +151,7 @@ namespace oni {
                                                               m_MaxNumTextureSamplers,
                                                               sizeof(components::TexturedVertex),
                                                               std::move(bufferStructures));
+
             auto projMatrix = math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
 
             shader->enable();

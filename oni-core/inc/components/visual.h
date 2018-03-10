@@ -67,10 +67,11 @@ namespace oni {
 
         struct Text {
             std::string text;
+            math::vec3 position;
 
-            Text() : text(std::string()) {}
+            Text() : text(std::string()), position(math::vec3()) {}
 
-            explicit Text(std::string _text) : text(std::move(_text)) {}
+            Text(std::string _text, const math::vec3 &_position) : text(std::move(_text)), position(_position) {}
         };
 
     }

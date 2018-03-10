@@ -25,7 +25,7 @@ int main() {
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
     auto lightLayer = graphics::Layer::createTileLayer(10, "shaders/basic.vert", "shaders/spotlight.frag");
     auto carLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
-    auto textLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
+    auto textLayer = graphics::Layer::createTexturedTileLayer(100, "shaders/texture.vert", "shaders/texture.frag");
 
     float yStep = 0.6f;
     float xStep = 0.4f;
@@ -107,12 +107,15 @@ int main() {
     auto lightAppearance = components::Appearance();
     lightAppearance.color = math::vec4(0, 0.6f, 0.5f, 0.0f);
 
-
     world.setEntityPlacement(light, lightPlacement);
     world.setEntityAppearance(light, lightAppearance);
 
     auto textLayerID = components::LayerID(textLayer->getLayerID());
     auto text = world.createEntity(entities::TextSprite, textLayerID);
+
+    auto textString = components::Text("HELLO AND FUCK", math::vec3(1.0f, 5.0f, 0.0f));
+
+    world.setEntityText(text, textString);
 
     float frameTime = 0.0f;
 
@@ -158,6 +161,7 @@ int main() {
         lightLayer->renderSprites(world);
         carLayer->renderTexturedSprites(world);
         particleLayer->renderSprites(world);
+        textLayer->renderText(world);
 
         window.update();
 

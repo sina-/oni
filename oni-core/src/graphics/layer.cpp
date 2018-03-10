@@ -1,5 +1,4 @@
 #include <graphics/layer.h>
-#include <graphics/batch-renderer-2d.h>
 
 namespace oni {
     namespace graphics {
@@ -15,10 +14,13 @@ namespace oni {
         void Layer::renderSprites(const entities::World &world) {
             begin();
 
-            unsigned long entityIndex = 0;
             auto mask = components::Mask().set(components::APPEARANCE).set(components::PLACEMENT);
+            auto layerID = getLayerID();
+
+            unsigned long entityIndex = 0;
+
             for (const auto &entity: world.getEntities()) {
-                if (((entity & mask) == mask) && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
+                if ((world.getEntityLayerID(entityIndex).layerID == layerID && (entity & mask) == mask)) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
                                          world.getEntityAppearance(entityIndex));
@@ -32,14 +34,39 @@ namespace oni {
         void Layer::renderTexturedSprites(const entities::World &world) {
             begin();
 
-            unsigned long entityIndex = 0;
             auto mask = components::Mask().set(components::TEXTURE).set(components::PLACEMENT);
+            auto layerID = getLayerID();
+
+            unsigned long entityIndex = 0;
+
             for (const auto &entity: world.getEntities()) {
-                if (((entity & mask) == mask) && world.getEntityLayerID(entityIndex).layerID == getLayerID()) {
+                if ((world.getEntityLayerID(entityIndex).layerID == layerID && (entity & mask) == mask)) {
 
                     m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
                                          world.getEntityAppearance(entityIndex),
                                          world.getEntityTexture(entityIndex));
+                }
+                ++entityIndex;
+            }
+
+            end();
+
+        }
+
+        void Layer::renderText(const entities::World &world) {
+            begin();
+
+            auto mask = components::Mask().set(components::TEXT).set(components::PLACEMENT);
+            auto layerID = getLayerID();
+
+            unsigned long entityIndex = 0;
+
+            for (const auto &entity: world.getEntities()) {
+                if ((world.getEntityLayerID(entityIndex).layerID == layerID && (entity & mask) == mask)) {
+
+                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
+                                         world.getEntityAppearance(entityIndex),
+                                         world.getEntityText(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -130,11 +157,8 @@ namespace oni {
                                                               std::move(bufferStructures));
             auto projMatrix = math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
 
-            std::vector<GLint> textureIDs(m_MaxNumTextureSamplers);
-            std::iota(textureIDs.begin(), textureIDs.end(), 0);
-
             shader->enable();
-            shader->setUniformiv("samplers", textureIDs);
+            shader->setUniformiv("samplers", renderer->generateSamplerIDs());
             shader->disable();
 
             return std::make_unique<Layer>(std::move(renderer), std::move(shader), projMatrix);

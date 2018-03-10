@@ -70,6 +70,10 @@ namespace oni {
                 glUniform1iv(getUniformLocation(name), static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
             }
 
+            void setUniformuiv(const GLchar *name, const std::vector<GLuint> &textureIDs) {
+                glUniform1uiv(getUniformLocation(name), static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
+            }
+
         };
     }
 }

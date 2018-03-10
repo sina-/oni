@@ -38,8 +38,8 @@ namespace oni {
             void *m_Buffer;
 
             // A mapping from texture id to 2D sampler that will draw it.
-            std::map<GLuint, GLuint> m_TextureToSampler;
-            std::vector<GLuint> m_Samplers;
+            std::map<GLuint, GLint> m_TextureToSampler;
+            std::vector<GLint> m_Samplers;
 
             const unsigned long m_MaxNumTextureSamplers;
 
@@ -78,7 +78,10 @@ namespace oni {
              * in the vertex buffer. During rendering in the shader the proper sampler is selected based
              * on the sampler id in the buffer.
              */
-            GLuint getSamplerID(GLuint textureID);
+            GLint getSamplerID(GLuint textureID);
+
+        public:
+            std::vector<GLint> generateSamplerIDs();
         };
 
     }

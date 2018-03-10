@@ -33,6 +33,8 @@ namespace oni {
 
             void renderTexturedSprites(const entities::World &world);
 
+            void renderText(const entities::World &world);
+
             Shader &getShader() { return *m_Shader; }
 
             void begin() const;

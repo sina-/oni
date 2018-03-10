@@ -52,9 +52,7 @@ namespace oni {
 
             m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
 
-            m_Samplers.assign(m_MaxNumTextureSamplers, 0);
-            // Fill the vector with 0, 1, 2, 3, ...
-            std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
+            m_Samplers = generateSamplerIDs();
         }
 
         void BatchRenderer2D::begin() {
@@ -163,7 +161,35 @@ namespace oni {
 
         void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &color,
                                      const components::Text &text) {
+            ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
+
             auto samplerID = getSamplerID(m_FTAtlas->id);
+
+            auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
+
+            buffer->position = position.vertexA;
+//            buffer->uv = texture.uv[0];
+            buffer->samplerID = samplerID;
+            buffer++;
+
+            buffer->position = position.vertexB;
+//            buffer->uv = texture.uv[1];
+            buffer->samplerID = samplerID;
+            buffer++;
+
+            buffer->position = position.vertexC;
+//            buffer->uv = texture.uv[2];
+            buffer->samplerID = samplerID;
+            buffer++;
+
+            buffer->position = position.vertexD;
+//            buffer->uv = texture.uv[3];
+            buffer->samplerID = samplerID;
+            buffer++;
+
+            m_Buffer = static_cast<void *>(buffer);
+
+            m_IndexCount += 6;
         }
 
         void BatchRenderer2D::flush() {
@@ -202,9 +228,9 @@ namespace oni {
             m_TextureToSampler.clear();
         }
 
-        GLuint BatchRenderer2D::getSamplerID(GLuint textureID) {
+        GLint BatchRenderer2D::getSamplerID(GLuint textureID) {
             auto it = m_TextureToSampler.find(textureID);
-            GLuint samplerID = 0;
+            GLint samplerID = 0;
 
             if (it == m_TextureToSampler.end()) {
                 ONI_DEBUG_ASSERT(m_TextureToSampler.size() < m_MaxNumTextureSamplers);
@@ -225,6 +251,14 @@ namespace oni {
             }
 
             return samplerID;
+        }
+
+        std::vector<GLint> BatchRenderer2D::generateSamplerIDs() {
+            std::vector<GLint> samplers;
+            samplers.assign(m_MaxNumTextureSamplers, 0);
+            // Fill the vector with 0, 1, 2, 3, ...
+            std::iota(samplers.begin(), samplers.end(), 0);
+            return samplers;
         }
     }
 }

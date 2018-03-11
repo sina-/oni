@@ -13,5 +13,5 @@ void main()
 {
     // Compensate for epsilone of error.
     int sid = int(fs_in.samplerID + 0.1);
-	color = texture(samplers[sid], fs_in.uv);
+	color = vec4(1, 0, 0, 1) * texture2D(samplers[sid], fs_in.uv);
 }

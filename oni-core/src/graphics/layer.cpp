@@ -1,4 +1,5 @@
 #include <graphics/layer.h>
+#include <graphics/texture.h>
 
 namespace oni {
     namespace graphics {
@@ -62,13 +63,12 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityText(entityIndex));
+                    m_Renderer2D->submit(world.getEntityText(entityIndex), m_FontManager->getAtlas(),
+                                         m_FontManager->getFont());
                 }
                 ++entityIndex;
             }
-
             end();
-
         }
 
         void Layer::begin() const {
@@ -159,6 +159,22 @@ namespace oni {
             shader->disable();
 
             return std::make_unique<Layer>(std::move(renderer), std::move(shader), projMatrix);
+        }
+
+        std::unique_ptr<Layer> Layer::createTextTileLayer(unsigned long maxSpriteCount,
+                                                          std::string &&vertexShader,
+                                                          std::string &&fragmentShader) {
+
+
+            auto layer = Layer::createTexturedTileLayer(maxSpriteCount, std::move(vertexShader),
+                                                        std::move(fragmentShader));
+            auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf");
+
+            graphics::LoadTexture::load(*fontManager);
+
+            layer->setFontManager(std::move(fontManager));
+
+            return std::move(layer);
         }
     }
 }

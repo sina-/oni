@@ -1,6 +1,7 @@
 #include <graphics/batch-renderer-2d.h>
 #include <graphics/utils/index-buffer-gen.h>
 #include <graphics/texture.h>
+#include <utils/io.h>
 
 namespace oni {
     namespace graphics {
@@ -10,11 +11,7 @@ namespace oni {
                 : m_IndexCount(0),
                   m_MaxSpriteCount(maxSpriteCount),
                   m_MaxVertexSize(maxVertexSize),
-                  m_MaxNumTextureSamplers(maxNumTextureSamplers),
-                  m_FTAtlas(ftgl::texture_atlas_new(512, 512, 1), ftgl::texture_atlas_delete),
-                  m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/FreeMonoBold.ttf"),
-                           ftgl::texture_font_delete)
-        {
+                  m_MaxNumTextureSamplers(maxNumTextureSamplers) {
 
             // Each sprite has 6 indices.
             m_MaxIndicesCount = m_MaxSpriteCount * 6;
@@ -60,21 +57,7 @@ namespace oni {
 
         void BatchRenderer2D::begin() {
             m_VAO->bindVBO();
-            /***
-             * If you want to use smart pointers, you need to supply custom deleter:
-             * struct custom_deleter
-                  {
-                    void operator ()( void const* ) const
-                    {
-                      glUnmapBuffer(GL_ARRAY_BUFFER);
-                    }
-                };
-             * to the raw pointer, and do something like:
-             * m_Buffer = std::unique_ptr<VertexData, custom_deleter>(
-                reinterpret_cast<VertexData*>(glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY)),
-                    custom_deleter(GL_ARRAY_BUFFER) );
-             * For more details: https://github.com/sina-/ehgl/blob/master/eg/buffer_target.hpp#L159
-             ***/
+            // Data written to m_Buffer has to match the structure of VBO.
             m_Buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
 
@@ -113,6 +96,7 @@ namespace oni {
             buffer->color = appearance.color;
             buffer++;
 
+            // Update the m_Buffer to point to the head.
             m_Buffer = static_cast<void *>(buffer);
 
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
@@ -160,43 +144,44 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::submit(const components::Text &text) {
-            auto samplerID = getSamplerID(m_FTAtlas->id);
-
+        void BatchRenderer2D::submit(const components::Text &text, const ftgl::texture_atlas_t *atlas,
+                                     ftgl::texture_font_t *font) {
             auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
+
+            auto samplerID = getSamplerID(atlas->id);
 
             for (auto character: text.text) {
                 ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
-                auto glyph = ftgl::texture_font_get_glyph(m_FTFont.get(), &character);
+                auto glyph = ftgl::texture_font_find_glyph(font, &character);
 
                 if (glyph) {
-                    auto x0 = text.position.x + glyph->offset_x;
-                    auto y0 = text.position.y + glyph->offset_y;
-                    auto x1 = x0 + glyph->width;
-                    auto y1 = y0 + glyph->height;
+                    auto x0 = 1.0f; //text.position.x + glyph->offset_x;
+                    auto y0 = 1.0f; //text.position.y + glyph->offset_y;
+                    auto x1 = 15.0f; //x0 + glyph->width;
+                    auto y1 = 8.0f; //y0 + glyph->height;
 
-                    auto u0 = glyph->s0;
-                    auto v0 = glyph->t0;
-                    auto u1 = glyph->s1;
-                    auto v1 = glyph->t1;
+                    auto u0 = 0.0f;//glyph->s0;
+                    auto v0 = 0.0f;//glyph->t0;
+                    auto u1 = 1.0f;//glyph->s1;
+                    auto v1 = 1.0f;//glyph->t1;
 
-                    buffer->position = math::vec3(x0, y0, 0);
+                    buffer->position = math::vec3(x0, y0, 1);
                     buffer->uv = math::vec2(u0, v0);
                     buffer->samplerID = samplerID;
                     buffer++;
 
-                    buffer->position = math::vec3(x0, y1, 0);
+                    buffer->position = math::vec3(x0, y1, 1);
                     buffer->uv = math::vec2(u0, v1);
                     buffer->samplerID = samplerID;
                     buffer++;
 
-                    buffer->position = math::vec3(x1, y1, 0);
+                    buffer->position = math::vec3(x1, y1, 1);
                     buffer->uv = math::vec2(u1, v1);
                     buffer->samplerID = samplerID;
                     buffer++;
 
-                    buffer->position = math::vec3(x1, y0, 0);
+                    buffer->position = math::vec3(x1, y0, 1);
                     buffer->uv = math::vec2(u1, v0);
                     buffer->samplerID = samplerID;
                     buffer++;

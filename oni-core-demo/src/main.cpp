@@ -25,7 +25,7 @@ int main() {
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
     auto lightLayer = graphics::Layer::createTileLayer(10, "shaders/basic.vert", "shaders/spotlight.frag");
     auto carLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
-    auto textLayer = graphics::Layer::createTexturedTileLayer(100, "shaders/texture.vert", "shaders/texture.frag");
+    auto textLayer = graphics::Layer::createTextTileLayer(100, "shaders/texture.vert", "shaders/texture.frag");
 
     float yStep = 0.6f;
     float xStep = 0.4f;
@@ -80,9 +80,6 @@ int main() {
     carPlacement.vertexC = math::vec3(1.0f, 3.0f, 0.0f);
     carPlacement.vertexD = math::vec3(1.0f, 0.0f, 0.0f);
 
-    auto carAppearance = components::Appearance();
-    carAppearance.color = math::vec4(0.3f, 0.1f, 0.2f, 1.0f);
-
     auto carVelocity = components::Velocity();
     carVelocity.magnitude = 0.0005f;
     carVelocity.direction = math::vec3();
@@ -90,7 +87,6 @@ int main() {
     auto carTexture = graphics::LoadTexture::load("resources/images/test.png");
 
     world.setEntityPlacement(car, carPlacement);
-    world.setEntityAppearance(car, carAppearance);
     world.setEntityVelocity(car, carVelocity);
     world.setEntityTexture(car, carTexture);
 
@@ -113,7 +109,7 @@ int main() {
     auto textLayerID = components::LayerID(textLayer->getLayerID());
     auto text = world.createEntity(entities::TextSprite, textLayerID);
 
-    auto textString = components::Text("HELLO AND FUCK", math::vec3(1.0f, 5.0f, 0.0f));
+    auto textString = components::Text("HELLO", math::vec3(0.0f, 0.0f, 1.0f));
 
     world.setEntityText(text, textString);
 
@@ -149,7 +145,6 @@ int main() {
             auto particleAppearance = components::Appearance();
             particleAppearance.color = math::vec4(rand() % 1000 / 1000.0f, 0, 0, 1);
 
-
             world.setEntityPlacement(particle, particlePlacement);
             world.setEntityAppearance(particle, particleAppearance);
         }
@@ -157,10 +152,10 @@ int main() {
         movement.update(world, window);
         graphics::Light::update(*lightLayer, mouseX, mouseY, width, height);
 
-        spriteLayer->renderTexturedSprites(world);
-        lightLayer->renderSprites(world);
-        carLayer->renderTexturedSprites(world);
-        particleLayer->renderSprites(world);
+//        spriteLayer->renderTexturedSprites(world);
+//        carLayer->renderTexturedSprites(world);
+//        particleLayer->renderSprites(world);
+//        lightLayer->renderSprites(world);
         textLayer->renderText(world);
 
         window.update();

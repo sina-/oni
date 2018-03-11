@@ -43,10 +43,6 @@ namespace oni {
 
             const unsigned long m_MaxNumTextureSamplers;
 
-            // Wrap atlas and font with unique_ptr and pass the custom deleter
-            std::unique_ptr<ftgl::texture_atlas_t, decltype(&ftgl::texture_atlas_delete)> m_FTAtlas;
-            std::unique_ptr<ftgl::texture_font_t, decltype(&ftgl::texture_font_delete)> m_FTFont;
-
         public:
             BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
                             GLsizei maxVertexSize,
@@ -60,7 +56,7 @@ namespace oni {
 
             void submit(const components::Placement &position, const components::Texture &texture) override;
 
-            void submit(const components::Text &text) override;
+            void submit(const components::Text &text, const ftgl::texture_atlas_t *atlas, ftgl::texture_font_t *font) override;
 
             void flush() override;
 

@@ -53,6 +53,10 @@ namespace oni {
 			glfwSetCursorPosCallback(m_Window, cursorPosCallback);
 			// This will disable v-sync.
             glfwSwapInterval(0.0);
+
+
+//			glEnable(GL_BLEND);
+//			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		Window::~Window()
@@ -74,7 +78,8 @@ namespace oni {
 		void Window::clear() const
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		}
+            glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
+        }
 
 		void Window::windowResizeCallback(GLFWwindow * window, int width, int height)
 		{

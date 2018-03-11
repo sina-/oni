@@ -43,7 +43,7 @@ namespace oni {
 
             FreeImage_Unload(dib);
 
-            std::vector<math::vec2> uv {math::vec2(0,0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+            std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
 
             return components::Texture(path, textureID, width, height, uv);
         }
@@ -54,6 +54,32 @@ namespace oni {
 
         void LoadTexture::unbind() {
             glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
+        components::Texture LoadTexture::load(graphics::FontManager &fontManager) {
+            auto width = fontManager.getAtlas()->width;
+            auto height = fontManager.getAtlas()->height;
+
+            GLuint textureID = 0;
+            glGenTextures(1, &textureID);
+
+            fontManager.setAtlasID(textureID);
+
+            bind(textureID);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE,
+                         fontManager.getAtlas()->data);
+
+            unbind();
+
+            std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+
+            return components::Texture("", textureID, static_cast<GLsizei>(width), static_cast<GLsizei>(height), uv);
         }
     }
 }

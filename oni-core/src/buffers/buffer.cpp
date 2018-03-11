@@ -11,6 +11,7 @@ namespace oni {
 
             glGenBuffers(1, &m_BufferID);
             bind();
+            // Use the data for GL_STATIC_DRAW, otherwise pass nullptr for GL_DYNAMIC_DRAW.
             auto dataPtr = !data.empty() ? data.data() : nullptr;
             glBufferData(GL_ARRAY_BUFFER, dataSize, dataPtr, usage);
 

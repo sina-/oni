@@ -25,7 +25,7 @@ int main() {
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
     auto lightLayer = graphics::Layer::createTileLayer(10, "shaders/basic.vert", "shaders/spotlight.frag");
     auto carLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
-    auto textLayer = graphics::Layer::createTextTileLayer(100, "shaders/texture.vert", "shaders/texture.frag");
+    auto textLayer = graphics::Layer::createTextTileLayer(100, "shaders/text.vert", "shaders/text.frag");
 
     float yStep = 0.6f;
     float xStep = 0.4f;
@@ -95,10 +95,10 @@ int main() {
     auto light = world.createEntity(entities::Sprite, lightLayerID);
 
     auto lightPlacement = components::Placement();
-    lightPlacement.vertexA = math::vec3(1.0f, 1.0f, 0.0f);
-    lightPlacement.vertexB = math::vec3(1.0f, 8.0f, 0.0f);
-    lightPlacement.vertexC = math::vec3(15.0f, 8.0f, 0.0f);
-    lightPlacement.vertexD = math::vec3(15.0f, 1.0f, 0.0f);
+    lightPlacement.vertexA = math::vec3(0.0f, 0.0f, 0.0f);
+    lightPlacement.vertexB = math::vec3(0.0f, 9.0f, 0.0f);
+    lightPlacement.vertexC = math::vec3(16.0f, 9.0f, 0.0f);
+    lightPlacement.vertexD = math::vec3(16.0f, 0.0f, 0.0f);
 
     auto lightAppearance = components::Appearance();
     lightAppearance.color = math::vec4(0, 0.6f, 0.5f, 0.0f);
@@ -109,7 +109,7 @@ int main() {
     auto textLayerID = components::LayerID(textLayer->getLayerID());
     auto text = world.createEntity(entities::TextSprite, textLayerID);
 
-    auto textString = components::Text("HELLO", math::vec3(0.0f, 0.0f, 1.0f));
+    auto textString = components::Text("HELLO BASHTARDI MY OLD FRIEND", math::vec3(0.0f, 0.0f, 1.0f));
 
     world.setEntityText(text, textString);
 
@@ -152,10 +152,10 @@ int main() {
         movement.update(world, window);
         graphics::Light::update(*lightLayer, mouseX, mouseY, width, height);
 
-//        spriteLayer->renderTexturedSprites(world);
-//        carLayer->renderTexturedSprites(world);
-//        particleLayer->renderSprites(world);
-//        lightLayer->renderSprites(world);
+        spriteLayer->renderTexturedSprites(world);
+        carLayer->renderTexturedSprites(world);
+        particleLayer->renderSprites(world);
+        lightLayer->renderSprites(world);
         textLayer->renderText(world);
 
         window.update();

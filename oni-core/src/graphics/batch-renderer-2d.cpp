@@ -150,46 +150,52 @@ namespace oni {
 
             auto samplerID = getSamplerID(atlas->id);
 
+            auto advance = 0.0f;
+
+            float scaleX = 1600.0f / 64.0f;
+            float scaleY = 900.0f / 38.0f;
+
             for (auto character: text.text) {
                 ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
                 auto glyph = ftgl::texture_font_find_glyph(font, &character);
+//                auto glyph = texture_font_get_glyph(font, &character);
 
-                if (glyph) {
-                    auto x0 = 1.0f; //text.position.x + glyph->offset_x;
-                    auto y0 = 1.0f; //text.position.y + glyph->offset_y;
-                    auto x1 = 15.0f; //x0 + glyph->width;
-                    auto y1 = 8.0f; //y0 + glyph->height;
+                // Make sure the character is pre-loaded and valid.
+                ONI_DEBUG_ASSERT(glyph);
 
-                    auto u0 = 0.0f;//glyph->s0;
-                    auto v0 = 0.0f;//glyph->t0;
-                    auto u1 = 1.0f;//glyph->s1;
-                    auto v1 = 1.0f;//glyph->t1;
+                auto x0 = text.position.x + glyph->offset_x / scaleX + advance;
+                auto y0 = text.position.y + glyph->offset_y / scaleY;
+                auto x1 = x0 + glyph->width / scaleX;
+                auto y1 = y0 - glyph->height / scaleY;
 
-                    buffer->position = math::vec3(x0, y0, 1);
-                    buffer->uv = math::vec2(u0, v0);
-                    buffer->samplerID = samplerID;
-                    buffer++;
+                auto u0 = glyph->s0;
+                auto v0 = glyph->t0;
+                auto u1 = glyph->s1;
+                auto v1 = glyph->t1;
 
-                    buffer->position = math::vec3(x0, y1, 1);
-                    buffer->uv = math::vec2(u0, v1);
-                    buffer->samplerID = samplerID;
-                    buffer++;
+                buffer->position = math::vec3(x0, y0, 1);
+                buffer->uv = math::vec2(u0, v0);
+                buffer->samplerID = samplerID;
+                buffer++;
 
-                    buffer->position = math::vec3(x1, y1, 1);
-                    buffer->uv = math::vec2(u1, v1);
-                    buffer->samplerID = samplerID;
-                    buffer++;
+                buffer->position = math::vec3(x0, y1, 1);
+                buffer->uv = math::vec2(u0, v1);
+                buffer->samplerID = samplerID;
+                buffer++;
 
-                    buffer->position = math::vec3(x1, y0, 1);
-                    buffer->uv = math::vec2(u1, v0);
-                    buffer->samplerID = samplerID;
-                    buffer++;
+                buffer->position = math::vec3(x1, y1, 1);
+                buffer->uv = math::vec2(u1, v1);
+                buffer->samplerID = samplerID;
+                buffer++;
 
-                    m_IndexCount += 6;
-                } else {
-                    throw std::runtime_error("Invalid character");
-                }
+                buffer->position = math::vec3(x1, y0, 1);
+                buffer->uv = math::vec2(u1, v0);
+                buffer->samplerID = samplerID;
+                buffer++;
+
+                advance += glyph->advance_x / scaleX;
+                m_IndexCount += 6;
             }
 
             m_Buffer = static_cast<void *>(buffer);

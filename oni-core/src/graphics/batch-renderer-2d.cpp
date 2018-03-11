@@ -144,32 +144,28 @@ namespace oni {
 
         }
 
-        // TODO: submit needs not to know about fontmanager. Find the glyph and load the relevant data into
-        // Text component during init, and just read them during submit.
-        void BatchRenderer2D::submit(const components::Text &text, const graphics::FontManager &fontManager) {
+        void BatchRenderer2D::submit(const components::Text &text) {
             auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
 
-            auto samplerID = getSamplerID(fontManager.getTextureID());
+            auto samplerID = getSamplerID(text.textureID);
 
             auto advance = 0.0f;
 
             float scaleX = 1600.0f / 64.0f;
             float scaleY = 900.0f / 38.0f;
 
-            for (auto character: text.text) {
+            for(int i = 0; i < text.text.size(); i++){
                 ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
-                auto glyph = fontManager.findGlyph(character);
+                auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;
+                auto y0 = text.position.y + text.offsetY[i] / scaleY;
+                auto x1 = x0 + text.width[i] / scaleX;
+                auto y1 = y0 - text.height[i] / scaleY;
 
-                auto x0 = text.position.x + glyph->offset_x / scaleX + advance;
-                auto y0 = text.position.y + glyph->offset_y / scaleY;
-                auto x1 = x0 + glyph->width / scaleX;
-                auto y1 = y0 - glyph->height / scaleY;
-
-                auto u0 = glyph->s0;
-                auto v0 = glyph->t0;
-                auto u1 = glyph->s1;
-                auto v1 = glyph->t1;
+                auto u0 = text.uv[i].x;
+                auto v0 = text.uv[i].y;
+                auto u1 = text.uv[i].z;
+                auto v1 = text.uv[i].w;
 
                 buffer->position = math::vec3(x0, y0, 1);
                 buffer->uv = math::vec2(u0, v0);
@@ -191,7 +187,7 @@ namespace oni {
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                advance += glyph->advance_x / scaleX;
+                advance += text.advanceX[i] / scaleX;
                 m_IndexCount += 6;
             }
 

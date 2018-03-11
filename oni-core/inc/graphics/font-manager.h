@@ -4,6 +4,8 @@
 
 #include <ftgl/texture-atlas.h>
 #include <ftgl/freetype-gl.h>
+
+#include <components/visual.h>
 #include <utils/oni-assert.h>
 
 namespace oni {
@@ -21,15 +23,18 @@ namespace oni {
 
             ~FontManager();
 
-            const ftgl::texture_glyph_t *findGlyph(const char &character) const;
+            components::Text createTextFromString(const std::string &text, const math::vec3 &position);
 
             size_t getAtlasWidth() const;
 
             size_t getAtlasHeight() const;
 
-            unsigned char * getAtlasData() const;
+            unsigned char *getAtlasData() const;
 
             GLuint getTextureID() const;
+
+        private:
+            const ftgl::texture_glyph_t *findGlyph(const char &character) const;
         };
     }
 }

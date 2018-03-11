@@ -63,7 +63,7 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityText(entityIndex), *m_FontManager);
+                    m_Renderer2D->submit(world.getEntityText(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -158,20 +158,6 @@ namespace oni {
             shader->disable();
 
             return std::make_unique<Layer>(std::move(renderer), std::move(shader), projMatrix);
-        }
-
-        std::unique_ptr<Layer> Layer::createTextTileLayer(unsigned long maxSpriteCount,
-                                                          std::string &&vertexShader,
-                                                          std::string &&fragmentShader) {
-
-
-            auto layer = Layer::createTexturedTileLayer(maxSpriteCount, std::move(vertexShader),
-                                                        std::move(fragmentShader));
-            auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 20);
-
-            layer->setFontManager(std::move(fontManager));
-
-            return std::move(layer);
         }
     }
 }

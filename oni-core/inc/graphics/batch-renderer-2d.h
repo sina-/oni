@@ -57,7 +57,7 @@ namespace oni {
 
             void submit(const components::Placement &position, const components::Texture &texture) override;
 
-            void submit(const components::Text &text, const graphics::FontManager &fontManager) override;
+            void submit(const components::Text &text) override;
 
             void flush() override;
 

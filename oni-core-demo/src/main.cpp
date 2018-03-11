@@ -18,14 +18,17 @@ int main() {
     entities::World world;
     physics::Movement movement;
 
+
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     graphics::Window window("Oni Demo", width, height);
+
+    auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 20);
 
     auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000, "shaders/texture.vert", "shaders/texture.frag");
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
     auto lightLayer = graphics::Layer::createTileLayer(10, "shaders/basic.vert", "shaders/spotlight.frag");
     auto carLayer = graphics::Layer::createTexturedTileLayer(10, "shaders/texture.vert", "shaders/texture.frag");
-    auto textLayer = graphics::Layer::createTextTileLayer(100, "shaders/text.vert", "shaders/text.frag");
+    auto textLayer = graphics::Layer::createTexturedTileLayer(100, "shaders/text.vert", "shaders/text.frag");
 
     float yStep = 0.6f;
     float xStep = 0.4f;
@@ -109,7 +112,7 @@ int main() {
     auto textLayerID = components::LayerID(textLayer->getLayerID());
     auto text = world.createEntity(entities::TextSprite, textLayerID);
 
-    auto textString = components::Text("HELLO BASHTARDI MY OLD FRIEND", math::vec3(0.0f, 0.0f, 1.0f));
+    auto textString = fontManager->createTextFromString("HELLO BASHTARDI MY OLD FRIEND", math::vec3(0.0f, 0.0f, 1.0f));
 
     world.setEntityText(text, textString);
 

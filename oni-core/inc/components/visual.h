@@ -66,12 +66,21 @@ namespace oni {
         };
 
         struct Text {
-            std::string text;
+            // TODO: ordering?
+            GLuint textureID;
             math::vec3 position;
+            std::string text;
+            std::vector<size_t> width;
+            std::vector<size_t> height;
+            std::vector<int> offsetX;
+            std::vector<int> offsetY;
+            std::vector<float> advanceX;
+            std::vector<float> advanceY;
+            std::vector<math::vec4> uv;
 
-            Text() : text(std::string()), position(math::vec3()) {}
-
-            Text(std::string _text, const math::vec3 &_position) : text(std::move(_text)), position(_position) {}
+            Text() : text(std::string()), textureID(0), position(math::vec3()), uv(std::vector<math::vec4>()), width(0),
+                     height(0), advanceX(0), advanceY(0),
+                     offsetX(0), offsetY(0) {}
         };
 
     }

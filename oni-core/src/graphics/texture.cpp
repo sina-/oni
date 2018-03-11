@@ -32,6 +32,10 @@ namespace oni {
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
 
+            if(!textureID){
+                throw std::runtime_error("Could not generate texture.");
+            }
+
             bind(textureID);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -62,6 +66,10 @@ namespace oni {
 
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
+
+            if(!textureID){
+                throw std::runtime_error("Could not generate texture.");
+            }
 
             bind(textureID);
 

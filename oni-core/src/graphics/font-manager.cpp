@@ -46,10 +46,28 @@ namespace oni {
             return m_FTAtlas->height;
         }
 
-        unsigned char * FontManager::getAtlasData() const {
+        unsigned char *FontManager::getAtlasData() const {
             return m_FTAtlas->data;
         }
 
         GLuint FontManager::getTextureID() const { return m_FTAtlas->id; }
+
+        components::Text FontManager::createTextFromString(const std::string &text, const math::vec3 &position) {
+            auto textComponent = components::Text();
+            for (auto character: text) {
+                auto glyph = findGlyph(character);
+                textComponent.height.emplace_back(glyph->height);
+                textComponent.width.emplace_back(glyph->width);
+                textComponent.offsetX.emplace_back(glyph->offset_x);
+                textComponent.offsetY.emplace_back(glyph->offset_y);
+                textComponent.advanceX.emplace_back(glyph->advance_x);
+                textComponent.advanceY.emplace_back(glyph->advance_y);
+                textComponent.uv.emplace_back(glyph->s0, glyph->t0, glyph->s1, glyph->t1);
+            }
+            textComponent.textureID = m_FTAtlas->id;
+            textComponent.text = text;
+            textComponent.position = position;
+            return textComponent;
+        }
     }
 }

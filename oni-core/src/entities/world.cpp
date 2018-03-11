@@ -19,7 +19,7 @@ namespace oni {
             m_Velocities.emplace_back(math::vec3(), 0.0f);
             m_Textures.emplace_back("", 0, 0, 0, std::vector<math::vec2>());
             m_LayerIDs.emplace_back(0);
-            m_Texts.emplace_back(std::string(), math::vec3());
+            m_Texts.emplace_back(components::Text());
             return m_Entities.size() - 1;
         }
 

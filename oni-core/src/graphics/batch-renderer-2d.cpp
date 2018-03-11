@@ -144,11 +144,12 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::submit(const components::Text &text, const ftgl::texture_atlas_t *atlas,
-                                     ftgl::texture_font_t *font) {
+        // TODO: submit needs not to know about fontmanager. Find the glyph and load the relevant data into
+        // Text component during init, and just read them during submit.
+        void BatchRenderer2D::submit(const components::Text &text, const graphics::FontManager &fontManager) {
             auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
 
-            auto samplerID = getSamplerID(atlas->id);
+            auto samplerID = getSamplerID(fontManager.getTextureID());
 
             auto advance = 0.0f;
 
@@ -158,11 +159,7 @@ namespace oni {
             for (auto character: text.text) {
                 ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
-                auto glyph = ftgl::texture_font_find_glyph(font, &character);
-//                auto glyph = texture_font_get_glyph(font, &character);
-
-                // Make sure the character is pre-loaded and valid.
-                ONI_DEBUG_ASSERT(glyph);
+                auto glyph = fontManager.findGlyph(character);
 
                 auto x0 = text.position.x + glyph->offset_x / scaleX + advance;
                 auto y0 = text.position.y + glyph->offset_y / scaleY;

@@ -56,14 +56,12 @@ namespace oni {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        components::Texture LoadTexture::load(graphics::FontManager &fontManager) {
-            auto width = fontManager.getAtlas()->width;
-            auto height = fontManager.getAtlas()->height;
+        GLuint LoadTexture::load(const graphics::FontManager &fontManager) {
+            auto width = fontManager.getAtlasWidth();
+            auto height = fontManager.getAtlasHeight();
 
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
-
-            fontManager.setAtlasID(textureID);
 
             bind(textureID);
 
@@ -73,13 +71,11 @@ namespace oni {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE,
-                         fontManager.getAtlas()->data);
+                         fontManager.getAtlasData());
 
             unbind();
 
-            std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
-
-            return components::Texture("", textureID, static_cast<GLsizei>(width), static_cast<GLsizei>(height), uv);
+            return textureID;
         }
     }
 }

@@ -12,6 +12,7 @@
 #include <components/physical.h>
 #include <graphics/renderer-2d.h>
 #include <utils/oni-assert.h>
+#include <graphics/font-manager.h>
 
 namespace oni {
     namespace graphics {
@@ -56,7 +57,7 @@ namespace oni {
 
             void submit(const components::Placement &position, const components::Texture &texture) override;
 
-            void submit(const components::Text &text, const ftgl::texture_atlas_t *atlas, ftgl::texture_font_t *font) override;
+            void submit(const components::Text &text, const graphics::FontManager &fontManager) override;
 
             void flush() override;
 

@@ -16,7 +16,7 @@ namespace oni {
         public:
             static components::Texture load(const std::string &path);
 
-            static components::Texture load(graphics::FontManager &fontManager);
+            static GLuint load(const graphics::FontManager &fontManager);
 
             static void bind(GLuint textureID);
 

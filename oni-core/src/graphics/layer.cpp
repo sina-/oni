@@ -63,8 +63,7 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityText(entityIndex), m_FontManager->getAtlas(),
-                                         m_FontManager->getFont());
+                    m_Renderer2D->submit(world.getEntityText(entityIndex), *m_FontManager);
                 }
                 ++entityIndex;
             }
@@ -168,9 +167,7 @@ namespace oni {
 
             auto layer = Layer::createTexturedTileLayer(maxSpriteCount, std::move(vertexShader),
                                                         std::move(fragmentShader));
-            auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf");
-
-            graphics::LoadTexture::load(*fontManager);
+            auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 20);
 
             layer->setFontManager(std::move(fontManager));
 

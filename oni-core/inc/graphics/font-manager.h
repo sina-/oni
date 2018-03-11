@@ -4,6 +4,7 @@
 
 #include <ftgl/texture-atlas.h>
 #include <ftgl/freetype-gl.h>
+#include <utils/oni-assert.h>
 
 namespace oni {
     namespace graphics {
@@ -16,24 +17,19 @@ namespace oni {
             ftgl::texture_font_t *m_FTFont;
 
         public:
-            explicit FontManager(std::string font);
+            FontManager(std::string font, int size);
 
-            ~FontManager() {
-                ftgl::texture_atlas_delete(m_FTAtlas);
-                ftgl::texture_font_delete(m_FTFont);
-            }
+            ~FontManager();
 
-            ftgl::texture_atlas_t *getAtlas() {
-                return m_FTAtlas;
-            };
+            const ftgl::texture_glyph_t *findGlyph(const char &character) const;
 
-            ftgl::texture_font_t *getFont() const {
-                return m_FTFont;
-            };
+            size_t getAtlasWidth() const;
 
-            void setAtlasID(unsigned int id) {
-                m_FTAtlas->id = id;
-            }
+            size_t getAtlasHeight() const;
+
+            unsigned char * getAtlasData() const;
+
+            GLuint getTextureID() const;
         };
     }
 }

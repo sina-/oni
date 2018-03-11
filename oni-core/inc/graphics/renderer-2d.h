@@ -2,6 +2,7 @@
 
 #include <components/visual.h>
 #include <components/physical.h>
+#include <graphics/font-manager.h>
 
 namespace oni {
     namespace graphics {
@@ -45,7 +46,7 @@ namespace oni {
 
             virtual void submit(const components::Placement &position, const components::Texture &texture) = 0;
             virtual void
-            submit(const components::Text &text, const ftgl::texture_atlas_t *atlas, ftgl::texture_font_t *font) = 0;
+            submit(const components::Text &text, const graphics::FontManager &fontManager) = 0;
 
             /**
              * Draw the element(s).

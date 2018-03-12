@@ -69,7 +69,7 @@ namespace oni {
             // TODO: ordering?
             GLuint textureID;
             math::vec3 position;
-            std::string text;
+            std::string textContent;
             std::vector<size_t> width;
             std::vector<size_t> height;
             std::vector<int> offsetX;
@@ -78,9 +78,8 @@ namespace oni {
             std::vector<float> advanceY;
             std::vector<math::vec4> uv;
 
-            Text() : text(std::string()), textureID(0), position(math::vec3()), uv(std::vector<math::vec4>()), width(0),
-                     height(0), advanceX(0), advanceY(0),
-                     offsetX(0), offsetY(0) {}
+            Text() : textContent(std::string()), textureID(0), position(math::vec3()), uv(std::vector<math::vec4>()),
+                     width(0), height(0), advanceX(0), advanceY(0), offsetX(0), offsetY(0) {}
         };
 
     }

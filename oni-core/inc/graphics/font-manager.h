@@ -25,6 +25,8 @@ namespace oni {
 
             components::Text createTextFromString(const std::string &text, const math::vec3 &position);
 
+            void updateText(const std::string &textContent, components::Text &text);
+
             size_t getAtlasWidth() const;
 
             size_t getAtlasHeight() const;

@@ -151,10 +151,10 @@ namespace oni {
 
             auto advance = 0.0f;
 
-            float scaleX = 1600.0f / 64.0f;
-            float scaleY = 900.0f / 38.0f;
+            float scaleX = 1600.0f / 16.0f;
+            float scaleY = 900.0f / 9.0f;
 
-            for(int i = 0; i < text.text.size(); i++){
+            for(int i = 0; i < text.textContent.size(); i++){
                 ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
 
                 auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;

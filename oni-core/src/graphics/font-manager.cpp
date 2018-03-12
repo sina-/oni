@@ -65,9 +65,13 @@ namespace oni {
                 textComponent.uv.emplace_back(glyph->s0, glyph->t0, glyph->s1, glyph->t1);
             }
             textComponent.textureID = m_FTAtlas->id;
-            textComponent.text = text;
+            textComponent.textContent = text;
             textComponent.position = position;
             return textComponent;
+        }
+
+        void FontManager::updateText(const std::string &textContent, components::Text &text) {
+            text = createTextFromString(textContent, text.position);
         }
     }
 }

@@ -21,7 +21,7 @@ int main() {
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     graphics::Window window("Oni Demo", width, height);
 
-    auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 20);
+    auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 25);
 
     auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000, "shaders/texture.vert", "shaders/texture.frag");
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
@@ -109,16 +109,20 @@ int main() {
     world.setEntityAppearance(light, lightAppearance);
 
     auto textLayerID = components::LayerID(textLayer->getLayerID());
-    auto text = world.createEntity(entities::TextSprite, textLayerID);
+    auto textEntity = world.createEntity(entities::TextSprite, textLayerID);
+    auto fpsEntity = world.createEntity(entities::TextSprite, textLayerID);
 
     auto textString = fontManager->createTextFromString("HELLO BASHTARDI MY OLD FRIEND", math::vec3(0.0f, 0.0f, 1.0f));
+    auto fpsText = fontManager->createTextFromString("0", math::vec3(0.0f, 8.8f, 1.0f));
 
-    world.setEntityText(text, textString);
+    world.setEntityText(textEntity, textString);
+    world.setEntityText(fpsEntity, fpsText);
 
     float frameTime = 0.0f;
 
     float totalFPS = 0.0f;
     int secondsPassed = 0;
+    std::chrono::duration<float> diff;
 
     while (!window.closed()) {
         auto start = std::chrono::steady_clock::now();
@@ -162,14 +166,15 @@ int main() {
 
         window.update();
 
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<float> diff = end - start;
+        diff = std::chrono::steady_clock::now() - start;
         frameTime += diff.count();
-        if (frameTime > 1.0f) {
+        if (frameTime > 0.5f) {
             auto fps = 1.0f / diff.count();
             totalFPS += fps;
             secondsPassed++;
+            fontManager->updateText(std::to_string(int(fps)), fpsText);
             printl(fps);
+            world.setEntityText(fpsEntity, fpsText);
             frameTime = 0;
         }
 

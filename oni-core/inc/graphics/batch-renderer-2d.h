@@ -3,6 +3,7 @@
 #include <map>
 #include <stack>
 
+// TODO: Don't include shit, forward declare them in the headers and include in CPP.
 #include <ftgl/freetype-gl.h>
 #include <ftgl/texture-atlas.h>
 

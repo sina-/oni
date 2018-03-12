@@ -18,7 +18,6 @@ int main() {
     entities::World world;
     physics::Movement movement;
 
-
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
     graphics::Window window("Oni Demo", width, height);
 

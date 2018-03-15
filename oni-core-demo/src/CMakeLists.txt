@@ -13,6 +13,9 @@ target_link_libraries(oni-core-demo
         freetype-gl
         # NOTE: FreeType must be linked after freetype-gl because fucking G++
         ${FREETYPE_LIBRARY}
+        gorilla
+        ${OPENAL_LIBRARY}
+        ${CMAKE_THREAD_LIBS_INIT}
         oni-core-buffers
         oni-core-entities
         oni-core-graphics

@@ -27,6 +27,8 @@ int main() {
 
     auto audioManager = std::make_unique<audio::AudioManager>();
     auto soundID = audioManager->loadSound("resources/audio/test.wav");
+    audioManager->setLoop(soundID, true);
+    audioManager->setVolume(soundID, 2.0f);
     audioManager->playSound(soundID);
 
     auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000, "shaders/texture.vert", "shaders/texture.frag");

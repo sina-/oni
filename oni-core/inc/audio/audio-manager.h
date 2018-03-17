@@ -27,6 +27,16 @@ namespace oni {
              */
             void playSound(long soundID);
 
+            void pauseSound(long soundID);
+
+            void stopSound(long soundID);
+
+            void setLoop(long soundID, bool loop);
+
+            void setVolume(long soundID, float volume);
+
+            float getVolume(long soundID);
+
         private:
             SoLoud::Soloud m_SoloudManager;
             std::vector<SoLoud::Wav> m_AudioSources;

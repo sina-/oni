@@ -34,9 +34,31 @@ namespace oni {
             if (m_SoloudManager.getPause(m_Handles[soundID])) {
                 m_SoloudManager.setPause(m_Handles[soundID], false);
             } else {
+                // NOTE: if play is called on paused source, none of the attribute settings will work.
                 m_SoloudManager.play(m_AudioSources[soundID]);
             }
         }
+
+        void AudioManager::pauseSound(long soundID) {
+            m_SoloudManager.setPause(m_Handles[soundID], true);
+        }
+
+        void AudioManager::setLoop(long soundID, bool loop) {
+            m_SoloudManager.setLooping(m_Handles[soundID], loop);
+        }
+
+        void AudioManager::stopSound(long soundID) {
+            m_SoloudManager.stop(m_Handles[soundID]);
+        }
+
+        void AudioManager::setVolume(long soundID, float volume) {
+            m_SoloudManager.setVolume(m_Handles[soundID], volume);
+        }
+
+        float AudioManager::getVolume(long soundID) {
+            m_SoloudManager.getVolume(m_Handles[soundID]);
+        }
+
 
     }
 }

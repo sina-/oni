@@ -12,8 +12,8 @@ target_link_libraries(oni-core-demo
         freetype-gl
         # NOTE: FreeType must be linked after freetype-gl because fucking G++
         ${FREETYPE_LIBRARY}
-        gorilla
-        ${OPENAL_LIBRARY}
+        # NOTE: Required by soloud, otherwise linker will complain with
+        # /lib/x86_64-linux-gnu/libpthread.so.0: error adding symbols: DSO missing from command line
         ${CMAKE_THREAD_LIBS_INIT}
         SDL2
         soloud

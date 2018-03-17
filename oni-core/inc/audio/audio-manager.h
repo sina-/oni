@@ -15,8 +15,16 @@ namespace oni {
 
             ~AudioManager() = default;
 
+            /**
+             * @param name Path to the audio
+             * @return unique ID
+             */
             long loadSound(const std::string &name);
 
+            /**
+             * Unpause or play
+             * @param soundID value returned by AudioManager::loadSound()
+             */
             void playSound(long soundID);
 
         private:

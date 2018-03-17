@@ -1,12 +1,14 @@
 #include <iostream>
 #include <chrono>
 
+#include <audio/audio-manager.h>
 #include <graphics/batch-renderer-2d.h>
 #include <graphics/window.h>
 #include <graphics/texture.h>
 #include <graphics/layer.h>
 #include <graphics/light.h>
 #include <physics/movement.h>
+
 
 int main() {
     using namespace oni;
@@ -22,6 +24,10 @@ int main() {
     graphics::Window window("Oni Demo", width, height);
 
     auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 25);
+
+    auto audioManager = std::make_unique<audio::AudioManager>();
+    auto soundID = audioManager->loadSound("resources/audio/test.wav");
+    audioManager->playSound(soundID);
 
     auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000, "shaders/texture.vert", "shaders/texture.frag");
     auto particleLayer = graphics::Layer::createTileLayer(10000, "shaders/basic.vert", "shaders/basic.frag");
@@ -112,10 +118,10 @@ int main() {
     auto textEntity = world.createEntity(entities::TextSprite, textLayerID);
     auto fpsEntity = world.createEntity(entities::TextSprite, textLayerID);
 
-    auto textString = fontManager->createTextFromString("HELLO BASHTARDI MY OLD FRIEND", math::vec3(0.0f, 0.0f, 1.0f));
+    auto captionText = fontManager->createTextFromString("HELLO BASHTARDI MY OLD FRIEND", math::vec3(0.0f, 0.0f, 1.0f));
     auto fpsText = fontManager->createTextFromString("0", math::vec3(0.0f, 8.8f, 1.0f));
 
-    world.setEntityText(textEntity, textString);
+    world.setEntityText(textEntity, captionText);
     world.setEntityText(fpsEntity, fpsText);
 
     float frameTime = 0.0f;

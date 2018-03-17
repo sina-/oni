@@ -1,5 +1,4 @@
 include_directories(${oni_SOURCE_DIR}/oni-core/inc)
-link_directories(${oni_SOURCE_DIR}/oni-core/src)
 
 add_executable(oni-core-demo main.cpp)
 target_link_libraries(oni-core-demo
@@ -16,6 +15,9 @@ target_link_libraries(oni-core-demo
         gorilla
         ${OPENAL_LIBRARY}
         ${CMAKE_THREAD_LIBS_INIT}
+        SDL2
+        soloud
+        oni-core-audio
         oni-core-buffers
         oni-core-entities
         oni-core-graphics

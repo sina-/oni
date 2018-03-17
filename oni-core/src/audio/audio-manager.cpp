@@ -2,59 +2,42 @@
 
 #include <algorithm>
 
-#include <utils/oni-assert.h>
-#include <thread>
-
 namespace oni {
     namespace audio {
 
         AudioManager::AudioManager() {
-            gc_initialize(nullptr);
-            m_GAManager = gau_manager_create();
-            m_GAMixer = gau_manager_mixer(m_GAManager);
-
-            soundID = 0;
+            using namespace SoLoud;
+            m_SoloudManager = std::make_unique<SoLoud::Soloud>();
+            m_SoloudManager->init(Soloud::FLAGS::CLIP_ROUNDOFF, Soloud::BACKENDS::SDL2, Soloud::AUTO, Soloud::AUTO);
         }
 
-        AudioManager::~AudioManager() {
-            for (auto sound: m_GASound) {
-                ga_sound_release(sound);
+        long AudioManager::loadSound(const std::string &name) {
+            // Avoid double loading
+            auto it = std::find(m_AudioNames.begin(), m_AudioNames.end(), name);
+
+            if (it == m_AudioNames.end()) {
+                m_AudioNames.emplace_back(name);
+                m_AudioSources.emplace_back(std::make_unique<SoLoud::Wav>());
+                m_AudioSources.back()->load(name.c_str());
+
+                // Get a handle to a paused audio. Use the handle to play the audio.
+                auto handle = m_SoloudManager->play(*m_AudioSources.back(), 1, 0, true);
+                m_Handles.push_back(handle);
+
+                return m_Handles.size() - 1;
+            } else {
+                return it - m_AudioNames.begin();
             }
 
-            gau_manager_destroy(m_GAManager);
-            gc_shutdown();
         }
 
-        unsigned int AudioManager::loadSound(const std::string &name) {
-            // Avoid double loading of sounds
-            ONI_DEBUG_ASSERT(std::find(m_LoadedSounds.begin(), m_LoadedSounds.end(), name) == m_LoadedSounds.end());
-
-            unsigned int newSoundID = soundID;
-            m_GASound.emplace_back(gau_load_sound_file(name.c_str(), "wav"));
-            m_FinishedPlaying.emplace_back(0);
-            m_GAHandle.emplace_back(
-                    gau_create_handle_sound(m_GAMixer, m_GASound.back(), &playFinished, &m_FinishedPlaying.back(),
-                                            nullptr));
-
-            m_LoadedSounds.emplace_back(name);
-            soundID++;
-
-            return newSoundID;
+        void AudioManager::playSound(long soundID) {
+            if (m_SoloudManager->getPause(m_Handles[soundID])) {
+                m_SoloudManager->setPause(m_Handles[soundID], false);
+            } else {
+                m_SoloudManager->play(*m_AudioSources[soundID]);
+            }
         }
 
-        void AudioManager::playSound(unsigned int soundID) {
-            new std::thread([this, soundID]() {
-                ga_handle_play(m_GAHandle[soundID]);
-                while (!m_FinishedPlaying[soundID]) {
-                    gau_manager_update(m_GAManager);
-                    //gc_thread_sleep(1);
-                }
-            });
-        }
-
-        void AudioManager::playFinished(ga_Handle *in_handle, void *in_context) {
-            auto finished = (char *) (in_context);
-            *finished = 1;
-        }
     }
 }

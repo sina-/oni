@@ -86,5 +86,13 @@ find_package(X11 REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+# Required by soloud
+# sudo apt install libsdl2-dev
+find_package(SDL2 REQUIRED)
+
+# For some reason including directories inside the socloud CMake doesnt work
+include_directories(${LIB_DEP}/soloud/include)
+subdirs(lib/soloud)
+
 # Project files
 subdirs(oni-core oni-core-demo)

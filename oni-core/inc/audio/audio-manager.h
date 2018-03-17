@@ -3,8 +3,9 @@
 #include <string>
 #include <vector>
 
-#include <gorilla/ga.h>
-#include <gorilla/gau.h>
+#include <soloud.h>
+#include <soloud_wav.h>
+#include <memory>
 
 namespace oni {
     namespace audio {
@@ -12,26 +13,18 @@ namespace oni {
         public:
             AudioManager();
 
-            ~AudioManager();
+            ~AudioManager() = default;
 
-            unsigned int loadSound(const std::string &name);
+            long loadSound(const std::string &name);
 
-            void playSound(unsigned int soundID);
-
-        private:
-            gau_Manager *m_GAManager;
-            ga_Mixer *m_GAMixer;
-
-            std::vector<ga_Sound *> m_GASound;
-            std::vector<ga_Handle *> m_GAHandle;
-            std::vector<char> m_FinishedPlaying;
-
-            // Next available handle ID. It can be used to index into m_GAHandle.
-            unsigned int soundID;
-            std::vector<std::string> m_LoadedSounds;
+            void playSound(long soundID);
 
         private:
-            static void playFinished(ga_Handle * in_handle, void* in_context);
+            std::unique_ptr<SoLoud::Soloud> m_SoloudManager;
+            std::vector<std::unique_ptr<SoLoud::Wav>> m_AudioSources;
+            std::vector<std::string> m_AudioNames;
+            std::vector<SoLoud::handle> m_Handles;
+
         };
     }
 }

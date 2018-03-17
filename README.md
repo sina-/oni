@@ -12,6 +12,7 @@ sudo apt install libgl1-mesa-dev     \
                  libglfw3-dev        \
                  libglew-dev         \
                  libopenal-dev       \
+                 libsdl2-dev         \
                  libfreeimage3       \
                  libfreeimage-dev    \
                  libfreetype6        \

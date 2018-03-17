@@ -1,6 +1,7 @@
 #include <audio/audio-manager.h>
 
 #include <algorithm>
+#include <utils/oni-assert.h>
 
 namespace oni {
     namespace audio {
@@ -18,7 +19,8 @@ namespace oni {
             if (it == m_AudioNames.end()) {
                 m_AudioNames.emplace_back(name);
                 m_AudioSources.emplace_back(SoLoud::Wav());
-                m_AudioSources.back().load(name.c_str());
+                auto result = m_AudioSources.back().load(name.c_str());
+                ONI_DEBUG_ASSERT(result == SoLoud::SOLOUD_ERRORS::SO_NO_ERROR);
 
                 // Get a handle to a paused audio. Use the handle to play the audio.
                 auto handle = m_SoloudManager.play(m_AudioSources.back(), 1, 0, true);

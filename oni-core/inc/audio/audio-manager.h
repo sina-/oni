@@ -28,8 +28,8 @@ namespace oni {
             void playSound(long soundID);
 
         private:
-            std::unique_ptr<SoLoud::Soloud> m_SoloudManager;
-            std::vector<std::unique_ptr<SoLoud::Wav>> m_AudioSources;
+            SoLoud::Soloud m_SoloudManager;
+            std::vector<SoLoud::Wav> m_AudioSources;
             std::vector<std::string> m_AudioNames;
             std::vector<SoLoud::handle> m_Handles;
 

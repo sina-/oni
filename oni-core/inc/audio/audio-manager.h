@@ -42,7 +42,6 @@ namespace oni {
             std::vector<SoLoud::Wav> m_AudioSources;
             std::vector<std::string> m_AudioNames;
             std::vector<SoLoud::handle> m_Handles;
-
         };
     }
 }

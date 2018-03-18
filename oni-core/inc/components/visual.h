@@ -77,9 +77,12 @@ namespace oni {
             std::vector<float> advanceX;
             std::vector<float> advanceY;
             std::vector<math::vec4> uv;
+            float xScaling;
+            float yScaling;
 
             Text() : textContent(std::string()), textureID(0), position(math::vec3()), uv(std::vector<math::vec4>()),
-                     width(0), height(0), advanceX(0), advanceY(0), offsetX(0), offsetY(0) {}
+                     width(0), height(0), advanceX(0), advanceY(0), offsetX(0), offsetY(0), xScaling(1.0f),
+                     yScaling(1.0f) {}
         };
 
     }

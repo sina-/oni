@@ -3,10 +3,12 @@
 namespace oni {
 	namespace graphics {
 
-		Window::Window(const char * title, int width, int height)
+		Window::Window(const char *title, int width, int height, int widthRange, int heightRange)
 		{
 			m_Title = title;
 			m_Width = width;
+			m_WidthRange = widthRange;
+			m_HeightRange = heightRange;
 			m_Height = height;
 			m_KeyPressed = GLFW_KEY_UNKNOWN;
 			m_MouseButton = GLFW_KEY_UNKNOWN;

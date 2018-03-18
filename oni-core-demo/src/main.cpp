@@ -21,14 +21,18 @@ int main() {
     physics::Movement movement;
 
     // NOTE: any call to GLEW functions will fail with Segfault if GLEW is uninitialized (initialization happens in Window).
-    graphics::Window window("Oni Demo", width, height);
+    graphics::Window window("Oni Demo", width, height, 16, 9);
 
-    auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 25);
+    float xScaling = width / window.getWidthRange();
+    float yScaling = height / window.getHeightRange();
+
+    auto fontManager = std::make_unique<graphics::FontManager>("resources/fonts/FreeMonoBold.ttf", 25,
+                                                               xScaling, yScaling);
 
     auto audioManager = std::make_unique<audio::AudioManager>();
-    auto soundID = audioManager->loadSound("resources/audio/test.wav");
+    auto soundID = audioManager->loadSound("resources/audio/beat.wav");
     audioManager->setLoop(soundID, true);
-    audioManager->setVolume(soundID, 2.0f);
+    audioManager->setVolume(soundID, 0.2f);
     audioManager->playSound(soundID);
 
     auto spriteLayer = graphics::Layer::createTexturedTileLayer(500000, "shaders/texture.vert", "shaders/texture.frag");
@@ -41,10 +45,10 @@ int main() {
     float xStep = 0.4f;
 
     float xStart = 0.5f;
-    float xEnd = 15.5f;
+    float xEnd = window.getWidthRange() - 0.5f;
 
     float yStart = 0.5f;
-    float yEnd = 8.5f;
+    float yEnd = window.getHeightRange() - 0.5f;
 
     auto batchSize = static_cast<unsigned long>(((yEnd - yStart + 1) / yStep) * ((xEnd - xStart + 1) / xStep));
     world.reserveEntity(batchSize);

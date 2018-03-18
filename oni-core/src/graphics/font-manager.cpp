@@ -5,7 +5,7 @@
 namespace oni {
     namespace graphics {
 
-        FontManager::FontManager(std::string font, int size)
+        FontManager::FontManager(std::string font, int size, float xScaling, float yScaling)
 //                m_FTAtlas(, ftgl::texture_atlas_delete),
 //                m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/Vera.ttf"),
 //                         ftgl::texture_font_delete) {
@@ -13,6 +13,9 @@ namespace oni {
 
             m_FTAtlas = ftgl::texture_atlas_new(512, 512, 1);
             m_FTFont = ftgl::texture_font_new_from_file(m_FTAtlas, size, font.c_str());
+
+            m_XScaling = xScaling;
+            m_YScaling = yScaling;
 
             std::string cache = " !\"#$%&'()*+,-./0123456789:;<=>?@"
                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -63,6 +66,8 @@ namespace oni {
                 textComponent.advanceX.emplace_back(glyph->advance_x);
                 textComponent.advanceY.emplace_back(glyph->advance_y);
                 textComponent.uv.emplace_back(glyph->s0, glyph->t0, glyph->s1, glyph->t1);
+                textComponent.xScaling = m_XScaling;
+                textComponent.yScaling = m_YScaling;
             }
             textComponent.textureID = m_FTAtlas->id;
             textComponent.textContent = text;

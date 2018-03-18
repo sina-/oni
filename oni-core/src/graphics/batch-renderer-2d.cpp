@@ -151,8 +151,8 @@ namespace oni {
 
             auto advance = 0.0f;
 
-            float scaleX = 1600.0f / 16.0f;
-            float scaleY = 900.0f / 9.0f;
+            float scaleX = text.xScaling;
+            float scaleY = text.yScaling;
 
             for(int i = 0; i < text.textContent.size(); i++){
                 ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);

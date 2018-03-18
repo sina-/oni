@@ -27,20 +27,10 @@ namespace oni {
             }
         };
 
-        // TODO: Does this have to be a struct? I think it can be just saved as GLuint with two copies, one
-        // in the world and another in the layer.
-        struct LayerID {
-            /** Determines the Layer. And that effectively clusters entities based on
-             * Layer and helps renderer to only switch state per cluster of entities.
-             */
-            GLuint layerID;
-
-            LayerID() : layerID(0) {}
-
-            explicit LayerID(GLuint _id) : layerID(_id) {}
-
-            LayerID(const LayerID &) = default;
-        };
+        /** Determines the Layer. And that effectively clusters entities based on
+         * layer and helps renderer to only switch state per cluster of entities.
+         */
+        typedef GLuint LayerID;
 
         struct Texture {
             // TODO: This might need re ordering for better caching.

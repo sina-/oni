@@ -20,7 +20,7 @@ namespace oni {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
+                if ((world.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::Sprite) == entities::Sprite)) {
 
                     mRenderer2D->submit(world.getEntityPlacement(entityIndex),
@@ -40,7 +40,7 @@ namespace oni {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
+                if ((world.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
                     mRenderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityTexture(entityIndex));
@@ -60,7 +60,7 @@ namespace oni {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
+                if ((world.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
                     mRenderer2D->submit(world.getEntityText(entityIndex));

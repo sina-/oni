@@ -71,20 +71,20 @@ namespace oni {
             const components::Text &getEntityText(unsigned long entity) const;
 
         private:
-            std::stack<unsigned long> m_FreeEntitySlots;
+            std::stack<unsigned long> mFreeEntitySlots;
             /**
              * For each entity, define a bitset showing
              * which components are enabled. For example, a simple static
              * game object could be defined by (Components:Vertex | Components:Appearance).
              */
-            components::EntityMask m_Entities;
+            components::EntityMask mEntities;
 
-            std::vector<components::Placement> m_Placements;
-            std::vector<components::Appearance> m_Appearances;
-            std::vector<components::Velocity> m_Velocities;
-            std::vector<components::Texture> m_Textures;
-            std::vector<components::LayerID> m_LayerIDs;
-            std::vector<components::Text> m_Texts;
+            std::vector<components::Placement> mPlacements;
+            std::vector<components::Appearance> mAppearances;
+            std::vector<components::Velocity> mVelocities;
+            std::vector<components::Texture> mTextures;
+            std::vector<components::LayerID> mLayerIDs;
+            std::vector<components::Text> mTexts;
 
         };
     }

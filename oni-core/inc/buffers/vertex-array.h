@@ -10,21 +10,21 @@ namespace oni {
     namespace buffers {
 
         class VertexArray {
-            GLuint m_ArrayID;
-            std::unique_ptr<const Buffer> m_VertexBuffers;
+            GLuint mArrayID;
+            std::unique_ptr<const Buffer> mVertexBuffers;
 
         public:
             explicit VertexArray(std::unique_ptr<const Buffer> vertexBuffer);
 
-            ~VertexArray() { glDeleteVertexArrays(1, &m_ArrayID); };
+            ~VertexArray() { glDeleteVertexArrays(1, &mArrayID); };
 
-            void bindVAO() const { glBindVertexArray(m_ArrayID); }
+            void bindVAO() const { glBindVertexArray(mArrayID); }
 
             void unbindVAO() const { glBindVertexArray(0); }
 
-            void bindVBO() const { m_VertexBuffers->bind(); }
+            void bindVBO() const { mVertexBuffers->bind(); }
 
-            void unbindVBO() const { m_VertexBuffers->unbind(); }
+            void unbindVBO() const { mVertexBuffers->unbind(); }
 
         };
 

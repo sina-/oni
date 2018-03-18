@@ -5,7 +5,7 @@
 namespace oni {
     namespace graphics {
         Shader::Shader(std::string &&vertPath, std::string &&fragPath) :
-                m_VertPath(std::move(vertPath)), m_FragPath(std::move(fragPath)) {
+                mVertPath(std::move(vertPath)), mFragPath(std::move(fragPath)) {
 
             glEnable(GL_DEBUG_OUTPUT);
             glDebugMessageCallback((GLDEBUGPROC) &messageCallback, nullptr);
@@ -14,8 +14,8 @@ namespace oni {
             GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
             GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-            auto vertSource = read_file(m_VertPath);
-            auto fragSource = read_file(m_FragPath);
+            auto vertSource = read_file(mVertPath);
+            auto fragSource = read_file(mFragPath);
 
             auto vertSourceChar = vertSource.c_str();
             auto fragSourceChar = fragSource.c_str();
@@ -52,7 +52,7 @@ namespace oni {
             glDeleteShader(vertex);
             glDeleteShader(fragment);
 
-            m_Program = program;
+            mProgram = program;
 
             // Test if the shader can be linked.
             enable();
@@ -62,7 +62,7 @@ namespace oni {
 
         GLint Shader::getUniformLocation(const GLchar *name) {
             // TODO: Slow operation, need caching
-            auto location = glGetUniformLocation(m_Program, name);
+            auto location = glGetUniformLocation(mProgram, name);
             if (location == -1) {
                 throw std::runtime_error("Invalid uniform name.");
             }

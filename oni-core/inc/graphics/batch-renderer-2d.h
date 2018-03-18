@@ -21,36 +21,36 @@ namespace oni {
 
         class BatchRenderer2D : public Renderer2D {
 
-            unsigned long m_MaxSpriteCount;
-            unsigned long m_MaxIndicesCount;
+            unsigned long mMaxSpriteCount;
+            unsigned long mMaxIndicesCount;
 
-            unsigned long m_MaxBufferSize;
-            GLsizei m_MaxVertexSize;
-            GLsizei m_MaxSpriteSize;
+            unsigned long mMaxBufferSize;
+            GLsizei mMaxVertexSize;
+            GLsizei mMaxSpriteSize;
 
-            std::unique_ptr<IndexBuffer> m_IBO;
+            std::unique_ptr<IndexBuffer> mIBO;
 
             // Actual number of indices used.
-            GLsizei m_IndexCount;
+            GLsizei mIndexCount;
 
-            GLuint m_VDO;
-            std::unique_ptr<VertexArray> m_VAO;
+            GLuint mVDO;
+            std::unique_ptr<VertexArray> mVAO;
 
             // The buffer that will hold components::Vertex data, or its variants, in the batch.
-            void *m_Buffer;
+            void *mBuffer;
 
             // A mapping from texture id to 2D sampler that will draw it.
-            std::map<GLuint, GLint> m_TextureToSampler;
-            std::vector<GLint> m_Samplers;
+            std::map<GLuint, GLint> mTextureToSampler;
+            std::vector<GLint> mSamplers;
 
-            const unsigned long m_MaxNumTextureSamplers;
+            const unsigned long mMaxNumTextureSamplers;
 
         public:
             BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
                             GLsizei maxVertexSize,
                             components::BufferStructures bufferStructures);
 
-            ~BatchRenderer2D() { glDeleteBuffers(1, &m_VDO); };
+            ~BatchRenderer2D() { glDeleteBuffers(1, &mVDO); };
 
             void begin() override;
 
@@ -69,7 +69,7 @@ namespace oni {
 
             // TODO: checkout texture arrays.
             /**
-             * There are 0, 1, ..., m_MaxNumTextureSamplers texture samplers are available.
+             * There are 0, 1, ..., mMaxNumTextureSamplers texture samplers are available.
              * Each texture is assigned one and the id to the sampler is saved as part of vertex data
              * in the vertex buffer. During rendering in the shader the proper sampler is selected based
              * on the sampler id in the buffer.

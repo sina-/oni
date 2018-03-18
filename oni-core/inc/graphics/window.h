@@ -22,13 +22,13 @@ namespace oni {
          *  by registering a call-back that is called on such events.
          */
         class Window {
-            const char *m_Title;
-            int m_Width, m_Height;
-            int m_WidthRange, m_HeightRange;
-            GLFWwindow *m_Window;
-            int m_KeyPressed;
-            int m_MouseButton;
-            double m_CursorX, m_CursorY;
+            const char *mTitle;
+            int mWidth, mHeight;
+            int mWidthRange, mHeightRange;
+            GLFWwindow *mWindow;
+            int mKeyPressed;
+            int mMouseButton;
+            double mCursorX, mCursorY;
 
         public:
             Window(const char *name, int width, int height, int widthRange, int heightRange);
@@ -41,37 +41,37 @@ namespace oni {
 
             void clear() const;
 
-            void setWidth(int width) { m_Width = width; }
+            void setWidth(int width) { mWidth = width; }
 
-            const int &getWidth() const { return m_Width; }
+            const int &getWidth() const { return mWidth; }
 
-            void setHeight(int height) { m_Height = height; }
+            void setHeight(int height) { mHeight = height; }
 
-            const int &getHeight() const { return m_Height; }
+            const int &getHeight() const { return mHeight; }
 
-            void setWidthRange(int widthRange) { m_WidthRange = widthRange; }
+            void setWidthRange(int widthRange) { mWidthRange = widthRange; }
 
-            int getWidthRange() { return m_WidthRange; }
+            int getWidthRange() { return mWidthRange; }
 
-            void setHeightRange(int heightRange) { m_HeightRange = heightRange; }
+            void setHeightRange(int heightRange) { mHeightRange = heightRange; }
 
-            int getHeightRange() { return m_HeightRange; }
+            int getHeightRange() { return mHeightRange; }
 
-            void setKeyPressed(int key) { m_KeyPressed = key; }
+            void setKeyPressed(int key) { mKeyPressed = key; }
 
-            const int &getKeyPressed() const { return m_KeyPressed; }
+            const int &getKeyPressed() const { return mKeyPressed; }
 
-            void setMouseButton(int button) { m_MouseButton = button; }
+            void setMouseButton(int button) { mMouseButton = button; }
 
-            const int &getMouseButton() const { return m_MouseButton; }
+            const int &getMouseButton() const { return mMouseButton; }
 
-            void setCursorX(double x) { m_CursorX = x; }
+            void setCursorX(double x) { mCursorX = x; }
 
-            const double &getCursorX() const { return m_CursorX; }
+            const double &getCursorX() const { return mCursorX; }
 
-            void setCursorY(double y) { m_CursorY = y; }
+            void setCursorY(double y) { mCursorY = y; }
 
-            const double &getCursorY() const { return m_CursorY; }
+            const double &getCursorY() const { return mCursorY; }
 
             static Window *getThisFromGLFWWindow(GLFWwindow *window) {
                 return reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));

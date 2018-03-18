@@ -5,11 +5,11 @@ namespace oni {
     namespace graphics {
 
         Layer::Layer(std::unique_ptr<BatchRenderer2D> renderer, std::unique_ptr<Shader> shader,
-                     const math::mat4 &projMatrix) : m_Renderer2D(std::move(renderer)), m_Shader(std::move(shader)),
-                                                     m_ProjectionMatrix(projMatrix) {
-            m_Shader->enable();
-            m_Shader->setUniformMat4("pr_matrix", m_ProjectionMatrix);
-            m_Shader->disable();
+                     const math::mat4 &projMatrix) : mRenderer2D(std::move(renderer)), mShader(std::move(shader)),
+                                                     mProjectionMatrix(projMatrix) {
+            mShader->enable();
+            mShader->setUniformMat4("pr_matrix", mProjectionMatrix);
+            mShader->disable();
         }
 
         void Layer::renderSprites(const entities::World &world) {
@@ -23,7 +23,7 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::Sprite) == entities::Sprite)) {
 
-                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex),
+                    mRenderer2D->submit(world.getEntityPlacement(entityIndex),
                                          world.getEntityAppearance(entityIndex));
                 }
                 ++entityIndex;
@@ -43,7 +43,7 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityTexture(entityIndex));
+                    mRenderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityTexture(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -63,7 +63,7 @@ namespace oni {
                 if ((world.getEntityLayerID(entityIndex).layerID == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
-                    m_Renderer2D->submit(world.getEntityText(entityIndex));
+                    mRenderer2D->submit(world.getEntityText(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -71,14 +71,14 @@ namespace oni {
         }
 
         void Layer::begin() const {
-            m_Shader->enable();
-            m_Renderer2D->begin();
+            mShader->enable();
+            mRenderer2D->begin();
         }
 
         void Layer::end() const {
-            m_Renderer2D->end();
-            m_Renderer2D->flush();
-            m_Shader->disable();
+            mRenderer2D->end();
+            mRenderer2D->flush();
+            mShader->disable();
         }
 
         std::unique_ptr<Layer> Layer::createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
@@ -107,7 +107,7 @@ namespace oni {
             bufferStructures.push_back(std::move(color));
 
             auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount,
-                                                              m_MaxNumTextureSamplers,
+                                                              mMaxNumTextureSamplers,
                                                               sizeof(components::ColoredVertex),
                                                               std::move(bufferStructures));
             auto projMatrix = math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
@@ -147,7 +147,7 @@ namespace oni {
             bufferStructures.push_back(std::move(uv));
 
             auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount,
-                                                              m_MaxNumTextureSamplers,
+                                                              mMaxNumTextureSamplers,
                                                               sizeof(components::TexturedVertex),
                                                               std::move(bufferStructures));
 

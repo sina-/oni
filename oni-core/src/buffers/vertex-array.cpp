@@ -3,20 +3,20 @@
 namespace oni {
     namespace buffers {
         VertexArray::VertexArray(std::unique_ptr<const Buffer> vertexBuffer) {
-            glGenVertexArrays(1, &m_ArrayID);
+            glGenVertexArrays(1, &mArrayID);
 
-            m_VertexBuffers = std::move(vertexBuffer);
+            mVertexBuffers = std::move(vertexBuffer);
 
             bindVAO();
-            m_VertexBuffers->bind();
+            mVertexBuffers->bind();
 
-            for (const auto &vertex: *(m_VertexBuffers->getBufferStructure())) {
+            for (const auto &vertex: *(mVertexBuffers->getBufferStructure())) {
                 glEnableVertexAttribArray(vertex->index);
                 glVertexAttribPointer(vertex->index, vertex->componentCount, vertex->componentType, vertex->normalized,
                                       vertex->stride, vertex->offset);
             }
 
-            m_VertexBuffers->unbind();
+            mVertexBuffers->unbind();
             unbindVAO();
         }
 

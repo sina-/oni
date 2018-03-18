@@ -5,11 +5,11 @@ namespace oni {
     namespace buffers {
         Buffer::Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
                        components::BufferStructures bufferStructures)
-                : m_BufferStructures(std::move(bufferStructures)) {
+                : mBufferStructures(std::move(bufferStructures)) {
             // Check for supported usages.
             ONI_DEBUG_ASSERT(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)
 
-            glGenBuffers(1, &m_BufferID);
+            glGenBuffers(1, &mBufferID);
             bind();
             // Use the data for GL_STATIC_DRAW, otherwise pass nullptr for GL_DYNAMIC_DRAW.
             auto dataPtr = !data.empty() ? data.data() : nullptr;
@@ -18,7 +18,7 @@ namespace oni {
             GLint actualSize = 0;
             glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);
             if (dataSize != actualSize) {
-                glDeleteBuffers(1, &m_BufferID);
+                glDeleteBuffers(1, &mBufferID);
                 throw std::runtime_error("Could not allocate vertex buffer!");
             }
 

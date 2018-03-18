@@ -14,7 +14,7 @@
 namespace oni {
     namespace graphics {
 
-        static const unsigned long m_MaxNumTextureSamplers = 32;
+        static const unsigned long mMaxNumTextureSamplers = 32;
 
         /**
          * A Layer is the composition that renders entities in the world. Each entity
@@ -24,9 +24,9 @@ namespace oni {
         class Layer {
             // TODO: Using BatchRenderer2D instead of Renderer2D for x0.7 speed up by avoiding
             // polymorphism. Do I really need Renderer2D interface?
-            std::unique_ptr<BatchRenderer2D> m_Renderer2D;
-            std::unique_ptr<Shader> m_Shader;
-            math::mat4 m_ProjectionMatrix;
+            std::unique_ptr<BatchRenderer2D> mRenderer2D;
+            std::unique_ptr<Shader> mShader;
+            math::mat4 mProjectionMatrix;
 
         public:
             Layer(std::unique_ptr<BatchRenderer2D>, std::unique_ptr<Shader>, const math::mat4 &);
@@ -39,7 +39,7 @@ namespace oni {
 
             void renderText(const entities::World &world);
 
-            Shader &getShader() { return *m_Shader; }
+            Shader &getShader() { return *mShader; }
 
             void begin() const;
 
@@ -50,7 +50,7 @@ namespace oni {
              *
              * @return unique ID
              */
-            GLuint getLayerID() { return m_Shader->getProgram(); }
+            GLuint getLayerID() { return mShader->getProgram(); }
 
         public:
             /**

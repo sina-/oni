@@ -13,24 +13,24 @@ namespace oni {
          * Great tutorial on OpenGL buffers: https://open.gl/drawing
          */
         class Buffer {
-            GLuint m_BufferID;
-            components::BufferStructures m_BufferStructures;
+            GLuint mBufferID;
+            components::BufferStructures mBufferStructures;
 
         public:
             Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
                    components::BufferStructures bufferStructures);
 
-            ~Buffer() { glDeleteBuffers(1, &m_BufferID); }
+            ~Buffer() { glDeleteBuffers(1, &mBufferID); }
 
             Buffer &operator=(const Buffer &) = delete;
 
             Buffer &operator=(Buffer &) = delete;
 
-            inline void bind() const { glBindBuffer(GL_ARRAY_BUFFER, m_BufferID); }
+            inline void bind() const { glBindBuffer(GL_ARRAY_BUFFER, mBufferID); }
 
             inline void unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
-            inline const auto getBufferStructure() const { return &m_BufferStructures; }
+            inline const auto getBufferStructure() const { return &mBufferStructures; }
         };
 
     }

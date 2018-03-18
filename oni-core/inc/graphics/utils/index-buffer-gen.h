@@ -18,15 +18,15 @@ namespace oni {
          */
         template<class T>
         class IndexBufferGen {
-            T m_Counter = 0;
-            T m_Offset = 0;
+            T mCounter = 0;
+            T mOffset = 0;
         public:
             IndexBufferGen() = default;
 
             T getValue() {
-                T current = m_Offset;
+                T current = mOffset;
 
-                switch (m_Counter % 6) {
+                switch (mCounter % 6) {
                     case 0:
                         current += 0;
                         break;
@@ -49,10 +49,10 @@ namespace oni {
                         break;
                 }
 
-                m_Counter++;
+                mCounter++;
 
-                if (m_Counter % 6 == 0) {
-                    m_Offset += 4;
+                if (mCounter % 6 == 0) {
+                    mOffset += 4;
                 }
 
                 return current;

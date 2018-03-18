@@ -18,21 +18,21 @@ namespace oni {
              * In other word, a child has to apply all the transformations of its
              * parents prior to its own transformation.
              */
-            //std::vector<math::mat4> m_TransformationStack;
+            //std::vector<math::mat4> mTransformationStack;
 
             Renderer2D() {
                 // identity matrix is the grand parent of all transformations, and
                 // it should always stay in the stack.
-                //m_TransformationStack.push_back(math::mat4::identity());
+                //mTransformationStack.push_back(math::mat4::identity());
             }
 
 /*            void push(const math::mat4 transformation) {
-                m_TransformationStack.push_back(m_TransformationStack.back() * transformation);
+                mTransformationStack.push_back(mTransformationStack.back() * transformation);
             }
 
             void pop() {
-                if (m_TransformationStack.size() > 1) {
-                    m_TransformationStack.pop_back();
+                if (mTransformationStack.size() > 1) {
+                    mTransformationStack.pop_back();
                 }
             }*/
 

@@ -23,12 +23,12 @@ namespace oni {
             Placement() : vertexA(math::vec3()), vertexB(math::vec3()),
                           vertexC(math::vec3()), vertexD(math::vec3()) {}
 
-            Placement(const math::vec3 &m_PositionA, const math::vec3 &m_PositionB,
-                      const math::vec3 &m_PositionC, const math::vec3 &m_PositionD) :
-                    vertexA(m_PositionA),
-                    vertexB(m_PositionB),
-                    vertexC(m_PositionC),
-                    vertexD(m_PositionD) {}
+            Placement(const math::vec3 &mPositionA, const math::vec3 &mPositionB,
+                      const math::vec3 &mPositionC, const math::vec3 &mPositionD) :
+                    vertexA(mPositionA),
+                    vertexB(mPositionB),
+                    vertexC(mPositionC),
+                    vertexD(mPositionD) {}
 
             Placement(const Placement &other) = default;
 

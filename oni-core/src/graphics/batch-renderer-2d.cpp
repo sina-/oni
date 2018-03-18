@@ -8,26 +8,26 @@ namespace oni {
         BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
                                          GLsizei maxVertexSize,
                                          components::BufferStructures bufferStructures)
-                : m_IndexCount(0),
-                  m_MaxSpriteCount(maxSpriteCount),
-                  m_MaxVertexSize(maxVertexSize),
-                  m_MaxNumTextureSamplers(maxNumTextureSamplers) {
+                : mIndexCount(0),
+                  mMaxSpriteCount(maxSpriteCount),
+                  mMaxVertexSize(maxVertexSize),
+                  mMaxNumTextureSamplers(maxNumTextureSamplers) {
 
             // Each sprite has 6 indices.
-            m_MaxIndicesCount = m_MaxSpriteCount * 6;
+            mMaxIndicesCount = mMaxSpriteCount * 6;
 
             auto maxUIntSize = std::numeric_limits<unsigned int>::max();
-            ONI_DEBUG_ASSERT(m_MaxIndicesCount < maxUIntSize);
+            ONI_DEBUG_ASSERT(mMaxIndicesCount < maxUIntSize);
 
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
-            m_MaxSpriteSize = m_MaxVertexSize * 4;
-            m_MaxBufferSize = m_MaxSpriteSize * m_MaxSpriteCount;
+            mMaxSpriteSize = mMaxVertexSize * 4;
+            mMaxBufferSize = mMaxSpriteSize * mMaxSpriteCount;
 
-            auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), m_MaxBufferSize, GL_STATIC_DRAW,
+            auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), mMaxBufferSize, GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
-            m_VAO = std::make_unique<buffers::VertexArray>(std::move(vbo));
+            mVAO = std::make_unique<buffers::VertexArray>(std::move(vbo));
 
-            std::vector<GLuint> indices(m_MaxIndicesCount);
+            std::vector<GLuint> indices(mMaxIndicesCount);
 
             /**
              * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
@@ -35,7 +35,7 @@ namespace oni {
              */
             /*
             GLushort offset = 0;
-            for (auto i = 0; i < m_MaxIndicesCount; i += 6) {
+            for (auto i = 0; i < mMaxIndicesCount; i += 6) {
                 indices[i + 0] = offset + 0;
                 indices[i + 1] = offset + 1;
                 indices[i + 2] = offset + 2;
@@ -49,24 +49,24 @@ namespace oni {
             IndexBufferGen<GLuint> gen;
             std::generate(indices.begin(), indices.end(), gen);
 
-            m_IBO = std::make_unique<buffers::IndexBuffer>(indices, m_MaxIndicesCount);
+            mIBO = std::make_unique<buffers::IndexBuffer>(indices, mMaxIndicesCount);
 
-            m_Samplers = generateSamplerIDs();
+            mSamplers = generateSamplerIDs();
 
         }
 
         void BatchRenderer2D::begin() {
-            m_VAO->bindVBO();
-            // Data written to m_Buffer has to match the structure of VBO.
-            m_Buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+            mVAO->bindVBO();
+            // Data written to mBuffer has to match the structure of VBO.
+            mBuffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
 
         void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance) {
             // Check if Buffer can handle the number of vertices.
             // TODO: This seems to trigger even in none-debug mode
-            ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
+            ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
-            auto buffer = static_cast<components::ColoredVertex *>(m_Buffer);
+            auto buffer = static_cast<components::ColoredVertex *>(mBuffer);
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -96,8 +96,8 @@ namespace oni {
             buffer->color = appearance.color;
             buffer++;
 
-            // Update the m_Buffer to point to the head.
-            m_Buffer = static_cast<void *>(buffer);
+            // Update the mBuffer to point to the head.
+            mBuffer = static_cast<void *>(buffer);
 
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
             // defined by 4 vertices only.
@@ -107,16 +107,16 @@ namespace oni {
              *      |/  |
              *    2 +---+ 3
              **/
-            m_IndexCount += 6;
+            mIndexCount += 6;
         }
 
         void BatchRenderer2D::submit(const components::Placement &position, const components::Texture &texture) {
             // Check if Buffer can handle the number of vertices.
-            ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
+            ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
             auto samplerID = getSamplerID(texture.textureID);
 
-            auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
+            auto buffer = static_cast<components::TexturedVertex *>(mBuffer);
 
             buffer->position = position.vertexA;
             buffer->uv = texture.uv[0];
@@ -138,14 +138,14 @@ namespace oni {
             buffer->samplerID = samplerID;
             buffer++;
 
-            m_Buffer = static_cast<void *>(buffer);
+            mBuffer = static_cast<void *>(buffer);
 
-            m_IndexCount += 6;
+            mIndexCount += 6;
 
         }
 
         void BatchRenderer2D::submit(const components::Text &text) {
-            auto buffer = static_cast<components::TexturedVertex *>(m_Buffer);
+            auto buffer = static_cast<components::TexturedVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
 
@@ -155,7 +155,7 @@ namespace oni {
             float scaleY = text.yScaling;
 
             for(int i = 0; i < text.textContent.size(); i++){
-                ONI_DEBUG_ASSERT(m_IndexCount + 6 < m_MaxIndicesCount);
+                ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;
                 auto y0 = text.position.y + text.offsetY[i] / scaleY;
@@ -188,36 +188,36 @@ namespace oni {
                 buffer++;
 
                 advance += text.advanceX[i] / scaleX;
-                m_IndexCount += 6;
+                mIndexCount += 6;
             }
 
-            m_Buffer = static_cast<void *>(buffer);
+            mBuffer = static_cast<void *>(buffer);
 
         }
 
         void BatchRenderer2D::flush() {
-            for (const auto &t2s: m_TextureToSampler) {
+            for (const auto &t2s: mTextureToSampler) {
                 glActiveTexture(GL_TEXTURE0 + t2s.second);
                 LoadTexture::bind(t2s.first);
             }
 
-            m_VAO->bindVAO();
-            m_IBO->bind();
+            mVAO->bindVAO();
+            mIBO->bind();
 
-            glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, nullptr);
+            glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, nullptr);
 
-            m_IBO->unbind();
-            m_VAO->unbindVAO();
+            mIBO->unbind();
+            mVAO->unbindVAO();
 
             LoadTexture::unbind();
 
-            m_IndexCount = 0;
+            mIndexCount = 0;
 
         }
 
         void BatchRenderer2D::end() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
-            m_VAO->unbindVBO();
+            mVAO->unbindVBO();
 
         }
 
@@ -225,30 +225,30 @@ namespace oni {
             end();
             flush();
             begin();
-            m_Samplers.assign(m_MaxNumTextureSamplers, 0);
+            mSamplers.assign(mMaxNumTextureSamplers, 0);
             // Fill the vector with 0, 1, 2, 3, ...
-            std::iota(m_Samplers.begin(), m_Samplers.end(), 0);
-            m_TextureToSampler.clear();
+            std::iota(mSamplers.begin(), mSamplers.end(), 0);
+            mTextureToSampler.clear();
         }
 
         GLint BatchRenderer2D::getSamplerID(GLuint textureID) {
-            auto it = m_TextureToSampler.find(textureID);
+            auto it = mTextureToSampler.find(textureID);
             GLint samplerID = 0;
 
-            if (it == m_TextureToSampler.end()) {
-                ONI_DEBUG_ASSERT(m_TextureToSampler.size() < m_MaxNumTextureSamplers);
+            if (it == mTextureToSampler.end()) {
+                ONI_DEBUG_ASSERT(mTextureToSampler.size() < mMaxNumTextureSamplers);
 
                 /*
-                 * To support more than m_MaxNumTextureSamplers following can be used. But,
+                 * To support more than mMaxNumTextureSamplers following can be used. But,
                  * this operation is very expensive. Instead create more layers if needed.
-                if (m_TextureToSampler.size() >= m_MaxNumTextureSamplers) {
+                if (mTextureToSampler.size() >= mMaxNumTextureSamplers) {
                     reset();
                 }
                 */
 
-                samplerID = m_Samplers.back();
-                m_TextureToSampler[textureID] = samplerID;
-                m_Samplers.pop_back();
+                samplerID = mSamplers.back();
+                mTextureToSampler[textureID] = samplerID;
+                mSamplers.pop_back();
             } else {
                 samplerID = (*it).second;
             }
@@ -258,7 +258,7 @@ namespace oni {
 
         std::vector<GLint> BatchRenderer2D::generateSamplerIDs() {
             std::vector<GLint> samplers;
-            samplers.assign(m_MaxNumTextureSamplers, 0);
+            samplers.assign(mMaxNumTextureSamplers, 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(samplers.begin(), samplers.end(), 0);
             return samplers;

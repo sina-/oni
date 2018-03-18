@@ -5,26 +5,26 @@ namespace oni {
 
 		Window::Window(const char *title, int width, int height, int widthRange, int heightRange)
 		{
-			m_Title = title;
-			m_Width = width;
-			m_WidthRange = widthRange;
-			m_HeightRange = heightRange;
-			m_Height = height;
-			m_KeyPressed = GLFW_KEY_UNKNOWN;
-			m_MouseButton = GLFW_KEY_UNKNOWN;
-			m_CursorX = 0.0;
-			m_CursorY = 0.0;
+			mTitle = title;
+			mWidth = width;
+			mWidthRange = widthRange;
+			mHeightRange = heightRange;
+			mHeight = height;
+			mKeyPressed = GLFW_KEY_UNKNOWN;
+			mMouseButton = GLFW_KEY_UNKNOWN;
+			mCursorX = 0.0;
+			mCursorY = 0.0;
 
 			if (!glfwInit())
 				throw std::runtime_error("Failed to init GLFW!");
 
-			m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, nullptr, nullptr);
-			if (!m_Window) {
+			mWindow = glfwCreateWindow(mWidth, mHeight, mTitle, nullptr, nullptr);
+			if (!mWindow) {
 				glfwTerminate();
 				throw std::runtime_error("Failed to create window!");
 			}
 
-			glfwMakeContextCurrent(m_Window);
+			glfwMakeContextCurrent(mWindow);
 
 			if (glewInit() != GLEW_OK)
 				throw std::runtime_error("GLEW failed to initialize!");
@@ -37,7 +37,7 @@ namespace oni {
 				2) define a static callback function and register it as a call back;
 				3) gain access to Window instance by casting GLFWWindow* to a pointer to user object!
 			*/
-			glfwSetWindowUserPointer(m_Window, reinterpret_cast<void*>(this));
+			glfwSetWindowUserPointer(mWindow, reinterpret_cast<void*>(this));
 			/*
 			1) First try
 			auto windowResizeCallback = [](GLFWwindow* w, int width, int height)
@@ -49,10 +49,10 @@ namespace oni {
 				this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 			*/
 
-			glfwSetWindowSizeCallback(m_Window, windowResizeCallback);
-			glfwSetKeyCallback(m_Window, keyCallback);
-			glfwSetMouseButtonCallback(m_Window, mouseCallback);
-			glfwSetCursorPosCallback(m_Window, cursorPosCallback);
+			glfwSetWindowSizeCallback(mWindow, windowResizeCallback);
+			glfwSetKeyCallback(mWindow, keyCallback);
+			glfwSetMouseButtonCallback(mWindow, mouseCallback);
+			glfwSetCursorPosCallback(mWindow, cursorPosCallback);
 			// This will disable v-sync.
             glfwSwapInterval(0.0);
 
@@ -69,12 +69,12 @@ namespace oni {
 		void Window::update() const
 		{
 			glfwPollEvents();
-			glfwSwapBuffers(m_Window);
+			glfwSwapBuffers(mWindow);
 		}
 
 		bool Window::closed() const
 		{
-			return glfwWindowShouldClose(m_Window) == 1;
+			return glfwWindowShouldClose(mWindow) == 1;
 		}
 
 		void Window::clear() const

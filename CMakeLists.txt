@@ -76,4 +76,4 @@ include_directories(${LIB_DEP}/soloud/include)
 subdirs(lib/soloud)
 
 # Project files
-subdirs(oni-core oni-core-demo)
+subdirs(oni-core)

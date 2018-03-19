@@ -1,4 +1,5 @@
 include_directories(${oni_SOURCE_DIR}/oni-core/inc)
+include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
 
 add_library(oni-core-graphics window.cpp shader.cpp batch-renderer-2d.cpp layer.cpp texture.cpp light.cpp font-manager.cpp)
 

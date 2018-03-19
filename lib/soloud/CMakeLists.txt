@@ -1,3 +1,5 @@
+include_directories(${oni_SOURCE_DIR}/lib/soloud/include)
+
 file(GLOB core ${oni_SOURCE_DIR}/lib/soloud/src/core/*.cpp)
 file(GLOB filter ${oni_SOURCE_DIR}/lib/soloud/src/filter/*.cpp)
 file(GLOB backend ${oni_SOURCE_DIR}/lib/soloud/src/backend/sdl2_static/*.cpp)

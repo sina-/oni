@@ -4,7 +4,7 @@
 #include <string>
 #include <entities/world.h>
 #include <ftgl/texture-atlas.h>
-#include "font-manager.h"
+#include <graphics/font-manager.h>
 
 namespace oni {
     namespace graphics {
@@ -14,6 +14,9 @@ namespace oni {
             ~LoadTexture() = default;
 
         public:
+            // TODO: At some point would be nice to have a list of all loaded textures and only load a new
+            // one if it has not been loaded already. Perhaps its easier to have a texture manager just like
+            // font manager or audio manager.
             static components::Texture load(const std::string &path);
 
             static GLuint load(const graphics::FontManager &fontManager);

@@ -23,7 +23,7 @@ namespace oni {
             return mEntities.size() - 1;
         }
 
-        void World::reserveEntity(unsigned long size) {
+        void World::reserveEntity(entities::entityID size) {
             mEntities.reserve(mEntities.size() + size);
             mPlacements.reserve(mPlacements.size() + size);
             mAppearances.reserve(mAppearances.size() + size);
@@ -33,77 +33,77 @@ namespace oni {
             mTexts.reserve(mTexts.size() + size);
         }
 
-        unsigned long World::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
+        entities::entityID World::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
             auto entity = _createEntity();
             mEntities[entity] = mask;
             mLayerIDs[entity] = layerID;
             return entity;
         }
 
-        void World::addComponent(unsigned long entity, const components::Component &component) {
-            mEntities[entity].set(component);
+        void World::addComponent(entities::entityID id, const components::Component &component) {
+            mEntities[id].set(component);
         }
 
-        void World::destroyEntity(unsigned long entity) {
-            mEntities[entity] = components::Component::NONE;
-            mFreeEntitySlots.push(entity);
+        void World::destroyEntity(entities::entityID id) {
+            mEntities[id] = components::Component::NONE;
+            mFreeEntitySlots.push(id);
         }
 
         const components::EntityMask &World::getEntities() const {
             return mEntities;
         }
 
-        const components::Mask &World::getEntity(unsigned long entity) const {
-            return mEntities[entity];
+        const components::Mask &World::getEntity(entities::entityID id) const {
+            return mEntities[id];
         }
 
-        const components::Placement &World::getEntityPlacement(unsigned long entity) const {
-            return mPlacements[entity];
+        const components::Placement &World::getEntityPlacement(entities::entityID id) const {
+            return mPlacements[id];
         }
 
-        const components::Appearance &World::getEntityAppearance(unsigned long entity) const {
-            return mAppearances[entity];
+        const components::Appearance &World::getEntityAppearance(entities::entityID id) const {
+            return mAppearances[id];
         }
 
-        const components::Velocity &World::getEntityVelocity(unsigned long entity) const {
-            return mVelocities[entity];
+        const components::Velocity &World::getEntityVelocity(entities::entityID id) const {
+            return mVelocities[id];
         }
 
-        const components::Texture &World::getEntityTexture(unsigned long entity) const {
-            return mTextures[entity];
+        const components::Texture &World::getEntityTexture(entities::entityID id) const {
+            return mTextures[id];
         }
 
-        const components::LayerID &World::getEntityLayerID(unsigned long entity) const {
-            return mLayerIDs[entity];
+        const components::LayerID &World::getEntityLayerID(entities::entityID id) const {
+            return mLayerIDs[id];
         }
 
-        const components::Text &World::getEntityText(unsigned long entity) const {
-            return mTexts[entity];
+        const components::Text &World::getEntityText(entities::entityID id) const {
+            return mTexts[id];
         }
 
-        void World::setEntityPlacement(unsigned long entity, const components::Placement &placement) {
-            mPlacements[entity] = placement;
+        void World::setEntityPlacement(entities::entityID id, const components::Placement &placement) {
+            mPlacements[id] = placement;
         }
 
-        void World::setEntityAppearance(unsigned long entity, const components::Appearance &appearance) {
-            mAppearances[entity] = appearance;
+        void World::setEntityAppearance(entities::entityID id, const components::Appearance &appearance) {
+            mAppearances[id] = appearance;
         }
 
-        void World::setEntityVelocity(unsigned long entity, const components::Velocity &velocity) {
-            mVelocities[entity] = velocity;
+        void World::setEntityVelocity(entities::entityID id, const components::Velocity &velocity) {
+            mVelocities[id] = velocity;
         }
 
-        void World::setEntityTexture(unsigned long entity, const components::Texture &texture) {
-            mTextures[entity] = texture;
+        void World::setEntityTexture(entities::entityID id, const components::Texture &texture) {
+            mTextures[id] = texture;
         }
 
-        void World::setEntityLayerID(unsigned long entity, const components::LayerID &layerID) {
-            mLayerIDs[entity] = layerID;
+        void World::setEntityLayerID(entities::entityID id, const components::LayerID &layerID) {
+            mLayerIDs[id] = layerID;
 
         }
 
-        void World::setEntityText(unsigned long entity, const components::Text &text) {
-            mTexts[entity] = text;
+        void World::setEntityText(entities::entityID id, const components::Text &text) {
+            mTexts[id] = text;
 
         }
     }

@@ -34,44 +34,44 @@ namespace oni {
              */
             World() = default;
 
-            void reserveEntity(unsigned long count);
+            void reserveEntity(entities::entityID count);
 
-            void destroyEntity(unsigned long entity);
+            void destroyEntity(entities::entityID id);
 
-            unsigned long createEntity(const components::Mask &mask, const components::LayerID &layerID);
+            entities::entityID createEntity(const components::Mask &mask, const components::LayerID &layerID);
 
-            void addComponent(unsigned long entity, const components::Component &component);
+            void addComponent(entities::entityID id, const components::Component &component);
 
-            void setEntityPlacement(unsigned long entity, const components::Placement &placement);
+            void setEntityPlacement(entities::entityID id, const components::Placement &placement);
 
-            void setEntityAppearance(unsigned long entity, const components::Appearance &appearance);
+            void setEntityAppearance(entities::entityID id, const components::Appearance &appearance);
 
-            void setEntityVelocity(unsigned long entity, const components::Velocity &velocity);
+            void setEntityVelocity(entities::entityID id, const components::Velocity &velocity);
 
-            void setEntityTexture(unsigned long entity, const components::Texture &texture);
+            void setEntityTexture(entities::entityID id, const components::Texture &texture);
 
-            void setEntityLayerID(unsigned long entity, const components::LayerID &tileID);
+            void setEntityLayerID(entities::entityID id, const components::LayerID &tileID);
 
-            void setEntityText(unsigned long entity, const components::Text &text);
+            void setEntityText(entities::entityID id, const components::Text &text);
 
             const components::EntityMask &getEntities() const;
 
-            const components::Mask &getEntity(unsigned long entity) const;
+            const components::Mask &getEntity(entities::entityID id) const;
 
-            const components::Placement &getEntityPlacement(unsigned long entity) const;
+            const components::Placement &getEntityPlacement(entities::entityID id) const;
 
-            const components::Appearance &getEntityAppearance(unsigned long entity) const;
+            const components::Appearance &getEntityAppearance(entities::entityID id) const;
 
-            const components::Velocity &getEntityVelocity(unsigned long entity) const;
+            const components::Velocity &getEntityVelocity(entities::entityID id) const;
 
-            const components::Texture &getEntityTexture(unsigned long entity) const;
+            const components::Texture &getEntityTexture(entities::entityID id) const;
 
-            const components::LayerID &getEntityLayerID(unsigned long entity) const;
+            const components::LayerID &getEntityLayerID(entities::entityID id) const;
 
-            const components::Text &getEntityText(unsigned long entity) const;
+            const components::Text &getEntityText(entities::entityID id) const;
 
         private:
-            std::stack<unsigned long> mFreeEntitySlots;
+            std::stack<entities::entityID> mFreeEntitySlots;
             /**
              * For each entity, define a bitset showing
              * which components are enabled. For example, a simple static

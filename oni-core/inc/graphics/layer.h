@@ -50,7 +50,7 @@ namespace oni {
              *
              * @return unique ID
              */
-            GLuint getLayerID() { return mShader->getProgram(); }
+            components::LayerID getLayerID() { return mShader->getProgram(); }
 
         public:
             /**

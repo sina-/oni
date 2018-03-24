@@ -24,14 +24,14 @@ namespace oni {
         class Window {
             const char *mTitle;
             int mWidth, mHeight;
-            int mWidthRange, mHeightRange;
+            int mXScaling, mYScaling;
             GLFWwindow *mWindow;
             int mKeyPressed;
             int mMouseButton;
             double mCursorX, mCursorY;
 
         public:
-            Window(const char *name, int width, int height, int widthRange, int heightRange);
+            Window(const char *name, int width, int height, int xScaling, int yScaling);
 
             ~Window();
 
@@ -49,13 +49,9 @@ namespace oni {
 
             const int &getHeight() const { return mHeight; }
 
-            void setWidthRange(int widthRange) { mWidthRange = widthRange; }
+            int getXScaling() { return mXScaling; }
 
-            int getWidthRange() { return mWidthRange; }
-
-            void setHeightRange(int heightRange) { mHeightRange = heightRange; }
-
-            int getHeightRange() { return mHeightRange; }
+            int getYScaling() { return mYScaling; }
 
             void setKeyPressed(int key) { mKeyPressed = key; }
 

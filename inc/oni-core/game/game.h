@@ -6,17 +6,27 @@ namespace oni {
     namespace game {
         class Game {
         public:
-            Game() = default;
+            Game();
 
-            virtual ~Game() = 0;
+            virtual ~Game() = default;
 
+            /**
+             * Main loop should run this function as fast as possible.
+             */
             virtual void update();
 
+            /**
+             * Condition under which the game should terminate. Usually happens if user
+             * exists the game.
+             * @return
+             */
+            virtual bool shouldTerminate() = 0;
+
+        protected:
             virtual void tick();
 
             virtual void render();
 
-        protected:
             virtual void _tick() = 0;
 
             virtual void _render() = 0;
@@ -25,6 +35,7 @@ namespace oni {
 
         protected:
             utils::HighResolutionTimer mTimer;
+
             double mTickTime;
             double mFrameTime;
             unsigned int mCycles;

@@ -23,32 +23,38 @@ namespace oni {
             virtual bool shouldTerminate() = 0;
 
         protected:
-            virtual void tick(int keyPressed) final;
+            virtual void tick(const int keyPressed) final;
 
             virtual void render() final;
 
-            virtual void _tick(float tickTime, int keyPressed) = 0;
+            virtual void _tick(const float tickTime, const int keyPressed) = 0;
 
             virtual void _render() = 0;
 
             virtual void showFPS(unsigned short fps) = 0;
 
+            virtual void showTPS(unsigned short tps) = 0;
+
             virtual int getKey() = 0;
 
         protected:
-            utils::HighResolutionTimer mUpdateTimer;
+            utils::HighResolutionTimer mRunTimer;
             utils::HighResolutionTimer mFrameTimer;
             utils::HighResolutionTimer mTickTimer;
 
-            double mUpdateLag;
+            double mRunLag;
             double mFrameLag;
             double mTickLag;
-            unsigned int mCycles;
+            unsigned short mRunCounter;
+            unsigned short mTickCounter = 0;
+            unsigned short mFrameCounter = 0;
 
             // 120Hz
-            const float mTickMS = 1 / 60.0f;
+            const float mTickMS = 1 / 120.0f;
             // 30Hz
             const float mMinTickMS = 1 / 30.0f;
+
+            const float ep = 0.00001f;
         };
     }
 }

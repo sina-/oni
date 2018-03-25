@@ -7,18 +7,23 @@ namespace oni {
     namespace game {
 
         Game::Game()
-                : mUpdateTimer(), mUpdateLag(0.0f), mCycles(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
+                : mRunTimer(), mRunLag(0.0f), mRunCounter(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
                   mTickLag(0) {}
 
         void Game::run() {
-            mUpdateTimer.restart();
+            mRunTimer.restart();
 
-            if (mUpdateLag > 0.5f) {
-                auto fps = mCycles / mUpdateLag;
+            if (mRunLag - 1.0f  > ep) {
+                auto fps = mRunCounter / mRunLag;
+                auto tps = 1 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));
+                showTPS(tps);
 
-                mUpdateLag = 0;
-                mCycles = 0;
+                mRunLag = 0;
+                mTickLag = 0;
+                mRunCounter = 0;
+                mTickCounter = 0;
+                mFrameCounter = 0;
             }
 
             // TODO: Create an input class that can be polled for input status.
@@ -28,33 +33,33 @@ namespace oni {
             render();
             mFrameLag += mFrameTimer.elapsed();
 
-            mCycles++;
-            mUpdateLag += mUpdateTimer.elapsed();
+            mRunCounter++;
+            mFrameCounter++;
+            mRunLag += mRunTimer.elapsed();
         }
 
-        void Game::tick(int keyPressed) {
-            while (mFrameLag >= mTickMS) {
-
-                /*
-                auto correction = (float) std::max(mTickLag, mTickMS);
-                correction = std::min((float)mMinTickMS, correction);
-                _tick(fix, keyPressed);
-                */
-
+        void Game::tick(const int keyPressed) {
+            while (mFrameLag > mTickMS) {
                 mTickTimer.restart();
+
+/*                auto correction = std::max((float) mTickLag, mTickMS);
+                correction = std::min(mMinTickMS, correction);
+                _tick(correction, keyPressed);*/
+
                 _tick(mTickMS, keyPressed);
-                mTickLag = mTickTimer.elapsed();
+                mTickLag += mTickTimer.elapsed();
 
                 // If it takes longer than tick frequency to run the simulations movements will slow down.
                 ONI_DEBUG_ASSERT(mTickLag <= mTickMS);
 
                 mFrameLag -= mTickMS;
+                mTickCounter++;
             }
         }
 
         void Game::render() {
             // Add lag
-            //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 2));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 30));
             _render();
         }
 

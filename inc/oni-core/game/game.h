@@ -13,7 +13,7 @@ namespace oni {
             /**
              * Main loop should run this function as fast as possible.
              */
-            virtual void update();
+            virtual void run();
 
             /**
              * Condition under which the game should terminate. Usually happens if user
@@ -23,22 +23,26 @@ namespace oni {
             virtual bool shouldTerminate() = 0;
 
         protected:
-            virtual void tick();
+            virtual void tick(int keyPressed) final;
 
-            virtual void render();
+            virtual void render() final;
 
-            virtual void _tick() = 0;
+            virtual void _tick(float tickTime, int keyPressed) = 0;
 
             virtual void _render() = 0;
 
             virtual void showFPS(unsigned short fps) = 0;
 
+            virtual int getKey() = 0;
+
         protected:
             utils::HighResolutionTimer mTimer;
 
-            double mTickTime;
             double mFrameTime;
+            double mFrameLag;
             unsigned int mCycles;
+
+            const float mTickTime = 0.01f;
         };
     }
 }

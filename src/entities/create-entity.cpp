@@ -51,8 +51,8 @@ namespace oni {
             entityPlacement.vertexD = math::vec3(position.x + size.x, position.y, position.z);
 
             auto entityVelocity = components::Velocity();
-            entityVelocity.magnitude = 0.0005f;
-            entityVelocity.direction = math::vec3();
+            entityVelocity.magnitude = 8.0f;
+            entityVelocity.direction = math::vec3(0.0f, 0.0f, 0.0f);
 
             world.setEntityPlacement(entity, entityPlacement);
             world.setEntityVelocity(entity, entityVelocity);

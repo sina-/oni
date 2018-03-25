@@ -9,7 +9,7 @@ namespace oni {
         public:
             // TODO: passing Window just to get the keyboard. Refactor Window for easier
             // access to IO events.
-            virtual void update(entities::World &world, const graphics::Window &window) = 0;
+            virtual void update(entities::World &world, int keyPressed, float tickTime) = 0;
         };
     }
 }

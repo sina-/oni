@@ -12,6 +12,7 @@ namespace oni {
 
         void Game::run() {
             mRunTimer.restart();
+            mFrameTimer.restart();
 
             if (mRunLag - 1.0f  > ep) {
                 auto fps = mRunCounter / mRunLag;
@@ -29,13 +30,12 @@ namespace oni {
             // TODO: Create an input class that can be polled for input status.
             tick(getKey());
 
-            mFrameTimer.restart();
             render();
-            mFrameLag += mFrameTimer.elapsed();
 
             mRunCounter++;
             mFrameCounter++;
             mRunLag += mRunTimer.elapsed();
+            mFrameLag += mFrameTimer.elapsed();
         }
 
         void Game::tick(const int keyPressed) {
@@ -49,7 +49,7 @@ namespace oni {
                 _tick(mTickMS, keyPressed);
                 mTickLag += mTickTimer.elapsed();
 
-                // If it takes longer than tick frequency to run the simulations movements will slow down.
+                // If it takes longer than tick frequency to run the simulations, the game will die.
                 ONI_DEBUG_ASSERT(mTickLag <= mTickMS);
 
                 mFrameLag -= mTickMS;
@@ -59,7 +59,7 @@ namespace oni {
 
         void Game::render() {
             // Add lag
-            //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 30));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 20));
             _render();
         }
 

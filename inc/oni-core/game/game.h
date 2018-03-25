@@ -36,13 +36,19 @@ namespace oni {
             virtual int getKey() = 0;
 
         protected:
-            utils::HighResolutionTimer mTimer;
+            utils::HighResolutionTimer mUpdateTimer;
+            utils::HighResolutionTimer mFrameTimer;
+            utils::HighResolutionTimer mTickTimer;
 
-            double mFrameTime;
+            double mUpdateLag;
             double mFrameLag;
+            double mTickLag;
             unsigned int mCycles;
 
-            const float mTickTime = 0.01f;
+            // 120Hz
+            const float mTickMS = 1 / 60.0f;
+            // 30Hz
+            const float mMinTickMS = 1 / 30.0f;
         };
     }
 }

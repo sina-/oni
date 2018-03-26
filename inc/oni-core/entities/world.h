@@ -16,7 +16,6 @@ namespace oni {
         private:
             /**
              * It can reuse free slots created by destroyEntity().
-             * If there is no free slot and all the initial slots, marked by World(initialEntityCount), are taken
              * When adding batch of entities, first reserve the number of entities needed by calling
              * World::reserveEntity(BATCH_SIZE);
              *
@@ -34,7 +33,7 @@ namespace oni {
              */
             World() = default;
 
-            void reserveEntity(entities::entityID count);
+            void reserveEntity(size_t count);
 
             void destroyEntity(entities::entityID id);
 
@@ -54,7 +53,7 @@ namespace oni {
 
             void setEntityText(entities::entityID id, const components::Text &text);
 
-            const components::EntityMask &getEntities() const;
+            const components::EntityMasks &getEntities() const;
 
             const components::Mask &getEntity(entities::entityID id) const;
 
@@ -70,14 +69,14 @@ namespace oni {
 
             const components::Text &getEntityText(entities::entityID id) const;
 
-        private:
+        protected:
             std::stack<entities::entityID> mFreeEntitySlots;
             /**
              * For each entity, define a bitset showing
              * which components are enabled. For example, a simple static
              * game object could be defined by (Components:Vertex | Components:Appearance).
              */
-            components::EntityMask mEntities;
+            components::EntityMasks mEntities;
 
             std::vector<components::Placement> mPlacements;
             std::vector<components::Appearance> mAppearances;

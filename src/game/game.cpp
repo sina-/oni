@@ -14,7 +14,7 @@ namespace oni {
             mRunTimer.restart();
             mFrameTimer.restart();
 
-            if (mRunLag - 1.0f  > ep) {
+            if (1.0f - mRunLag <= ep) {
                 auto fps = mRunCounter / mRunLag;
                 auto tps = 1 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));
@@ -47,10 +47,10 @@ namespace oni {
                 _tick(correction, keyPressed);*/
 
                 _tick(mTickMS, keyPressed);
-                mTickLag += mTickTimer.elapsed();
+                mTickLag = mTickTimer.elapsed();
 
                 // If it takes longer than tick frequency to run the simulations, the game will die.
-                ONI_DEBUG_ASSERT(mTickLag <= mTickMS);
+                ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
 
                 mFrameLag -= mTickMS;
                 mTickCounter++;

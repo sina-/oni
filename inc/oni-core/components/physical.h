@@ -32,12 +32,6 @@ namespace oni {
 
             Placement(const Placement &other) = default;
 
-/*            void setVertexPositions(const math::vec2 &size, const math::vec3 &pos) {
-        m_PositionA = pos;
-        vertexB = math::vec3(pos.x, pos.y + size.y, pos.z);
-        vertexC = math::vec3(pos.x + size.x, pos.y + size.y, pos.z);
-        vertexD = math::vec3(pos.x + size.x, pos.y, pos.z);
-    }*/
         };
 
         struct Velocity {
@@ -51,6 +45,100 @@ namespace oni {
 
             Velocity(const Velocity &other) = default;
 
+        };
+
+        typedef double carScalar;
+
+        struct Car {
+            carScalar heading;
+            carScalar velocityAbsolute;
+            carScalar yawRate;
+            carScalar steer;
+            carScalar steerAngle;
+            carScalar inertia;
+            carScalar wheelBase;
+            carScalar axleWeightRatioFront;
+            carScalar axleWeightRatioRear;
+
+            math::vec2 position;
+            math::vec2 velocity;
+            math::vec2 velocityLocal;
+            math::vec2 acceleration;
+            math::vec2 accelerationLocal;
+
+            bool smoothSteer;
+            bool safeSteer;
+
+            Car() {
+                heading = 0.0f;
+                velocityAbsolute = 0.0f;
+                yawRate = 0.0f;
+                steer = 0.0f;
+                steerAngle = 0.0f;
+                inertia = 0.0f;
+                wheelBase = 0.0f;
+                axleWeightRatioFront = 0.0f;
+                axleWeightRatioRear = 0.0f;
+
+                position = math::vec2();
+                velocity = math::vec2();
+                velocityLocal = math::vec2();
+                acceleration = math::vec2();
+                accelerationLocal = math::vec2();
+
+                smoothSteer = true;
+                safeSteer = true;
+            }
+        };
+
+        struct CarConfig {
+            carScalar gravity;
+            carScalar mass;
+            carScalar inertialScale;
+            carScalar halfWidth;
+            carScalar cgToFront;
+            carScalar cgToRear;
+            carScalar cgToFrontAxle;
+            carScalar cgToRearAxle;
+            carScalar cgHeight;
+            carScalar wheelRadius;
+            carScalar wheelWidth;
+            carScalar tireGrip;
+            carScalar lockGrip;
+            carScalar engineForce;
+            carScalar brakeForce;
+            carScalar eBrakeForce;
+            carScalar weightTransfer;
+            carScalar maxSteer;
+            carScalar cornerStiffnessFront;
+            carScalar cornerStiffnessRear;
+            carScalar airResist;
+            carScalar rollResist;
+
+            CarConfig() {
+                gravity = 9.81f;
+                mass = 1200.0f;
+                inertialScale = 1.0f;
+                halfWidth = 0.8f;
+                cgToFront = 2.0f;
+                cgToRear = 2.0f;
+                cgToFrontAxle = 1.25f;
+                cgToRearAxle = 1.25f;
+                cgHeight = 0.55f;
+                wheelRadius = 0.3f;
+                wheelWidth = 0.2f;
+                tireGrip = 2.0f;
+                lockGrip = 2.0f;
+                engineForce = 8000.0f;
+                brakeForce = 12000.0f;
+                eBrakeForce = brakeForce / 2.5f;
+                weightTransfer = 0.2f;
+                maxSteer = 0.6f;
+                cornerStiffnessFront = 5.0f;
+                cornerStiffnessRear = 5.2f;
+                airResist = 2.5f;
+                rollResist = 8.0f;
+            }
         };
 
 

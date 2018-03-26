@@ -26,6 +26,8 @@ namespace oni {
 			bool operator==(const vec2& other);
 			bool operator!=(const vec2& other);
 
+			float len();
+
 			friend std::ostream& operator<<(std::ostream& stream, const vec2& vector);
 
 		};

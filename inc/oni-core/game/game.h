@@ -49,8 +49,8 @@ namespace oni {
             unsigned short mTickCounter = 0;
             unsigned short mFrameCounter = 0;
 
-            // 120Hz
-            const float mTickMS = 1 / 120.0f;
+            // 60Hz
+            const float mTickMS = 1 / 60.0f;
             // 30Hz
             const float mMinTickMS = 1 / 30.0f;
 

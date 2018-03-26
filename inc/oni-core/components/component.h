@@ -23,7 +23,7 @@ namespace oni {
         };
 
         typedef std::bitset<MAX> Mask;
-        typedef std::vector<std::bitset<MAX>> EntityMask;
+        typedef std::vector<std::bitset<MAX>> EntityMasks;
 
         const static components::Mask PlacementComponent = components::Mask().set(components::PLACEMENT);
         const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);

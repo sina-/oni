@@ -23,7 +23,7 @@ namespace oni {
             return mEntities.size() - 1;
         }
 
-        void World::reserveEntity(entities::entityID size) {
+        void World::reserveEntity(size_t size) {
             mEntities.reserve(mEntities.size() + size);
             mPlacements.reserve(mPlacements.size() + size);
             mAppearances.reserve(mAppearances.size() + size);
@@ -49,7 +49,7 @@ namespace oni {
             mFreeEntitySlots.push(id);
         }
 
-        const components::EntityMask &World::getEntities() const {
+        const components::EntityMasks &World::getEntities() const {
             return mEntities;
         }
 

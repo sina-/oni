@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <oni-core/math/vec2.h>
 
 namespace oni {
@@ -98,5 +100,9 @@ namespace oni {
 			return stream;
 		}
 
-	}
+        float vec2::len() {
+            return std::sqrt(x * x + y * y);
+        }
+
+    }
 }

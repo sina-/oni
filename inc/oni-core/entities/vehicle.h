@@ -10,7 +10,7 @@ namespace oni {
         // TODO: Make sure this inheritance doesn't add additional costs, or its minimum.
         class Vehicle : public World {
         public:
-            Vehicle() = default;
+            Vehicle();
 
             ~Vehicle() = default;
 
@@ -18,9 +18,17 @@ namespace oni {
 
             void setCarConfig(const entities::entityID &id, const components::CarConfig &carConfig);
 
+            components::Car &getCar(const entities::entityID &id);
+
+            const components::CarConfig &getCarConfig(const entities::entityID &id) const;
+
         private:
             std::vector<components::Car> mCars;
             std::vector<components::CarConfig> mCarConfigs;
+
+        protected:
+            entities::entityID _createEntity() override;
+
         };
     }
 }

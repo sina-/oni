@@ -47,49 +47,8 @@ namespace oni {
 
         };
 
+        // TODO: better name
         typedef double carScalar;
-
-        struct Car {
-            carScalar heading;
-            carScalar velocityAbsolute;
-            carScalar yawRate;
-            carScalar steer;
-            carScalar steerAngle;
-            carScalar inertia;
-            carScalar wheelBase;
-            carScalar axleWeightRatioFront;
-            carScalar axleWeightRatioRear;
-
-            math::vec2 position;
-            math::vec2 velocity;
-            math::vec2 velocityLocal;
-            math::vec2 acceleration;
-            math::vec2 accelerationLocal;
-
-            bool smoothSteer;
-            bool safeSteer;
-
-            Car() {
-                heading = 0.0f;
-                velocityAbsolute = 0.0f;
-                yawRate = 0.0f;
-                steer = 0.0f;
-                steerAngle = 0.0f;
-                inertia = 0.0f;
-                wheelBase = 0.0f;
-                axleWeightRatioFront = 0.0f;
-                axleWeightRatioRear = 0.0f;
-
-                position = math::vec2();
-                velocity = math::vec2();
-                velocityLocal = math::vec2();
-                acceleration = math::vec2();
-                accelerationLocal = math::vec2();
-
-                smoothSteer = true;
-                safeSteer = true;
-            }
-        };
 
         struct CarConfig {
             carScalar gravity;
@@ -115,22 +74,23 @@ namespace oni {
             carScalar airResist;
             carScalar rollResist;
 
+            // TODO: move this to cpp file
             CarConfig() {
                 gravity = 9.81f;
+                engineForce = 18000.0f;
+                brakeForce = 12000.0f;
                 mass = 1200.0f;
                 inertialScale = 1.0f;
                 halfWidth = 0.8f;
-                cgToFront = 2.0f;
-                cgToRear = 2.0f;
-                cgToFrontAxle = 1.25f;
-                cgToRearAxle = 1.25f;
+                cgToFront = 1.0f;
+                cgToRear = 1.0f;
+                cgToFrontAxle = 0.55f;
+                cgToRearAxle = 0.55f;
                 cgHeight = 0.55f;
-                wheelRadius = 0.3f;
-                wheelWidth = 0.2f;
+                wheelRadius = 0.2f;
+                wheelWidth = 0.1f;
                 tireGrip = 2.0f;
                 lockGrip = 2.0f;
-                engineForce = 8000.0f;
-                brakeForce = 12000.0f;
                 eBrakeForce = brakeForce / 2.5f;
                 weightTransfer = 0.2f;
                 maxSteer = 0.6f;
@@ -140,6 +100,49 @@ namespace oni {
                 rollResist = 8.0f;
             }
         };
+
+        struct Car {
+            carScalar heading;
+            carScalar velocityAbsolute;
+            carScalar yawRate;
+            carScalar steer;
+            carScalar steerAngle;
+            carScalar inertia;
+            carScalar wheelBase;
+            carScalar axleWeightRatioFront;
+            carScalar axleWeightRatioRear;
+
+            math::vec2 position;
+            math::vec2 velocity;
+            math::vec2 velocityLocal;
+            math::vec2 acceleration;
+            math::vec2 accelerationLocal;
+
+            bool smoothSteer;
+            bool safeSteer;
+
+            Car(const components::CarConfig &carConfig) {
+                heading = 0.0f;
+                velocityAbsolute = 0.0f;
+                yawRate = 0.0f;
+                steer = 0.0f;
+                steerAngle = 0.0f;
+                inertia = carConfig.mass * carConfig.inertialScale;
+                wheelBase = carConfig.cgToFrontAxle + carConfig.cgToRearAxle;
+                axleWeightRatioFront = carConfig.cgToRearAxle / wheelBase;
+                axleWeightRatioRear = carConfig.cgToFrontAxle / wheelBase;
+
+                position = math::vec2();
+                velocity = math::vec2();
+                velocityLocal = math::vec2();
+                acceleration = math::vec2();
+                accelerationLocal = math::vec2();
+
+                smoothSteer = true;
+                safeSteer = true;
+            }
+        };
+
 
 
     }

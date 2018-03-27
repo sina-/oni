@@ -19,10 +19,9 @@ namespace oni {
             return std::max(lower, std::min(n, upper));
         }
 
-        static void tick(components::Car &car, const components::CarConfig &config,
-                         const components::CarInput &inputs, float dt) {
+        static void tickCar(components::Car &car, const components::CarConfig &config,
+                            const components::CarInput &inputs, float dt) {
             using components::carScalar;
-
             carScalar sn = std::sin(car.heading);
             carScalar cs = std::cos(car.heading);
 
@@ -114,6 +113,30 @@ namespace oni {
             car.position.y += car.velocity.y * dt;
 
         }
+
+        static components::carScalar applySmoothSteer(const components::Car &car, components::carScalar steerInput, float dt) {
+            components::carScalar steer = 0;
+
+            if (std::abs(steerInput) > 0.001) {
+                //  Move toward steering input
+                steer = clip(car.steer + steerInput * dt * 2.0, -1.0, 1.0); // -inp.right, inp.left);
+            } else {
+                //  No steer input - move toward centre (0)
+                if (car.steer > 0) {
+                    steer = std::max(car.steer - dt * 1.0, (components::carScalar) 0.0f);
+                } else if (car.steer < 0) {
+                    steer = std::min(car.steer + dt * 1.0, (components::carScalar) 0.0f);
+                }
+            }
+
+            return steer;
+        };
+
+        static components::carScalar applySafeSteer(const components::Car &car, components::carScalar steerInput) {
+            auto avel = std::min(car.velocityAbsolute, (components::carScalar) 250.0);
+            auto steer = steerInput * (1.0 - (avel / 280.0));
+            return steer;
+        };
 
     }
 }

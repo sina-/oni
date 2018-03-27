@@ -13,7 +13,7 @@
 namespace oni {
     namespace entities {
         class World {
-        private:
+        protected:
             /**
              * It can reuse free slots created by destroyEntity().
              * When adding batch of entities, first reserve the number of entities needed by calling
@@ -23,7 +23,7 @@ namespace oni {
              *
              * @return entity ID.
              */
-            auto _createEntity();
+            virtual entities::entityID _createEntity();
 
         public:
             /**

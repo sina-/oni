@@ -3,7 +3,7 @@
 namespace oni {
     namespace entities {
 
-        auto World::_createEntity() {
+        entities::entityID World::_createEntity() {
             if (!mFreeEntitySlots.empty()) {
                 auto entity = mFreeEntitySlots.top();
                 mFreeEntitySlots.pop();

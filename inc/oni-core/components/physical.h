@@ -5,6 +5,8 @@
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 
+// TODO: This file name sucks
+
 namespace oni {
     namespace components {
         struct Placement {
@@ -121,7 +123,7 @@ namespace oni {
             bool smoothSteer;
             bool safeSteer;
 
-            Car(const components::CarConfig &carConfig) {
+            explicit Car(const components::CarConfig &carConfig) {
                 heading = 0.0f;
                 velocityAbsolute = 0.0f;
                 yawRate = 0.0f;

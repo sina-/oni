@@ -58,7 +58,7 @@ namespace oni {
                     // TODO: Can't accept more than one key
                     switch (keyPressed) {
                         case GLFW_KEY_W: {
-                            input.throttle = 1.4f;
+                            input.throttle = 0.4f;
                             break;
                         }
                         case GLFW_KEY_A: {
@@ -75,13 +75,14 @@ namespace oni {
                         }
 
                         case GLFW_KEY_SPACE: {
-                            input.brake = 0.2f;
+                            input.eBrake = 1.5f;
                             break;
                         }
 
                         default:
                             break;
                     }
+
 
                     auto steerInput = input.left - input.right;
                     if (car.smoothSteer) {
@@ -99,10 +100,50 @@ namespace oni {
                     tickCar(car, carConfig, input, tickTime);
 
                     // TODO: Size of the car should be saved as part of Car data.
+                    // TODO: Fix this mess of calculation
+                    // TODO: Maybe this can happen in the vertex shader
                     position.vertexA = math::vec3(car.position.x, car.position.y, 0.0f);
-                    position.vertexB = math::vec3(car.position.x, car.position.y + 1.0f, 0.0f);
-                    position.vertexC = math::vec3(car.position.x + 0.5f, car.position.y + 1.0f, 0.0f);
-                    position.vertexD = math::vec3(car.position.x + 0.5f, car.position.y, 0.0f);
+                    position.vertexB = math::vec3(car.position.x, car.position.y + 0.5f, 0.0f);
+                    position.vertexC = math::vec3(car.position.x + 1.0f, car.position.y + 0.5f, 0.0f);
+                    position.vertexD = math::vec3(car.position.x + 1.0f, car.position.y, 0.0f);
+
+                    auto a = position.vertexA;
+                    auto b = position.vertexB;
+                    auto c = position.vertexC;
+                    auto d = position.vertexD;
+
+                    auto sn = std::sin(car.heading);
+                    auto cs = std::cos(car.heading);
+
+                    auto cx = (a.x + c.x) / 2;
+                    auto cy = (a.y + b.y) / 2;
+
+                    a = math::vec3(a.x - cx, a.y - cy, a.z);
+                    b = math::vec3(b.x - cx, b.y - cy, b.z);
+                    c = math::vec3(c.x - cx, c.y - cy, c.z);
+                    d = math::vec3(d.x - cx, d.y - cy, d.z);
+
+                    auto aax = a.x * cs - a.y * sn;
+                    auto aay = a.x * sn + a.y * cs;
+
+                    auto bbx = b.x * cs - b.y * sn;
+                    auto bby = b.x * sn + b.y * cs;
+
+                    auto ccx = c.x * cs - c.y * sn;
+                    auto ccy = c.x * sn + c.y * cs;
+
+                    auto ddx = d.x * cs - d.y * sn;
+                    auto ddy = d.x * sn + d.y * cs;
+
+                    a = math::vec3(aax + cx, aay + cy, a.z);
+                    b = math::vec3(bbx + cx, bby + cy, b.z);
+                    c = math::vec3(ccx + cx, ccy + cy, c.z);
+                    d = math::vec3(ddx + cx, ddy + cy, d.z);
+
+                    position.vertexA = a;
+                    position.vertexB = b;
+                    position.vertexC = c;
+                    position.vertexD = d;
 
                     vehicle.setEntityPlacement(entityIndex, position);
                     vehicle.setCar(entityIndex, car);

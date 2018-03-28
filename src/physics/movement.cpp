@@ -3,7 +3,7 @@
 namespace oni {
     namespace physics {
 
-        void Movement::update(entities::World &world, int keyPressed, float tickTime) {
+        void Movement::update(entities::World &world, const io::Input &input, float tickTime) {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
@@ -13,26 +13,19 @@ namespace oni {
                     auto velocity = world.getEntityVelocity(entityIndex);
                     auto magnitude = velocity.magnitude * tickTime;
 
-                    switch (keyPressed) {
-                        case GLFW_KEY_W: {
-                            velocity.direction += math::vec3(0.0f, magnitude, 0.0f);
-                            break;
-                        }
-                        case GLFW_KEY_A: {
-                            velocity.direction += math::vec3(-magnitude, 0.0f, 0.0f);
-                            break;
-                        }
-                        case GLFW_KEY_S: {
-                            velocity.direction += math::vec3(0.0f, -magnitude, 0.0f);
-                            break;
-                        }
-                        case GLFW_KEY_D:
-                            velocity.direction += math::vec3(magnitude, 0.0f, 0.0f);
-                            break;
-
-                        default:
-                            break;
+                    if (input.isPressed(GLFW_KEY_W)) {
+                        velocity.direction += math::vec3(0.0f, magnitude, 0.0f);
                     }
+                    if (input.isPressed(GLFW_KEY_A)) {
+                        velocity.direction += math::vec3(-magnitude, 0.0f, 0.0f);
+                    }
+                    if (input.isPressed(GLFW_KEY_S)) {
+                        velocity.direction += math::vec3(0.0f, -magnitude, 0.0f);
+                    }
+                    if (input.isPressed(GLFW_KEY_D)) {
+                        velocity.direction += math::vec3(magnitude, 0.0f, 0.0f);
+                    }
+
                     updatePosition(position, velocity.direction, tickTime);
                     world.setEntityPlacement(entityIndex, position);
                     world.setEntityVelocity(entityIndex, velocity);
@@ -43,7 +36,7 @@ namespace oni {
 
         }
 
-        void Movement::update(entities::Vehicle &vehicle, int keyPressed, float tickTime) {
+        void Movement::update(entities::Vehicle &vehicle, const io::Input &input, float tickTime) {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: vehicle.getEntities()) {
@@ -53,38 +46,25 @@ namespace oni {
                     auto car = vehicle.getCar(entityIndex);
                     const auto &carConfig = vehicle.getCarConfig(entityIndex);
 
-                    auto input = components::CarInput();
+                    auto carInput = components::CarInput();
 
-                    // TODO: Can't accept more than one key
-                    switch (keyPressed) {
-                        case GLFW_KEY_W: {
-                            input.throttle = 0.4f;
-                            break;
-                        }
-                        case GLFW_KEY_A: {
-                            input.left = 3.3f;
-                            break;
-                        }
-                        case GLFW_KEY_S: {
-                            input.brake = 1.0f;
-                            break;
-                        }
-                        case GLFW_KEY_D: {
-                            input.right = 3.3f;
-                            break;
-                        }
-
-                        case GLFW_KEY_SPACE: {
-                            input.eBrake = 1.5f;
-                            break;
-                        }
-
-                        default:
-                            break;
+                    if (input.isPressed(GLFW_KEY_W)) {
+                        carInput.throttle = 0.4f;
+                    }
+                    if (input.isPressed(GLFW_KEY_A)) {
+                        carInput.left = 3.3f;
+                    }
+                    if (input.isPressed(GLFW_KEY_S)) {
+                        carInput.brake = 1.0f;
+                    }
+                    if (input.isPressed(GLFW_KEY_D)) {
+                        carInput.right = 3.3f;
+                    }
+                    if (input.isPressed(GLFW_KEY_SPACE)) {
+                        carInput.eBrake = 1.5f;
                     }
 
-
-                    auto steerInput = input.left - input.right;
+                    auto steerInput = carInput.left - carInput.right;
                     if (car.smoothSteer) {
                         car.steer = applySmoothSteer(car, steerInput, tickTime);
                     } else {
@@ -97,7 +77,7 @@ namespace oni {
 
                     car.steerAngle = car.steer * carConfig.maxSteer;
 
-                    tickCar(car, carConfig, input, tickTime);
+                    tickCar(car, carConfig, carInput, tickTime);
 
                     // TODO: Size of the car should be saved as part of Car data.
                     // TODO: Fix this mess of calculation

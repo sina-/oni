@@ -1,7 +1,7 @@
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/utils/index-buffer-gen.h>
 #include <oni-core/graphics/texture.h>
-#include <oni-core/utils/io.h>
+#include <oni-core/io/input.h>
 
 namespace oni {
     namespace graphics {

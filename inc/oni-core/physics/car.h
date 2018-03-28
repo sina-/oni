@@ -4,7 +4,7 @@
 #include <algorithm>
 
 #include <oni-core/math/vec2.h>
-#include <oni-core/components/input.h>
+#include <oni-core/components/input-data.h>
 
 namespace oni {
     namespace physics {

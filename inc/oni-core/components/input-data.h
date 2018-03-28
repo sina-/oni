@@ -2,6 +2,8 @@
 
 namespace oni {
     namespace components {
+        typedef int oniKey;
+
         struct CarInput {
             float left;
             float right;

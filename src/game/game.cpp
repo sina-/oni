@@ -1,5 +1,5 @@
 #include <oni-core/game/game.h>
-#include <oni-core/utils/io.h>
+#include <oni-core/io/input.h>
 #include <thread>
 #include <oni-core/utils/oni-assert.h>
 
@@ -28,7 +28,7 @@ namespace oni {
             }
 
             // TODO: Create an input class that can be polled for input status.
-            tick(getKey());
+            tick();
 
             render();
 
@@ -38,7 +38,7 @@ namespace oni {
             mFrameLag += mFrameTimer.elapsed();
         }
 
-        void Game::tick(const int keyPressed) {
+        void Game::tick() {
             while (mFrameLag > mTickMS) {
                 mTickTimer.restart();
 
@@ -46,11 +46,11 @@ namespace oni {
                 correction = std::min(mMinTickMS, correction);
                 _tick(correction, keyPressed);*/
 
-                _tick(mTickMS, keyPressed);
+                _tick(mTickMS);
                 mTickLag = mTickTimer.elapsed();
 
                 // If it takes longer than tick frequency to run the simulations, the game will die.
-                ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
+                //ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
 
                 mFrameLag -= mTickMS;
                 mTickCounter++;

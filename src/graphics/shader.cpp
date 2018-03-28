@@ -1,5 +1,5 @@
 #include <oni-core/graphics/utils/check-ogl-errors.h>
-#include <oni-core/utils/io.h>
+#include <oni-core/io/input.h>
 #include <oni-core/graphics/shader.h>
 
 namespace oni {

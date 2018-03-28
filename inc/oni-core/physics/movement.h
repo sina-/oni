@@ -7,8 +7,8 @@ namespace oni {
     namespace physics {
         class Movement : public Physic {
         public:
-            void update(entities::World &world, int keyPressed, float tickTime) override;
-            void update(entities::Vehicle &vehicle, int keyPressed, float tickTime) override;
+            void update(entities::World &world, const io::Input &input, float tickTime) override;
+            void update(entities::Vehicle &vehicle, const io::Input &input, float tickTime) override;
 
         private:
             void updatePosition(components::Placement &position, const math::vec3 &direction, float tickTime);

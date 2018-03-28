@@ -23,19 +23,17 @@ namespace oni {
             virtual bool shouldTerminate() = 0;
 
         protected:
-            virtual void tick(const int keyPressed) final;
+            virtual void tick() final;
 
             virtual void render() final;
 
-            virtual void _tick(const float tickTime, const int keyPressed) = 0;
+            virtual void _tick(const float tickTime) = 0;
 
             virtual void _render() = 0;
 
             virtual void showFPS(unsigned short fps) = 0;
 
             virtual void showTPS(unsigned short tps) = 0;
-
-            virtual int getKey() = 0;
 
         protected:
             utils::HighResolutionTimer mRunTimer;

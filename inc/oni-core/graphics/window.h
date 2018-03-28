@@ -8,7 +8,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <oni-core/utils/io.h>
+#include <oni-core/io/input.h>
 
 namespace oni {
     namespace graphics {
@@ -26,16 +26,17 @@ namespace oni {
             int mWidth, mHeight;
             int mXScaling, mYScaling;
             GLFWwindow *mWindow;
-            int mKeyPressed;
             int mMouseButton;
             double mCursorX, mCursorY;
+            std::vector<int> mKeysPressed;
+            std::vector<int> mKeysReleased;
 
         public:
             Window(const char *name, int width, int height, int xScaling, int yScaling);
 
             ~Window();
 
-            void update() const;
+            void update(io::Input &input);
 
             bool closed() const;
 
@@ -53,9 +54,9 @@ namespace oni {
 
             int getYScaling() { return mYScaling; }
 
-            void setKeyPressed(int key) { mKeyPressed = key; }
+            void addKeyPressed(int key) { mKeysPressed.push_back(key); }
 
-            const int &getKeyPressed() const { return mKeyPressed; }
+            void addKeyReleased(int key) { mKeysReleased.push_back(key); }
 
             void setMouseButton(int button) { mMouseButton = button; }
 

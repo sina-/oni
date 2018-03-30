@@ -16,7 +16,6 @@ namespace oni {
             // NOTE: This type of initialization will avoid copy construction.
             mPlacements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
             mAppearances.emplace_back(math::vec4());
-            mVelocities.emplace_back(math::vec3(), 0.0f);
             mTextures.emplace_back("", 0, 0, 0, std::vector<math::vec2>());
             mLayerIDs.emplace_back(0);
             mTexts.emplace_back(components::Text());
@@ -27,7 +26,6 @@ namespace oni {
             mEntities.reserve(mEntities.size() + size);
             mPlacements.reserve(mPlacements.size() + size);
             mAppearances.reserve(mAppearances.size() + size);
-            mVelocities.reserve(mVelocities.size() + size);
             mTextures.reserve(mTextures.size() + size);
             mLayerIDs.reserve(mLayerIDs.size() + size);
             mTexts.reserve(mTexts.size() + size);
@@ -65,10 +63,6 @@ namespace oni {
             return mAppearances[id];
         }
 
-        const components::Velocity &BasicEntityRepo::getEntityVelocity(entities::entityID id) const {
-            return mVelocities[id];
-        }
-
         const components::Texture &BasicEntityRepo::getEntityTexture(entities::entityID id) const {
             return mTextures[id];
         }
@@ -87,10 +81,6 @@ namespace oni {
 
         void BasicEntityRepo::setEntityAppearance(entities::entityID id, const components::Appearance &appearance) {
             mAppearances[id] = appearance;
-        }
-
-        void BasicEntityRepo::setEntityVelocity(entities::entityID id, const components::Velocity &velocity) {
-            mVelocities[id] = velocity;
         }
 
         void BasicEntityRepo::setEntityTexture(entities::entityID id, const components::Texture &texture) {

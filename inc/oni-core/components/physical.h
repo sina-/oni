@@ -42,20 +42,6 @@ namespace oni {
             Placement(const Placement &other) = default;
         };
 
-        struct Velocity {
-            math::vec3 direction;
-            float magnitude;
-
-            Velocity() : direction(math::vec3()), magnitude(0.0f) {};
-
-            Velocity(const math::vec3 &_direction, float _magnitude) : direction(_direction),
-                                                                       magnitude(_magnitude) {};
-
-            Velocity(const Velocity &other) = default;
-
-        };
-
-        // TODO: better name
         typedef double carSimDouble;
 
         struct CarConfig {

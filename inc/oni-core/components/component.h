@@ -14,7 +14,7 @@ namespace oni {
 
             PLACEMENT,      // 2 -> 8
             APPEARANCE,     // 3 -> 16
-            VELOCITY,       // 4 -> 32
+            DYNAMIC,       // 4 -> 32
             TEXTURE,        // ...
             TEXT,
 
@@ -27,7 +27,7 @@ namespace oni {
 
         const static components::Mask PlacementComponent = components::Mask().set(components::PLACEMENT);
         const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);
-        const static components::Mask VelocityComponent = components::Mask().set(components::VELOCITY);
+        const static components::Mask DynamicComponent = components::Mask().set(components::DYNAMIC);
         const static components::Mask TextureComponent = components::Mask().set(components::TEXTURE);
         const static components::Mask TextComponent = components::Mask().set(components::TEXT);
     }

@@ -30,24 +30,6 @@ namespace oni {
             return entity;
         }
 
-        entities::entityID createDynamicTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
-                                                       const components::Texture &entityTexture,
-                                                       const math::vec3 &position, const math::vec2 &size) {
-            auto entity = basicEntityRepo.createEntity(entities::DynamicTexturedSprite, layerID);
-
-            auto entityPlacement = components::Placement(position, size);
-
-            auto entityVelocity = components::Velocity();
-            entityVelocity.magnitude = 8.0f;
-            entityVelocity.direction = math::vec3(0.0f, 0.0f, 0.0f);
-
-            basicEntityRepo.setEntityPlacement(entity, entityPlacement);
-            basicEntityRepo.setEntityVelocity(entity, entityVelocity);
-            basicEntityRepo.setEntityTexture(entity, entityTexture);
-
-            return entity;
-        }
-
         entities::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
                                             components::LayerID layerID, const std::string &text,
                                             const math::vec3 &position) {

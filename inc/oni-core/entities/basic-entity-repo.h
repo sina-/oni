@@ -45,8 +45,6 @@ namespace oni {
 
             void setEntityAppearance(entities::entityID id, const components::Appearance &appearance);
 
-            void setEntityVelocity(entities::entityID id, const components::Velocity &velocity);
-
             void setEntityTexture(entities::entityID id, const components::Texture &texture);
 
             void setEntityLayerID(entities::entityID id, const components::LayerID &tileID);
@@ -60,8 +58,6 @@ namespace oni {
             const components::Placement &getEntityPlacement(entities::entityID id) const;
 
             const components::Appearance &getEntityAppearance(entities::entityID id) const;
-
-            const components::Velocity &getEntityVelocity(entities::entityID id) const;
 
             const components::Texture &getEntityTexture(entities::entityID id) const;
 
@@ -82,8 +78,6 @@ namespace oni {
 
             std::vector<components::Placement> mPlacements;
             std::vector<components::Appearance> mAppearances;
-            // TODO: Remove this, also from components
-            std::vector<components::Velocity> mVelocities;
             std::vector<components::Texture> mTextures;
             std::vector<components::LayerID> mLayerIDs;
             std::vector<components::Text> mTexts;

@@ -81,7 +81,8 @@ namespace oni {
             carScalar cornerStiffnessRear;
             carScalar airResist;
             carScalar rollResist;
-            carScalar scaleMultiplier;
+            carScalar scaleMultiplierX;
+            carScalar scaleMultiplierY;
 
             // TODO: move this to cpp file
             CarConfig() {
@@ -107,7 +108,8 @@ namespace oni {
                 cornerStiffnessRear = 5.2f;
                 airResist = 2.5f;
                 rollResist = 8.0f;
-                scaleMultiplier = 0.25f;
+                scaleMultiplierX = 0.25f;
+                scaleMultiplierY = 0.30f;
             }
         };
 

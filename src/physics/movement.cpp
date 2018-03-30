@@ -83,9 +83,11 @@ namespace oni {
                     // TODO: Fix this mess of calculation
                     // TODO: Maybe this can happen in the vertex shader
                     auto position = components::Placement(
-                            math::vec3(car.position.x - (carConfig.cgToRear * carConfig.scaleMultiplier), car.position.y - (carConfig.halfWidth * carConfig.scaleMultiplier),
-                                       1.0f), math::vec2((carConfig.cgToRear + carConfig.cgToFront) * carConfig.scaleMultiplier,
-                                                         carConfig.halfWidth * 2 * carConfig.scaleMultiplier));
+                            math::vec3(car.position.x - (carConfig.cgToRear * carConfig.scaleMultiplierX),
+                                       car.position.y - (carConfig.halfWidth * carConfig.scaleMultiplierY),
+                                       1.0f),
+                            math::vec2((carConfig.cgToRear + carConfig.cgToFront) * carConfig.scaleMultiplierX,
+                                       carConfig.halfWidth * 2 * carConfig.scaleMultiplierY));
 
                     auto a = position.vertexA;
                     auto b = position.vertexB;

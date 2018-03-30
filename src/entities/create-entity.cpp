@@ -7,14 +7,8 @@ namespace oni {
                                               const math::vec3 &position, const math::vec2 &size) {
             auto entity = world.createEntity(entities::Sprite, layerID);
 
-            auto entityPlacement = components::Placement();
-            entityPlacement.vertexA = math::vec3(position.x, position.y, position.z);
-            entityPlacement.vertexB = math::vec3(position.x, position.y + size.y, position.z);
-            entityPlacement.vertexC = math::vec3(position.x + size.x, position.y + size.y, position.z);
-            entityPlacement.vertexD = math::vec3(position.x + size.x, position.y, position.z);
-
-            auto entityAppearance = components::Appearance();
-            entityAppearance.color = color;
+            auto entityPlacement = components::Placement(position, size);
+            auto entityAppearance = components::Appearance(color);
 
             world.setEntityPlacement(entity, entityPlacement);
             world.setEntityAppearance(entity, entityAppearance);

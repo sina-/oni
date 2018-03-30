@@ -161,7 +161,7 @@ namespace oni {
         }
 
         void Layer::moveCamera(float x, float y) {
-            // TODO: Is it really necessary to create a new matrix? Can't we just transalte the old one?
+            // TODO: Is it really necessary to create a new matrix? Can't we just translate the old one?
             auto projMatrix = math::mat4::orthographic(mScreenBound.xMin + x, mScreenBound.xMax + x,
                                                        mScreenBound.yMin + y, mScreenBound.yMax + y, -1.0f, 1.0f);
 

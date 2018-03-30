@@ -3,6 +3,8 @@
 namespace oni {
     namespace entities {
 
+        BasicEntityRepo::BasicEntityRepo() = default;
+
         entities::entityID BasicEntityRepo::_createEntity() {
             if (!mFreeEntitySlots.empty()) {
                 auto entity = mFreeEntitySlots.top();

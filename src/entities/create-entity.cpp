@@ -38,6 +38,29 @@ namespace oni {
 
             return textEntity;
         }
+
+        entities::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::LayerID layerID,
+                                               const components::Texture &entityTexture,
+                                               const components::CarConfig &carConfig) {
+            auto entity = vehicleEntityRepo.createEntity(entities::DynamicTexturedSprite, layerID);
+
+
+            auto carX = -carConfig.cgToRear * carConfig.scaleMultiplierX;
+            auto carY = -carConfig.halfWidth * carConfig.scaleMultiplierY;
+            auto carSizeX = (carConfig.cgToRear + carConfig.cgToFront) * carConfig.scaleMultiplierX;
+            auto carSizeY = carConfig.halfWidth * 2 * carConfig.scaleMultiplierY;
+
+            auto entityPlacement = components::Placement(math::vec3((float) carX, (float) carY, 1.0f),
+                                                         math::vec2((float) carSizeX, (float) carSizeY));
+            auto car = components::Car(carConfig);
+            vehicleEntityRepo.setCar(entity, car);
+            vehicleEntityRepo.setCarConfig(entity, carConfig);
+
+            vehicleEntityRepo.setEntityPlacement(entity, entityPlacement);
+            vehicleEntityRepo.setEntityTexture(entity, entityTexture);
+
+            return entity;
+        }
     }
 
 }

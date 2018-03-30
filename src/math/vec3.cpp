@@ -8,7 +8,7 @@ namespace oni {
             z = 0.0f;
         }
 
-        vec3::vec3(const float &x, const float &y, const float &z) {
+        vec3::vec3(float x, float y, float z) {
             this->x = x;
             this->y = y;
             this->z = z;

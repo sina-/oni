@@ -8,7 +8,7 @@ namespace oni {
 
         Game::Game()
                 : mRunTimerA(), mRunLagAccumulator(0.0f), mRunCounter(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
-                  mTickLag(0), mRunLag(0.0f),mRunTimerB() {}
+                  mTickLag(0), mRunLag(0.0f), mRunTimerB() {}
 
         void Game::run() {
             mRunTimerA.restart();
@@ -32,33 +32,35 @@ namespace oni {
 
             render();
 
+            mRunLag = mRunTimerB.elapsed();
+
+            if (mRunLag < mTickMS) {
+                auto sleepFor = (int) (((mTickMS - mRunLag)) * 1000);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+            }
+
             mRunCounter++;
             mFrameCounter++;
             mFrameLag += mFrameTimer.elapsed();
             mRunLagAccumulator += mRunTimerA.elapsed();
-            mRunLag = mRunTimerB.elapsed();
-
-            if(mRunLag < 1 / 60.0f){
-                std::this_thread::sleep_for(std::chrono::milliseconds((int)((1/60.0f - mRunLag))*1000));
-            }
         }
 
         void Game::tick() {
             //while (mFrameLag > mTickMS) {
-                mTickTimer.restart();
+            mTickTimer.restart();
 
 /*                auto correction = std::max((float) mTickLag, mTickMS);
                 correction = std::min(mMinTickMS, correction);
                 _tick(correction, keyPressed);*/
 
-                _tick(mTickMS);
-                mTickLag = mTickTimer.elapsed();
+            _tick(mTickMS);
+            mTickLag = mTickTimer.elapsed();
 
-                // If it takes longer than tick frequency to run the simulations, the game will die.
-                //ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
+            // If it takes longer than tick frequency to run the simulations, the game will die.
+            //ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
 
-                //mFrameLag -= mTickMS;
-                mTickCounter++;
+            //mFrameLag -= mTickMS;
+            mTickCounter++;
             //}
         }
 

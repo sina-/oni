@@ -10,7 +10,7 @@ namespace oni {
 			y = 0.0f;
 		}
 
-		vec2::vec2(const float & x, const float & y)
+		vec2::vec2(float x, float y)
 		{
 			this->x = x;
 			this->y = y;

@@ -52,7 +52,7 @@ namespace oni {
             glfwSetMouseButtonCallback(mWindow, mouseCallback);
             glfwSetCursorPosCallback(mWindow, cursorPosCallback);
             // This will disable v-sync.
-            glfwSwapInterval(1.0);
+            glfwSwapInterval(0.0);
 
 
             glEnable(GL_BLEND);

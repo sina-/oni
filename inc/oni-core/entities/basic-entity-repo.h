@@ -31,7 +31,7 @@ namespace oni {
              * keeps data in a contiguous stack-based memory. This is in contrast to the usual list of struct.
              *
              */
-            BasicEntityRepo() = default;
+            BasicEntityRepo();
 
             void reserveEntity(size_t count);
 

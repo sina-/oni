@@ -36,10 +36,12 @@ namespace oni {
             virtual void showTPS(unsigned short tps) = 0;
 
         protected:
-            utils::HighResolutionTimer mRunTimer;
+            utils::HighResolutionTimer mRunTimerA;
+            utils::HighResolutionTimer mRunTimerB;
             utils::HighResolutionTimer mFrameTimer;
             utils::HighResolutionTimer mTickTimer;
 
+            double mRunLagAccumulator;
             double mRunLag;
             double mFrameLag;
             double mTickLag;

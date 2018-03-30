@@ -7,20 +7,21 @@ namespace oni {
     namespace game {
 
         Game::Game()
-                : mRunTimer(), mRunLag(0.0f), mRunCounter(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
-                  mTickLag(0) {}
+                : mRunTimerA(), mRunLagAccumulator(0.0f), mRunCounter(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
+                  mTickLag(0), mRunLag(0.0f),mRunTimerB() {}
 
         void Game::run() {
-            mRunTimer.restart();
+            mRunTimerA.restart();
+            mRunTimerB.restart();
             mFrameTimer.restart();
 
-            if (0.1f - mRunLag <= ep) {
-                auto fps = mRunCounter / mRunLag;
-                auto tps = 1 * mTickCounter;
+            if (0.1f - mRunLagAccumulator <= ep) {
+                auto fps = mRunCounter / mRunLagAccumulator;
+                auto tps = 10 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));
                 showTPS(static_cast<unsigned short>(tps));
 
-                mRunLag = 0;
+                mRunLagAccumulator = 0;
                 mTickLag = 0;
                 mRunCounter = 0;
                 mTickCounter = 0;
@@ -33,12 +34,17 @@ namespace oni {
 
             mRunCounter++;
             mFrameCounter++;
-            mRunLag += mRunTimer.elapsed();
             mFrameLag += mFrameTimer.elapsed();
+            mRunLagAccumulator += mRunTimerA.elapsed();
+            mRunLag = mRunTimerB.elapsed();
+
+            if(mRunLag < 1 / 60.0f){
+                std::this_thread::sleep_for(std::chrono::milliseconds((int)((1/60.0f - mRunLag))*1000));
+            }
         }
 
         void Game::tick() {
-            while (mFrameLag > mTickMS) {
+            //while (mFrameLag > mTickMS) {
                 mTickTimer.restart();
 
 /*                auto correction = std::max((float) mTickLag, mTickMS);
@@ -51,9 +57,9 @@ namespace oni {
                 // If it takes longer than tick frequency to run the simulations, the game will die.
                 //ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
 
-                mFrameLag -= mTickMS;
+                //mFrameLag -= mTickMS;
                 mTickCounter++;
-            }
+            //}
         }
 
         void Game::render() {

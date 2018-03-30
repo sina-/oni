@@ -81,6 +81,7 @@ namespace oni {
             carScalar cornerStiffnessRear;
             carScalar airResist;
             carScalar rollResist;
+            carScalar scaleMultiplier;
 
             // TODO: move this to cpp file
             CarConfig() {
@@ -89,16 +90,16 @@ namespace oni {
                 brakeForce = 12000.0f;
                 mass = 1200.0f;
                 inertialScale = 1.0f;
-                halfWidth = 0.4f;
-                cgToFront = 1.0f;
-                cgToRear = 1.0f;
-                cgToFrontAxle = 0.55f;
-                cgToRearAxle = 0.55f;
+                halfWidth = 0.8f;
+                cgToFront = 2.0f;
+                cgToRear = 2.0f;
+                cgToFrontAxle = 1.25f;
+                cgToRearAxle = 1.25f;
                 cgHeight = 0.55f;
-                wheelRadius = 0.2f;
-                wheelWidth = 0.1f;
+                wheelRadius = 0.3f;
+                wheelWidth = 0.2f;
                 tireGrip = 2.0f;
-                lockGrip = 2.0f;
+                lockGrip = 1.0f;
                 eBrakeForce = brakeForce / 2.5f;
                 weightTransfer = 0.2f;
                 maxSteer = 0.6f;
@@ -106,6 +107,7 @@ namespace oni {
                 cornerStiffnessRear = 5.2f;
                 airResist = 2.5f;
                 rollResist = 8.0f;
+                scaleMultiplier = 0.25f;
             }
         };
 

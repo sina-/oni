@@ -49,7 +49,7 @@ namespace oni {
                     auto carInput = components::CarInput();
 
                     if (input.isPressed(GLFW_KEY_W)) {
-                        carInput.throttle = 1.0f;
+                        carInput.throttle = 0.5f;
                     }
                     if (input.isPressed(GLFW_KEY_A)) {
                         carInput.left = 1.0f;
@@ -83,9 +83,9 @@ namespace oni {
                     // TODO: Fix this mess of calculation
                     // TODO: Maybe this can happen in the vertex shader
                     auto position = components::Placement(
-                            math::vec3(car.position.x - carConfig.cgToRear, car.position.y - carConfig.halfWidth,
-                                       1.0f), math::vec2(carConfig.cgToRear + carConfig.cgToFront,
-                                                         carConfig.halfWidth * 2));
+                            math::vec3(car.position.x - (carConfig.cgToRear * carConfig.scaleMultiplier), car.position.y - (carConfig.halfWidth * carConfig.scaleMultiplier),
+                                       1.0f), math::vec2((carConfig.cgToRear + carConfig.cgToFront) * carConfig.scaleMultiplier,
+                                                         carConfig.halfWidth * 2 * carConfig.scaleMultiplier));
 
                     auto a = position.vertexA;
                     auto b = position.vertexB;

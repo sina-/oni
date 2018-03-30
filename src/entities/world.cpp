@@ -106,5 +106,9 @@ namespace oni {
             mTexts[id] = text;
 
         }
+
+        components::Text &World::getEntityText(entities::entityID id) {
+            return mTexts[id];
+        }
     }
 }

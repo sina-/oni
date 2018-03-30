@@ -18,7 +18,7 @@ namespace oni {
                 auto fps = mRunCounter / mRunLag;
                 auto tps = 1 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));
-                showTPS(tps);
+                showTPS(static_cast<unsigned short>(tps));
 
                 mRunLag = 0;
                 mTickLag = 0;
@@ -27,7 +27,6 @@ namespace oni {
                 mFrameCounter = 0;
             }
 
-            // TODO: Create an input class that can be polled for input status.
             tick();
 
             render();

@@ -49,19 +49,19 @@ namespace oni {
                     auto carInput = components::CarInput();
 
                     if (input.isPressed(GLFW_KEY_W)) {
-                        carInput.throttle = 0.4f;
+                        carInput.throttle = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_A)) {
-                        carInput.left = 3.3f;
+                        carInput.left = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_S)) {
                         carInput.brake = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_D)) {
-                        carInput.right = 3.3f;
+                        carInput.right = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_SPACE)) {
-                        carInput.eBrake = 1.5f;
+                        carInput.eBrake = 3.0f;
                     }
 
                     auto steerInput = carInput.left - carInput.right;

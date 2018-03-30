@@ -27,9 +27,10 @@ namespace oni {
             std::unique_ptr<BatchRenderer2D> mRenderer2D;
             std::unique_ptr<Shader> mShader;
             math::mat4 mProjectionMatrix;
+            math::vec4 mScreenBound;
 
         public:
-            Layer(std::unique_ptr<BatchRenderer2D>, std::unique_ptr<Shader>, const math::mat4 &);
+            Layer(std::unique_ptr<BatchRenderer2D>, std::unique_ptr<Shader>, const math::vec4 &screenBound);
 
             ~Layer() = default;
 
@@ -44,6 +45,8 @@ namespace oni {
             void begin() const;
 
             void end() const;
+
+            void moveCamera(float x, float y);
 
             /**
              * This function should always return a unique ID.
@@ -62,8 +65,8 @@ namespace oni {
              * @return
              */
             static std::unique_ptr<Layer>
-            createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
-                            std::string &&fragmentShader);
+            createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader, std::string &&fragmentShader,
+                                        const math::vec4 &screenBound);
 
             /**
              * Similar to tile layer but rendered with textures instead of solid colors.
@@ -72,7 +75,8 @@ namespace oni {
              */
             static std::unique_ptr<Layer>
             createTexturedTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
-                                    std::string &&fragmentShader);
+                                    std::string &&fragmentShader,
+                                    const math::vec4 &screenBound);
 
         };
 

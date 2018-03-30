@@ -12,6 +12,7 @@
 
 namespace oni {
     namespace entities {
+        // TODO: This class is not necessarily World class, a better name could be BaseEntity, or Entity.
         class World {
         protected:
             /**
@@ -68,6 +69,8 @@ namespace oni {
             const components::LayerID &getEntityLayerID(entities::entityID id) const;
 
             const components::Text &getEntityText(entities::entityID id) const;
+
+            components::Text &getEntityText(entities::entityID id);
 
         protected:
             std::stack<entities::entityID> mFreeEntitySlots;

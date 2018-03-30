@@ -6,9 +6,9 @@ namespace oni {
         Window::Window(const char *title, int width, int height, int xScaling, int yScaling) {
             mTitle = title;
             mWidth = width;
+            mHeight = height;
             mXScaling = xScaling;
             mYScaling = yScaling;
-            mHeight = height;
             mMouseButton = GLFW_KEY_UNKNOWN;
             mCursorX = 0.0;
             mCursorY = 0.0;

@@ -4,7 +4,7 @@ namespace oni {
     namespace physics {
 
         // TODO: Delete this function
-        void Movement::update(entities::World &world, const io::Input &input, float tickTime) {
+        void Movement::tick(entities::World &world, const io::Input &input, float tickTime) {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: world.getEntities()) {
@@ -37,13 +37,12 @@ namespace oni {
 
         }
 
-        void Movement::update(entities::Vehicle &vehicle, const io::Input &input, float tickTime) {
+        void Movement::tick(entities::Vehicle &vehicle, const io::Input &input, float tickTime) {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: vehicle.getEntities()) {
                 if ((entity & components::VelocityComponent) == components::VelocityComponent
                     && (entity & components::PlacementComponent) == components::PlacementComponent) {
-                    auto position = vehicle.getEntityPlacement(entityIndex);
                     auto car = vehicle.getCar(entityIndex);
                     const auto &carConfig = vehicle.getCarConfig(entityIndex);
 
@@ -83,7 +82,7 @@ namespace oni {
                     // TODO: Size of the car should be saved as part of Car data.
                     // TODO: Fix this mess of calculation
                     // TODO: Maybe this can happen in the vertex shader
-                    position = components::Placement(
+                    auto position = components::Placement(
                             math::vec3(car.position.x - carConfig.cgToRear, car.position.y - carConfig.halfWidth,
                                        1.0f), math::vec2(carConfig.cgToRear + carConfig.cgToFront,
                                                          carConfig.halfWidth * 2));

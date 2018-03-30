@@ -8,8 +8,8 @@ namespace oni {
     namespace physics {
         class Physic {
         public:
-            virtual void update(entities::World &world, const io::Input &input, float tickTime) = 0;
-            virtual void update(entities::Vehicle &vehicle, const io::Input &input, float tickTime) = 0;
+            virtual void tick(entities::World &world, const io::Input &input, float tickTime) = 0;
+            virtual void tick(entities::Vehicle &vehicle, const io::Input &input, float tickTime) = 0;
         };
     }
 }

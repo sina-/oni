@@ -7,7 +7,7 @@ namespace oni {
     namespace graphics {
         class Light {
         public:
-            static void update(Layer &layer, double mouseX, double mouseY, int windowWidth, int windowHeight);
+            static void tick(Layer &layer, double mouseX, double mouseY, int windowWidth, int windowHeight);
         };
     }
 }

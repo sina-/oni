@@ -16,6 +16,13 @@ namespace oni {
 
         static const unsigned long mMaxNumTextureSamplers = 32;
 
+        struct ScreenBounds {
+            float xMin;
+            float xMax;
+            float yMin;
+            float yMax;
+        };
+
         /**
          * A Layer is the composition that renders entities in the world. Each entity
          * is assigned a layer. Every rendering property that affects group of entities is defined in
@@ -26,11 +33,10 @@ namespace oni {
             // polymorphism. Do I really need Renderer2D interface?
             std::unique_ptr<BatchRenderer2D> mRenderer2D;
             std::unique_ptr<Shader> mShader;
-            math::mat4 mProjectionMatrix;
-            math::vec4 mScreenBound;
+            graphics::ScreenBounds mScreenBound;
 
         public:
-            Layer(std::unique_ptr<BatchRenderer2D>, std::unique_ptr<Shader>, const math::vec4 &screenBound);
+            Layer(std::unique_ptr<BatchRenderer2D>, std::unique_ptr<Shader>, const graphics::ScreenBounds &screenBound);
 
             ~Layer() = default;
 
@@ -66,7 +72,7 @@ namespace oni {
              */
             static std::unique_ptr<Layer>
             createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader, std::string &&fragmentShader,
-                                        const math::vec4 &screenBound);
+                                        const graphics::ScreenBounds &screenBound);
 
             /**
              * Similar to tile layer but rendered with textures instead of solid colors.
@@ -76,7 +82,7 @@ namespace oni {
             static std::unique_ptr<Layer>
             createTexturedTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
                                     std::string &&fragmentShader,
-                                    const math::vec4 &screenBound);
+                                    const graphics::ScreenBounds&screenBound);
 
         };
 

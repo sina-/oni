@@ -1,14 +1,14 @@
 #include <oni-core/graphics/layer.h>
 #include <oni-core/graphics/texture.h>
+#include <oni-core/graphics/window.h>
 
 namespace oni {
     namespace graphics {
 
         Layer::Layer(std::unique_ptr<BatchRenderer2D> renderer, std::unique_ptr<Shader> shader,
-                     const math::vec4 &screenBound)
+                     const graphics::ScreenBounds &screenBound)
                 : mRenderer2D(std::move(renderer)),
                   mShader(std::move(shader)),
-                  mProjectionMatrix(math::mat4()),
                   mScreenBound(screenBound) {
             moveCamera(0.0f, 0.0f);
         }
@@ -84,7 +84,7 @@ namespace oni {
 
         std::unique_ptr<Layer>
         Layer::createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader, std::string &&fragmentShader,
-                               const math::vec4 &screenBound) {
+                               const graphics::ScreenBounds &screenBound) {
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
 
             auto program = shader->getProgram();
@@ -118,7 +118,7 @@ namespace oni {
         std::unique_ptr<Layer>
         Layer::createTexturedTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
                                        std::string &&fragmentShader,
-                                       const math::vec4 &screenBound) {
+                                       const graphics::ScreenBounds &screenBound) {
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
 
             auto program = shader->getProgram();
@@ -161,15 +161,12 @@ namespace oni {
         }
 
         void Layer::moveCamera(float x, float y) {
-            auto xMin = mScreenBound.x;
-            auto xMax = mScreenBound.y;
-            auto yMin = mScreenBound.z;
-            auto yMax = mScreenBound.w;
             // TODO: Is it really necessary to create a new matrix? Can't we just transalte the old one?
-            mProjectionMatrix = math::mat4::orthographic(xMin + x, xMax + x, yMin + y, yMax + y, -1.0f, 1.0f);
+            auto projMatrix = math::mat4::orthographic(mScreenBound.xMin + x, mScreenBound.xMax + x,
+                                                       mScreenBound.yMin + y, mScreenBound.yMax + y, -1.0f, 1.0f);
 
             mShader->enable();
-            mShader->setUniformMat4("pr_matrix", mProjectionMatrix);
+            mShader->setUniformMat4("pr_matrix", projMatrix);
             mShader->disable();
         }
     }

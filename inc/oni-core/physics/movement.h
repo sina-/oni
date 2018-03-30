@@ -11,7 +11,7 @@ namespace oni {
             void update(entities::Vehicle &vehicle, const io::Input &input, float tickTime) override;
 
         private:
-            void updatePosition(components::Placement &position, const math::vec3 &direction, float tickTime);
+            void updatePosition(components::Placement &position, const math::vec3 &direction);
         };
     }
 }

@@ -3,6 +3,7 @@
 namespace oni {
     namespace physics {
 
+        // TODO: Delete this function
         void Movement::update(entities::World &world, const io::Input &input, float tickTime) {
             unsigned long entityIndex = 0;
 
@@ -26,7 +27,7 @@ namespace oni {
                         velocity.direction += math::vec3(magnitude, 0.0f, 0.0f);
                     }
 
-                    updatePosition(position, velocity.direction, tickTime);
+                    updatePosition(position, velocity.direction);
                     world.setEntityPlacement(entityIndex, position);
                     world.setEntityVelocity(entityIndex, velocity);
 
@@ -82,10 +83,10 @@ namespace oni {
                     // TODO: Size of the car should be saved as part of Car data.
                     // TODO: Fix this mess of calculation
                     // TODO: Maybe this can happen in the vertex shader
-                    position.vertexA = math::vec3(car.position.x, car.position.y, 0.0f);
-                    position.vertexB = math::vec3(car.position.x, car.position.y + 0.5f, 0.0f);
-                    position.vertexC = math::vec3(car.position.x + 1.0f, car.position.y + 0.5f, 0.0f);
-                    position.vertexD = math::vec3(car.position.x + 1.0f, car.position.y, 0.0f);
+                    position = components::Placement(
+                            math::vec3(car.position.x - carConfig.cgToRear, car.position.y - carConfig.halfWidth,
+                                       1.0f), math::vec2(carConfig.cgToRear + carConfig.cgToFront,
+                                                         carConfig.halfWidth * 2));
 
                     auto a = position.vertexA;
                     auto b = position.vertexB;
@@ -133,13 +134,13 @@ namespace oni {
 
         }
 
-        void Movement::updatePosition(components::Placement &position, const math::vec3 &direction, float tickTime) {
-            auto adjustedDirection = math::vec3(direction.x * tickTime, direction.y * tickTime, direction.z * tickTime);
+        void Movement::updatePosition(components::Placement &position, const math::vec3 &direction) {
+            //auto adjustedDirection = math::vec3(direction.x * tickTime, direction.y * tickTime, direction.z * tickTime);
 
-            position.vertexA += adjustedDirection;
-            position.vertexB += adjustedDirection;
-            position.vertexC += adjustedDirection;
-            position.vertexD += adjustedDirection;
+            position.vertexA += direction;
+            position.vertexB += direction;
+            position.vertexC += direction;
+            position.vertexD += direction;
         }
     }
 }

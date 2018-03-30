@@ -27,11 +27,7 @@ namespace oni {
                                                 const math::vec3 &position, const math::vec2 &size) {
             auto entity = world.createEntity(entities::TexturedSprite, layerID);
 
-            auto entityPlacement = components::Placement();
-            entityPlacement.vertexA = math::vec3(position.x, position.y, position.z);
-            entityPlacement.vertexB = math::vec3(position.x, position.y + size.y, position.z);
-            entityPlacement.vertexC = math::vec3(position.x + size.x, position.y + size.y, position.z);
-            entityPlacement.vertexD = math::vec3(position.x + size.x, position.y, position.z);
+            auto entityPlacement = components::Placement(position, size);
 
             world.setEntityPlacement(entity, entityPlacement);
             world.setEntityTexture(entity, entityTexture);
@@ -44,11 +40,7 @@ namespace oni {
                                                        const math::vec3 &position, const math::vec2 &size) {
             auto entity = world.createEntity(entities::DynamicTexturedSprite, layerID);
 
-            auto entityPlacement = components::Placement();
-            entityPlacement.vertexA = math::vec3(position.x, position.y, position.z);
-            entityPlacement.vertexB = math::vec3(position.x, position.y + size.y, position.z);
-            entityPlacement.vertexC = math::vec3(position.x + size.x, position.y + size.y, position.z);
-            entityPlacement.vertexD = math::vec3(position.x + size.x, position.y, position.z);
+            auto entityPlacement = components::Placement(position, size);
 
             auto entityVelocity = components::Velocity();
             entityVelocity.magnitude = 8.0f;

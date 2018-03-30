@@ -32,8 +32,14 @@ namespace oni {
                     vertexC(mPositionC),
                     vertexD(mPositionD) {}
 
-            Placement(const Placement &other) = default;
+            Placement(const math::vec3 position, const math::vec2 size) {
+                vertexA = math::vec3(position.x, position.y, position.z);
+                vertexB = math::vec3(position.x, position.y + size.y, position.z);
+                vertexC = math::vec3(position.x + size.x, position.y + size.y, position.z);
+                vertexD = math::vec3(position.x + size.x, position.y, position.z);
+            }
 
+            Placement(const Placement &other) = default;
         };
 
         struct Velocity {
@@ -83,7 +89,7 @@ namespace oni {
                 brakeForce = 12000.0f;
                 mass = 1200.0f;
                 inertialScale = 1.0f;
-                halfWidth = 0.8f;
+                halfWidth = 0.4f;
                 cgToFront = 1.0f;
                 cgToRear = 1.0f;
                 cgToFrontAxle = 0.55f;
@@ -144,7 +150,6 @@ namespace oni {
                 safeSteer = true;
             }
         };
-
 
 
     }

@@ -4,14 +4,14 @@ namespace oni {
     namespace physics {
 
         // TODO: Delete this function
-        void Movement::tick(entities::World &world, const io::Input &input, float tickTime) {
+        void Movement::tick(entities::BasicEntityRepo &basicEntityRepo, const io::Input &input, float tickTime) {
             unsigned long entityIndex = 0;
 
-            for (const auto &entity: world.getEntities()) {
+            for (const auto &entity: basicEntityRepo.getEntities()) {
                 if ((entity & components::VelocityComponent) == components::VelocityComponent
                     && (entity & components::PlacementComponent) == components::PlacementComponent) {
-                    auto position = world.getEntityPlacement(entityIndex);
-                    auto velocity = world.getEntityVelocity(entityIndex);
+                    auto position = basicEntityRepo.getEntityPlacement(entityIndex);
+                    auto velocity = basicEntityRepo.getEntityVelocity(entityIndex);
                     auto magnitude = velocity.magnitude * tickTime;
 
                     if (input.isPressed(GLFW_KEY_W)) {
@@ -28,8 +28,8 @@ namespace oni {
                     }
 
                     updatePosition(position, velocity.direction);
-                    world.setEntityPlacement(entityIndex, position);
-                    world.setEntityVelocity(entityIndex, velocity);
+                    basicEntityRepo.setEntityPlacement(entityIndex, position);
+                    basicEntityRepo.setEntityVelocity(entityIndex, velocity);
 
                 }
                 ++entityIndex;

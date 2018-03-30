@@ -9,7 +9,7 @@
 #include <oni-core/graphics/shader.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/components/visual.h>
-#include <oni-core/entities/world.h>
+#include <oni-core/entities/basic-entity-repo.h>
 
 namespace oni {
     namespace graphics {
@@ -40,11 +40,11 @@ namespace oni {
 
             ~Layer() = default;
 
-            void renderSprites(const entities::World &world);
+            void renderSprites(const entities::BasicEntityRepo &basicEntityRepo);
 
-            void renderTexturedSprites(const entities::World &world);
+            void renderTexturedSprites(const entities::BasicEntityRepo &basicEntityRepo);
 
-            void renderText(const entities::World &world);
+            void renderText(const entities::BasicEntityRepo &basicEntityRepo);
 
             Shader &getShader() { return *mShader; }
 

@@ -2,13 +2,13 @@
 
 #include <oni-core/entities/entity.h>
 #include <oni-core/components/physical.h>
-#include <oni-core/entities/world.h>
+#include <oni-core/entities/basic-entity-repo.h>
 
 namespace oni {
     namespace entities {
-        // TODO: Maybe move World into entity.h and rename it to Entity.
+        // TODO: Maybe move BasicEntityRepo into entity.h and rename it to Entity.
         // TODO: Make sure this inheritance doesn't add additional costs, or its minimum.
-        class Vehicle : public World {
+        class Vehicle : public BasicEntityRepo {
         public:
             Vehicle();
 

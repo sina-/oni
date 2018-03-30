@@ -13,19 +13,19 @@ namespace oni {
             moveCamera(0.0f, 0.0f);
         }
 
-        void Layer::renderSprites(const entities::World &world) {
+        void Layer::renderSprites(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
 
             auto layerID = getLayerID();
 
             unsigned long entityIndex = 0;
 
-            for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex) == layerID &&
+            for (const auto &entity: basicEntityRepo.getEntities()) {
+                if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::Sprite) == entities::Sprite)) {
 
-                    mRenderer2D->submit(world.getEntityPlacement(entityIndex),
-                                        world.getEntityAppearance(entityIndex));
+                    mRenderer2D->submit(basicEntityRepo.getEntityPlacement(entityIndex),
+                                        basicEntityRepo.getEntityAppearance(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -33,18 +33,18 @@ namespace oni {
             end();
         }
 
-        void Layer::renderTexturedSprites(const entities::World &world) {
+        void Layer::renderTexturedSprites(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
 
             auto layerID = getLayerID();
 
             unsigned long entityIndex = 0;
 
-            for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex) == layerID &&
+            for (const auto &entity: basicEntityRepo.getEntities()) {
+                if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
-                    mRenderer2D->submit(world.getEntityPlacement(entityIndex), world.getEntityTexture(entityIndex));
+                    mRenderer2D->submit(basicEntityRepo.getEntityPlacement(entityIndex), basicEntityRepo.getEntityTexture(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -53,18 +53,18 @@ namespace oni {
 
         }
 
-        void Layer::renderText(const entities::World &world) {
+        void Layer::renderText(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
 
             auto layerID = getLayerID();
 
             unsigned long entityIndex = 0;
 
-            for (const auto &entity: world.getEntities()) {
-                if ((world.getEntityLayerID(entityIndex) == layerID &&
+            for (const auto &entity: basicEntityRepo.getEntities()) {
+                if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
-                    mRenderer2D->submit(world.getEntityText(entityIndex));
+                    mRenderer2D->submit(basicEntityRepo.getEntityText(entityIndex));
                 }
                 ++entityIndex;
             }

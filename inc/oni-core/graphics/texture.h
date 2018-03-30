@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <ftgl/texture-atlas.h>
 
-#include <oni-core/entities/world.h>
+#include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/graphics/font-manager.h>
 
 namespace oni {

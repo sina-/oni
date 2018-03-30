@@ -7,7 +7,7 @@ namespace oni {
     namespace physics {
         class Movement : public Physic {
         public:
-            void tick(entities::World &world, const io::Input &input, float tickTime) override;
+            void tick(entities::BasicEntityRepo &basicEntityRepo, const io::Input &input, float tickTime) override;
             void tick(entities::Vehicle &vehicle, const io::Input &input, float tickTime) override;
 
         private:

@@ -34,7 +34,7 @@ namespace oni {
             auto carConfig = components::CarConfig();
             mCars.emplace_back(components::Car(carConfig));
             mCarConfigs.emplace_back(carConfig);
-            return World::_createEntity();
+            return BasicEntityRepo::_createEntity();
         }
     }
 }

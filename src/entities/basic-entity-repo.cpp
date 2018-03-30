@@ -1,9 +1,9 @@
-#include <oni-core/entities/world.h>
+#include <oni-core/entities/basic-entity-repo.h>
 
 namespace oni {
     namespace entities {
 
-        entities::entityID World::_createEntity() {
+        entities::entityID BasicEntityRepo::_createEntity() {
             if (!mFreeEntitySlots.empty()) {
                 auto entity = mFreeEntitySlots.top();
                 mFreeEntitySlots.pop();
@@ -23,7 +23,7 @@ namespace oni {
             return mEntities.size() - 1;
         }
 
-        void World::reserveEntity(size_t size) {
+        void BasicEntityRepo::reserveEntity(size_t size) {
             mEntities.reserve(mEntities.size() + size);
             mPlacements.reserve(mPlacements.size() + size);
             mAppearances.reserve(mAppearances.size() + size);
@@ -33,81 +33,81 @@ namespace oni {
             mTexts.reserve(mTexts.size() + size);
         }
 
-        entities::entityID World::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
+        entities::entityID BasicEntityRepo::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
             auto entity = _createEntity();
             mEntities[entity] = mask;
             mLayerIDs[entity] = layerID;
             return entity;
         }
 
-        void World::addComponent(entities::entityID id, const components::Component &component) {
+        void BasicEntityRepo::addComponent(entities::entityID id, const components::Component &component) {
             mEntities[id].set(component);
         }
 
-        void World::destroyEntity(entities::entityID id) {
+        void BasicEntityRepo::destroyEntity(entities::entityID id) {
             mEntities[id] = components::Component::NONE;
             mFreeEntitySlots.push(id);
         }
 
-        const components::EntityMasks &World::getEntities() const {
+        const components::EntityMasks &BasicEntityRepo::getEntities() const {
             return mEntities;
         }
 
-        const components::Mask &World::getEntity(entities::entityID id) const {
+        const components::Mask &BasicEntityRepo::getEntity(entities::entityID id) const {
             return mEntities[id];
         }
 
-        const components::Placement &World::getEntityPlacement(entities::entityID id) const {
+        const components::Placement &BasicEntityRepo::getEntityPlacement(entities::entityID id) const {
             return mPlacements[id];
         }
 
-        const components::Appearance &World::getEntityAppearance(entities::entityID id) const {
+        const components::Appearance &BasicEntityRepo::getEntityAppearance(entities::entityID id) const {
             return mAppearances[id];
         }
 
-        const components::Velocity &World::getEntityVelocity(entities::entityID id) const {
+        const components::Velocity &BasicEntityRepo::getEntityVelocity(entities::entityID id) const {
             return mVelocities[id];
         }
 
-        const components::Texture &World::getEntityTexture(entities::entityID id) const {
+        const components::Texture &BasicEntityRepo::getEntityTexture(entities::entityID id) const {
             return mTextures[id];
         }
 
-        const components::LayerID &World::getEntityLayerID(entities::entityID id) const {
+        const components::LayerID &BasicEntityRepo::getEntityLayerID(entities::entityID id) const {
             return mLayerIDs[id];
         }
 
-        const components::Text &World::getEntityText(entities::entityID id) const {
+        const components::Text &BasicEntityRepo::getEntityText(entities::entityID id) const {
             return mTexts[id];
         }
 
-        void World::setEntityPlacement(entities::entityID id, const components::Placement &placement) {
+        void BasicEntityRepo::setEntityPlacement(entities::entityID id, const components::Placement &placement) {
             mPlacements[id] = placement;
         }
 
-        void World::setEntityAppearance(entities::entityID id, const components::Appearance &appearance) {
+        void BasicEntityRepo::setEntityAppearance(entities::entityID id, const components::Appearance &appearance) {
             mAppearances[id] = appearance;
         }
 
-        void World::setEntityVelocity(entities::entityID id, const components::Velocity &velocity) {
+        void BasicEntityRepo::setEntityVelocity(entities::entityID id, const components::Velocity &velocity) {
             mVelocities[id] = velocity;
         }
 
-        void World::setEntityTexture(entities::entityID id, const components::Texture &texture) {
+        void BasicEntityRepo::setEntityTexture(entities::entityID id, const components::Texture &texture) {
             mTextures[id] = texture;
         }
 
-        void World::setEntityLayerID(entities::entityID id, const components::LayerID &layerID) {
+        void BasicEntityRepo::setEntityLayerID(entities::entityID id, const components::LayerID &layerID) {
             mLayerIDs[id] = layerID;
 
         }
 
-        void World::setEntityText(entities::entityID id, const components::Text &text) {
+        void BasicEntityRepo::setEntityText(entities::entityID id, const components::Text &text) {
             mTexts[id] = text;
 
         }
 
-        components::Text &World::getEntityText(entities::entityID id) {
+        components::Text &BasicEntityRepo::getEntityText(entities::entityID id) {
             return mTexts[id];
         }
     }

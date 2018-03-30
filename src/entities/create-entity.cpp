@@ -3,36 +3,37 @@
 namespace oni {
     namespace entities {
 
-        entities::entityID createSpriteEntity(World &world, components::LayerID layerID, const math::vec4 &color,
+        entities::entityID createSpriteEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
+                                              const math::vec4 &color,
                                               const math::vec3 &position, const math::vec2 &size) {
-            auto entity = world.createEntity(entities::Sprite, layerID);
+            auto entity = basicEntityRepo.createEntity(entities::Sprite, layerID);
 
             auto entityPlacement = components::Placement(position, size);
             auto entityAppearance = components::Appearance(color);
 
-            world.setEntityPlacement(entity, entityPlacement);
-            world.setEntityAppearance(entity, entityAppearance);
+            basicEntityRepo.setEntityPlacement(entity, entityPlacement);
+            basicEntityRepo.setEntityAppearance(entity, entityAppearance);
 
             return entity;
         }
 
-        entities::entityID createTexturedEntity(World &world, components::LayerID layerID,
+        entities::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
                                                 const components::Texture &entityTexture,
                                                 const math::vec3 &position, const math::vec2 &size) {
-            auto entity = world.createEntity(entities::TexturedSprite, layerID);
+            auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, layerID);
 
             auto entityPlacement = components::Placement(position, size);
 
-            world.setEntityPlacement(entity, entityPlacement);
-            world.setEntityTexture(entity, entityTexture);
+            basicEntityRepo.setEntityPlacement(entity, entityPlacement);
+            basicEntityRepo.setEntityTexture(entity, entityTexture);
 
             return entity;
         }
 
-        entities::entityID createDynamicTexturedEntity(World &world, components::LayerID layerID,
+        entities::entityID createDynamicTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
                                                        const components::Texture &entityTexture,
                                                        const math::vec3 &position, const math::vec2 &size) {
-            auto entity = world.createEntity(entities::DynamicTexturedSprite, layerID);
+            auto entity = basicEntityRepo.createEntity(entities::DynamicTexturedSprite, layerID);
 
             auto entityPlacement = components::Placement(position, size);
 
@@ -40,18 +41,18 @@ namespace oni {
             entityVelocity.magnitude = 8.0f;
             entityVelocity.direction = math::vec3(0.0f, 0.0f, 0.0f);
 
-            world.setEntityPlacement(entity, entityPlacement);
-            world.setEntityVelocity(entity, entityVelocity);
-            world.setEntityTexture(entity, entityTexture);
+            basicEntityRepo.setEntityPlacement(entity, entityPlacement);
+            basicEntityRepo.setEntityVelocity(entity, entityVelocity);
+            basicEntityRepo.setEntityTexture(entity, entityTexture);
 
             return entity;
         }
 
-        entities::entityID createTextEntity(World &world, graphics::FontManager &fontManager,
+        entities::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
                                             components::LayerID layerID, const std::string &text,
                                             const math::vec3 &position) {
-            auto textEntity = world.createEntity(entities::TextSprite, layerID);
-            world.setEntityText(textEntity, fontManager.createTextFromString(text, position));
+            auto textEntity = basicEntityRepo.createEntity(entities::TextSprite, layerID);
+            basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
 
             return textEntity;
         }

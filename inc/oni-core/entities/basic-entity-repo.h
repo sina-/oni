@@ -12,8 +12,7 @@
 
 namespace oni {
     namespace entities {
-        // TODO: This class is not necessarily World class, a better name could be BaseEntity, or Entity.
-        class World {
+        class BasicEntityRepo {
         protected:
             /**
              * It can reuse free slots created by destroyEntity().
@@ -32,7 +31,7 @@ namespace oni {
              * keeps data in a contiguous stack-based memory. This is in contrast to the usual list of struct.
              *
              */
-            World() = default;
+            BasicEntityRepo() = default;
 
             void reserveEntity(size_t count);
 
@@ -83,6 +82,7 @@ namespace oni {
 
             std::vector<components::Placement> mPlacements;
             std::vector<components::Appearance> mAppearances;
+            // TODO: Remove this, also from components
             std::vector<components::Velocity> mVelocities;
             std::vector<components::Texture> mTextures;
             std::vector<components::LayerID> mLayerIDs;

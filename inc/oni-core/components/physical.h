@@ -56,33 +56,33 @@ namespace oni {
         };
 
         // TODO: better name
-        typedef double carScalar;
+        typedef double carSimDouble;
 
         struct CarConfig {
-            carScalar gravity;
-            carScalar mass;
-            carScalar inertialScale;
-            carScalar halfWidth;
-            carScalar cgToFront;
-            carScalar cgToRear;
-            carScalar cgToFrontAxle;
-            carScalar cgToRearAxle;
-            carScalar cgHeight;
-            carScalar wheelRadius;
-            carScalar wheelWidth;
-            carScalar tireGrip;
-            carScalar lockGrip;
-            carScalar engineForce;
-            carScalar brakeForce;
-            carScalar eBrakeForce;
-            carScalar weightTransfer;
-            carScalar maxSteer;
-            carScalar cornerStiffnessFront;
-            carScalar cornerStiffnessRear;
-            carScalar airResist;
-            carScalar rollResist;
-            carScalar scaleMultiplierX;
-            carScalar scaleMultiplierY;
+            carSimDouble gravity;
+            carSimDouble mass;
+            carSimDouble inertialScale;
+            carSimDouble halfWidth;
+            carSimDouble cgToFront;
+            carSimDouble cgToRear;
+            carSimDouble cgToFrontAxle;
+            carSimDouble cgToRearAxle;
+            carSimDouble cgHeight;
+            carSimDouble wheelRadius;
+            carSimDouble wheelWidth;
+            carSimDouble tireGrip;
+            carSimDouble lockGrip;
+            carSimDouble engineForce;
+            carSimDouble brakeForce;
+            carSimDouble eBrakeForce;
+            carSimDouble weightTransfer;
+            carSimDouble maxSteer;
+            carSimDouble cornerStiffnessFront;
+            carSimDouble cornerStiffnessRear;
+            carSimDouble airResist;
+            carSimDouble rollResist;
+            carSimDouble scaleMultiplierX;
+            carSimDouble scaleMultiplierY;
 
             // TODO: move this to cpp file
             CarConfig() {
@@ -114,15 +114,15 @@ namespace oni {
         };
 
         struct Car {
-            carScalar heading;
-            carScalar velocityAbsolute;
-            carScalar yawRate;
-            carScalar steer;
-            carScalar steerAngle;
-            carScalar inertia;
-            carScalar wheelBase;
-            carScalar axleWeightRatioFront;
-            carScalar axleWeightRatioRear;
+            carSimDouble heading;
+            carSimDouble velocityAbsolute;
+            carSimDouble yawRate;
+            carSimDouble steer;
+            carSimDouble steerAngle;
+            carSimDouble inertia;
+            carSimDouble wheelBase;
+            carSimDouble axleWeightRatioFront;
+            carSimDouble axleWeightRatioRear;
 
             math::vec2 position;
             math::vec2 velocity;

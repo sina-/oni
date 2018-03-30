@@ -87,7 +87,7 @@ namespace oni {
             // TODO: move this to cpp file
             CarConfig() {
                 gravity = 9.81f;
-                engineForce = 18000.0f;
+                engineForce = 3000.0f;
                 brakeForce = 12000.0f;
                 mass = 1200.0f;
                 inertialScale = 1.0f;
@@ -100,10 +100,10 @@ namespace oni {
                 wheelRadius = 0.3f;
                 wheelWidth = 0.2f;
                 tireGrip = 2.0f;
-                lockGrip = 1.0f;
+                lockGrip = 0.6f;
                 eBrakeForce = brakeForce / 2.5f;
                 weightTransfer = 0.2f;
-                maxSteer = 0.6f;
+                maxSteer = 0.9f;
                 cornerStiffnessFront = 5.0f;
                 cornerStiffnessRear = 5.2f;
                 airResist = 2.5f;

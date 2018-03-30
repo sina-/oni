@@ -14,7 +14,7 @@ namespace oni {
             mRunTimer.restart();
             mFrameTimer.restart();
 
-            if (1.0f - mRunLag <= ep) {
+            if (0.1f - mRunLag <= ep) {
                 auto fps = mRunCounter / mRunLag;
                 auto tps = 1 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));

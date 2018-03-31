@@ -8,24 +8,26 @@ namespace oni {
 
         Game::Game()
                 : mRunTimerA(), mRunLagAccumulator(0.0f), mRunCounter(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
-                  mTickLag(0), mRunLag(0.0f), mRunTimerB() {}
+                  mTickLag(0), mRunLag(0.0f), mRunTimerB(), mFrameExcessTime(0) {}
 
         void Game::run() {
             mRunTimerA.restart();
             mRunTimerB.restart();
             mFrameTimer.restart();
 
-            if (0.1f - mRunLagAccumulator <= ep) {
+            if (1.0f - mRunLagAccumulator <= ep) {
                 auto fps = mRunCounter / mRunLagAccumulator;
-                auto tps = 10 * mTickCounter;
+                auto tps = 1 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));
                 showTPS(static_cast<unsigned short>(tps));
+                showFET(static_cast<short>(mFrameExcessTime * 1000));
 
                 mRunLagAccumulator = 0;
                 mTickLag = 0;
                 mRunCounter = 0;
                 mTickCounter = 0;
                 mFrameCounter = 0;
+                mFrameExcessTime = 0;
             }
 
             tick();
@@ -34,8 +36,11 @@ namespace oni {
 
             mRunLag = mRunTimerB.elapsed();
 
-            if (mRunLag < mTickMS) {
-                auto sleepFor = (int) (((mTickMS - mRunLag)) * 1000);
+            auto excess = mTickMS - mRunLag;
+            mFrameExcessTime += excess;
+
+            if (excess > 0) {
+                auto sleepFor = (int) (excess * 1000);
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
             }
 

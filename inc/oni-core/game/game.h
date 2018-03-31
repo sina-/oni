@@ -35,6 +35,12 @@ namespace oni {
 
             virtual void showTPS(unsigned short tps) = 0;
 
+            /**
+             * Accumulated time in ms over 1 second spent sleeping due to excess.
+             * @param fet
+             */
+            virtual void showFET(short fet) = 0;
+
         protected:
             utils::HighResolutionTimer mRunTimerA;
             utils::HighResolutionTimer mRunTimerB;
@@ -45,6 +51,7 @@ namespace oni {
             double mRunLag;
             double mFrameLag;
             double mTickLag;
+            double mFrameExcessTime;
             unsigned short mRunCounter;
             unsigned short mTickCounter = 0;
             unsigned short mFrameCounter = 0;

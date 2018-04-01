@@ -34,9 +34,16 @@ namespace oni {
             std::unique_ptr<BatchRenderer2D> mRenderer2D;
             std::unique_ptr<Shader> mShader;
             graphics::ScreenBounds mScreenBound;
+            math::mat4 mModalMatrix;
+            math::mat4 mViewMatrix;
+            math::mat4 mProjectionMatrix;
+
 
         public:
-            Layer(std::unique_ptr<BatchRenderer2D>, std::unique_ptr<Shader>, const graphics::ScreenBounds &screenBound);
+            Layer(std::unique_ptr<BatchRenderer2D> renderer, std::unique_ptr<Shader> shader,
+                  const graphics::ScreenBounds &screenBound, const math::mat4 &modalMatrix,
+                  const math::mat4 &viewMatrix,
+                  const math::mat4 &projectionMatrix);
 
             ~Layer() = default;
 
@@ -53,6 +60,18 @@ namespace oni {
             void end() const;
 
             void moveCamera(float x, float y);
+
+            const math::mat4 &getModelMatrix() const;
+
+            void setModelMatrix(const math::mat4 &mModelMatrix);
+
+            const math::mat4 &getViewMatrix() const;
+
+            void setViewMatrix(const math::mat4 &mViewMatrix);
+
+            const math::mat4 &getProjectionMatrix() const;
+
+            void setProjectionMatrix(const math::mat4 &mProjectionMatrix);
 
             /**
              * This function should always return a unique ID.
@@ -72,7 +91,7 @@ namespace oni {
              */
             static std::unique_ptr<Layer>
             createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader, std::string &&fragmentShader,
-                                        const graphics::ScreenBounds &screenBound);
+                            const graphics::ScreenBounds &screenBound);
 
             /**
              * Similar to tile layer but rendered with textures instead of solid colors.
@@ -82,7 +101,7 @@ namespace oni {
             static std::unique_ptr<Layer>
             createTexturedTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
                                     std::string &&fragmentShader,
-                                    const graphics::ScreenBounds&screenBound);
+                                    const graphics::ScreenBounds &screenBound);
 
         };
 

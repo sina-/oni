@@ -59,6 +59,15 @@ namespace oni {
             return result;
         }
 
+        mat4 mat4::translation(float x, float y, float z) {
+            mat4 result(1.0f);
+            result.elements[0 + 3 * 4] = x;
+            result.elements[1 + 3 * 4] = y;
+            result.elements[2 + 3 * 4] = z;
+
+            return result;
+        }
+
         mat4 mat4::rotation(float angle, const vec3 &axis) {
             mat4 result(1.0f);
             float r = toRadians(angle);

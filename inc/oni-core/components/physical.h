@@ -70,7 +70,6 @@ namespace oni {
             carSimDouble scaleMultiplierX;
             carSimDouble scaleMultiplierY;
 
-            // TODO: move this to cpp file
             CarConfig() {
                 gravity = 9.81f;
                 engineForce = 3000.0f;

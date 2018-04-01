@@ -6,10 +6,15 @@ namespace oni {
     namespace graphics {
 
         Layer::Layer(std::unique_ptr<BatchRenderer2D> renderer, std::unique_ptr<Shader> shader,
-                     const graphics::ScreenBounds &screenBound)
+                     const graphics::ScreenBounds &screenBound, const math::mat4 &modalMatrix,
+                     const math::mat4 &viewMatrix,
+                     const math::mat4 &projectionMatrix)
                 : mRenderer2D(std::move(renderer)),
                   mShader(std::move(shader)),
-                  mScreenBound(screenBound) {
+                  mScreenBound(screenBound),
+                  mModalMatrix(modalMatrix),
+                  mViewMatrix(viewMatrix),
+                  mProjectionMatrix(projectionMatrix) {
             moveCamera(0.0f, 0.0f);
         }
 
@@ -44,7 +49,8 @@ namespace oni {
                 if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
-                    mRenderer2D->submit(basicEntityRepo.getEntityPlacement(entityIndex), basicEntityRepo.getEntityTexture(entityIndex));
+                    mRenderer2D->submit(basicEntityRepo.getEntityPlacement(entityIndex),
+                                        basicEntityRepo.getEntityTexture(entityIndex));
                 }
                 ++entityIndex;
             }
@@ -73,6 +79,8 @@ namespace oni {
 
         void Layer::begin() const {
             mShader->enable();
+            mShader->setUniformMat4("vw_matrix", mViewMatrix);
+            mShader->setUniformMat4("pr_matrix", mProjectionMatrix);
             mRenderer2D->begin();
         }
 
@@ -82,11 +90,46 @@ namespace oni {
             mShader->disable();
         }
 
-        std::unique_ptr<Layer>
-        Layer::createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader, std::string &&fragmentShader,
-                               const graphics::ScreenBounds &screenBound) {
-            auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
+        void Layer::moveCamera(float x, float y) {
+            mViewMatrix = math::mat4::translation(-x, -y, 0.0f);
+        }
 
+        const math::mat4 &Layer::getModelMatrix() const {
+            return mModalMatrix;
+        }
+
+        void Layer::setModelMatrix(const math::mat4 &mModelMatrix) {
+            Layer::mModalMatrix = mModelMatrix;
+        }
+
+        const math::mat4 &Layer::getViewMatrix() const {
+            return mViewMatrix;
+        }
+
+        void Layer::setViewMatrix(const math::mat4 &mViewMatrix) {
+            Layer::mViewMatrix = mViewMatrix;
+        }
+
+        const math::mat4 &Layer::getProjectionMatrix() const {
+            return mProjectionMatrix;
+        }
+
+        void Layer::setProjectionMatrix(const math::mat4 &mProjectionMatrix) {
+            Layer::mProjectionMatrix = mProjectionMatrix;
+        }
+
+    }
+
+    /**
+     * Static functions follow:
+    */
+    namespace graphics {
+
+        std::unique_ptr<Layer> Layer::createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
+                                                      std::string &&fragmentShader,
+                                                      const graphics::ScreenBounds &screenBound) {
+
+            auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
             auto program = shader->getProgram();
 
             auto stride = sizeof(components::ColoredVertex);
@@ -112,15 +155,19 @@ namespace oni {
                                                               mMaxNumTextureSamplers,
                                                               sizeof(components::ColoredVertex),
                                                               std::move(bufferStructures));
-            return std::make_unique<Layer>(std::move(renderer), std::move(shader), screenBound);
+
+            auto projection = math::mat4::orthographic(screenBound.xMin, screenBound.xMax, screenBound.yMin,
+                                                       screenBound.yMax, -1.0f, 1.0f);
+            auto identity = math::mat4::identity();
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), screenBound, identity,
+                                           identity, projection);
         }
 
-        std::unique_ptr<Layer>
-        Layer::createTexturedTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
-                                       std::string &&fragmentShader,
-                                       const graphics::ScreenBounds &screenBound) {
-            auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
+        std::unique_ptr<Layer> Layer::createTexturedTileLayer(unsigned long maxSpriteCount,
+                                                              std::string &&vertexShader, std::string &&fragmentShader,
+                                                              const graphics::ScreenBounds &screenBound) {
 
+            auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
             auto program = shader->getProgram();
 
             auto stride = sizeof(components::TexturedVertex);
@@ -157,17 +204,11 @@ namespace oni {
             shader->setUniformiv("samplers", renderer->generateSamplerIDs());
             shader->disable();
 
-            return std::make_unique<Layer>(std::move(renderer), std::move(shader), screenBound);
-        }
-
-        void Layer::moveCamera(float x, float y) {
-            // TODO: Is it really necessary to create a new matrix? Can't we just translate the old one?
-            auto projMatrix = math::mat4::orthographic(mScreenBound.xMin + x, mScreenBound.xMax + x,
-                                                       mScreenBound.yMin + y, mScreenBound.yMax + y, -1.0f, 1.0f);
-
-            mShader->enable();
-            mShader->setUniformMat4("pr_matrix", projMatrix);
-            mShader->disable();
+            auto projection = math::mat4::orthographic(screenBound.xMin, screenBound.xMax, screenBound.yMin,
+                                                       screenBound.yMax, -1.0f, 1.0f);
+            auto identity = math::mat4::identity();
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), screenBound, identity, identity,
+                                           projection);
         }
     }
 }

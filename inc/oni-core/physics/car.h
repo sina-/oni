@@ -7,6 +7,10 @@
 #include <oni-core/components/input-data.h>
 #include <oni-core/components/physical.h>
 
+/**
+ * The idea is from https://github.com/spacejack/carphysics2d
+ */
+
 namespace oni {
     namespace physics {
 

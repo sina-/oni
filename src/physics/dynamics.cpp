@@ -15,6 +15,7 @@ namespace oni {
                     auto carInput = components::CarInput();
 
                     if (input.isPressed(GLFW_KEY_W) || input.isPressed(GLFW_KEY_UP)) {
+                        // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
                         carInput.throttle = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_A) || input.isPressed(GLFW_KEY_LEFT)) {

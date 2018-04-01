@@ -35,7 +35,8 @@ namespace oni {
 
             carSimDouble tireGripFront = config.tireGrip;
             carSimDouble tireGripRear = config.tireGrip * (1.0 - inputs.eBrake *
-                                                                 (1.0 - config.lockGrip)); // reduce rear grip when eBrake is on
+                                                                 (1.0 -
+                                                                  config.lockGrip)); // reduce rear grip when eBrake is on
 
             carSimDouble frictionForceFront_cy =
                     clip(-config.cornerStiffnessFront * slipAngleFront, -tireGripFront, tireGripFront) *
@@ -46,10 +47,12 @@ namespace oni {
             //  Get amount of brake/throttle from our inputs
             carSimDouble brake = std::min(inputs.brake * config.brakeForce + inputs.eBrake * config.eBrakeForce,
                                           config.brakeForce);
+            // TODO: The actual formula for this has to include current gear and RPM:
+            // http://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
             carSimDouble throttle = inputs.throttle * config.engineForce;
 
             //  Resulting force in local car coordinates.
-            //  This is implemented as a RWD car only.
+            //  This is implemented as a Rear-Wheel-Drive car only.
             carSimDouble tractionForce_cx = throttle - brake * sign(car.velocityLocal.x);
             carSimDouble tractionForce_cy = 0;
 
@@ -60,9 +63,8 @@ namespace oni {
 
             // total force in car coordinates
             carSimDouble totalForce_cx = dragForce_cx + tractionForce_cx;
-            carSimDouble totalForce_cy =
-                    dragForce_cy + tractionForce_cy + std::cos(car.steerAngle) * frictionForceFront_cy +
-                    frictionForceRear_cy;
+            carSimDouble totalForce_cy = dragForce_cy + tractionForce_cy +
+                                         std::cos(car.steerAngle) * frictionForceFront_cy + frictionForceRear_cy;
 
             // acceleration along car axes
             car.accelerationLocal.x = totalForce_cx / config.mass;  // forward/reverse acceleration

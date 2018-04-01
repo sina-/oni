@@ -22,9 +22,9 @@ namespace oni {
                                                          car.wheelBase);
 
             // Resulting velocity of the wheels as result of the yaw rate of the car body.
-            // v = yawRate * r where r is distance from axle to CG and yawRate (angular velocity) in rad/s.
-            carSimDouble yawSpeedFront = config.cgToFrontAxle * car.yawRate;
-            carSimDouble yawSpeedRear = -config.cgToRearAxle * car.yawRate;
+            // v = angularVelocity * r where r is distance from axle to CG and angularVelocity (angular velocity) in rad/s.
+            carSimDouble yawSpeedFront = config.cgToFrontAxle * car.angularVelocity;
+            carSimDouble yawSpeedRear = -config.cgToRearAxle * car.angularVelocity;
 
             // Calculate slip angles for front and rear wheels (a.k.a. alpha)
             carSimDouble slipAngleFront =
@@ -38,10 +38,10 @@ namespace oni {
                                                                  (1.0 -
                                                                   config.lockGrip)); // reduce rear grip when eBrake is on
 
-            carSimDouble frictionForceFront_cy =
+            carSimDouble frictionForceFrontLocalY =
                     clip(-config.cornerStiffnessFront * slipAngleFront, -tireGripFront, tireGripFront) *
                     axleWeightFront;
-            carSimDouble frictionForceRear_cy =
+            carSimDouble frictionForceRearLocalY =
                     clip(-config.cornerStiffnessRear * slipAngleRear, -tireGripRear, tireGripRear) * axleWeightRear;
 
             //  Get amount of brake/throttle from our inputs
@@ -53,22 +53,23 @@ namespace oni {
 
             //  Resulting force in local car coordinates.
             //  This is implemented as a Rear-Wheel-Drive car only.
-            carSimDouble tractionForce_cx = throttle - brake * sign(car.velocityLocal.x);
-            carSimDouble tractionForce_cy = 0;
+            carSimDouble tractionForceLocalX = throttle - brake * sign(car.velocityLocal.x);
+            carSimDouble tractionForceLocalY = 0;
 
-            carSimDouble dragForce_cx = -config.rollResist * car.velocityLocal.x -
-                                        config.airResist * car.velocityLocal.x * std::abs(car.velocityLocal.x);
-            carSimDouble dragForce_cy = -config.rollResist * car.velocityLocal.y -
-                                        config.airResist * car.velocityLocal.y * std::abs(car.velocityLocal.y);
+            carSimDouble dragForceLocalX = -config.rollResist * car.velocityLocal.x -
+                                           config.airResist * car.velocityLocal.x * std::abs(car.velocityLocal.x);
+            carSimDouble dragForceLocalY = -config.rollResist * car.velocityLocal.y -
+                                           config.airResist * car.velocityLocal.y * std::abs(car.velocityLocal.y);
 
             // total force in car coordinates
-            carSimDouble totalForce_cx = dragForce_cx + tractionForce_cx;
-            carSimDouble totalForce_cy = dragForce_cy + tractionForce_cy +
-                                         std::cos(car.steerAngle) * frictionForceFront_cy + frictionForceRear_cy;
+            carSimDouble totalForceLocalX = dragForceLocalX + tractionForceLocalX;
+            carSimDouble totalForceLocalY = dragForceLocalY + tractionForceLocalY +
+                                            std::cos(car.steerAngle) * frictionForceFrontLocalY +
+                                            frictionForceRearLocalY;
 
             // acceleration along car axes
-            car.accelerationLocal.x = totalForce_cx / config.mass;  // forward/reverse acceleration
-            car.accelerationLocal.y = totalForce_cy / config.mass;  // sideways acceleration
+            car.accelerationLocal.x = totalForceLocalX / config.mass;  // forward/reverse acceleration
+            car.accelerationLocal.y = totalForceLocalY / config.mass;  // sideways acceleration
 
             // acceleration in world coordinates
             car.acceleration.x = cs * car.accelerationLocal.x - sn * car.accelerationLocal.y;
@@ -79,21 +80,26 @@ namespace oni {
             car.velocity.y += car.acceleration.y * dt;
 
             car.velocityAbsolute = car.velocity.len();
+            carSimDouble wheelAngularVelocity = car.velocityAbsolute / config.wheelRadius;
+            car.rpm = wheelAngularVelocity * config.gearRatio * config.differentialRatio * 60 / (2 * M_PI);
+            if (car.rpm < 800.0f) {
+                car.rpm = 800.0f;
+            }
 
             // calculate rotational forces
-            carSimDouble angularTorque = (frictionForceFront_cy + tractionForce_cy) * config.cgToFrontAxle -
-                                         frictionForceRear_cy * config.cgToRearAxle;
+            carSimDouble angularTorque = (frictionForceFrontLocalY + tractionForceLocalY) * config.cgToFrontAxle -
+                                         frictionForceRearLocalY * config.cgToRearAxle;
 
             //  Sim gets unstable at very slow speeds, so just stop the car
             if (std::abs(car.velocityAbsolute) < 0.5 && !throttle) {
                 car.velocity.x = car.velocity.y = car.velocityAbsolute = 0;
-                angularTorque = car.yawRate = 0;
+                angularTorque = car.angularVelocity = 0;
             }
 
             carSimDouble angularAcceleration = angularTorque / car.inertia;
 
-            car.yawRate += angularAcceleration * dt;
-            car.heading += car.yawRate * dt;
+            car.angularVelocity += angularAcceleration * dt;
+            car.heading += car.angularVelocity * dt;
 
             //  finally we can update position
             car.position.x += car.velocity.x * dt;

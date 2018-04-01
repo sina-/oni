@@ -71,6 +71,9 @@ namespace oni {
             carSimDouble scaleMultiplierX; // Car image scale along X multiplier for rendering
             carSimDouble scaleMultiplierY; // Car image scale along Y multiplier for rendering
 
+            carSimDouble gearRatio;
+            carSimDouble differentialRatio;
+
             CarConfig() {
                 gravity = 9.81f;
                 engineForce = 3000.0f;
@@ -96,23 +99,26 @@ namespace oni {
                 rollResist = 8.0f;
                 scaleMultiplierX = 0.25f;
                 scaleMultiplierY = 0.30f;
+                gearRatio = 2.7f;
+                differentialRatio = 3.4f;
             }
         };
 
         struct Car {
             carSimDouble heading;
             carSimDouble velocityAbsolute;
-            carSimDouble yawRate; // Angular velocity in radians
+            carSimDouble angularVelocity; // Angular velocity in radians (rad/s)
             carSimDouble steer; // (-1.0..1.0)
             carSimDouble steerAngle; // (-maxSteer..maxSteer)
             carSimDouble inertia;
             carSimDouble wheelBase;
             carSimDouble axleWeightRatioFront;
             carSimDouble axleWeightRatioRear;
+            carSimDouble rpm;
 
             math::vec2 position;
-            math::vec2 velocity;
-            math::vec2 velocityLocal;
+            math::vec2 velocity; // m/s
+            math::vec2 velocityLocal; // m/s
             math::vec2 acceleration;
             math::vec2 accelerationLocal;
 
@@ -122,7 +128,7 @@ namespace oni {
             explicit Car(const components::CarConfig &carConfig) {
                 heading = 0.0f;
                 velocityAbsolute = 0.0f;
-                yawRate = 0.0f;
+                angularVelocity = 0.0f;
                 steer = 0.0f;
                 steerAngle = 0.0f;
                 inertia = carConfig.mass * carConfig.inertialScale;
@@ -135,6 +141,8 @@ namespace oni {
                 velocityLocal = math::vec2();
                 acceleration = math::vec2();
                 accelerationLocal = math::vec2();
+
+                rpm = 0.0f;
 
                 smoothSteer = true;
                 safeSteer = true;

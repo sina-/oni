@@ -61,6 +61,8 @@ namespace oni {
 
             void lookAt(float x, float y);
 
+            void lookAt(float x, float y, float distance);
+
             void orientTo(float x, float y, float degree);
 
             const math::mat4 &getModelMatrix() const;

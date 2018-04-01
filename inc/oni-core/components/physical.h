@@ -49,26 +49,27 @@ namespace oni {
             carSimDouble mass;
             carSimDouble inertialScale;
             carSimDouble halfWidth;
-            carSimDouble cgToFront;
+            carSimDouble cgToFront; // Distance from center of gravity to the front in meters.
             carSimDouble cgToRear;
             carSimDouble cgToFrontAxle;
             carSimDouble cgToRearAxle;
             carSimDouble cgHeight;
-            carSimDouble wheelRadius;
-            carSimDouble wheelWidth;
+            carSimDouble wheelRadius; // For rendering only
+            carSimDouble wheelWidth; // For rendering only
             carSimDouble tireGrip;
-            carSimDouble lockGrip;
+            carSimDouble lockGrip; // % of grip when wheel is locked
             carSimDouble engineForce;
             carSimDouble brakeForce;
             carSimDouble eBrakeForce;
             carSimDouble weightTransfer;
-            carSimDouble maxSteer;
+            carSimDouble maxSteer; // in radians
             carSimDouble cornerStiffnessFront;
             carSimDouble cornerStiffnessRear;
             carSimDouble airResist;
             carSimDouble rollResist;
-            carSimDouble scaleMultiplierX;
-            carSimDouble scaleMultiplierY;
+
+            carSimDouble scaleMultiplierX; // Car image scale along X multiplier for rendering
+            carSimDouble scaleMultiplierY; // Car image scale along Y multiplier for rendering
 
             CarConfig() {
                 gravity = 9.81f;
@@ -88,7 +89,7 @@ namespace oni {
                 lockGrip = 0.6f;
                 eBrakeForce = brakeForce / 2.5f;
                 weightTransfer = 0.2f;
-                maxSteer = 0.9f;
+                maxSteer = 0.6f;
                 cornerStiffnessFront = 5.0f;
                 cornerStiffnessRear = 5.2f;
                 airResist = 2.5f;
@@ -101,9 +102,9 @@ namespace oni {
         struct Car {
             carSimDouble heading;
             carSimDouble velocityAbsolute;
-            carSimDouble yawRate;
-            carSimDouble steer;
-            carSimDouble steerAngle;
+            carSimDouble yawRate; // Angular velocity in radians
+            carSimDouble steer; // (-1.0..1.0)
+            carSimDouble steerAngle; // (-maxSteer..maxSteer)
             carSimDouble inertia;
             carSimDouble wheelBase;
             carSimDouble axleWeightRatioFront;

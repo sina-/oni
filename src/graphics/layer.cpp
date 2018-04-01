@@ -79,6 +79,8 @@ namespace oni {
 
         void Layer::begin() const {
             mShader->enable();
+            // TODO: Merge all these matrices into one and call it ModelViewProjMatrix and use it in the
+            // shader. This is to avoid the same matrix multiplication for each vertex in the game over and over.
             mShader->setUniformMat4("pr_matrix", mProjectionMatrix);
             mShader->setUniformMat4("vw_matrix", mViewMatrix);
             mShader->setUniformMat4("ml_matrix", mModalMatrix);
@@ -93,6 +95,11 @@ namespace oni {
 
         void Layer::lookAt(float x, float y) {
             mViewMatrix = math::mat4::translation(-x, -y, 0.0f);
+        }
+
+        void Layer::lookAt(float x, float y, float distance) {
+            mViewMatrix = math::mat4::scale(math::vec3(distance, distance, 1.0f)) *
+                          math::mat4::translation(-x, -y, 0.0f);
         }
 
         void Layer::orientTo(float x, float y, float degree) {

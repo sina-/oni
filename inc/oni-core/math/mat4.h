@@ -30,6 +30,12 @@ namespace oni {
 
 			static mat4 translation(const vec3& translation);
 			static mat4 translation(float x, float y, float z);
+			/**
+			 * create rotation matrix
+			 * @param angle in radians
+			 * @param axis
+			 * @return
+			 */
 			static mat4 rotation(float angle, const vec3& axis);
 			static mat4 scale(const vec3& scale);
 

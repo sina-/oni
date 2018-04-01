@@ -79,8 +79,9 @@ namespace oni {
 
         void Layer::begin() const {
             mShader->enable();
-            mShader->setUniformMat4("vw_matrix", mViewMatrix);
             mShader->setUniformMat4("pr_matrix", mProjectionMatrix);
+            mShader->setUniformMat4("vw_matrix", mViewMatrix);
+            mShader->setUniformMat4("ml_matrix", mModalMatrix);
             mRenderer2D->begin();
         }
 
@@ -92,6 +93,12 @@ namespace oni {
 
         void Layer::lookAt(float x, float y) {
             mViewMatrix = math::mat4::translation(-x, -y, 0.0f);
+        }
+
+        void Layer::orientTo(float x, float y, float degree) {
+            auto rotate = math::mat4::rotation(degree, math::vec3(0.0f, 0.0f, 1.0f));
+            auto translation = math::mat4::translation(x, y, 0.0f);
+            mModalMatrix = translation * rotate;
         }
 
         const math::mat4 &Layer::getModelMatrix() const {

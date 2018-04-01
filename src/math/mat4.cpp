@@ -70,9 +70,8 @@ namespace oni {
 
         mat4 mat4::rotation(float angle, const vec3 &axis) {
             mat4 result(1.0f);
-            float r = toRadians(angle);
-            float c = std::cos(r);
-            float s = std::sin(r);
+            float c = std::cos(angle);
+            float s = std::sin(angle);
             float omc = 1.0f - c;
 
             float x = axis.x;

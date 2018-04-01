@@ -59,7 +59,7 @@ namespace oni {
 
             void end() const;
 
-            void moveCamera(float x, float y);
+            void lookAt(float x, float y);
 
             const math::mat4 &getModelMatrix() const;
 

@@ -15,7 +15,7 @@ namespace oni {
                   mModalMatrix(modalMatrix),
                   mViewMatrix(viewMatrix),
                   mProjectionMatrix(projectionMatrix) {
-            moveCamera(0.0f, 0.0f);
+            lookAt(0.0f, 0.0f);
         }
 
         void Layer::renderSprites(const entities::BasicEntityRepo &basicEntityRepo) {
@@ -90,7 +90,7 @@ namespace oni {
             mShader->disable();
         }
 
-        void Layer::moveCamera(float x, float y) {
+        void Layer::lookAt(float x, float y) {
             mViewMatrix = math::mat4::translation(-x, -y, 0.0f);
         }
 

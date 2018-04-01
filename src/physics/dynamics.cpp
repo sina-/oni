@@ -14,16 +14,16 @@ namespace oni {
 
                     auto carInput = components::CarInput();
 
-                    if (input.isPressed(GLFW_KEY_W)) {
+                    if (input.isPressed(GLFW_KEY_W) || input.isPressed(GLFW_KEY_UP)) {
                         carInput.throttle = 1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_A)) {
+                    if (input.isPressed(GLFW_KEY_A) || input.isPressed(GLFW_KEY_LEFT)) {
                         carInput.left = 1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_S)) {
+                    if (input.isPressed(GLFW_KEY_S) || input.isPressed(GLFW_KEY_DOWN)) {
                         carInput.brake = 1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_D)) {
+                    if (input.isPressed(GLFW_KEY_D) || input.isPressed(GLFW_KEY_RIGHT)) {
                         carInput.right = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_SPACE)) {

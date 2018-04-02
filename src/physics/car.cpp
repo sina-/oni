@@ -56,14 +56,15 @@ namespace oni {
             carSimDouble tractionForceLocalX = throttle - brake * sign(car.velocityLocal.x);
             carSimDouble tractionForceLocalY = 0;
 
-            carSimDouble dragForceLocalX = -config.rollResist * car.velocityLocal.x -
-                                           config.airResist * car.velocityLocal.x * std::abs(car.velocityLocal.x);
-            carSimDouble dragForceLocalY = -config.rollResist * car.velocityLocal.y -
-                                           config.airResist * car.velocityLocal.y * std::abs(car.velocityLocal.y);
+            carSimDouble rollingResistanceForceLocalX = -config.rollResist * car.velocityLocal.x;
+            carSimDouble rollingResistanceForceLocalY = -config.rollResist * car.velocityLocal.y;
+
+            carSimDouble dragForceLocalX = -config.airResist * car.velocityLocal.x * std::abs(car.velocityLocal.x);
+            carSimDouble dragForceLocalY = -config.airResist * car.velocityLocal.y * std::abs(car.velocityLocal.y);
 
             // total force in car coordinates
-            carSimDouble totalForceLocalX = dragForceLocalX + tractionForceLocalX;
-            carSimDouble totalForceLocalY = dragForceLocalY + tractionForceLocalY +
+            carSimDouble totalForceLocalX = rollingResistanceForceLocalX + dragForceLocalX + tractionForceLocalX;
+            carSimDouble totalForceLocalY = rollingResistanceForceLocalY + dragForceLocalY + tractionForceLocalY +
                                             std::cos(car.steerAngle) * frictionForceFrontLocalY +
                                             frictionForceRearLocalY;
 
@@ -79,8 +80,11 @@ namespace oni {
             car.velocity.x += car.acceleration.x * dt;
             car.velocity.y += car.acceleration.y * dt;
 
-            car.velocityAbsolute = car.velocity.len();
+            auto velocityAbsolute = car.velocity.len();
+            car.accelerating = velocityAbsolute > car.velocityAbsolute;
+            car.velocityAbsolute = velocityAbsolute;
             carSimDouble wheelAngularVelocity = car.velocityAbsolute / config.wheelRadius;
+            // TODO: This is incorrect in case of slipping.
             car.rpm = wheelAngularVelocity * config.gearRatio * config.differentialRatio * 60 / (2 * M_PI);
             if (car.rpm < 800.0f) {
                 car.rpm = 800.0f;

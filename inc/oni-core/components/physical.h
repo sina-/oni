@@ -90,7 +90,7 @@ namespace oni {
                 wheelWidth = 0.2f;
                 tireGrip = 2.0f;
                 lockGrip = 0.6f;
-                eBrakeForce = brakeForce / 2.5f;
+                eBrakeForce = brakeForce / 5.5f;
                 weightTransfer = 0.2f;
                 maxSteer = 0.6f;
                 cornerStiffnessFront = 5.0f;
@@ -115,6 +115,7 @@ namespace oni {
             carSimDouble axleWeightRatioFront;
             carSimDouble axleWeightRatioRear;
             carSimDouble rpm;
+            carSimDouble maxVelocityAbsolute;
 
             math::vec2 position;
             math::vec2 velocity; // m/s
@@ -122,19 +123,21 @@ namespace oni {
             math::vec2 acceleration;
             math::vec2 accelerationLocal;
 
+            bool accelerating;
+
             bool smoothSteer;
             bool safeSteer;
 
-            explicit Car(const components::CarConfig &carConfig) {
+            explicit Car(const components::CarConfig &c) {
                 heading = 0.0f;
                 velocityAbsolute = 0.0f;
                 angularVelocity = 0.0f;
                 steer = 0.0f;
                 steerAngle = 0.0f;
-                inertia = carConfig.mass * carConfig.inertialScale;
-                wheelBase = carConfig.cgToFrontAxle + carConfig.cgToRearAxle;
-                axleWeightRatioFront = carConfig.cgToRearAxle / wheelBase;
-                axleWeightRatioRear = carConfig.cgToFrontAxle / wheelBase;
+                inertia = c.mass * c.inertialScale;
+                wheelBase = c.cgToFrontAxle + c.cgToRearAxle;
+                axleWeightRatioFront = c.cgToRearAxle / wheelBase;
+                axleWeightRatioRear = c.cgToFrontAxle / wheelBase;
 
                 position = math::vec2();
                 velocity = math::vec2();
@@ -143,6 +146,12 @@ namespace oni {
                 accelerationLocal = math::vec2();
 
                 rpm = 0.0f;
+                accelerating = false;
+                // Formula for solving quadratic equation: -c.airResistance*v^2 - c.rollResistance*v + c.engineForce = 0
+                // Notice we are only interested in the positive answer.
+                maxVelocityAbsolute = (c.rollResist -
+                                       std::sqrt(c.rollResist * c.rollResist + 4 * c.airResist * c.engineForce)) /
+                                      (-2 * c.airResist);
 
                 smoothSteer = true;
                 safeSteer = true;

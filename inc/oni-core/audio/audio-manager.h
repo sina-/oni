@@ -2,46 +2,46 @@
 
 #include <string>
 #include <vector>
-
-#include <soloud.h>
-#include <soloud_wav.h>
 #include <memory>
 
 namespace oni {
     namespace audio {
+        typedef long oniSoundID;
+
         class AudioManager {
         public:
-            AudioManager();
-
-            ~AudioManager() = default;
+            AudioManager() = default;
 
             /**
              * @param name Path to the audio
              * @return unique ID
              */
-            long loadSound(const std::string &name);
+            virtual oniSoundID loadSound(const std::string &name) = 0;
 
             /**
              * Unpause or play
-             * @param soundID value returned by AudioManager::loadSound()
+             * @param id value returned by AudioManager::loadSound()
              */
-            void playSound(long soundID);
+            virtual void playSound(oniSoundID id) = 0;
 
-            void pauseSound(long soundID);
+            /**
+             * Sets the audio to paused and returns played duration
+             * @param id
+             * @return duration played
+             */
+            virtual double pauseSound(oniSoundID id) = 0;
 
-            void stopSound(long soundID);
+            virtual void stopSound(oniSoundID id) = 0;
 
-            void setLoop(long soundID, bool loop);
+            virtual void setLoop(oniSoundID id, bool loop) = 0;
 
-            void setVolume(long soundID, float volume);
+            virtual void setVolume(oniSoundID id, float volume) = 0;
 
-            float getVolume(long soundID);
+            virtual float getVolume(oniSoundID id) = 0;
 
-        private:
-            SoLoud::Soloud m_SoloudManager;
-            std::vector<SoLoud::Wav> m_AudioSources;
-            std::vector<std::string> m_AudioNames;
-            std::vector<SoLoud::handle> m_Handles;
+            virtual bool isPlaying(oniSoundID id) = 0;
+
+            virtual void seek(oniSoundID id, double position) = 0;
         };
     }
 }

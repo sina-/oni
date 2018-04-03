@@ -63,7 +63,7 @@ namespace oni {
             glfwTerminate();
         }
 
-        void Window::update(io::Input &input) {
+        void Window::tick(io::Input &input) {
             glfwPollEvents();
             glfwSwapBuffers(mWindow);
 

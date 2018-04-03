@@ -61,6 +61,7 @@ namespace oni {
             // 30Hz
             const float mMinTickMS = 1 / 30.0f;
 
+            // TODO: Move it to a file where all consts are
             const float ep = 0.00001f;
         };
     }

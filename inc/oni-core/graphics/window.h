@@ -36,7 +36,7 @@ namespace oni {
 
             ~Window();
 
-            void update(io::Input &input);
+            void tick(io::Input &input);
 
             bool closed() const;
 

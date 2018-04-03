@@ -1,7 +1,5 @@
 #include <oni-core/game/game.h>
-#include <oni-core/io/input.h>
 #include <thread>
-#include <oni-core/utils/oni-assert.h>
 
 namespace oni {
     namespace game {

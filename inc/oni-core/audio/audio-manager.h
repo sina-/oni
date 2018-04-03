@@ -12,6 +12,10 @@ namespace oni {
         public:
             AudioManager() = default;
 
+            virtual ~AudioManager() = default;
+
+            virtual void tick() = 0;
+
             /**
              * @param name Path to the audio
              * @return unique ID
@@ -42,6 +46,8 @@ namespace oni {
             virtual bool isPlaying(oniSoundID id) = 0;
 
             virtual void seek(oniSoundID id, double position) = 0;
+
+            virtual void setPitch(oniSoundID id, float pitch) = 0;
         };
     }
 }

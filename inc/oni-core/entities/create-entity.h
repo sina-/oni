@@ -15,13 +15,13 @@ namespace oni {
 
         entities::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
                                                         const components::Texture &entityTexture, const math::vec3 &position,
-                                                        const float scalingFactor);
+                                                        const math::vec2 &size);
 
         entities::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
                                             components::LayerID layerID, const std::string &text,
                                             const math::vec3 &position);
 
         entities::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::LayerID layerID,
-                                                       const components::Texture &entityTexture, const float scalingFactor);
+                                                       const components::Texture &entityTexture);
     }
 }

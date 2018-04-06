@@ -18,11 +18,9 @@ namespace oni {
         }
 
         entities::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
-                                                        const components::Texture &entityTexture, const math::vec3 &position,
-                                                        const float scalingFactor) {
+                                                const components::Texture &entityTexture, const math::vec3 &position,
+                                                const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, layerID);
-
-            auto size = math::vec2(entityTexture.width * scalingFactor, entityTexture.height * scalingFactor);
 
             auto entityPlacement = components::Placement(position, size);
 
@@ -42,30 +40,36 @@ namespace oni {
         }
 
         entities::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::LayerID layerID,
-                                               const components::Texture &entityTexture, const float scalingFactor) {
+                                               const components::Texture &entityTexture) {
             auto carConfig = components::CarConfig();
             auto entity = vehicleEntityRepo.createEntity(entities::DynamicTexturedSprite, layerID);
 
-            carConfig.cgToRear = 1.0f;
-            carConfig.cgToFront = 1.0f;
-            carConfig.cgToFrontAxle = 0.75f;
-            carConfig.cgToRearAxle = 0.75f;
+            // TODO: this should be defined by the user of this function
+            carConfig.cgToRear = 1.25f;
+            carConfig.cgToFront = 1.25f;
+            carConfig.cgToFrontAxle = 1.15f;
+            carConfig.cgToRearAxle = 1.15f;
+            carConfig.halfWidth = 0.55f;
             carConfig.inertialScale = 0.5f;
             carConfig.lockGrip = 0.2f;
-            carConfig.tireGrip = 4.0f;
-            carConfig.engineForce = 8000;
-            carConfig.brakeForce = 4000;
-            // NOTE: These numbers should match carConfig.cgToFront and cgToRear and all the other dimension data.
-            // For example if cgToFront is 2.0m then texture width should be 2 * 20 * 2 = 80px
-            // and if carConfig.halfWidth is 0.9m then texture height should be 0.9 * 20 * 2 = 18px
-            auto carX = -entityTexture.width * scalingFactor / 2;
-            auto carY = -entityTexture.height * scalingFactor / 2;
-            auto carSizeX = entityTexture.width * scalingFactor;
-            auto carSizeY = entityTexture.height * scalingFactor;
+            carConfig.tireGrip = 3.0f;
+            carConfig.engineForce = 10000;
+            carConfig.brakeForce = 1000;
+            carConfig.cornerStiffnessRear = 5.5f;
+            carConfig.cornerStiffnessFront = 5.0f;
+            carConfig.maxSteer = 0.6f;
+            carConfig.rollResist = 8.0f;
+
+            auto carX = -carConfig.cgToRear;
+            auto carY = -carConfig.halfWidth;
+            auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
+            auto carSizeY = carConfig.halfWidth * 2.0f;
 
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
-            auto entityPlacement = components::Placement(math::vec3(carX, carY, 1.0f),
-                                                         math::vec2(carSizeX, carSizeY));
+            
+            auto entityPlacement = components::Placement(math::vec3((float) (carX), (float) (carY), 1.0f),
+                                                         math::vec2((float) (carSizeX),
+                                                                    (float) (carSizeY)));
             auto car = components::Car(carConfig);
             vehicleEntityRepo.setCar(entity, car);
             vehicleEntityRepo.setCarConfig(entity, carConfig);

@@ -1,7 +1,7 @@
 #include <oni-core/graphics/texture.h>
-#include <oni-core/graphics/utils/check-ogl-errors.h>
 
 #include <FreeImage.h>
+#include <oni-core/io/output.h>
 
 namespace oni {
     namespace graphics {
@@ -25,6 +25,7 @@ namespace oni {
             auto bits = FreeImage_GetBits(dib);
             auto width = FreeImage_GetWidth(dib);
             auto height = FreeImage_GetHeight(dib);
+
             if ((bits == nullptr) || (width == 0) || (height == 0)) {
                 std::runtime_error("Image loaded with no data: " + path);
             }
@@ -32,7 +33,7 @@ namespace oni {
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
 
-            if(!textureID){
+            if (!textureID) {
                 throw std::runtime_error("Could not generate texture.");
             }
 
@@ -67,7 +68,7 @@ namespace oni {
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
 
-            if(!textureID){
+            if (!textureID) {
                 throw std::runtime_error("Could not generate texture.");
             }
 
@@ -84,6 +85,44 @@ namespace oni {
             unbind();
 
             return textureID;
+        }
+
+        components::Texture generate() {
+            const auto width = 1000;
+            const auto height = 1000;
+            std::vector<unsigned char> bits(4 * width * height, 0);
+            // Elements in pixel
+            auto eip = 4;
+            auto stride = width * eip;
+
+            for (auto y = 0; y <= height; ++y) {
+                for (auto x = 0; x < width; ++x) {
+                    bits[(y * stride) + (x * eip) + FI_RGBA_BLUE] = 0;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_GREEN] = 0;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_RED] = 225;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_ALPHA] = 255;
+                }
+            }
+
+            GLuint textureID = 0;
+            glGenTextures(1, &textureID);
+
+            if (!textureID) {
+                throw std::runtime_error("Could not generate texture.");
+            }
+
+            LoadTexture::bind(textureID);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, bits.data());
+
+            LoadTexture::unbind();
+
+            std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+
+            return components::Texture("", textureID, width, height, uv);
         }
     }
 }

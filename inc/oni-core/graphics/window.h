@@ -24,7 +24,7 @@ namespace oni {
         class Window {
             const char *mTitle;
             int mWidth, mHeight;
-            int mXScaling, mYScaling;
+            int mGameWidth, mGameHeight;
             GLFWwindow *mWindow;
             int mMouseButton;
             double mCursorX, mCursorY;
@@ -50,9 +50,9 @@ namespace oni {
 
             const int &getHeight() const { return mHeight; }
 
-            int getXScaling() { return mXScaling; }
+            int getGameWidth() { return mGameWidth; }
 
-            int getYScaling() { return mYScaling; }
+            int getGameHeight() { return mGameHeight; }
 
             void addKeyPressed(int key) { mKeysPressed.push_back(key); }
 

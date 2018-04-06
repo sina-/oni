@@ -7,8 +7,8 @@ namespace oni {
             mTitle = title;
             mWidth = width;
             mHeight = height;
-            mXScaling = xScaling;
-            mYScaling = yScaling;
+            mGameWidth = xScaling;
+            mGameHeight = yScaling;
             mMouseButton = GLFW_KEY_UNKNOWN;
             mCursorX = 0.0;
             mCursorY = 0.0;

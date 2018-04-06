@@ -18,11 +18,11 @@ namespace oni {
             ftgl::texture_atlas_t *m_FTAtlas;
             ftgl::texture_font_t *m_FTFont;
 
-            float m_XScaling;
-            float m_YScaling;
+            float mGameWidth;
+            float mGameHeight;
 
         public:
-            FontManager(std::string font, int size, float xScaling, float yScaling);
+            FontManager(std::string font, int size, float gameWidth, float gameHeight);
 
             ~FontManager();
 

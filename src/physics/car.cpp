@@ -86,8 +86,8 @@ namespace oni {
             carSimDouble wheelAngularVelocity = car.velocityAbsolute / config.wheelRadius;
             // TODO: This is incorrect in case of slipping.
             car.rpm = wheelAngularVelocity * config.gearRatio * config.differentialRatio * 60 / (2 * M_PI);
-            if (car.rpm < 800.0f) {
-                car.rpm = 800.0f;
+            if (car.rpm < 400.0f) {
+                car.rpm = 400.0f;
             }
 
             // calculate rotational forces

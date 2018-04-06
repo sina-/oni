@@ -68,19 +68,19 @@ namespace oni {
             carSimDouble airResist;
             carSimDouble rollResist;
 
-            carSimDouble scaleMultiplierX; // Car image scale along X multiplier for rendering
-            carSimDouble scaleMultiplierY; // Car image scale along Y multiplier for rendering
+            //carSimDouble scaleMultiplierX; // Car image scale along X multiplier for rendering
+            //carSimDouble scaleMultiplierY; // Car image scale along Y multiplier for rendering
 
             carSimDouble gearRatio;
             carSimDouble differentialRatio;
 
             CarConfig() {
                 gravity = 9.81f;
-                engineForce = 3000.0f;
+                engineForce = 4000.0f;
                 brakeForce = 12000.0f;
                 mass = 1200.0f;
                 inertialScale = 1.0f;
-                halfWidth = 0.8f;
+                halfWidth = 0.9f;
                 cgToFront = 2.0f;
                 cgToRear = 2.0f;
                 cgToFrontAxle = 1.25f;
@@ -97,8 +97,8 @@ namespace oni {
                 cornerStiffnessRear = 5.2f;
                 airResist = 2.5f;
                 rollResist = 8.0f;
-                scaleMultiplierX = 0.25f;
-                scaleMultiplierY = 0.30f;
+                //scaleMultiplierX = 0.25f;
+                //scaleMultiplierY = 0.30f;
                 gearRatio = 2.7f;
                 differentialRatio = 3.4f;
             }

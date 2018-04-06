@@ -27,5 +27,6 @@ namespace oni {
 
             static void unbind();
         };
+            components::Texture generate();
     }
 }

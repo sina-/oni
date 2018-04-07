@@ -6,5 +6,4 @@ set(CMAKE_CXX_STANDARD 17)
 set(Oni_VERSION_MAJOR 0)
 set(Oni_VERSION_MINOR 1)
 
-subdirs(lib/soloud)
 subdirs(src)

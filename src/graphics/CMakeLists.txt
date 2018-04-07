@@ -36,6 +36,10 @@ endif()
 include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
 find_library(FREETYPE_GL freetype-gl PATHS ${oni_SOURCE_DIR}/lib/freetype-gl/bin)
 
+
+include_directories(${oni_SOURCE_DIR}/lib/ant-tweak-bar/include)
+find_library(ANT_TWEAK_BAR AntTweakBar PATHS ${oni_SOURCE_DIR}/lib/ant-tweak-bar/bin)
+
 # TODO: Statically link the dependencies by adding the lib to the repo together
 # with headers
 find_package(PkgConfig REQUIRED)
@@ -65,4 +69,5 @@ target_link_libraries(oni-core-graphics
         # NOTE: FreeType must be linked after freetype-gl because fucking g++
         ${FREETYPE_LIBRARY}
         ${OPENGL_LIBRARY}
+        ${ANT_TWEAK_BAR}
         oni-core-buffers)

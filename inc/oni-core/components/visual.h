@@ -58,7 +58,7 @@ namespace oni {
                 filePath = other.filePath;
                 textureID = other.textureID;
                 width = other.width;
-                height = other.width;
+                height = other.height;
                 uv = other.uv;
                 format = other.format;
                 type = other.type;

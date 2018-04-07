@@ -93,19 +93,7 @@ namespace oni {
         }
 
         components::Texture Texture::generate(const int width, const int height, const components::PixelRGBA &pixel) {
-            std::vector<unsigned char> bits(4 * width * height, 0);
-            // Elements in pixel
-            auto eip = 4;
-            auto stride = width * eip;
-
-            for (auto y = 0; y <= height; ++y) {
-                for (auto x = 0; x < width; ++x) {
-                    bits[(y * stride) + (x * eip) + FI_RGBA_BLUE] = pixel.blue;
-                    bits[(y * stride) + (x * eip) + FI_RGBA_GREEN] = pixel.green;
-                    bits[(y * stride) + (x * eip) + FI_RGBA_RED] = pixel.red;
-                    bits[(y * stride) + (x * eip) + FI_RGBA_ALPHA] = pixel.alpha;
-                }
-            }
+            auto bits = generateBits(width, height, pixel);
 
             GLuint textureID = 0;
             glGenTextures(1, &textureID);
@@ -129,6 +117,34 @@ namespace oni {
             std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
 
             return components::Texture("", textureID, width, height, format, type, uv);
+        }
+
+        void Texture::updateSubTexture(components::Texture texture, const GLint xOffset, const GLint yOffset,
+                                       const GLint width, const GLint height,
+                                       const std::vector<unsigned char> &bits) {
+            ONI_DEBUG_ASSERT(texture.width >= width);
+            ONI_DEBUG_ASSERT(texture.height >= height);
+            glTextureSubImage2D(texture.textureID, 0, xOffset, yOffset, width, height, texture.format, texture.type,
+                                bits.data());
+        }
+
+        std::vector<unsigned char> Texture::generateBits(const int width, const int height,
+                                                         const components::PixelRGBA &pixel) {
+            std::vector<unsigned char> bits(4 * width * height, 0);
+            // Elements in pixel
+            auto eip = 4;
+            auto stride = width * eip;
+
+            for (auto y = 0; y < height; ++y) {
+                for (auto x = 0; x < width; ++x) {
+                    bits[(y * stride) + (x * eip) + FI_RGBA_BLUE] = pixel.blue;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_GREEN] = pixel.green;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_RED] = pixel.red;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_ALPHA] = pixel.alpha;
+                }
+            }
+
+            return bits;
         }
     }
 }

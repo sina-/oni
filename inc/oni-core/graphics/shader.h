@@ -18,14 +18,6 @@ namespace oni {
             const std::string mVertPath;
             const std::string mFragPath;
 
-            static void messageCallback(GLenum source,
-                                        GLenum type,
-                                        GLuint id,
-                                        GLenum severity,
-                                        GLsizei length,
-                                        const GLchar *message,
-                                        const void *userParam);
-
             GLint getUniformLocation(const GLchar *name);
 
         public:

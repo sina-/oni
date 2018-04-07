@@ -9,6 +9,12 @@ namespace oni {
             // Check for supported usages.
             ONI_DEBUG_ASSERT(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)
 
+            // TODO: Check this comment on how to use OpenGL4.5 to create buffers:
+            // http://stackoverflow.com/a/21652955/558366
+            // Also this example can help:
+            // https://bcmpinc.wordpress.com/2015/10/07/copy-a-texture-to-screen/
+            // TODO: Another guide to using modern OpenGL that covers more than just
+            // Buffers: https://github.com/Fennec-kun/Guide-to-Modern-OpenGL-Functions
             glGenBuffers(1, &mBufferID);
             bind();
             // Use the data for GL_STATIC_DRAW, otherwise pass nullptr for GL_DYNAMIC_DRAW.

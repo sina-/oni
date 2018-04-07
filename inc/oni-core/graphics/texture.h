@@ -23,6 +23,14 @@ namespace oni {
 
             static components::Texture generate(const int width, const int height, const components::PixelRGBA &pixel);
 
+            static std::vector<unsigned char> generateBits(const int width, const int height,
+                                                           const components::PixelRGBA &pixel);
+
+            static void updateSubTexture(components::Texture texture, const GLint xOffset,
+                                         const GLint yOffset, const GLint width,
+                                         const GLint height,
+                                         const std::vector<unsigned char> &bits);
+
             static GLuint load(const graphics::FontManager &fontManager);
 
             static void bind(GLuint textureID);

@@ -81,6 +81,16 @@ namespace oni {
             static void mouseCallback(GLFWwindow *window, int button, int action, int mods);
 
             static void cursorPosCallback(GLFWwindow *window, double x, double y);
+
+        private:
+            static void messageCallback(GLenum source,
+                                        GLenum type,
+                                        GLuint id,
+                                        GLenum severity,
+                                        GLsizei length,
+                                        const GLchar *message,
+                                        const void *userParam);
+
         };
     }
 }

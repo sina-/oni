@@ -1,3 +1,5 @@
+#include <AntTweakBar.h>
+
 #include <oni-core/graphics/window.h>
 
 namespace oni {
@@ -88,6 +90,7 @@ namespace oni {
 
         void Window::windowResizeCallback(GLFWwindow *window, int width, int height) {
             auto thiz = getThisFromGLFWWindow(window);
+            TwWindowSize(width, height);
 
             glViewport(0, 0, width, height);
             thiz->setHeight(height);
@@ -103,6 +106,7 @@ namespace oni {
         }
 
         void Window::mouseCallback(GLFWwindow *window, int button, int action, int mods) {
+            TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);
             if (action == GLFW_PRESS)
                 thiz->setMouseButton(button);
@@ -111,6 +115,7 @@ namespace oni {
         }
 
         void Window::cursorPosCallback(GLFWwindow *window, double x, double y) {
+            TwEventMousePosGLFW(x, y);
             auto thiz = getThisFromGLFWWindow(window);
             thiz->setCursorX(x);
             thiz->setCursorY(y);

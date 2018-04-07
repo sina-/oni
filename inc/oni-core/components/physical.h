@@ -116,6 +116,7 @@ namespace oni {
             carSimDouble axleWeightRatioRear;
             carSimDouble rpm;
             carSimDouble maxVelocityAbsolute;
+            carSimDouble accumulatedEBrake;
 
             math::vec2 position;
             math::vec2 velocity; // m/s
@@ -152,6 +153,7 @@ namespace oni {
                 maxVelocityAbsolute = (c.rollResist -
                                        std::sqrt(c.rollResist * c.rollResist + 4 * c.airResist * c.engineForce)) /
                                       (-2 * c.airResist);
+                accumulatedEBrake = 0.0f;
 
                 smoothSteer = true;
                 safeSteer = true;

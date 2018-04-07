@@ -28,7 +28,12 @@ namespace oni {
                         carInput.right = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_SPACE)) {
-                        carInput.eBrake = 1.0f;
+                        if (car.accumulatedEBrake < 1.0f) {
+                            car.accumulatedEBrake += 0.01f;
+                        }
+                        carInput.eBrake = static_cast<float>(car.accumulatedEBrake);
+                    } else {
+                        car.accumulatedEBrake = 0.0f;
                     }
 
                     auto steerInput = carInput.left - carInput.right;

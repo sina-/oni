@@ -29,6 +29,8 @@ namespace oni {
             if (glewInit() != GLEW_OK)
                 throw std::runtime_error("GLEW failed to initialize!");
 
+            printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+
             /*
             Final solution for accessing (Window*) from C callback function.
             (Inspired from: https://codereview.stackexchange.com/a/119374)

@@ -18,7 +18,7 @@ namespace oni {
             // NOTE: This type of initialization will avoid copy construction.
             mPlacements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
             mAppearances.emplace_back(math::vec4());
-            mTextures.emplace_back("", 0, 0, 0, std::vector<math::vec2>());
+            mTextures.emplace_back("", 0, 0, 0, 0, 0, std::vector<math::vec2>());
             mLayerIDs.emplace_back(0);
             mTexts.emplace_back(components::Text());
             return mEntities.size() - 1;

@@ -198,7 +198,7 @@ namespace oni {
         void BatchRenderer2D::flush() {
             for (const auto &t2s: mTextureToSampler) {
                 glActiveTexture(GL_TEXTURE0 + t2s.second);
-                LoadTexture::bind(t2s.first);
+                Texture::bind(t2s.first);
             }
 
             mVAO->bindVAO();
@@ -209,7 +209,7 @@ namespace oni {
             mIBO->unbind();
             mVAO->unbindVAO();
 
-            LoadTexture::unbind();
+            Texture::unbind();
 
             mIndexCount = 0;
 

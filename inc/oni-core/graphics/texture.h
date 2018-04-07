@@ -10,10 +10,10 @@
 
 namespace oni {
     namespace graphics {
-        class LoadTexture {
-            LoadTexture() = default;
+        class Texture {
+            Texture() = default;
 
-            ~LoadTexture() = default;
+            ~Texture() = default;
 
         public:
             // TODO: At some point would be nice to have a list of all loaded textures and only load a new
@@ -21,12 +21,13 @@ namespace oni {
             // font manager or audio manager.
             static components::Texture load(const std::string &path);
 
+            static components::Texture generate(const int width, const int height, const components::PixelRGBA &pixel);
+
             static GLuint load(const graphics::FontManager &fontManager);
 
             static void bind(GLuint textureID);
 
             static void unbind();
         };
-            components::Texture generate();
     }
 }

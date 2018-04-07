@@ -24,7 +24,7 @@ namespace oni {
 
             ONI_DEBUG_ASSERT(glyph == 0);
 
-            m_FTAtlas->id = graphics::LoadTexture::load(*this);
+            m_FTAtlas->id = graphics::Texture::load(*this);
 
         }
 

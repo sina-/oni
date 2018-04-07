@@ -38,14 +38,21 @@ namespace oni {
             GLsizei width;
             GLsizei height;
             GLuint textureID;
+            GLenum format;
+            GLenum type;
             std::string filePath;
             std::vector<math::vec2> uv;
 
-            Texture() : filePath(std::string()), textureID(0), width(0), height(0), uv(std::vector<math::vec2>()) {};
+            Texture() : filePath(std::string()), textureID(0), width(0), height(0),
+                        format(GL_BGRA), type(GL_UNSIGNED_BYTE),
+                        uv(std::vector<math::vec2>()) {};
 
             Texture(std::string _filePath, GLuint _textureID, GLsizei _width, GLsizei _height,
+                    GLenum _format, GLenum _type,
                     std::vector<math::vec2> _uv) : filePath(
-                    std::move(_filePath)), textureID(_textureID), width(_width), height(_height), uv(std::move(_uv)) {};
+                    std::move(_filePath)), textureID(_textureID), width(_width), height(_height),
+                                                   format(_format), type(_type),
+                                                   uv(std::move(_uv)) {};
 
             Texture(const Texture &other) {
                 filePath = other.filePath;
@@ -53,6 +60,8 @@ namespace oni {
                 width = other.width;
                 height = other.width;
                 uv = other.uv;
+                format = other.format;
+                type = other.type;
             }
         };
 
@@ -74,6 +83,21 @@ namespace oni {
             Text() : textContent(std::string()), textureID(0), position(math::vec3()), uv(std::vector<math::vec4>()),
                      width(0), height(0), advanceX(0), advanceY(0), offsetX(0), offsetY(0), xScaling(1.0f),
                      yScaling(1.0f) {}
+        };
+
+        struct PixelRGBA {
+            unsigned char red;
+            unsigned char blue;
+            unsigned char green;
+            unsigned char alpha;
+
+            PixelRGBA() : red(0), blue(0), green(0), alpha(0) {}
+
+            PixelRGBA(unsigned char red_, unsigned char blue_, unsigned char green_, unsigned char alpha_) :
+                    red(red_),
+                    blue(blue_),
+                    green(green_),
+                    alpha(alpha_) {}
         };
 
     }

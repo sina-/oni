@@ -83,7 +83,8 @@ namespace oni {
                         type, severity, message);
                 throw std::runtime_error("OpenGL error!");
             } else {
-                // TODO: Other type of errors can be logged depending on logging level.
+                fprintf(stderr, "GL CALLBACK: type = 0x%x, severity = 0x%x, source = 0x%x,message = %s\n",
+                        type, severity, source, message);
             }
         }
 

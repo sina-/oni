@@ -122,6 +122,10 @@ namespace oni {
         void Texture::updateSubTexture(components::Texture texture, const GLint xOffset, const GLint yOffset,
                                        const GLint width, const GLint height,
                                        const std::vector<unsigned char> &bits) {
+            ONI_DEBUG_ASSERT(texture.width > xOffset);
+            ONI_DEBUG_ASSERT(texture.height > yOffset);
+            ONI_DEBUG_ASSERT(xOffset >= 0);
+            ONI_DEBUG_ASSERT(yOffset >= 0);
             ONI_DEBUG_ASSERT(texture.width >= width);
             ONI_DEBUG_ASSERT(texture.height >= height);
             glTextureSubImage2D(texture.textureID, 0, xOffset, yOffset, width, height, texture.format, texture.type,

@@ -40,6 +40,8 @@ namespace oni {
             }
 
             Placement(const Placement &other) = default;
+
+            math::vec3 getPosition() const { return vertexA; }
         };
 
         typedef double carSimDouble;

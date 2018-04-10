@@ -26,6 +26,17 @@ namespace oni {
             static std::vector<unsigned char> generateBits(const int width, const int height,
                                                            const components::PixelRGBA &pixel);
 
+            /**
+             * Given a texture object and a region in the local texture coordinates overwrites
+             * the texture data with the new bits.
+             *
+             * @param texture
+             * @param xOffset in local texture coordinates
+             * @param yOffset in local texture coordinates
+             * @param width in local texture coordinates
+             * @param height in local texture coordinates
+             * @param bits data to overwrite the texture with, must match the given region
+             */
             static void updateSubTexture(components::Texture texture, const GLint xOffset,
                                          const GLint yOffset, const GLint width,
                                          const GLint height,

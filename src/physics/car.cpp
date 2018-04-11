@@ -33,6 +33,12 @@ namespace oni {
             carSimDouble slipAngleRear = std::atan2(car.velocityLocal.y + yawSpeedRear,
                                                     std::abs(car.velocityLocal.x));
 
+            car.slippingFront = std::abs(slipAngleFront) > 0.6f;
+            car.slippingRear = std::abs(slipAngleRear) > 0.6f;
+
+            car.slipAngleFront = slipAngleFront;
+            car.slipAngleRear = slipAngleRear;
+
             carSimDouble tireGripFront = config.tireGrip;
             carSimDouble tireGripRear = config.tireGrip * (1.0 - inputs.eBrake *
                                                                  (1.0 -

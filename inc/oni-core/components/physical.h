@@ -119,6 +119,9 @@ namespace oni {
             carSimDouble rpm;
             carSimDouble maxVelocityAbsolute;
             carSimDouble accumulatedEBrake;
+            carSimDouble slipAngleFront;
+            carSimDouble slipAngleRear;
+
 
             math::vec2 position;
             math::vec2 velocity; // m/s
@@ -127,6 +130,8 @@ namespace oni {
             math::vec2 accelerationLocal;
 
             bool accelerating;
+            bool slippingFront;
+            bool slippingRear;
 
             bool smoothSteer;
             bool safeSteer;
@@ -141,6 +146,8 @@ namespace oni {
                 wheelBase = c.cgToFrontAxle + c.cgToRearAxle;
                 axleWeightRatioFront = c.cgToRearAxle / wheelBase;
                 axleWeightRatioRear = c.cgToFrontAxle / wheelBase;
+                slipAngleFront = 0.0f;
+                slipAngleRear = 0.0f;
 
                 position = math::vec2();
                 velocity = math::vec2();
@@ -159,6 +166,8 @@ namespace oni {
 
                 smoothSteer = true;
                 safeSteer = true;
+                slippingFront = false;
+                slippingRear = false;
             }
         };
 

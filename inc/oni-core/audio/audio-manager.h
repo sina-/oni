@@ -4,9 +4,12 @@
 #include <vector>
 #include <memory>
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace audio {
-        typedef long oniSoundID;
+
+        using common::oniSoundID;
 
         class AudioManager {
         public:

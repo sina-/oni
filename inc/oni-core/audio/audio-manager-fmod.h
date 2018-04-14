@@ -4,12 +4,27 @@
 #include <vector>
 #include <memory>
 
-#include <fmod.hpp>
-
 #include <oni-core/audio/audio-manager.h>
+#include <oni-core/common/typedefs.h>
+
+namespace FMOD {
+    class Sound;
+
+    class System;
+
+    class Channel;
+}
 
 namespace oni {
     namespace audio {
+        using common::oniSoundID;
+
+        class FMODDeleter {
+        public:
+            void operator()(FMOD::Sound *s) const;
+
+            void operator()(FMOD::System *sys) const;
+        };
 
         class AudioManagerFMOD : public AudioManager {
         public:
@@ -40,23 +55,11 @@ namespace oni {
             void setPitch(oniSoundID id, float pitch) override;
 
         private:
-            class FMODDeleter {
-            public:
-                void operator()(FMOD::Sound *s) const { s->release(); }
-
-                void operator()(FMOD::System *sys) const {
-                    sys->close();
-                    sys->release();
-                }
-            };
 
         private:
-            std::unique_ptr<FMOD::System, AudioManagerFMOD::FMODDeleter> mSystem;
-            std::vector<std::unique_ptr<FMOD::Sound, AudioManagerFMOD::FMODDeleter>> mSounds;
+            std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
+            std::vector<std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
             std::vector<std::unique_ptr<FMOD::Channel>> mChannels;
-
-            // TODO: move it to const deceleration file, where ever that is
-            const float ep = 0.00001f;
         };
     }
 }

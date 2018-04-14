@@ -1,5 +1,8 @@
+#include <fmod.hpp>
+
 #include <oni-core/audio/audio-manager-fmod.h>
 #include <oni-core/utils/oni-assert.h>
+#include <oni-core/common/consts.h>
 
 #define ERRCHECK(_result) ONI_DEBUG_ASSERT((_result) == FMOD_OK)
 
@@ -68,7 +71,7 @@ namespace oni {
             ERRCHECK(result);
 
             // TODO: This is just a work around to keep the interface consistent with double.
-            return ((double) pos) + ep;
+            return ((double) pos) + common::ep;
         }
 
         void AudioManagerFMOD::stopSound(oniSoundID id) {
@@ -95,13 +98,22 @@ namespace oni {
         }
 
         void AudioManagerFMOD::seek(oniSoundID id, double position) {
-            auto result = mChannels[id]->setPosition(static_cast<unsigned int>(position + ep), FMOD_TIMEUNIT_MS);
+            auto result = mChannels[id]->setPosition(static_cast<unsigned int>(position + common::ep), FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
         }
 
         void AudioManagerFMOD::setPitch(oniSoundID id, float pitch) {
             auto result = mChannels[id]->setPitch(pitch);
             ERRCHECK(result);
+        }
+
+        void FMODDeleter::operator()(FMOD::Sound *s) const {
+            s->release();
+        }
+
+        void FMODDeleter::operator()(FMOD::System *sys) const {
+            sys->close();
+            sys->release();
         }
     }
 }

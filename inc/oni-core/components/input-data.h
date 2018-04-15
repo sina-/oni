@@ -5,11 +5,11 @@ namespace oni {
         typedef int oniKey;
 
         struct CarInput {
-            float left;
-            float right;
-            float throttle;
-            float brake;
-            float eBrake;
+            float left{0.0f};
+            float right{0.0f};
+            float throttle{0.0f};
+            float brake{0.0f};
+            float eBrake{0.0f};
         };
     }
 }

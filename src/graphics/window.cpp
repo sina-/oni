@@ -1,6 +1,7 @@
 #include <AntTweakBar.h>
 
 #include <oni-core/graphics/window.h>
+#include <oni-core/common/defines.h>
 
 namespace oni {
     namespace graphics {
@@ -78,6 +79,9 @@ namespace oni {
                                      GLsizei length,
                                      const GLchar *message,
                                      const void *userParam) {
+            UNUSED(id);
+            UNUSED(length);
+            UNUSED(userParam);
             if (type == GL_DEBUG_TYPE_ERROR) {
                 fprintf(stderr, "GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n",
                         type, severity, message);

@@ -16,11 +16,11 @@ namespace oni {
 
             mEntities.emplace_back(components::Mask().set(components::READY));
             // NOTE: This type of initialization will avoid copy construction.
-            mPlacements.emplace_back(math::vec3(), math::vec3(), math::vec3(), math::vec3());
-            mAppearances.emplace_back(math::vec4());
-            mTextures.emplace_back("", 0, 0, 0, 0, 0, std::vector<math::vec2>());
+            mPlacements.emplace_back(components::Placement{});
+            mAppearances.emplace_back(components::Appearance{});
+            mTextures.emplace_back(components::Texture{});
             mLayerIDs.emplace_back(0);
-            mTexts.emplace_back(components::Text());
+            mTexts.emplace_back(components::Text{});
             return mEntities.size() - 1;
         }
 
@@ -33,7 +33,8 @@ namespace oni {
             mTexts.reserve(mTexts.size() + size);
         }
 
-        entities::entityID BasicEntityRepo::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
+        entities::entityID
+        BasicEntityRepo::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
             auto entity = _createEntity();
             mEntities[entity] = mask;
             mLayerIDs[entity] = layerID;

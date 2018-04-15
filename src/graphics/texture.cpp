@@ -28,8 +28,8 @@ namespace oni {
             }
 
             auto bits = FreeImage_GetBits(dib);
-            auto width = FreeImage_GetWidth(dib);
-            auto height = FreeImage_GetHeight(dib);
+            GLsizei width = FreeImage_GetWidth(dib);
+            GLsizei height = FreeImage_GetHeight(dib);
 
             if ((bits == nullptr) || (width == 0) || (height == 0)) {
                 std::runtime_error("Image loaded with no data: " + path);
@@ -56,9 +56,9 @@ namespace oni {
 
             FreeImage_Unload(dib);
 
-            std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+            std::vector<math::vec2> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
 
-            return components::Texture(path, textureID, width, height, format, type, uv);
+            return components::Texture {width, height, textureID, format, type, path, uv};
         }
 
         void Texture::bind(GLuint textureID) {
@@ -119,9 +119,9 @@ namespace oni {
 
             Texture::unbind();
 
-            std::vector<math::vec2> uv{math::vec2(0, 0), math::vec2(0, 1), math::vec2(1, 1), math::vec2(1, 0)};
+            std::vector<math::vec2> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
 
-            return components::Texture("", textureID, width, height, format, type, uv);
+            return components::Texture{width, height, textureID, format, type, "", uv};
         }
 
         void Texture::updateSubTexture(components::Texture texture, const GLint xOffset, const GLint yOffset,

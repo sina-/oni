@@ -176,23 +176,23 @@ namespace oni {
                 auto u1 = text.uv[i].z;
                 auto v1 = text.uv[i].w;
 
-                buffer->position = math::vec3(x0, y0, 1);
-                buffer->uv = math::vec2(u0, v0);
+                buffer->position = math::vec3{x0, y0, 1};
+                buffer->uv = math::vec2{u0, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                buffer->position = math::vec3(x0, y1, 1);
-                buffer->uv = math::vec2(u0, v1);
+                buffer->position = math::vec3{x0, y1, 1};
+                buffer->uv = math::vec2{u0, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                buffer->position = math::vec3(x1, y1, 1);
-                buffer->uv = math::vec2(u1, v1);
+                buffer->position = math::vec3{x1, y1, 1};
+                buffer->uv = math::vec2{u1, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                buffer->position = math::vec3(x1, y0, 1);
-                buffer->uv = math::vec2(u1, v0);
+                buffer->position = math::vec3{x1, y0, 1};
+                buffer->uv = math::vec2{u1, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 

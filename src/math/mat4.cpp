@@ -134,20 +134,20 @@ namespace oni {
         }
 
         vec4 mat4::multiply(const vec4 &other) const {
-            return math::vec4(
+            return math::vec4{
                     elements[0] * other.x + elements[4] * other.y + elements[8] * other.z + elements[12] * other.w,
                     elements[1] * other.x + elements[5] * other.y + elements[9] * other.z + elements[13] * other.w,
                     elements[2] * other.x + elements[6] * other.y + elements[10] * other.z + elements[14] * other.w,
                     elements[3] * other.x + elements[7] * other.y + elements[11] * other.z + elements[15] * other.w
-            );
+            };
         }
 
         vec3 mat4::multiply(const vec3 &other) const {
-            return math::vec3(
+            return math::vec3{
                     elements[0] * other.x + elements[4] * other.y + elements[8] * other.z + elements[12],
                     elements[1] * other.x + elements[5] * other.y + elements[9] * other.z + elements[13],
                     elements[2] * other.x + elements[6] * other.y + elements[10] * other.z + elements[14]
-            );
+            };
         }
 
     }

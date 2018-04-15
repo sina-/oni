@@ -2,18 +2,6 @@
 
 namespace oni {
     namespace math {
-        vec3::vec3() {
-            x = 0.0f;
-            y = 0.0f;
-            z = 0.0f;
-        }
-
-        vec3::vec3(float x, float y, float z) {
-            this->x = x;
-            this->y = y;
-            this->z = z;
-        }
-
         vec3 &vec3::add(const vec3 &other) {
             x += other.x;
             y += other.y;
@@ -43,19 +31,19 @@ namespace oni {
         }
 
         vec3 operator+(const vec3 &left, const vec3 &right) {
-            return vec3(left.x, left.y, left.z).add(right);
+            return vec3{left.x, left.y, left.z}.add(right);
         }
 
         vec3 operator-(const vec3 &left, const vec3 &right) {
-            return vec3(left.x, left.y, left.z).subtract(right);
+            return vec3{left.x, left.y, left.z}.subtract(right);
         }
 
         vec3 operator*(const vec3 &left, const vec3 &right) {
-            return vec3(left.x, left.y, left.z).multiply(right);
+            return vec3{left.x, left.y, left.z}.multiply(right);
         }
 
         vec3 operator/(const vec3 &left, const vec3 &right) {
-            return vec3(left.x, left.y, left.z).divide(right);
+            return vec3{left.x, left.y, left.z}.divide(right);
         }
 
         vec3 &vec3::operator+=(const vec3 &other) {

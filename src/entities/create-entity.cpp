@@ -12,8 +12,8 @@ namespace oni {
                                               const math::vec3 &position, const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::Sprite, layerID);
 
-            auto entityPlacement = components::Placement(position, size);
-            auto entityAppearance = components::Appearance(color);
+            auto entityPlacement = components::Placement::fromPositionAndSize(position, size);
+            components::Appearance entityAppearance{color};
 
             basicEntityRepo.setEntityPlacement(entity, entityPlacement);
             basicEntityRepo.setEntityAppearance(entity, entityAppearance);
@@ -26,7 +26,7 @@ namespace oni {
                                                 const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, layerID);
 
-            auto entityPlacement = components::Placement(position, size);
+            auto entityPlacement = components::Placement::fromPositionAndSize(position, size);
 
             basicEntityRepo.setEntityPlacement(entity, entityPlacement);
             basicEntityRepo.setEntityTexture(entity, entityTexture);
@@ -70,10 +70,10 @@ namespace oni {
             auto carSizeY = carConfig.halfWidth * 2.0f;
 
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
-            
-            auto entityPlacement = components::Placement(math::vec3((float) (carX), (float) (carY), 1.0f),
-                                                         math::vec2((float) (carSizeX),
-                                                                    (float) (carSizeY)));
+
+            auto entityPlacement = components::Placement::fromPositionAndSize(
+                    math::vec3{(float) (carX), (float) (carY), 1.0f},
+                    math::vec2{(float) (carSizeX), (float) (carSizeY)});
             auto car = components::Car(carConfig);
             vehicleEntityRepo.setCar(entity, car);
             vehicleEntityRepo.setCarConfig(entity, carConfig);

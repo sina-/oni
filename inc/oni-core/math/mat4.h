@@ -20,7 +20,8 @@ namespace oni {
 			};
 
 			mat4();
-			mat4(float diag);
+
+			explicit mat4(float diag);
 
 			const float * getArray() const { return &elements.front(); };
 

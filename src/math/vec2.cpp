@@ -4,18 +4,6 @@
 
 namespace oni {
 	namespace math {
-		vec2::vec2()
-		{
-			x = 0.0f;
-			y = 0.0f;
-		}
-
-		vec2::vec2(float x, float y)
-		{
-			this->x = x;
-			this->y = y;
-		}
-
 		vec2 & vec2::add(const vec2 & other)
 		{
 			x += other.x;
@@ -46,22 +34,22 @@ namespace oni {
 
 		vec2 operator+(const vec2 & left, const vec2 & right)
 		{
-			return vec2(left.x, left.y).add(right);
+			return vec2{left.x, left.y}.add(right);
 		}
 
 		vec2 operator-(const vec2 & left, const vec2 & right)
 		{
-			return vec2(left.x, left.y).subtract(right);
+			return vec2{left.x, left.y}.subtract(right);
 		}
 
 		vec2 operator*(const vec2 & left, const vec2 & right)
 		{
-			return vec2(left.x, left.y).multiply(right);
+			return vec2{left.x, left.y}.multiply(right);
 		}
 
 		vec2 operator/(const vec2 & left, const vec2 & right)
 		{
-			return vec2(left.x, left.y).divide(right);
+			return vec2{left.x, left.y}.divide(right);
 		}
 
 		vec2 & vec2::operator+=(const vec2 & other)

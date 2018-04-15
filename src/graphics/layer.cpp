@@ -110,12 +110,12 @@ namespace oni {
         }
 
         void Layer::lookAt(float x, float y, float distance) {
-            mViewMatrix = math::mat4::scale(math::vec3(distance, distance, 1.0f)) *
+            mViewMatrix = math::mat4::scale(math::vec3{distance, distance, 1.0f}) *
                           math::mat4::translation(-x, -y, 0.0f);
         }
 
         void Layer::orientTo(float x, float y, float degree) {
-            auto rotate = math::mat4::rotation(degree, math::vec3(0.0f, 0.0f, 1.0f));
+            auto rotate = math::mat4::rotation(degree, math::vec3{0.0f, 0.0f, 1.0f});
             auto translation = math::mat4::translation(x, y, 0.0f);
             mModalMatrix = translation * rotate;
         }
@@ -175,11 +175,13 @@ namespace oni {
             }
 
             auto position = std::make_unique<const components::BufferStructure>
-                    (positionIndex, 3, GL_FLOAT, GL_FALSE, stride, static_cast<const GLvoid *>(nullptr));
+                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
+                                                 stride,
+                                                 static_cast<const GLvoid *>(nullptr)});
             auto color = std::make_unique<const components::BufferStructure>
-                    (colorIndex, 4, GL_FLOAT, GL_TRUE, stride,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::ColoredVertex,
-                                                               components::ColoredVertex::color)));
+                    (components::BufferStructure{static_cast<GLuint>(colorIndex), 4, GL_FLOAT, GL_TRUE, stride,
+                                                 reinterpret_cast<const GLvoid *>(offsetof(components::ColoredVertex,
+                                                                                           components::ColoredVertex::color))});
 
             auto bufferStructures = common::BufferStructures();
             bufferStructures.push_back(std::move(position));
@@ -214,15 +216,16 @@ namespace oni {
             }
 
             auto position = std::make_unique<const components::BufferStructure>
-                    (positionIndex, 3, GL_FLOAT, GL_FALSE, stride, static_cast<const GLvoid *>(nullptr));
+                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
+                                                 static_cast<const GLvoid *>(nullptr)});
             auto samplerID = std::make_unique<const components::BufferStructure>
-                    (samplerIDIndex, 1, GL_FLOAT, GL_FALSE, stride,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                               components::TexturedVertex::samplerID)));
+                    (components::BufferStructure{static_cast<GLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE, stride,
+                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
+                                                                                           components::TexturedVertex::samplerID))});
             auto uv = std::make_unique<const components::BufferStructure>
-                    (uvIndex, 2, GL_FLOAT, GL_FALSE, stride,
-                     reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                               components::TexturedVertex::uv)));
+                    (components::BufferStructure{static_cast<GLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
+                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
+                                                                                           components::TexturedVertex::uv))});
 
             auto bufferStructures = common::BufferStructures();
             bufferStructures.push_back(std::move(position));

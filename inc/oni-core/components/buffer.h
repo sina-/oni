@@ -12,39 +12,28 @@
 namespace oni {
     namespace components {
         struct Vertex {
-            math::vec3 position;
-
-            Vertex() : position(math::vec3()) {}
+            math::vec3 position{0.0f, 0.0f, 0.0f};
         };
 
         struct ColoredVertex {
-            math::vec3 position;
-            math::vec4 color;
-
-            ColoredVertex() : position(math::vec3()), color(math::vec4()) {}
+            math::vec3 position{0.0f, 0.0f, 0.0f};
+            math::vec4 color{0.0f, 0.0f, 0.0f, 0.0f};
         };
 
         struct TexturedVertex {
-            math::vec3 position;
-            GLint samplerID;
+            math::vec3 position{0.0f, 0.0f, 0.0f};
+            GLint samplerID{0};
             // TODO: use UNSIGNED_SHORT
-            oni::math::vec2 uv;
-
-            TexturedVertex() : position(math::vec3()), samplerID(0), uv(math::vec2()) {}
+            math::vec2 uv{0.0f, 0.0f};
         };
 
         struct BufferStructure {
-            GLuint index;
-            GLuint componentCount;
-            GLenum componentType;
-            GLboolean normalized;
-            GLsizei stride;
-            const GLvoid *offset;
-
-            BufferStructure(GLuint index, GLuint componentCount, GLenum componentType, GLboolean normalized,
-                            GLsizei stride, const void *offset) : index(index), componentCount(componentCount),
-                                                                  componentType(componentType), normalized(normalized),
-                                                                  stride(stride), offset(offset) {}
+            GLuint index{0};
+            GLuint componentCount{0};
+            GLenum componentType{0};
+            GLboolean normalized{0};
+            GLsizei stride{0};
+            const GLvoid *offset{nullptr};
         };
 
     }

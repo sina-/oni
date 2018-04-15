@@ -69,7 +69,7 @@ namespace oni {
                 textComponent.offsetY.emplace_back(glyph->offset_y);
                 textComponent.advanceX.emplace_back(glyph->advance_x);
                 textComponent.advanceY.emplace_back(glyph->advance_y);
-                textComponent.uv.emplace_back(glyph->s0, glyph->t0, glyph->s1, glyph->t1);
+                textComponent.uv.emplace_back(math::vec4{glyph->s0, glyph->t0, glyph->s1, glyph->t1});
                 textComponent.xScaling = mGameWidth;
                 textComponent.yScaling = mGameHeight;
             }

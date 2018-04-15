@@ -18,91 +18,48 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            math::vec3 vertexA;
-            math::vec3 vertexB;
-            math::vec3 vertexC;
-            math::vec3 vertexD;
-
-            Placement() : vertexA(math::vec3()), vertexB(math::vec3()),
-                          vertexC(math::vec3()), vertexD(math::vec3()) {}
-
-            Placement(const math::vec3 &mPositionA, const math::vec3 &mPositionB,
-                      const math::vec3 &mPositionC, const math::vec3 &mPositionD) :
-                    vertexA(mPositionA),
-                    vertexB(mPositionB),
-                    vertexC(mPositionC),
-                    vertexD(mPositionD) {}
-
-            Placement(const math::vec3 position, const math::vec2 size) {
-                vertexA = math::vec3(position.x, position.y, position.z);
-                vertexB = math::vec3(position.x, position.y + size.y, position.z);
-                vertexC = math::vec3(position.x + size.x, position.y + size.y, position.z);
-                vertexD = math::vec3(position.x + size.x, position.y, position.z);
-            }
-
-            Placement(const Placement &other) = default;
+            math::vec3 vertexA{0.0f, 0.0f, 0.0f};
+            math::vec3 vertexB{0.0f, 0.0f, 0.0f};
+            math::vec3 vertexC{0.0f, 0.0f, 0.0f};
+            math::vec3 vertexD{0.0f, 0.0f, 0.0f};
 
             math::vec3 getPosition() const { return vertexA; }
+
+            static Placement fromPositionAndSize(const math::vec3 position, const math::vec2 size) {
+                return Placement{
+                        math::vec3{position.x, position.y, position.z},
+                        math::vec3{position.x, position.y + size.y, position.z},
+                        math::vec3{position.x + size.x, position.y + size.y, position.z},
+                        math::vec3{position.x + size.x, position.y, position.z}};
+            }
         };
 
         struct CarConfig {
-            common::carSimDouble gravity;
-            common::carSimDouble mass;
-            common::carSimDouble inertialScale;
-            common::carSimDouble halfWidth;
-            common::carSimDouble cgToFront; // Distance from center of gravity to the front in meters.
-            common::carSimDouble cgToRear;
-            common::carSimDouble cgToFrontAxle;
-            common::carSimDouble cgToRearAxle;
-            common::carSimDouble cgHeight;
-            common::carSimDouble wheelRadius; // For rendering only
-            common::carSimDouble wheelWidth; // For rendering only
-            common::carSimDouble tireGrip;
-            common::carSimDouble lockGrip; // % of grip when wheel is locked
-            common::carSimDouble engineForce;
-            common::carSimDouble brakeForce;
-            common::carSimDouble eBrakeForce;
-            common::carSimDouble weightTransfer;
-            common::carSimDouble maxSteer; // in radians
-            common::carSimDouble cornerStiffnessFront;
-            common::carSimDouble cornerStiffnessRear;
-            common::carSimDouble airResist;
-            common::carSimDouble rollResist;
+            common::carSimDouble gravity{9.81f};
+            common::carSimDouble mass{1200};
+            common::carSimDouble inertialScale{1.0f};
+            common::carSimDouble halfWidth{0.9f};
+            common::carSimDouble cgToFront{2.0f}; // Distance from center of gravity to the front in meters.
+            common::carSimDouble cgToRear{2.0f};
+            common::carSimDouble cgToFrontAxle{1.25f};
+            common::carSimDouble cgToRearAxle{1.25f};
+            common::carSimDouble cgHeight{0.55f};
+            common::carSimDouble wheelRadius{0.3f}; // For rendering only
+            common::carSimDouble wheelWidth{0.2f}; // For rendering only
+            common::carSimDouble tireGrip{2.0f};
+            common::carSimDouble lockGrip{0.6f}; // % of grip when wheel is locked
+            common::carSimDouble engineForce{4000.0f};
+            common::carSimDouble brakeForce{12000.0f};
+            common::carSimDouble eBrakeForce{12000.0f / 5.5f};
+            common::carSimDouble weightTransfer{0.2f};
+            common::carSimDouble maxSteer{0.6f}; // in radians
+            common::carSimDouble cornerStiffnessFront{5.0f};
+            common::carSimDouble cornerStiffnessRear{5.2f};
+            common::carSimDouble airResist{2.5f};
+            common::carSimDouble rollResist{8.0f};
 
-            //carSimDouble scaleMultiplierX; // Car image scale along X multiplier for rendering
-            //carSimDouble scaleMultiplierY; // Car image scale along Y multiplier for rendering
-
-            common::carSimDouble gearRatio;
-            common::carSimDouble differentialRatio;
-
-            CarConfig() {
-                gravity = 9.81f;
-                engineForce = 4000.0f;
-                brakeForce = 12000.0f;
-                mass = 1200.0f;
-                inertialScale = 1.0f;
-                halfWidth = 0.9f;
-                cgToFront = 2.0f;
-                cgToRear = 2.0f;
-                cgToFrontAxle = 1.25f;
-                cgToRearAxle = 1.25f;
-                cgHeight = 0.55f;
-                wheelRadius = 0.3f;
-                wheelWidth = 0.2f;
-                tireGrip = 2.0f;
-                lockGrip = 0.6f;
-                eBrakeForce = brakeForce / 5.5f;
-                weightTransfer = 0.2f;
-                maxSteer = 0.6f;
-                cornerStiffnessFront = 5.0f;
-                cornerStiffnessRear = 5.2f;
-                airResist = 2.5f;
-                rollResist = 8.0f;
-                //scaleMultiplierX = 0.25f;
-                //scaleMultiplierY = 0.30f;
-                gearRatio = 2.7f;
-                differentialRatio = 3.4f;
-            }
+            common::carSimDouble gearRatio{2.7f};
+            common::carSimDouble differentialRatio{3.4f};
         };
 
         struct Car {
@@ -148,11 +105,11 @@ namespace oni {
                 slipAngleFront = 0.0f;
                 slipAngleRear = 0.0f;
 
-                position = math::vec2();
-                velocity = math::vec2();
-                velocityLocal = math::vec2();
-                acceleration = math::vec2();
-                accelerationLocal = math::vec2();
+                position = math::vec2{0.0f, 0.0f};
+                velocity = math::vec2{0.0f, 0.0f};
+                velocityLocal = math::vec2{0.0f, 0.0f};
+                acceleration = math::vec2{0.0f, 0.0f};
+                accelerationLocal = math::vec2{0.0f, 0.0f};
 
                 rpm = 0.0f;
                 accelerating = false;

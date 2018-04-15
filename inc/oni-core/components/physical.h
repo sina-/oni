@@ -4,6 +4,7 @@
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
+#include <oni-core/common/typedefs.h>
 
 // TODO: This file name sucks
 
@@ -44,37 +45,35 @@ namespace oni {
             math::vec3 getPosition() const { return vertexA; }
         };
 
-        typedef double carSimDouble;
-
         struct CarConfig {
-            carSimDouble gravity;
-            carSimDouble mass;
-            carSimDouble inertialScale;
-            carSimDouble halfWidth;
-            carSimDouble cgToFront; // Distance from center of gravity to the front in meters.
-            carSimDouble cgToRear;
-            carSimDouble cgToFrontAxle;
-            carSimDouble cgToRearAxle;
-            carSimDouble cgHeight;
-            carSimDouble wheelRadius; // For rendering only
-            carSimDouble wheelWidth; // For rendering only
-            carSimDouble tireGrip;
-            carSimDouble lockGrip; // % of grip when wheel is locked
-            carSimDouble engineForce;
-            carSimDouble brakeForce;
-            carSimDouble eBrakeForce;
-            carSimDouble weightTransfer;
-            carSimDouble maxSteer; // in radians
-            carSimDouble cornerStiffnessFront;
-            carSimDouble cornerStiffnessRear;
-            carSimDouble airResist;
-            carSimDouble rollResist;
+            common::carSimDouble gravity;
+            common::carSimDouble mass;
+            common::carSimDouble inertialScale;
+            common::carSimDouble halfWidth;
+            common::carSimDouble cgToFront; // Distance from center of gravity to the front in meters.
+            common::carSimDouble cgToRear;
+            common::carSimDouble cgToFrontAxle;
+            common::carSimDouble cgToRearAxle;
+            common::carSimDouble cgHeight;
+            common::carSimDouble wheelRadius; // For rendering only
+            common::carSimDouble wheelWidth; // For rendering only
+            common::carSimDouble tireGrip;
+            common::carSimDouble lockGrip; // % of grip when wheel is locked
+            common::carSimDouble engineForce;
+            common::carSimDouble brakeForce;
+            common::carSimDouble eBrakeForce;
+            common::carSimDouble weightTransfer;
+            common::carSimDouble maxSteer; // in radians
+            common::carSimDouble cornerStiffnessFront;
+            common::carSimDouble cornerStiffnessRear;
+            common::carSimDouble airResist;
+            common::carSimDouble rollResist;
 
             //carSimDouble scaleMultiplierX; // Car image scale along X multiplier for rendering
             //carSimDouble scaleMultiplierY; // Car image scale along Y multiplier for rendering
 
-            carSimDouble gearRatio;
-            carSimDouble differentialRatio;
+            common::carSimDouble gearRatio;
+            common::carSimDouble differentialRatio;
 
             CarConfig() {
                 gravity = 9.81f;
@@ -107,20 +106,20 @@ namespace oni {
         };
 
         struct Car {
-            carSimDouble heading;
-            carSimDouble velocityAbsolute;
-            carSimDouble angularVelocity; // Angular velocity in radians (rad/s)
-            carSimDouble steer; // (-1.0..1.0)
-            carSimDouble steerAngle; // (-maxSteer..maxSteer)
-            carSimDouble inertia;
-            carSimDouble wheelBase;
-            carSimDouble axleWeightRatioFront;
-            carSimDouble axleWeightRatioRear;
-            carSimDouble rpm;
-            carSimDouble maxVelocityAbsolute;
-            carSimDouble accumulatedEBrake;
-            carSimDouble slipAngleFront;
-            carSimDouble slipAngleRear;
+            common::carSimDouble heading;
+            common::carSimDouble velocityAbsolute;
+            common::carSimDouble angularVelocity; // Angular velocity in radians (rad/s)
+            common::carSimDouble steer; // (-1.0..1.0)
+            common::carSimDouble steerAngle; // (-maxSteer..maxSteer)
+            common::carSimDouble inertia;
+            common::carSimDouble wheelBase;
+            common::carSimDouble axleWeightRatioFront;
+            common::carSimDouble axleWeightRatioRear;
+            common::carSimDouble rpm;
+            common::carSimDouble maxVelocityAbsolute;
+            common::carSimDouble accumulatedEBrake;
+            common::carSimDouble slipAngleFront;
+            common::carSimDouble slipAngleRear;
 
 
             math::vec2 position;

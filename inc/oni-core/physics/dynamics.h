@@ -1,9 +1,12 @@
 #pragma once
 
 #include <oni-core/physics/physic.h>
-#include <oni-core/physics/car.h>
 
 namespace oni {
+    namespace entities {
+        class VehicleEntityRepo;
+    }
+
     namespace physics {
         class Dynamics : public Physic {
         public:

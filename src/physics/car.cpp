@@ -1,11 +1,14 @@
 #include <oni-core/physics/car.h>
+#include <oni-core/components/input-data.h>
+#include <oni-core/components/physical.h>
+
 
 namespace oni {
     namespace physics {
 
         void tickCar(components::Car &car, const components::CarConfig &config,
                      const components::CarInput &inputs, float dt) {
-            using components::carSimDouble;
+            using common::carSimDouble;
             carSimDouble sn = std::sin(car.heading);
             carSimDouble cs = std::cos(car.heading);
 
@@ -116,9 +119,9 @@ namespace oni {
             car.position.y += car.velocity.y * dt;
         }
 
-        components::carSimDouble applySmoothSteer(const components::Car &car,
-                                                  components::carSimDouble steerInput, float dt) {
-            components::carSimDouble steer = 0;
+        common::carSimDouble applySmoothSteer(const components::Car &car,
+                                              common::carSimDouble steerInput, float dt) {
+            common::carSimDouble steer = 0;
 
             if (std::abs(steerInput) > 0.001) {
                 //  Move toward steering input
@@ -126,18 +129,18 @@ namespace oni {
             } else {
                 //  No steer input - move toward centre (0)
                 if (car.steer > 0) {
-                    steer = std::max(car.steer - dt * 1.0, (components::carSimDouble) 0.0f);
+                    steer = std::max(car.steer - dt * 1.0, (common::carSimDouble) 0.0f);
                 } else if (car.steer < 0) {
-                    steer = std::min(car.steer + dt * 1.0, (components::carSimDouble) 0.0f);
+                    steer = std::min(car.steer + dt * 1.0, (common::carSimDouble) 0.0f);
                 }
             }
 
             return steer;
         }
 
-        components::carSimDouble applySafeSteer(const components::Car &car,
-                                                components::carSimDouble steerInput) {
-            auto avel = std::min(car.velocityAbsolute, (components::carSimDouble) 250.0);
+        common::carSimDouble applySafeSteer(const components::Car &car,
+                                            common::carSimDouble steerInput) {
+            auto avel = std::min(car.velocityAbsolute, (common::carSimDouble) 250.0);
             auto steer = steerInput * (1.0 - (avel / 280.0));
             return steer;
         }

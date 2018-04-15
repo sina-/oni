@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+
 #include <oni-core/math/functions.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>

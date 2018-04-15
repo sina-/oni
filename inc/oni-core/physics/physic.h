@@ -1,10 +1,14 @@
 #pragma once
 
-#include <oni-core/entities/basic-entity-repo.h>
-#include <oni-core/graphics/window.h>
-#include <oni-core/entities/vehicle-entity-repo.h>
-
 namespace oni {
+    namespace entities {
+        class VehicleEntityRepo;
+    }
+
+    namespace io {
+        class Input;
+    }
+
     namespace physics {
         class Physic {
         public:

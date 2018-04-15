@@ -4,14 +4,21 @@
 #include <algorithm>
 
 #include <oni-core/math/vec2.h>
-#include <oni-core/components/input-data.h>
-#include <oni-core/components/physical.h>
+#include <oni-core/common/typedefs.h>
 
 /**
  * The idea is from https://github.com/spacejack/carphysics2d
  */
 
 namespace oni {
+    namespace components {
+        class Car;
+
+        class CarConfig;
+
+        class CarInput;
+
+    }
     namespace physics {
 
         template<class T>
@@ -28,11 +35,11 @@ namespace oni {
                      const components::CarInput &inputs, float dt);
 
 
-        components::carSimDouble applySmoothSteer(const components::Car &car,
-                                                  components::carSimDouble steerInput, float dt);
+        common::carSimDouble applySmoothSteer(const components::Car &car,
+                                                  common::carSimDouble steerInput, float dt);
 
-        components::carSimDouble applySafeSteer(const components::Car &car,
-                                                components::carSimDouble steerInput);
+        common::carSimDouble applySafeSteer(const components::Car &car,
+                                                common::carSimDouble steerInput);
 
     }
 }

@@ -1,4 +1,8 @@
 #include <oni-core/physics/dynamics.h>
+#include <oni-core/physics/car.h>
+#include <oni-core/entities/basic-entity-repo.h>
+#include <oni-core/entities/vehicle-entity-repo.h>
+#include <oni-core/graphics/window.h>
 
 namespace oni {
     namespace physics {

@@ -1,6 +1,10 @@
+#include <ftgl/texture-atlas.h>
+#include <ftgl/freetype-gl.h>
+
+#include <oni-core/components/visual.h>
 #include <oni-core/graphics/font-manager.h>
-#include <oni-core/utils/oni-assert.h>
 #include <oni-core/graphics/texture.h>
+#include <oni-core/utils/oni-assert.h>
 
 namespace oni {
     namespace graphics {

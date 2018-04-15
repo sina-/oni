@@ -3,6 +3,10 @@
 #include <oni-core/graphics/texture.h>
 #include <oni-core/io/input.h>
 #include <oni-core/buffers/buffer.h>
+#include <oni-core/buffers/index-buffer.h>
+#include <oni-core/buffers/vertex-array.h>
+#include <oni-core/utils/oni-assert.h>
+#include <oni-core/components/physical.h>
 
 namespace oni {
     namespace graphics {
@@ -54,6 +58,10 @@ namespace oni {
 
             mSamplers = generateSamplerIDs();
 
+        }
+
+        BatchRenderer2D::~BatchRenderer2D() {
+            glDeleteBuffers(1, &mVDO);
         }
 
         void BatchRenderer2D::begin() {
@@ -155,7 +163,7 @@ namespace oni {
             float scaleX = text.xScaling;
             float scaleY = text.yScaling;
 
-            for(int i = 0; i < text.textContent.size(); i++){
+            for (int i = 0; i < text.textContent.size(); i++) {
                 ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;

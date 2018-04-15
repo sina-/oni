@@ -1,6 +1,5 @@
 #pragma once
 
-#include <oni-core/graphics/window.h>
 #include <oni-core/graphics/layer.h>
 
 namespace oni {

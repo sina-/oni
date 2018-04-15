@@ -1,15 +1,19 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <GL/glew.h>
-#include <ftgl/texture-atlas.h>
-
-#include <oni-core/entities/basic-entity-repo.h>
-#include <oni-core/graphics/font-manager.h>
 
 namespace oni {
+    namespace components {
+        class Texture;
+
+        class PixelRGBA;
+    }
     namespace graphics {
+        class FontManager;
+
         class Texture {
             Texture() = default;
 

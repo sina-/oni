@@ -1,4 +1,5 @@
 #include <oni-core/graphics/light.h>
+#include <oni-core/graphics/shader.h>
 
 namespace oni {
     namespace graphics {

@@ -1,4 +1,14 @@
 #include <oni-core/graphics/layer.h>
+
+#include <ftgl/texture-atlas.h>
+#include <ftgl/texture-font.h>
+
+#include <oni-core/graphics/renderer-2d.h>
+#include <oni-core/graphics/batch-renderer-2d.h>
+#include <oni-core/graphics/font-manager.h>
+#include <oni-core/graphics/shader.h>
+#include <oni-core/components/visual.h>
+#include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/graphics/texture.h>
 #include <oni-core/graphics/window.h>
 
@@ -17,6 +27,8 @@ namespace oni {
                   mProjectionMatrix(projectionMatrix) {
             lookAt(0.0f, 0.0f);
         }
+
+        Layer::~Layer() = default;
 
         void Layer::renderSprites(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
@@ -130,6 +142,14 @@ namespace oni {
 
         void Layer::setProjectionMatrix(const math::mat4 &mProjectionMatrix) {
             Layer::mProjectionMatrix = mProjectionMatrix;
+        }
+
+        components::LayerID Layer::getLayerID() {
+            return mShader->getProgram();
+        }
+
+        Shader &Layer::getShader() {
+            return *mShader;
         }
 
     }

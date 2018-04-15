@@ -1,18 +1,19 @@
 #pragma once
 
-#include <ftgl/texture-atlas.h>
-#include <ftgl/texture-font.h>
+#include <memory>
+#include <string>
 
-#include <oni-core/graphics/renderer-2d.h>
-#include <oni-core/graphics/batch-renderer-2d.h>
-#include <oni-core/graphics/font-manager.h>
-#include <oni-core/graphics/shader.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/components/visual.h>
-#include <oni-core/entities/basic-entity-repo.h>
 
 namespace oni {
+    namespace entities {
+        class BasicEntityRepo;
+    }
     namespace graphics {
+
+        class BatchRenderer2D;
+        class Shader;
 
         static const unsigned long mMaxNumTextureSamplers = 32;
 
@@ -45,7 +46,7 @@ namespace oni {
                   const math::mat4 &viewMatrix,
                   const math::mat4 &projectionMatrix);
 
-            ~Layer() = default;
+            ~Layer();
 
             void renderSprites(const entities::BasicEntityRepo &basicEntityRepo);
 
@@ -53,7 +54,7 @@ namespace oni {
 
             void renderText(const entities::BasicEntityRepo &basicEntityRepo);
 
-            Shader &getShader() { return *mShader; }
+            Shader &getShader();
 
             void begin() const;
 
@@ -82,7 +83,7 @@ namespace oni {
              *
              * @return unique ID
              */
-            components::LayerID getLayerID() { return mShader->getProgram(); }
+            components::LayerID getLayerID();
 
         public:
             /**

@@ -1,7 +1,12 @@
 #include <oni-core/graphics/texture.h>
 
+#include <ftgl/texture-atlas.h>
 #include <FreeImage.h>
+
+#include <oni-core/entities/basic-entity-repo.h>
+#include <oni-core/graphics/font-manager.h>
 #include <oni-core/io/output.h>
+#include <oni-core/utils/oni-assert.h>
 
 namespace oni {
     namespace graphics {

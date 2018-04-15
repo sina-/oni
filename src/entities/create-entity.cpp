@@ -2,6 +2,7 @@
 #include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/entities/vehicle-entity-repo.h>
 #include <oni-core/graphics/font-manager.h>
+#include <oni-core/utils/oni-assert.h>
 
 namespace oni {
     namespace entities {

@@ -1,10 +1,13 @@
 #pragma once
 
-#include <oni-core/components/visual.h>
-#include <oni-core/components/physical.h>
-#include <oni-core/graphics/font-manager.h>
-
 namespace oni {
+
+    namespace components {
+        class Appearance;
+        class Texture;
+        class Text;
+        class Placement;
+    }
     namespace graphics {
         class Renderer2D {
         protected:

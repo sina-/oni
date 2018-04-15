@@ -1,25 +1,27 @@
 #pragma once
 
 #include <map>
-#include <vector>
-#include <stack>
 
-// TODO: Don't include shit, forward declare them in the headers and include in CPP.
-#include <ftgl/freetype-gl.h>
-#include <ftgl/texture-atlas.h>
-
-#include <oni-core/buffers/index-buffer.h>
-#include <oni-core/buffers/vertex-array.h>
-#include <oni-core/components/visual.h>
-#include <oni-core/components/physical.h>
 #include <oni-core/graphics/renderer-2d.h>
-#include <oni-core/graphics/font-manager.h>
-#include <oni-core/utils/oni-assert.h>
 #include <oni-core/components/buffer.h>
 
 namespace oni {
+    namespace buffers {
+        class IndexBuffer;
+
+        class VertexArray;
+    }
+
+    namespace components {
+        class Texture;
+        class Placement;
+        class Text;
+        class Appearance;
+
+    }
+
     namespace graphics {
-        using namespace buffers;
+
 
         class BatchRenderer2D : public Renderer2D {
 
@@ -30,13 +32,13 @@ namespace oni {
             GLsizei mMaxVertexSize;
             GLsizei mMaxSpriteSize;
 
-            std::unique_ptr<IndexBuffer> mIBO;
+            std::unique_ptr<buffers::IndexBuffer> mIBO;
 
             // Actual number of indices used.
             GLsizei mIndexCount;
 
             GLuint mVDO;
-            std::unique_ptr<VertexArray> mVAO;
+            std::unique_ptr<buffers::VertexArray> mVAO;
 
             // The buffer that will hold components::Vertex data, or its variants, in the batch.
             void *mBuffer;
@@ -52,7 +54,7 @@ namespace oni {
                             GLsizei maxVertexSize,
                             components::BufferStructures bufferStructures);
 
-            ~BatchRenderer2D() { glDeleteBuffers(1, &mVDO); };
+            ~BatchRenderer2D();
 
             void begin() override;
 

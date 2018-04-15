@@ -2,13 +2,21 @@
 
 #include <memory>
 
-#include <ftgl/texture-atlas.h>
-#include <ftgl/freetype-gl.h>
+#include <GL/glew.h>
 
-#include <oni-core/components/visual.h>
-#include <oni-core/utils/oni-assert.h>
+namespace ftgl {
+    class texture_atlas_t;
+
+    class texture_font_t;
+
+    class texture_glyph_t;
+}
 
 namespace oni {
+    namespace components {
+        class Text;
+    }
+
     namespace graphics {
         class FontManager {
 

@@ -1,3 +1,5 @@
+#include <numeric>
+
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/utils/index-buffer-gen.h>
 #include <oni-core/graphics/texture.h>

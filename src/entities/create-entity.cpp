@@ -1,4 +1,7 @@
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/basic-entity-repo.h>
+#include <oni-core/entities/vehicle-entity-repo.h>
+#include <oni-core/graphics/font-manager.h>
 
 namespace oni {
     namespace entities {

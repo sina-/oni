@@ -72,7 +72,7 @@ namespace oni {
             ERRCHECK(result);
 
             // TODO: This is just a work around to keep the interface consistent with double.
-            return ((double) pos) + common::ep;
+            return (static_cast<double>(pos) + common::ep);
         }
 
         void AudioManagerFMOD::stopSound(oniSoundID id) {

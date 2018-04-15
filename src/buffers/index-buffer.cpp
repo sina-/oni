@@ -14,7 +14,7 @@ namespace oni {
 
             GLint actualSize{0};
             glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);
-            if ((GLint) dataSize != actualSize) {
+            if (static_cast<GLint>(dataSize) != actualSize) {
                 glDeleteBuffers(mSize, &mBufferID);
                 throw std::runtime_error("Could not allocate index buffer!");
             }

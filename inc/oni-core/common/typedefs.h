@@ -9,7 +9,7 @@ namespace oni {
     }
 
     namespace common {
-        typedef long oniSoundID;
+        typedef unsigned long oniSoundID;
         typedef double carSimDouble;
 
         typedef std::vector<std::unique_ptr<const components::BufferStructure>> BufferStructures;

@@ -6,7 +6,6 @@
 
 #include <GL/glew.h>
 
-
 namespace oni {
     namespace buffers {
 

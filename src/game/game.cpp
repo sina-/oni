@@ -41,7 +41,7 @@ namespace oni {
             mFrameExcessTime += excess;
 
             if (excess > 0) {
-                auto sleepFor = (int) (excess * 1000);
+                auto sleepFor = static_cast<int>(excess * 1000);
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
             }
 

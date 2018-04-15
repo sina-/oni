@@ -3,7 +3,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include <oni-core/math/vec2.h>
 #include <oni-core/common/typedefs.h>
 
 /**

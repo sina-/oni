@@ -124,24 +124,24 @@ namespace oni {
             return mModalMatrix;
         }
 
-        void Layer::setModelMatrix(const math::mat4 &mModelMatrix) {
-            Layer::mModalMatrix = mModelMatrix;
+        void Layer::setModelMatrix(const math::mat4 &modelMatrix) {
+            mModalMatrix = modelMatrix;
         }
 
         const math::mat4 &Layer::getViewMatrix() const {
             return mViewMatrix;
         }
 
-        void Layer::setViewMatrix(const math::mat4 &mViewMatrix) {
-            Layer::mViewMatrix = mViewMatrix;
+        void Layer::setViewMatrix(const math::mat4 &viewMatrix) {
+            mViewMatrix = viewMatrix;
         }
 
         const math::mat4 &Layer::getProjectionMatrix() const {
             return mProjectionMatrix;
         }
 
-        void Layer::setProjectionMatrix(const math::mat4 &mProjectionMatrix) {
-            Layer::mProjectionMatrix = mProjectionMatrix;
+        void Layer::setProjectionMatrix(const math::mat4 &projectionMatrix) {
+            mProjectionMatrix = projectionMatrix;
         }
 
         components::LayerID Layer::getLayerID() {

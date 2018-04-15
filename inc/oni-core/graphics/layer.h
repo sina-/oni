@@ -68,15 +68,15 @@ namespace oni {
 
             const math::mat4 &getModelMatrix() const;
 
-            void setModelMatrix(const math::mat4 &mModelMatrix);
+            void setModelMatrix(const math::mat4 &modelMatrix);
 
             const math::mat4 &getViewMatrix() const;
 
-            void setViewMatrix(const math::mat4 &mViewMatrix);
+            void setViewMatrix(const math::mat4 &viewMatrix);
 
             const math::mat4 &getProjectionMatrix() const;
 
-            void setProjectionMatrix(const math::mat4 &mProjectionMatrix);
+            void setProjectionMatrix(const math::mat4 &projectionMatrix);
 
             /**
              * This function should always return a unique ID.

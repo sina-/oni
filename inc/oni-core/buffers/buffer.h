@@ -5,8 +5,6 @@
 
 #include <GL/glew.h>
 
-#include <oni-core/components/visual.h>
-#include <oni-core/components/buffer.h>
 #include <oni-core/common/typedefs.h>
 
 namespace oni {

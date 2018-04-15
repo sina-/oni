@@ -129,9 +129,9 @@ namespace oni {
             } else {
                 //  No steer input - move toward centre (0)
                 if (car.steer > 0) {
-                    steer = std::max(car.steer - dt * 1.0, (common::carSimDouble) 0.0f);
+                    steer = std::max(car.steer - dt * 1.0, static_cast<common::carSimDouble> (0.0f));
                 } else if (car.steer < 0) {
-                    steer = std::min(car.steer + dt * 1.0, (common::carSimDouble) 0.0f);
+                    steer = std::min(car.steer + dt * 1.0, static_cast<common::carSimDouble> (0.0f));
                 }
             }
 
@@ -140,7 +140,7 @@ namespace oni {
 
         common::carSimDouble applySafeSteer(const components::Car &car,
                                             common::carSimDouble steerInput) {
-            auto avel = std::min(car.velocityAbsolute, (common::carSimDouble) 250.0);
+            auto avel = std::min(car.velocityAbsolute, static_cast<common::carSimDouble> (250.0));
             auto steer = steerInput * (1.0 - (avel / 280.0));
             return steer;
         }

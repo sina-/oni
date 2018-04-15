@@ -67,7 +67,7 @@ namespace oni {
 
             GLsizei mMaxSpriteCount;
             GLsizei mMaxVertexSize;
-            const GLsizei mMaxNumTextureSamplers;
+            const GLint mMaxNumTextureSamplers;
             GLsizei mMaxIndicesCount;
             GLsizei mMaxSpriteSize;
             GLsizei mMaxBufferSize;

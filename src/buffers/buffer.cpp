@@ -1,5 +1,6 @@
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/buffers/buffer.h>
+#include <oni-core/components/buffer.h>
 
 namespace oni {
     namespace buffers {

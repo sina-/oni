@@ -8,8 +8,8 @@ namespace oni {
     namespace entities {
 
         common::entityID createSpriteEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
-                                              const math::vec4 &color,
-                                              const math::vec3 &position, const math::vec2 &size) {
+                                            const math::vec4 &color,
+                                            const math::vec3 &position, const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::Sprite, layerID);
 
             auto entityPlacement = components::Placement::fromPositionAndSize(position, size);
@@ -22,8 +22,8 @@ namespace oni {
         }
 
         common::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
-                                                const components::Texture &entityTexture, const math::vec3 &position,
-                                                const math::vec2 &size) {
+                                              const components::Texture &entityTexture, const math::vec3 &position,
+                                              const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, layerID);
 
             auto entityPlacement = components::Placement::fromPositionAndSize(position, size);
@@ -35,8 +35,8 @@ namespace oni {
         }
 
         common::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
-                                            components::LayerID layerID, const std::string &text,
-                                            const math::vec3 &position) {
+                                          components::LayerID layerID, const std::string &text,
+                                          const math::vec3 &position) {
             auto textEntity = basicEntityRepo.createEntity(entities::TextSprite, layerID);
             basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
 
@@ -44,7 +44,7 @@ namespace oni {
         }
 
         common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::LayerID layerID,
-                                               const components::Texture &entityTexture) {
+                                             const components::Texture &entityTexture) {
             auto carConfig = components::CarConfig();
             auto entity = vehicleEntityRepo.createEntity(entities::DynamicTexturedSprite, layerID);
 
@@ -72,8 +72,8 @@ namespace oni {
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
             auto entityPlacement = components::Placement::fromPositionAndSize(
-                    math::vec3{(float) (carX), (float) (carY), 1.0f},
-                    math::vec2{(float) (carSizeX), (float) (carSizeY)});
+                    math::vec3{static_cast<float> (carX), static_cast<float> (carY), 1.0f},
+                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)});
             auto car = components::Car(carConfig);
             vehicleEntityRepo.setCar(entity, car);
             vehicleEntityRepo.setCarConfig(entity, carConfig);

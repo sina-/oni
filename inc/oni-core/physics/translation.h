@@ -1,9 +1,11 @@
 #pragma once
 
-#include <oni-core/math/vec2.h>
-#include <oni-core/math/vec3.h>
-
 namespace oni {
+    namespace math {
+        class vec2;
+
+        class vec3;
+    }
     namespace physics {
         class Translation {
             Translation() = default;

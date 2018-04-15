@@ -29,7 +29,7 @@ namespace oni {
 
         struct BufferStructure {
             GLuint index{0};
-            GLuint componentCount{0};
+            GLint componentCount{0};
             GLenum componentType{0};
             GLboolean normalized{0};
             GLsizei stride{0};

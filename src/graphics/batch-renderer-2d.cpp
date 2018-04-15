@@ -7,10 +7,11 @@
 #include <oni-core/buffers/vertex-array.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/components/physical.h>
+#include <oni-core/components/visual.h>
 
 namespace oni {
     namespace graphics {
-        BatchRenderer2D::BatchRenderer2D(const GLsizei maxSpriteCount, const GLsizei maxNumTextureSamplers,
+        BatchRenderer2D::BatchRenderer2D(const GLsizei maxSpriteCount, const GLint maxNumTextureSamplers,
                                          const GLsizei maxVertexSize,
                                          common::BufferStructures bufferStructures)
                 : mIndexCount{0},
@@ -209,7 +210,7 @@ namespace oni {
 
         void BatchRenderer2D::flush() {
             for (const auto &t2s: mTextureToSampler) {
-                glActiveTexture(GL_TEXTURE0 + t2s.second);
+                glActiveTexture(GL_TEXTURE0 + static_cast<GLenum >(t2s.second));
                 Texture::bind(t2s.first);
             }
 
@@ -237,7 +238,7 @@ namespace oni {
             end();
             flush();
             begin();
-            mSamplers.assign(mMaxNumTextureSamplers, 0);
+            mSamplers.assign(static_cast<unsigned int>(mMaxNumTextureSamplers), 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(mSamplers.begin(), mSamplers.end(), 0);
             mTextureToSampler.clear();
@@ -248,7 +249,7 @@ namespace oni {
             GLint samplerID = 0;
 
             if (it == mTextureToSampler.end()) {
-                ONI_DEBUG_ASSERT((GLsizei) mTextureToSampler.size() < mMaxNumTextureSamplers);
+                ONI_DEBUG_ASSERT(static_cast<GLint> (mTextureToSampler.size()) < mMaxNumTextureSamplers);
 
                 /*
                  * To support more than mMaxNumTextureSamplers following can be used. But,
@@ -259,6 +260,7 @@ namespace oni {
                 */
 
                 samplerID = mSamplers.back();
+
                 mTextureToSampler[textureID] = samplerID;
                 mSamplers.pop_back();
             } else {
@@ -270,7 +272,7 @@ namespace oni {
 
         std::vector<GLint> BatchRenderer2D::generateSamplerIDs() {
             std::vector<GLint> samplers;
-            samplers.assign(mMaxNumTextureSamplers, 0);
+            samplers.assign(static_cast<unsigned int>(mMaxNumTextureSamplers), 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(samplers.begin(), samplers.end(), 0);
             return samplers;

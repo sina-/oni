@@ -65,7 +65,7 @@ namespace oni {
 
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            glDebugMessageCallback((GLDEBUGPROC) &messageCallback, nullptr);
+            glDebugMessageCallback(static_cast<GLDEBUGPROC> (&messageCallback), nullptr);
         }
 
         Window::~Window() {

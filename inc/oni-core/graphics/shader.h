@@ -66,6 +66,10 @@ namespace oni {
                 glUniform1uiv(getUniformLocation(name), static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
             }
 
+            void setUniformui(const GLchar *name, const GLuint textureID) {
+                glUniform1ui(getUniformLocation(name), textureID);
+            }
+
         };
     }
 }

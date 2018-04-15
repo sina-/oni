@@ -2,6 +2,7 @@
 #include <oni-core/graphics/utils/index-buffer-gen.h>
 #include <oni-core/graphics/texture.h>
 #include <oni-core/io/input.h>
+#include <oni-core/buffers/buffer.h>
 
 namespace oni {
     namespace graphics {

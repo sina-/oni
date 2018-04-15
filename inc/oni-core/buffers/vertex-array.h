@@ -6,10 +6,11 @@
 
 #include <GL/glew.h>
 
-#include <oni-core/buffers/buffer.h>
 
 namespace oni {
     namespace buffers {
+
+        class Buffer;
 
         class VertexArray {
             GLuint mArrayID;
@@ -18,15 +19,15 @@ namespace oni {
         public:
             explicit VertexArray(std::unique_ptr<const Buffer> vertexBuffer);
 
-            ~VertexArray() { glDeleteVertexArrays(1, &mArrayID); };
+            ~VertexArray();
 
-            void bindVAO() const { glBindVertexArray(mArrayID); }
+            void bindVAO() const;
 
-            void unbindVAO() const { glBindVertexArray(0); }
+            void unbindVAO() const;
 
-            void bindVBO() const { mVertexBuffers->bind(); }
+            void bindVBO() const;
 
-            void unbindVBO() const { mVertexBuffers->unbind(); }
+            void unbindVBO() const;
 
         };
 

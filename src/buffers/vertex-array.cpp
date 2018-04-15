@@ -1,3 +1,4 @@
+#include <oni-core/buffers/buffer.h>
 #include <oni-core/buffers/vertex-array.h>
 
 namespace oni {
@@ -18,6 +19,26 @@ namespace oni {
 
             mVertexBuffers->unbind();
             unbindVAO();
+        }
+
+        VertexArray::~VertexArray() {
+            glDeleteVertexArrays(1, &mArrayID);
+        }
+
+        void VertexArray::bindVAO() const {
+            glBindVertexArray(mArrayID);
+        }
+
+        void VertexArray::unbindVAO() const {
+            glBindVertexArray(0);
+        }
+
+        void VertexArray::bindVBO() const {
+            mVertexBuffers->bind();
+        }
+
+        void VertexArray::unbindVBO() const {
+            mVertexBuffers->unbind();
         }
 
     }

@@ -15,6 +15,7 @@
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/graphics/font-manager.h>
 #include <oni-core/utils/oni-assert.h>
+#include <oni-core/components/buffer.h>
 
 namespace oni {
     namespace graphics {

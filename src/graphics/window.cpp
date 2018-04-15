@@ -6,20 +6,18 @@
 namespace oni {
     namespace graphics {
 
-        Window::Window(const char *title, int width, int height, int xScaling, int yScaling) {
-            mTitle = title;
-            mWidth = width;
-            mHeight = height;
-            mGameWidth = xScaling;
-            mGameHeight = yScaling;
-            mMouseButton = GLFW_KEY_UNKNOWN;
-            mCursorX = 0.0;
-            mCursorY = 0.0;
+        Window::Window(std::string &&title, int width, int height, int gameWidth, int gameHeight) :
+                mTitle{std::move(title)}, mWidth{width}, mHeight{height},
+                mWindow{nullptr},
+                mGameWidth{gameWidth},
+                mGameHeight{gameHeight},
+                mMouseButton{GLFW_KEY_UNKNOWN}, mCursorX{0.0f}, mCursorY{0.0f},
+                mKeysPressed{}, mKeysReleased{} {
 
             if (!glfwInit())
                 throw std::runtime_error("Failed to init GLFW!");
 
-            mWindow = glfwCreateWindow(mWidth, mHeight, mTitle, nullptr, nullptr);
+            mWindow = glfwCreateWindow(mWidth, mHeight, mTitle.c_str(), nullptr, nullptr);
             if (!mWindow) {
                 glfwTerminate();
                 throw std::runtime_error("Failed to create window!");
@@ -70,6 +68,7 @@ namespace oni {
 
         Window::~Window() {
             glfwTerminate();
+            mWindow = nullptr;
         }
 
         void Window::messageCallback(GLenum source,

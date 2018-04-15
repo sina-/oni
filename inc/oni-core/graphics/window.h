@@ -22,7 +22,7 @@ namespace oni {
          *  by registering a call-back that is called on such events.
          */
         class Window {
-            const char *mTitle;
+            std::string mTitle;
             int mWidth, mHeight;
             int mGameWidth, mGameHeight;
             GLFWwindow *mWindow;
@@ -33,7 +33,7 @@ namespace oni {
 
 
         public:
-            Window(const char *name, int width, int height, int xScaling, int yScaling);
+            Window(std::string &&name, int width, int height, int gameWidth, int gameHeight);
 
             ~Window();
 

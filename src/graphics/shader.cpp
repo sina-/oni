@@ -5,7 +5,7 @@
 namespace oni {
     namespace graphics {
         Shader::Shader(std::string &&vertPath, std::string &&fragPath) :
-                mVertPath(std::move(vertPath)), mFragPath(std::move(fragPath)) {
+                mVertPath{std::move(vertPath)}, mFragPath{std::move(fragPath)} {
 
             GLuint program = glCreateProgram();
             GLuint vertex = glCreateShader(GL_VERTEX_SHADER);

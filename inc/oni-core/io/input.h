@@ -12,19 +12,19 @@ namespace oni {
 
             Input();
 
-            void update(components::oniKey keyPressed, components::oniKey keyReleased);
+            void update(components::oniKeyPress keyPressed, components::oniKeyPress keyReleased);
 
-            bool isPressed(components::oniKey key) const;
+            bool isPressed(components::oniKeyPress key) const;
 
-            bool isReleased(components::oniKey key) const;
+            bool isReleased(components::oniKeyPress key) const;
 
-            void setPressed(components::oniKey key);
+            void setPressed(components::oniKeyPress key);
 
-            void setReleased(components::oniKey key);
+            void setReleased(components::oniKeyPress key);
 
         private:
-            std::vector<components::oniKey> mKeysPressed;
-            std::vector<components::oniKey> mKeysReleased;
+            std::vector<components::oniKeyPress> mKeysPressed;
+            std::vector<components::oniKeyPress> mKeysReleased;
         };
     }
 }

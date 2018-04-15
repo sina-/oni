@@ -5,8 +5,6 @@
 namespace oni {
     namespace entities {
 
-        typedef unsigned long entityID;
-
         const static components::Mask Sprite = components::Mask().set(components::PLACEMENT).set(
                 components::APPEARANCE);
         const static components::Mask DynamicSprite = components::Mask().set(components::PLACEMENT).set(

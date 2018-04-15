@@ -12,7 +12,7 @@ namespace oni {
             // Otherwise its UB and you get garbage rendered.
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, data.data(), GL_STATIC_DRAW);
 
-            GLint actualSize = 0;
+            GLint actualSize{0};
             glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);
             if ((GLint) dataSize != actualSize) {
                 glDeleteBuffers(mSize, &mBufferID);

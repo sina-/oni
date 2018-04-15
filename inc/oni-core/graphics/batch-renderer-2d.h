@@ -28,33 +28,9 @@ namespace oni {
 
 
         class BatchRenderer2D : public Renderer2D {
-            // Actual number of indices used.
-            GLsizei mIndexCount;
-
-            unsigned long mMaxSpriteCount;
-            GLsizei mMaxVertexSize;
-            const unsigned long mMaxNumTextureSamplers;
-            GLsizei mMaxIndicesCount;
-            GLsizei mMaxSpriteSize;
-            unsigned long mMaxBufferSize;
-
-            GLuint mVDO;
-
-            std::unique_ptr<buffers::VertexArray> mVAO;
-            std::unique_ptr<buffers::IndexBuffer> mIBO;
-
-            // A mapping from texture id to 2D sampler that will draw it.
-            std::map<GLuint, GLint> mTextureToSampler{};
-
-            std::vector<GLint> mSamplers;
-
-            // The buffer that will hold components::Vertex data, or its variants, in the batch.
-            void *mBuffer;
-
-
         public:
-            BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
-                            GLsizei maxVertexSize,
+            BatchRenderer2D(const GLsizei maxSpriteCount, const GLsizei maxNumTextureSamplers,
+                            const GLsizei maxVertexSize,
                             common::BufferStructures bufferStructures);
 
             ~BatchRenderer2D();
@@ -71,6 +47,8 @@ namespace oni {
 
             void end() override;
 
+            std::vector<GLint> generateSamplerIDs();
+
         private:
             void reset();
 
@@ -83,8 +61,29 @@ namespace oni {
              */
             GLint getSamplerID(GLuint textureID);
 
-        public:
-            std::vector<GLint> generateSamplerIDs();
+        private:
+            // Actual number of indices used.
+            GLsizei mIndexCount;
+
+            GLsizei mMaxSpriteCount;
+            GLsizei mMaxVertexSize;
+            const GLsizei mMaxNumTextureSamplers;
+            GLsizei mMaxIndicesCount;
+            GLsizei mMaxSpriteSize;
+            GLsizei mMaxBufferSize;
+
+            GLuint mVDO;
+
+            std::unique_ptr<buffers::VertexArray> mVAO;
+            std::unique_ptr<buffers::IndexBuffer> mIBO;
+
+            // A mapping from texture id to 2D sampler that will draw it.
+            std::map<GLuint, GLint> mTextureToSampler{};
+
+            std::vector<GLint> mSamplers;
+
+            // The buffer that will hold components::Vertex data, or its variants, in the batch.
+            void *mBuffer;
         };
 
     }

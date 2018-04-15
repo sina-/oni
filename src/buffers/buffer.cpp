@@ -21,7 +21,7 @@ namespace oni {
             auto dataPtr = !data.empty() ? data.data() : nullptr;
             glBufferData(GL_ARRAY_BUFFER, dataSize, dataPtr, usage);
 
-            GLint actualSize = 0;
+            GLint actualSize{0};
             glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);
             if (dataSize != actualSize) {
                 glDeleteBuffers(1, &mBufferID);
@@ -31,5 +31,7 @@ namespace oni {
             unbind();
 
         }
+
+        Buffer::~Buffer() { glDeleteBuffers(1, &mBufferID); }
     }
 }

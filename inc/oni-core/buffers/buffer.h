@@ -23,11 +23,15 @@ namespace oni {
             Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
                    common::BufferStructures bufferStructures);
 
-            ~Buffer() { glDeleteBuffers(1, &mBufferID); }
+            ~Buffer();
 
             Buffer &operator=(const Buffer &) = delete;
 
             Buffer &operator=(Buffer &) = delete;
+
+            Buffer(const Buffer &) = delete;
+
+            Buffer(Buffer &) = delete;
 
             inline void bind() const { glBindBuffer(GL_ARRAY_BUFFER, mBufferID); }
 

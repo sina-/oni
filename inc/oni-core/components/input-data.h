@@ -2,7 +2,7 @@
 
 namespace oni {
     namespace components {
-        typedef int oniKey;
+        typedef int oniKeyPress;
 
         struct CarInput {
             float left{0.0f};

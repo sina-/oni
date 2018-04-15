@@ -5,7 +5,7 @@ namespace oni {
 
         BasicEntityRepo::BasicEntityRepo() = default;
 
-        entities::entityID BasicEntityRepo::_createEntity() {
+        common::entityID BasicEntityRepo::_createEntity() {
             if (!mFreeEntitySlots.empty()) {
                 auto entity = mFreeEntitySlots.top();
                 mFreeEntitySlots.pop();
@@ -33,7 +33,7 @@ namespace oni {
             mTexts.reserve(mTexts.size() + size);
         }
 
-        entities::entityID
+        common::entityID
         BasicEntityRepo::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
             auto entity = _createEntity();
             mEntities[entity] = mask;
@@ -41,11 +41,11 @@ namespace oni {
             return entity;
         }
 
-        void BasicEntityRepo::addComponent(entities::entityID id, const components::Component &component) {
+        void BasicEntityRepo::addComponent(common::entityID id, const components::Component &component) {
             mEntities[id].set(component);
         }
 
-        void BasicEntityRepo::destroyEntity(entities::entityID id) {
+        void BasicEntityRepo::destroyEntity(common::entityID id) {
             mEntities[id] = components::Component::NONE;
             mFreeEntitySlots.push(id);
         }
@@ -54,53 +54,53 @@ namespace oni {
             return mEntities;
         }
 
-        const components::Mask &BasicEntityRepo::getEntity(entities::entityID id) const {
+        const components::Mask &BasicEntityRepo::getEntity(common::entityID id) const {
             return mEntities[id];
         }
 
-        const components::Placement &BasicEntityRepo::getEntityPlacement(entities::entityID id) const {
+        const components::Placement &BasicEntityRepo::getEntityPlacement(common::entityID id) const {
             return mPlacements[id];
         }
 
-        const components::Appearance &BasicEntityRepo::getEntityAppearance(entities::entityID id) const {
+        const components::Appearance &BasicEntityRepo::getEntityAppearance(common::entityID id) const {
             return mAppearances[id];
         }
 
-        const components::Texture &BasicEntityRepo::getEntityTexture(entities::entityID id) const {
+        const components::Texture &BasicEntityRepo::getEntityTexture(common::entityID id) const {
             return mTextures[id];
         }
 
-        const components::LayerID &BasicEntityRepo::getEntityLayerID(entities::entityID id) const {
+        const components::LayerID &BasicEntityRepo::getEntityLayerID(common::entityID id) const {
             return mLayerIDs[id];
         }
 
-        const components::Text &BasicEntityRepo::getEntityText(entities::entityID id) const {
+        const components::Text &BasicEntityRepo::getEntityText(common::entityID id) const {
             return mTexts[id];
         }
 
-        void BasicEntityRepo::setEntityPlacement(entities::entityID id, const components::Placement &placement) {
+        void BasicEntityRepo::setEntityPlacement(common::entityID id, const components::Placement &placement) {
             mPlacements[id] = placement;
         }
 
-        void BasicEntityRepo::setEntityAppearance(entities::entityID id, const components::Appearance &appearance) {
+        void BasicEntityRepo::setEntityAppearance(common::entityID id, const components::Appearance &appearance) {
             mAppearances[id] = appearance;
         }
 
-        void BasicEntityRepo::setEntityTexture(entities::entityID id, const components::Texture &texture) {
+        void BasicEntityRepo::setEntityTexture(common::entityID id, const components::Texture &texture) {
             mTextures[id] = texture;
         }
 
-        void BasicEntityRepo::setEntityLayerID(entities::entityID id, const components::LayerID &layerID) {
+        void BasicEntityRepo::setEntityLayerID(common::entityID id, const components::LayerID &layerID) {
             mLayerIDs[id] = layerID;
 
         }
 
-        void BasicEntityRepo::setEntityText(entities::entityID id, const components::Text &text) {
+        void BasicEntityRepo::setEntityText(common::entityID id, const components::Text &text) {
             mTexts[id] = text;
 
         }
 
-        components::Text &BasicEntityRepo::getEntityText(entities::entityID id) {
+        components::Text &BasicEntityRepo::getEntityText(common::entityID id) {
             return mTexts[id];
         }
     }

@@ -12,7 +12,8 @@ namespace oni {
         typedef long oniSoundID;
         typedef double carSimDouble;
 
-
         typedef std::vector<std::unique_ptr<const components::BufferStructure>> BufferStructures;
+
+        typedef unsigned long entityID;
     }
 }

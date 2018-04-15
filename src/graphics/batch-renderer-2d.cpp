@@ -10,8 +10,8 @@
 
 namespace oni {
     namespace graphics {
-        BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
-                                         GLsizei maxVertexSize,
+        BatchRenderer2D::BatchRenderer2D(const GLsizei maxSpriteCount, const GLsizei maxNumTextureSamplers,
+                                         const GLsizei maxVertexSize,
                                          common::BufferStructures bufferStructures)
                 : mIndexCount{0},
                   mMaxSpriteCount{maxSpriteCount},
@@ -32,7 +32,7 @@ namespace oni {
                                                          std::move(bufferStructures));
             mVAO = std::make_unique<buffers::VertexArray>(std::move(vbo));
 
-            std::vector<GLuint> indices(mMaxIndicesCount);
+            std::vector<GLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
 
             /**
              * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
@@ -248,7 +248,7 @@ namespace oni {
             GLint samplerID = 0;
 
             if (it == mTextureToSampler.end()) {
-                ONI_DEBUG_ASSERT(mTextureToSampler.size() < mMaxNumTextureSamplers);
+                ONI_DEBUG_ASSERT((GLsizei) mTextureToSampler.size() < mMaxNumTextureSamplers);
 
                 /*
                  * To support more than mMaxNumTextureSamplers following can be used. But,

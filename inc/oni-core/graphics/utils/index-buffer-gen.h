@@ -18,8 +18,8 @@ namespace oni {
          */
         template<class T>
         class IndexBufferGen {
-            T mCounter = 0;
-            T mOffset = 0;
+            T mCounter{0};
+            T mOffset{0};
         public:
             IndexBufferGen() = default;
 

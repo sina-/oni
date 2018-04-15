@@ -23,7 +23,7 @@ namespace oni {
              *
              * @return entity ID.
              */
-            virtual entities::entityID _createEntity();
+            virtual common::entityID _createEntity();
 
         public:
             /**
@@ -35,53 +35,52 @@ namespace oni {
 
             void reserveEntity(size_t count);
 
-            void destroyEntity(entities::entityID id);
+            void destroyEntity(common::entityID id);
 
-            entities::entityID createEntity(const components::Mask &mask, const components::LayerID &layerID);
+            common::entityID createEntity(const components::Mask &mask, const components::LayerID &layerID);
 
-            void addComponent(entities::entityID id, const components::Component &component);
+            void addComponent(common::entityID id, const components::Component &component);
 
-            void setEntityPlacement(entities::entityID id, const components::Placement &placement);
+            void setEntityPlacement(common::entityID id, const components::Placement &placement);
 
-            void setEntityAppearance(entities::entityID id, const components::Appearance &appearance);
+            void setEntityAppearance(common::entityID id, const components::Appearance &appearance);
 
-            void setEntityTexture(entities::entityID id, const components::Texture &texture);
+            void setEntityTexture(common::entityID id, const components::Texture &texture);
 
-            void setEntityLayerID(entities::entityID id, const components::LayerID &tileID);
+            void setEntityLayerID(common::entityID id, const components::LayerID &tileID);
 
-            void setEntityText(entities::entityID id, const components::Text &text);
+            void setEntityText(common::entityID id, const components::Text &text);
 
             const components::EntityMasks &getEntities() const;
 
-            const components::Mask &getEntity(entities::entityID id) const;
+            const components::Mask &getEntity(common::entityID id) const;
 
-            const components::Placement &getEntityPlacement(entities::entityID id) const;
+            const components::Placement &getEntityPlacement(common::entityID id) const;
 
-            const components::Appearance &getEntityAppearance(entities::entityID id) const;
+            const components::Appearance &getEntityAppearance(common::entityID id) const;
 
-            const components::Texture &getEntityTexture(entities::entityID id) const;
+            const components::Texture &getEntityTexture(common::entityID id) const;
 
-            const components::LayerID &getEntityLayerID(entities::entityID id) const;
+            const components::LayerID &getEntityLayerID(common::entityID id) const;
 
-            const components::Text &getEntityText(entities::entityID id) const;
+            const components::Text &getEntityText(common::entityID id) const;
 
-            components::Text &getEntityText(entities::entityID id);
+            components::Text &getEntityText(common::entityID id);
 
         protected:
-            std::stack<entities::entityID> mFreeEntitySlots;
+            std::stack<common::entityID> mFreeEntitySlots{};
             /**
              * For each entity, define a bitset showing
              * which components are enabled. For example, a simple static
              * game object could be defined by (Components:Vertex | Components:Appearance).
              */
-            components::EntityMasks mEntities;
+            components::EntityMasks mEntities{};
 
-            std::vector<components::Placement> mPlacements;
-            std::vector<components::Appearance> mAppearances;
-            std::vector<components::Texture> mTextures;
-            std::vector<components::LayerID> mLayerIDs;
-            std::vector<components::Text> mTexts;
-
+            std::vector<components::Placement> mPlacements{};
+            std::vector<components::Appearance> mAppearances{};
+            std::vector<components::Texture> mTextures{};
+            std::vector<components::LayerID> mLayerIDs{};
+            std::vector<components::Text> mTexts{};
         };
     }
 }

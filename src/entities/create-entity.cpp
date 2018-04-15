@@ -7,7 +7,7 @@
 namespace oni {
     namespace entities {
 
-        entities::entityID createSpriteEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
+        common::entityID createSpriteEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
                                               const math::vec4 &color,
                                               const math::vec3 &position, const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::Sprite, layerID);
@@ -21,7 +21,7 @@ namespace oni {
             return entity;
         }
 
-        entities::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
+        common::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::LayerID layerID,
                                                 const components::Texture &entityTexture, const math::vec3 &position,
                                                 const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, layerID);
@@ -34,7 +34,7 @@ namespace oni {
             return entity;
         }
 
-        entities::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
+        common::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
                                             components::LayerID layerID, const std::string &text,
                                             const math::vec3 &position) {
             auto textEntity = basicEntityRepo.createEntity(entities::TextSprite, layerID);
@@ -43,7 +43,7 @@ namespace oni {
             return textEntity;
         }
 
-        entities::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::LayerID layerID,
+        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::LayerID layerID,
                                                const components::Texture &entityTexture) {
             auto carConfig = components::CarConfig();
             auto entity = vehicleEntityRepo.createEntity(entities::DynamicTexturedSprite, layerID);

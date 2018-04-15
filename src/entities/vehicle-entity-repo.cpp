@@ -4,23 +4,25 @@ namespace oni {
     namespace entities {
         VehicleEntityRepo::VehicleEntityRepo() = default;
 
-        void VehicleEntityRepo::setCar(const entities::entityID &id, const components::Car &car) {
+        VehicleEntityRepo::~VehicleEntityRepo()  = default;
+
+        void VehicleEntityRepo::setCar(const common::entityID &id, const components::Car &car) {
             mCars[id] = car;
         }
 
-        void VehicleEntityRepo::setCarConfig(const entities::entityID &id, const components::CarConfig &carConfig) {
+        void VehicleEntityRepo::setCarConfig(const common::entityID &id, const components::CarConfig &carConfig) {
             mCarConfigs[id] = carConfig;
         }
 
-        components::Car &VehicleEntityRepo::getCar(const entities::entityID &id) {
+        components::Car &VehicleEntityRepo::getCar(const common::entityID &id) {
             return mCars[id];
         }
 
-        const components::CarConfig &VehicleEntityRepo::getCarConfig(const entities::entityID &id) const {
+        const components::CarConfig &VehicleEntityRepo::getCarConfig(const common::entityID &id) const {
             return mCarConfigs[id];
         }
 
-        entities::entityID VehicleEntityRepo::_createEntity() {
+        common::entityID VehicleEntityRepo::_createEntity() {
             if (!mFreeEntitySlots.empty()) {
                 auto entity = mFreeEntitySlots.top();
                 mFreeEntitySlots.pop();

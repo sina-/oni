@@ -11,22 +11,22 @@ namespace oni {
         public:
             VehicleEntityRepo();
 
-            ~VehicleEntityRepo() = default;
+            ~VehicleEntityRepo();
 
-            void setCar(const entities::entityID &id, const components::Car &car);
+            void setCar(const common::entityID &id, const components::Car &car);
 
-            void setCarConfig(const entities::entityID &id, const components::CarConfig &carConfig);
+            void setCarConfig(const common::entityID &id, const components::CarConfig &carConfig);
 
-            components::Car &getCar(const entities::entityID &id);
+            components::Car &getCar(const common::entityID &id);
 
-            const components::CarConfig &getCarConfig(const entities::entityID &id) const;
+            const components::CarConfig &getCarConfig(const common::entityID &id) const;
 
         private:
-            std::vector<components::Car> mCars;
-            std::vector<components::CarConfig> mCarConfigs;
+            std::vector<components::Car> mCars{};
+            std::vector<components::CarConfig> mCarConfigs{};
 
         protected:
-            entities::entityID _createEntity() override;
+            common::entityID _createEntity() override;
 
         };
     }

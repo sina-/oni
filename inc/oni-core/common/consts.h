@@ -2,6 +2,6 @@
 
 namespace oni {
     namespace common {
-        const float ep = 0.00001f;
+        const float ep{0.00001f};
     }
 }

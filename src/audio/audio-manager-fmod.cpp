@@ -12,7 +12,7 @@ namespace oni {
 
         AudioManagerFMOD::AudioManagerFMOD() {
 
-            FMOD::System *system = nullptr;
+            FMOD::System *system{nullptr};
 
             auto result = FMOD::System_Create(&system);
             ERRCHECK(result);
@@ -41,7 +41,7 @@ namespace oni {
             // TODO: This will break for one-off sound effects, currently all the functions in this
             // class work if the audio is to be looped over.
 
-            FMOD::Sound *sound;
+            FMOD::Sound *sound{nullptr};
             auto result = mSystem->createSound(name.c_str(), FMOD_DEFAULT, nullptr, &sound);
             mSounds.emplace_back(std::unique_ptr<FMOD::Sound, FMODDeleter>(sound, FMODDeleter()));
             ERRCHECK(result);
@@ -49,7 +49,7 @@ namespace oni {
             result = mSounds.back()->setMode(FMOD_LOOP_NORMAL);
             ERRCHECK(result);
 
-            FMOD::Channel *channel;
+            FMOD::Channel *channel{nullptr};
             result = mSystem->playSound(sound, nullptr, true, &channel);
             ERRCHECK(result);
 
@@ -97,14 +97,15 @@ namespace oni {
         }
 
         bool AudioManagerFMOD::isPlaying(oniSoundID id) {
-            bool isPaused = false;
+            bool isPaused{false};
             auto result = mChannels[id]->getPaused(&isPaused);
             ERRCHECK(result);
             return !isPaused;
         }
 
         void AudioManagerFMOD::seek(oniSoundID id, double position) {
-            auto result = mChannels[id]->setPosition(static_cast<unsigned int>(position + common::ep), FMOD_TIMEUNIT_MS);
+            auto result = mChannels[id]->setPosition(static_cast<unsigned int>(position + common::ep),
+                                                     FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
         }
 

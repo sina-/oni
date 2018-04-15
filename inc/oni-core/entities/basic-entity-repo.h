@@ -33,6 +33,8 @@ namespace oni {
              */
             BasicEntityRepo();
 
+            virtual ~BasicEntityRepo() = default;
+
             void reserveEntity(size_t count);
 
             void destroyEntity(common::entityID id);

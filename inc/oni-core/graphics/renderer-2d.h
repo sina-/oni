@@ -4,8 +4,11 @@ namespace oni {
 
     namespace components {
         class Appearance;
+
         class Texture;
+
         class Text;
+
         class Placement;
     }
     namespace graphics {
@@ -29,6 +32,8 @@ namespace oni {
                 //mTransformationStack.push_back(math::mat4::identity());
             }
 
+            virtual ~Renderer2D() = default;
+
 /*            void push(const math::mat4 transformation) {
                 mTransformationStack.push_back(mTransformationStack.back() * transformation);
             }
@@ -48,6 +53,7 @@ namespace oni {
             virtual void submit(const components::Placement &position, const components::Appearance &color) = 0;
 
             virtual void submit(const components::Placement &position, const components::Texture &texture) = 0;
+
             virtual void
             submit(const components::Text &text) = 0;
 

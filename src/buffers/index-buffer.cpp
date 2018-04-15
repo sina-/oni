@@ -2,8 +2,9 @@
 
 namespace oni {
     namespace buffers {
-        IndexBuffer::IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size) : mCount(count),
-                                                                                                mSize(size) {
+        IndexBuffer::IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size) : mBufferID{0},
+                                                                                                mCount{count},
+                                                                                                mSize{size} {
             auto dataSize = count * sizeof(GLuint);
 
             glGenBuffers(size, &mBufferID);

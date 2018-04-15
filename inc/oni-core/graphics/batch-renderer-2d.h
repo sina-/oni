@@ -35,6 +35,10 @@ namespace oni {
 
             ~BatchRenderer2D();
 
+            BatchRenderer2D(const BatchRenderer2D &) = delete;
+
+            BatchRenderer2D &operator=(BatchRenderer2D &) = delete;
+
             void begin() override;
 
             void submit(const components::Placement &position, const components::Appearance &color) override;

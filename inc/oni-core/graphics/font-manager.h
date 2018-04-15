@@ -34,6 +34,10 @@ namespace oni {
 
             ~FontManager();
 
+            FontManager(const FontManager &) = delete;
+
+            FontManager &operator=(FontManager &) = delete;
+
             components::Text createTextFromString(const std::string &text, const math::vec3 &position);
 
             void updateText(const std::string &textContent, components::Text &text);

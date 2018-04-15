@@ -11,6 +11,9 @@ namespace oni {
 
     namespace physics {
         class Physic {
+        protected:
+            virtual ~Physic() = default;
+
         public:
             virtual void tick(entities::VehicleEntityRepo &vehicle, const io::Input &input, float tickTime) = 0;
         };

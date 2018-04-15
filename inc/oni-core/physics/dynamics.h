@@ -9,7 +9,10 @@ namespace oni {
 
     namespace physics {
         class Dynamics : public Physic {
+
         public:
+            ~Dynamics() = default;
+
             void tick(entities::VehicleEntityRepo &vehicle, const io::Input &input, float tickTime) override;
         };
     }

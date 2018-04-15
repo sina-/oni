@@ -31,10 +31,15 @@ namespace oni {
             std::vector<int> mKeysPressed;
             std::vector<int> mKeysReleased;
 
+
         public:
             Window(const char *name, int width, int height, int xScaling, int yScaling);
 
             ~Window();
+
+            Window(const Window &) = delete;
+
+            Window &operator=(const Window &) = delete;
 
             void tick(io::Input &input);
 

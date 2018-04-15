@@ -10,7 +10,7 @@
 namespace oni {
     namespace audio {
 
-        AudioManagerFMOD::AudioManagerFMOD() {
+        AudioManagerFMOD::AudioManagerFMOD() : mSystem{}, mSounds{}, mChannels{} {
 
             FMOD::System *system{nullptr};
 

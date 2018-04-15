@@ -7,6 +7,7 @@
 
 #include <oni-core/components/visual.h>
 #include <oni-core/components/buffer.h>
+#include <oni-core/common/typedefs.h>
 
 namespace oni {
     namespace buffers {
@@ -16,11 +17,11 @@ namespace oni {
          */
         class Buffer {
             GLuint mBufferID;
-            components::BufferStructures mBufferStructures;
+            common::BufferStructures mBufferStructures;
 
         public:
             Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
-                   components::BufferStructures bufferStructures);
+                   common::BufferStructures bufferStructures);
 
             ~Buffer() { glDeleteBuffers(1, &mBufferID); }
 

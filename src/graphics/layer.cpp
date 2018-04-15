@@ -181,7 +181,7 @@ namespace oni {
                      reinterpret_cast<const GLvoid *>(offsetof(components::ColoredVertex,
                                                                components::ColoredVertex::color)));
 
-            auto bufferStructures = components::BufferStructures();
+            auto bufferStructures = common::BufferStructures();
             bufferStructures.push_back(std::move(position));
             bufferStructures.push_back(std::move(color));
 
@@ -224,7 +224,7 @@ namespace oni {
                      reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
                                                                components::TexturedVertex::uv)));
 
-            auto bufferStructures = components::BufferStructures();
+            auto bufferStructures = common::BufferStructures();
             bufferStructures.push_back(std::move(position));
             bufferStructures.push_back(std::move(samplerID));
             bufferStructures.push_back(std::move(uv));

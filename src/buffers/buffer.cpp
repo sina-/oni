@@ -4,7 +4,7 @@
 namespace oni {
     namespace buffers {
         Buffer::Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
-                       components::BufferStructures bufferStructures)
+                       common::BufferStructures bufferStructures)
                 : mBufferStructures(std::move(bufferStructures)) {
             // Check for supported usages.
             ONI_DEBUG_ASSERT(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)

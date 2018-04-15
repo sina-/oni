@@ -47,8 +47,5 @@ namespace oni {
                                                                   stride(stride), offset(offset) {}
         };
 
-        typedef std::vector<std::unique_ptr<const BufferStructure>> BufferStructures;
-
-
     }
 }

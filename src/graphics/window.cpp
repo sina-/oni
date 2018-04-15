@@ -126,6 +126,8 @@ namespace oni {
         }
 
         void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+            UNUSED(scancode);
+            UNUSED(mods);
             auto thiz = getThisFromGLFWWindow(window);
             if (action == GLFW_PRESS)
                 thiz->addKeyPressed(key);
@@ -134,6 +136,7 @@ namespace oni {
         }
 
         void Window::mouseCallback(GLFWwindow *window, int button, int action, int mods) {
+            UNUSED(mods);
             TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);
             if (action == GLFW_PRESS)

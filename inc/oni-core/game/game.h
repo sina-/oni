@@ -8,7 +8,7 @@ namespace oni {
         public:
             Game();
 
-            virtual ~Game() = default;
+            virtual ~Game();
 
             /**
              * Main loop should run this function as fast as possible.
@@ -42,27 +42,24 @@ namespace oni {
             virtual void showFET(short fet) = 0;
 
         protected:
-            utils::HighResolutionTimer mRunTimerA;
-            utils::HighResolutionTimer mRunTimerB;
-            utils::HighResolutionTimer mFrameTimer;
-            utils::HighResolutionTimer mTickTimer;
+            utils::HighResolutionTimer mRunTimerA{};
+            utils::HighResolutionTimer mRunTimerB{};
+            utils::HighResolutionTimer mFrameTimer{};
+            utils::HighResolutionTimer mTickTimer{};
 
-            double mRunLagAccumulator;
-            double mRunLag;
-            double mFrameLag;
-            double mTickLag;
-            double mFrameExcessTime;
-            unsigned short mRunCounter;
-            unsigned short mTickCounter = 0;
-            unsigned short mFrameCounter = 0;
+            double mRunLagAccumulator{0.0f};
+            double mRunLag{0.0f};
+            double mFrameLag{0.0f};
+            double mTickLag{0.0f};
+            double mFrameExcessTime{0.0f};
+            unsigned short mRunCounter{0};
+            unsigned short mTickCounter{0};
+            unsigned short mFrameCounter{0};
 
             // 60Hz
-            const float mTickMS = 1 / 60.0f;
+            const float mTickMS{1 / 60.0f};
             // 30Hz
-            const float mMinTickMS = 1 / 30.0f;
-
-            // TODO: Move it to a file where all consts are
-            const float ep = 0.00001f;
+            // const float mMinTickMS{1 / 30.0f};
         };
     }
 }

@@ -3,6 +3,7 @@
 #include <oni-core/audio/audio-manager-fmod.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/common/consts.h>
+#include <oni-core/common/defines.h>
 
 #define ERRCHECK(_result) ONI_DEBUG_ASSERT((_result) == FMOD_OK)
 
@@ -75,18 +76,23 @@ namespace oni {
         }
 
         void AudioManagerFMOD::stopSound(oniSoundID id) {
-
+            UNUSED(id);
         }
 
         void AudioManagerFMOD::setLoop(oniSoundID id, bool loop) {
+            UNUSED(id);
+            UNUSED(loop);
 
         }
 
         void AudioManagerFMOD::setVolume(oniSoundID id, float volume) {
+            UNUSED(id);
+            UNUSED(volume);
 
         }
 
         float AudioManagerFMOD::getVolume(oniSoundID id) {
+            UNUSED(id);
             return 0;
         }
 

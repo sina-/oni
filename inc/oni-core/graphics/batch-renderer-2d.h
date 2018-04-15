@@ -15,8 +15,11 @@ namespace oni {
 
     namespace components {
         class Texture;
+
         class Placement;
+
         class Text;
+
         class Appearance;
 
     }
@@ -25,30 +28,29 @@ namespace oni {
 
 
         class BatchRenderer2D : public Renderer2D {
-
-            unsigned long mMaxSpriteCount;
-            unsigned long mMaxIndicesCount;
-
-            unsigned long mMaxBufferSize;
-            GLsizei mMaxVertexSize;
-            GLsizei mMaxSpriteSize;
-
-            std::unique_ptr<buffers::IndexBuffer> mIBO;
-
             // Actual number of indices used.
             GLsizei mIndexCount;
 
+            unsigned long mMaxSpriteCount;
+            GLsizei mMaxVertexSize;
+            const unsigned long mMaxNumTextureSamplers;
+            GLsizei mMaxIndicesCount;
+            GLsizei mMaxSpriteSize;
+            unsigned long mMaxBufferSize;
+
             GLuint mVDO;
+
             std::unique_ptr<buffers::VertexArray> mVAO;
+            std::unique_ptr<buffers::IndexBuffer> mIBO;
+
+            // A mapping from texture id to 2D sampler that will draw it.
+            std::map<GLuint, GLint> mTextureToSampler{};
+
+            std::vector<GLint> mSamplers;
 
             // The buffer that will hold components::Vertex data, or its variants, in the batch.
             void *mBuffer;
 
-            // A mapping from texture id to 2D sampler that will draw it.
-            std::map<GLuint, GLint> mTextureToSampler;
-            std::vector<GLint> mSamplers;
-
-            const unsigned long mMaxNumTextureSamplers;
 
         public:
             BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,

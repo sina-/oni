@@ -32,7 +32,7 @@ namespace oni {
 
             void disable() const { glUseProgram(0); }
 
-            const GLuint getProgram() const { return mProgram; }
+            GLuint getProgram() const { return mProgram; }
 
             void setUniform1f(const GLchar *name, float value) {
                 glUniform1f(getUniformLocation(name), value);

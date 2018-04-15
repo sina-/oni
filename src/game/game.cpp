@@ -1,19 +1,22 @@
 #include <oni-core/game/game.h>
+
 #include <thread>
+
+#include <oni-core/common/consts.h>
 
 namespace oni {
     namespace game {
 
-        Game::Game()
-                : mRunTimerA(), mRunLagAccumulator(0.0f), mRunCounter(0), mFrameLag(0.0f), mFrameTimer(), mTickTimer(),
-                  mTickLag(0), mRunLag(0.0f), mRunTimerB(), mFrameExcessTime(0) {}
+        Game::Game() = default;
+
+        Game::~Game() = default;
 
         void Game::run() {
             mRunTimerA.restart();
             mRunTimerB.restart();
             mFrameTimer.restart();
 
-            if (1.0f - mRunLagAccumulator <= ep) {
+            if (1.0f - mRunLagAccumulator <= common::ep) {
                 auto fps = mRunCounter / mRunLagAccumulator;
                 auto tps = 1 * mTickCounter;
                 showFPS(static_cast<unsigned short>(fps));

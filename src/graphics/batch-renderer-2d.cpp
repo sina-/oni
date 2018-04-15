@@ -13,15 +13,15 @@ namespace oni {
         BatchRenderer2D::BatchRenderer2D(const unsigned long maxSpriteCount, unsigned long maxNumTextureSamplers,
                                          GLsizei maxVertexSize,
                                          common::BufferStructures bufferStructures)
-                : mIndexCount(0),
-                  mMaxSpriteCount(maxSpriteCount),
-                  mMaxVertexSize(maxVertexSize),
-                  mMaxNumTextureSamplers(maxNumTextureSamplers) {
+                : mIndexCount{0},
+                  mMaxSpriteCount{maxSpriteCount},
+                  mMaxVertexSize{maxVertexSize},
+                  mMaxNumTextureSamplers{maxNumTextureSamplers} {
 
             // Each sprite has 6 indices.
             mMaxIndicesCount = mMaxSpriteCount * 6;
 
-            auto maxUIntSize = std::numeric_limits<unsigned int>::max();
+            auto maxUIntSize = std::numeric_limits<int>::max();
             ONI_DEBUG_ASSERT(mMaxIndicesCount < maxUIntSize);
 
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
@@ -56,8 +56,11 @@ namespace oni {
 
             mIBO = std::make_unique<buffers::IndexBuffer>(indices, mMaxIndicesCount);
 
+            mTextureToSampler = {};
+
             mSamplers = generateSamplerIDs();
 
+            mBuffer = nullptr;
         }
 
         BatchRenderer2D::~BatchRenderer2D() {
@@ -163,7 +166,7 @@ namespace oni {
             float scaleX = text.xScaling;
             float scaleY = text.yScaling;
 
-            for (int i = 0; i < text.textContent.size(); i++) {
+            for (unsigned int i = 0; i < text.textContent.size(); i++) {
                 ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;

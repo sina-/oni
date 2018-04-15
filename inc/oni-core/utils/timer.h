@@ -23,7 +23,7 @@ namespace oni {
             }
 
         private:
-            std::uint64_t mStartTime;
+            std::uint64_t mStartTime{0};
         };
     }
 }

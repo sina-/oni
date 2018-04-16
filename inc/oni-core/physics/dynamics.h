@@ -11,7 +11,7 @@ namespace oni {
         class Dynamics : public Physic {
 
         public:
-            ~Dynamics() = default;
+            ~Dynamics() override = default;
 
             void tick(entities::VehicleEntityRepo &vehicle, const io::Input &input, float tickTime) override;
         };

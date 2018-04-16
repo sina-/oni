@@ -8,9 +8,9 @@ namespace oni {
 
         Window::Window(std::string &&title, int width, int height, int gameWidth, int gameHeight) :
                 mTitle{std::move(title)}, mWidth{width}, mHeight{height},
-                mWindow{nullptr},
                 mGameWidth{gameWidth},
                 mGameHeight{gameHeight},
+                mWindow{nullptr},
                 mMouseButton{GLFW_KEY_UNKNOWN}, mCursorX{0.0f}, mCursorY{0.0f},
                 mKeysPressed{}, mKeysReleased{} {
 
@@ -63,7 +63,7 @@ namespace oni {
 
             glEnable(GL_DEBUG_OUTPUT);
             glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            glDebugMessageCallback(static_cast<GLDEBUGPROC> (&messageCallback), nullptr);
+            glDebugMessageCallback(&messageCallback, nullptr);
         }
 
         Window::~Window() {

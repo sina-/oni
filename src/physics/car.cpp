@@ -140,7 +140,7 @@ namespace oni {
 
         common::carSimDouble applySafeSteer(const components::Car &car,
                                             common::carSimDouble steerInput) {
-            auto avel = std::min(car.velocityAbsolute, static_cast<common::carSimDouble> (250.0));
+            auto avel = std::min(car.velocityAbsolute, 250.0);
             auto steer = steerInput * (1.0 - (avel / 280.0));
             return steer;
         }

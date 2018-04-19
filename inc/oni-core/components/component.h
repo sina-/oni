@@ -10,26 +10,28 @@ namespace oni {
             // Ready to be writen to. This is a temporary state. Very similar to NONE, but could be
             // useful if interested in knowing how many entities are created but never
             // initialized.
-            READY,
+                    READY,
 
             PLACEMENT,      // 2 -> 8
             APPEARANCE,     // 3 -> 16
             DYNAMIC,       // 4 -> 32
             TEXTURE,        // ...
             TEXT,
+            ORIENTATION,
 
             // NOTE: Always keep it last to determine size.
-            MAX
+                    MAX
         };
 
         typedef std::bitset<MAX> Mask;
         typedef std::vector<std::bitset<MAX>> EntityMasks;
 
-        const static components::Mask PlacementComponent = components::Mask().set(components::PLACEMENT);
-        const static components::Mask AppearanceComponent = components::Mask().set(components::APPEARANCE);
-        const static components::Mask DynamicComponent = components::Mask().set(components::DYNAMIC);
-        const static components::Mask TextureComponent = components::Mask().set(components::TEXTURE);
-        const static components::Mask TextComponent = components::Mask().set(components::TEXT);
+        const static Mask PlacementComponent = Mask().set(components::PLACEMENT);
+        const static Mask AppearanceComponent = Mask().set(components::APPEARANCE);
+        const static Mask DynamicComponent = Mask().set(components::DYNAMIC);
+        const static Mask TextureComponent = Mask().set(components::TEXTURE);
+        const static Mask OrientationComponent = Mask().set(components::ORIENTATION);
+        const static Mask TextComponent = Mask().set(components::TEXT);
     }
 
 }

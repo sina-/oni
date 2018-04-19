@@ -8,6 +8,7 @@
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
+#include <oni-core/math/mat4.h>
 
 namespace oni {
     namespace components {

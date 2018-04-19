@@ -59,6 +59,8 @@ namespace oni {
 
             const components::Placement &getEntityPlacement(common::entityID id) const;
 
+            components::Placement &getEntityPlacement(common::entityID id);
+
             const components::Appearance &getEntityAppearance(common::entityID id) const;
 
             const components::Texture &getEntityTexture(common::entityID id) const;

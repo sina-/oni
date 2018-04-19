@@ -109,7 +109,5 @@ namespace oni {
                                     const graphics::ScreenBounds &screenBound);
 
         };
-
-
     }
 }

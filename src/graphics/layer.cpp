@@ -61,8 +61,10 @@ namespace oni {
                 if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
                      (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
-                    mRenderer2D->submit(basicEntityRepo.getEntityPlacement(entityIndex),
-                                        basicEntityRepo.getEntityTexture(entityIndex));
+                    auto placement = basicEntityRepo.getEntityPlacement(entityIndex);
+                    const auto &texture = basicEntityRepo.getEntityTexture(entityIndex);
+
+                    mRenderer2D->submit(placement, texture);
                 }
                 ++entityIndex;
             }

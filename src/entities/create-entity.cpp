@@ -12,7 +12,7 @@ namespace oni {
                                             const math::vec3 &position, const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::Sprite, layerID);
 
-            auto entityPlacement = components::Placement::fromPositionAndSize(position, size);
+            auto entityPlacement = components::Placement::fromPositionAndSize(position, size, 0.0f);
             components::Appearance entityAppearance{color};
 
             basicEntityRepo.setEntityPlacement(entity, entityPlacement);
@@ -26,7 +26,7 @@ namespace oni {
                                               const math::vec2 &size) {
             auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, layerID);
 
-            auto entityPlacement = components::Placement::fromPositionAndSize(position, size);
+            auto entityPlacement = components::Placement::fromPositionAndSize(position, size, 0.0f);
 
             basicEntityRepo.setEntityPlacement(entity, entityPlacement);
             basicEntityRepo.setEntityTexture(entity, entityTexture);
@@ -61,7 +61,7 @@ namespace oni {
             carConfig.brakeForce = 1000;
             carConfig.cornerStiffnessRear = 5.5f;
             carConfig.cornerStiffnessFront = 5.0f;
-            carConfig.maxSteer = 0.6f;
+            carConfig.maxSteer = 0.5f;
             carConfig.rollResist = 8.0f;
 
             auto carX = -carConfig.cgToRear;
@@ -73,7 +73,7 @@ namespace oni {
 
             auto entityPlacement = components::Placement::fromPositionAndSize(
                     math::vec3{static_cast<float> (carX), static_cast<float> (carY), 1.0f},
-                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)});
+                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)}, 0.0f);
             auto car = components::Car(carConfig);
             vehicleEntityRepo.setCar(entity, car);
             vehicleEntityRepo.setCarConfig(entity, carConfig);

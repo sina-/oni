@@ -62,6 +62,10 @@ namespace oni {
             return mPlacements[id];
         }
 
+        components::Placement &BasicEntityRepo::getEntityPlacement(common::entityID id) {
+            return mPlacements[id];
+        }
+
         const components::Appearance &BasicEntityRepo::getEntityAppearance(common::entityID id) const {
             return mAppearances[id];
         }

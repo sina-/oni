@@ -22,15 +22,18 @@ namespace oni {
             math::vec3 vertexB{0.0f, 0.0f, 0.0f};
             math::vec3 vertexC{0.0f, 0.0f, 0.0f};
             math::vec3 vertexD{0.0f, 0.0f, 0.0f};
+            // TODO: This shouldn't be here.
+            float heading{0.0f};
 
             math::vec3 getPosition() const { return vertexA; }
 
-            static Placement fromPositionAndSize(const math::vec3 position, const math::vec2 size) {
+            static Placement fromPositionAndSize(const math::vec3 position, const math::vec2 size,
+                                                 const float orientation) {
                 return Placement{
                         math::vec3{position.x, position.y, position.z},
                         math::vec3{position.x, position.y + size.y, position.z},
                         math::vec3{position.x + size.x, position.y + size.y, position.z},
-                        math::vec3{position.x + size.x, position.y, position.z}};
+                        math::vec3{position.x + size.x, position.y, position.z}, orientation};
             }
         };
 

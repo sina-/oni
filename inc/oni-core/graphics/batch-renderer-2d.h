@@ -33,27 +33,27 @@ namespace oni {
                             const GLsizei maxVertexSize,
                             common::BufferStructures bufferStructures);
 
-            ~BatchRenderer2D();
+            ~BatchRenderer2D() override;
 
             BatchRenderer2D(const BatchRenderer2D &) = delete;
 
             BatchRenderer2D &operator=(BatchRenderer2D &) = delete;
 
-            void begin() override;
-
-            void submit(const components::Placement &position, const components::Appearance &color) override;
-
-            void submit(const components::Placement &position, const components::Texture &texture) override;
-
-            void submit(const components::Text &text) override;
-
-            void flush() override;
-
-            void end() override;
-
             std::vector<GLint> generateSamplerIDs();
 
         private:
+            void _begin() override;
+
+            void _submit(const components::Placement &position, const components::Appearance &color) override;
+
+            void _submit(const components::Placement &position, const components::Texture &texture) override;
+
+            void _submit(const components::Text &text) override;
+
+            void _flush() override;
+
+            void _end() override;
+
             void reset();
 
             // TODO: checkout texture arrays.

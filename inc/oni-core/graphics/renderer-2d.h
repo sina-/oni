@@ -26,13 +26,9 @@ namespace oni {
              */
             //std::vector<math::mat4> mTransformationStack;
 
-            Renderer2D() {
-                // identity matrix is the grand parent of all transformations, and
-                // it should always stay in the stack.
-                //mTransformationStack.push_back(math::mat4::identity());
-            }
+            Renderer2D();
 
-            virtual ~Renderer2D() = default;
+            virtual ~Renderer2D();
 
 /*            void push(const math::mat4 transformation) {
                 mTransformationStack.push_back(mTransformationStack.back() * transformation);
@@ -48,24 +44,42 @@ namespace oni {
             /**
              * Preparation work, if needed.
              */
-            virtual void begin() = 0;
+            void begin();
 
-            virtual void submit(const components::Placement &position, const components::Appearance &color) = 0;
+            void submit(const components::Placement &position, const components::Appearance &color);
 
-            virtual void submit(const components::Placement &position, const components::Texture &texture) = 0;
+            void submit(const components::Placement &position, const components::Texture &texture);
 
-            virtual void
-            submit(const components::Text &text) = 0;
+            void submit(const components::Text &text);
 
             /**
              * Draw the element(s).
              */
-            virtual void flush() = 0;
+            void flush();
 
             /**
              * Clean up, if needed.
              */
-            virtual void end() = 0;
+            void end();
+
+        private:
+            virtual void _begin() = 0;
+
+            virtual void _submit(const components::Placement &position, const components::Appearance &color) = 0;
+
+            virtual void _submit(const components::Placement &position, const components::Texture &texture) = 0;
+
+            virtual void _submit(const components::Text &text) = 0;
+
+            /**
+             * Draw the element(s).
+             */
+            virtual void _flush() = 0;
+
+            /**
+             * Clean up, if needed.
+             */
+            virtual void _end() = 0;
         };
     }
 }

@@ -70,13 +70,13 @@ namespace oni {
             glDeleteBuffers(1, &mVDO);
         }
 
-        void BatchRenderer2D::begin() {
+        void BatchRenderer2D::_begin() {
             mVAO->bindVBO();
             // Data written to mBuffer has to match the structure of VBO.
             mBuffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
 
-        void BatchRenderer2D::submit(const components::Placement &position, const components::Appearance &appearance) {
+        void BatchRenderer2D::_submit(const components::Placement &position, const components::Appearance &appearance) {
             // Check if Buffer can handle the number of vertices.
             // TODO: This seems to trigger even in none-debug mode
             ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
@@ -125,7 +125,7 @@ namespace oni {
             mIndexCount += 6;
         }
 
-        void BatchRenderer2D::submit(const components::Placement &position, const components::Texture &texture) {
+        void BatchRenderer2D::_submit(const components::Placement &position, const components::Texture &texture) {
             // Check if Buffer can handle the number of vertices.
             ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
@@ -159,7 +159,7 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::submit(const components::Text &text) {
+        void BatchRenderer2D::_submit(const components::Text &text) {
             auto buffer = static_cast<components::TexturedVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
@@ -210,7 +210,7 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::flush() {
+        void BatchRenderer2D::_flush() {
             for (const auto &t2s: mTextureToSampler) {
                 glActiveTexture(GL_TEXTURE0 + static_cast<GLenum >(t2s.second));
                 Texture::bind(t2s.first);
@@ -230,7 +230,7 @@ namespace oni {
 
         }
 
-        void BatchRenderer2D::end() {
+        void BatchRenderer2D::_end() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
             mVAO->unbindVBO();
 

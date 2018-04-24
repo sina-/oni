@@ -13,6 +13,7 @@ namespace oni {
                 mStartTime = takeTimeStamp();
             }
 
+            // Return elapsed time in seconds
             double elapsed() const { return double(takeTimeStamp() - mStartTime) * 1e-9; }
 
             std::uint64_t elapsed_nanoseconds() const { return takeTimeStamp() - mStartTime; }

@@ -26,7 +26,6 @@ namespace oni {
 
     namespace graphics {
 
-
         class BatchRenderer2D : public Renderer2D {
         public:
             BatchRenderer2D(const GLsizei maxSpriteCount, const GLsizei maxNumTextureSamplers,

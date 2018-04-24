@@ -15,6 +15,7 @@ namespace oni {
          */
         class Buffer {
             GLuint mBufferID;
+            // TODO: This is un-used by the Buffer class, but VAO which usually has this class uses it.
             common::BufferStructures mBufferStructures;
 
         public:

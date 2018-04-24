@@ -57,7 +57,7 @@ namespace oni {
 
         }
 
-        GLint Shader::getUniformLocation(const GLchar *name) {
+        GLint Shader::getUniformLocation(const GLchar *name) const{
             // TODO: Slow operation, need caching
             auto location = glGetUniformLocation(mProgram, name);
             if (location == -1) {

@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: remove memory from this file
 #include <memory>
 #include <utility>
 #include <vector>
@@ -21,7 +22,7 @@ namespace oni {
         /** Determines the Layer. And that effectively clusters entities based on
          * layer and helps renderer to only switch state per cluster of entities.
          */
-        typedef GLuint LayerID;
+        typedef GLuint ShaderID;
 
         struct Texture {
             // TODO: This might need re ordering for better caching.
@@ -57,6 +58,13 @@ namespace oni {
             unsigned char blue{0};
             unsigned char green{0};
             unsigned char alpha{0};
+        };
+
+        struct ScreenBounds {
+            float xMin;
+            float xMax;
+            float yMin;
+            float yMax;
         };
 
     }

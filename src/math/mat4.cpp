@@ -150,5 +150,8 @@ namespace oni {
             };
         }
 
+        vec3 mat4::getPosition() {
+            return vec3{columns[3].x, columns[3].y, columns[3].z};
+        }
     }
 }

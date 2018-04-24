@@ -11,17 +11,15 @@
 #include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/graphics/texture.h>
 #include <oni-core/graphics/window.h>
+#include <oni-core/common/consts.h>
 
 namespace oni {
     namespace graphics {
 
         Layer::Layer(std::unique_ptr<BatchRenderer2D> renderer, std::unique_ptr<Shader> shader,
-                     const graphics::ScreenBounds &screenBound, const math::mat4 &modalMatrix,
-                     const math::mat4 &viewMatrix,
-                     const math::mat4 &projectionMatrix)
+                     const math::mat4 &modalMatrix, const math::mat4 &viewMatrix, const math::mat4 &projectionMatrix)
                 : mRenderer2D(std::move(renderer)),
                   mShader(std::move(shader)),
-                  mScreenBound(screenBound),
                   mModalMatrix(modalMatrix),
                   mViewMatrix(viewMatrix),
                   mProjectionMatrix(projectionMatrix) {
@@ -33,15 +31,15 @@ namespace oni {
         void Layer::renderSprites(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
 
-            auto layerID = getLayerID();
+            auto shaderID = getShaderID();
 
             unsigned long entityIndex = 0;
 
             for (const auto &entity: basicEntityRepo.getEntities()) {
-                if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
+                if ((basicEntityRepo.getEntityShaderID(entityIndex) == shaderID &&
                      (entity & entities::Sprite) == entities::Sprite)) {
 
-                    mRenderer2D->submit(basicEntityRepo.getEntityPlacement(entityIndex),
+                    mRenderer2D->submit(basicEntityRepo.getEntityPlacementLocal(entityIndex),
                                         basicEntityRepo.getEntityAppearance(entityIndex));
                 }
                 ++entityIndex;
@@ -53,15 +51,15 @@ namespace oni {
         void Layer::renderTexturedSprites(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
 
-            auto layerID = getLayerID();
+            auto shaderID = getShaderID();
 
             unsigned long entityIndex = 0;
 
             for (const auto &entity: basicEntityRepo.getEntities()) {
-                if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
+                if ((basicEntityRepo.getEntityShaderID(entityIndex) == shaderID &&
                      (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
 
-                    auto placement = basicEntityRepo.getEntityPlacement(entityIndex);
+                    auto placement = basicEntityRepo.getEntityPlacementLocal(entityIndex);
                     const auto &texture = basicEntityRepo.getEntityTexture(entityIndex);
 
                     mRenderer2D->submit(placement, texture);
@@ -76,12 +74,12 @@ namespace oni {
         void Layer::renderText(const entities::BasicEntityRepo &basicEntityRepo) {
             begin();
 
-            auto layerID = getLayerID();
+            auto shaderID = getShaderID();
 
             unsigned long entityIndex = 0;
 
             for (const auto &entity: basicEntityRepo.getEntities()) {
-                if ((basicEntityRepo.getEntityLayerID(entityIndex) == layerID &&
+                if ((basicEntityRepo.getEntityShaderID(entityIndex) == shaderID &&
                      (entity & entities::TextSprite) == entities::TextSprite)) {
 
                     mRenderer2D->submit(basicEntityRepo.getEntityText(entityIndex));
@@ -146,7 +144,7 @@ namespace oni {
             mProjectionMatrix = projectionMatrix;
         }
 
-        components::LayerID Layer::getLayerID() {
+        components::ShaderID Layer::getShaderID() {
             return mShader->getProgram();
         }
 
@@ -163,7 +161,7 @@ namespace oni {
 
         std::unique_ptr<Layer> Layer::createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
                                                       std::string &&fragmentShader,
-                                                      const graphics::ScreenBounds &screenBound) {
+                                                      const components::ScreenBounds &screenBound) {
 
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
             auto program = shader->getProgram();
@@ -190,20 +188,20 @@ namespace oni {
             bufferStructures.push_back(std::move(color));
 
             auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount,
-                                                              mMaxNumTextureSamplers,
+                                                              common::maxNumTextureSamplers,
                                                               sizeof(components::ColoredVertex),
                                                               std::move(bufferStructures));
 
             auto projection = math::mat4::orthographic(screenBound.xMin, screenBound.xMax, screenBound.yMin,
                                                        screenBound.yMax, -1.0f, 1.0f);
             auto identity = math::mat4::identity();
-            return std::make_unique<Layer>(std::move(renderer), std::move(shader), screenBound, identity,
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), identity,
                                            identity, projection);
         }
 
         std::unique_ptr<Layer> Layer::createTexturedTileLayer(unsigned long maxSpriteCount,
                                                               std::string &&vertexShader, std::string &&fragmentShader,
-                                                              const graphics::ScreenBounds &screenBound) {
+                                                              const components::ScreenBounds &screenBound) {
 
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
             auto program = shader->getProgram();
@@ -235,7 +233,7 @@ namespace oni {
             bufferStructures.push_back(std::move(uv));
 
             auto renderer = std::make_unique<BatchRenderer2D>(maxSpriteCount,
-                                                              mMaxNumTextureSamplers,
+                                                              common::maxNumTextureSamplers,
                                                               sizeof(components::TexturedVertex),
                                                               std::move(bufferStructures));
 
@@ -246,7 +244,7 @@ namespace oni {
             auto projection = math::mat4::orthographic(screenBound.xMin, screenBound.xMax, screenBound.yMin,
                                                        screenBound.yMax, -1.0f, 1.0f);
             auto identity = math::mat4::identity();
-            return std::make_unique<Layer>(std::move(renderer), std::move(shader), screenBound, identity, identity,
+            return std::make_unique<Layer>(std::move(renderer), std::move(shader), identity, identity,
                                            projection);
         }
     }

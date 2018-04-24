@@ -1,10 +1,15 @@
 #pragma once
 
+#include <oni-core/components/physical.h>
+
 namespace oni {
     namespace math {
         class vec2;
 
         class vec3;
+    }
+    namespace components {
+        class Placement;
     }
     namespace physics {
         class Translation {
@@ -14,6 +19,10 @@ namespace oni {
 
         public:
             static void worldToLocal(const math::vec3 &reference, math::vec3 &operand);
+
+            static void localToWorld(const math::vec3 &reference, math::vec3 &operand);
+
+            static void localToWorld(const math::vec3 &reference, components::Placement &placement);
 
             static void localToTexture(const float ratio, math::vec3 &operand);
 

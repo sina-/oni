@@ -24,7 +24,7 @@ namespace oni {
 
             const float *getArray() const { return &elements.front(); };
 
-            vec3 getPosition() { return vec3{columns[3].x, columns[3].y, columns[3].y}; };
+            vec3 getPosition();
 
             static mat4 identity();
 

@@ -22,7 +22,7 @@ namespace oni {
              */
             virtual bool shouldTerminate() = 0;
 
-        protected:
+        private:
             virtual void tick() final;
 
             virtual void render() final;

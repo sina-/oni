@@ -15,14 +15,7 @@ namespace oni {
         class BatchRenderer2D;
         class Shader;
 
-        static const unsigned long mMaxNumTextureSamplers = 32;
-
-        struct ScreenBounds {
-            float xMin;
-            float xMax;
-            float yMin;
-            float yMax;
-        };
+        // TODO: Move this classes functions to SceneManager and then remove it
 
         /**
          * A Layer is the composition that renders entities in the world. Each entity
@@ -34,7 +27,6 @@ namespace oni {
             // polymorphism. Do I really need Renderer2D interface?
             std::unique_ptr<BatchRenderer2D> mRenderer2D;
             std::unique_ptr<Shader> mShader;
-            graphics::ScreenBounds mScreenBound;
             math::mat4 mModalMatrix;
             math::mat4 mViewMatrix;
             math::mat4 mProjectionMatrix;
@@ -42,9 +34,7 @@ namespace oni {
 
         public:
             Layer(std::unique_ptr<BatchRenderer2D> renderer, std::unique_ptr<Shader> shader,
-                  const graphics::ScreenBounds &screenBound, const math::mat4 &modalMatrix,
-                  const math::mat4 &viewMatrix,
-                  const math::mat4 &projectionMatrix);
+                              const math::mat4 &modalMatrix, const math::mat4 &viewMatrix, const math::mat4 &projectionMatrix);
 
             ~Layer();
 
@@ -83,7 +73,7 @@ namespace oni {
              *
              * @return unique ID
              */
-            components::LayerID getLayerID();
+            components::ShaderID getShaderID();
 
         public:
             /**
@@ -96,7 +86,7 @@ namespace oni {
              */
             static std::unique_ptr<Layer>
             createTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader, std::string &&fragmentShader,
-                            const graphics::ScreenBounds &screenBound);
+                            const components::ScreenBounds &screenBound);
 
             /**
              * Similar to tile layer but rendered with textures instead of solid colors.
@@ -106,7 +96,7 @@ namespace oni {
             static std::unique_ptr<Layer>
             createTexturedTileLayer(unsigned long maxSpriteCount, std::string &&vertexShader,
                                     std::string &&fragmentShader,
-                                    const graphics::ScreenBounds &screenBound);
+                                    const components::ScreenBounds &screenBound);
 
         };
     }

@@ -16,28 +16,30 @@ namespace oni {
 
             mEntities.emplace_back(components::Mask().set(components::READY));
             // NOTE: This type of initialization will avoid copy construction.
-            mPlacements.emplace_back(components::Placement{});
+            mPlacementsLocal.emplace_back(components::Placement{});
+            mPlacementsWorld.emplace_back(components::Placement{});
             mAppearances.emplace_back(components::Appearance{});
             mTextures.emplace_back(components::Texture{});
-            mLayerIDs.emplace_back(0);
+            mShaderIDs.emplace_back(0);
             mTexts.emplace_back(components::Text{});
             return mEntities.size() - 1;
         }
 
         void BasicEntityRepo::reserveEntity(size_t size) {
             mEntities.reserve(mEntities.size() + size);
-            mPlacements.reserve(mPlacements.size() + size);
+            mPlacementsLocal.reserve(mPlacementsLocal.size() + size);
+            mPlacementsWorld.reserve(mPlacementsWorld.size() + size);
             mAppearances.reserve(mAppearances.size() + size);
             mTextures.reserve(mTextures.size() + size);
-            mLayerIDs.reserve(mLayerIDs.size() + size);
+            mShaderIDs.reserve(mShaderIDs.size() + size);
             mTexts.reserve(mTexts.size() + size);
         }
 
         common::entityID
-        BasicEntityRepo::createEntity(const components::Mask &mask, const components::LayerID &layerID) {
+        BasicEntityRepo::createEntity(const components::Mask &mask, const components::ShaderID &shaderID) {
             auto entity = _createEntity();
             mEntities[entity] = mask;
-            mLayerIDs[entity] = layerID;
+            mShaderIDs[entity] = shaderID;
             return entity;
         }
 
@@ -58,12 +60,12 @@ namespace oni {
             return mEntities[id];
         }
 
-        const components::Placement &BasicEntityRepo::getEntityPlacement(common::entityID id) const {
-            return mPlacements[id];
+        const components::Placement &BasicEntityRepo::getEntityPlacementLocal(common::entityID id) const {
+            return mPlacementsLocal[id];
         }
 
-        components::Placement &BasicEntityRepo::getEntityPlacement(common::entityID id) {
-            return mPlacements[id];
+        components::Placement &BasicEntityRepo::getEntityPlacementLocal(common::entityID id) {
+            return mPlacementsLocal[id];
         }
 
         const components::Appearance &BasicEntityRepo::getEntityAppearance(common::entityID id) const {
@@ -74,16 +76,16 @@ namespace oni {
             return mTextures[id];
         }
 
-        const components::LayerID &BasicEntityRepo::getEntityLayerID(common::entityID id) const {
-            return mLayerIDs[id];
+        const components::ShaderID &BasicEntityRepo::getEntityShaderID(common::entityID id) const {
+            return mShaderIDs[id];
         }
 
         const components::Text &BasicEntityRepo::getEntityText(common::entityID id) const {
             return mTexts[id];
         }
 
-        void BasicEntityRepo::setEntityPlacement(common::entityID id, const components::Placement &placement) {
-            mPlacements[id] = placement;
+        void BasicEntityRepo::setEntityPlacementLocal(common::entityID id, const components::Placement &placement) {
+            mPlacementsLocal[id] = placement;
         }
 
         void BasicEntityRepo::setEntityAppearance(common::entityID id, const components::Appearance &appearance) {
@@ -94,8 +96,8 @@ namespace oni {
             mTextures[id] = texture;
         }
 
-        void BasicEntityRepo::setEntityLayerID(common::entityID id, const components::LayerID &layerID) {
-            mLayerIDs[id] = layerID;
+        void BasicEntityRepo::setEntityShaderID(common::entityID id, const components::ShaderID &shaderID) {
+            mShaderIDs[id] = shaderID;
 
         }
 
@@ -106,6 +108,18 @@ namespace oni {
 
         components::Text &BasicEntityRepo::getEntityText(common::entityID id) {
             return mTexts[id];
+        }
+
+        void BasicEntityRepo::setEntityPlacementWorld(common::entityID id, const components::Placement &placement) {
+            mPlacementsWorld[id] = placement;
+        }
+
+        const components::Placement &BasicEntityRepo::getEntityPlacementWorld(common::entityID id) const {
+            return mPlacementsWorld[id];
+        }
+
+        components::Placement &BasicEntityRepo::getEntityPlacementWorld(common::entityID id) {
+            return mPlacementsWorld[id];
         }
     }
 }

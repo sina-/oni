@@ -18,9 +18,11 @@ namespace oni {
             TEXTURE,        // ...
             TEXT,
             ORIENTATION,
+            STATIC,
 
             // NOTE: Always keep it last to determine size.
-                    MAX
+            MAX
+
         };
 
         typedef std::bitset<MAX> Mask;

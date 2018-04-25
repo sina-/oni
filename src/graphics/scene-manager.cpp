@@ -46,6 +46,63 @@ namespace oni {
             }
         }
 
+        void SceneManager::initializeRenderer(const Shader &shader) {
+
+            auto program = shader.getProgram();
+
+            GLsizei stride = sizeof(components::TexturedVertex);
+            auto positionIndex = glGetAttribLocation(program, "position");
+            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
+            auto uvIndex = glGetAttribLocation(program, "uv");
+
+            if (positionIndex == -1 || samplerIDIndex == -1 || uvIndex == -1) {
+                throw std::runtime_error("Invalid attribute name.");
+            }
+
+            auto position = std::make_unique<const components::BufferStructure>
+                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
+                                                 static_cast<const GLvoid *>(nullptr)});
+            auto samplerID = std::make_unique<const components::BufferStructure>
+                    (components::BufferStructure{static_cast<GLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE, stride,
+                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
+                                                                                           components::TexturedVertex::samplerID))});
+            auto uv = std::make_unique<const components::BufferStructure>
+                    (components::BufferStructure{static_cast<GLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
+                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
+                                                                                           components::TexturedVertex::uv))});
+
+            auto bufferStructures = common::BufferStructures();
+            bufferStructures.push_back(std::move(position));
+            bufferStructures.push_back(std::move(samplerID));
+            bufferStructures.push_back(std::move(uv));
+
+            mRenderer2D = std::make_unique<BatchRenderer2D>(mMaxSpriteCount,
+                    // TODO: This is a problem
+                                                            common::maxNumTextureSamplers,
+                                                            sizeof(components::TexturedVertex),
+                                                            std::move(bufferStructures));
+
+            shader.enable();
+            shader.setUniformiv("samplers", mRenderer2D->generateSamplerIDs());
+            shader.disable();
+        }
+
+        void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D) {
+            shader.enable();
+            // TODO: Merge all these matrices into one and call it ModelViewProjMatrix and use it in the
+            // shader. This is to avoid the same matrix multiplication for each vertex in the game over and over.
+            shader.setUniformMat4("pr_matrix", mProjectionMatrix);
+            shader.setUniformMat4("vw_matrix", mViewMatrix);
+            shader.setUniformMat4("ml_matrix", mModelMatrix);
+            renderer2D.begin();
+        }
+
+        void SceneManager::end(const Shader &shader, Renderer2D &renderer2D) {
+            renderer2D.end();
+            renderer2D.flush();
+            shader.disable();
+        }
+
         void SceneManager::render(const entities::BasicEntityRepo &entityRepo) {
             // TODO: It makes more sense to iterate over renderers when shader and renderer are merged.
             for (auto const &shaderPair : mShaders) {
@@ -78,63 +135,6 @@ namespace oni {
         void SceneManager::lookAt(float x, float y, float distance) {
             mViewMatrix = math::mat4::scale(math::vec3{distance, distance, 1.0f}) *
                           math::mat4::translation(-x, -y, 0.0f);
-        }
-
-        void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D) {
-            shader.enable();
-            // TODO: Merge all these matrices into one and call it ModelViewProjMatrix and use it in the
-            // shader. This is to avoid the same matrix multiplication for each vertex in the game over and over.
-            shader.setUniformMat4("pr_matrix", mProjectionMatrix);
-            shader.setUniformMat4("vw_matrix", mViewMatrix);
-            shader.setUniformMat4("ml_matrix", mModelMatrix);
-            renderer2D.begin();
-        }
-
-        void SceneManager::end(const Shader &shader, Renderer2D &renderer2D) {
-            renderer2D.end();
-            renderer2D.flush();
-            shader.disable();
-        }
-
-        void SceneManager::initializeRenderer(const Shader &shader) {
-
-            auto program = shader.getProgram();
-
-            GLsizei stride = sizeof(components::TexturedVertex);
-            auto positionIndex = glGetAttribLocation(program, "position");
-            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
-            auto uvIndex = glGetAttribLocation(program, "uv");
-
-            if (positionIndex == -1 || samplerIDIndex == -1 || uvIndex == -1) {
-                throw std::runtime_error("Invalid attribute name.");
-            }
-
-            auto position = std::make_unique<const components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
-                                                 static_cast<const GLvoid *>(nullptr)});
-            auto samplerID = std::make_unique<const components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE, stride,
-                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                                                           components::TexturedVertex::samplerID))});
-            auto uv = std::make_unique<const components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
-                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                                                           components::TexturedVertex::uv))});
-
-            auto bufferStructures = common::BufferStructures();
-            bufferStructures.push_back(std::move(position));
-            bufferStructures.push_back(std::move(samplerID));
-            bufferStructures.push_back(std::move(uv));
-
-            mRenderer2D = std::make_unique<BatchRenderer2D>(mMaxSpriteCount,
-                                                            // TODO: This is a problem
-                                                            common::maxNumTextureSamplers,
-                                                            sizeof(components::TexturedVertex),
-                                                            std::move(bufferStructures));
-
-            shader.enable();
-            shader.setUniformiv("samplers", mRenderer2D->generateSamplerIDs());
-            shader.disable();
         }
     }
 }

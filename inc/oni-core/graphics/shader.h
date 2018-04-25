@@ -25,6 +25,10 @@ namespace oni {
 
             ~Shader() { glDeleteProgram(mProgram); };
 
+            Shader(const Shader &) = delete;
+
+            Shader &operator=(Shader &) = delete;
+
             /*
              * Have to call this before using a shader.
              */

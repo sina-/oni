@@ -5,6 +5,7 @@
 // TODO: It sucks that I have to include shader.h just because scene-manager forward declares it and includes it in
 // the scene-manager.cpp only.
 #include <oni-core/graphics/shader.h>
+#include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/graphics/scene-manager.h>
 #include <oni-core/physics/translation.h>
@@ -26,6 +27,27 @@ namespace oni {
             return entity;
         }
 
+        common::entityID createSpriteStaticEntity(BasicEntityRepo &basicEntityRepo,
+                                                  graphics::SceneManager &sceneManager,
+                                                  const math::vec4 &color,
+                                                  const math::vec2 &size,
+                                                  const math::vec3 &positionInWorld) {
+            auto shaderID = sceneManager.requestShaderID(components::VertexType::COLOR_VERTEX);
+            auto entity = basicEntityRepo.createEntity(entities::SpriteStatic, shaderID);
+            auto entityAppearance = components::Appearance {color};
+
+            auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
+            auto entityPlacementWorld = entityPlacementLocal;
+
+            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
+
+            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
+            basicEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
+            basicEntityRepo.setEntityAppearance(entity, entityAppearance);
+
+            return entity;
+        }
+
         common::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::ShaderID shaderID,
                                               const components::Texture &entityTexture, const math::vec3 &position,
                                               const math::vec2 &size) {
@@ -39,18 +61,15 @@ namespace oni {
             return entity;
         }
 
-        common::entityID createTexturedEntityStatic(BasicEntityRepo &basicEntityRepo,
+        common::entityID createTexturedStaticEntity(BasicEntityRepo &basicEntityRepo,
                                                     graphics::SceneManager &sceneManager,
                                                     const components::Texture &entityTexture,
-                                                    const math::vec3 &position,
                                                     const math::vec2 &size,
-                                                    const math::vec3 &positionInWorld,
-                                                    std::string &&vertShader,
-                                                    std::string &&fragShader) {
-            auto shaderID = sceneManager.requestShader(std::move(vertShader), std::move(fragShader));
+                                                    const math::vec3 &positionInWorld) {
+            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
             auto entity = basicEntityRepo.createEntity(entities::TexturedSpriteStatic, shaderID);
 
-            auto entityPlacementLocal = components::Placement::fromPositionAndSize(position, size, 0.0f);
+            auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
             auto entityPlacementWorld = entityPlacementLocal;
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
@@ -71,7 +90,7 @@ namespace oni {
             return textEntity;
         }
 
-        common::entityID createTextEntityStatic(BasicEntityRepo &basicEntityRepo,
+        common::entityID createTextStaticEntity(BasicEntityRepo &basicEntityRepo,
                                                 graphics::SceneManager &sceneManager,
                                                 graphics::FontManager &fontManager,
                                                 const std::string &text,
@@ -79,11 +98,11 @@ namespace oni {
                                                 const math::vec2 &size,
                                                 const math::vec3 &positionInWorld,
                                                 std::string &&vertShader,
-                                                std::string &&fragShader){
+                                                std::string &&fragShader) {
 
             // TODO: Text does not have a local and world Placement, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
-            auto shaderID = sceneManager.requestShader(std::move(vertShader), std::move(fragShader));
+            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
             auto textEntity = basicEntityRepo.createEntity(entities::TextSprite, shaderID);
             basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
 

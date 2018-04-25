@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <oni-core/components/visual.h>
+#include <oni-core/components/buffer.h>
 #include <oni-core/math/mat4.h>
 
 namespace oni {
@@ -13,7 +14,9 @@ namespace oni {
 
     namespace graphics {
         class Shader;
+
         class BatchRenderer2D;
+
         class Renderer2D;
 
         class SceneManager {
@@ -22,7 +25,7 @@ namespace oni {
 
             ~SceneManager();
 
-            components::ShaderID requestShader(std::string &&vertShader, std::string &&fragShader);
+            components::ShaderID requestShaderID(const components::VertexType &shaderType);
 
             void render(const entities::BasicEntityRepo &entityRepo);
 
@@ -32,23 +35,25 @@ namespace oni {
             void lookAt(float x, float y, float distance);
 
         private:
-            void begin(const Shader& shader, Renderer2D& renderer2D);
+            void begin(const Shader &shader, Renderer2D &renderer2D);
 
             void end(const Shader &shader, Renderer2D &renderer2D);
 
-            void initializeRenderer(const Shader& shader);
+            void initializeTextureRenderer(const Shader &shader);
+
+            void initializeColorRenderer(const Shader &shader);
 
         private:
-            std::map<std::string, components::ShaderID> mShaderCache{};
+            // Users of this class request a renderer for a given VertexType and we keep a 1-to-1 mapping between
+            // VertexType and Shader+Renderer associated with that type.
+            std::map<components::VertexType, components::ShaderID> mShaderCache{};
             std::map<components::ShaderID, std::unique_ptr<Shader>> mShaders{};
-
-            std::unique_ptr<BatchRenderer2D> mRenderer2D;
+            std::map<components::ShaderID, std::unique_ptr<BatchRenderer2D>> mRenderers2D{};
 
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            // 64k vertices
             const unsigned int mMaxSpriteCount{0};
 
         };

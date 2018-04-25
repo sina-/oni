@@ -166,7 +166,6 @@ namespace oni {
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
             auto program = shader->getProgram();
 
-            GLsizei stride = sizeof(components::ColoredVertex);
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
 
@@ -174,6 +173,7 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
+            GLsizei stride = sizeof(components::ColoredVertex);
             auto position = std::make_unique<const components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
                                                  stride,
@@ -206,7 +206,6 @@ namespace oni {
             auto shader = std::make_unique<graphics::Shader>(std::move(vertexShader), std::move(fragmentShader));
             auto program = shader->getProgram();
 
-            GLsizei stride = sizeof(components::TexturedVertex);
             auto positionIndex = glGetAttribLocation(program, "position");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
             auto uvIndex = glGetAttribLocation(program, "uv");
@@ -215,6 +214,7 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
+            GLsizei stride = sizeof(components::TexturedVertex);
             auto position = std::make_unique<const components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
                                                  static_cast<const GLvoid *>(nullptr)});

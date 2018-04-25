@@ -4,11 +4,13 @@
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/common/consts.h>
+#include <oni-core/io/output.h>
 
 namespace oni {
     namespace graphics {
 
         SceneManager::SceneManager(const components::ScreenBounds &screenBounds) :
+        // 64k vertices
                 mMaxSpriteCount(16 * 1000) {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
@@ -16,41 +18,73 @@ namespace oni {
             mViewMatrix = math::mat4::identity();
 
             mModelMatrix = math::mat4::identity();
+
+            // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
+            // I am forcing the users to only depend on built-in shaders. I should think of a better way
+            // to provide flexibility in type of shaders users can define and expect to just work by having buffer
+            // structure and what not set up automatically.
+            auto textureShader = std::make_unique<graphics::Shader>("resources/shaders/texture.vert",
+                                                                    "resources/shaders/texture.frag");
+            initializeTextureRenderer(*textureShader);
+            mShaderCache.emplace(components::VertexType::TEXTURE_VERTEX, textureShader->getProgram());
+            mShaders.emplace(textureShader->getProgram(), std::move(textureShader));
+            // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
+            // shader prior to render series of calls. Maybe shader should be built into the renderer.
+
+            auto colorShader = std::make_unique<graphics::Shader>("resources/shaders/basic.vert",
+                                                                  "resources/shaders/basic.frag");
+            initializeColorRenderer(*colorShader);
+            mShaderCache.emplace(components::VertexType::COLOR_VERTEX, colorShader->getProgram());
+            mShaders.emplace(colorShader->getProgram(), std::move(colorShader));
         }
 
         SceneManager::~SceneManager() = default;
 
-        components::ShaderID SceneManager::requestShader(std::string &&vertShader,
-                                                         std::string &&fragShader) {
-            auto shaderKey = vertShader + fragShader;
-            auto search = mShaderCache.find(shaderKey);
-            if (search == mShaderCache.end()) {
-                auto shader = std::make_unique<graphics::Shader>(std::move(vertShader), std::move(fragShader));
-
-                // TODO: Either rename this function or move this initialization somewhere else as it is really
-                // awkward and unexpected to get a renderer created when asking for a shader.
-                // Probably in the future when I have a better grasp of what kind of renderers I need and how they
-                // are created to be used by SceneManager in a smarter way I can make a better decision as to where
-                // to move this call.
-                // TODO: What kind of renderer?
-                // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
-                // shader prior to render series of calls. Maybe shader should be built into the renderer.
-                initializeRenderer(*shader);
-
-                auto shaderID = shader->getProgram();
-                mShaderCache.emplace(shaderKey, shaderID);
-                mShaders.emplace(shaderID, std::move(shader));
-                return shaderID;
-            } else {
-                return search->second;
-            }
+        // TODO: What I really need to send back to the users is a renderer ID, which could be under the hood just
+        // program ID, but the users don't really need to know about shader. Rename all the references to renderer ID.
+        components::ShaderID SceneManager::requestShaderID(const components::VertexType &vertexType) {
+            auto shaderID = mShaderCache.at(vertexType);
+            // Just to make sure there is a renderer that can take care of this type of shader.
+            mRenderers2D.at(shaderID);
+            return shaderID;
         }
 
-        void SceneManager::initializeRenderer(const Shader &shader) {
-
+        void SceneManager::initializeColorRenderer(const Shader &shader) {
             auto program = shader.getProgram();
 
-            GLsizei stride = sizeof(components::TexturedVertex);
+            auto positionIndex = glGetAttribLocation(program, "position");
+            auto colorIndex = glGetAttribLocation(program, "color");
+
+            if (positionIndex == -1 || colorIndex == -1) {
+                throw std::runtime_error("Invalid attribute name.");
+            }
+
+            GLsizei stride = sizeof(components::ColoredVertex);
+            auto position = std::make_unique<const components::BufferStructure>
+                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
+                                                 stride,
+                                                 static_cast<const GLvoid *>(nullptr)});
+            auto color = std::make_unique<const components::BufferStructure>
+                    (components::BufferStructure{static_cast<GLuint>(colorIndex), 4, GL_FLOAT, GL_TRUE, stride,
+                                                 reinterpret_cast<const GLvoid *>(offsetof(components::ColoredVertex,
+                                                                                           components::ColoredVertex::color))});
+
+            auto bufferStructures = common::BufferStructures();
+            bufferStructures.push_back(std::move(position));
+            bufferStructures.push_back(std::move(color));
+
+            auto renderer = std::make_unique<BatchRenderer2D>(
+                    mMaxSpriteCount,
+                    common::maxNumTextureSamplers,
+                    sizeof(components::ColoredVertex),
+                    std::move(bufferStructures));
+
+            mRenderers2D.emplace(program, std::move(renderer));
+        }
+
+        void SceneManager::initializeTextureRenderer(const Shader &shader) {
+            auto program = shader.getProgram();
+
             auto positionIndex = glGetAttribLocation(program, "position");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
             auto uvIndex = glGetAttribLocation(program, "uv");
@@ -59,6 +93,7 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
+            GLsizei stride = sizeof(components::TexturedVertex);
             auto position = std::make_unique<const components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
                                                  static_cast<const GLvoid *>(nullptr)});
@@ -76,15 +111,18 @@ namespace oni {
             bufferStructures.push_back(std::move(samplerID));
             bufferStructures.push_back(std::move(uv));
 
-            mRenderer2D = std::make_unique<BatchRenderer2D>(mMaxSpriteCount,
+            auto renderer = std::make_unique<BatchRenderer2D>(
+                    mMaxSpriteCount,
                     // TODO: This is a problem
-                                                            common::maxNumTextureSamplers,
-                                                            sizeof(components::TexturedVertex),
-                                                            std::move(bufferStructures));
+                    common::maxNumTextureSamplers,
+                    sizeof(components::TexturedVertex),
+                    std::move(bufferStructures));
 
             shader.enable();
-            shader.setUniformiv("samplers", mRenderer2D->generateSamplerIDs());
+            shader.setUniformiv("samplers", renderer->generateSamplerIDs());
             shader.disable();
+
+            mRenderers2D.emplace(program, std::move(renderer));
         }
 
         void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D) {
@@ -106,10 +144,10 @@ namespace oni {
         void SceneManager::render(const entities::BasicEntityRepo &entityRepo) {
             // TODO: It makes more sense to iterate over renderers when shader and renderer are merged.
             for (auto const &shaderPair : mShaders) {
-
                 auto shader = shaderPair.second.get();
                 auto shaderID = shaderPair.first;
-                begin(*shader, *mRenderer2D);
+                const auto &renderer = mRenderers2D.at(shaderID);
+                begin(*shader, *renderer);
 
                 unsigned long entityIndex = 0;
 
@@ -120,11 +158,26 @@ namespace oni {
                         auto placement = entityRepo.getEntityPlacementWorld(entityIndex);
                         const auto &texture = entityRepo.getEntityTexture(entityIndex);
 
-                        mRenderer2D->submit(placement, texture);
+                        renderer->submit(placement, texture);
+                    } else if ((entityRepo.getEntityShaderID(entityIndex) == shaderID &&
+                                (entity & entities::SpriteStatic) == entities::SpriteStatic)) {
+
+                        auto placement = entityRepo.getEntityPlacementWorld(entityIndex);
+                        const auto &appearance = entityRepo.getEntityAppearance(entityIndex);
+
+                        renderer->submit(placement, appearance);
                     }
                     ++entityIndex;
+
+                    // TODO: This is a dumb way to handle BatchRenderer's limit. It could be good enough for a long
+                    // time before it becomes and issue. Something to keep in mind for future improvements.
+                    if (entityIndex >= mMaxSpriteCount) {
+                        io::printl("WARNING: Max number of sprites reached. Flushing the current pending sprites!");
+                        end(*shader, *renderer);
+                        begin(*shader, *renderer);
+                    }
                 }
-                end(*shader, *mRenderer2D);
+                end(*shader, *renderer);
             }
         }
 

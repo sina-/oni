@@ -27,13 +27,21 @@ namespace oni {
 
             math::vec3 getPosition() const { return vertexA; }
 
-            static Placement fromPositionAndSize(const math::vec3 position, const math::vec2 size,
+            static Placement fromPositionAndSize(const math::vec3 &position, const math::vec2 &size,
                                                  const float orientation) {
                 return Placement{
                         math::vec3{position.x, position.y, position.z},
                         math::vec3{position.x, position.y + size.y, position.z},
                         math::vec3{position.x + size.x, position.y + size.y, position.z},
                         math::vec3{position.x + size.x, position.y, position.z}, orientation};
+            }
+
+            static Placement fromSize(const math::vec2 &size, const float orientation) {
+                return Placement{
+                        math::vec3{0.0f, 0.0f, 0.0f},
+                        math::vec3{0.0f, size.y, 0.0f},
+                        math::vec3{size.x, size.y, 0.0f},
+                        math::vec3{size.x, 0.0f, 0.0f}, orientation};
             }
         };
 

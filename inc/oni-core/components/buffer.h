@@ -37,5 +37,10 @@ namespace oni {
             const GLvoid *offset{nullptr};
         };
 
+        enum VertexType {
+            COLOR_VERTEX,
+            TEXTURE_VERTEX
+        };
+
     }
 }

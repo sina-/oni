@@ -70,6 +70,8 @@ target_link_libraries(oni-core-graphics
         ${FREETYPE_LIBRARY}
         ${OPENGL_LIBRARY}
         ${ANT_TWEAK_BAR}
-        oni-core-buffers)
+        oni-core-buffers
+        oni-core-io
+        )
 
-add_dependencies(oni-core-graphics oni-core-buffers)
+add_dependencies(oni-core-graphics oni-core-buffers oni-core-io)

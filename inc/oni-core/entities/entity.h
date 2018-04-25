@@ -7,6 +7,8 @@ namespace oni {
 
         const static components::Mask Sprite = components::Mask().set(components::PLACEMENT).set(
                 components::APPEARANCE);
+        const static components::Mask SpriteStatic = components::Mask().set(components::PLACEMENT).set(
+                components::APPEARANCE).set(components::STATIC);
         const static components::Mask DynamicSprite = components::Mask().set(components::PLACEMENT).set(
                 components::APPEARANCE).set(components::DYNAMIC);
         const static components::Mask TexturedSprite = components::Mask().set(components::PLACEMENT)

@@ -19,6 +19,8 @@ namespace oni {
 
             components::Car &getCar(const common::entityID &id);
 
+            const components::Car &getCar(const common::entityID &id) const;
+
             const components::CarConfig &getCarConfig(const common::entityID &id) const;
 
         private:

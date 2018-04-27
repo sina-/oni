@@ -5,21 +5,40 @@
 namespace oni {
     namespace entities {
 
-        const static components::Mask Sprite = components::Mask().set(components::PLACEMENT).set(
+        const static auto Sprite = components::Mask().set(components::PLACEMENT).set(
                 components::APPEARANCE);
-        const static components::Mask SpriteStatic = components::Mask().set(components::PLACEMENT).set(
+        const static auto SpriteStatic = components::Mask().set(components::PLACEMENT).set(
                 components::APPEARANCE).set(components::STATIC);
-        const static components::Mask DynamicSprite = components::Mask().set(components::PLACEMENT).set(
-                components::APPEARANCE).set(components::DYNAMIC);
-        const static components::Mask TexturedSprite = components::Mask().set(components::PLACEMENT)
+        const static auto SpriteDynamic = components::Mask().set(components::PLACEMENT).set(
+                components::APPEARANCE).set(components::VEHICLE_DYNAMICS);
+        const static auto SpriteTextured = components::Mask().set(components::PLACEMENT)
                 .set(components::TEXTURE);
-        const static components::Mask TexturedSpriteStatic = components::Mask().set(components::PLACEMENT)
+        const static auto SpriteTexturedStatic = components::Mask().set(components::PLACEMENT)
                 .set(components::TEXTURE).set(components::STATIC);
-        const static components::Mask DynamicTexturedSprite = components::Mask().set(components::PLACEMENT)
+        const static auto SpriteTexturedDynamic = components::Mask().set(components::PLACEMENT)
                 .set(components::TEXTURE).set(components::DYNAMIC);
+        const static auto VehicleTextured = components::Mask().set(components::PLACEMENT)
+                .set(components::TEXTURE).set(components::VEHICLE_DYNAMICS);
         // TODO: add color
-        const static components::Mask TextSprite = components::Mask().set(components::TEXT);
-        const static components::Mask TextSpriteStatic = components::Mask().set(components::TEXT).set(
-                components::STATIC);
+        const static auto SpriteText = components::Mask().set(components::TEXT);
+        const static auto SpriteTextStatic = components::Mask().set(components::TEXT).set(components::STATIC);
+
+        bool isSprite(const components::Mask &mask);
+
+        bool isSpriteStatic(const components::Mask &mask);
+
+        bool isSpriteDynamic(const components::Mask &mask);
+
+        bool isSpriteTextured(const components::Mask &mask);
+
+        bool isSpriteTexturedStatic(const components::Mask &mask);
+
+        bool isSpriteTexturedDynamic(const components::Mask &mask);
+
+        bool isVehicleTextured(const components::Mask &mask);
+
+        bool isSpriteText(const components::Mask &mask);
+
+        bool isSpriteTextStatic(const components::Mask &mask);
     }
 }

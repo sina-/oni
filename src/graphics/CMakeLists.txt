@@ -3,35 +3,35 @@ include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
 
 # sudo apt install libfreeimage3 libfreeimage-dev
 find_library(FREEIMAGE_LIBRARY NAMES freeimage)
-if(FREEIMAGE_LIBRARY)
+if (FREEIMAGE_LIBRARY)
     message("Found FreeImage at: ${FREEIMAGE_LIBRARY}")
-else()
+else ()
     message(FATAL_ERROR "Could not find FreeImage")
-endif()
+endif ()
 
 find_path(FREEIMAGE_INCLUDE_DIRS NAMES FreeImage.h)
-if(FREEIMAGE_INCLUDE_DIRS)
+if (FREEIMAGE_INCLUDE_DIRS)
     message("Found FreeImage header at: ${FREEIMAGE_INCLUDE_DIRS}")
     include_directories(${FREEIMAGE_INCLUDE_DIRS})
-else()
+else ()
     message(FATAL_ERROR "Could not find FreeImage header")
-endif()
+endif ()
 
 #  sudo apt install libfreetype6 libfreetype6-dev
 find_library(FREETYPE_LIBRARY NAMES freetype)
-if(FREETYPE_LIBRARY)
+if (FREETYPE_LIBRARY)
     message("Found FreeType at: ${FREETYPE_LIBRARY}")
-else()
+else ()
     message(FATAL_ERROR "Could not find FreeType")
-endif()
+endif ()
 
 find_path(FREETYPE_INCLUDE_DIRS NAMES ft2build.h PATH_SUFFIXES include/freetype2 include)
-if(FREETYPE_INCLUDE_DIRS)
+if (FREETYPE_INCLUDE_DIRS)
     message("Found FreeType header at: ${FREETYPE_INCLUDE_DIRS}")
     include_directories(${FREETYPE_INCLUDE_DIRS})
-else()
+else ()
     message(FATAL_ERROR "Could not find FreeType header")
-endif()
+endif ()
 
 include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
 find_library(FREETYPE_GL freetype-gl PATHS ${oni_SOURCE_DIR}/lib/freetype-gl/bin)
@@ -72,6 +72,7 @@ target_link_libraries(oni-core-graphics
         ${ANT_TWEAK_BAR}
         oni-core-buffers
         oni-core-io
+        oni-core-entities
         )
 
 add_dependencies(oni-core-graphics oni-core-buffers oni-core-io)

@@ -1,8 +1,5 @@
 #include <oni-core/physics/translation.h>
 
-#include <oni-core/math/vec2.h>
-#include <oni-core/math/vec3.h>
-
 namespace oni {
     namespace physics {
 

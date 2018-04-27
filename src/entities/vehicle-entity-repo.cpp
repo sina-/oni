@@ -4,7 +4,7 @@ namespace oni {
     namespace entities {
         VehicleEntityRepo::VehicleEntityRepo() = default;
 
-        VehicleEntityRepo::~VehicleEntityRepo()  = default;
+        VehicleEntityRepo::~VehicleEntityRepo() = default;
 
         void VehicleEntityRepo::setCar(const common::entityID &id, const components::Car &car) {
             mCars[id] = car;
@@ -15,6 +15,10 @@ namespace oni {
         }
 
         components::Car &VehicleEntityRepo::getCar(const common::entityID &id) {
+            return mCars[id];
+        }
+
+        const components::Car &VehicleEntityRepo::getCar(const common::entityID &id) const {
             return mCars[id];
         }
 

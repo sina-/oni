@@ -57,7 +57,7 @@ namespace oni {
 
             for (const auto &entity: basicEntityRepo.getEntities()) {
                 if ((basicEntityRepo.getEntityShaderID(entityIndex) == shaderID &&
-                     (entity & entities::TexturedSprite) == entities::TexturedSprite)) {
+                     (entity & entities::SpriteTextured) == entities::SpriteTextured)) {
 
                     auto placement = basicEntityRepo.getEntityPlacementLocal(entityIndex);
                     const auto &texture = basicEntityRepo.getEntityTexture(entityIndex);
@@ -80,7 +80,7 @@ namespace oni {
 
             for (const auto &entity: basicEntityRepo.getEntities()) {
                 if ((basicEntityRepo.getEntityShaderID(entityIndex) == shaderID &&
-                     (entity & entities::TextSprite) == entities::TextSprite)) {
+                     (entity & entities::SpriteText) == entities::SpriteText)) {
 
                     mRenderer2D->submit(basicEntityRepo.getEntityText(entityIndex));
                 }

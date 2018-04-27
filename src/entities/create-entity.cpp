@@ -48,14 +48,21 @@ namespace oni {
             return entity;
         }
 
-        common::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::ShaderID shaderID,
-                                              const components::Texture &entityTexture, const math::vec3 &position,
-                                              const math::vec2 &size) {
-            auto entity = basicEntityRepo.createEntity(entities::TexturedSprite, shaderID);
+        common::entityID createTexturedDynamicEntity(BasicEntityRepo &basicEntityRepo,
+                                                     graphics::SceneManager &sceneManager,
+                                                     const components::Texture &entityTexture,
+                                                     const math::vec2 &size,
+                                                     const math::vec3 &positionInWorld) {
+            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
+            auto entity = basicEntityRepo.createEntity(entities::SpriteTexturedDynamic, shaderID);
 
-            auto entityPlacement = components::Placement::fromPositionAndSize(position, size, 0.0f);
+            auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
+            auto entityPlacementWorld = entityPlacementLocal;
 
-            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacement);
+            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
+
+            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
+            basicEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
             basicEntityRepo.setEntityTexture(entity, entityTexture);
 
             return entity;
@@ -67,7 +74,7 @@ namespace oni {
                                                     const math::vec2 &size,
                                                     const math::vec3 &positionInWorld) {
             auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto entity = basicEntityRepo.createEntity(entities::TexturedSpriteStatic, shaderID);
+            auto entity = basicEntityRepo.createEntity(entities::SpriteTexturedStatic, shaderID);
 
             auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
             auto entityPlacementWorld = entityPlacementLocal;
@@ -84,7 +91,7 @@ namespace oni {
         common::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
                                           components::ShaderID shaderID, const std::string &text,
                                           const math::vec3 &position) {
-            auto textEntity = basicEntityRepo.createEntity(entities::TextSprite, shaderID);
+            auto textEntity = basicEntityRepo.createEntity(entities::SpriteText, shaderID);
             basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
 
             return textEntity;
@@ -103,17 +110,18 @@ namespace oni {
             // TODO: Text does not have a local and world Placement, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
             auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto textEntity = basicEntityRepo.createEntity(entities::TextSprite, shaderID);
+            auto textEntity = basicEntityRepo.createEntity(entities::SpriteText, shaderID);
             basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
 
             return textEntity;
 
         }
 
-        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::ShaderID shaderID,
+        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, graphics::SceneManager &sceneManager,
                                              const components::Texture &entityTexture) {
             auto carConfig = components::CarConfig();
-            auto entity = vehicleEntityRepo.createEntity(entities::DynamicTexturedSprite, shaderID);
+            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
+            auto entity = vehicleEntityRepo.createEntity(entities::VehicleTextured, shaderID);
 
             // TODO: this should be defined by the user of this function
             carConfig.cgToRear = 1.25f;
@@ -140,14 +148,17 @@ namespace oni {
 
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
-            auto entityPlacement = components::Placement::fromPositionAndSize(
+            auto entityPlacementLocal = components::Placement::fromSize(
+                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)}, 0.0f);
+            auto entityPlacementWorld = components::Placement::fromPositionAndSize(
                     math::vec3{static_cast<float> (carX), static_cast<float> (carY), 1.0f},
                     math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)}, 0.0f);
             auto car = components::Car(carConfig);
             vehicleEntityRepo.setCar(entity, car);
             vehicleEntityRepo.setCarConfig(entity, carConfig);
 
-            vehicleEntityRepo.setEntityPlacementLocal(entity, entityPlacement);
+            vehicleEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
+            vehicleEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
             vehicleEntityRepo.setEntityTexture(entity, entityTexture);
 
             return entity;

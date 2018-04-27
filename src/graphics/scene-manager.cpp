@@ -5,6 +5,8 @@
 #include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/io/output.h>
+#include <oni-core/physics/translation.h>
+#include <oni-core/entities/vehicle-entity-repo.h>
 
 namespace oni {
     namespace graphics {
@@ -152,20 +154,73 @@ namespace oni {
                 unsigned long entityIndex = 0;
 
                 for (const auto &entity: entityRepo.getEntities()) {
-                    if ((entityRepo.getEntityShaderID(entityIndex) == shaderID &&
-                         (entity & entities::TexturedSpriteStatic) == entities::TexturedSpriteStatic)) {
+                    auto entityShaderID = entityRepo.getEntityShaderID(entityIndex);
+                    if (entityShaderID == shaderID) {
+                        if (entities::isSpriteTexturedStatic(entity)) {
+                            const auto &placement = entityRepo.getEntityPlacementWorld(entityIndex);
+                            const auto &texture = entityRepo.getEntityTexture(entityIndex);
+                            renderer->submit(placement, texture);
+                        } else if (entities::isSpriteStatic(entity)) {
+                            const auto &placement = entityRepo.getEntityPlacementWorld(entityIndex);
+                            const auto &appearance = entityRepo.getEntityAppearance(entityIndex);
+                            renderer->submit(placement, appearance);
+                        } else if (entities::isVehicleTextured(entity)) {
+                            // TODO: We know that vehicle entities are stored in entity repositories of type
+                            // VehicleEntityRepo, so the cast is fine. But I rather have the design that does not
+                            // require this cast. One way to do that is to define:
+                            // void SceneManager::render(const entities::VehicleEntityRepo &entityRepo);
+                            // and call it separately.
+                            const auto &vehicleRepo = dynamic_cast<const entities::VehicleEntityRepo &>(entityRepo);
+                            const auto heading = vehicleRepo.getCar(entityIndex).heading;
+                            const auto &placement = vehicleRepo.getEntityPlacementWorld(entityIndex);
+                            const auto &texture = vehicleRepo.getEntityTexture(entityIndex);
 
-                        auto placement = entityRepo.getEntityPlacementWorld(entityIndex);
-                        const auto &texture = entityRepo.getEntityTexture(entityIndex);
+                            // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
+                            // Maybe its faster to just reset the view matrix and make a new
+                            // draw call instead of this shit.
+                            const auto centerX = (placement.vertexA.x + placement.vertexD.x) / 2.0f;
+                            const auto centerY = (placement.vertexA.y + placement.vertexB.y) / 2.0f;
 
-                        renderer->submit(placement, texture);
-                    } else if ((entityRepo.getEntityShaderID(entityIndex) == shaderID &&
-                                (entity & entities::SpriteStatic) == entities::SpriteStatic)) {
+                            const auto Ax = placement.vertexA.x - centerX;
+                            const auto Bx = placement.vertexB.x - centerX;
+                            const auto Cx = placement.vertexC.x - centerX;
+                            const auto Dx = placement.vertexD.x - centerX;
 
-                        auto placement = entityRepo.getEntityPlacementWorld(entityIndex);
-                        const auto &appearance = entityRepo.getEntityAppearance(entityIndex);
+                            const auto Ay = placement.vertexA.y - centerY;
+                            const auto By = placement.vertexB.y - centerY;
+                            const auto Cy = placement.vertexC.y - centerY;
+                            const auto Dy = placement.vertexD.y - centerY;
 
-                        renderer->submit(placement, appearance);
+                            const auto cs = std::cos(heading);
+                            const auto sn = std::sin(heading);
+
+                            const auto Ax_ = Ax * cs - Ay * sn + centerX;
+                            const auto Bx_ = Bx * cs - By * sn + centerX;
+                            const auto Cx_ = Cx * cs - Cy * sn + centerX;
+                            const auto Dx_ = Dx * cs - Dy * sn + centerX;
+
+                            const auto Ay_ = Ax * sn + Ay * cs + centerY;
+                            const auto By_ = Bx * sn + By * cs + centerY;
+                            const auto Cy_ = Cx * sn + Cy * cs + centerY;
+                            const auto Dy_ = Dx * sn + Dy * cs + centerY;
+
+                            const auto A = math::vec3{Ax_, Ay_, 0.0f};
+                            const auto B = math::vec3{Bx_, By_, 0.0f};
+                            const auto C = math::vec3{Cx_, Cy_, 0.0f};
+                            const auto D = math::vec3{Dx_, Dy_, 0.0f};
+
+                            auto placementFinal = components::Placement{A, B, C, D};
+
+                            const auto &positionInWorld = vehicleRepo.getCar(entityIndex).position;
+
+                            physics::Translation::localToWorld(math::vec3{positionInWorld.x, positionInWorld.y, 0.0f},
+                                                               placementFinal);
+
+                            renderer->submit(placementFinal, texture);
+                        }
+                        else if(entities::isSpriteTexturedDynamic(entity)){
+                            // TODO: Render these bad boys.
+                        }
                     }
                     ++entityIndex;
 

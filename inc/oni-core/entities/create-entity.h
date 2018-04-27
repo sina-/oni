@@ -20,17 +20,20 @@ namespace oni {
                                             const math::vec4 &color, const math::vec3 &position,
                                             const math::vec2 &size);
 
-        common::entityID createSpriteStaticEntity(BasicEntityRepo &basicEntityRepo, graphics::SceneManager &sceneManager,
-                                                          const math::vec4 &color, const math::vec2 &size,
-                                                          const math::vec3 &positionInWorld);
+        common::entityID createSpriteStaticEntity(BasicEntityRepo &basicEntityRepo,
+                                                  graphics::SceneManager &sceneManager,
+                                                  const math::vec4 &color, const math::vec2 &size,
+                                                  const math::vec3 &positionInWorld);
 
-        common::entityID createTexturedEntity(BasicEntityRepo &basicEntityRepo, components::ShaderID shaderID,
-                                              const components::Texture &entityTexture, const math::vec3 &position,
-                                              const math::vec2 &size);
+        common::entityID createTexturedDynamicEntity(BasicEntityRepo &basicEntityRepo,
+                                                     graphics::SceneManager &sceneManager,
+                                                     const components::Texture &entityTexture, const math::vec2 &size,
+                                                     const math::vec3 &positionInWorld);
 
-        common::entityID createTexturedStaticEntity(BasicEntityRepo &basicEntityRepo, graphics::SceneManager &sceneManager,
-                                                            const components::Texture &entityTexture, const math::vec2 &size,
-                                                            const math::vec3 &positionInWorld);
+        common::entityID createTexturedStaticEntity(BasicEntityRepo &basicEntityRepo,
+                                                    graphics::SceneManager &sceneManager,
+                                                    const components::Texture &entityTexture, const math::vec2 &size,
+                                                    const math::vec3 &positionInWorld);
 
         common::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
                                           components::ShaderID shaderID, const std::string &text,
@@ -46,7 +49,7 @@ namespace oni {
                                                 std::string &&vertShader,
                                                 std::string &&fragShader);
 
-        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, components::ShaderID shaderID,
+        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, graphics::SceneManager &sceneManager,
                                              const components::Texture &entityTexture);
     }
 }

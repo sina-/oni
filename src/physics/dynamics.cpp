@@ -11,7 +11,7 @@ namespace oni {
             unsigned long entityIndex = 0;
 
             for (const auto &entity: vehicle.getEntities()) {
-                if ((entity & components::DynamicComponent) == components::DynamicComponent
+                if ((entity & components::VehicleDynamicsComponent) == components::VehicleDynamicsComponent
                     && (entity & components::PlacementComponent) == components::PlacementComponent) {
                     auto car = vehicle.getCar(entityIndex);
                     const auto &carConfig = vehicle.getCarConfig(entityIndex);

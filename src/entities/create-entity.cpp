@@ -1,7 +1,8 @@
+#include <entt/entt.hpp>
+
 #include <oni-core/entities/create-entity.h>
-#include <oni-core/entities/basic-entity-repo.h>
-#include <oni-core/entities/vehicle-entity-repo.h>
 #include <oni-core/graphics/font-manager.h>
+
 // TODO: It sucks that I have to include shader.h just because scene-manager forward declares it and includes it in
 // the scene-manager.cpp only.
 #include <oni-core/graphics/shader.h>
@@ -13,115 +14,125 @@
 namespace oni {
     namespace entities {
 
-        common::entityID createSpriteEntity(BasicEntityRepo &basicEntityRepo, components::ShaderID shaderID,
-                                            const math::vec4 &color,
-                                            const math::vec3 &position, const math::vec2 &size) {
-            auto entity = basicEntityRepo.createEntity(entities::Sprite, shaderID);
+        entityID createSpriteEntity(entt::DefaultRegistry &registry,
+                                    graphics::SceneManager &sceneManager,
+                                    const math::vec4 &color,
+                                    const math::vec2 &size,
+                                    const math::vec3 &positionInWorld) {
+            auto entity = registry.create();
 
-            auto entityPlacement = components::Placement::fromPositionAndSize(position, size, 0.0f);
-            components::Appearance entityAppearance{color};
-
-            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacement);
-            basicEntityRepo.setEntityAppearance(entity, entityAppearance);
-
-            return entity;
-        }
-
-        common::entityID createSpriteStaticEntity(BasicEntityRepo &basicEntityRepo,
-                                                  graphics::SceneManager &sceneManager,
-                                                  const math::vec4 &color,
-                                                  const math::vec2 &size,
-                                                  const math::vec3 &positionInWorld) {
             auto shaderID = sceneManager.requestShaderID(components::VertexType::COLOR_VERTEX);
-            auto entity = basicEntityRepo.createEntity(entities::SpriteStatic, shaderID);
+            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityAppearance = components::Appearance{color};
+
+            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
+
+            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Appearance>(entity, entityAppearance);
+            registry.assign<components::Renderer>(entity, shaderID);
+
+            return entity;
+        }
+
+        entityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
+                                          graphics::SceneManager &sceneManager,
+                                          const math::vec4 &color,
+                                          const math::vec2 &size,
+                                          const math::vec3 &positionInWorld) {
+            auto entity = registry.create();
+
+            auto shaderID = sceneManager.requestShaderID(components::VertexType::COLOR_VERTEX);
             auto entityAppearance = components::Appearance {color};
-
-            auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
-            auto entityPlacementWorld = entityPlacementLocal;
+            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityStatic = components::Static{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
-            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
-            basicEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
-            basicEntityRepo.setEntityAppearance(entity, entityAppearance);
+            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Appearance>(entity, entityAppearance);
+            registry.assign<components::Renderer>(entity, shaderID);
+            // TODO: Is this the correct usage of tags?
+            registry.assign<components::Static>(entity, entityStatic);
 
             return entity;
         }
 
-        common::entityID createTexturedDynamicEntity(BasicEntityRepo &basicEntityRepo,
-                                                     graphics::SceneManager &sceneManager,
-                                                     const components::Texture &entityTexture,
-                                                     const math::vec2 &size,
-                                                     const math::vec3 &positionInWorld) {
+        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
+                                             graphics::SceneManager &sceneManager,
+                                             const components::Texture &entityTexture,
+                                             const math::vec2 &size,
+                                             const math::vec3 &positionInWorld) {
+            auto entity = registry.create();
+
             auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto entity = basicEntityRepo.createEntity(entities::SpriteTexturedDynamic, shaderID);
-
-            auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
-            auto entityPlacementWorld = entityPlacementLocal;
+            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityDynamic = components::Dynamic{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
-            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
-            basicEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
-            basicEntityRepo.setEntityTexture(entity, entityTexture);
+            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Texture>(entity, entityTexture);
+            registry.assign<components::Renderer>(entity, shaderID);
+            registry.assign<components::Dynamic>(entity, entityDynamic);
 
             return entity;
         }
 
-        common::entityID createTexturedStaticEntity(BasicEntityRepo &basicEntityRepo,
-                                                    graphics::SceneManager &sceneManager,
-                                                    const components::Texture &entityTexture,
-                                                    const math::vec2 &size,
-                                                    const math::vec3 &positionInWorld) {
+        entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
+                                            graphics::SceneManager &sceneManager,
+                                            const components::Texture &entityTexture,
+                                            const math::vec2 &size,
+                                            const math::vec3 &positionInWorld) {
+            auto entity = registry.create();
             auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto entity = basicEntityRepo.createEntity(entities::SpriteTexturedStatic, shaderID);
-
-            auto entityPlacementLocal = components::Placement::fromSize(size, 0.0f);
-            auto entityPlacementWorld = entityPlacementLocal;
+            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityStatic = components::Static{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
-            basicEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
-            basicEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
-            basicEntityRepo.setEntityTexture(entity, entityTexture);
+            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Texture>(entity, entityTexture);
+            registry.assign<components::Renderer>(entity, shaderID);
+            registry.assign<components::Static>(entity, entityStatic);
 
             return entity;
         }
 
-        common::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
-                                          components::ShaderID shaderID, const std::string &text,
-                                          const math::vec3 &position) {
-            auto textEntity = basicEntityRepo.createEntity(entities::SpriteText, shaderID);
-            basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
+        entityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
+                                  components::ShaderID shaderID, const std::string &text,
+                                  const math::vec3 &position) {
+            // TODO: This is incompelte
+            auto entity = registry.create();
 
-            return textEntity;
+            return entity;
         }
 
-        common::entityID createTextStaticEntity(BasicEntityRepo &basicEntityRepo,
-                                                graphics::SceneManager &sceneManager,
-                                                graphics::FontManager &fontManager,
-                                                const std::string &text,
-                                                const math::vec3 &position,
-                                                const math::vec2 &size,
-                                                const math::vec3 &positionInWorld,
-                                                std::string &&vertShader,
-                                                std::string &&fragShader) {
+        entityID createTextStaticEntity(entt::DefaultRegistry &registry,
+                                        graphics::SceneManager &sceneManager,
+                                        graphics::FontManager &fontManager,
+                                        const std::string &text,
+                                        const math::vec3 &position,
+                                        const math::vec2 &size,
+                                        const math::vec3 &positionInWorld,
+                                        std::string &&vertShader,
+                                        std::string &&fragShader) {
 
+            auto entity = registry.create();
             // TODO: Text does not have a local and world Placement, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
             auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto textEntity = basicEntityRepo.createEntity(entities::SpriteText, shaderID);
-            basicEntityRepo.setEntityText(textEntity, fontManager.createTextFromString(text, position));
 
-            return textEntity;
+            return entity;
 
         }
 
-        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, graphics::SceneManager &sceneManager,
-                                             const components::Texture &entityTexture) {
+        entityID createVehicleEntity(entt::DefaultRegistry &registry, graphics::SceneManager &sceneManager,
+                                     const components::Texture &entityTexture) {
+            auto entity = registry.create();
+
             auto carConfig = components::CarConfig();
             auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto entity = vehicleEntityRepo.createEntity(entities::VehicleTextured, shaderID);
+            auto entityDynamic = components::Dynamic{};
 
             // TODO: this should be defined by the user of this function
             carConfig.cgToRear = 1.25f;
@@ -148,18 +159,17 @@ namespace oni {
 
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
-            auto entityPlacementLocal = components::Placement::fromSize(
-                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)}, 0.0f);
             auto entityPlacementWorld = components::Placement::fromPositionAndSize(
                     math::vec3{static_cast<float> (carX), static_cast<float> (carY), 1.0f},
                     math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)}, 0.0f);
             auto car = components::Car(carConfig);
-            vehicleEntityRepo.setCar(entity, car);
-            vehicleEntityRepo.setCarConfig(entity, carConfig);
 
-            vehicleEntityRepo.setEntityPlacementLocal(entity, entityPlacementLocal);
-            vehicleEntityRepo.setEntityPlacementWorld(entity, entityPlacementWorld);
-            vehicleEntityRepo.setEntityTexture(entity, entityTexture);
+            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Texture>(entity, entityTexture);
+            registry.assign<components::Renderer>(entity, shaderID);
+            registry.assign<components::Car>(entity, car);
+            registry.assign<components::CarConfig>(entity, carConfig);
+            registry.assign<components::Dynamic>(entity, entityDynamic);
 
             return entity;
         }

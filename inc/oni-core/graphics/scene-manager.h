@@ -3,15 +3,13 @@
 #include <map>
 #include <memory>
 
+#include <entt/entt.hpp>
+
 #include <oni-core/components/visual.h>
 #include <oni-core/components/buffer.h>
 #include <oni-core/math/mat4.h>
 
 namespace oni {
-    namespace entities {
-        class BasicEntityRepo;
-    }
-
     namespace graphics {
         class Shader;
 
@@ -27,7 +25,7 @@ namespace oni {
 
             components::ShaderID requestShaderID(const components::VertexType &shaderType);
 
-            void render(const entities::BasicEntityRepo &entityRepo);
+            void render(entt::DefaultRegistry &registry);
 
             // TODO: What about a camera class?
             void lookAt(float x, float y);

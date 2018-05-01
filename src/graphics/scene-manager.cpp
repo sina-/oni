@@ -1,12 +1,12 @@
+#include <entt/entt.hpp>
+
 #include <oni-core/graphics/scene-manager.h>
 #include <oni-core/graphics/shader.h>
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
-#include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/io/output.h>
 #include <oni-core/physics/translation.h>
-#include <oni-core/entities/vehicle-entity-repo.h>
 
 namespace oni {
     namespace graphics {
@@ -143,7 +143,7 @@ namespace oni {
             shader.disable();
         }
 
-        void SceneManager::render(const entities::BasicEntityRepo &entityRepo) {
+        void SceneManager::render(entt::DefaultRegistry &registry) {
             // TODO: It makes more sense to iterate over renderers when shader and renderer are merged.
             for (auto const &shaderPair : mShaders) {
                 auto shader = shaderPair.second.get();
@@ -151,85 +151,77 @@ namespace oni {
                 const auto &renderer = mRenderers2D.at(shaderID);
                 begin(*shader, *renderer);
 
-                unsigned long entityIndex = 0;
-
-                for (const auto &entity: entityRepo.getEntities()) {
-                    auto entityShaderID = entityRepo.getEntityShaderID(entityIndex);
-                    if (entityShaderID == shaderID) {
-                        if (entities::isSpriteTexturedStatic(entity)) {
-                            const auto &placement = entityRepo.getEntityPlacementWorld(entityIndex);
-                            const auto &texture = entityRepo.getEntityTexture(entityIndex);
-                            renderer->submit(placement, texture);
-                        } else if (entities::isSpriteStatic(entity)) {
-                            const auto &placement = entityRepo.getEntityPlacementWorld(entityIndex);
-                            const auto &appearance = entityRepo.getEntityAppearance(entityIndex);
-                            renderer->submit(placement, appearance);
-                        } else if (entities::isVehicleTextured(entity)) {
-                            // TODO: We know that vehicle entities are stored in entity repositories of type
-                            // VehicleEntityRepo, so the cast is fine. But I rather have the design that does not
-                            // require this cast. One way to do that is to define:
-                            // void SceneManager::render(const entities::VehicleEntityRepo &entityRepo);
-                            // and call it separately.
-                            const auto &vehicleRepo = dynamic_cast<const entities::VehicleEntityRepo &>(entityRepo);
-                            const auto heading = vehicleRepo.getCar(entityIndex).heading;
-                            const auto &placement = vehicleRepo.getEntityPlacementWorld(entityIndex);
-                            const auto &texture = vehicleRepo.getEntityTexture(entityIndex);
-
-                            // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
-                            // Maybe its faster to just reset the view matrix and make a new
-                            // draw call instead of this shit.
-                            const auto centerX = (placement.vertexA.x + placement.vertexD.x) / 2.0f;
-                            const auto centerY = (placement.vertexA.y + placement.vertexB.y) / 2.0f;
-
-                            const auto Ax = placement.vertexA.x - centerX;
-                            const auto Bx = placement.vertexB.x - centerX;
-                            const auto Cx = placement.vertexC.x - centerX;
-                            const auto Dx = placement.vertexD.x - centerX;
-
-                            const auto Ay = placement.vertexA.y - centerY;
-                            const auto By = placement.vertexB.y - centerY;
-                            const auto Cy = placement.vertexC.y - centerY;
-                            const auto Dy = placement.vertexD.y - centerY;
-
-                            const auto cs = std::cos(heading);
-                            const auto sn = std::sin(heading);
-
-                            const auto Ax_ = Ax * cs - Ay * sn + centerX;
-                            const auto Bx_ = Bx * cs - By * sn + centerX;
-                            const auto Cx_ = Cx * cs - Cy * sn + centerX;
-                            const auto Dx_ = Dx * cs - Dy * sn + centerX;
-
-                            const auto Ay_ = Ax * sn + Ay * cs + centerY;
-                            const auto By_ = Bx * sn + By * cs + centerY;
-                            const auto Cy_ = Cx * sn + Cy * cs + centerY;
-                            const auto Dy_ = Dx * sn + Dy * cs + centerY;
-
-                            const auto A = math::vec3{Ax_, Ay_, 0.0f};
-                            const auto B = math::vec3{Bx_, By_, 0.0f};
-                            const auto C = math::vec3{Cx_, Cy_, 0.0f};
-                            const auto D = math::vec3{Dx_, Dy_, 0.0f};
-
-                            auto placementFinal = components::Placement{A, B, C, D};
-
-                            const auto &positionInWorld = vehicleRepo.getCar(entityIndex).position;
-
-                            physics::Translation::localToWorld(math::vec3{positionInWorld.x, positionInWorld.y, 0.0f},
-                                                               placementFinal);
-
-                            renderer->submit(placementFinal, texture);
-                        }
-                        else if(entities::isSpriteTexturedDynamic(entity)){
-                            // TODO: Render these bad boys.
-                        }
+                auto staticTextureSpriteView = registry.persistent<components::Renderer, components::Placement,
+                        components::Texture, components::Static>();
+                for (const auto &entity: staticTextureSpriteView) {
+                    if (staticTextureSpriteView.get<components::Renderer>(entity).rendererID == shaderID) {
+                        const auto &placement = staticTextureSpriteView.get<components::Placement>(entity);
+                        const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                        renderer->submit(placement, texture);
                     }
-                    ++entityIndex;
+                }
 
-                    // TODO: This is a dumb way to handle BatchRenderer's limit. It could be good enough for a long
-                    // time before it becomes and issue. Something to keep in mind for future improvements.
-                    if (entityIndex >= mMaxSpriteCount) {
-                        io::printl("WARNING: Max number of sprites reached. Flushing the current pending sprites!");
-                        end(*shader, *renderer);
-                        begin(*shader, *renderer);
+                auto staticSpriteView = registry.persistent<components::Renderer, components::Placement,
+                        components::Appearance, components::Static>();
+                for (const auto &entity: staticSpriteView) {
+                    if (staticSpriteView.get<components::Renderer>(entity).rendererID == shaderID) {
+                        const auto &placement = staticSpriteView.get<components::Placement>(entity);
+                        const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
+                        renderer->submit(placement, appearance);
+                    }
+                }
+
+                auto textureVehicles = registry.persistent<components::Renderer, components::Placement,
+                        components::Texture, components::Dynamic, components::Car>();
+                for (const auto &entity: textureVehicles) {
+                    if (textureVehicles.get<components::Renderer>(entity).rendererID == shaderID) {
+                        const auto &placement = textureVehicles.get<components::Placement>(entity);
+                        const auto &texture = textureVehicles.get<components::Texture>(entity);
+                        const auto &car = textureVehicles.get<components::Car>(entity);
+                        const auto &heading = car.heading;
+
+                        // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
+                        // Maybe its faster to just reset the view matrix and make a new
+                        // draw call instead of this shit.
+                        const auto centerX = (placement.vertexA.x + placement.vertexD.x) / 2.0f;
+                        const auto centerY = (placement.vertexA.y + placement.vertexB.y) / 2.0f;
+
+                        const auto Ax = placement.vertexA.x - centerX;
+                        const auto Bx = placement.vertexB.x - centerX;
+                        const auto Cx = placement.vertexC.x - centerX;
+                        const auto Dx = placement.vertexD.x - centerX;
+
+                        const auto Ay = placement.vertexA.y - centerY;
+                        const auto By = placement.vertexB.y - centerY;
+                        const auto Cy = placement.vertexC.y - centerY;
+                        const auto Dy = placement.vertexD.y - centerY;
+
+                        const auto cs = std::cos(heading);
+                        const auto sn = std::sin(heading);
+
+                        const auto Ax_ = Ax * cs - Ay * sn + centerX;
+                        const auto Bx_ = Bx * cs - By * sn + centerX;
+                        const auto Cx_ = Cx * cs - Cy * sn + centerX;
+                        const auto Dx_ = Dx * cs - Dy * sn + centerX;
+
+                        const auto Ay_ = Ax * sn + Ay * cs + centerY;
+                        const auto By_ = Bx * sn + By * cs + centerY;
+                        const auto Cy_ = Cx * sn + Cy * cs + centerY;
+                        const auto Dy_ = Dx * sn + Dy * cs + centerY;
+
+                        const auto A = math::vec3{Ax_, Ay_, 0.0f};
+                        const auto B = math::vec3{Bx_, By_, 0.0f};
+                        const auto C = math::vec3{Cx_, Cy_, 0.0f};
+                        const auto D = math::vec3{Dx_, Dy_, 0.0f};
+
+                        auto placementFinal = components::Placement{A, B, C, D};
+
+                        const auto &positionInWorld = car.position;
+
+                        physics::Translation::localToWorld(math::vec3{positionInWorld.x, positionInWorld.y, 0.0f},
+                                                           placementFinal);
+
+                        renderer->submit(placementFinal, texture);
                     }
                 }
                 end(*shader, *renderer);

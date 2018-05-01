@@ -1,10 +1,8 @@
 #pragma once
 
-namespace oni {
-    namespace entities {
-        class VehicleEntityRepo;
-    }
+#include <entt/entt.hpp>
 
+namespace oni {
     namespace io {
         class Input;
     }
@@ -15,7 +13,7 @@ namespace oni {
             virtual ~Physic() = default;
 
         public:
-            virtual void tick(entities::VehicleEntityRepo &vehicle, const io::Input &input, float tickTime) = 0;
+            virtual void tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) = 0;
         };
     }
 }

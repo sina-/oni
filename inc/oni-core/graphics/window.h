@@ -43,6 +43,8 @@ namespace oni {
 
             void tick(io::Input &input);
 
+            void display();
+
             bool closed() const;
 
             void clear() const;

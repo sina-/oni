@@ -24,6 +24,10 @@ namespace oni {
          */
         typedef GLuint ShaderID;
 
+        struct Renderer {
+            GLuint rendererID;
+        };
+
         struct Texture {
             // TODO: This might need re ordering for better caching.
             GLsizei width{0};

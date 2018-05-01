@@ -45,6 +45,9 @@ namespace oni {
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
             }
 
+            // NOTE: Only display the result at the end after mTickMS amount of time has passed.
+            display();
+
             mRunCounter++;
             mFrameCounter++;
             mFrameLag += mFrameTimer.elapsed();
@@ -74,6 +77,10 @@ namespace oni {
             // Add lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 20));
             _render();
+        }
+
+        void Game::display() {
+            _display();
         }
 
     }

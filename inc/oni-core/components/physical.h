@@ -27,6 +27,10 @@ namespace oni {
 
             math::vec3 getPosition() const { return vertexA; }
 
+            math::vec2 getSize() {
+                return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
+            }
+
             static Placement fromPositionAndSize(const math::vec3 &position, const math::vec2 &size,
                                                  const float orientation) {
                 return Placement{
@@ -43,6 +47,13 @@ namespace oni {
                         math::vec3{size.x, size.y, 0.0f},
                         math::vec3{size.x, 0.0f, 0.0f}, orientation};
             }
+
+        };
+
+        struct Static {
+        };
+
+        struct Dynamic {
         };
 
         struct CarConfig {

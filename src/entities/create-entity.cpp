@@ -9,7 +9,7 @@
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/graphics/scene-manager.h>
-#include <oni-core/physics/translation.h>
+#include <oni-core/physics/transformation.h>
 
 namespace oni {
     namespace entities {
@@ -20,13 +20,13 @@ namespace oni {
                                     const math::vec3 &positionInWorld) {
             auto entity = registry.create();
 
-            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityShapeWorld = components::Shape::fromSize(size);
             auto entityAppearance = components::Appearance{color};
             auto entityColorShader = components::TagColorShaded{};
 
-            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
+            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
-            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Appearance>(entity, entityAppearance);
             registry.assign<components::TagColorShaded>(entity, entityColorShader);
 
@@ -40,13 +40,13 @@ namespace oni {
             auto entity = registry.create();
 
             auto entityAppearance = components::Appearance {color};
-            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityShapeWorld = components::Shape::fromSize(size);
             auto entityStatic = components::TagStatic{};
             auto entityColorShader = components::TagColorShaded{};
 
-            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
+            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
-            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Appearance>(entity, entityAppearance);
             registry.assign<components::TagColorShaded>(entity, entityColorShader);
             // TODO: Is this the correct usage of tags?
@@ -58,17 +58,18 @@ namespace oni {
         entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
                                              const components::Texture &entityTexture,
                                              const math::vec2 &size,
-                                             const math::vec3 &positionInWorld) {
+                                             const math::vec3 &positionInWorld,
+                                             const float heading) {
             auto entity = registry.create();
 
-            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityShape = components::Shape::fromSize(size);
             auto entityDynamic = components::TagDynamic{};
             auto entityTextureShader = components::TagTextureShaded{};
+            auto entityPlacement = components::Placement{positionInWorld, heading};
 
-            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
-
-            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Shape>(entity, entityShape);
             registry.assign<components::Texture>(entity, entityTexture);
+            registry.assign<components::Placement>(entity, entityPlacement);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
             registry.assign<components::TagDynamic>(entity, entityDynamic);
 
@@ -80,13 +81,13 @@ namespace oni {
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld) {
             auto entity = registry.create();
-            auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
+            auto entityShapeWorld = components::Shape::fromSize(size);
             auto entityStatic = components::TagStatic{};
             auto entityTextureShader = components::TagTextureShaded{};
 
-            physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
+            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
-            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
             registry.assign<components::TagStatic>(entity, entityStatic);
@@ -111,7 +112,7 @@ namespace oni {
                                         const math::vec3 &positionInWorld) {
 
             auto entity = registry.create();
-            // TODO: Text does not have a local and world Placement, have to fix that before implementing
+            // TODO: Text does not have a local and world Shape, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
 
             return entity;
@@ -123,7 +124,7 @@ namespace oni {
             auto entity = registry.create();
 
             auto carConfig = components::CarConfig();
-            auto entityDynamic = components::TagDynamic{};
+            auto entityVehicleTag = components::TagVehicle{};
             auto entityTextureShader = components::TagTextureShaded{};
 
             // TODO: this should be defined by the user of this function
@@ -151,17 +152,17 @@ namespace oni {
 
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
-            auto entityPlacementWorld = components::Placement::fromPositionAndSize(
-                    math::vec3{static_cast<float> (carX), static_cast<float> (carY), 1.0f},
-                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)}, 0.0f);
+            auto entityShapeWorld = components::Shape::fromPositionAndSize(
+                    math::vec3{static_cast<float> (carX), static_cast<float> (carY)},
+                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)});
             auto car = components::Car(carConfig);
 
-            registry.assign<components::Placement>(entity, entityPlacementWorld);
+            registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
             registry.assign<components::Car>(entity, car);
             registry.assign<components::CarConfig>(entity, carConfig);
-            registry.assign<components::TagDynamic>(entity, entityDynamic);
+            registry.assign<components::TagVehicle>(entity, entityVehicleTag);
 
             return entity;
         }

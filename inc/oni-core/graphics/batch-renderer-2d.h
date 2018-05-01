@@ -16,7 +16,7 @@ namespace oni {
     namespace components {
         class Texture;
 
-        class Placement;
+        class Shape;
 
         class Text;
 
@@ -43,9 +43,9 @@ namespace oni {
         private:
             void _begin() override;
 
-            void _submit(const components::Placement &position, const components::Appearance &color) override;
+            void _submit(const components::Shape &position, const components::Appearance &color) override;
 
-            void _submit(const components::Placement &position, const components::Texture &texture) override;
+            void _submit(const components::Shape &position, const components::Texture &texture) override;
 
             void _submit(const components::Text &text) override;
 

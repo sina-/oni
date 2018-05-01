@@ -6,13 +6,13 @@
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
 
-// TODO: This file name sucks
-
 namespace oni {
     namespace components {
-        // TODO: This name is wrong, the struct defines a geometry in local coordinate
-        struct Placement {
+
+        struct Shape {
             /**
+             *    NOTE: Local coordinates for dynamic objects and world coordinates for static objects.
+             *
              *    B    C
              *    +----+
              *    |    |
@@ -23,8 +23,6 @@ namespace oni {
             math::vec3 vertexB{0.0f, 0.0f, 0.0f};
             math::vec3 vertexC{0.0f, 0.0f, 0.0f};
             math::vec3 vertexD{0.0f, 0.0f, 0.0f};
-            // TODO: This shouldn't be here.
-            float heading{0.0f};
 
             math::vec3 getPosition() const { return vertexA; }
 
@@ -32,29 +30,36 @@ namespace oni {
                 return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
             }
 
-            static Placement fromPositionAndSize(const math::vec3 &position, const math::vec2 &size,
-                                                 const float orientation) {
-                return Placement{
+            static Shape fromPositionAndSize(const math::vec3 &position, const math::vec2 &size) {
+                return Shape{
                         math::vec3{position.x, position.y, position.z},
                         math::vec3{position.x, position.y + size.y, position.z},
                         math::vec3{position.x + size.x, position.y + size.y, position.z},
-                        math::vec3{position.x + size.x, position.y, position.z}, orientation};
+                        math::vec3{position.x + size.x, position.y, position.z}};
             }
 
-            static Placement fromSize(const math::vec2 &size, const float orientation) {
-                return Placement{
+            static Shape fromSize(const math::vec2 &size) {
+                return Shape{
                         math::vec3{0.0f, 0.0f, 0.0f},
                         math::vec3{0.0f, size.y, 0.0f},
                         math::vec3{size.x, size.y, 0.0f},
-                        math::vec3{size.x, 0.0f, 0.0f}, orientation};
+                        math::vec3{size.x, 0.0f, 0.0f}};
             }
 
+        };
+
+        struct Placement {
+            math::vec3 position{0.0f, 0.0f, 0.0f};
+            float heading{0.0f};
         };
 
         struct TagStatic {
         };
 
         struct TagDynamic {
+        };
+
+        struct TagVehicle {
         };
 
         struct CarConfig {

@@ -6,7 +6,7 @@
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/io/output.h>
-#include <oni-core/physics/translation.h>
+#include <oni-core/physics/transformation.h>
 
 namespace oni {
     namespace graphics {
@@ -131,10 +131,10 @@ namespace oni {
         void SceneManager::render(entt::DefaultRegistry &registry) {
             begin(*mTextureShader, *mTextureRenderer);
 
-            auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Placement,
+            auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
                     components::Texture, components::TagStatic>();
             for (const auto &entity: staticTextureSpriteView) {
-                const auto &placement = staticTextureSpriteView.get<components::Placement>(entity);
+                const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
                 const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
                 // TODO: submit will fail if we reach maximum number of sprites.
                 // I could also check the number of entities using the view and decide before hand at which point I
@@ -146,70 +146,56 @@ namespace oni {
                 // by merging many textures to keep below the limit. Other solutions might be looking into other type
                 // of texture storage that can hold bigger number of textures.
 
-                mTextureRenderer->submit(placement, texture);
+                mTextureRenderer->submit(shape, texture);
             }
 
-            auto textureVehicles = registry.persistent<components::TagTextureShaded, components::Placement,
-                    components::Texture, components::TagDynamic, components::Car>();
+            auto textureVehicles = registry.persistent<components::TagTextureShaded, components::Shape,
+                    components::Texture, components::TagVehicle, components::Car>();
             for (const auto &entity: textureVehicles) {
-                const auto &placement = textureVehicles.get<components::Placement>(entity);
+                const auto &shape = textureVehicles.get<components::Shape>(entity);
                 const auto &texture = textureVehicles.get<components::Texture>(entity);
                 const auto &car = textureVehicles.get<components::Car>(entity);
-                const auto &heading = car.heading;
+                const auto heading = static_cast<float>(car.heading);
 
                 // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
                 // Maybe its faster to just reset the view matrix and make a new
                 // draw call instead of this shit.
-                const auto centerX = (placement.vertexA.x + placement.vertexD.x) / 2.0f;
-                const auto centerY = (placement.vertexA.y + placement.vertexB.y) / 2.0f;
-
-                const auto Ax = placement.vertexA.x - centerX;
-                const auto Bx = placement.vertexB.x - centerX;
-                const auto Cx = placement.vertexC.x - centerX;
-                const auto Dx = placement.vertexD.x - centerX;
-
-                const auto Ay = placement.vertexA.y - centerY;
-                const auto By = placement.vertexB.y - centerY;
-                const auto Cy = placement.vertexC.y - centerY;
-                const auto Dy = placement.vertexD.y - centerY;
-
-                const auto cs = std::cos(heading);
-                const auto sn = std::sin(heading);
-
-                const auto Ax_ = static_cast<const float>(Ax * cs - Ay * sn + centerX);
-                const auto Bx_ = static_cast<const float>(Bx * cs - By * sn + centerX);
-                const auto Cx_ = static_cast<const float>(Cx * cs - Cy * sn + centerX);
-                const auto Dx_ = static_cast<const float>(Dx * cs - Dy * sn + centerX);
-
-                const auto Ay_ = static_cast<const float>(Ax * sn + Ay * cs + centerY);
-                const auto By_ = static_cast<const float>(Bx * sn + By * cs + centerY);
-                const auto Cy_ = static_cast<const float>(Cx * sn + Cy * cs + centerY);
-                const auto Dy_ = static_cast<const float>(Dx * sn + Dy * cs + centerY);
-
-                const auto A = math::vec3{Ax_, Ay_, 0.0f};
-                const auto B = math::vec3{Bx_, By_, 0.0f};
-                const auto C = math::vec3{Cx_, Cy_, 0.0f};
-                const auto D = math::vec3{Dx_, Dy_, 0.0f};
-
-                auto placementFinal = components::Placement{A, B, C, D};
+                auto shapeTransformed = physics::Transformation::localRotation(heading, shape);
 
                 const auto &positionInWorld = car.position;
 
-                physics::Translation::localToWorld(math::vec3{positionInWorld.x, positionInWorld.y, 0.0f},
-                                                   placementFinal);
+                physics::Transformation::localToWorldTranslation(math::vec3{positionInWorld.x,
+                                                                            positionInWorld.y,
+                                                                            0.0f},
+                                                                 shapeTransformed);
 
-                mTextureRenderer->submit(placementFinal, texture);
+                mTextureRenderer->submit(shapeTransformed, texture);
+            }
+
+            auto dynamicTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
+                    components::Texture, components::Placement, components::TagDynamic>();
+            for (const auto &entity: dynamicTextureSpriteView) {
+                const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
+                const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
+                const auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+                const auto heading = placement.heading;
+
+                auto shapeTransformed = physics::Transformation::localRotation(heading, shape);
+
+                physics::Transformation::localToWorldTranslation(placement.position, shapeTransformed);
+
+                mTextureRenderer->submit(shapeTransformed, texture);
             }
 
             end(*mTextureShader, *mTextureRenderer);
 
             begin(*mColorShader, *mColorRenderer);
-            auto staticSpriteView = registry.persistent<components::TagColorShaded, components::Placement,
+            auto staticSpriteView = registry.persistent<components::TagColorShaded, components::Shape,
                     components::Appearance, components::TagStatic>();
             for (const auto &entity: staticSpriteView) {
-                const auto &placement = staticSpriteView.get<components::Placement>(entity);
+                const auto &shape = staticSpriteView.get<components::Shape>(entity);
                 const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
-                mColorRenderer->submit(placement, appearance);
+                mColorRenderer->submit(shape, appearance);
             }
 
             end(*mColorShader, *mColorRenderer);

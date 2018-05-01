@@ -1,6 +1,6 @@
 #pragma once
 
-#include <oni-core/components/physical.h>
+#include <oni-core/components/geometry.h>
 
 namespace oni {
     namespace math {
@@ -9,22 +9,24 @@ namespace oni {
         class vec3;
     }
     namespace components {
-        class Placement;
+        class Shape;
     }
     namespace physics {
-        class Translation {
-            Translation() = default;
+        class Transformation {
+            Transformation() = default;
 
-            ~Translation() = default;
+            ~Transformation() = default;
 
         public:
-            static void worldToLocal(const math::vec3 &reference, math::vec3 &operand);
+            static components::Shape localRotation(const float rotation, const components::Shape &shape);
 
-            static void localToWorld(const math::vec3 &reference, math::vec3 &operand);
+            static void worldToLocalTranslation(const math::vec3 &reference, math::vec3 &operand);
 
-            static void localToWorld(const math::vec3 &reference, components::Placement &placement);
+            static void localToWorldTranslation(const math::vec3 &reference, math::vec3 &operand);
 
-            static void localToTexture(const float ratio, math::vec3 &operand);
+            static void localToWorldTranslation(const math::vec3 &reference, components::Shape &shape);
+
+            static void localToTextureTranslation(const float ratio, math::vec3 &operand);
 
             /**
              * Translates operand in the world coordinates to local coordinates of reference in texture coordinates.
@@ -37,7 +39,8 @@ namespace oni {
              * @param ratio each game unit is worth this many texture pixels
              * @param operand input as world coordinate and outputs as local texture coordinates
              */
-            static void worldToLocalTexture(const math::vec3 &reference, const float ratio, math::vec3 &operand);
+            static void worldToLocalTextureTranslation(const math::vec3 &reference, const float ratio,
+                                                       math::vec3 &operand);
         };
     }
 }

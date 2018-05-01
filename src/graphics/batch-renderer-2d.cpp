@@ -8,7 +8,7 @@
 #include <oni-core/buffers/index-buffer.h>
 #include <oni-core/buffers/vertex-array.h>
 #include <oni-core/utils/oni-assert.h>
-#include <oni-core/components/physical.h>
+#include <oni-core/components/geometry.h>
 #include <oni-core/components/visual.h>
 
 namespace oni {
@@ -76,7 +76,7 @@ namespace oni {
             mBuffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
 
-        void BatchRenderer2D::_submit(const components::Placement &position, const components::Appearance &appearance) {
+        void BatchRenderer2D::_submit(const components::Shape &position, const components::Appearance &appearance) {
             // Check if Buffer can handle the number of vertices.
             // TODO: This seems to trigger even in none-debug mode
             ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
@@ -125,7 +125,7 @@ namespace oni {
             mIndexCount += 6;
         }
 
-        void BatchRenderer2D::_submit(const components::Placement &position, const components::Texture &texture) {
+        void BatchRenderer2D::_submit(const components::Shape &position, const components::Texture &texture) {
             // Check if Buffer can handle the number of vertices.
             ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 

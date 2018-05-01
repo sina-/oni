@@ -14,11 +14,11 @@ namespace oni {
             _begin();
         }
 
-        void Renderer2D::submit(const components::Placement &position, const components::Appearance &color) {
+        void Renderer2D::submit(const components::Shape &position, const components::Appearance &color) {
             _submit(position, color);
         }
 
-        void Renderer2D::submit(const components::Placement &position, const components::Texture &texture) {
+        void Renderer2D::submit(const components::Shape &position, const components::Texture &texture) {
             _submit(position, texture);
         }
 

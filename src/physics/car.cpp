@@ -1,6 +1,6 @@
 #include <oni-core/physics/car.h>
 #include <oni-core/components/input-data.h>
-#include <oni-core/components/physical.h>
+#include <oni-core/components/geometry.h>
 
 
 namespace oni {

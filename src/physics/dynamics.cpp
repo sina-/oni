@@ -1,13 +1,13 @@
 #include <oni-core/physics/dynamics.h>
 #include <oni-core/physics/car.h>
 #include <oni-core/graphics/window.h>
-#include <oni-core/components/physical.h>
+#include <oni-core/components/geometry.h>
 
 namespace oni {
     namespace physics {
 
         void Dynamics::tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) {
-            auto view = registry.view<components::Car, components::CarConfig>();
+            auto view = registry.view<components::Car, components::CarConfig, components::TagVehicle>();
 
             for (auto entity: view) {
                 auto &car = view.get<components::Car>(entity);

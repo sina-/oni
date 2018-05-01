@@ -26,10 +26,8 @@ namespace oni {
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld);
 
-        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
-                                             const components::Texture &entityTexture,
-                                             const math::vec2 &size,
-                                             const math::vec3 &positionInWorld);
+        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry, const components::Texture &entityTexture,
+                                                     const math::vec2 &size, const math::vec3 &positionInWorld, const float heading);
 
         entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
                                             const components::Texture &entityTexture,

@@ -9,7 +9,7 @@ namespace oni {
 
         class Text;
 
-        class Placement;
+        class Shape;
     }
 
     namespace graphics {
@@ -25,9 +25,9 @@ namespace oni {
              */
             void begin();
 
-            void submit(const components::Placement &position, const components::Appearance &color);
+            void submit(const components::Shape &position, const components::Appearance &color);
 
-            void submit(const components::Placement &position, const components::Texture &texture);
+            void submit(const components::Shape &position, const components::Texture &texture);
 
             void submit(const components::Text &text);
 
@@ -44,9 +44,9 @@ namespace oni {
         private:
             virtual void _begin() = 0;
 
-            virtual void _submit(const components::Placement &position, const components::Appearance &color) = 0;
+            virtual void _submit(const components::Shape &position, const components::Appearance &color) = 0;
 
-            virtual void _submit(const components::Placement &position, const components::Texture &texture) = 0;
+            virtual void _submit(const components::Shape &position, const components::Texture &texture) = 0;
 
             virtual void _submit(const components::Text &text) = 0;
 

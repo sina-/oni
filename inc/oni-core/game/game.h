@@ -27,9 +27,13 @@ namespace oni {
 
             virtual void render() final;
 
+            virtual void display() final;
+
             virtual void _tick(const float tickTime) = 0;
 
             virtual void _render() = 0;
+
+            virtual void _display() = 0;
 
             virtual void showFPS(unsigned short fps) = 0;
 

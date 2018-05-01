@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 
+#include <oni-core/math/vec3.h>
+
 namespace ftgl {
     class texture_atlas_t;
 

@@ -3,10 +3,11 @@
 #include <ftgl/texture-atlas.h>
 #include <FreeImage.h>
 
-#include <oni-core/entities/basic-entity-repo.h>
 #include <oni-core/graphics/font-manager.h>
 #include <oni-core/io/output.h>
 #include <oni-core/utils/oni-assert.h>
+#include <oni-core/math/vec2.h>
+#include <oni-core/components/visual.h>
 
 namespace oni {
     namespace graphics {

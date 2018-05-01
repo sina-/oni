@@ -1,7 +1,8 @@
 #pragma once
 
+#include <entt/entt.hpp>
+
 #include <oni-core/components/visual.h>
-#include <oni-core/entities/entity.h>
 #include <oni-core/common/typedefs.h>
 
 namespace oni {
@@ -12,44 +13,43 @@ namespace oni {
     }
 
     namespace entities {
-        class BasicEntityRepo;
+        using entityID = typename entt::DefaultRegistry::entity_type;
 
-        class VehicleEntityRepo;
+        // TODO: These functions are good candidates for templating.
+        entityID createSpriteEntity(entt::DefaultRegistry &registry, graphics::SceneManager &sceneManager,
+                                    const math::vec4 &color,
+                                    const math::vec2 &size, const math::vec3 &positionInWorld);
 
-        common::entityID createSpriteEntity(BasicEntityRepo &basicEntityRepo, components::ShaderID shaderID,
-                                            const math::vec4 &color, const math::vec3 &position,
-                                            const math::vec2 &size);
+        entityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
+                                          graphics::SceneManager &sceneManager,
+                                          const math::vec4 &color, const math::vec2 &size,
+                                          const math::vec3 &positionInWorld);
 
-        common::entityID createSpriteStaticEntity(BasicEntityRepo &basicEntityRepo,
-                                                  graphics::SceneManager &sceneManager,
-                                                  const math::vec4 &color, const math::vec2 &size,
-                                                  const math::vec3 &positionInWorld);
+        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
+                                             graphics::SceneManager &sceneManager,
+                                             const components::Texture &entityTexture, const math::vec2 &size,
+                                             const math::vec3 &positionInWorld);
 
-        common::entityID createTexturedDynamicEntity(BasicEntityRepo &basicEntityRepo,
-                                                     graphics::SceneManager &sceneManager,
-                                                     const components::Texture &entityTexture, const math::vec2 &size,
-                                                     const math::vec3 &positionInWorld);
+        entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
+                                            graphics::SceneManager &sceneManager,
+                                            const components::Texture &entityTexture, const math::vec2 &size,
+                                            const math::vec3 &positionInWorld);
 
-        common::entityID createTexturedStaticEntity(BasicEntityRepo &basicEntityRepo,
-                                                    graphics::SceneManager &sceneManager,
-                                                    const components::Texture &entityTexture, const math::vec2 &size,
-                                                    const math::vec3 &positionInWorld);
+        entityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
+                                  components::ShaderID shaderID, const std::string &text,
+                                  const math::vec3 &position);
 
-        common::entityID createTextEntity(BasicEntityRepo &basicEntityRepo, graphics::FontManager &fontManager,
-                                          components::ShaderID shaderID, const std::string &text,
-                                          const math::vec3 &position);
+        entityID createTextStaticEntity(entt::DefaultRegistry &registry,
+                                        graphics::SceneManager &sceneManager,
+                                        graphics::FontManager &fontManager,
+                                        const std::string &text,
+                                        const math::vec3 &position,
+                                        const math::vec2 &size,
+                                        const math::vec3 &positionInWorld,
+                                        std::string &&vertShader,
+                                        std::string &&fragShader);
 
-        common::entityID createTextStaticEntity(BasicEntityRepo &basicEntityRepo,
-                                                graphics::SceneManager &sceneManager,
-                                                graphics::FontManager &fontManager,
-                                                const std::string &text,
-                                                const math::vec3 &position,
-                                                const math::vec2 &size,
-                                                const math::vec3 &positionInWorld,
-                                                std::string &&vertShader,
-                                                std::string &&fragShader);
-
-        common::entityID createVehicleEntity(VehicleEntityRepo &vehicleEntityRepo, graphics::SceneManager &sceneManager,
-                                             const components::Texture &entityTexture);
+        entityID createVehicleEntity(entt::DefaultRegistry &registry, graphics::SceneManager &sceneManager,
+                                     const components::Texture &entityTexture);
     }
 }

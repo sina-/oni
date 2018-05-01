@@ -3,17 +3,13 @@
 #include <oni-core/physics/physic.h>
 
 namespace oni {
-    namespace entities {
-        class VehicleEntityRepo;
-    }
-
     namespace physics {
         class Dynamics : public Physic {
 
         public:
             ~Dynamics() override = default;
 
-            void tick(entities::VehicleEntityRepo &vehicle, const io::Input &input, float tickTime) override;
+            void tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) override;
         };
     }
 }

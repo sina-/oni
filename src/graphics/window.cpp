@@ -94,7 +94,6 @@ namespace oni {
 
         void Window::tick(io::Input &input) {
             glfwPollEvents();
-            glfwSwapBuffers(mWindow);
 
             for (auto key: mKeysPressed) {
                 input.setPressed(key);
@@ -149,6 +148,10 @@ namespace oni {
             auto thiz = getThisFromGLFWWindow(window);
             thiz->setCursorX(x);
             thiz->setCursorY(y);
+        }
+
+        void Window::display() {
+            glfwSwapBuffers(mWindow);
         }
 
     }

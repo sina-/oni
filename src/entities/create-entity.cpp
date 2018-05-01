@@ -108,9 +108,7 @@ namespace oni {
                                         const std::string &text,
                                         const math::vec3 &position,
                                         const math::vec2 &size,
-                                        const math::vec3 &positionInWorld,
-                                        std::string &&vertShader,
-                                        std::string &&fragShader) {
+                                        const math::vec3 &positionInWorld) {
 
             auto entity = registry.create();
             // TODO: Text does not have a local and world Placement, have to fix that before implementing

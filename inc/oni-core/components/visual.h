@@ -1,7 +1,5 @@
 #pragma once
 
-// TODO: remove memory from this file
-#include <memory>
 #include <utility>
 #include <vector>
 

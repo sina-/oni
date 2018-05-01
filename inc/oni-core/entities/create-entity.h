@@ -46,9 +46,7 @@ namespace oni {
                                         const std::string &text,
                                         const math::vec3 &position,
                                         const math::vec2 &size,
-                                        const math::vec3 &positionInWorld,
-                                        std::string &&vertShader,
-                                        std::string &&fragShader);
+                                        const math::vec3 &positionInWorld);
 
         entityID createVehicleEntity(entt::DefaultRegistry &registry,
                                      const components::Texture &entityTexture);

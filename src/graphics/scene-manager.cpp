@@ -136,6 +136,16 @@ namespace oni {
             for (const auto &entity: staticTextureSpriteView) {
                 const auto &placement = staticTextureSpriteView.get<components::Placement>(entity);
                 const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                // TODO: submit will fail if we reach maximum number of sprites.
+                // I could also check the number of entities using the view and decide before hand at which point I
+                // flush the renderer and open up room for new sprites.
+
+                // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
+                // Currently the renderer is limited to 32 samplers, I have to either use the reset method
+                // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
+                // by merging many textures to keep below the limit. Other solutions might be looking into other type
+                // of texture storage that can hold bigger number of textures.
+
                 mTextureRenderer->submit(placement, texture);
             }
 

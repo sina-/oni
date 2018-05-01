@@ -10,6 +10,7 @@
 
 namespace oni {
     namespace components {
+        // TODO: This name is wrong, the struct defines a geometry in local coordinate
         struct Placement {
             /**
              *    B    C
@@ -50,10 +51,10 @@ namespace oni {
 
         };
 
-        struct Static {
+        struct TagStatic {
         };
 
-        struct Dynamic {
+        struct TagDynamic {
         };
 
         struct CarConfig {

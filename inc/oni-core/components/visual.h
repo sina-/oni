@@ -19,13 +19,10 @@ namespace oni {
             math::vec4 color{0.0f, 0.0f, 0.0f, 0.0f};
         };
 
-        /** Determines the Layer. And that effectively clusters entities based on
-         * layer and helps renderer to only switch state per cluster of entities.
-         */
-        typedef GLuint ShaderID;
+        struct TagColorShaded {
+        };
 
-        struct Renderer {
-            GLuint rendererID;
+        struct TagTextureShaded {
         };
 
         struct Texture {

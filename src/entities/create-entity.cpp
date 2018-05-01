@@ -15,91 +15,87 @@ namespace oni {
     namespace entities {
 
         entityID createSpriteEntity(entt::DefaultRegistry &registry,
-                                    graphics::SceneManager &sceneManager,
                                     const math::vec4 &color,
                                     const math::vec2 &size,
                                     const math::vec3 &positionInWorld) {
             auto entity = registry.create();
 
-            auto shaderID = sceneManager.requestShaderID(components::VertexType::COLOR_VERTEX);
             auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
             auto entityAppearance = components::Appearance{color};
+            auto entityColorShader = components::TagColorShaded{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
             registry.assign<components::Placement>(entity, entityPlacementWorld);
             registry.assign<components::Appearance>(entity, entityAppearance);
-            registry.assign<components::Renderer>(entity, shaderID);
+            registry.assign<components::TagColorShaded>(entity, entityColorShader);
 
             return entity;
         }
 
         entityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
-                                          graphics::SceneManager &sceneManager,
                                           const math::vec4 &color,
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld) {
             auto entity = registry.create();
 
-            auto shaderID = sceneManager.requestShaderID(components::VertexType::COLOR_VERTEX);
             auto entityAppearance = components::Appearance {color};
             auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
-            auto entityStatic = components::Static{};
+            auto entityStatic = components::TagStatic{};
+            auto entityColorShader = components::TagColorShaded{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
             registry.assign<components::Placement>(entity, entityPlacementWorld);
             registry.assign<components::Appearance>(entity, entityAppearance);
-            registry.assign<components::Renderer>(entity, shaderID);
+            registry.assign<components::TagColorShaded>(entity, entityColorShader);
             // TODO: Is this the correct usage of tags?
-            registry.assign<components::Static>(entity, entityStatic);
+            registry.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
         }
 
         entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
-                                             graphics::SceneManager &sceneManager,
                                              const components::Texture &entityTexture,
                                              const math::vec2 &size,
                                              const math::vec3 &positionInWorld) {
             auto entity = registry.create();
 
-            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
             auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
-            auto entityDynamic = components::Dynamic{};
+            auto entityDynamic = components::TagDynamic{};
+            auto entityTextureShader = components::TagTextureShaded{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
             registry.assign<components::Placement>(entity, entityPlacementWorld);
             registry.assign<components::Texture>(entity, entityTexture);
-            registry.assign<components::Renderer>(entity, shaderID);
-            registry.assign<components::Dynamic>(entity, entityDynamic);
+            registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
+            registry.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
         }
 
         entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
-                                            graphics::SceneManager &sceneManager,
                                             const components::Texture &entityTexture,
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld) {
             auto entity = registry.create();
-            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
             auto entityPlacementWorld = components::Placement::fromSize(size, 0.0f);
-            auto entityStatic = components::Static{};
+            auto entityStatic = components::TagStatic{};
+            auto entityTextureShader = components::TagTextureShaded{};
 
             physics::Translation::localToWorld(positionInWorld, entityPlacementWorld);
 
             registry.assign<components::Placement>(entity, entityPlacementWorld);
             registry.assign<components::Texture>(entity, entityTexture);
-            registry.assign<components::Renderer>(entity, shaderID);
-            registry.assign<components::Static>(entity, entityStatic);
+            registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
+            registry.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
         }
 
         entityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
-                                  components::ShaderID shaderID, const std::string &text,
+                                  const std::string &text,
                                   const math::vec3 &position) {
             // TODO: This is incompelte
             auto entity = registry.create();
@@ -108,7 +104,6 @@ namespace oni {
         }
 
         entityID createTextStaticEntity(entt::DefaultRegistry &registry,
-                                        graphics::SceneManager &sceneManager,
                                         graphics::FontManager &fontManager,
                                         const std::string &text,
                                         const math::vec3 &position,
@@ -120,19 +115,18 @@ namespace oni {
             auto entity = registry.create();
             // TODO: Text does not have a local and world Placement, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
-            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
 
             return entity;
 
         }
 
-        entityID createVehicleEntity(entt::DefaultRegistry &registry, graphics::SceneManager &sceneManager,
+        entityID createVehicleEntity(entt::DefaultRegistry &registry,
                                      const components::Texture &entityTexture) {
             auto entity = registry.create();
 
             auto carConfig = components::CarConfig();
-            auto shaderID = sceneManager.requestShaderID(components::VertexType::TEXTURE_VERTEX);
-            auto entityDynamic = components::Dynamic{};
+            auto entityDynamic = components::TagDynamic{};
+            auto entityTextureShader = components::TagTextureShaded{};
 
             // TODO: this should be defined by the user of this function
             carConfig.cgToRear = 1.25f;
@@ -166,10 +160,10 @@ namespace oni {
 
             registry.assign<components::Placement>(entity, entityPlacementWorld);
             registry.assign<components::Texture>(entity, entityTexture);
-            registry.assign<components::Renderer>(entity, shaderID);
+            registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
             registry.assign<components::Car>(entity, car);
             registry.assign<components::CarConfig>(entity, carConfig);
-            registry.assign<components::Dynamic>(entity, entityDynamic);
+            registry.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
         }

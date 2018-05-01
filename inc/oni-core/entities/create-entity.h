@@ -16,31 +16,32 @@ namespace oni {
         using entityID = typename entt::DefaultRegistry::entity_type;
 
         // TODO: These functions are good candidates for templating.
-        entityID createSpriteEntity(entt::DefaultRegistry &registry, graphics::SceneManager &sceneManager,
+        entityID createSpriteEntity(entt::DefaultRegistry &registry,
                                     const math::vec4 &color,
-                                    const math::vec2 &size, const math::vec3 &positionInWorld);
+                                    const math::vec2 &size,
+                                    const math::vec3 &positionInWorld);
 
         entityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
-                                          graphics::SceneManager &sceneManager,
-                                          const math::vec4 &color, const math::vec2 &size,
+                                          const math::vec4 &color,
+                                          const math::vec2 &size,
                                           const math::vec3 &positionInWorld);
 
         entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
-                                             graphics::SceneManager &sceneManager,
-                                             const components::Texture &entityTexture, const math::vec2 &size,
+                                             const components::Texture &entityTexture,
+                                             const math::vec2 &size,
                                              const math::vec3 &positionInWorld);
 
         entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
-                                            graphics::SceneManager &sceneManager,
-                                            const components::Texture &entityTexture, const math::vec2 &size,
+                                            const components::Texture &entityTexture,
+                                            const math::vec2 &size,
                                             const math::vec3 &positionInWorld);
 
-        entityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
-                                  components::ShaderID shaderID, const std::string &text,
+        entityID createTextEntity(entt::DefaultRegistry &registry,
+                                  graphics::FontManager &fontManager,
+                                  const std::string &text,
                                   const math::vec3 &position);
 
         entityID createTextStaticEntity(entt::DefaultRegistry &registry,
-                                        graphics::SceneManager &sceneManager,
                                         graphics::FontManager &fontManager,
                                         const std::string &text,
                                         const math::vec3 &position,
@@ -49,7 +50,7 @@ namespace oni {
                                         std::string &&vertShader,
                                         std::string &&fragShader);
 
-        entityID createVehicleEntity(entt::DefaultRegistry &registry, graphics::SceneManager &sceneManager,
+        entityID createVehicleEntity(entt::DefaultRegistry &registry,
                                      const components::Texture &entityTexture);
     }
 }

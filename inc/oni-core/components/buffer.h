@@ -36,11 +36,5 @@ namespace oni {
             GLsizei stride{0};
             const GLvoid *offset{nullptr};
         };
-
-        enum VertexType {
-            COLOR_VERTEX,
-            TEXTURE_VERTEX
-        };
-
     }
 }

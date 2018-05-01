@@ -1,6 +1,7 @@
 include_directories(${oni_SOURCE_DIR}/inc)
 include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
-include_directories(${oni_SOURCE_DIR}/lib/entt)
+# NOTE: SYSTEM so the warnings are disabled
+include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/entt)
 
 # sudo apt install libfreeimage3 libfreeimage-dev
 find_library(FREEIMAGE_LIBRARY NAMES freeimage)

@@ -23,8 +23,6 @@ namespace oni {
 
             ~SceneManager();
 
-            components::ShaderID requestShaderID(const components::VertexType &shaderType);
-
             void render(entt::DefaultRegistry &registry);
 
             // TODO: What about a camera class?
@@ -42,11 +40,10 @@ namespace oni {
             void initializeColorRenderer(const Shader &shader);
 
         private:
-            // Users of this class request a renderer for a given VertexType and we keep a 1-to-1 mapping between
-            // VertexType and Shader+Renderer associated with that type.
-            std::map<components::VertexType, components::ShaderID> mShaderCache{};
-            std::map<components::ShaderID, std::unique_ptr<Shader>> mShaders{};
-            std::map<components::ShaderID, std::unique_ptr<BatchRenderer2D>> mRenderers2D{};
+            std::unique_ptr<Shader> mColorShader;
+            std::unique_ptr<Shader> mTextureShader;
+            std::unique_ptr<BatchRenderer2D> mColorRenderer;
+            std::unique_ptr<BatchRenderer2D> mTextureRenderer;
 
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};

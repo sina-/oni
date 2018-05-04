@@ -24,13 +24,13 @@ namespace oni {
             void operator()(FMOD::Sound *s) const;
 
             void operator()(FMOD::System *sys) const;
+
+            void operator()(FMOD::Channel *channel) const;
         };
 
         class AudioManagerFMOD : public AudioManager {
         public:
             AudioManagerFMOD();
-
-            ~AudioManagerFMOD() override;
 
             void tick() override;
 
@@ -55,11 +55,9 @@ namespace oni {
             void setPitch(oniSoundID id, float pitch) override;
 
         private:
-
-        private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
             std::vector<std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
-            std::vector<std::unique_ptr<FMOD::Channel>> mChannels;
+            std::vector<std::unique_ptr<FMOD::Channel, FMODDeleter>> mChannels;
         };
     }
 }

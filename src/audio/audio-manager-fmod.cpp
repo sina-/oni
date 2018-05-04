@@ -30,8 +30,6 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        AudioManagerFMOD::~AudioManagerFMOD() = default;
-
         void AudioManagerFMOD::tick() {
             auto result = mSystem->update();
             ERRCHECK(result);
@@ -53,7 +51,7 @@ namespace oni {
             result = mSystem->playSound(sound, nullptr, true, &channel);
             ERRCHECK(result);
 
-            mChannels.emplace_back(std::unique_ptr<FMOD::Channel>(channel));
+            mChannels.emplace_back(std::unique_ptr<FMOD::Channel, FMODDeleter>(channel, FMODDeleter()));
 
             return mChannels.size() - 1;
         }
@@ -121,6 +119,10 @@ namespace oni {
         void FMODDeleter::operator()(FMOD::System *sys) const {
             sys->close();
             sys->release();
+        }
+
+        void FMODDeleter::operator()(FMOD::Channel *channel) const {
+
         }
     }
 }

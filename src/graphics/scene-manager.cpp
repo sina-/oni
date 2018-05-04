@@ -149,29 +149,6 @@ namespace oni {
                 mTextureRenderer->submit(shape, texture);
             }
 
-            auto textureVehicles = registry.persistent<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::TagVehicle, components::Car>();
-            for (const auto &entity: textureVehicles) {
-                const auto &shape = textureVehicles.get<components::Shape>(entity);
-                const auto &texture = textureVehicles.get<components::Texture>(entity);
-                const auto &car = textureVehicles.get<components::Car>(entity);
-                const auto heading = static_cast<float>(car.heading);
-
-                // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
-                // Maybe its faster to just reset the view matrix and make a new
-                // draw call instead of this shit.
-                auto shapeTransformed = physics::Transformation::localRotation(heading, shape);
-
-                const auto &positionInWorld = car.position;
-
-                physics::Transformation::localToWorldTranslation(math::vec3{positionInWorld.x,
-                                                                            positionInWorld.y,
-                                                                            0.0f},
-                                                                 shapeTransformed);
-
-                mTextureRenderer->submit(shapeTransformed, texture);
-            }
-
             auto dynamicTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
                     components::Texture, components::Placement, components::TagDynamic>();
             for (const auto &entity: dynamicTextureSpriteView) {
@@ -180,6 +157,9 @@ namespace oni {
                 const auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
                 const auto heading = placement.heading;
 
+                // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
+                // Maybe its faster to just reset the view matrix and make a new
+                // draw call instead of this shit.
                 auto shapeTransformed = physics::Transformation::localRotation(heading, shape);
 
                 physics::Transformation::localToWorldTranslation(placement.position, shapeTransformed);

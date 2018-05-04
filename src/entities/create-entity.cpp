@@ -64,13 +64,13 @@ namespace oni {
 
             auto entityShape = components::Shape::fromSize(size);
             auto entityDynamic = components::TagDynamic{};
-            auto entityTextureShader = components::TagTextureShaded{};
+            auto entityTextureShaded = components::TagTextureShaded{};
             auto entityPlacement = components::Placement{positionInWorld, heading};
 
             registry.assign<components::Shape>(entity, entityShape);
             registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::Placement>(entity, entityPlacement);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
+            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
@@ -83,13 +83,13 @@ namespace oni {
             auto entity = registry.create();
             auto entityShapeWorld = components::Shape::fromSize(size);
             auto entityStatic = components::TagStatic{};
-            auto entityTextureShader = components::TagTextureShaded{};
+            auto entityTextureShaded = components::TagTextureShaded{};
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
             registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Texture>(entity, entityTexture);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
+            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
@@ -125,7 +125,8 @@ namespace oni {
 
             auto carConfig = components::CarConfig();
             auto entityVehicleTag = components::TagVehicle{};
-            auto entityTextureShader = components::TagTextureShaded{};
+            auto entityDynamicTag = components::TagDynamic{};
+            auto entityTextureShaded = components::TagTextureShaded{};
 
             // TODO: this should be defined by the user of this function
             carConfig.cgToRear = 1.25f;
@@ -157,12 +158,16 @@ namespace oni {
                     math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)});
             auto car = components::Car(carConfig);
 
+            auto entityPlacement = components::Placement{0.0f, 0.0f, 0.0f, 0.0f};
+
             registry.assign<components::Shape>(entity, entityShapeWorld);
+            registry.assign<components::Placement>(entity, entityPlacement);
             registry.assign<components::Texture>(entity, entityTexture);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShader);
+            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::Car>(entity, car);
             registry.assign<components::CarConfig>(entity, carConfig);
             registry.assign<components::TagVehicle>(entity, entityVehicleTag);
+            registry.assign<components::TagDynamic>(entity, entityDynamicTag);
 
             return entity;
         }

@@ -7,7 +7,8 @@ namespace oni {
     namespace physics {
 
         void Dynamics::tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) {
-            auto view = registry.view<components::Car, components::CarConfig, components::TagVehicle>();
+            auto view = registry.view<components::Placement, components::Car,
+                    components::CarConfig, components::TagVehicle>();
 
             for (auto entity: view) {
                 auto &car = view.get<components::Car>(entity);
@@ -51,6 +52,12 @@ namespace oni {
                 car.steerAngle = car.steer * carConfig.maxSteer;
 
                 tickCar(car, carConfig, carInput, tickTime);
+
+                auto placement = view.get<components::Placement>(entity);
+                placement.position = math::vec3{car.position.x, car.position.y, 1.0f};
+                placement.heading = static_cast<float>(car.heading);
+
+                registry.replace<components::Placement>(entity, placement);
             }
         }
     }

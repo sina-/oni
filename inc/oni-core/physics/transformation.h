@@ -1,6 +1,8 @@
 #pragma once
 
 #include <oni-core/components/geometry.h>
+#include <oni-core/entities/create-entity.h>
+#include <oni-core/components/hierarchy.h>
 
 namespace oni {
     namespace math {
@@ -18,7 +20,12 @@ namespace oni {
             ~Transformation() = default;
 
         public:
-            static components::Shape localRotation(const float rotation, const components::Shape &shape);
+
+            static components::Shape shapeTransformation(const math::mat4 &transformation,
+                                                         const components::Shape &shape);
+
+            static math::mat4 createTransformation(const math::vec3 &position, const float rotation,
+                                                   const math::vec3 &scale);
 
             static void worldToLocalTranslation(const math::vec3 &reference, math::vec3 &operand);
 
@@ -41,6 +48,14 @@ namespace oni {
              */
             static void worldToLocalTextureTranslation(const math::vec3 &reference, const float ratio,
                                                        math::vec3 &operand);
+
+            static void updatePlacement(entt::DefaultRegistry &registry,
+                                        entities::entityID entity,
+                                        const components::Placement &placement);
+
+            static void updateTransformParent(entt::DefaultRegistry &registry,
+                                              entities::entityID entity,
+                                              const components::TransformParent &transformParent);
         };
     }
 }

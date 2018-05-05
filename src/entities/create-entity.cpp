@@ -1,5 +1,3 @@
-#include <entt/entt.hpp>
-
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/graphics/font-manager.h>
 
@@ -20,7 +18,7 @@ namespace oni {
                                     const math::vec3 &positionInWorld) {
             auto entity = registry.create();
 
-            auto entityShapeWorld = components::Shape::fromSize(size);
+            auto entityShapeWorld = components::Shape::fromSizeVertical(size);
             auto entityAppearance = components::Appearance{color};
             auto entityColorShader = components::TagColorShaded{};
 
@@ -40,7 +38,7 @@ namespace oni {
             auto entity = registry.create();
 
             auto entityAppearance = components::Appearance {color};
-            auto entityShapeWorld = components::Shape::fromSize(size);
+            auto entityShapeWorld = components::Shape::fromSizeVertical(size);
             auto entityStatic = components::TagStatic{};
             auto entityColorShader = components::TagColorShaded{};
 
@@ -55,17 +53,17 @@ namespace oni {
             return entity;
         }
 
-        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
-                                             const components::Texture &entityTexture,
-                                             const math::vec2 &size,
-                                             const math::vec3 &positionInWorld,
-                                             const float heading) {
+        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry, const components::Texture &entityTexture,
+                                             const math::vec2 &size, const math::vec3 &positionInWorld,
+                                             const float heading,
+                                             const math::vec3 &scale) {
             auto entity = registry.create();
 
-            auto entityShape = components::Shape::fromSize(size);
+            auto entityShape = components::Shape::fromSizeHorizantal(size);
             auto entityDynamic = components::TagDynamic{};
             auto entityTextureShaded = components::TagTextureShaded{};
-            auto entityPlacement = components::Placement{positionInWorld, heading};
+
+            auto entityPlacement = components::Placement{positionInWorld, heading, scale};
 
             registry.assign<components::Shape>(entity, entityShape);
             registry.assign<components::Texture>(entity, entityTexture);
@@ -81,7 +79,7 @@ namespace oni {
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld) {
             auto entity = registry.create();
-            auto entityShapeWorld = components::Shape::fromSize(size);
+            auto entityShapeWorld = components::Shape::fromSizeVertical(size);
             auto entityStatic = components::TagStatic{};
             auto entityTextureShaded = components::TagTextureShaded{};
 
@@ -138,7 +136,7 @@ namespace oni {
             carConfig.lockGrip = 0.2f;
             carConfig.tireGrip = 3.0f;
             carConfig.engineForce = 10000;
-            carConfig.brakeForce = 1000;
+            carConfig.brakeForce = 4000;
             carConfig.cornerStiffnessRear = 5.5f;
             carConfig.cornerStiffnessFront = 5.0f;
             carConfig.maxSteer = 0.5f;
@@ -158,7 +156,7 @@ namespace oni {
                     math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)});
             auto car = components::Car(carConfig);
 
-            auto entityPlacement = components::Placement{0.0f, 0.0f, 0.0f, 0.0f};
+            auto entityPlacement = components::Placement{math::vec3{0.0f, 0.0f, 1.0f}, 0.0f, {1.0f, 1.0f, 0.0f}};
 
             registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Placement>(entity, entityPlacement);

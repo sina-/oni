@@ -155,14 +155,21 @@ namespace oni {
                 const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
                 const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
                 const auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
-                const auto heading = placement.heading;
+
+                auto transformation = physics::Transformation::createTransformation(placement.position,
+                                                                                    placement.rotation,
+                                                                                    placement.scale);
 
                 // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
                 // Maybe its faster to just reset the view matrix and make a new
                 // draw call instead of this shit.
-                auto shapeTransformed = physics::Transformation::localRotation(heading, shape);
+                if (registry.has<components::TransformParent>(entity)) {
+                    const auto &transformParent = registry.get<components::TransformParent>(entity);
+                    // NOTE: Order matters. First transform by parent's transformation then child.
+                    transformation = transformParent.transform * transformation;
+                }
 
-                physics::Transformation::localToWorldTranslation(placement.position, shapeTransformed);
+                auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
 
                 mTextureRenderer->submit(shapeTransformed, texture);
             }

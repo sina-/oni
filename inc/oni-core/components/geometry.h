@@ -38,19 +38,32 @@ namespace oni {
                         math::vec3{position.x + size.x, position.y, position.z}};
             }
 
-            static Shape fromSize(const math::vec2 &size) {
+            static Shape fromSizeVertical(const math::vec2 &size) {
+                auto halfSizeX = size.x / 2;
+                auto halfSizeY = size.y / 2;
                 return Shape{
-                        math::vec3{0.0f, 0.0f, 0.0f},
-                        math::vec3{0.0f, size.y, 0.0f},
-                        math::vec3{size.x, size.y, 0.0f},
-                        math::vec3{size.x, 0.0f, 0.0f}};
+                        math::vec3{-halfSizeX, -halfSizeY, 0.0f},
+                        math::vec3{-halfSizeX, halfSizeY, 0.0f},
+                        math::vec3{halfSizeX, halfSizeY, 0.0f},
+                        math::vec3{halfSizeX, -halfSizeY, 0.0f}};
+            }
+
+            static Shape fromSizeHorizantal(const math::vec2 &size) {
+                auto halfSizeX = size.x / 2;
+                auto halfSizeY = size.y / 2;
+                return Shape{
+                        math::vec3{-halfSizeY, -halfSizeX, 0.0f},
+                        math::vec3{-halfSizeY, halfSizeX, 0.0f},
+                        math::vec3{halfSizeY, halfSizeX, 0.0f},
+                        math::vec3{halfSizeY, -halfSizeX, 0.0f}};
             }
 
         };
 
         struct Placement {
             math::vec3 position{0.0f, 0.0f, 0.0f};
-            float heading{0.0f};
+            float rotation{0.0f};
+            math::vec3 scale{1.0f, 1.0f, 0.0f};
         };
 
         struct TagStatic {

@@ -2,6 +2,7 @@
 #include <oni-core/physics/car.h>
 #include <oni-core/graphics/window.h>
 #include <oni-core/components/geometry.h>
+#include <oni-core/physics/transformation.h>
 
 namespace oni {
     namespace physics {
@@ -53,11 +54,11 @@ namespace oni {
 
                 tickCar(car, carConfig, carInput, tickTime);
 
-                auto placement = view.get<components::Placement>(entity);
-                placement.position = math::vec3{car.position.x, car.position.y, 1.0f};
-                placement.heading = static_cast<float>(car.heading);
+                auto placement = components::Placement{math::vec3{car.position.x, car.position.y, 1.0f},
+                                                       static_cast<const float>(car.heading),
+                                                       math::vec3{1.0f, 1.0f, 0.0f}};
 
-                registry.replace<components::Placement>(entity, placement);
+                Transformation::updatePlacement(registry, entity, placement);
             }
         }
     }

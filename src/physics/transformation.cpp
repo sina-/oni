@@ -1,4 +1,7 @@
 #include <oni-core/physics/transformation.h>
+#include <entt/entt.hpp>
+#include <oni-core/entities/create-entity.h>
+#include <oni-core/components/hierarchy.h>
 
 namespace oni {
     namespace physics {
@@ -31,39 +34,50 @@ namespace oni {
             Transformation::localToTextureTranslation(ratio, operand);
         }
 
-        components::Shape Transformation::localRotation(const float rotation, const components::Shape &shape) {
-            const auto centerX = (shape.vertexA.x + shape.vertexD.x) / 2.0f;
-            const auto centerY = (shape.vertexA.y + shape.vertexB.y) / 2.0f;
+        void Transformation::updatePlacement(entt::DefaultRegistry &registry,
+                                             entities::entityID entity,
+                                             const components::Placement &placement) {
+            registry.replace<components::Placement>(entity, placement);
 
-            const auto Ax = shape.vertexA.x - centerX;
-            const auto Bx = shape.vertexB.x - centerX;
-            const auto Cx = shape.vertexC.x - centerX;
-            const auto Dx = shape.vertexD.x - centerX;
+            if (registry.has<components::TransformChildren>(entity)) {
+                auto transformChildren = registry.get<components::TransformChildren>(entity);
+                for (auto child: transformChildren.children) {
+                    auto transformParent = registry.get<components::TransformParent>(child);
+                    transformParent.transform = createTransformation(placement.position, placement.rotation,
+                                                                     placement.scale);
 
-            const auto Ay = shape.vertexA.y - centerY;
-            const auto By = shape.vertexB.y - centerY;
-            const auto Cy = shape.vertexC.y - centerY;
-            const auto Dy = shape.vertexD.y - centerY;
+                    updateTransformParent(registry, child, transformParent);
+                }
+            }
+        }
 
-            const auto cs = std::cos(rotation);
-            const auto sn = std::sin(rotation);
+        void Transformation::updateTransformParent(entt::DefaultRegistry &registry,
+                                                   entities::entityID entity,
+                                                   const components::TransformParent &transformParent) {
+            // TODO: This function should recurse
+            registry.replace<components::TransformParent>(entity, transformParent);
+        }
 
-            const auto Ax_ = static_cast<const float>(Ax * cs - Ay * sn + centerX);
-            const auto Bx_ = static_cast<const float>(Bx * cs - By * sn + centerX);
-            const auto Cx_ = static_cast<const float>(Cx * cs - Cy * sn + centerX);
-            const auto Dx_ = static_cast<const float>(Dx * cs - Dy * sn + centerX);
+        components::Shape Transformation::shapeTransformation(const math::mat4 &transformation,
+                                                              const components::Shape &shape) {
+            auto vertexA = shape.vertexA;
+            auto vertexB = shape.vertexB;
+            auto vertexC = shape.vertexC;
+            auto vertexD = shape.vertexD;
 
-            const auto Ay_ = static_cast<const float>(Ax * sn + Ay * cs + centerY);
-            const auto By_ = static_cast<const float>(Bx * sn + By * cs + centerY);
-            const auto Cy_ = static_cast<const float>(Cx * sn + Cy * cs + centerY);
-            const auto Dy_ = static_cast<const float>(Dx * sn + Dy * cs + centerY);
+            return components::Shape{transformation * vertexA,
+                                     transformation * vertexB,
+                                     transformation * vertexC,
+                                     transformation * vertexD};
+        }
 
-            const auto A = math::vec3{Ax_, Ay_, 0.0f};
-            const auto B = math::vec3{Bx_, By_, 0.0f};
-            const auto C = math::vec3{Cx_, Cy_, 0.0f};
-            const auto D = math::vec3{Dx_, Dy_, 0.0f};
-
-            return components::Shape{A, B, C, D};
+        math::mat4 Transformation::createTransformation(const math::vec3 &position, const float rotation,
+                                                        const math::vec3 &scale) {
+            auto translationMat = math::mat4::translation(position);
+            auto rotationMat = math::mat4::rotation(rotation, math::vec3{0.0f, 0.0f, 1.0f});
+            auto scaleMat = math::mat4::scale(scale);
+            auto transformation = translationMat * rotationMat * scaleMat;
+            return transformation;
         }
     }
 }

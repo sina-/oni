@@ -18,7 +18,7 @@ namespace oni {
                                     const math::vec3 &positionInWorld) {
             auto entity = registry.create();
 
-            auto entityShapeWorld = components::Shape::fromSizeVertical(size);
+            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityAppearance = components::Appearance{color};
             auto entityColorShader = components::TagColorShaded{};
 
@@ -38,7 +38,7 @@ namespace oni {
             auto entity = registry.create();
 
             auto entityAppearance = components::Appearance {color};
-            auto entityShapeWorld = components::Shape::fromSizeVertical(size);
+            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityStatic = components::TagStatic{};
             auto entityColorShader = components::TagColorShaded{};
 
@@ -59,7 +59,7 @@ namespace oni {
                                              const math::vec3 &scale) {
             auto entity = registry.create();
 
-            auto entityShape = components::Shape::fromSizeHorizantal(size);
+            auto entityShape = components::Shape::fromSizeAndRotation(size, heading);
             auto entityDynamic = components::TagDynamic{};
             auto entityTextureShaded = components::TagTextureShaded{};
 
@@ -79,7 +79,7 @@ namespace oni {
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld) {
             auto entity = registry.create();
-            auto entityShapeWorld = components::Shape::fromSizeVertical(size);
+            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityStatic = components::TagStatic{};
             auto entityTextureShaded = components::TagTextureShaded{};
 

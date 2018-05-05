@@ -38,24 +38,22 @@ namespace oni {
                         math::vec3{position.x + size.x, position.y, position.z}};
             }
 
-            static Shape fromSizeVertical(const math::vec2 &size) {
+            static Shape fromSizeAndRotation(const math::vec2 &size, const float rotation) {
                 auto halfSizeX = size.x / 2;
                 auto halfSizeY = size.y / 2;
-                return Shape{
+                auto shape = Shape{
                         math::vec3{-halfSizeX, -halfSizeY, 0.0f},
                         math::vec3{-halfSizeX, halfSizeY, 0.0f},
                         math::vec3{halfSizeX, halfSizeY, 0.0f},
                         math::vec3{halfSizeX, -halfSizeY, 0.0f}};
-            }
-
-            static Shape fromSizeHorizantal(const math::vec2 &size) {
-                auto halfSizeX = size.x / 2;
-                auto halfSizeY = size.y / 2;
-                return Shape{
-                        math::vec3{-halfSizeY, -halfSizeX, 0.0f},
-                        math::vec3{-halfSizeY, halfSizeX, 0.0f},
-                        math::vec3{halfSizeY, halfSizeX, 0.0f},
-                        math::vec3{halfSizeY, -halfSizeX, 0.0f}};
+                if (rotation) {
+                    auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.0f, 0.0f, 1.0f});
+                    shape.vertexA = rotationMat * shape.vertexA;
+                    shape.vertexB = rotationMat * shape.vertexB;
+                    shape.vertexC = rotationMat * shape.vertexC;
+                    shape.vertexD = rotationMat * shape.vertexD;
+                }
+                return shape;
             }
 
         };

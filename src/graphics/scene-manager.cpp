@@ -160,9 +160,9 @@ namespace oni {
                                                                                     placement.rotation,
                                                                                     placement.scale);
 
-                // TODO: All this CPU calculations to avoid another draw call for dynamic entities.
-                // Maybe its faster to just reset the view matrix and make a new
-                // draw call instead of this shit.
+                // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
+                // separately for each entity and each time a physics system updates an entity it will automatically
+                // recalculate PlacementWorld for the entity and all its child entities.
                 if (registry.has<components::TransformParent>(entity)) {
                     const auto &transformParent = registry.get<components::TransformParent>(entity);
                     // NOTE: Order matters. First transform by parent's transformation then child.

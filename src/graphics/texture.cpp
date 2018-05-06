@@ -141,13 +141,13 @@ namespace oni {
 
         std::vector<unsigned char> Texture::generateBits(const int width, const int height,
                                                          const components::PixelRGBA &pixel) {
-            std::vector<unsigned char> bits(static_cast<unsigned long>(4 * width * height), 0);
             // Elements in pixel
             auto eip = 4;
+            std::vector<unsigned char> bits(static_cast<unsigned long>(eip * width * height), 0);
             auto stride = width * eip;
 
-            for (int y = 0; y < height; ++y) {
-                for (int x = 0; x < width; ++x) {
+            for (unsigned int y = 0; y < height; ++y) {
+                for (unsigned int x = 0; x < width; ++x) {
                     bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_BLUE)] = pixel.blue;
                     bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_GREEN)] = pixel.green;
                     bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_RED)] = pixel.red;

@@ -53,6 +53,7 @@ namespace oni {
             return entity;
         }
 
+        // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
         entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry, const components::Texture &entityTexture,
                                              const math::vec2 &size, const math::vec3 &positionInWorld,
                                              const float heading,
@@ -130,7 +131,7 @@ namespace oni {
             carConfig.cgToRear = 1.25f;
             carConfig.cgToFront = 1.25f;
             carConfig.cgToFrontAxle = 1.15f;
-            carConfig.cgToRearAxle = 1.15f;
+            carConfig.cgToRearAxle = 1.00f;
             carConfig.halfWidth = 0.55f;
             carConfig.inertialScale = 0.5f;
             carConfig.lockGrip = 0.2f;

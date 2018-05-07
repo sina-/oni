@@ -146,12 +146,12 @@ namespace oni {
             std::vector<unsigned char> bits(static_cast<unsigned long>(eip * width * height), 0);
             auto stride = width * eip;
 
-            for (unsigned int y = 0; y < height; ++y) {
-                for (unsigned int x = 0; x < width; ++x) {
-                    bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_BLUE)] = pixel.blue;
-                    bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_GREEN)] = pixel.green;
-                    bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_RED)] = pixel.red;
-                    bits[static_cast<unsigned long>((y * stride) + (x * eip) + FI_RGBA_ALPHA)] = pixel.alpha;
+            for (unsigned long y = 0; y < height; ++y) {
+                for (unsigned long x = 0; x < width; ++x) {
+                    bits[(y * stride) + (x * eip) + FI_RGBA_BLUE] = pixel.blue;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_GREEN] = pixel.green;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_RED] = pixel.red;
+                    bits[(y * stride) + (x * eip) + FI_RGBA_ALPHA] = pixel.alpha;
                 }
             }
 

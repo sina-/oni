@@ -4,7 +4,7 @@ include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
 # NOTE: SYSTEM so the warnings are disabled
 include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/entt)
 
-add_library(oni-core-entities create-entity.cpp manage-hierarchy.cpp)
+add_library(oni-core-entities create-entity.cpp manage-hierarchy.cpp tile-world.cpp)
 
 target_link_libraries(
         oni-core-entities

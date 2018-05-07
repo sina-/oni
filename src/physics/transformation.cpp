@@ -1,5 +1,4 @@
 #include <oni-core/physics/transformation.h>
-#include <entt/entt.hpp>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/components/hierarchy.h>
 

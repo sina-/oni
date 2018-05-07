@@ -1,5 +1,3 @@
-#include <entt/entt.hpp>
-
 #include <oni-core/graphics/scene-manager.h>
 #include <oni-core/graphics/shader.h>
 #include <oni-core/graphics/renderer-2d.h>

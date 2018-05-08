@@ -14,30 +14,24 @@ namespace oni {
             return mTileSize;
         }
 
-        entities::entityID TileWorld::getTileID(double tileCoords) const {
-            auto result = mCoordToTileLookup.find(tileCoords);
-            ONI_DEBUG_ASSERT(result != mCoordToTileLookup.end());
-
-            return result->second;
-        }
-
-        bool TileWorld::tileExsists(long tileCoords) const {
+        bool TileWorld::tileExists(long tileCoords) const {
             return mCoordToTileLookup.find(tileCoords) != mCoordToTileLookup.end();
         }
 
-        long TileWorld::packCoords(const math::vec2 &position) {
+        long TileWorld::packCoordinates(const math::vec2 &position) {
+            // TODO: Need to use int64_t for return type and int32_t instead of int below
+            //  when I have migrated to double precision in the math library
             int x = static_cast<int>(position.x) / mTileSize;
             int y = static_cast<int>(position.y) / mTileSize;
 
             // https://stackoverflow.com/a/827267
-            long result = x;
-            result = result << 32;
+            long result = x << 32;
             result = result | static_cast<long>(static_cast<unsigned int>(y));
 
             return result;
         }
 
-        math::vec2 TileWorld::unpackCoords(long coord) {
+        math::vec2 TileWorld::unpackCoordinates(long coord) {
             auto x = static_cast<int>(coord >> 32) * mTileSize;
             auto y = static_cast<int>(coord & (0xFFFFFFFF)) * mTileSize;
 
@@ -46,23 +40,28 @@ namespace oni {
         }
 
         math::vec4 TileWorld::getTileColor(const math::vec2 &position) {
-            auto tileCoord = packCoords(position);
-            auto tileID = getTileID(tileCoord);
+            auto tileCoord = packCoordinates(position);
+            auto result = mCoordToTileLookup.find(tileCoord);
+
+            // TODO: It might also make sense to log a warning message and just tick the missing tile.
+            ONI_DEBUG_ASSERT(result != mCoordToTileLookup.end());
+
+            auto tileID = result->second;
 
             return mTileRegistry->get<math::vec4>(tileID);
         }
 
-        void TileWorld::tick(const math::vec2 &position, unsigned int distanceToRightSideOfScreen) {
+        void TileWorld::tick(const math::vec2 &position, unsigned int tickRadius) {
             // TODO: Make sure tiles adjacent to the given position are properly created and save into
             // mTileRegistry.
 
-            auto tileCoords = packCoords(position);
-            if (!tileExsists(tileCoords)) {
-                auto uCoords = unpackCoords(tileCoords);
-                auto color = math::vec4{position.x, position.y, uCoords.x, uCoords.y};
+            auto tileCoordinates = packCoordinates(position);
+            if (!tileExists(tileCoordinates)) {
+                auto uCoordinates = unpackCoordinates(tileCoordinates);
+                auto color = math::vec4{position.x, position.y, uCoordinates.x, uCoordinates.y};
                 auto tile = mTileRegistry->create();
 
-                mCoordToTileLookup.emplace(tileCoords, tile);
+                mCoordToTileLookup.emplace(tileCoordinates, tile);
 
                 mTileRegistry->assign<math::vec4>(tile, color);
             }

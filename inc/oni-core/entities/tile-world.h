@@ -17,31 +17,32 @@ namespace oni {
 
             ~TileWorld();
 
-            void tick(const math::vec2 &position, unsigned int distanceToRightSideOfScreen);
+            /**
+             * Prepares the tiles at given position for the tickRadius so that information will be available
+             * to the renderer or other systems.
+             *
+             * @param position location in the world coordinate to tick
+             * @param tickRadius in game units that is meters
+             */
+            void tick(const math::vec2 &position, unsigned int tickRadius);
 
+            // TODO: Template the function and call it getTileData
             math::vec4 getTileColor(const math::vec2 &position);
+
+            int getTileSize() const;
 
         private:
             /**
              * Pack float values in the range (x +-16, y +-16) into a long.
              * For example: any x and y from 0 to 15.99999 is saved into the same long.
              * @param position
-             * @return
+             * @return pack long value
              */
-            long packCoords(const math::vec2 &position);
+            long packCoordinates(const math::vec2 &position);
 
-            math::vec2 unpackCoords(long coord);
+            math::vec2 unpackCoordinates(long coord);
 
-            int getTileSize() const;
-
-            /**
-             * Given a packed coordinate, using packCoords(), return the tile ID that (x, y) are within.
-             * @param tileCoords
-             * @return
-             */
-            entities::entityID getTileID(double tileCoords) const;
-
-            bool tileExsists(long tileCoords) const;
+            bool tileExists(long tileCoords) const;
 
         public:
             std::map<long, entities::entityID> mCoordToTileLookup{};

@@ -58,6 +58,27 @@ namespace oni {
 
         };
 
+        struct Tile {
+            math::vec4 color{0.5f, 0.5f, 0.5f, 1.0f};
+        };
+
+        struct TileChunk {
+            static const unsigned int dimensionX{16};
+            static const unsigned int dimensionY{16};
+
+            std::vector<Tile> tiles{};
+        };
+
+        struct World {
+            static const unsigned int width{1024};
+            static const unsigned int height{1024};
+            /*
+             * An array of pointers to TileChunk which is width * height big. If there is no chunk in a position
+             * then the lookup  will return nullptr, i.e., world[x + y*width] == nullptr.
+             */
+            std::vector<std::unique_ptr<TileChunk>> world{};
+        };
+
         struct Placement {
             math::vec3 position{0.0f, 0.0f, 0.0f};
             float rotation{0.0f};

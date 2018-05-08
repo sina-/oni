@@ -5,6 +5,8 @@
 #include <oni-core/common/consts.h>
 #include <oni-core/io/output.h>
 #include <oni-core/physics/transformation.h>
+#include <oni-core/math/vec2.h>
+#include <oni-core/entities/tile-world.h>
 
 namespace oni {
     namespace graphics {
@@ -124,6 +126,72 @@ namespace oni {
             renderer2D.end();
             renderer2D.flush();
             shader.disable();
+        }
+
+        void SceneManager::renderTileWorld(const entities::TileWorld &tileWorld, const math::vec2 &position) {
+            begin(*mColorShader, *mColorRenderer);
+
+            auto x = position.x;
+            auto y = position.y;
+            auto tileSizeX = tileWorld.getTileSizeX();
+            auto tileSizeY = tileWorld.getTileSizeY();
+            auto tileIndexX = tileWorld.getTileIndexX(x);
+            auto tileIndexY = tileWorld.getTileIndexX(y);
+            auto tilePosX = tileIndexX * tileSizeX;
+            auto tilePosY = tileIndexY * tileSizeY;
+            auto color = tileWorld.getTileColor(position);
+
+            /**
+             *      A-B-C
+             *      D-E-F
+             *      G-h-I
+             */
+            auto shape = components::Shape::fromSizeAndRotation(math::vec2{tileSizeX, tileSizeY}, 0.0f);
+
+            // TODO: Move this into TileWorld.tick() function.
+            auto translation = math::mat4::translation({tilePosX - tileSizeX, tilePosY + tileSizeY, 1.0f});
+            auto shapeTransformedA = physics::Transformation::shapeTransformation(translation, shape);
+            translation = math::mat4::translation({tilePosX, tilePosY + tileSizeY, 1.0f});
+            auto shapeTransformedB = physics::Transformation::shapeTransformation(translation, shape);
+            translation = math::mat4::translation({tilePosX + tileSizeX, tilePosY + tileSizeY, 1.0f});
+            auto shapeTransformedC = physics::Transformation::shapeTransformation(translation, shape);
+
+            translation = math::mat4::translation({tilePosX - tileSizeX, tilePosY, 1.0f});
+            auto shapeTransformedD = physics::Transformation::shapeTransformation(translation, shape);
+            translation = math::mat4::translation({tilePosX, tilePosY, 1.0f});
+            auto shapeTransformedE = physics::Transformation::shapeTransformation(translation, shape);
+
+            translation = math::mat4::translation({tilePosX + tileSizeX, tilePosY, 1.0f});
+            auto shapeTransformedF = physics::Transformation::shapeTransformation(translation, shape);
+
+            translation = math::mat4::translation({tilePosX - tileSizeX, tilePosY - tileSizeY, 1.0f});
+            auto shapeTransformedG = physics::Transformation::shapeTransformation(translation, shape);
+            translation = math::mat4::translation({tilePosX, tilePosY - tileSizeY, 1.0f});
+            auto shapeTransformedH = physics::Transformation::shapeTransformation(translation, shape);
+            translation = math::mat4::translation({tilePosX + tileSizeX, tilePosY - tileSizeY, 1.0f});
+            auto shapeTransformedI = physics::Transformation::shapeTransformation(translation, shape);
+
+            auto appearance = components::Appearance{color};
+            mColorRenderer->submit(shapeTransformedE, appearance);
+
+            appearance = components::Appearance{math::vec4{0.2f, 0.0f, 0.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedA, appearance);
+            appearance = components::Appearance{math::vec4{0.0f, 1.0f, 0.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedB, appearance);
+            appearance = components::Appearance{math::vec4{0.0f, 0.0f, 1.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedC, appearance);
+            appearance = components::Appearance{math::vec4{1.0f, 0.0f, 1.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedD, appearance);
+            appearance = components::Appearance{math::vec4{1.0f, 1.0f, 0.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedF, appearance);
+            appearance = components::Appearance{math::vec4{0.0f, 1.0f, 1.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedG, appearance);
+            appearance = components::Appearance{math::vec4{1.0f, 1.0f, 1.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedH, appearance);
+            appearance = components::Appearance{math::vec4{0.0f, 0.0f, 0.0f, 1.0f}};
+            mColorRenderer->submit(shapeTransformedI, appearance);
+
+            end(*mColorShader, *mColorRenderer);
         }
 
         void SceneManager::render(entt::DefaultRegistry &registry) {

@@ -8,8 +8,17 @@
 #include <oni-core/components/visual.h>
 #include <oni-core/components/buffer.h>
 #include <oni-core/math/mat4.h>
+#include <oni-core/entities/tile-world.h>
 
 namespace oni {
+    namespace math {
+        class vec2;
+    }
+
+    namespace entities {
+        class TileWorld;
+    }
+
     namespace graphics {
         class Shader;
 
@@ -24,6 +33,8 @@ namespace oni {
             ~SceneManager();
 
             void render(entt::DefaultRegistry &registry);
+
+            void renderTileWorld(const entities::TileWorld &tileWorld, const math::vec2 &position);
 
             // TODO: What about a camera class?
             void lookAt(float x, float y);

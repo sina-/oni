@@ -27,9 +27,15 @@ namespace oni {
             void tick(const math::vec2 &position, unsigned int tickRadius);
 
             // TODO: Template the function and call it getTileData
-            math::vec4 getTileColor(const math::vec2 &position);
+            math::vec4 getTileColor(const math::vec2 &position) const;
 
-            int getTileSize() const;
+            int getTileSizeX() const;
+
+            int getTileSizeY() const;
+
+            int getTileIndexX(float x) const;
+
+            int getTileIndexY(float y) const;
 
         private:
             /**
@@ -38,18 +44,19 @@ namespace oni {
              * @param position
              * @return pack long value
              */
-            long packCoordinates(const math::vec2 &position);
+            long packCoordinates(const math::vec2 &position) const;
 
-            math::vec2 unpackCoordinates(long coord);
+            math::vec2 unpackCoordinates(long coord) const;
 
-            bool tileExists(long tileCoords) const;
+            bool tileExists(long tileCoordinates) const;
 
         public:
             std::map<long, entities::entityID> mCoordToTileLookup{};
             std::unique_ptr<entt::DefaultRegistry> mTileRegistry{};
 
             // Square tiles of 16mx16m
-            int mTileSize{16};
+            int mTileSizeX{16};
+            int mTileSizeY{16};
         };
     }
 }

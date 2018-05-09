@@ -122,7 +122,7 @@ namespace oni {
         }
 
         void FMODDeleter::operator()(FMOD::Channel *channel) const {
-
+            UNUSED(channel);
         }
     }
 }

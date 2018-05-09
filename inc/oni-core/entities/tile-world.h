@@ -37,6 +37,8 @@ namespace oni {
 
             int getTileIndexY(float y) const;
 
+            entt::DefaultRegistry &getRegistry();
+
         private:
             /**
              * Pack float values in the range (x +-16, y +-16) into a long.
@@ -44,11 +46,13 @@ namespace oni {
              * @param position
              * @return pack long value
              */
-            long packCoordinates(const math::vec2 &position) const;
+            common::packedTileCoordinates packCoordinates(const math::vec2 &position) const;
 
             math::vec2 unpackCoordinates(long coord) const;
 
             bool tileExists(long tileCoordinates) const;
+
+            void createTileIfMissing(const math::vec2 &position);
 
         public:
             std::map<long, entities::entityID> mCoordToTileLookup{};

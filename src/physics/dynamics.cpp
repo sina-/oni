@@ -58,6 +58,11 @@ namespace oni {
                                                        static_cast<const float>(car.heading),
                                                        math::vec3{1.0f, 1.0f, 0.0f}};
 
+                auto velocity = car.velocityLocal.len();
+                // NOTE: This is not really distance from camera but it is a multiplier that can be used to scale an
+                // orthographical camera
+                car.distanceFromCamera = 1 / (1 + velocity * 2 / car.maxVelocityAbsolute);
+
                 Transformation::updatePlacement(registry, entity, placement);
             }
         }

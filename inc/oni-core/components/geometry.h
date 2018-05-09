@@ -46,7 +46,7 @@ namespace oni {
                         math::vec3{-halfSizeX, halfSizeY, 0.0f},
                         math::vec3{halfSizeX, halfSizeY, 0.0f},
                         math::vec3{halfSizeX, -halfSizeY, 0.0f}};
-                if (!static_cast<int>(rotation)) {
+                if (!static_cast<unsigned int>(rotation)) {
                     auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.0f, 0.0f, 1.0f});
                     shape.vertexA = rotationMat * shape.vertexA;
                     shape.vertexB = rotationMat * shape.vertexB;
@@ -152,6 +152,8 @@ namespace oni {
             bool smoothSteer;
             bool safeSteer;
 
+            common::carSimDouble distanceFromCamera;
+
             explicit Car(const components::CarConfig &c) {
                 heading = 0.0f;
                 velocityAbsolute = 0.0f;
@@ -184,6 +186,8 @@ namespace oni {
                 safeSteer = true;
                 slippingFront = false;
                 slippingRear = false;
+
+                distanceFromCamera = 1.0f;
             }
         };
 

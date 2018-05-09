@@ -34,12 +34,14 @@ namespace oni {
 
             void render(entt::DefaultRegistry &registry);
 
-            void renderTileWorld(const entities::TileWorld &tileWorld, const math::vec2 &position);
-
             // TODO: What about a camera class?
             void lookAt(float x, float y);
 
             void lookAt(float x, float y, float distance);
+
+            const math::mat4 &getProjectionMatrix() const;
+
+            const math::mat4 &getViewMatrix() const;
 
         private:
             void begin(const Shader &shader, Renderer2D &renderer2D);
@@ -61,7 +63,6 @@ namespace oni {
             math::mat4 mProjectionMatrix{};
 
             const unsigned int mMaxSpriteCount{0};
-
         };
     }
 }

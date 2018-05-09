@@ -58,18 +58,6 @@ namespace oni {
             return math::vec2{x, y};
         }
 
-        math::vec4 TileWorld::getTileColor(const math::vec2 &position) const {
-            auto tileCoord = packCoordinates(position);
-            auto result = mCoordToTileLookup.find(tileCoord);
-
-            // TODO: It might also make sense to log a warning message and just tick the missing tile.
-            ONI_DEBUG_ASSERT(result != mCoordToTileLookup.end());
-
-            auto tileID = result->second;
-
-            return mTileRegistry->get<math::vec4>(tileID);
-        }
-
         void TileWorld::tick(const math::vec2 &position, unsigned int tickRadius) {
             auto tilesInAlongX = getTileIndexX(tickRadius);
             auto tilesInAlongY = getTileIndexY(tickRadius);

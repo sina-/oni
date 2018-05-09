@@ -26,9 +26,6 @@ namespace oni {
              */
             void tick(const math::vec2 &position, unsigned int tickRadius);
 
-            // TODO: Template the function and call it getTileData
-            math::vec4 getTileColor(const math::vec2 &position) const;
-
             int getTileSizeX() const;
 
             int getTileSizeY() const;

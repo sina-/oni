@@ -30,7 +30,7 @@ namespace oni {
                 if (status == GL_FALSE) {
                     GLint length;
                     glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
-                    std::vector<char> error(static_cast<unsigned int>(length));
+                    std::vector<char> error(static_cast<common::uint32>(length));
                     glGetShaderInfoLog(shaderID, length, &length, &error[0]);
                     glDeleteShader(shaderID);
                     throw std::runtime_error(&error[0]);

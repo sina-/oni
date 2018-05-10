@@ -3,6 +3,7 @@
 #include <thread>
 
 #include <oni-core/common/consts.h>
+#include <oni-core/common/typedefs.h>
 
 namespace oni {
     namespace game {
@@ -19,9 +20,9 @@ namespace oni {
             if (1.0f - mRunLagAccumulator <= common::ep) {
                 auto fps = mRunCounter / mRunLagAccumulator;
                 auto tps = 1 * mTickCounter;
-                showFPS(static_cast<unsigned short>(fps));
-                showTPS(static_cast<unsigned short>(tps));
-                showFET(static_cast<short>(mFrameExcessTime * 1000));
+                showFPS(static_cast<common::uint16 >(fps));
+                showTPS(static_cast<common::uint16 >(tps));
+                showFET(static_cast<common::int16>(mFrameExcessTime * 1000));
 
                 mRunLagAccumulator = 0;
                 mTickLag = 0;
@@ -41,7 +42,7 @@ namespace oni {
             mFrameExcessTime += excess;
 
             if (excess > 0) {
-                auto sleepFor = static_cast<int>(excess * 1000);
+                auto sleepFor = static_cast<common::uint32>(excess * 1000);
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
             }
 

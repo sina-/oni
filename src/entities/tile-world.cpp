@@ -14,11 +14,11 @@ namespace oni {
 
         TileWorld::~TileWorld() = default;
 
-        int TileWorld::getTileSizeX() const {
+        common::uint16 TileWorld::getTileSizeX() const {
             return mTileSizeX;
         }
 
-        int TileWorld::getTileSizeY() const {
+        common::uint16 TileWorld::getTileSizeY() const {
             return mTileSizeY;
         }
 
@@ -29,8 +29,8 @@ namespace oni {
         common::packedTileCoordinates TileWorld::packCoordinates(const math::vec2 &position) const {
             // TODO: Need to use int64_t for return type and int32_t instead of int for getTileIndexX()
             //  when I have migrated to double precision in the math library
-            int x = getTileIndexX(position.x);
-            int y = getTileIndexY(position.y);
+            auto x = getTileIndexX(position.x);
+            auto y = getTileIndexY(position.y);
 
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
@@ -58,7 +58,7 @@ namespace oni {
             return math::vec2{x, y};
         }
 
-        void TileWorld::tick(const math::vec2 &position, unsigned int tickRadius) {
+        void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius) {
             auto tilesInAlongX = getTileIndexX(tickRadius);
             auto tilesInAlongY = getTileIndexY(tickRadius);
             for (auto i = -tilesInAlongX; i <= tilesInAlongX; ++i) {
@@ -69,13 +69,13 @@ namespace oni {
             }
         }
 
-        int TileWorld::getTileIndexX(float x) const {
-            int _x = static_cast<int>(x) / mTileSizeX;
+        common::int64 TileWorld::getTileIndexX(float x) const {
+            common::int64 _x = static_cast<common::int64>(x) / mTileSizeX;
             return _x;
         }
 
-        int TileWorld::getTileIndexY(float y) const {
-            int _y = static_cast<int>(y) / mTileSizeY;
+        common::int64 TileWorld::getTileIndexY(float y) const {
+            common::int64 _y = static_cast<common::int64>(y) / mTileSizeY;
             return _y;
         }
 

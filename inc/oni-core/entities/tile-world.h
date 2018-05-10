@@ -24,15 +24,15 @@ namespace oni {
              * @param position location in the world coordinate to tick
              * @param tickRadius in game units that is meters
              */
-            void tick(const math::vec2 &position, unsigned int tickRadius);
+            void tick(const math::vec2 &position, common::uint16 tickRadius);
 
-            int getTileSizeX() const;
+            common::uint16 getTileSizeX() const;
 
-            int getTileSizeY() const;
+            common::uint16 getTileSizeY() const;
 
-            int getTileIndexX(float x) const;
+            common::int64 getTileIndexX(float x) const;
 
-            int getTileIndexY(float y) const;
+            common::int64 getTileIndexY(float y) const;
 
             entt::DefaultRegistry &getRegistry();
 
@@ -56,8 +56,8 @@ namespace oni {
             std::unique_ptr<entt::DefaultRegistry> mTileRegistry{};
 
             // Square tiles of 16mx16m
-            int mTileSizeX{16};
-            int mTileSizeY{16};
+            common::uint16 mTileSizeX{16};
+            common::uint16 mTileSizeY{16};
         };
     }
 }

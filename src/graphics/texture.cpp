@@ -99,7 +99,8 @@ namespace oni {
             return textureID;
         }
 
-        components::Texture Texture::generate(const int width, const int height, const components::PixelRGBA &pixel) {
+        components::Texture
+        Texture::generate(const common::uint16 width, const common::uint16 height, const components::PixelRGBA &pixel) {
             auto bits = generateBits(width, height, pixel);
 
             GLuint textureID = 0;
@@ -139,15 +140,15 @@ namespace oni {
                                 bits.data());
         }
 
-        std::vector<unsigned char> Texture::generateBits(const int width, const int height,
+        std::vector<unsigned char> Texture::generateBits(const common::uint16 width, const common::uint16 height,
                                                          const components::PixelRGBA &pixel) {
             // Elements in pixel
-            auto eip = 4;
-            std::vector<unsigned char> bits(static_cast<unsigned long>(eip * width * height), 0);
-            auto stride = width * eip;
+            common::uint8 eip = 4;
+            std::vector<common::uint8> bits(static_cast<common::uint32>(eip * width * height), 0);
+            common::uint16 stride = width * eip;
 
-            for (unsigned long y = 0; y < height; ++y) {
-                for (unsigned long x = 0; x < width; ++x) {
+            for (common::uint32 y = 0; y < height; ++y) {
+                for (common::uint32 x = 0; x < width; ++x) {
                     bits[(y * stride) + (x * eip) + FI_RGBA_BLUE] = pixel.blue;
                     bits[(y * stride) + (x * eip) + FI_RGBA_GREEN] = pixel.green;
                     bits[(y * stride) + (x * eip) + FI_RGBA_RED] = pixel.red;

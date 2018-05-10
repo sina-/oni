@@ -9,11 +9,23 @@ namespace oni {
     }
 
     namespace common {
-        typedef unsigned long oniSoundID;
-        typedef double carSimDouble;
         typedef std::int64_t int64;
+        typedef std::int32_t int32;
+        typedef std::int16_t int16;
+        typedef std::int8_t int8;
 
-        typedef int64 packedTileCoordinates;
+        typedef std::uint64_t uint64;
+        typedef std::uint32_t uint32;
+        typedef std::uint16_t uint16;
+        typedef std::uint8_t uint8;
+
+        typedef float real32;
+        typedef double real64;
+
+        typedef real64 carSimDouble;
+        typedef uint32 oniSoundID;
+
+        typedef uint64 packedTileCoordinates;
         typedef std::vector<std::unique_ptr<const components::BufferStructure>> BufferStructures;
     }
 }

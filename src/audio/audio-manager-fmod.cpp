@@ -18,7 +18,7 @@ namespace oni {
             ERRCHECK(result);
             mSystem = std::unique_ptr<FMOD::System, FMODDeleter>(system, FMODDeleter());
 
-            unsigned int version;
+            common::uint32 version;
             result = system->getVersion(&version);
             ERRCHECK(result);
             ONI_DEBUG_ASSERT(version >= FMOD_VERSION)
@@ -65,7 +65,7 @@ namespace oni {
             auto result = mChannels[id]->setPaused(true);
             ERRCHECK(result);
 
-            unsigned int pos;
+            common::uint32 pos;
             result = mChannels[id]->getPosition(&pos, FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
 
@@ -102,7 +102,7 @@ namespace oni {
         }
 
         void AudioManagerFMOD::seek(oniSoundID id, double position) {
-            auto result = mChannels[id]->setPosition(static_cast<unsigned int>(position + common::ep),
+            auto result = mChannels[id]->setPosition(static_cast<common::uint32>(position + common::ep),
                                                      FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
         }

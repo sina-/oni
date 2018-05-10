@@ -6,7 +6,8 @@
 namespace oni {
     namespace graphics {
 
-        Window::Window(std::string &&title, int width, int height, int gameWidth, int gameHeight) :
+        Window::Window(std::string &&title, common::int32 width, common::int32 height, common::int32 gameWidth,
+                       common::int32 gameHeight) :
                 mTitle{std::move(title)}, mWidth{width}, mHeight{height},
                 mGameWidth{gameWidth},
                 mGameHeight{gameHeight},
@@ -41,12 +42,12 @@ namespace oni {
             glfwSetWindowUserPointer(mWindow, reinterpret_cast<void *>(this));
             /*
             1) First try
-            auto windowResizeCallback = [](GLFWwindow* w, int width, int height)
+            auto windowResizeCallback = [](GLFWwindow* w, common::int32 width, common::int32 height)
             {
                 static_cast<Window*>(glfwGetWindowUserPointer(w))->windowResizeCallback(w, width, height);
             };
             2) Second try. It didn't work :(
-            std::function<void(GLFWwindow*, int, int)> windowResizeCallback = std::bind(&Window::windowResizeCallback,
+            std::function<void(GLFWwindow*, common::int32, common::int32)> windowResizeCallback = std::bind(&Window::windowResizeCallback,
                 this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
             */
 
@@ -114,7 +115,7 @@ namespace oni {
             glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
         }
 
-        void Window::windowResizeCallback(GLFWwindow *window, int width, int height) {
+        void Window::windowResizeCallback(GLFWwindow *window, common::int32 width, common::int32 height) {
             auto thiz = getThisFromGLFWWindow(window);
             TwWindowSize(width, height);
 
@@ -123,7 +124,8 @@ namespace oni {
             thiz->setWidth(width);
         }
 
-        void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+        void Window::keyCallback(GLFWwindow *window, common::int32 key, common::int32 scancode, common::int32 action,
+                                 common::int32 mods) {
             UNUSED(scancode);
             UNUSED(mods);
             auto thiz = getThisFromGLFWWindow(window);
@@ -133,7 +135,8 @@ namespace oni {
                 thiz->addKeyReleased(key);
         }
 
-        void Window::mouseCallback(GLFWwindow *window, int button, int action, int mods) {
+        void
+        Window::mouseCallback(GLFWwindow *window, common::int32 button, common::int32 action, common::int32 mods) {
             UNUSED(mods);
             TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);

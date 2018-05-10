@@ -24,7 +24,7 @@ namespace oni {
             // Each sprite has 6 indices.
             mMaxIndicesCount = mMaxSpriteCount * 6;
 
-            auto maxUIntSize = std::numeric_limits<int>::max();
+            auto maxUIntSize = std::numeric_limits<common::int32>::max();
             ONI_DEBUG_ASSERT(mMaxIndicesCount < maxUIntSize);
 
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
@@ -169,7 +169,7 @@ namespace oni {
             float scaleX = text.xScaling;
             float scaleY = text.yScaling;
 
-            for (unsigned int i = 0; i < text.textContent.size(); i++) {
+            for (common::uint32 i = 0; i < text.textContent.size(); i++) {
                 ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;
@@ -240,7 +240,7 @@ namespace oni {
             end();
             flush();
             begin();
-            mSamplers.assign(static_cast<unsigned int>(mMaxNumTextureSamplers), 0);
+            mSamplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(mSamplers.begin(), mSamplers.end(), 0);
             mTextureToSampler.clear();
@@ -274,7 +274,7 @@ namespace oni {
 
         std::vector<GLint> BatchRenderer2D::generateSamplerIDs() {
             std::vector<GLint> samplers;
-            samplers.assign(static_cast<unsigned int>(mMaxNumTextureSamplers), 0);
+            samplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(samplers.begin(), samplers.end(), 0);
             return samplers;

@@ -54,7 +54,7 @@ namespace oni {
                 glUniform4f(getUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
             };
 
-            void setUniform1i(const GLchar *name, int value) const {
+            void setUniform1i(const GLchar *name, common::int32 value) const {
                 glUniform1i(getUniformLocation(name), value);
             };
 

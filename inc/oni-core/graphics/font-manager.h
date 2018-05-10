@@ -32,7 +32,7 @@ namespace oni {
             float mGameHeight;
 
         public:
-            FontManager(std::string font, int size, float gameWidth, float gameHeight);
+            FontManager(std::string font, common::uint8 size, float gameWidth, float gameHeight);
 
             ~FontManager();
 

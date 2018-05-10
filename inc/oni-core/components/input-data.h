@@ -1,8 +1,10 @@
 #pragma once
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace components {
-        typedef int oniKeyPress;
+        typedef common::uint16 oniKeyPress;
 
         struct CarInput {
             float left{0.0f};

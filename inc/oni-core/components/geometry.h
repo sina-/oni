@@ -46,7 +46,7 @@ namespace oni {
                         math::vec3{-halfSizeX, halfSizeY, 0.0f},
                         math::vec3{halfSizeX, halfSizeY, 0.0f},
                         math::vec3{halfSizeX, -halfSizeY, 0.0f}};
-                if (!static_cast<unsigned int>(rotation)) {
+                if (!static_cast<common::uint16>(rotation)) {
                     auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.0f, 0.0f, 1.0f});
                     shape.vertexA = rotationMat * shape.vertexA;
                     shape.vertexB = rotationMat * shape.vertexB;
@@ -63,15 +63,15 @@ namespace oni {
         };
 
         struct TileChunk {
-            static const unsigned int dimensionX{16};
-            static const unsigned int dimensionY{16};
+            static const common::uint8 dimensionX{16};
+            static const common::uint8 dimensionY{16};
 
             std::vector<Tile> tiles{};
         };
 
         struct World {
-            static const unsigned int width{1024};
-            static const unsigned int height{1024};
+            static const common::uint16 width{1024};
+            static const common::uint16 height{1024};
             /*
              * An array of pointers to TileChunk which is width * height big. If there is no chunk in a position
              * then the lookup  will return nullptr, i.e., world[x + y*width] == nullptr.

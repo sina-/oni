@@ -21,7 +21,7 @@ namespace oni {
     namespace physics {
 
         template<class T>
-        int sign(T n) {
+        common::int32 sign(T n) {
             return (T(0) < n) - (T(0) > n);
         }
 

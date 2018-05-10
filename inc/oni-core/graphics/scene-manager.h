@@ -62,7 +62,7 @@ namespace oni {
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            const unsigned int mMaxSpriteCount{0};
+            const common::uint16 mMaxSpriteCount{0};
         };
     }
 }

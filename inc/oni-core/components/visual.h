@@ -9,6 +9,7 @@
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
+#include <oni-core/common/typedefs.h>
 
 namespace oni {
     namespace components {
@@ -42,13 +43,13 @@ namespace oni {
             std::string textContent{};
             std::vector<size_t> width{};
             std::vector<size_t> height{};
-            std::vector<int> offsetX{};
-            std::vector<int> offsetY{};
-            std::vector<float> advanceX{};
-            std::vector<float> advanceY{};
+            std::vector<common::uint32> offsetX{};
+            std::vector<common::uint32> offsetY{};
+            std::vector<common::real32> advanceX{};
+            std::vector<common::real32> advanceY{};
             std::vector<math::vec4> uv{};
-            float xScaling{1.0f};
-            float yScaling{1.0f};
+            common::real32 xScaling{1.0f};
+            common::real32 yScaling{1.0f};
 
         };
 

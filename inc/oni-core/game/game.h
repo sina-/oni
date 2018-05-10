@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/utils/timer.h>
+#include <oni-core/common/typedefs.h>
 
 namespace oni {
     namespace game {
@@ -35,15 +36,15 @@ namespace oni {
 
             virtual void _display() = 0;
 
-            virtual void showFPS(unsigned short fps) = 0;
+            virtual void showFPS(common::uint16 fps) = 0;
 
-            virtual void showTPS(unsigned short tps) = 0;
+            virtual void showTPS(common::uint16 tps) = 0;
 
             /**
              * Accumulated time in ms over 1 second spent sleeping due to excess.
              * @param fet
              */
-            virtual void showFET(short fet) = 0;
+            virtual void showFET(common::int16 fet) = 0;
 
         protected:
             utils::HighResolutionTimer mRunTimerA{};
@@ -56,9 +57,9 @@ namespace oni {
             double mFrameLag{0.0f};
             double mTickLag{0.0f};
             double mFrameExcessTime{0.0f};
-            unsigned short mRunCounter{0};
-            unsigned short mTickCounter{0};
-            unsigned short mFrameCounter{0};
+            common::uint16 mRunCounter{0};
+            common::uint16 mTickCounter{0};
+            common::uint16 mFrameCounter{0};
 
             // 60Hz
             const float mTickMS{1 / 60.0f};

@@ -30,34 +30,34 @@ namespace oni {
 
             common::uint16 getTileSizeY() const;
 
-            common::int64 getTileIndexX(float x) const;
+            common::int64 getTileIndexX(common::real64 x) const;
 
-            common::int64 getTileIndexY(float y) const;
+            common::int64 getTileIndexY(common::real64 y) const;
 
             entt::DefaultRegistry &getRegistry();
 
         private:
             /**
-             * Pack float values in the range (x +-16, y +-16) into a long.
+             * Pack common::real32 values in the range (x +-16, y +-16) into a uint64.
              * For example: any x and y from 0 to 15.99999 is saved into the same long.
              * @param position
-             * @return pack long value
+             * @return pack uint64 value
              */
             common::packedTileCoordinates packCoordinates(const math::vec2 &position) const;
 
-            math::vec2 unpackCoordinates(long coord) const;
+            math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            bool tileExists(long tileCoordinates) const;
+            bool tileExists(common::uint64 tileCoordinates) const;
 
             void createTileIfMissing(const math::vec2 &position);
 
         public:
-            std::map<long, entities::entityID> mCoordToTileLookup{};
+            std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
             std::unique_ptr<entt::DefaultRegistry> mTileRegistry{};
 
             // Square tiles of 16mx16m
-            common::uint16 mTileSizeX{16};
-            common::uint16 mTileSizeY{16};
+            const common::uint16 mTileSizeX{16};
+            const common::uint16 mTileSizeY{16};
         };
     }
 }

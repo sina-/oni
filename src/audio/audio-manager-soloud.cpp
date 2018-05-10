@@ -66,11 +66,11 @@ namespace oni {
             mSoloudManager.stop(mHandles[id]);
         }
 
-        void AudioManagerSoloud::setVolume(oniSoundID id, float volume) {
+        void AudioManagerSoloud::setVolume(oniSoundID id, common::real32 volume) {
             mSoloudManager.setVolume(mHandles[id], volume);
         }
 
-        float AudioManagerSoloud::getVolume(oniSoundID id) {
+        common::real32 AudioManagerSoloud::getVolume(oniSoundID id) {
             mSoloudManager.getVolume(mHandles[id]);
             return 0;
         }

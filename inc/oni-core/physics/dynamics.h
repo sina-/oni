@@ -9,7 +9,7 @@ namespace oni {
         public:
             ~Dynamics() override = default;
 
-            void tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) override;
+            void tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) override;
         };
     }
 }

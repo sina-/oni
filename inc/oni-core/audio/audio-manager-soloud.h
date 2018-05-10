@@ -29,9 +29,9 @@ namespace oni {
 
             void setLoop(oniSoundID id, bool loop) override;
 
-            void setVolume(oniSoundID id, float volume) override;
+            void setVolume(oniSoundID id, common::real32 volume) override;
 
-            float getVolume(oniSoundID id) override;
+            common::real32 getVolume(oniSoundID id) override;
 
             bool isPlaying(oniSoundID id) override;
 

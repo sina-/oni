@@ -35,9 +35,9 @@ namespace oni {
             void render(entt::DefaultRegistry &registry);
 
             // TODO: What about a camera class?
-            void lookAt(float x, float y);
+            void lookAt(common::real32 x, common::real32 y);
 
-            void lookAt(float x, float y, float distance);
+            void lookAt(common::real32 x, common::real32 y, common::real32 distance);
 
             const math::mat4 &getProjectionMatrix() const;
 

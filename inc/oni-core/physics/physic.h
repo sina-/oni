@@ -2,6 +2,8 @@
 
 #include <entt/entity/registry.hpp>
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace io {
         class Input;
@@ -13,7 +15,7 @@ namespace oni {
             virtual ~Physic() = default;
 
         public:
-            virtual void tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) = 0;
+            virtual void tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) = 0;
         };
     }
 }

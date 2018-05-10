@@ -31,11 +31,11 @@ namespace oni {
         }
 
         void tickCar(components::Car &car, const components::CarConfig &config,
-                     const components::CarInput &inputs, float dt);
+                     const components::CarInput &inputs, common::real32 dt);
 
 
         common::carSimDouble applySmoothSteer(const components::Car &car,
-                                                  common::carSimDouble steerInput, float dt);
+                                                  common::carSimDouble steerInput, common::real32 dt);
 
         common::carSimDouble applySafeSteer(const components::Car &car,
                                                 common::carSimDouble steerInput);

@@ -166,8 +166,8 @@ namespace oni {
 
             auto advance = 0.0f;
 
-            float scaleX = text.xScaling;
-            float scaleY = text.yScaling;
+            auto scaleX = text.xScaling;
+            auto scaleY = text.yScaling;
 
             for (common::uint32 i = 0; i < text.textContent.size(); i++) {
                 ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);

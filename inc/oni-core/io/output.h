@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace io {
         void printl(const std::string &text);
@@ -10,6 +12,6 @@ namespace oni {
 
         void printl(double text);
 
-        void printl(float text);
+        void printl(common::real32 text);
     }
 }

@@ -83,13 +83,13 @@ namespace oni {
 
         }
 
-        void AudioManagerFMOD::setVolume(oniSoundID id, float volume) {
+        void AudioManagerFMOD::setVolume(oniSoundID id, common::real32 volume) {
             UNUSED(id);
             UNUSED(volume);
 
         }
 
-        float AudioManagerFMOD::getVolume(oniSoundID id) {
+        common::real32 AudioManagerFMOD::getVolume(oniSoundID id) {
             UNUSED(id);
             return 0;
         }
@@ -107,7 +107,7 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        void AudioManagerFMOD::setPitch(oniSoundID id, float pitch) {
+        void AudioManagerFMOD::setPitch(oniSoundID id, common::real32 pitch) {
             auto result = mChannels[id]->setPitch(pitch);
             ERRCHECK(result);
         }

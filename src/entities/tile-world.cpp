@@ -22,7 +22,7 @@ namespace oni {
             return mTileSizeY;
         }
 
-        bool TileWorld::tileExists(long tileCoordinates) const {
+        bool TileWorld::tileExists(common::uint64 tileCoordinates) const {
             return mCoordToTileLookup.find(tileCoordinates) != mCoordToTileLookup.end();
         }
 
@@ -48,14 +48,14 @@ namespace oni {
             return result;
         }
 
-        math::vec2 TileWorld::unpackCoordinates(long coord) const {
+        math::vec2 TileWorld::unpackCoordinates(common::uint64 coord) const {
             // TODO: This function is incorrect. Need to match it to packCoordinates function if I ever use it
             ONI_DEBUG_ASSERT(false);
-            auto x = static_cast<int>(coord >> 32) * mTileSizeX;
-            auto y = static_cast<int>(coord & (0xFFFFFFFF)) * mTileSizeX;
+            //auto x = static_cast<int>(coord >> 32) * mTileSizeX;
+            //auto y = static_cast<int>(coord & (0xFFFFFFFF)) * mTileSizeX;
 
-            // TODO: This won't work with float for math::vec2. I need to migrate to doubles.
-            return math::vec2{x, y};
+            //return math::vec2{x, y};
+            return math::vec2{};
         }
 
         void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius) {
@@ -69,12 +69,12 @@ namespace oni {
             }
         }
 
-        common::int64 TileWorld::getTileIndexX(float x) const {
+        common::int64 TileWorld::getTileIndexX(common::real64 x) const {
             common::int64 _x = static_cast<common::int64>(x) / mTileSizeX;
             return _x;
         }
 
-        common::int64 TileWorld::getTileIndexY(float y) const {
+        common::int64 TileWorld::getTileIndexY(common::real64 y) const {
             common::int64 _y = static_cast<common::int64>(y) / mTileSizeY;
             return _y;
         }
@@ -82,18 +82,18 @@ namespace oni {
         void TileWorld::createTileIfMissing(const math::vec2 &position) {
             auto packedCoordinates = packCoordinates(position);
             if (!tileExists(packedCoordinates)) {
-                auto R = (std::rand() % 255) / 255.0f;
-                auto G = (std::rand() % 255) / 255.0f;
-                auto B = (std::rand() % 255) / 255.0f;
-                auto color = math::vec4{R, G, B, 1.0f};
+                const auto R = (std::rand() % 255) / 255.0f;
+                const auto G = (std::rand() % 255) / 255.0f;
+                const auto B = (std::rand() % 255) / 255.0f;
+                const auto color = math::vec4{R, G, B, 1.0f};
 
-                auto tileIndexX = getTileIndexX(position.x);
-                auto tileIndexY = getTileIndexX(position.y);
-                auto tilePosX = tileIndexX * mTileSizeX;
-                auto tilePosY = tileIndexY * mTileSizeY;
-                auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
-                auto id = createSpriteStaticEntity(*mTileRegistry, color, math::vec2{mTileSizeX, mTileSizeY},
-                                                   positionInWorld);
+                const auto tileIndexX = getTileIndexX(position.x);
+                const auto tileIndexY = getTileIndexX(position.y);
+                const auto tilePosX = tileIndexX * mTileSizeX;
+                const auto tilePosY = tileIndexY * mTileSizeY;
+                const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
+                const auto id = createSpriteStaticEntity(*mTileRegistry, color, math::vec2{mTileSizeX, mTileSizeY},
+                                                         positionInWorld);
 
                 mCoordToTileLookup.emplace(packedCoordinates, id);
 

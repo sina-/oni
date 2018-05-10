@@ -7,11 +7,11 @@ namespace oni {
         typedef common::uint16 oniKeyPress;
 
         struct CarInput {
-            float left{0.0f};
-            float right{0.0f};
-            float throttle{0.0f};
-            float brake{0.0f};
-            float eBrake{0.0f};
+            common::real32 left{0.0f};
+            common::real32 right{0.0f};
+            common::real32 throttle{0.0f};
+            common::real32 brake{0.0f};
+            common::real32 eBrake{0.0f};
         };
     }
 }

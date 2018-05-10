@@ -17,7 +17,7 @@ namespace oni {
             std::cout << text << std::endl;
         }
 
-        void printl(float text) {
+        void printl(common::real32 text) {
             std::cout << text << std::endl;
         }
     }

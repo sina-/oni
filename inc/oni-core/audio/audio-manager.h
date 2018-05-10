@@ -42,15 +42,15 @@ namespace oni {
 
             virtual void setLoop(oniSoundID id, bool loop) = 0;
 
-            virtual void setVolume(oniSoundID id, float volume) = 0;
+            virtual void setVolume(oniSoundID id, common::real32 volume) = 0;
 
-            virtual float getVolume(oniSoundID id) = 0;
+            virtual common::real32 getVolume(oniSoundID id) = 0;
 
             virtual bool isPlaying(oniSoundID id) = 0;
 
             virtual void seek(oniSoundID id, double position) = 0;
 
-            virtual void setPitch(oniSoundID id, float pitch) = 0;
+            virtual void setPitch(oniSoundID id, common::real32 pitch) = 0;
         };
     }
 }

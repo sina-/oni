@@ -2,7 +2,7 @@
 
 namespace oni {
     namespace common {
-        const float ep{0.00001f};
+        const common::real32 ep{0.00001f};
         static const unsigned long maxNumTextureSamplers{32};
     }
 }

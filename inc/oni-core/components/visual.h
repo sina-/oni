@@ -61,10 +61,10 @@ namespace oni {
         };
 
         struct ScreenBounds {
-            float xMin;
-            float xMax;
-            float yMin;
-            float yMax;
+            common::real32 xMin;
+            common::real32 xMax;
+            common::real32 yMin;
+            common::real32 yMax;
         };
 
     }

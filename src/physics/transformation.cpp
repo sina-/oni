@@ -22,12 +22,12 @@ namespace oni {
             physics::Transformation::localToWorldTranslation(reference, shape.vertexD);
         }
 
-        void Transformation::localToTextureTranslation(const float ratio, math::vec3 &operand) {
+        void Transformation::localToTextureTranslation(const common::real32 ratio, math::vec3 &operand) {
             operand.x *= ratio;
             operand.y *= ratio;
         }
 
-        void Transformation::worldToLocalTextureTranslation(const math::vec3 &reference, const float ratio,
+        void Transformation::worldToLocalTextureTranslation(const math::vec3 &reference, const common::real32 ratio,
                                                             math::vec3 &operand) {
             Transformation::worldToLocalTranslation(reference, operand);
             Transformation::localToTextureTranslation(ratio, operand);
@@ -70,7 +70,7 @@ namespace oni {
                                      transformation * vertexD};
         }
 
-        math::mat4 Transformation::createTransformation(const math::vec3 &position, const float rotation,
+        math::mat4 Transformation::createTransformation(const math::vec3 &position, const common::real32 rotation,
                                                         const math::vec3 &scale) {
             auto translationMat = math::mat4::translation(position);
             auto rotationMat = math::mat4::rotation(rotation, math::vec3{0.0f, 0.0f, 1.0f});

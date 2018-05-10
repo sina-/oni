@@ -38,7 +38,7 @@ namespace oni {
                         math::vec3{position.x + size.x, position.y, position.z}};
             }
 
-            static Shape fromSizeAndRotation(const math::vec2 &size, const float rotation) {
+            static Shape fromSizeAndRotation(const math::vec2 &size, const common::real32 rotation) {
                 auto halfSizeX = size.x / 2;
                 auto halfSizeY = size.y / 2;
                 auto shape = Shape{
@@ -81,7 +81,7 @@ namespace oni {
 
         struct Placement {
             math::vec3 position{0.0f, 0.0f, 0.0f};
-            float rotation{0.0f};
+            common::real32 rotation{0.0f};
             math::vec3 scale{1.0f, 1.0f, 0.0f};
         };
 

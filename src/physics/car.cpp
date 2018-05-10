@@ -7,7 +7,7 @@ namespace oni {
     namespace physics {
 
         void tickCar(components::Car &car, const components::CarConfig &config,
-                     const components::CarInput &inputs, float dt) {
+                     const components::CarInput &inputs, common::real32 dt) {
             using common::carSimDouble;
             carSimDouble sn = std::sin(car.heading);
             carSimDouble cs = std::cos(car.heading);
@@ -120,7 +120,7 @@ namespace oni {
         }
 
         common::carSimDouble applySmoothSteer(const components::Car &car,
-                                              common::carSimDouble steerInput, float dt) {
+                                              common::carSimDouble steerInput, common::real32 dt) {
             common::carSimDouble steer = 0;
 
             if (std::abs(steerInput) > 0.001) {
@@ -129,9 +129,9 @@ namespace oni {
             } else {
                 //  No steer input - move toward centre (0)
                 if (car.steer > 0) {
-                    steer = std::max(car.steer - dt * 1.0, static_cast<common::carSimDouble> (0.0f));
+                    steer = std::max(car.steer - dt * 1.0f, static_cast<common::carSimDouble> (0.0f));
                 } else if (car.steer < 0) {
-                    steer = std::min(car.steer + dt * 1.0, static_cast<common::carSimDouble> (0.0f));
+                    steer = std::min(car.steer + dt * 1.0f, static_cast<common::carSimDouble> (0.0f));
                 }
             }
 
@@ -141,7 +141,7 @@ namespace oni {
         common::carSimDouble applySafeSteer(const components::Car &car,
                                             common::carSimDouble steerInput) {
             auto avel = std::min(car.velocityAbsolute, 250.0);
-            auto steer = steerInput * (1.0 - (avel / 280.0));
+            auto steer = steerInput * (1.0f - (avel / 280.0));
             return steer;
         }
     }

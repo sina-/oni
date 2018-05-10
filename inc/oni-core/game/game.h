@@ -30,7 +30,7 @@ namespace oni {
 
             virtual void display() final;
 
-            virtual void _tick(const float tickTime) = 0;
+            virtual void _tick(const common::real32 tickTime) = 0;
 
             virtual void _render() = 0;
 
@@ -62,9 +62,9 @@ namespace oni {
             common::uint16 mFrameCounter{0};
 
             // 60Hz
-            const float mTickMS{1 / 60.0f};
+            const common::real32 mTickMS{1 / 60.0f};
             // 30Hz
-            // const float mMinTickMS{1 / 30.0f};
+            // const common::real32 mMinTickMS{1 / 30.0f};
         };
     }
 }

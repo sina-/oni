@@ -44,15 +44,15 @@ namespace oni {
 
             void setLoop(oniSoundID id, bool loop) override;
 
-            void setVolume(oniSoundID id, float volume) override;
+            void setVolume(oniSoundID id, common::real32 volume) override;
 
-            float getVolume(oniSoundID id) override;
+            common::real32 getVolume(oniSoundID id) override;
 
             bool isPlaying(oniSoundID id) override;
 
             void seek(oniSoundID id, double position) override;
 
-            void setPitch(oniSoundID id, float pitch) override;
+            void setPitch(oniSoundID id, common::real32 pitch) override;
 
         private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;

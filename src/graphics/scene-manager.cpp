@@ -190,11 +190,11 @@ namespace oni {
             end(*mColorShader, *mColorRenderer);
         }
 
-        void SceneManager::lookAt(float x, float y) {
+        void SceneManager::lookAt(common::real32 x, common::real32 y) {
             mViewMatrix = math::mat4::translation(-x, -y, 0.0f);
         }
 
-        void SceneManager::lookAt(float x, float y, float distance) {
+        void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
             mViewMatrix = math::mat4::scale(math::vec3{distance, distance, 1.0f}) *
                           math::mat4::translation(-x, -y, 0.0f);
         }

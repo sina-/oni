@@ -59,7 +59,7 @@ namespace oni {
             //while (mFrameLag > mTickMS) {
             mTickTimer.restart();
 
-/*                auto correction = std::max((float) mTickLag, mTickMS);
+/*                auto correction = std::max((common::real32) mTickLag, mTickMS);
                 correction = std::min(mMinTickMS, correction);
                 _tick(correction, keyPressed);*/
 

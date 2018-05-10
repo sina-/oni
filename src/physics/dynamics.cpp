@@ -7,7 +7,7 @@
 namespace oni {
     namespace physics {
 
-        void Dynamics::tick(entt::DefaultRegistry &registry, const io::Input &input, float tickTime) {
+        void Dynamics::tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) {
             auto view = registry.view<components::Placement, components::Car,
                     components::CarConfig, components::TagVehicle>();
 
@@ -34,7 +34,7 @@ namespace oni {
                     if (car.accumulatedEBrake < 1.0f) {
                         car.accumulatedEBrake += 0.01f;
                     }
-                    carInput.eBrake = static_cast<float>(car.accumulatedEBrake);
+                    carInput.eBrake = static_cast<common::real32>(car.accumulatedEBrake);
                 } else {
                     car.accumulatedEBrake = 0.0f;
                 }
@@ -55,7 +55,7 @@ namespace oni {
                 tickCar(car, carConfig, carInput, tickTime);
 
                 auto placement = components::Placement{math::vec3{car.position.x, car.position.y, 1.0f},
-                                                       static_cast<const float>(car.heading),
+                                                       static_cast<const common::real32>(car.heading),
                                                        math::vec3{1.0f, 1.0f, 0.0f}};
 
                 auto velocity = car.velocityLocal.len();

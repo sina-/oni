@@ -56,7 +56,7 @@ namespace oni {
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
         entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry, const components::Texture &entityTexture,
                                              const math::vec2 &size, const math::vec3 &positionInWorld,
-                                             const float heading,
+                                             const common::real32 heading,
                                              const math::vec3 &scale) {
             auto entity = registry.create();
 
@@ -153,8 +153,8 @@ namespace oni {
             ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
             auto entityShapeWorld = components::Shape::fromPositionAndSize(
-                    math::vec3{static_cast<float> (carX), static_cast<float> (carY)},
-                    math::vec2{static_cast<float> (carSizeX), static_cast<float> (carSizeY)});
+                    math::vec3{static_cast<common::real32> (carX), static_cast<common::real32> (carY)},
+                    math::vec2{static_cast<common::real32> (carSizeX), static_cast<common::real32> (carSizeY)});
             auto car = components::Car(carConfig);
 
             auto entityPlacement = components::Placement{math::vec3{0.0f, 0.0f, 1.0f}, 0.0f, {1.0f, 1.0f, 0.0f}};

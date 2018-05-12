@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 
+#include <oni-core/common/typedefs.h>
 #include <oni-core/math/functions.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
@@ -14,27 +15,27 @@ namespace oni {
             // https://stackoverflow.com/a/18177444
             union {
                 // Column major ordering
-                std::array<float, 4 * 4> elements;
+                std::array<oni::common::real32, 4 * 4> elements;
                 vec4 columns[4];
             };
 
             mat4();
 
-            explicit mat4(float diag);
+            explicit mat4(oni::common::real32 diag);
 
-            const float *getArray() const { return &elements.front(); };
+            const oni::common::real32 *getArray() const { return &elements.front(); };
 
             vec3 getPosition();
 
             static mat4 identity();
 
-            static mat4 orthographic(float left, float right, float bottom, float top, float near, float far);
+            static mat4 orthographic(oni::common::real32 left, oni::common::real32 right, oni::common::real32 bottom, oni::common::real32 top, oni::common::real32 near, oni::common::real32 far);
 
-            static mat4 perspective(float fov, float aspectRatio, float near, float far);
+            static mat4 perspective(oni::common::real32 fov, oni::common::real32 aspectRatio, oni::common::real32 near, oni::common::real32 far);
 
             static mat4 translation(const vec3 &translation);
 
-            static mat4 translation(float x, float y, float z);
+            static mat4 translation(oni::common::real32 x, oni::common::real32 y, oni::common::real32 z);
 
             /**
              * create rotation matrix
@@ -42,7 +43,7 @@ namespace oni {
              * @param axis
              * @return
              */
-            static mat4 rotation(float angle, const vec3 &axis);
+            static mat4 rotation(oni::common::real32 angle, const vec3 &axis);
 
             static mat4 scale(const vec3 &scale);
 

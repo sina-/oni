@@ -38,7 +38,7 @@ namespace oni {
 
             void playSound(oniSoundID id) override;
 
-            double pauseSound(oniSoundID id) override;
+            oni::common::real64 pauseSound(oniSoundID id) override;
 
             void stopSound(oniSoundID id) override;
 
@@ -50,7 +50,7 @@ namespace oni {
 
             bool isPlaying(oniSoundID id) override;
 
-            void seek(oniSoundID id, double position) override;
+            void seek(oniSoundID id, oni::common::real64 position) override;
 
             void setPitch(oniSoundID id, common::real32 pitch) override;
 

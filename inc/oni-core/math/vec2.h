@@ -2,11 +2,13 @@
 
 #include <iostream>
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace math {
         struct vec2 {
-            float x{0.0f};
-            float y{0.0f};
+            oni::common::real32 x{0.0f};
+            oni::common::real32 y{0.0f};
 
             vec2 &add(const vec2 &other);
 
@@ -36,7 +38,7 @@ namespace oni {
 
             bool operator!=(const vec2 &other);
 
-            float len();
+            oni::common::real32 len();
 
             friend std::ostream &operator<<(std::ostream &stream, const vec2 &vector);
 

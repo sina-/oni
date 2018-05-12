@@ -52,11 +52,11 @@ namespace oni {
             utils::HighResolutionTimer mFrameTimer{};
             utils::HighResolutionTimer mTickTimer{};
 
-            double mRunLagAccumulator{0.0f};
-            double mRunLag{0.0f};
-            double mFrameLag{0.0f};
-            double mTickLag{0.0f};
-            double mFrameExcessTime{0.0f};
+            oni::common::real64 mRunLagAccumulator{0.0f};
+            oni::common::real64 mRunLag{0.0f};
+            oni::common::real64 mFrameLag{0.0f};
+            oni::common::real64 mTickLag{0.0f};
+            oni::common::real64 mFrameExcessTime{0.0f};
             common::uint16 mRunCounter{0};
             common::uint16 mTickCounter{0};
             common::uint16 mFrameCounter{0};

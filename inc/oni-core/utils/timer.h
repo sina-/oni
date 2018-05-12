@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <chrono>
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace utils {
         class HighResolutionTimer {
@@ -14,7 +16,7 @@ namespace oni {
             }
 
             // Return elapsed time in seconds
-            double elapsed() const { return double(takeTimeStamp() - mStartTime) * 1e-9; }
+            oni::common::real64 elapsed() const { return oni::common::real64(takeTimeStamp() - mStartTime) * 1e-9; }
 
             std::uint64_t elapsed_nanoseconds() const { return takeTimeStamp() - mStartTime; }
 

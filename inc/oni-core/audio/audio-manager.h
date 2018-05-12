@@ -36,7 +36,7 @@ namespace oni {
              * @param id
              * @return duration played
              */
-            virtual double pauseSound(oniSoundID id) = 0;
+            virtual oni::common::real64 pauseSound(oniSoundID id) = 0;
 
             virtual void stopSound(oniSoundID id) = 0;
 
@@ -48,7 +48,7 @@ namespace oni {
 
             virtual bool isPlaying(oniSoundID id) = 0;
 
-            virtual void seek(oniSoundID id, double position) = 0;
+            virtual void seek(oniSoundID id, oni::common::real64 position) = 0;
 
             virtual void setPitch(oniSoundID id, common::real32 pitch) = 0;
         };

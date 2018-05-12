@@ -27,7 +27,7 @@ namespace oni {
             common::int32 mGameWidth, mGameHeight;
             GLFWwindow *mWindow;
             common::int32 mMouseButton;
-            double mCursorX, mCursorY;
+            oni::common::real64 mCursorX, mCursorY;
             std::vector<common::int32> mKeysPressed;
             std::vector<common::int32> mKeysReleased;
 
@@ -69,13 +69,13 @@ namespace oni {
 
             const common::int32 &getMouseButton() const { return mMouseButton; }
 
-            void setCursorX(double x) { mCursorX = x; }
+            void setCursorX(oni::common::real64 x) { mCursorX = x; }
 
-            const double &getCursorX() const { return mCursorX; }
+            const oni::common::real64 &getCursorX() const { return mCursorX; }
 
-            void setCursorY(double y) { mCursorY = y; }
+            void setCursorY(oni::common::real64 y) { mCursorY = y; }
 
-            const double &getCursorY() const { return mCursorY; }
+            const oni::common::real64 &getCursorY() const { return mCursorY; }
 
             static Window *getThisFromGLFWWindow(GLFWwindow *window) {
                 return reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
@@ -87,7 +87,7 @@ namespace oni {
 
             static void mouseCallback(GLFWwindow *window, common::int32 button, common::int32 action, common::int32 mods);
 
-            static void cursorPosCallback(GLFWwindow *window, double x, double y);
+            static void cursorPosCallback(GLFWwindow *window, oni::common::real64 x, oni::common::real64 y);
 
         private:
             static void messageCallback(GLenum source,

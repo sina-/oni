@@ -2,12 +2,14 @@
 
 #include <iostream>
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
     namespace math {
         struct vec3 {
-            float x{0.0f};
-            float y{0.0f};
-            float z{0.0f};
+            oni::common::real32 x{0.0f};
+            oni::common::real32 y{0.0f};
+            oni::common::real32 z{0.0f};
 
             vec3 &add(const vec3 &other);
 

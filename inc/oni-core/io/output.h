@@ -10,7 +10,7 @@ namespace oni {
 
         void printl(int text);
 
-        void printl(double text);
+        void printl(oni::common::real64 text);
 
         void printl(common::real32 text);
     }

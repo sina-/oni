@@ -38,7 +38,7 @@ namespace oni {
 
             GLuint getProgram() const { return mProgram; }
 
-            void setUniform1f(const GLchar *name, float value) const {
+            void setUniform1f(const GLchar *name, oni::common::real32 value) const {
                 glUniform1f(getUniformLocation(name), value);
             };
 

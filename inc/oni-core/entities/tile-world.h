@@ -7,6 +7,7 @@
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/components/geometry.h>
 
 // TODO: Need to use int32_t and its siblings instead of int and long
 namespace oni {
@@ -24,7 +25,10 @@ namespace oni {
              * @param position location in the world coordinate to tick
              * @param tickRadius in game units that is meters
              */
-            void tick(const math::vec2 &position, common::uint16 tickRadius);
+            // TODO: Instead of a car the function should go through all the car entities in the world and
+            // update as needed.
+            void tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
+                      entt::DefaultRegistry &entityRegistry);
 
             common::uint16 getTileSizeX() const;
 
@@ -49,10 +53,13 @@ namespace oni {
 
             bool tileExists(common::uint64 tileCoordinates) const;
 
+            bool skidTileExists(common::uint64 tileCoordinates) const;
+
             void createTileIfMissing(const math::vec2 &position);
 
         public:
             std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
+            std::map<common::uint64, entities::entityID> mCoordToSkidlineLookup{};
             std::unique_ptr<entt::DefaultRegistry> mTileRegistry{};
 
             // Square tiles of 16mx16m

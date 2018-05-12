@@ -60,7 +60,12 @@ namespace oni {
                                              const math::vec3 &scale) {
             auto entity = registry.create();
 
-            auto entityShape = components::Shape::fromSizeAndRotation(size, heading);
+            // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
+            // works out without needing to translate the entity to the center before rotation and then back to its
+            // position in the local space.
+            auto halfSizeX = size.x / 2;
+            auto halfSizeY = size.y / 2;
+            auto entityShape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
             auto entityDynamic = components::TagDynamic{};
             auto entityTextureShaded = components::TagTextureShaded{};
 

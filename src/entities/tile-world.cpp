@@ -3,8 +3,15 @@
 #include <oni-core/entities/tile-world.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/components/geometry.h>
+#include <oni-core/physics/transformation.h>
+#include <oni-core/graphics/texture.h>
+#include <oni-core/common/consts.h>
+
 
 namespace oni {
+    // TODO: save this as a tag in the world registry
+    static const common::real32 GAME_UNIT_TO_PIXELS = 20.0f;
+
     namespace entities {
 
         TileWorld::TileWorld() {
@@ -22,8 +29,32 @@ namespace oni {
             return mTileSizeY;
         }
 
+        common::int64 TileWorld::getTileIndexX(common::real64 x) const {
+            // NOTE: Without the correction all the negative number will overlap with the tile before:
+            // x = 2 and -2 -> getTileIndex = 0
+            // But correct answer is 1 and -1!
+            if (x < 0){
+                x -= mTileSizeX;
+            }
+            common::int64 _x = static_cast<common::int64>(x) / mTileSizeX;
+            return _x;
+        }
+
+        common::int64 TileWorld::getTileIndexY(common::real64 y) const {
+            if(y < 0){
+                y -= mTileSizeY;
+            }
+            common::int64 _y = static_cast<common::int64>(y) / mTileSizeY;
+            return _y;
+        }
+
+
         bool TileWorld::tileExists(common::uint64 tileCoordinates) const {
             return mCoordToTileLookup.find(tileCoordinates) != mCoordToTileLookup.end();
+        }
+
+        bool TileWorld::skidTileExists(common::uint64 tileCoordinates) const {
+            return mCoordToSkidlineLookup.find(tileCoordinates) != mCoordToSkidlineLookup.end();
         }
 
         common::packedTileCoordinates TileWorld::packCoordinates(const math::vec2 &position) const {
@@ -58,26 +89,78 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius) {
+        void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
+                             entt::DefaultRegistry &entityRegistry) {
             // TODO: Hardcoded +2 until I find a good way to calculate the exact number of tiles
-            auto tilesInAlongX = getTileIndexX(tickRadius) + 2;
-            auto tilesInAlongY = getTileIndexY(tickRadius) + 2;
-            for (auto i = -tilesInAlongX; i <= tilesInAlongX; ++i) {
-                for (auto j = -tilesInAlongY; j <= tilesInAlongY; ++j) {
+            auto tilesAlongX = getTileIndexX(tickRadius) + 2;
+            auto tilesAlongY = getTileIndexY(tickRadius) + 2;
+            for (auto i = -tilesAlongX; i <= tilesAlongX; ++i) {
+                for (auto j = -tilesAlongY; j <= tilesAlongY; ++j) {
                     auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
                     createTileIfMissing(tilePosition);
                 }
             }
-        }
 
-        common::int64 TileWorld::getTileIndexX(common::real64 x) const {
-            common::int64 _x = static_cast<common::int64>(x) / mTileSizeX;
-            return _x;
-        }
+            // NOTE: Technically I should use slippingRear, but this gives better effect
+            if (car.slippingFront) {
+/*                auto carTireBRPlacement = entityRegistry.get<components::Placement>(mCarTireBREntity);
+                auto carTireBLPlacement = entityRegistry.get<components::Placement>(mCarTireBLEntity);*/
 
-        common::int64 TileWorld::getTileIndexY(common::real64 y) const {
-            common::int64 _y = static_cast<common::int64>(y) / mTileSizeY;
-            return _y;
+/*                const auto &transformParentBL = entityRegistry.get<components::TransformParent>(mCarTireBLEntity);
+                const auto &transformParentBR = entityRegistry.get<components::TransformParent>(mCarTireBREntity);*/
+
+/*                auto skidMarkBLPos = transformParentBL.transform * carTireBLPlacement.position;
+                auto skidMarkBRPos = transformParentBR.transform * carTireBRPlacement.position;*/
+
+                auto carPos = car.position;
+                auto packedCoordinates = packCoordinates(carPos);
+
+                entityID skidEntity = 0;
+                if (!skidTileExists(packedCoordinates)) {
+                    // TODO: These are constant
+                    auto skidWidthInPixels = static_cast<common::int32>(mTileSizeX * GAME_UNIT_TO_PIXELS + common::ep);
+                    auto skidHeightInPixels = static_cast<common::int32>(mTileSizeY * GAME_UNIT_TO_PIXELS + common::ep);
+                    auto skidDefaultPixel = oni::components::PixelRGBA{};
+
+                    auto skidTexture = graphics::Texture::generate(skidWidthInPixels, skidHeightInPixels,
+                                                                   skidDefaultPixel);
+                    // END TODO
+                    auto skidSize = math::vec2{mTileSizeX, mTileSizeY};
+                    auto carTileX = getTileIndexX(car.position.x);
+                    auto carTileY = getTileIndexY(car.position.y);
+                    auto tilePosX = carTileX * mTileSizeX;
+                    auto tilePosY = carTileY * mTileSizeY;
+                    auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
+                    skidEntity = entities::createTexturedStaticEntity(entityRegistry, skidTexture,
+                                                                      skidSize, positionInWorld);
+                    mCoordToSkidlineLookup.emplace(packedCoordinates, skidEntity);
+                } else {
+                    skidEntity = mCoordToSkidlineLookup.at(packedCoordinates);
+                }
+
+                auto skidMarksTexture = entityRegistry.get<components::Texture>(skidEntity);
+                auto skidMarksTexturePos = entityRegistry.get<components::Shape>(skidEntity).getPosition();
+
+                auto skidPos = math::vec3{car.position.x, car.position.y, 1.0f};
+
+                physics::Transformation::worldToLocalTextureTranslation(skidMarksTexturePos, GAME_UNIT_TO_PIXELS,
+                                                                        skidPos);
+
+                auto alpha = static_cast<unsigned char>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+                // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
+                // squares.
+                //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
+                //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
+                common::uint16 height = 10;
+                common::uint16 width = 10;
+
+                auto bits = graphics::Texture::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
+                graphics::Texture::updateSubTexture(skidMarksTexture,
+                                                    static_cast<GLint>(skidPos.x - width / 2),
+                                                    static_cast<GLint>(skidPos.y - width / 2),
+                                                    width, height, bits);
+            }
+
         }
 
         void TileWorld::createTileIfMissing(const math::vec2 &position) {

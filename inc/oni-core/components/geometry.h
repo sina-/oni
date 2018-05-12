@@ -39,19 +39,28 @@ namespace oni {
             }
 
             static Shape fromSizeAndRotation(const math::vec2 &size, const common::real32 rotation) {
-                auto halfSizeX = size.x / 2;
-                auto halfSizeY = size.y / 2;
                 auto shape = Shape{
-                        math::vec3{-halfSizeX, -halfSizeY, 0.0f},
-                        math::vec3{-halfSizeX, halfSizeY, 0.0f},
-                        math::vec3{halfSizeX, halfSizeY, 0.0f},
-                        math::vec3{halfSizeX, -halfSizeY, 0.0f}};
+                        math::vec3{0, 0, 1},
+                        math::vec3{0, size.y, 1},
+                        math::vec3{size.x, size.y, 1},
+                        math::vec3{size.x, 0, 1}
+                };
                 if (!static_cast<common::uint16>(rotation)) {
+                    shape.vertexA -= math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexB -= math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexC -= math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexD -= math::vec3{size.x / 2, size.y / 2, 0.0f};
+
                     auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.0f, 0.0f, 1.0f});
                     shape.vertexA = rotationMat * shape.vertexA;
                     shape.vertexB = rotationMat * shape.vertexB;
                     shape.vertexC = rotationMat * shape.vertexC;
                     shape.vertexD = rotationMat * shape.vertexD;
+
+                    shape.vertexA += math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexB += math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexC += math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexD += math::vec3{size.x / 2, size.y / 2, 0.0f};
                 }
                 return shape;
             }

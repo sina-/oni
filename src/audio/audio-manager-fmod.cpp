@@ -84,9 +84,8 @@ namespace oni {
         }
 
         void AudioManagerFMOD::setVolume(oniSoundID id, common::real32 volume) {
-            UNUSED(id);
-            UNUSED(volume);
-
+            auto result = mChannels[id]->setVolume(volume);
+            ERRCHECK(result);
         }
 
         common::real32 AudioManagerFMOD::getVolume(oniSoundID id) {

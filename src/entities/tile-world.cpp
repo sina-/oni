@@ -59,8 +59,9 @@ namespace oni {
         }
 
         void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius) {
-            auto tilesInAlongX = getTileIndexX(tickRadius);
-            auto tilesInAlongY = getTileIndexY(tickRadius);
+            // TODO: Hardcoded +2 until I find a good way to calculate the exact number of tiles
+            auto tilesInAlongX = getTileIndexX(tickRadius) + 2;
+            auto tilesInAlongY = getTileIndexY(tickRadius) + 2;
             for (auto i = -tilesInAlongX; i <= tilesInAlongX; ++i) {
                 for (auto j = -tilesInAlongY; j <= tilesInAlongY; ++j) {
                     auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};

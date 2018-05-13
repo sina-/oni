@@ -28,7 +28,7 @@ namespace oni {
             // TODO: Instead of a car the function should go through all the car entities in the world and
             // update as needed.
             void tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
-                      entt::DefaultRegistry &entityRegistry);
+                      entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities);
 
             common::uint16 getTileSizeX() const;
 
@@ -56,9 +56,6 @@ namespace oni {
             common::real32 getTilePosForXIndex(common::int64 xIndex) const;
 
             common::real32 getTilePosForYIndex(common::int64 yIndex) const;
-
-            entt::DefaultRegistry &getRegistry();
-
         private:
             /**
              * Pack common::real32 values in the range (x +-16, y +-16) into a uint64.
@@ -74,12 +71,11 @@ namespace oni {
 
             bool skidTileExists(common::uint64 tileCoordinates) const;
 
-            void createTileIfMissing(const math::vec2 &position);
+            void createTileIfMissing(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
 
         public:
             std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
             std::map<common::uint64, entities::entityID> mCoordToSkidLineLookup{};
-            std::unique_ptr<entt::DefaultRegistry> mTileRegistry{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};

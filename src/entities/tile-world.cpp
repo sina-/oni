@@ -18,7 +18,6 @@ namespace oni {
                 mTileSizeX{16}, mTileSizeY{16},
                 mHalfTileSizeX{mTileSizeX / 2.0f},
                 mHalfTileSizeY{mTileSizeX / 2.0f} {
-            mTileRegistry = std::make_unique<entt::DefaultRegistry>();
             std::srand(std::time(nullptr));
         }
 
@@ -108,14 +107,14 @@ namespace oni {
         }
 
         void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
-                             entt::DefaultRegistry &entityRegistry) {
+                             entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities) {
             // TODO: Hardcoded +2 until I find a good way to calculate the exact number of tiles
             auto tilesAlongX = getTileXIndex(tickRadius) + 2;
             auto tilesAlongY = getTileYIndex(tickRadius) + 2;
             for (auto i = -tilesAlongX; i <= tilesAlongX; ++i) {
                 for (auto j = -tilesAlongY; j <= tilesAlongY; ++j) {
                     auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
-                    createTileIfMissing(tilePosition);
+                    createTileIfMissing(tilePosition, backgroundEntities);
                 }
             }
 
@@ -149,15 +148,15 @@ namespace oni {
                     auto tilePosX = getTilePosForXIndex(carTileX);
                     auto tilePosY = getTilePosForYIndex(carTileY);
                     auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
-                    skidEntity = entities::createTexturedStaticEntity(entityRegistry, skidTexture,
+                    skidEntity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
                                                                       skidSize, positionInWorld);
                     mCoordToSkidLineLookup.emplace(packedCoordinates, skidEntity);
                 } else {
                     skidEntity = mCoordToSkidLineLookup.at(packedCoordinates);
                 }
 
-                auto skidMarksTexture = entityRegistry.get<components::Texture>(skidEntity);
-                auto skidMarksTexturePos = entityRegistry.get<components::Shape>(skidEntity).getPosition();
+                auto skidMarksTexture = foregroundEntities.get<components::Texture>(skidEntity);
+                auto skidMarksTexturePos = foregroundEntities.get<components::Shape>(skidEntity).getPosition();
 
                 auto skidPos = math::vec3{car.position.x, car.position.y, 1.0f};
 
@@ -181,7 +180,7 @@ namespace oni {
 
         }
 
-        void TileWorld::createTileIfMissing(const math::vec2 &position) {
+        void TileWorld::createTileIfMissing(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities) {
             auto packedCoordinates = packCoordinates(position);
             if (!tileExists(packedCoordinates)) {
                 const auto R = (std::rand() % 255) / 255.0f;
@@ -194,17 +193,11 @@ namespace oni {
                 const auto tilePosX = getTilePosForXIndex(tileIndexX);
                 const auto tilePosY = getTilePosForYIndex(tileIndexY);
                 const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
-                const auto id = createSpriteStaticEntity(*mTileRegistry, color, math::vec2{mTileSizeX, mTileSizeY},
+                const auto id = createSpriteStaticEntity(backgroundEntities, color, math::vec2{mTileSizeX, mTileSizeY},
                                                          positionInWorld);
 
                 mCoordToTileLookup.emplace(packedCoordinates, id);
-
             }
         }
-
-        entt::DefaultRegistry &TileWorld::getRegistry() {
-            return *mTileRegistry;
-        }
-
     }
 }

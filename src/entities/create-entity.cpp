@@ -147,6 +147,7 @@ namespace oni {
             carConfig.cornerStiffnessFront = 5.0f;
             carConfig.maxSteer = 0.5f;
             carConfig.rollResist = 8.0f;
+            carConfig.wheelRadius= 0.25f;
 
             // TODO: This is wrong. Car vertex position must be in local space starting from (0, 0).
             // Model matrix should move the car to this coordinates.

@@ -34,9 +34,28 @@ namespace oni {
 
             common::uint16 getTileSizeY() const;
 
-            common::int64 getTileIndexX(common::real64 x) const;
+            /**
+             * Find corresponding tile index for a given x.
+             * @param x in world coordinates
+             * @return index
+             */
+            common::int64 getTileXIndex(common::real64 x) const;
 
-            common::int64 getTileIndexY(common::real64 y) const;
+            /**
+             * Find corresponding tile index for a given y.
+             * @param y in world coordinates
+             * @return index
+             */
+            common::int64 getTileYIndex(common::real64 y) const;
+
+            /**
+             * Do the inverse of getTileIndexX()
+             * @param xIndex
+             * @return minimum x in the tile corresponding to the given index.
+             */
+            common::real32 getTilePosForXIndex(common::int64 xIndex) const;
+
+            common::real32 getTilePosForYIndex(common::int64 yIndex) const;
 
             entt::DefaultRegistry &getRegistry();
 
@@ -59,12 +78,14 @@ namespace oni {
 
         public:
             std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
-            std::map<common::uint64, entities::entityID> mCoordToSkidlineLookup{};
+            std::map<common::uint64, entities::entityID> mCoordToSkidLineLookup{};
             std::unique_ptr<entt::DefaultRegistry> mTileRegistry{};
 
-            // Square tiles of 16mx16m
-            const common::uint16 mTileSizeX{16};
-            const common::uint16 mTileSizeY{16};
+            const common::uint16 mTileSizeX{0};
+            const common::uint16 mTileSizeY{0};
+
+            const common::real32 mHalfTileSizeX{};
+            const common::real32 mHalfTileSizeY{};
         };
     }
 }

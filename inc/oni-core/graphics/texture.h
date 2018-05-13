@@ -43,8 +43,8 @@ namespace oni {
              * @param bits data to overwrite the texture with, must match the given region
              */
             static void updateSubTexture(components::Texture texture, const GLint xOffset,
-                                         const GLint yOffset, const GLint width,
-                                         const GLint height,
+                                         const GLint yOffset, GLint width,
+                                         GLint height,
                                          const std::vector<unsigned char> &bits);
 
             static GLuint load(const graphics::FontManager &fontManager);

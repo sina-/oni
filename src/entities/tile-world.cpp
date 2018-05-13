@@ -14,7 +14,10 @@ namespace oni {
 
     namespace entities {
 
-        TileWorld::TileWorld() {
+        TileWorld::TileWorld() :
+                mTileSizeX{16}, mTileSizeY{16},
+                mHalfTileSizeX{mTileSizeX / 2.0f},
+                mHalfTileSizeY{mTileSizeX / 2.0f} {
             mTileRegistry = std::make_unique<entt::DefaultRegistry>();
             std::srand(std::time(nullptr));
         }
@@ -29,23 +32,40 @@ namespace oni {
             return mTileSizeY;
         }
 
-        common::int64 TileWorld::getTileIndexX(common::real64 x) const {
-            // NOTE: Without the correction all the negative number will overlap with the tile before:
-            // x = 2 and -2 -> getTileIndex = 0
-            // But correct answer is 1 and -1!
-            if (x < 0){
-                x -= mTileSizeX;
-            }
-            common::int64 _x = static_cast<common::int64>(x) / mTileSizeX;
-            return _x;
+        common::int64 TileWorld::getTileXIndex(common::real64 x) const {
+            /**
+             * Tiles in the world map fall under these indices:
+             *
+             * [-mHalfTileSize * 5, -mHalfTileSize * 3) -> -2
+             * [-mHalfTileSize * 3, -mHalfTileSize * 1) -> -1
+             * [-mHalfTileSize * 1, +mHalfTileSize * 1) -> +0
+             * [+mHalfTileSize * 1, +mHalfTileSize * 3) -> +1
+             * [+mHalfTileSize * 3, +mHalfTileSize * 5) -> +2
+             *
+             * For example for tile size 16 and half size of 8:
+             * [-40, -24) -> -2
+             * [-24,  -8) -> -1
+             * [ -8,  +8) -> +0
+             * [ +8, +24) -> +1
+             * [+24, +40) -> +2
+             */
+            auto result = floor(x / mTileSizeX + 0.5f);
+            auto truncated = static_cast<common::int64>(result);
+            return truncated;
         }
 
-        common::int64 TileWorld::getTileIndexY(common::real64 y) const {
-            if(y < 0){
-                y -= mTileSizeY;
-            }
-            common::int64 _y = static_cast<common::int64>(y) / mTileSizeY;
-            return _y;
+        common::int64 TileWorld::getTileYIndex(common::real64 y) const {
+            auto result = floor(y / mTileSizeX + 0.5f);
+            auto truncated = static_cast<common::int64>(result);
+            return truncated;
+        }
+
+        common::real32 TileWorld::getTilePosForXIndex(common::int64 xIndex) const {
+            return mTileSizeX * xIndex - mHalfTileSizeX;
+        }
+
+        common::real32 TileWorld::getTilePosForYIndex(common::int64 yIndex) const {
+            return mTileSizeY * yIndex - mHalfTileSizeY;
         }
 
 
@@ -54,14 +74,12 @@ namespace oni {
         }
 
         bool TileWorld::skidTileExists(common::uint64 tileCoordinates) const {
-            return mCoordToSkidlineLookup.find(tileCoordinates) != mCoordToSkidlineLookup.end();
+            return mCoordToSkidLineLookup.find(tileCoordinates) != mCoordToSkidLineLookup.end();
         }
 
         common::packedTileCoordinates TileWorld::packCoordinates(const math::vec2 &position) const {
-            // TODO: Need to use int64_t for return type and int32_t instead of int for getTileIndexX()
-            //  when I have migrated to double precision in the math library
-            auto x = getTileIndexX(position.x);
-            auto y = getTileIndexY(position.y);
+            auto x = getTileXIndex(position.x);
+            auto y = getTileYIndex(position.y);
 
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
@@ -92,8 +110,8 @@ namespace oni {
         void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
                              entt::DefaultRegistry &entityRegistry) {
             // TODO: Hardcoded +2 until I find a good way to calculate the exact number of tiles
-            auto tilesAlongX = getTileIndexX(tickRadius) + 2;
-            auto tilesAlongY = getTileIndexY(tickRadius) + 2;
+            auto tilesAlongX = getTileXIndex(tickRadius) + 2;
+            auto tilesAlongY = getTileYIndex(tickRadius) + 2;
             for (auto i = -tilesAlongX; i <= tilesAlongX; ++i) {
                 for (auto j = -tilesAlongY; j <= tilesAlongY; ++j) {
                     auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
@@ -126,16 +144,16 @@ namespace oni {
                                                                    skidDefaultPixel);
                     // END TODO
                     auto skidSize = math::vec2{mTileSizeX, mTileSizeY};
-                    auto carTileX = getTileIndexX(car.position.x);
-                    auto carTileY = getTileIndexY(car.position.y);
-                    auto tilePosX = carTileX * mTileSizeX;
-                    auto tilePosY = carTileY * mTileSizeY;
+                    auto carTileX = getTileXIndex(car.position.x);
+                    auto carTileY = getTileYIndex(car.position.y);
+                    auto tilePosX = getTilePosForXIndex(carTileX);
+                    auto tilePosY = getTilePosForYIndex(carTileY);
                     auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
                     skidEntity = entities::createTexturedStaticEntity(entityRegistry, skidTexture,
                                                                       skidSize, positionInWorld);
-                    mCoordToSkidlineLookup.emplace(packedCoordinates, skidEntity);
+                    mCoordToSkidLineLookup.emplace(packedCoordinates, skidEntity);
                 } else {
-                    skidEntity = mCoordToSkidlineLookup.at(packedCoordinates);
+                    skidEntity = mCoordToSkidLineLookup.at(packedCoordinates);
                 }
 
                 auto skidMarksTexture = entityRegistry.get<components::Texture>(skidEntity);
@@ -151,8 +169,8 @@ namespace oni {
                 // squares.
                 //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
                 //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
-                common::uint16 height = 10;
-                common::uint16 width = 10;
+                common::real32 height = 10.0f;
+                common::real32 width = 10.0f;
 
                 auto bits = graphics::Texture::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
                 graphics::Texture::updateSubTexture(skidMarksTexture,
@@ -171,10 +189,10 @@ namespace oni {
                 const auto B = (std::rand() % 255) / 255.0f;
                 const auto color = math::vec4{R, G, B, 1.0f};
 
-                const auto tileIndexX = getTileIndexX(position.x);
-                const auto tileIndexY = getTileIndexX(position.y);
-                const auto tilePosX = tileIndexX * mTileSizeX;
-                const auto tilePosY = tileIndexY * mTileSizeY;
+                const auto tileIndexX = getTileXIndex(position.x);
+                const auto tileIndexY = getTileXIndex(position.y);
+                const auto tilePosX = getTilePosForXIndex(tileIndexX);
+                const auto tilePosY = getTilePosForYIndex(tileIndexY);
                 const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
                 const auto id = createSpriteStaticEntity(*mTileRegistry, color, math::vec2{mTileSizeX, mTileSizeY},
                                                          positionInWorld);

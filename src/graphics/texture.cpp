@@ -128,10 +128,23 @@ namespace oni {
         }
 
         void Texture::updateSubTexture(components::Texture texture, const GLint xOffset, const GLint yOffset,
-                                       const GLint width, const GLint height,
+                                       GLint width, GLint height,
                                        const std::vector<unsigned char> &bits) {
             ONI_DEBUG_ASSERT(texture.width > xOffset);
             ONI_DEBUG_ASSERT(texture.height > yOffset);
+
+            // Truncate
+            if (xOffset + width >= texture.width) {
+                width = texture.width - xOffset - 1;
+            }
+            if (yOffset + height >= texture.height) {
+                height = texture.height - yOffset - 1;
+            }
+            ONI_DEBUG_ASSERT(texture.width > xOffset + width);
+            ONI_DEBUG_ASSERT(texture.height > yOffset + height);
+            if(xOffset < 0 || yOffset < 0){
+                return;
+            }
             ONI_DEBUG_ASSERT(xOffset >= 0);
             ONI_DEBUG_ASSERT(yOffset >= 0);
             ONI_DEBUG_ASSERT(texture.width >= width);

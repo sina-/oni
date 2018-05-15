@@ -19,6 +19,8 @@ namespace oni {
                 mHalfTileSizeX{mTileSizeX / 2.0f},
                 mHalfTileSizeY{mTileSizeX / 2.0f} {
             std::srand(std::time(nullptr));
+
+            mSkidSize = math::vec2{mTileSizeX, mTileSizeY};
         }
 
         TileWorld::~TileWorld() = default;
@@ -120,62 +122,24 @@ namespace oni {
 
             // NOTE: Technically I should use slippingRear, but this gives better effect
             if (car.slippingFront) {
-/*                auto carTireBRPlacement = entityRegistry.get<components::Placement>(mCarTireBREntity);
-                auto carTireBLPlacement = entityRegistry.get<components::Placement>(mCarTireBLEntity);*/
+                auto carTireRRPlacement = foregroundEntities.get<components::Placement>(car.tireRR);
+                auto carTireRLPlacement = foregroundEntities.get<components::Placement>(car.tireRL);
 
-/*                const auto &transformParentBL = entityRegistry.get<components::TransformParent>(mCarTireBLEntity);
-                const auto &transformParentBR = entityRegistry.get<components::TransformParent>(mCarTireBREntity);*/
+                const auto &transformParentRR = foregroundEntities.get<components::TransformParent>(car.tireRR);
+                const auto &transformParentRL = foregroundEntities.get<components::TransformParent>(car.tireRL);
 
-/*                auto skidMarkBLPos = transformParentBL.transform * carTireBLPlacement.position;
-                auto skidMarkBRPos = transformParentBR.transform * carTireBRPlacement.position;*/
+                auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
+                auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
 
-                auto carPos = car.position;
-                auto packedCoordinates = packCoordinates(carPos);
+                entityID skidEntityRL{0};
+                entityID skidEntityRR{0};
 
-                entityID skidEntity = 0;
-                if (!skidTileExists(packedCoordinates)) {
-                    // TODO: These are constant
-                    auto skidWidthInPixels = static_cast<common::int32>(mTileSizeX * GAME_UNIT_TO_PIXELS + common::ep);
-                    auto skidHeightInPixels = static_cast<common::int32>(mTileSizeY * GAME_UNIT_TO_PIXELS + common::ep);
-                    auto skidDefaultPixel = oni::components::PixelRGBA{};
-
-                    auto skidTexture = graphics::Texture::generate(skidWidthInPixels, skidHeightInPixels,
-                                                                   skidDefaultPixel);
-                    // END TODO
-                    auto skidSize = math::vec2{mTileSizeX, mTileSizeY};
-                    auto carTileX = getTileXIndex(car.position.x);
-                    auto carTileY = getTileYIndex(car.position.y);
-                    auto tilePosX = getTilePosForXIndex(carTileX);
-                    auto tilePosY = getTilePosForYIndex(carTileY);
-                    auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
-                    skidEntity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
-                                                                      skidSize, positionInWorld);
-                    mCoordToSkidLineLookup.emplace(packedCoordinates, skidEntity);
-                } else {
-                    skidEntity = mCoordToSkidLineLookup.at(packedCoordinates);
-                }
-
-                auto skidMarksTexture = foregroundEntities.get<components::Texture>(skidEntity);
-                auto skidMarksTexturePos = foregroundEntities.get<components::Shape>(skidEntity).getPosition();
-
-                auto skidPos = math::vec3{car.position.x, car.position.y, 1.0f};
-
-                physics::Transformation::worldToLocalTextureTranslation(skidMarksTexturePos, GAME_UNIT_TO_PIXELS,
-                                                                        skidPos);
-
+                skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY(), foregroundEntities);
+                skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY(), foregroundEntities);
                 auto alpha = static_cast<unsigned char>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-                // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
-                // squares.
-                //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
-                //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
-                common::real32 height = 10.0f;
-                common::real32 width = 10.0f;
 
-                auto bits = graphics::Texture::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
-                graphics::Texture::updateSubTexture(skidMarksTexture,
-                                                    static_cast<GLint>(skidPos.x - width / 2),
-                                                    static_cast<GLint>(skidPos.y - width / 2),
-                                                    width, height, bits);
+                updateSkidTexture(skidMarkRLPos, skidEntityRL, foregroundEntities, alpha);
+                updateSkidTexture(skidMarkRRPos, skidEntityRR, foregroundEntities, alpha);
             }
 
         }
@@ -198,6 +162,54 @@ namespace oni {
 
                 mCoordToTileLookup.emplace(packedCoordinates, id);
             }
+        }
+
+        entities::entityID TileWorld::createSkidTileIfMissing(const math::vec2 &position,
+                                                              entt::DefaultRegistry &foregroundEntities) {
+            auto packedCoordinates = packCoordinates(position);
+            entities::entityID entity{};
+            if (!skidTileExists(packedCoordinates)) {
+                auto tileX = getTileXIndex(position.x);
+                auto tileY = getTileYIndex(position.y);
+                auto tilePosX = getTilePosForXIndex(tileX);
+                auto tilePosY = getTilePosForYIndex(tileY);
+                auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
+
+                auto skidWidthInPixels = static_cast<common::uint16>(mTileSizeX * GAME_UNIT_TO_PIXELS + common::ep);
+                auto skidHeightInPixels = static_cast<common::uint16>(mTileSizeY * GAME_UNIT_TO_PIXELS + common::ep);
+                auto skidDefaultPixel = oni::components::PixelRGBA{};
+                auto skidTexture = graphics::Texture::generate(skidWidthInPixels, skidHeightInPixels, skidDefaultPixel);
+
+                entity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
+                                                              mSkidSize, positionInWorld);
+                mCoordToSkidLineLookup.emplace(packedCoordinates, entity);
+            } else {
+                entity = mCoordToSkidLineLookup.at(packedCoordinates);
+            }
+            return entity;
+        }
+
+        void TileWorld::updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
+                                          entt::DefaultRegistry &foregroundEntities, common::uint8 alpha) {
+            auto skidMarksTexture = foregroundEntities.get<components::Texture>(skidTextureEntity);
+            auto skidMarksTexturePos = foregroundEntities.get<components::Shape>(skidTextureEntity).getPosition();
+
+            auto skidPos = position;
+            physics::Transformation::worldToLocalTextureTranslation(skidMarksTexturePos, GAME_UNIT_TO_PIXELS, skidPos);
+
+            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
+            // squares.
+            //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
+            //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
+            common::real32 height = 5.0f;
+            common::real32 width = 5.0f;
+
+            auto bits = graphics::Texture::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
+            graphics::Texture::updateSubTexture(skidMarksTexture,
+                                                static_cast<GLint>(skidPos.x - width / 2),
+                                                static_cast<GLint>(skidPos.y - width / 2),
+                                                width, height, bits);
+
         }
     }
 }

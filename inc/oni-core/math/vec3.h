@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/math/vec2.h>
 
 namespace oni {
     namespace math {
@@ -18,6 +19,8 @@ namespace oni {
             vec3 &multiply(const vec3 &other);
 
             vec3 &divide(const vec3 &other);
+
+            vec2 getXY();
 
             friend vec3 operator+(const vec3 &left, const vec3 &right);
 

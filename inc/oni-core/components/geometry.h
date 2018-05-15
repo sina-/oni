@@ -5,6 +5,7 @@
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
+#include <oni-core/entities/create-entity.h>
 
 namespace oni {
     namespace components {
@@ -162,6 +163,11 @@ namespace oni {
             bool safeSteer;
 
             common::carSimDouble distanceFromCamera;
+
+            entities::entityID tireFR{};
+            entities::entityID tireFL{};
+            entities::entityID tireRR{};
+            entities::entityID tireRL{};
 
             explicit Car(const components::CarConfig &c) {
                 heading = 0.0f;

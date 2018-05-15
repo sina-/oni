@@ -56,6 +56,7 @@ namespace oni {
             common::real32 getTilePosForXIndex(common::int64 xIndex) const;
 
             common::real32 getTilePosForYIndex(common::int64 yIndex) const;
+
         private:
             /**
              * Pack common::real32 values in the range (x +-16, y +-16) into a uint64.
@@ -73,6 +74,12 @@ namespace oni {
 
             void createTileIfMissing(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
 
+            entities::entityID createSkidTileIfMissing(const math::vec2 &position,
+                                                       entt::DefaultRegistry &foregroundEntities);
+
+            void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
+                                   entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
+
         public:
             std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
             std::map<common::uint64, entities::entityID> mCoordToSkidLineLookup{};
@@ -82,6 +89,8 @@ namespace oni {
 
             const common::real32 mHalfTileSizeX{};
             const common::real32 mHalfTileSizeY{};
+
+            math::vec2 mSkidSize{0.0f, 0.0f};
         };
     }
 }

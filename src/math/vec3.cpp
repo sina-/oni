@@ -74,5 +74,9 @@ namespace oni {
             stream << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
             return stream;
         }
+
+        vec2 vec3::getXY() {
+            return vec2{x, y};
+        }
     }
 }

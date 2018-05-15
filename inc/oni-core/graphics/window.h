@@ -22,18 +22,21 @@ namespace oni {
          *  by registering a call-back that is called on such events.
          */
         class Window {
-            std::string mTitle;
-            common::int32 mWidth, mHeight;
-            common::int32 mGameWidth, mGameHeight;
-            GLFWwindow *mWindow;
-            common::int32 mMouseButton;
-            oni::common::real64 mCursorX, mCursorY;
-            std::vector<common::int32> mKeysPressed;
-            std::vector<common::int32> mKeysReleased;
+            std::string mTitle{};
+            common::int32 mWidth{};
+            common::int32 mHeight{};
+            common::int32 mGameWidth{};
+            common::int32 mGameHeight{};
+            GLFWwindow *mWindow{};
+            common::int32 mMouseButton{};
+            common::real64 mCursorX{};
+            common::real64 mCursorY{};
+            std::vector<common::int32> mKeysPressed{};
+            std::vector<common::int32> mKeysReleased{};
 
 
         public:
-            Window(std::string &&name, common::int32 width, common::int32 height, common::int32 gameWidth, common::int32 gameHeight);
+            Window(std::string &&name, common::int32 gameWidth, common::int32 gameHeight);
 
             ~Window();
 
@@ -83,9 +86,11 @@ namespace oni {
 
             static void windowResizeCallback(GLFWwindow *window, common::int32 width, common::int32 height);
 
-            static void keyCallback(GLFWwindow *window, common::int32 key, common::int32 scancode, common::int32 action, common::int32 mods);
+            static void keyCallback(GLFWwindow *window, common::int32 key, common::int32 scancode, common::int32 action,
+                                    common::int32 mods);
 
-            static void mouseCallback(GLFWwindow *window, common::int32 button, common::int32 action, common::int32 mods);
+            static void
+            mouseCallback(GLFWwindow *window, common::int32 button, common::int32 action, common::int32 mods);
 
             static void cursorPosCallback(GLFWwindow *window, oni::common::real64 x, oni::common::real64 y);
 

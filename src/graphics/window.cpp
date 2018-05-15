@@ -6,9 +6,8 @@
 namespace oni {
     namespace graphics {
 
-        Window::Window(std::string &&title, common::int32 width, common::int32 height, common::int32 gameWidth,
-                       common::int32 gameHeight) :
-                mTitle{std::move(title)}, mWidth{width}, mHeight{height},
+        Window::Window(std::string &&title, common::int32 gameWidth, common::int32 gameHeight) :
+                mTitle{std::move(title)},
                 mGameWidth{gameWidth},
                 mGameHeight{gameHeight},
                 mWindow{nullptr},
@@ -18,7 +17,19 @@ namespace oni {
             if (!glfwInit())
                 throw std::runtime_error("Failed to init GLFW!");
 
-            mWindow = glfwCreateWindow(mWidth, mHeight, mTitle.c_str(), nullptr, nullptr);
+            common::int32 monitorCount{};
+            auto monitors = glfwGetMonitors(&monitorCount);
+            const GLFWvidmode *mode = glfwGetVideoMode(monitors[0]);
+            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+            mWindow = glfwCreateWindow(mode->width, mode->height, mTitle.c_str(), monitors[0], nullptr);
+
+            mWidth = mode->width;
+            mHeight = mode->height;
+
             if (!mWindow) {
                 glfwTerminate();
                 throw std::runtime_error("Failed to create window!");

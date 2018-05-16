@@ -23,12 +23,14 @@ namespace oni {
              * to the renderer or other systems.
              *
              * @param position location in the world coordinate to tick
-             * @param tickRadius in game units that is meters
+             * @param viewWidth in game units
+             * @param viewHeight in game units
              */
             // TODO: Instead of a car the function should go through all the car entities in the world and
             // update as needed.
-            void tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
-                      entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities);
+            void tick(const math::vec2 &position, common::uint16 viewWidth, common::uint16 viewHeight,
+                      const components::Car &car, entt::DefaultRegistry &foregroundEntities,
+                      entt::DefaultRegistry &backgroundEntities);
 
             common::uint16 getTileSizeX() const;
 

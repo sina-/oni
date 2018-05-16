@@ -108,13 +108,13 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(const math::vec2 &position, common::uint16 tickRadius, const components::Car &car,
-                             entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities) {
-            // TODO: Hardcoded +2 until I find a good way to calculate the exact number of tiles
-            auto tilesAlongX = getTileXIndex(tickRadius) + 2;
-            auto tilesAlongY = getTileYIndex(tickRadius) + 2;
-            for (auto i = -tilesAlongX; i <= tilesAlongX; ++i) {
-                for (auto j = -tilesAlongY; j <= tilesAlongY; ++j) {
+        void TileWorld::tick(const math::vec2 &position, common::uint16 viewWidth, common::uint16 viewHeight,
+                             const components::Car &car, entt::DefaultRegistry &foregroundEntities,
+                             entt::DefaultRegistry &backgroundEntities) {
+            auto halfNumTilesAlongX = static_cast<common::uint16>(viewWidth / (2 * mTileSizeX)) + 1;
+            auto halfNumTilesAlongY = static_cast<common::uint16>(viewHeight / (2 * mTileSizeY)) + 1;
+            for (auto i = -halfNumTilesAlongX; i <= halfNumTilesAlongX; ++i) {
+                for (auto j = -halfNumTilesAlongY; j <= halfNumTilesAlongY; ++j) {
                     auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
                     createTileIfMissing(tilePosition, backgroundEntities);
                 }

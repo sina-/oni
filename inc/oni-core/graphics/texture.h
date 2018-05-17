@@ -51,6 +51,8 @@ namespace oni {
 
             static void bind(GLuint textureID);
 
+            static void bindRange(GLuint first, const std::vector<GLuint>& textures);
+
             static void unbind();
         };
     }

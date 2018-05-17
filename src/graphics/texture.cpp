@@ -142,7 +142,7 @@ namespace oni {
             }
             ONI_DEBUG_ASSERT(texture.width > xOffset + width);
             ONI_DEBUG_ASSERT(texture.height > yOffset + height);
-            if(xOffset < 0 || yOffset < 0){
+            if (xOffset < 0 || yOffset < 0) {
                 return;
             }
             ONI_DEBUG_ASSERT(xOffset >= 0);
@@ -170,6 +170,10 @@ namespace oni {
             }
 
             return bits;
+        }
+
+        void Texture::bindRange(GLuint first, const std::vector<GLuint> &textures) {
+            glBindTextures(first, static_cast<GLsizei>(textures.size()), textures.data());
         }
     }
 }

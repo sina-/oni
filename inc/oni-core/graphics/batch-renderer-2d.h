@@ -80,10 +80,9 @@ namespace oni {
             std::unique_ptr<buffers::VertexArray> mVAO;
             std::unique_ptr<buffers::IndexBuffer> mIBO;
 
-            // A mapping from texture id to 2D sampler that will draw it.
-            std::map<GLuint, GLint> mTextureToSampler{};
-
-            std::vector<GLint> mSamplers;
+            GLint mNextSamplerID{0};
+            std::vector<GLint> mSamplers{};
+            std::vector<GLuint> mTextures{};
 
             // The buffer that will hold components::Vertex data, or its variants, in the batch.
             void *mBuffer;

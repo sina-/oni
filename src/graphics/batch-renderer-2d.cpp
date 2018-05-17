@@ -59,10 +59,6 @@ namespace oni {
 
             mIBO = std::make_unique<buffers::IndexBuffer>(indices, mMaxIndicesCount);
 
-            mTextureToSampler = {};
-
-            mSamplers = generateSamplerIDs();
-
             mBuffer = nullptr;
         }
 
@@ -71,11 +67,9 @@ namespace oni {
         }
 
         void BatchRenderer2D::_begin() {
-            // TODO: use a function to reset samplers
-            mSamplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
-            // Fill the vector with 0, 1, 2, 3, ...
-            std::iota(mSamplers.begin(), mSamplers.end(), 0);
-            mTextureToSampler.clear();
+            mNextSamplerID = 0;
+            mSamplers.clear();
+            mTextures.clear();
 
             mVAO->bindVBO();
             // Data written to mBuffer has to match the structure of VBO.
@@ -162,7 +156,6 @@ namespace oni {
             mBuffer = static_cast<void *>(buffer);
 
             mIndexCount += 6;
-
         }
 
         void BatchRenderer2D::_submit(const components::Text &text) {
@@ -213,14 +206,10 @@ namespace oni {
             }
 
             mBuffer = static_cast<void *>(buffer);
-
         }
 
         void BatchRenderer2D::_flush() {
-            for (const auto &t2s: mTextureToSampler) {
-                glActiveTexture(GL_TEXTURE0 + static_cast<GLenum >(t2s.second));
-                Texture::bind(t2s.first);
-            }
+            Texture::bindRange(0, mTextures);
 
             mVAO->bindVAO();
             mIBO->bind();
@@ -239,44 +228,31 @@ namespace oni {
         void BatchRenderer2D::_end() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
             mVAO->unbindVBO();
-
         }
 
         void BatchRenderer2D::reset() {
             end();
             flush();
             begin();
-
-            mSamplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
-            // Fill the vector with 0, 1, 2, 3, ...
-            std::iota(mSamplers.begin(), mSamplers.end(), 0);
-            mTextureToSampler.clear();
         }
 
         GLint BatchRenderer2D::getSamplerID(GLuint textureID) {
-            auto it = mTextureToSampler.find(textureID);
-            GLint samplerID = 0;
-
-            if (it == mTextureToSampler.end()) {
-                ONI_DEBUG_ASSERT(static_cast<GLint> (mTextureToSampler.size()) < mMaxNumTextureSamplers);
-
+            auto it = std::find(mTextures.begin(), mTextures.end(), textureID);
+            if (it == mTextures.end()) {
                 /*
-                 * To support more than mMaxNumTextureSamplers following can be used. But,
-                 * this operation is very expensive. Instead create more layers if needed.
-                if (mTextureToSampler.size() >= mMaxNumTextureSamplers) {
+                 * This can be used to render more than max number of samplers, but it slows things down.
+                if (mNextSamplerID > mMaxNumTextureSamplers) {
                     reset();
-                }
-                */
+                }*/
+                ONI_DEBUG_ASSERT(mNextSamplerID <= mMaxNumTextureSamplers);
 
-                samplerID = mSamplers.back();
-
-                mTextureToSampler[textureID] = samplerID;
-                mSamplers.pop_back();
+                mTextures.push_back(textureID);
+                mSamplers.push_back(mNextSamplerID++);
+                return mSamplers.back();
             } else {
-                samplerID = (*it).second;
+                auto index = std::distance(mTextures.begin(), it);
+                return mSamplers[index];
             }
-
-            return samplerID;
         }
 
         std::vector<GLint> BatchRenderer2D::generateSamplerIDs() {

@@ -71,6 +71,12 @@ namespace oni {
         }
 
         void BatchRenderer2D::_begin() {
+            // TODO: use a function to reset samplers
+            mSamplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
+            // Fill the vector with 0, 1, 2, 3, ...
+            std::iota(mSamplers.begin(), mSamplers.end(), 0);
+            mTextureToSampler.clear();
+
             mVAO->bindVBO();
             // Data written to mBuffer has to match the structure of VBO.
             mBuffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -240,6 +246,7 @@ namespace oni {
             end();
             flush();
             begin();
+
             mSamplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(mSamplers.begin(), mSamplers.end(), 0);

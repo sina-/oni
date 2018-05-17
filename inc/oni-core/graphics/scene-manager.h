@@ -43,6 +43,10 @@ namespace oni {
 
             const math::mat4 &getViewMatrix() const;
 
+            common::uint16 getViewWidth() const;
+
+            common::uint16 getViewHeight() const;
+
         private:
             void begin(const Shader &shader, Renderer2D &renderer2D);
 
@@ -51,6 +55,8 @@ namespace oni {
             void initializeTextureRenderer(const Shader &shader);
 
             void initializeColorRenderer(const Shader &shader);
+
+            bool visibleToCamera(const components::Shape &shape) const;
 
         private:
             std::unique_ptr<Shader> mColorShader;
@@ -61,6 +67,9 @@ namespace oni {
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
+
+            components::ScreenBounds mScreenBounds{};
+            components::Camera mCamera{0.0f, 0.0f, 1.0f};
 
             const common::uint16 mMaxSpriteCount{0};
         };

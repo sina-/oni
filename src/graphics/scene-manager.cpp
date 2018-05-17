@@ -13,7 +13,7 @@ namespace oni {
 
         SceneManager::SceneManager(const components::ScreenBounds &screenBounds) :
         // 64k vertices
-                mMaxSpriteCount(16 * 1000) {
+                mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds) {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
                                                          screenBounds.yMax, -1.0f, 1.0f);
@@ -114,11 +114,11 @@ namespace oni {
 
         void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D) {
             shader.enable();
-            // TODO: Merge all these matrices into one and call it ModelViewProjMatrix and use it in the
-            // shader. This is to avoid the same matrix multiplication for each vertex in the game over and over.
-            shader.setUniformMat4("pr_matrix", mProjectionMatrix);
-            shader.setUniformMat4("vw_matrix", mViewMatrix);
-            shader.setUniformMat4("ml_matrix", mModelMatrix);
+
+            auto view = math::mat4::scale(math::vec3{mCamera.z, mCamera.z, 1.0f}) *
+                        math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
+            auto mvp = mProjectionMatrix * view;
+            shader.setUniformMat4("mvp", mvp);
             renderer2D.begin();
         }
 
@@ -137,6 +137,9 @@ namespace oni {
                     components::Texture, components::TagStatic>();
             for (const auto &entity: staticTextureSpriteView) {
                 const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
+                if (!visibleToCamera(shape)) {
+                    continue;
+                }
                 const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
                 // TODO: submit will fail if we reach maximum number of sprites.
                 // I could also check the number of entities using the view and decide before hand at which point I
@@ -172,6 +175,9 @@ namespace oni {
                 }
 
                 auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
+                if (!visibleToCamera(shapeTransformed)) {
+                    continue;
+                }
 
                 mTextureRenderer->submit(shapeTransformed, texture);
             }
@@ -183,6 +189,9 @@ namespace oni {
                     components::Appearance, components::TagStatic>();
             for (const auto &entity: staticSpriteView) {
                 const auto &shape = staticSpriteView.get<components::Shape>(entity);
+                if (!visibleToCamera(shape)) {
+                    continue;
+                }
                 const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
                 mColorRenderer->submit(shape, appearance);
             }
@@ -191,12 +200,14 @@ namespace oni {
         }
 
         void SceneManager::lookAt(common::real32 x, common::real32 y) {
-            mViewMatrix = math::mat4::translation(-x, -y, 0.0f);
+            mCamera.x = x;
+            mCamera.y = y;
         }
 
         void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
-            mViewMatrix = math::mat4::scale(math::vec3{distance, distance, 1.0f}) *
-                          math::mat4::translation(-x, -y, 0.0f);
+            mCamera.x = x;
+            mCamera.y = y;
+            mCamera.z = distance;
         }
 
         const math::mat4 &SceneManager::getProjectionMatrix() const {
@@ -205,6 +216,52 @@ namespace oni {
 
         const math::mat4 &SceneManager::getViewMatrix() const {
             return mViewMatrix;
+        }
+
+        common::uint16 SceneManager::getViewWidth() const {
+            return static_cast<common::uint16 >((mScreenBounds.xMax - mScreenBounds.xMin) *
+                                                (1 / mCamera.z));
+        }
+
+        common::uint16 SceneManager::getViewHeight() const {
+            return static_cast<common::uint16 >((mScreenBounds.yMax - mScreenBounds.yMin) *
+                                                (1 / mCamera.z));
+        }
+
+        bool SceneManager::visibleToCamera(const components::Shape &shape) const {
+            auto xMin = shape.vertexA.x;
+            auto xMax = shape.vertexC.x;
+
+            auto yMin = shape.vertexA.y;
+            auto yMax = shape.vertexC.y;
+
+            auto viewHalfWidth = static_cast<common::uint16>(getViewWidth() / 2);
+            auto viewHalfHeight = static_cast<common::uint16>(getViewHeight() / 2);
+
+            auto viewXMin = mCamera.x - viewHalfWidth;
+            auto viewXMax = mCamera.x + viewHalfWidth;
+
+            auto viewYMin = mCamera.y - viewHalfHeight;
+            auto viewYMax = mCamera.y + viewHalfHeight;
+
+            auto x = false;
+            auto y = false;
+
+            if (xMin >= viewXMin && xMin <= viewXMax) {
+                x = true;
+            }
+            if (xMax >= viewXMin && xMax <= viewXMax) {
+                x = true;
+            }
+
+            if (yMin >= viewYMin && yMin <= viewYMax) {
+                y = true;
+            }
+            if (yMax >= viewYMin && yMax <= viewYMax) {
+                y = true;
+            }
+
+            return x && y;
         }
 
     }

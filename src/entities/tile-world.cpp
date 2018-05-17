@@ -178,6 +178,8 @@ namespace oni {
                 auto skidWidthInPixels = static_cast<common::uint16>(mTileSizeX * GAME_UNIT_TO_PIXELS + common::ep);
                 auto skidHeightInPixels = static_cast<common::uint16>(mTileSizeY * GAME_UNIT_TO_PIXELS + common::ep);
                 auto skidDefaultPixel = oni::components::PixelRGBA{};
+                // TODO: This function generates a texture and loads it into video memory, meaning we can not
+                // blend two layers of skid mark onto each other
                 auto skidTexture = graphics::Texture::generate(skidWidthInPixels, skidHeightInPixels, skidDefaultPixel);
 
                 entity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,

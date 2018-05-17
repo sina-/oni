@@ -67,5 +67,11 @@ namespace oni {
             common::real32 yMax;
         };
 
+        struct Camera {
+            common::real32 x;
+            common::real32 y;
+            common::real32 z;
+        };
+
     }
 }

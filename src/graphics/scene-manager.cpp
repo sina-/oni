@@ -229,30 +229,37 @@ namespace oni {
         }
 
         bool SceneManager::visibleToCamera(const components::Shape &shape) const {
+            // Checks if corners of the shape is within the viewing rectangle.
+
+            auto x = false;
+            auto viewHalfWidth = static_cast<common::uint16>(getViewWidth() / 2);
+
             auto xMin = shape.vertexA.x;
             auto xMax = shape.vertexC.x;
-
-            auto yMin = shape.vertexA.y;
-            auto yMax = shape.vertexC.y;
-
-            auto viewHalfWidth = static_cast<common::uint16>(getViewWidth() / 2);
-            auto viewHalfHeight = static_cast<common::uint16>(getViewHeight() / 2);
 
             auto viewXMin = mCamera.x - viewHalfWidth;
             auto viewXMax = mCamera.x + viewHalfWidth;
 
-            auto viewYMin = mCamera.y - viewHalfHeight;
-            auto viewYMax = mCamera.y + viewHalfHeight;
-
-            auto x = false;
-            auto y = false;
-
             if (xMin >= viewXMin && xMin <= viewXMax) {
                 x = true;
             }
+
             if (xMax >= viewXMin && xMax <= viewXMax) {
                 x = true;
             }
+
+            if (!x) {
+                return false;
+            }
+
+            auto y = false;
+            auto viewHalfHeight = static_cast<common::uint16>(getViewHeight() / 2);
+
+            auto yMin = shape.vertexA.y;
+            auto yMax = shape.vertexC.y;
+
+            auto viewYMin = mCamera.y - viewHalfHeight;
+            auto viewYMax = mCamera.y + viewHalfHeight;
 
             if (yMin >= viewYMin && yMin <= viewYMax) {
                 y = true;
@@ -261,7 +268,7 @@ namespace oni {
                 y = true;
             }
 
-            return x && y;
+            return y;
         }
 
     }

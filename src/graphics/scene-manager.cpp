@@ -237,19 +237,19 @@ namespace oni {
 
         common::uint16 SceneManager::getViewWidth() const {
             return static_cast<common::uint16 >((mScreenBounds.xMax - mScreenBounds.xMin) *
-                                                (1 / mCamera.z));
+                                                (1.0f / mCamera.z));
         }
 
         common::uint16 SceneManager::getViewHeight() const {
             return static_cast<common::uint16 >((mScreenBounds.yMax - mScreenBounds.yMin) *
-                                                (1 / mCamera.z));
+                                                (1.0f / mCamera.z));
         }
 
         bool SceneManager::visibleToCamera(const components::Shape &shape) const {
             // Checks if corners of the shape is within the viewing rectangle.
 
             auto x = false;
-            auto viewHalfWidth = static_cast<common::uint16>(getViewWidth() / 2);
+            auto viewHalfWidth = static_cast<common::uint16>(getViewWidth() / 2.0f);
 
             auto xMin = shape.vertexA.x;
             auto xMax = shape.vertexC.x;
@@ -270,7 +270,7 @@ namespace oni {
             }
 
             auto y = false;
-            auto viewHalfHeight = static_cast<common::uint16>(getViewHeight() / 2);
+            auto viewHalfHeight = static_cast<common::uint16>(getViewHeight() / 2.0f);
 
             auto yMin = shape.vertexA.y;
             auto yMax = shape.vertexC.y;

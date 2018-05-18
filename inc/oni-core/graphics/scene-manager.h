@@ -47,6 +47,12 @@ namespace oni {
 
             common::uint16 getViewHeight() const;
 
+            common::uint16 getSpritesPerFrame() const;
+
+            common::uint16 getTexturesPerFrame() const;
+
+            void resetCounters();
+
         private:
             void begin(const Shader &shader, Renderer2D &renderer2D);
 
@@ -72,6 +78,9 @@ namespace oni {
             components::Camera mCamera{0.0f, 0.0f, 1.0f};
 
             const common::uint16 mMaxSpriteCount{0};
+
+            common::uint16 mRenderedSpritesPerFrame{0};
+            common::uint16 mRenderedTexturesPerFrame{0};
         };
     }
 }

@@ -141,6 +141,10 @@ namespace oni {
                     continue;
                 }
                 const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
+
                 // TODO: submit will fail if we reach maximum number of sprites.
                 // I could also check the number of entities using the view and decide before hand at which point I
                 // flush the renderer and open up room for new sprites.
@@ -150,7 +154,6 @@ namespace oni {
                 // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
                 // by merging many textures to keep below the limit. Other solutions might be looking into other type
                 // of texture storage that can hold bigger number of textures.
-
                 mTextureRenderer->submit(shape, texture);
             }
 
@@ -179,6 +182,9 @@ namespace oni {
                     continue;
                 }
 
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
+
                 mTextureRenderer->submit(shapeTransformed, texture);
             }
 
@@ -193,6 +199,9 @@ namespace oni {
                     continue;
                 }
                 const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
+
+                ++mRenderedSpritesPerFrame;
+
                 mColorRenderer->submit(shape, appearance);
             }
 
@@ -216,6 +225,14 @@ namespace oni {
 
         const math::mat4 &SceneManager::getViewMatrix() const {
             return mViewMatrix;
+        }
+
+        common::uint16 SceneManager::getSpritesPerFrame() const {
+            return mRenderedSpritesPerFrame;
+        }
+
+        common::uint16 SceneManager::getTexturesPerFrame() const {
+            return mRenderedTexturesPerFrame;
         }
 
         common::uint16 SceneManager::getViewWidth() const {
@@ -271,5 +288,9 @@ namespace oni {
             return y;
         }
 
+        void SceneManager::resetCounters() {
+            mRenderedSpritesPerFrame = 0;
+            mRenderedTexturesPerFrame = 0;
+        }
     }
 }

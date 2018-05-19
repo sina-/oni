@@ -127,7 +127,7 @@ namespace oni {
             return components::Texture{width, height, textureID, format, type, "", uv};
         }
 
-        void Texture::updateSubTexture(components::Texture texture, const GLint xOffset, const GLint yOffset,
+        void Texture::updateSubTexture(const components::Texture &texture, const GLint xOffset, const GLint yOffset,
                                        GLint width, GLint height,
                                        const std::vector<unsigned char> &bits) {
             ONI_DEBUG_ASSERT(texture.width > xOffset);

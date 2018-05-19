@@ -9,7 +9,6 @@
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/components/geometry.h>
 
-// TODO: Need to use int32_t and its siblings instead of int and long
 namespace oni {
     namespace entities {
         class TileWorld {

@@ -2,7 +2,6 @@
 
 #include <oni-core/entities/tile-world.h>
 #include <oni-core/utils/oni-assert.h>
-#include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/graphics/texture.h>
 #include <oni-core/common/consts.h>
@@ -15,7 +14,7 @@ namespace oni {
     namespace entities {
 
         TileWorld::TileWorld() :
-                mTileSizeX{8}, mTileSizeY{8},
+                mTileSizeX{32}, mTileSizeY{32},
                 mHalfTileSizeX{mTileSizeX / 2.0f},
                 mHalfTileSizeY{mTileSizeY / 2.0f} {
             std::srand(std::time(nullptr));

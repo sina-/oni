@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <GL/glew.h>
+
 #include <oni-core/common/typedefs.h>
 
 namespace oni {
@@ -26,7 +27,9 @@ namespace oni {
             // font manager or audio manager.
             static components::Texture load(const std::string &path);
 
-            static components::Texture generate(const common::uint16 width, const common::uint16 height, const components::PixelRGBA &pixel);
+            static components::Texture generate(const common::uint16 width,
+                                                const common::uint16 height,
+                                                const components::PixelRGBA &pixel);
 
             static std::vector<unsigned char> generateBits(const common::uint16 width, const common::uint16 height,
                                                            const components::PixelRGBA &pixel);
@@ -42,7 +45,7 @@ namespace oni {
              * @param height in local texture coordinates
              * @param bits data to overwrite the texture with, must match the given region
              */
-            static void updateSubTexture(components::Texture texture, const GLint xOffset,
+            static void updateSubTexture(const components::Texture &texture, const GLint xOffset,
                                          const GLint yOffset, GLint width,
                                          GLint height,
                                          const std::vector<unsigned char> &bits);
@@ -51,7 +54,7 @@ namespace oni {
 
             static void bind(GLuint textureID);
 
-            static void bindRange(GLuint first, const std::vector<GLuint>& textures);
+            static void bindRange(GLuint first, const std::vector<GLuint> &textures);
 
             static void unbind();
         };

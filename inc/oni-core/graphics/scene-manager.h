@@ -34,7 +34,6 @@ namespace oni {
 
             void render(entt::DefaultRegistry &registry);
 
-            // TODO: What about a camera class?
             void lookAt(common::real32 x, common::real32 y);
 
             void lookAt(common::real32 x, common::real32 y, common::real32 distance);

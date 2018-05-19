@@ -74,7 +74,7 @@ namespace oni {
 
             bool skidTileExists(common::uint64 tileCoordinates) const;
 
-            void createTileIfMissing(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
+            void createTileIfMissing(const math::vec2 &tileForPosition, entt::DefaultRegistry &backgroundEntities);
 
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);

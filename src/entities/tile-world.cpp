@@ -15,7 +15,7 @@ namespace oni {
     namespace entities {
 
         TileWorld::TileWorld() :
-                mTileSizeX{32}, mTileSizeY{64},
+                mTileSizeX{8}, mTileSizeY{8},
                 mHalfTileSizeX{mTileSizeX / 2.0f},
                 mHalfTileSizeY{mTileSizeY / 2.0f} {
             std::srand(std::time(nullptr));
@@ -115,8 +115,8 @@ namespace oni {
             auto halfNumTilesAlongY = static_cast<common::uint16>(viewHeight / (2.0f * mTileSizeY)) + 1;
             for (auto i = -halfNumTilesAlongX; i <= halfNumTilesAlongX; ++i) {
                 for (auto j = -halfNumTilesAlongY; j <= halfNumTilesAlongY; ++j) {
-                    auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
-                    createTileIfMissing(tilePosition, backgroundEntities);
+                    auto tileForPosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
+                    createTileIfMissing(tileForPosition, backgroundEntities);
                 }
             }
 
@@ -144,16 +144,17 @@ namespace oni {
 
         }
 
-        void TileWorld::createTileIfMissing(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities) {
-            auto packedCoordinates = packCoordinates(position);
+        void TileWorld::createTileIfMissing(const math::vec2 &tileForPosition,
+                                            entt::DefaultRegistry &backgroundEntities) {
+            auto packedCoordinates = packCoordinates(tileForPosition);
             if (!tileExists(packedCoordinates)) {
                 const auto R = (std::rand() % 255) / 255.0f;
                 const auto G = (std::rand() % 255) / 255.0f;
                 const auto B = (std::rand() % 255) / 255.0f;
                 const auto color = math::vec4{R, G, B, 1.0f};
 
-                const auto tileIndexX = getTileXIndex(position.x);
-                const auto tileIndexY = getTileXIndex(position.y);
+                const auto tileIndexX = getTileXIndex(tileForPosition.x);
+                const auto tileIndexY = getTileYIndex(tileForPosition.y);
                 const auto tilePosX = getTilePosForXIndex(tileIndexX);
                 const auto tilePosY = getTilePosForYIndex(tileIndexY);
                 const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};

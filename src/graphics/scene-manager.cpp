@@ -235,21 +235,17 @@ namespace oni {
             return mRenderedTexturesPerFrame;
         }
 
-        common::uint16 SceneManager::getViewWidth() const {
-            return static_cast<common::uint16 >((mScreenBounds.xMax - mScreenBounds.xMin) *
-                                                (1.0f / mCamera.z));
+        common::real32 SceneManager::getViewWidth() const {
+            return (mScreenBounds.xMax - mScreenBounds.xMin) * (1.0f / mCamera.z);
         }
 
-        common::uint16 SceneManager::getViewHeight() const {
-            return static_cast<common::uint16 >((mScreenBounds.yMax - mScreenBounds.yMin) *
-                                                (1.0f / mCamera.z));
+        common::real32 SceneManager::getViewHeight() const {
+            return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
         }
 
         bool SceneManager::visibleToCamera(const components::Shape &shape) const {
-            // Checks if corners of the shape is within the viewing rectangle.
-
             auto x = false;
-            auto viewHalfWidth = static_cast<common::uint16>(getViewWidth() / 2.0f);
+            auto viewHalfWidth = getViewWidth() / 2.0f;
 
             auto xMin = shape.vertexA.x;
             auto xMax = shape.vertexC.x;
@@ -266,7 +262,7 @@ namespace oni {
             }
 
             // Object is bigger than the frustum, i.e., view is inside the object
-            if(viewXMin >= xMin && viewXMax <= xMax){
+            if (viewXMin >= xMin && viewXMax <= xMax) {
                 x = true;
             }
 
@@ -275,7 +271,7 @@ namespace oni {
             }
 
             auto y = false;
-            auto viewHalfHeight = static_cast<common::uint16>(getViewHeight() / 2.0f);
+            auto viewHalfHeight = getViewHeight() / 2.0f;
 
             auto yMin = shape.vertexA.y;
             auto yMax = shape.vertexC.y;
@@ -291,7 +287,7 @@ namespace oni {
             }
 
             // Object is bigger than the frustum, i.e., view is inside the object
-            if(viewYMin >= yMin && viewYMax <= yMax){
+            if (viewYMin >= yMin && viewYMax <= yMax) {
                 y = true;
             }
 

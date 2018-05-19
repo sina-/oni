@@ -43,9 +43,9 @@ namespace oni {
 
             const math::mat4 &getViewMatrix() const;
 
-            common::uint16 getViewWidth() const;
+            common::real32 getViewWidth() const;
 
-            common::uint16 getViewHeight() const;
+            common::real32 getViewHeight() const;
 
             common::uint16 getSpritesPerFrame() const;
 

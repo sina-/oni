@@ -15,9 +15,9 @@ namespace oni {
     namespace entities {
 
         TileWorld::TileWorld() :
-                mTileSizeX{16}, mTileSizeY{16},
+                mTileSizeX{32}, mTileSizeY{64},
                 mHalfTileSizeX{mTileSizeX / 2.0f},
-                mHalfTileSizeY{mTileSizeX / 2.0f} {
+                mHalfTileSizeY{mTileSizeY / 2.0f} {
             std::srand(std::time(nullptr));
 
             mSkidSize = math::vec2{mTileSizeX, mTileSizeY};
@@ -56,7 +56,7 @@ namespace oni {
         }
 
         common::int64 TileWorld::getTileYIndex(common::real64 y) const {
-            auto result = floor(y / mTileSizeX + 0.5f);
+            auto result = floor(y / mTileSizeY + 0.5f);
             auto truncated = static_cast<common::int64>(result);
             return truncated;
         }
@@ -111,8 +111,8 @@ namespace oni {
         void TileWorld::tick(const math::vec2 &position, common::uint16 viewWidth, common::uint16 viewHeight,
                              const components::Car &car, entt::DefaultRegistry &foregroundEntities,
                              entt::DefaultRegistry &backgroundEntities) {
-            auto halfNumTilesAlongX = static_cast<common::uint16>(viewWidth / (2 * mTileSizeX)) + 1;
-            auto halfNumTilesAlongY = static_cast<common::uint16>(viewHeight / (2 * mTileSizeY)) + 1;
+            auto halfNumTilesAlongX = static_cast<common::uint16>(viewWidth / (2.0f * mTileSizeX)) + 1;
+            auto halfNumTilesAlongY = static_cast<common::uint16>(viewHeight / (2.0f * mTileSizeY)) + 1;
             for (auto i = -halfNumTilesAlongX; i <= halfNumTilesAlongX; ++i) {
                 for (auto j = -halfNumTilesAlongY; j <= halfNumTilesAlongY; ++j) {
                     auto tilePosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
@@ -208,8 +208,8 @@ namespace oni {
 
             auto bits = graphics::Texture::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
             graphics::Texture::updateSubTexture(skidMarksTexture,
-                                                static_cast<GLint>(skidPos.x - width / 2),
-                                                static_cast<GLint>(skidPos.y - width / 2),
+                                                static_cast<GLint>(skidPos.x - width / 2.0f),
+                                                static_cast<GLint>(skidPos.y - height / 2.0f),
                                                 width, height, bits);
 
         }

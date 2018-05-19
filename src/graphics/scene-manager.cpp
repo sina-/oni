@@ -265,6 +265,11 @@ namespace oni {
                 x = true;
             }
 
+            // Object is bigger than the frustum, i.e., view is inside the object
+            if(viewXMin >= xMin && viewXMax <= xMax){
+                x = true;
+            }
+
             if (!x) {
                 return false;
             }
@@ -282,6 +287,11 @@ namespace oni {
                 y = true;
             }
             if (yMax >= viewYMin && yMax <= viewYMax) {
+                y = true;
+            }
+
+            // Object is bigger than the frustum, i.e., view is inside the object
+            if(viewYMin >= yMin && viewYMax <= yMax){
                 y = true;
             }
 

@@ -129,8 +129,6 @@ namespace oni {
         }
 
         void SceneManager::render(entt::DefaultRegistry &registry) {
-            // TODO: render() function should only render things visible in the projection matrix not the
-            // whole world!
             begin(*mTextureShader, *mTextureRenderer);
 
             auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,

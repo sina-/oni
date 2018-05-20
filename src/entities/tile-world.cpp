@@ -99,25 +99,10 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(const math::vec2 &position, common::uint16 viewWidth, common::uint16 viewHeight,
-                             const components::Car &car, entt::DefaultRegistry &foregroundEntities,
-                             entt::DefaultRegistry &backgroundEntities) {
-            tickTiles(viewWidth, viewHeight, position, backgroundEntities);
+        void TileWorld::tick(const math::vec2 &position, const components::Car &car, entt::DefaultRegistry &foregroundEntities,
+                                     entt::DefaultRegistry &backgroundEntities) {
             tickChunk(position, backgroundEntities);
             tickCars(car, foregroundEntities);
-        }
-
-        void TileWorld::tickTiles(const common::uint16 viewWidth, const common::uint16 viewHeight,
-                                  const math::vec2 &position,
-                                  entt::DefaultRegistry &backgroundEntities) {
-            auto halfNumTilesAlongX = static_cast<common::uint16>(viewWidth / (2.0f * mTileSizeX)) + 1;
-            auto halfNumTilesAlongY = static_cast<common::uint16>(viewHeight / (2.0f * mTileSizeY)) + 1;
-            for (auto i = -halfNumTilesAlongX; i <= halfNumTilesAlongX; ++i) {
-                for (auto j = -halfNumTilesAlongY; j <= halfNumTilesAlongY; ++j) {
-                    auto tileForPosition = math::vec2{position.x + i * mTileSizeX, position.y + j * mTileSizeY};
-                    createTileIfMissing(tileForPosition, backgroundEntities);
-                }
-            }
         }
 
         void TileWorld::tickCars(const components::Car &car, entt::DefaultRegistry &foregroundEntities) {
@@ -153,7 +138,9 @@ namespace oni {
                 for (auto j = y - 1; j <= y + 1; ++j) {
                     const auto packedIndices = packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
-                        generateChunkOfRoad(i, j, backgroundEntities);
+                        generateChunkOfTiles(i, j, backgroundEntities);
+                        generateChunkOfRoads(i, j, backgroundEntities);
+
                         // TODO: create chunk entity
                         auto TEMPID = packedIndices;
                         mPackedRoadChunkIndicesToEntity.emplace(packedIndices, TEMPID);
@@ -162,8 +149,8 @@ namespace oni {
             }
         }
 
-        void TileWorld::generateChunkOfRoad(const common::int64 xIndex, const common::int64 yIndex,
-                                            entt::DefaultRegistry &backgroundEntities) {
+        void TileWorld::generateChunkOfRoads(const common::int64 xIndex, const common::int64 yIndex,
+                                             entt::DefaultRegistry &backgroundEntities) {
             // NOTE: These locations are in world coordinate
             const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
             const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;
@@ -174,7 +161,7 @@ namespace oni {
 
             for (auto i = firstTileX; i < lastTileX; i += mTileSizeX) {
                 for (auto j = firstTileY; j < lastTileY; j += mTileSizeY) {
-                    const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.8f};
+                    const auto color = math::vec4{0.5f, 0.1f, 0.1f, 0.8f};
 
                     const auto positionInWorld = math::vec3{i, j, 1.0f};
                     const auto roadID = createSpriteStaticEntity(backgroundEntities, color, roadTileSize,
@@ -186,28 +173,31 @@ namespace oni {
             }
         }
 
-        void TileWorld::createTileIfMissing(const math::vec2 &tileForPosition,
-                                            entt::DefaultRegistry &backgroundEntities) {
-            const auto x = positionToIndex(tileForPosition.x, mTileSizeX);
-            const auto y = positionToIndex(tileForPosition.y, mTileSizeY);
-            const auto packedIndices = packIntegers(x, y);
+        void TileWorld::generateChunkOfTiles(const common::int64 xIndex, const common::int64 yIndex,
+                                             entt::DefaultRegistry &backgroundEntities) {
 
-            if (!existsInMap(packedIndices, mPackedTileIndicesToEntity)) {
-                const auto R = (std::rand() % 255) / 255.0f;
-                const auto G = (std::rand() % 255) / 255.0f;
-                const auto B = (std::rand() % 255) / 255.0f;
-                const auto color = math::vec4{R, G, B, 1.0f};
+            const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
+            const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;
+            const auto firstTileY = yIndex * mChunkSizeY - mChunkSizeY / 2;
+            const auto lastTileY = yIndex * mChunkSizeY + mChunkSizeY / 2;
 
-                const auto tileIndexX = positionToIndex(tileForPosition.x, mTileSizeX);
-                const auto tileIndexY = positionToIndex(tileForPosition.y, mTileSizeY);
-                const auto tilePosX = indexToPosition(tileIndexX, mTileSizeX, mHalfTileSizeX);
-                const auto tilePosY = indexToPosition(tileIndexY, mTileSizeY, mHalfTileSizeY);
-                const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
-                const auto tileSize = math::vec2{mTileSizeX, mTileSizeY};
-                const auto tileID = createSpriteStaticEntity(backgroundEntities, color, tileSize,
-                                                             positionInWorld);
+            const auto tileSize = math::vec2{mTileSizeX, mTileSizeY};
 
-                mPackedTileIndicesToEntity.emplace(packedIndices, tileID);
+            for (auto i = firstTileX; i < lastTileX; i += mTileSizeX) {
+                for (auto j = firstTileY; j < lastTileY; j += mTileSizeY) {
+                    const auto R = (std::rand() % 255) / 255.0f;
+                    const auto G = (std::rand() % 255) / 255.0f;
+                    const auto B = (std::rand() % 255) / 255.0f;
+                    const auto color = math::vec4{R, G, B, 1.0f};
+
+                    const auto positionInWorld = math::vec3{i, j, 1.0f};
+
+                    const auto packedIndices = packIntegers(i, j);
+                    const auto tileID = createSpriteStaticEntity(backgroundEntities, color, tileSize,
+                                                                 positionInWorld);
+
+                    mPackedTileIndicesToEntity.emplace(packedIndices, tileID);
+                }
             }
         }
 

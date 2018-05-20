@@ -131,11 +131,14 @@ namespace oni {
         void SceneManager::render(entt::DefaultRegistry &registry) {
             begin(*mTextureShader, *mTextureRenderer);
 
+            auto halfViewWidth = getViewWidth() / 2.0f;
+            auto halfViewHeight = getViewHeight() / 2.0f;
+
             auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
                     components::Texture, components::TagStatic>();
             for (const auto &entity: staticTextureSpriteView) {
                 const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape)) {
+                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
                 const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
@@ -169,6 +172,8 @@ namespace oni {
                 // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
                 // separately for each entity and each time a physics system updates an entity it will automatically
                 // recalculate PlacementWorld for the entity and all its child entities.
+                // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
+                // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
                 if (registry.has<components::TransformParent>(entity)) {
                     const auto &transformParent = registry.get<components::TransformParent>(entity);
                     // NOTE: Order matters. First transform by parent's transformation then child.
@@ -176,7 +181,7 @@ namespace oni {
                 }
 
                 auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                if (!visibleToCamera(shapeTransformed)) {
+                if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
 
@@ -193,7 +198,7 @@ namespace oni {
                     components::Appearance, components::TagStatic>();
             for (const auto &entity: staticSpriteView) {
                 const auto &shape = staticSpriteView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape)) {
+                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
                 const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
@@ -241,15 +246,15 @@ namespace oni {
             return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
         }
 
-        bool SceneManager::visibleToCamera(const components::Shape &shape) const {
+        bool SceneManager::visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
+                                           const common::real32 halfViewHeight) const {
             auto x = false;
-            auto viewHalfWidth = getViewWidth() / 2.0f;
 
             auto xMin = shape.vertexA.x;
             auto xMax = shape.vertexC.x;
 
-            auto viewXMin = mCamera.x - viewHalfWidth;
-            auto viewXMax = mCamera.x + viewHalfWidth;
+            auto viewXMin = mCamera.x - halfViewWidth;
+            auto viewXMax = mCamera.x + halfViewWidth;
 
             if (xMin >= viewXMin && xMin <= viewXMax) {
                 x = true;
@@ -269,13 +274,12 @@ namespace oni {
             }
 
             auto y = false;
-            auto viewHalfHeight = getViewHeight() / 2.0f;
 
             auto yMin = shape.vertexA.y;
             auto yMax = shape.vertexC.y;
 
-            auto viewYMin = mCamera.y - viewHalfHeight;
-            auto viewYMax = mCamera.y + viewHalfHeight;
+            auto viewYMin = mCamera.y - halfViewHeight;
+            auto viewYMax = mCamera.y + halfViewHeight;
 
             if (yMin >= viewYMin && yMin <= viewYMax) {
                 y = true;

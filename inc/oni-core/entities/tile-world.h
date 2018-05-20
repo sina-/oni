@@ -20,23 +20,16 @@ namespace oni {
             ~TileWorld();
 
             /**
-             * Prepares the tiles at given position for the tickRadius so that information will be available
-             * to the renderer or other systems.
+             * Prepares the chunk in the given position and its neighbours
              *
              * @param position location in the world coordinate to tick
-             * @param viewWidth in game units
-             * @param viewHeight in game units
              */
             // TODO: Instead of a car the function should go through all the car entities in the world and
             // update as needed.
-            void tick(const math::vec2 &position, common::uint16 viewWidth, common::uint16 viewHeight,
-                      const components::Car &car, entt::DefaultRegistry &foregroundEntities,
+            void tick(const math::vec2 &position, const components::Car &car, entt::DefaultRegistry &foregroundEntities,
                       entt::DefaultRegistry &backgroundEntities);
 
         private:
-
-            void tickTiles(const common::uint16 viewWidth, const common::uint16 viewHeight, const math::vec2 &position,
-                           entt::DefaultRegistry &backgroundEntities);
 
             void tickCars(const components::Car &car, entt::DefaultRegistry &foregroundEntities);
 
@@ -66,13 +59,14 @@ namespace oni {
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            void createTileIfMissing(const math::vec2 &tileForPosition, entt::DefaultRegistry &backgroundEntities);
+            void generateChunkOfTiles(const common::int64 xIndex, const common::int64 yIndex,
+                                      entt::DefaultRegistry &backgroundEntities);
 
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);
 
-            void generateChunkOfRoad(const common::int64 xIndex, const common::int64 yIndex,
-                                     entt::DefaultRegistry &backgroundEntities);
+            void generateChunkOfRoads(const common::int64 xIndex, const common::int64 yIndex,
+                                      entt::DefaultRegistry &backgroundEntities);
 
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);

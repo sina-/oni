@@ -61,7 +61,8 @@ namespace oni {
 
             void initializeColorRenderer(const Shader &shader);
 
-            bool visibleToCamera(const components::Shape &shape) const;
+            bool visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
+                                             const common::real32 halfViewHeight) const;
 
         private:
             std::unique_ptr<Shader> mColorShader;

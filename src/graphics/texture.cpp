@@ -175,5 +175,10 @@ namespace oni {
         void Texture::bindRange(GLuint first, const std::vector<GLuint> &textures) {
             glBindTextures(first, static_cast<GLsizei>(textures.size()), textures.data());
         }
+
+        components::Texture Texture::loadBindless(const std::string &path) {
+            // TODO: Implement this method
+            return components::Texture();
+        }
     }
 }

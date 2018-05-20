@@ -77,10 +77,7 @@ namespace oni {
             return mCoordToSkidLineLookup.find(tileCoordinates) != mCoordToSkidLineLookup.end();
         }
 
-        common::packedTileCoordinates TileWorld::packCoordinates(const math::vec2 &position) const {
-            auto x = getTileXIndex(position.x);
-            auto y = getTileYIndex(position.y);
-
+        common::packedInt32 TileWorld::packIntegers(const common::int64 x, const common::int64 y) const {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -90,15 +87,15 @@ namespace oni {
             // unique inputs to a unique output.
             // There are other ways to do this: https://stackoverflow.com/a/13871379
             // I could also just yank the numbers together and save it as a string.
-            auto _x = std::uint64_t(std::uint32_t(x)) << 32;
-            auto _y = std::uint64_t(std::uint32_t(y));
+            auto _x = static_cast<common::uint64>(static_cast<common::uint32>(x)) << 32;
+            auto _y = static_cast<common::uint64>(static_cast<common::uint32>(y));
             auto result = _x | _y;
 
             return result;
         }
 
         math::vec2 TileWorld::unpackCoordinates(common::uint64 coord) const {
-            // TODO: This function is incorrect. Need to match it to packCoordinates function if I ever use it
+            // TODO: This function is incorrect. Need to match it to packIntegers function if I ever use it
             ONI_DEBUG_ASSERT(false);
             //auto x = static_cast<int>(coord >> 32) * mTileSizeX;
             //auto y = static_cast<int>(coord & (0xFFFFFFFF)) * mTileSizeX;
@@ -145,8 +142,11 @@ namespace oni {
 
         void TileWorld::createTileIfMissing(const math::vec2 &tileForPosition,
                                             entt::DefaultRegistry &backgroundEntities) {
-            auto packedCoordinates = packCoordinates(tileForPosition);
-            if (!tileExists(packedCoordinates)) {
+            auto x = getTileXIndex(tileForPosition.x);
+            auto y = getTileYIndex(tileForPosition.y);
+
+            auto packedXY = packIntegers(x, y);
+            if (!tileExists(packedXY)) {
                 const auto R = (std::rand() % 255) / 255.0f;
                 const auto G = (std::rand() % 255) / 255.0f;
                 const auto B = (std::rand() % 255) / 255.0f;
@@ -160,15 +160,17 @@ namespace oni {
                 const auto id = createSpriteStaticEntity(backgroundEntities, color, math::vec2{mTileSizeX, mTileSizeY},
                                                          positionInWorld);
 
-                mCoordToTileLookup.emplace(packedCoordinates, id);
+                mCoordToTileLookup.emplace(packedXY, id);
             }
         }
 
         entities::entityID TileWorld::createSkidTileIfMissing(const math::vec2 &position,
                                                               entt::DefaultRegistry &foregroundEntities) {
-            auto packedCoordinates = packCoordinates(position);
+            auto x = getTileXIndex(position.x);
+            auto y = getTileYIndex(position.y);
+            auto packedXY = packIntegers(x, y);
             entities::entityID entity{};
-            if (!skidTileExists(packedCoordinates)) {
+            if (!skidTileExists(packedXY)) {
                 auto tileX = getTileXIndex(position.x);
                 auto tileY = getTileYIndex(position.y);
                 auto tilePosX = getTilePosForXIndex(tileX);
@@ -184,9 +186,9 @@ namespace oni {
 
                 entity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
                                                               mSkidSize, positionInWorld);
-                mCoordToSkidLineLookup.emplace(packedCoordinates, entity);
+                mCoordToSkidLineLookup.emplace(packedXY, entity);
             } else {
-                entity = mCoordToSkidLineLookup.at(packedCoordinates);
+                entity = mCoordToSkidLineLookup.at(packedXY);
             }
             return entity;
         }

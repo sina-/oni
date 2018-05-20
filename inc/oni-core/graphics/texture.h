@@ -27,6 +27,8 @@ namespace oni {
             // font manager or audio manager.
             static components::Texture load(const std::string &path);
 
+            static components::Texture loadBindless(const std::string &path);
+
             static components::Texture generate(const common::uint16 width,
                                                 const common::uint16 height,
                                                 const components::PixelRGBA &pixel);

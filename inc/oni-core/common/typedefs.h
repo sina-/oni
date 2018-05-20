@@ -25,7 +25,7 @@ namespace oni {
         typedef real64 carSimDouble;
         typedef uint32 oniSoundID;
 
-        typedef uint64 packedTileCoordinates;
+        typedef uint64 packedInt32;
         typedef std::vector<std::unique_ptr<const components::BufferStructure>> BufferStructures;
     }
 }

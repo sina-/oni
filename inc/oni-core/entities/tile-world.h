@@ -60,12 +60,12 @@ namespace oni {
 
         private:
             /**
-             * Pack common::real32 values in the range (x +-16, y +-16) into a uint64.
+             * Pack real32 values in the range (x +-mTileSizeX, y +-mTileSizeY) into a uint64.
              * For example: any x and y from 0 to 15.99999 is saved into the same long.
-             * @param position
+             * @param x
              * @return pack uint64 value
              */
-            common::packedTileCoordinates packCoordinates(const math::vec2 &position) const;
+            common::packedInt32 packIntegers(const common::int64 x, const common::int64 y) const;
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
@@ -82,6 +82,11 @@ namespace oni {
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
 
         public:
+            /**
+             * A tile is determined by its lower left coordinate in the world. This coordinate is
+             * packed into a uint64 and the lookup table mCoordToTileLookup returns the entity ID
+             * corresponding to the tile.
+             */
             std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
             std::map<common::uint64, entities::entityID> mCoordToSkidLineLookup{};
 

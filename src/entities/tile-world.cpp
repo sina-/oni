@@ -99,8 +99,9 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(const math::vec2 &position, const components::Car &car, entt::DefaultRegistry &foregroundEntities,
-                                     entt::DefaultRegistry &backgroundEntities) {
+        void TileWorld::tick(const math::vec2 &position, const components::Car &car,
+                             entt::DefaultRegistry &foregroundEntities,
+                             entt::DefaultRegistry &backgroundEntities) {
             tickChunk(position, backgroundEntities);
             tickCars(car, foregroundEntities);
         }
@@ -134,12 +135,17 @@ namespace oni {
             const auto y = positionToIndex(position.y, mChunkSizeY);
 
             // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
+            // 1--2--3
+            // |--|--|
+            // 4--c--5
+            // |--|--|
+            // 6--7--8
             for (auto i = x - 1; i <= x + 1; ++i) {
                 for (auto j = y - 1; j <= y + 1; ++j) {
                     const auto packedIndices = packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
-                        generateChunkOfTiles(i, j, backgroundEntities);
-                        generateChunkOfRoads(i, j, backgroundEntities);
+                        generateTilesForChunk(i, j, backgroundEntities);
+                        generateRoadsForChunk(i, j, backgroundEntities);
 
                         // TODO: create chunk entity
                         auto TEMPID = packedIndices;
@@ -149,8 +155,8 @@ namespace oni {
             }
         }
 
-        void TileWorld::generateChunkOfRoads(const common::int64 xIndex, const common::int64 yIndex,
-                                             entt::DefaultRegistry &backgroundEntities) {
+        void TileWorld::generateRoadsForChunk(const common::int64 xIndex, const common::int64 yIndex,
+                                              entt::DefaultRegistry &backgroundEntities) {
             // NOTE: These locations are in world coordinate
             const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
             const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;
@@ -173,8 +179,8 @@ namespace oni {
             }
         }
 
-        void TileWorld::generateChunkOfTiles(const common::int64 xIndex, const common::int64 yIndex,
-                                             entt::DefaultRegistry &backgroundEntities) {
+        void TileWorld::generateTilesForChunk(const common::int64 xIndex, const common::int64 yIndex,
+                                              entt::DefaultRegistry &backgroundEntities) {
 
             const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
             const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;

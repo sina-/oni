@@ -59,14 +59,14 @@ namespace oni {
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            void generateChunkOfTiles(const common::int64 xIndex, const common::int64 yIndex,
-                                      entt::DefaultRegistry &backgroundEntities);
+            void generateTilesForChunk(const common::int64 xIndex, const common::int64 yIndex,
+                                       entt::DefaultRegistry &backgroundEntities);
 
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);
 
-            void generateChunkOfRoads(const common::int64 xIndex, const common::int64 yIndex,
-                                      entt::DefaultRegistry &backgroundEntities);
+            void generateRoadsForChunk(const common::int64 xIndex, const common::int64 yIndex,
+                                       entt::DefaultRegistry &backgroundEntities);
 
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);

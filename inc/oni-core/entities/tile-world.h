@@ -37,26 +37,18 @@ namespace oni {
 
             /**
              * Find corresponding tile index for a given x.
-             * @param x in world coordinates
+             * @param position in world coordinates
              * @return index
              */
-            common::int64 getTileXIndex(common::real64 x) const;
-
-            /**
-             * Find corresponding tile index for a given y.
-             * @param y in world coordinates
-             * @return index
-             */
-            common::int64 getTileYIndex(common::real64 y) const;
+            common::int64 positionToIndex(const common::real64 position, const common::uint16 tileSize) const;
 
             /**
              * Do the inverse of getTileIndexX()
-             * @param xIndex
+             * @param index
              * @return minimum x in the tile corresponding to the given index.
              */
-            common::real32 getTilePosForXIndex(common::int64 xIndex) const;
-
-            common::real32 getTilePosForYIndex(common::int64 yIndex) const;
+            common::real32 indexToPosition(const common::int64 index, const common::uint16 tileSize,
+                                           const common::real32 halfTileSize) const;
 
         private:
             /**
@@ -93,10 +85,16 @@ namespace oni {
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};
 
-            const common::real32 mHalfTileSizeX{};
-            const common::real32 mHalfTileSizeY{};
+            const common::real32 mHalfTileSizeX{0.0f};
+            const common::real32 mHalfTileSizeY{0.0f};
 
-            math::vec2 mSkidSize{0.0f, 0.0f};
+            const common::uint16 mSkidTileSizeX{0};
+            const common::uint16 mSkidTileSizeY{0};
+
+            const common::real32 mHalfSkidTileSizeX{0.0f};
+            const common::real32 mHalfSkidTileSizeY{0.0f};
+
+            math::vec2 mSkidTileSize{0.0f, 0.0f};
         };
     }
 }

@@ -14,12 +14,16 @@ namespace oni {
     namespace entities {
 
         TileWorld::TileWorld() :
-                mTileSizeX{32}, mTileSizeY{32},
+                mTileSizeX{32}, mTileSizeY{16},
                 mHalfTileSizeX{mTileSizeX / 2.0f},
-                mHalfTileSizeY{mTileSizeY / 2.0f} {
+                mHalfTileSizeY{mTileSizeY / 2.0f},
+                mSkidTileSizeX{64},
+                mSkidTileSizeY{64},
+                mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
+                mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f} {
             std::srand(std::time(nullptr));
 
-            mSkidSize = math::vec2{mTileSizeX, mTileSizeY};
+            mSkidTileSize = math::vec2{mSkidTileSizeX, mSkidTileSizeY};
         }
 
         TileWorld::~TileWorld() = default;
@@ -32,7 +36,7 @@ namespace oni {
             return mTileSizeY;
         }
 
-        common::int64 TileWorld::getTileXIndex(common::real64 x) const {
+        common::int64 TileWorld::positionToIndex(const common::real64 position, const common::uint16 tileSize) const {
             /**
              * Tiles in the world map fall under these indices:
              *
@@ -42,32 +46,22 @@ namespace oni {
              * [+mHalfTileSize * 1, +mHalfTileSize * 3) -> +1
              * [+mHalfTileSize * 3, +mHalfTileSize * 5) -> +2
              *
-             * For example for tile size 16 and half size of 8:
+             * For example for tile size 16:
              * [-40, -24) -> -2
              * [-24,  -8) -> -1
              * [ -8,  +8) -> +0
              * [ +8, +24) -> +1
              * [+24, +40) -> +2
              */
-            auto result = floor(x / mTileSizeX + 0.5f);
+            auto result = floor(position / tileSize + 0.5f);
             auto truncated = static_cast<common::int64>(result);
             return truncated;
         }
 
-        common::int64 TileWorld::getTileYIndex(common::real64 y) const {
-            auto result = floor(y / mTileSizeY + 0.5f);
-            auto truncated = static_cast<common::int64>(result);
-            return truncated;
+        common::real32 TileWorld::indexToPosition(const common::int64 index, const common::uint16 tileSize,
+                                                  const common::real32 halfTileSize) const {
+            return tileSize * index - halfTileSize;
         }
-
-        common::real32 TileWorld::getTilePosForXIndex(common::int64 xIndex) const {
-            return mTileSizeX * xIndex - mHalfTileSizeX;
-        }
-
-        common::real32 TileWorld::getTilePosForYIndex(common::int64 yIndex) const {
-            return mTileSizeY * yIndex - mHalfTileSizeY;
-        }
-
 
         bool TileWorld::tileExists(common::uint64 tileCoordinates) const {
             return mCoordToTileLookup.find(tileCoordinates) != mCoordToTileLookup.end();
@@ -117,7 +111,7 @@ namespace oni {
             }
 
             // NOTE: Technically I should use slippingRear, but this gives better effect
-            if (car.slippingFront) {
+            if (car.slippingFront || true) {
                 auto carTireRRPlacement = foregroundEntities.get<components::Placement>(car.tireRR);
                 auto carTireRLPlacement = foregroundEntities.get<components::Placement>(car.tireRL);
 
@@ -137,13 +131,12 @@ namespace oni {
                 updateSkidTexture(skidMarkRLPos, skidEntityRL, foregroundEntities, alpha);
                 updateSkidTexture(skidMarkRRPos, skidEntityRR, foregroundEntities, alpha);
             }
-
         }
 
         void TileWorld::createTileIfMissing(const math::vec2 &tileForPosition,
                                             entt::DefaultRegistry &backgroundEntities) {
-            auto x = getTileXIndex(tileForPosition.x);
-            auto y = getTileYIndex(tileForPosition.y);
+            auto x = positionToIndex(tileForPosition.x, mTileSizeX);
+            auto y = positionToIndex(tileForPosition.y, mTileSizeY);
 
             auto packedXY = packIntegers(x, y);
             if (!tileExists(packedXY)) {
@@ -152,10 +145,10 @@ namespace oni {
                 const auto B = (std::rand() % 255) / 255.0f;
                 const auto color = math::vec4{R, G, B, 1.0f};
 
-                const auto tileIndexX = getTileXIndex(tileForPosition.x);
-                const auto tileIndexY = getTileYIndex(tileForPosition.y);
-                const auto tilePosX = getTilePosForXIndex(tileIndexX);
-                const auto tilePosY = getTilePosForYIndex(tileIndexY);
+                const auto tileIndexX = positionToIndex(tileForPosition.x, mTileSizeX);
+                const auto tileIndexY = positionToIndex(tileForPosition.y, mTileSizeY);
+                const auto tilePosX = indexToPosition(tileIndexX, mTileSizeX, mHalfTileSizeX);
+                const auto tilePosY = indexToPosition(tileIndexY, mTileSizeY, mHalfTileSizeY);
                 const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
                 const auto id = createSpriteStaticEntity(backgroundEntities, color, math::vec2{mTileSizeX, mTileSizeY},
                                                          positionInWorld);
@@ -166,26 +159,27 @@ namespace oni {
 
         entities::entityID TileWorld::createSkidTileIfMissing(const math::vec2 &position,
                                                               entt::DefaultRegistry &foregroundEntities) {
-            auto x = getTileXIndex(position.x);
-            auto y = getTileYIndex(position.y);
+            auto x = positionToIndex(position.x, mSkidTileSizeX);
+            auto y = positionToIndex(position.y, mSkidTileSizeY);
             auto packedXY = packIntegers(x, y);
             entities::entityID entity{};
             if (!skidTileExists(packedXY)) {
-                auto tileX = getTileXIndex(position.x);
-                auto tileY = getTileYIndex(position.y);
-                auto tilePosX = getTilePosForXIndex(tileX);
-                auto tilePosY = getTilePosForYIndex(tileY);
+                auto tileX = positionToIndex(position.x, mSkidTileSizeX);
+                auto tileY = positionToIndex(position.y, mSkidTileSizeY);
+                auto tilePosX = indexToPosition(tileX, mSkidTileSizeX, mHalfSkidTileSizeX);
+                auto tilePosY = indexToPosition(tileY, mSkidTileSizeY, mHalfSkidTileSizeY);
                 auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
 
-                auto skidWidthInPixels = static_cast<common::uint16>(mTileSizeX * GAME_UNIT_TO_PIXELS + common::ep);
-                auto skidHeightInPixels = static_cast<common::uint16>(mTileSizeY * GAME_UNIT_TO_PIXELS + common::ep);
+                auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * GAME_UNIT_TO_PIXELS + common::ep);
+                auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * GAME_UNIT_TO_PIXELS +
+                                                                      common::ep);
                 auto skidDefaultPixel = oni::components::PixelRGBA{};
                 // TODO: This function generates a texture and loads it into video memory, meaning we can not
                 // blend two layers of skid mark onto each other
                 auto skidTexture = graphics::Texture::generate(skidWidthInPixels, skidHeightInPixels, skidDefaultPixel);
 
                 entity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
-                                                              mSkidSize, positionInWorld);
+                                                              mSkidTileSize, positionInWorld);
                 mCoordToSkidLineLookup.emplace(packedXY, entity);
             } else {
                 entity = mCoordToSkidLineLookup.at(packedXY);

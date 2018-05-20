@@ -107,6 +107,9 @@ namespace oni {
         }
 
         void AudioManagerFMOD::setPitch(oniSoundID id, common::real32 pitch) {
+            if (pitch > 256) {
+                pitch = 256;
+            }
             auto result = mChannels[id]->setPitch(pitch);
             ERRCHECK(result);
         }

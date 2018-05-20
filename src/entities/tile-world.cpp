@@ -28,14 +28,6 @@ namespace oni {
 
         TileWorld::~TileWorld() = default;
 
-        common::uint16 TileWorld::getTileSizeX() const {
-            return mTileSizeX;
-        }
-
-        common::uint16 TileWorld::getTileSizeY() const {
-            return mTileSizeY;
-        }
-
         common::int64 TileWorld::positionToIndex(const common::real64 position, const common::uint16 tileSize) const {
             /**
              * Tiles in the world map fall under these indices:
@@ -63,12 +55,8 @@ namespace oni {
             return tileSize * index - halfTileSize;
         }
 
-        bool TileWorld::tileExists(common::uint64 tileCoordinates) const {
-            return mPackedTileIndicesToEntity.find(tileCoordinates) != mPackedTileIndicesToEntity.end();
-        }
-
-        bool TileWorld::skidTileExists(common::uint64 tileCoordinates) const {
-            return mSkidPackedIndicesToEntity.find(tileCoordinates) != mSkidPackedIndicesToEntity.end();
+        bool TileWorld::existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const {
+            return map.find(packedIndices) != map.end();
         }
 
         common::packedInt32 TileWorld::packIntegers(const common::int64 x, const common::int64 y) const {
@@ -139,7 +127,7 @@ namespace oni {
             auto y = positionToIndex(tileForPosition.y, mTileSizeY);
 
             auto packedIndices = packIntegers(x, y);
-            if (!tileExists(packedIndices)) {
+            if (!existsInMap(packedIndices, mPackedTileIndicesToEntity)) {
                 const auto R = (std::rand() % 255) / 255.0f;
                 const auto G = (std::rand() % 255) / 255.0f;
                 const auto B = (std::rand() % 255) / 255.0f;
@@ -163,7 +151,7 @@ namespace oni {
             auto y = positionToIndex(position.y, mSkidTileSizeY);
             auto packedIndices = packIntegers(x, y);
             entities::entityID entity{};
-            if (!skidTileExists(packedIndices)) {
+            if (!existsInMap(packedIndices, mSkidPackedIndicesToEntity)) {
                 auto tileX = positionToIndex(position.x, mSkidTileSizeX);
                 auto tileY = positionToIndex(position.y, mSkidTileSizeY);
                 auto tilePosX = indexToPosition(tileX, mSkidTileSizeX, mHalfSkidTileSizeX);

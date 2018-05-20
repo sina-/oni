@@ -12,7 +12,9 @@
 namespace oni {
     namespace entities {
         class TileWorld {
+            using PackedIndiciesToEntity = typename std::map<common::uint64, entities::entityID>;
         public:
+
             TileWorld();
 
             ~TileWorld();
@@ -31,10 +33,7 @@ namespace oni {
                       const components::Car &car, entt::DefaultRegistry &foregroundEntities,
                       entt::DefaultRegistry &backgroundEntities);
 
-            common::uint16 getTileSizeX() const;
-
-            common::uint16 getTileSizeY() const;
-
+        private:
             /**
              * Find corresponding tile index for a given x.
              * @param position in world coordinates
@@ -50,7 +49,6 @@ namespace oni {
             common::real32 indexToPosition(const common::int64 index, const common::uint16 tileSize,
                                            const common::real32 halfTileSize) const;
 
-        private:
             /**
              * Pack real32 values in the range (x +-mTileSizeX, y +-mTileSizeY) into a uint64.
              * For example: any x and y from 0 to 15.99999 is saved into the same long.
@@ -61,9 +59,7 @@ namespace oni {
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            bool tileExists(common::uint64 tileCoordinates) const;
-
-            bool skidTileExists(common::uint64 tileCoordinates) const;
+            bool existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
 
             void createTileIfMissing(const math::vec2 &tileForPosition, entt::DefaultRegistry &backgroundEntities);
 
@@ -73,14 +69,14 @@ namespace oni {
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
 
-        public:
+        private:
             /**
              * A tile is determined by its lower left coordinate in the world. This coordinate is
              * packed into a uint64 and the lookup table mCoordToTileLookup returns the entity ID
              * corresponding to the tile.
              */
-            std::map<common::uint64, entities::entityID> mPackedTileIndicesToEntity{};
-            std::map<common::uint64, entities::entityID> mSkidPackedIndicesToEntity{};
+            PackedIndiciesToEntity mPackedTileIndicesToEntity{};
+            PackedIndiciesToEntity mSkidPackedIndicesToEntity{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};

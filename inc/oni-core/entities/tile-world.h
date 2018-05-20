@@ -40,7 +40,7 @@ namespace oni {
 
             void tickCars(const components::Car &car, entt::DefaultRegistry &foregroundEntities);
 
-            void tickRoadChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
+            void tickChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
 
             /**
              * Find corresponding tile index for a given x.
@@ -71,8 +71,8 @@ namespace oni {
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);
 
-            void createRoadTileChunkIfMissing(const common::int64 xIndex, const common::int64 yIndex,
-                                              entt::DefaultRegistry &backgroundEntities);
+            void generateChunkOfRoad(const common::int64 xIndex, const common::int64 yIndex,
+                                     entt::DefaultRegistry &backgroundEntities);
 
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
@@ -102,14 +102,8 @@ namespace oni {
             const common::real32 mHalfSkidTileSizeX{0.0f};
             const common::real32 mHalfSkidTileSizeY{0.0f};
 
-            const common::uint16 mRoadTileSizeX{0};
-            const common::uint16 mRoadTileSizeY{0};
-
-            const common::real32 mHalfRoadTileSizeX{0.0f};
-            const common::real32 mHalfRoadTileSizeY{0.0f};
-
-            const common::uint16 mRoadChunkSizeX{0};
-            const common::uint16 mRoadChunkSizeY{0};
+            const common::uint16 mChunkSizeX{0};
+            const common::uint16 mChunkSizeY{0};
         };
     }
 }

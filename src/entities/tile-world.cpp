@@ -20,27 +20,23 @@ namespace oni {
                 mSkidTileSizeX{64}, mSkidTileSizeY{64},
                 mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
                 mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
-                mRoadTileSizeX{16}, mRoadTileSizeY{16},
-                mHalfRoadTileSizeX{mRoadTileSizeX / 2.0f},
-                mHalfRoadTileSizeY{mRoadTileSizeY / 2.0f},
-                mRoadChunkSizeX{mRoadTileSizeX * 10 + mRoadTileSizeX}, mRoadChunkSizeY{mRoadTileSizeY * 10 +
-                                                                                       mRoadTileSizeY} {
+                mChunkSizeX{mTileSizeX * 10 + mTileSizeX}, mChunkSizeY{mTileSizeY * 10 + mTileSizeY} {
             std::srand(std::time(nullptr));
 
             // NOTE: A road chunk is filled with road tiles, therefore road chunk size should be,
             // dividable by road tile size.
-            ONI_DEBUG_ASSERT(mRoadTileSizeX <= mRoadChunkSizeX);
-            ONI_DEBUG_ASSERT(mRoadTileSizeY <= mRoadChunkSizeY);
-            ONI_DEBUG_ASSERT(mRoadChunkSizeX % mRoadTileSizeX == 0);
-            ONI_DEBUG_ASSERT(mRoadChunkSizeY % mRoadTileSizeY == 0);
+            ONI_DEBUG_ASSERT(mTileSizeX <= mChunkSizeX);
+            ONI_DEBUG_ASSERT(mTileSizeY <= mChunkSizeY);
+            ONI_DEBUG_ASSERT(mChunkSizeX % mTileSizeX == 0);
+            ONI_DEBUG_ASSERT(mChunkSizeY % mTileSizeY == 0);
 
             // NOTE: If number of road tiles in a chunk is not an odd number it means there is no middle
             // tile. For convenience its good to have a middle tile.
-            ONI_DEBUG_ASSERT((mRoadChunkSizeX / mRoadTileSizeX) % 2 == 1);
-            ONI_DEBUG_ASSERT((mRoadChunkSizeY / mRoadTileSizeY) % 2 == 1);
+            ONI_DEBUG_ASSERT((mChunkSizeX / mTileSizeX) % 2 == 1);
+            ONI_DEBUG_ASSERT((mChunkSizeY / mTileSizeY) % 2 == 1);
 
-            ONI_DEBUG_ASSERT(mRoadChunkSizeX % 2 == 0);
-            ONI_DEBUG_ASSERT(mRoadChunkSizeY % 2 == 0);
+            ONI_DEBUG_ASSERT(mChunkSizeX % 2 == 0);
+            ONI_DEBUG_ASSERT(mChunkSizeY % 2 == 0);
         }
 
         TileWorld::~TileWorld() = default;
@@ -107,7 +103,7 @@ namespace oni {
                              const components::Car &car, entt::DefaultRegistry &foregroundEntities,
                              entt::DefaultRegistry &backgroundEntities) {
             tickTiles(viewWidth, viewHeight, position, backgroundEntities);
-            tickRoadChunk(position, backgroundEntities);
+            tickChunk(position, backgroundEntities);
             tickCars(car, foregroundEntities);
         }
 
@@ -148,16 +144,16 @@ namespace oni {
             }
         }
 
-        void TileWorld::tickRoadChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities) {
-            const auto x = positionToIndex(position.x, mRoadChunkSizeX);
-            const auto y = positionToIndex(position.y, mRoadChunkSizeY);
+        void TileWorld::tickChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities) {
+            const auto x = positionToIndex(position.x, mChunkSizeX);
+            const auto y = positionToIndex(position.y, mChunkSizeY);
 
             // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
             for (auto i = x - 1; i <= x + 1; ++i) {
                 for (auto j = y - 1; j <= y + 1; ++j) {
                     const auto packedIndices = packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
-                        createRoadTileChunkIfMissing(i, j, backgroundEntities);
+                        generateChunkOfRoad(i, j, backgroundEntities);
                         // TODO: create chunk entity
                         auto TEMPID = packedIndices;
                         mPackedRoadChunkIndicesToEntity.emplace(packedIndices, TEMPID);
@@ -166,23 +162,26 @@ namespace oni {
             }
         }
 
-        void TileWorld::createRoadTileChunkIfMissing(const common::int64 xIndex, const common::int64 yIndex,
-                                                     entt::DefaultRegistry &backgroundEntities) {
+        void TileWorld::generateChunkOfRoad(const common::int64 xIndex, const common::int64 yIndex,
+                                            entt::DefaultRegistry &backgroundEntities) {
             // NOTE: These locations are in world coordinate
-            const auto firstTileX = xIndex * mRoadChunkSizeX - mRoadChunkSizeX / 2;
-            const auto lastTileX = xIndex * mRoadChunkSizeX + mRoadChunkSizeX / 2;
-            const auto firstTileY = yIndex * mRoadChunkSizeY - mRoadChunkSizeY / 2;
-            const auto lastTileY = yIndex * mRoadChunkSizeY + mRoadChunkSizeY / 2;
+            const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
+            const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;
+            const auto firstTileY = yIndex * mChunkSizeY - mChunkSizeY / 2;
+            const auto lastTileY = yIndex * mChunkSizeY + mChunkSizeY / 2;
 
-            const auto roadTileSize = math::vec2{mRoadTileSizeX, mRoadTileSizeY};
+            const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
 
-            for (auto i = firstTileX; i < lastTileX; i += mRoadTileSizeX) {
-                for (auto j = firstTileY; j < lastTileY; j += mRoadTileSizeY) {
+            for (auto i = firstTileX; i < lastTileX; i += mTileSizeX) {
+                for (auto j = firstTileY; j < lastTileY; j += mTileSizeY) {
                     const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.8f};
 
                     const auto positionInWorld = math::vec3{i, j, 1.0f};
                     const auto roadID = createSpriteStaticEntity(backgroundEntities, color, roadTileSize,
                                                                  positionInWorld);
+
+                    const auto packedIndices = packIntegers(i, j);
+                    mPackedRoadIndicesToEntity.emplace(packedIndices, roadID);
                 }
             }
         }

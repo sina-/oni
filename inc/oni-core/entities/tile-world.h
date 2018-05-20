@@ -34,6 +34,14 @@ namespace oni {
                       entt::DefaultRegistry &backgroundEntities);
 
         private:
+
+            void tickTiles(const common::uint16 viewWidth, const common::uint16 viewHeight, const math::vec2 &position,
+                           entt::DefaultRegistry &backgroundEntities);
+
+            void tickCars(const components::Car &car, entt::DefaultRegistry &foregroundEntities);
+
+            void tickRoadChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
+
             /**
              * Find corresponding tile index for a given x.
              * @param position in world coordinates
@@ -42,7 +50,7 @@ namespace oni {
             common::int64 positionToIndex(const common::real64 position, const common::uint16 tileSize) const;
 
             /**
-             * Do the inverse of getTileIndexX()
+             * Do the inverse of positionToIndex()
              * @param index
              * @return minimum x in the tile corresponding to the given index.
              */
@@ -50,8 +58,7 @@ namespace oni {
                                            const common::real32 halfTileSize) const;
 
             /**
-             * Pack real32 values in the range (x +-mTileSizeX, y +-mTileSizeY) into a uint64.
-             * For example: any x and y from 0 to 15.99999 is saved into the same long.
+             * Pack two unique int32 values into unique uint64.
              * @param x
              * @return pack uint64 value
              */
@@ -59,15 +66,18 @@ namespace oni {
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            bool existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
-
             void createTileIfMissing(const math::vec2 &tileForPosition, entt::DefaultRegistry &backgroundEntities);
 
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);
 
+            void createRoadTileChunkIfMissing(const common::int64 xIndex, const common::int64 yIndex,
+                                              entt::DefaultRegistry &backgroundEntities);
+
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
+
+            bool existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
 
         private:
             /**
@@ -76,7 +86,9 @@ namespace oni {
              * corresponding to the tile.
              */
             PackedIndiciesToEntity mPackedTileIndicesToEntity{};
-            PackedIndiciesToEntity mSkidPackedIndicesToEntity{};
+            PackedIndiciesToEntity mPackedSkidIndicesToEntity{};
+            PackedIndiciesToEntity mPackedRoadIndicesToEntity{};
+            PackedIndiciesToEntity mPackedRoadChunkIndicesToEntity{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};
@@ -90,7 +102,14 @@ namespace oni {
             const common::real32 mHalfSkidTileSizeX{0.0f};
             const common::real32 mHalfSkidTileSizeY{0.0f};
 
-            math::vec2 mSkidTileSize{0.0f, 0.0f};
+            const common::uint16 mRoadTileSizeX{0};
+            const common::uint16 mRoadTileSizeY{0};
+
+            const common::real32 mHalfRoadTileSizeX{0.0f};
+            const common::real32 mHalfRoadTileSizeY{0.0f};
+
+            const common::uint16 mRoadChunkSizeX{0};
+            const common::uint16 mRoadChunkSizeY{0};
         };
     }
 }

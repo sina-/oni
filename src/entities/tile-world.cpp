@@ -64,11 +64,11 @@ namespace oni {
         }
 
         bool TileWorld::tileExists(common::uint64 tileCoordinates) const {
-            return mCoordToTileLookup.find(tileCoordinates) != mCoordToTileLookup.end();
+            return mPackedTileIndicesToEntity.find(tileCoordinates) != mPackedTileIndicesToEntity.end();
         }
 
         bool TileWorld::skidTileExists(common::uint64 tileCoordinates) const {
-            return mCoordToSkidLineLookup.find(tileCoordinates) != mCoordToSkidLineLookup.end();
+            return mSkidPackedIndicesToEntity.find(tileCoordinates) != mSkidPackedIndicesToEntity.end();
         }
 
         common::packedInt32 TileWorld::packIntegers(const common::int64 x, const common::int64 y) const {
@@ -138,8 +138,8 @@ namespace oni {
             auto x = positionToIndex(tileForPosition.x, mTileSizeX);
             auto y = positionToIndex(tileForPosition.y, mTileSizeY);
 
-            auto packedXY = packIntegers(x, y);
-            if (!tileExists(packedXY)) {
+            auto packedIndices = packIntegers(x, y);
+            if (!tileExists(packedIndices)) {
                 const auto R = (std::rand() % 255) / 255.0f;
                 const auto G = (std::rand() % 255) / 255.0f;
                 const auto B = (std::rand() % 255) / 255.0f;
@@ -153,7 +153,7 @@ namespace oni {
                 const auto id = createSpriteStaticEntity(backgroundEntities, color, math::vec2{mTileSizeX, mTileSizeY},
                                                          positionInWorld);
 
-                mCoordToTileLookup.emplace(packedXY, id);
+                mPackedTileIndicesToEntity.emplace(packedIndices, id);
             }
         }
 
@@ -161,9 +161,9 @@ namespace oni {
                                                               entt::DefaultRegistry &foregroundEntities) {
             auto x = positionToIndex(position.x, mSkidTileSizeX);
             auto y = positionToIndex(position.y, mSkidTileSizeY);
-            auto packedXY = packIntegers(x, y);
+            auto packedIndices = packIntegers(x, y);
             entities::entityID entity{};
-            if (!skidTileExists(packedXY)) {
+            if (!skidTileExists(packedIndices)) {
                 auto tileX = positionToIndex(position.x, mSkidTileSizeX);
                 auto tileY = positionToIndex(position.y, mSkidTileSizeY);
                 auto tilePosX = indexToPosition(tileX, mSkidTileSizeX, mHalfSkidTileSizeX);
@@ -180,9 +180,9 @@ namespace oni {
 
                 entity = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
                                                               mSkidTileSize, positionInWorld);
-                mCoordToSkidLineLookup.emplace(packedXY, entity);
+                mSkidPackedIndicesToEntity.emplace(packedIndices, entity);
             } else {
-                entity = mCoordToSkidLineLookup.at(packedXY);
+                entity = mSkidPackedIndicesToEntity.at(packedIndices);
             }
             return entity;
         }

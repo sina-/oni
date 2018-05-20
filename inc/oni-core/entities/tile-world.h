@@ -79,8 +79,8 @@ namespace oni {
              * packed into a uint64 and the lookup table mCoordToTileLookup returns the entity ID
              * corresponding to the tile.
              */
-            std::map<common::uint64, entities::entityID> mCoordToTileLookup{};
-            std::map<common::uint64, entities::entityID> mCoordToSkidLineLookup{};
+            std::map<common::uint64, entities::entityID> mPackedTileIndicesToEntity{};
+            std::map<common::uint64, entities::entityID> mSkidPackedIndicesToEntity{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};

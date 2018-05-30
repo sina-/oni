@@ -71,7 +71,16 @@ namespace oni {
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
 
+            void generateRoadTile(const common::int64 tilePosX, const common::int64 tilePosY,
+                                  entt::DefaultRegistry &backgroundEntities);
+
+            void generateRoadTileBetween(common::int64 startTilePosX, common::int64 startTilePosY,
+                                         common::int64 endTilePosX, common::int64 endTilePosY,
+                                         entt::DefaultRegistry &backgroundEntities);
+
             bool existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
+
+            bool chunkWithRoads(const common::int64 xIndex, const common::int64 yIndex) const;
 
         private:
             /**
@@ -81,14 +90,14 @@ namespace oni {
              */
             PackedIndiciesToEntity mPackedTileIndicesToEntity{};
             PackedIndiciesToEntity mPackedSkidIndicesToEntity{};
-            PackedIndiciesToEntity mPackedRoadIndicesToEntity{};
+            PackedIndiciesToEntity mPackedRoadTileToEntity{};
             PackedIndiciesToEntity mPackedRoadChunkIndicesToEntity{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};
 
-            const common::real32 mHalfTileSizeX{0.0f};
-            const common::real32 mHalfTileSizeY{0.0f};
+            //const common::real32 mHalfTileSizeX{0.0f};
+            //const common::real32 mHalfTileSizeY{0.0f};
 
             const common::uint16 mSkidTileSizeX{0};
             const common::uint16 mSkidTileSizeY{0};
@@ -96,8 +105,14 @@ namespace oni {
             const common::real32 mHalfSkidTileSizeX{0.0f};
             const common::real32 mHalfSkidTileSizeY{0.0f};
 
+            const common::uint16 mTilesPerChunkX{0};
+            const common::uint16 mTilesPerChunkY{0};
+
             const common::uint16 mChunkSizeX{0};
             const common::uint16 mChunkSizeY{0};
+
+            const common::uint16 mHalfChunkSizeX{0};
+            const common::uint16 mHalfChunkSizeY{0};
         };
     }
 }

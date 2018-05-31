@@ -14,7 +14,7 @@ namespace oni {
     namespace entities {
 
         TileWorld::TileWorld() :
-                mTileSizeX{8}, mTileSizeY{16},
+                mTileSizeX{2}, mTileSizeY{2},
                 //mHalfTileSizeX{mTileSizeX / 2.0f},
                 //mHalfTileSizeY{mTileSizeY / 2.0f},
                 mSkidTileSizeX{64}, mSkidTileSizeY{64},
@@ -147,7 +147,6 @@ namespace oni {
                     const auto packedIndices = packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
                         //generateTilesForChunk(i, j, backgroundEntities);
-                        generateRoadsForChunk(i, j, backgroundEntities);
 
                         // NOTE: Just for debugging
                         auto R = (std::rand() % 255) / 255.0f;
@@ -157,18 +156,21 @@ namespace oni {
                         auto size = math::vec2{mChunkSizeX, mChunkSizeY};
                         auto positionInWorld = math::vec3{i * mChunkSizeX - mHalfChunkSizeX,
                                                           j * mChunkSizeY - mHalfChunkSizeY, 1.0f};
-                        createSpriteStaticEntity(backgroundEntities, color, size, positionInWorld);
+                        auto chunkID = createSpriteStaticEntity(backgroundEntities, color, size, positionInWorld);
 
-                        // TODO: create chunk entity
-                        auto TEMPID = packedIndices;
-                        mPackedRoadChunkIndicesToEntity.emplace(packedIndices, TEMPID);
+                        auto boarderRoadTiles = generateRoadsForChunk(i, j, backgroundEntities);
+                        auto chunk = components::Chunk{positionInWorld, packedIndices, std::move(boarderRoadTiles)};
+                        backgroundEntities.assign<components::Chunk>(chunkID, std::move(chunk));
+
+                        mPackedRoadChunkIndicesToEntity.emplace(packedIndices, chunkID);
                     }
                 }
             }
         }
 
-        void TileWorld::generateRoadsForChunk(const common::int64 xIndex, const common::int64 yIndex,
-                                              entt::DefaultRegistry &backgroundEntities) {
+        components::BoarderRoadTiles TileWorld::generateRoadsForChunk(const common::int64 xChunkIndex,
+                                                                      const common::int64 yChunkIndex,
+                                                                      entt::DefaultRegistry &backgroundEntities) {
             /**
              * 1. Check if there should be a road in this chunk
              * 2. Find the neighbours connected by road to current chunk
@@ -178,23 +180,26 @@ namespace oni {
              *    tile.
              * 4. Connect starting tile to the ending tile.
              */
-            if (!chunkWithRoads(xIndex, yIndex)) {
-                return;
+
+            components::BoarderRoadTiles boarderRoadTiles{};
+
+            if (!chunkWithRoads(xChunkIndex, yChunkIndex)) {
+                return boarderRoadTiles;
             }
-            auto northChunkX = xIndex;
-            auto northChunkY = yIndex + 1;
+            auto northChunkX = xChunkIndex;
+            auto northChunkY = yChunkIndex + 1;
             auto northChunkPacked = packIntegers(northChunkX, northChunkY);
 
-            auto southChunkX = xIndex;
-            auto southChunkY = yIndex - 1;
+            auto southChunkX = xChunkIndex;
+            auto southChunkY = yChunkIndex - 1;
             auto southChunkPacked = packIntegers(southChunkX, southChunkY);
 
-            auto westChunkX = xIndex - 1;
-            auto westChunkY = yIndex;
+            auto westChunkX = xChunkIndex - 1;
+            auto westChunkY = yChunkIndex;
             auto westChunkPacked = packIntegers(westChunkX, westChunkY);
 
-            auto eastChunkX = xIndex + 1;
-            auto eastChunkY = yIndex;
+            auto eastChunkX = xChunkIndex + 1;
+            auto eastChunkY = yChunkIndex;
             auto eastChunkPacked = packIntegers(eastChunkX, eastChunkY);
 
             auto northChunkHasRoads = chunkWithRoads(northChunkX, northChunkY);
@@ -213,60 +218,96 @@ namespace oni {
             common::int64 endingRoadTilePosX{0};
             common::int64 endingRoadTilePosY{0};
 
-            auto northBoarderRoadTileX = xIndex * mChunkSizeX +
+            // TODO: Maybe makes more sense to deal with chunk relative tile index instead of world coordinates
+            // for tile position. And only at the generation time multiply it by:
+            // xChunkIndex * mChunkSizeX + xTileIndex *mChunkSizeX
+            auto northBoarderRoadTileX = xChunkIndex * mChunkSizeX +
                                          (std::rand() % (mTilesPerChunkX) * mTileSizeX - mHalfChunkSizeX);
-            auto northBoarderRoadTileY = yIndex * mChunkSizeY + mHalfChunkSizeY;
+            auto northBoarderRoadTileY = yChunkIndex * mChunkSizeY + mHalfChunkSizeY;
 
-            auto southBoarderRoadTileX = xIndex * mChunkSizeX +
+            auto southBoarderRoadTileX = xChunkIndex * mChunkSizeX +
                                          (std::rand() % (mTilesPerChunkX) * mTileSizeX - mHalfChunkSizeX);
-            auto southBoarderRoadTileY = yIndex * mChunkSizeY - mHalfChunkSizeY;
+            auto southBoarderRoadTileY = yChunkIndex * mChunkSizeY - mHalfChunkSizeY;
 
-            auto westBoarderRoadTileX = xIndex * mChunkSizeX - mHalfChunkSizeX;
-            auto westBoarderRoadTileY = yIndex * mChunkSizeY +
+            auto westBoarderRoadTileX = xChunkIndex * mChunkSizeX - mHalfChunkSizeX;
+            auto westBoarderRoadTileY = yChunkIndex * mChunkSizeY +
                                         ((std::rand() % (mTilesPerChunkY)) * mTileSizeY - mHalfChunkSizeY);
 
-            auto eastBoarderRoadTileX = xIndex * mChunkSizeX + mHalfChunkSizeX;
-            auto eastBoarderRoadTileY = yIndex * mChunkSizeY +
+            auto eastBoarderRoadTileX = xChunkIndex * mChunkSizeX + mHalfChunkSizeX;
+            auto eastBoarderRoadTileY = yChunkIndex * mChunkSizeY +
                                         ((std::rand() % (mTilesPerChunkY)) * mTileSizeY - mHalfChunkSizeY);
 
-            // TODO: Pick the tiles randomly when you create TileChunk component and save starting and ending
-            // tile position for roads.
             if (northChunkHasRoads && southChunkHasRoads) {
-                startingRoadTilePosX = southBoarderRoadTileX;
-                startingRoadTilePosY = southBoarderRoadTileY;
+                boarderRoadTiles.southBoarder = std::make_unique<components::RoadTilePos>();
+                boarderRoadTiles.northBoarder = std::make_unique<components::RoadTilePos>();
 
-                endingRoadTilePosX = northBoarderRoadTileX;
-                endingRoadTilePosY = northBoarderRoadTileY;
+                if (existsInMap(southChunkPacked, mPackedRoadChunkIndicesToEntity)) {
+                    auto southChunkID = mPackedRoadChunkIndicesToEntity.at(southChunkPacked);
+                    const auto &southChunk = backgroundEntities.get<components::Chunk>(southChunkID);
+
+                    boarderRoadTiles.southBoarder->x = southChunk.boarderRoadTiles.northBoarder->x;
+                    boarderRoadTiles.southBoarder->y = southChunk.boarderRoadTiles.northBoarder->y + mTileSizeY;
+                } else {
+                    boarderRoadTiles.southBoarder->x = southBoarderRoadTileX;
+                    boarderRoadTiles.southBoarder->y = southBoarderRoadTileY;
+                }
+                if (existsInMap(northChunkPacked, mPackedRoadChunkIndicesToEntity)) {
+                    auto northChunkID = mPackedRoadChunkIndicesToEntity.at(northChunkPacked);
+                    const auto &northChunk = backgroundEntities.get<components::Chunk>(northChunkID);
+
+                    boarderRoadTiles.northBoarder->x = northChunk.boarderRoadTiles.southBoarder->x;
+                    boarderRoadTiles.northBoarder->y = northChunk.boarderRoadTiles.southBoarder->y - mTileSizeY;
+
+                } else {
+                    boarderRoadTiles.northBoarder->x = northBoarderRoadTileX;
+                    boarderRoadTiles.northBoarder->y = northBoarderRoadTileY;
+                }
+
+                startingRoadTilePosX = boarderRoadTiles.southBoarder->x;
+                startingRoadTilePosY = boarderRoadTiles.southBoarder->y;
+
+                endingRoadTilePosX = boarderRoadTiles.northBoarder->x;
+                endingRoadTilePosY = boarderRoadTiles.northBoarder->y;
             } else if (northChunkHasRoads && eastChunkHasRoads) {
-                startingRoadTilePosX = eastBoarderRoadTileX;
-                startingRoadTilePosY = eastBoarderRoadTileY;
 
-                endingRoadTilePosX = northBoarderRoadTileX;
-                endingRoadTilePosY = northBoarderRoadTileY;
             } else if (northChunkHasRoads && westChunkHasRoads) {
-                startingRoadTilePosX = westBoarderRoadTileX;
-                startingRoadTilePosY = westBoarderRoadTileY;
 
-                endingRoadTilePosX = northBoarderRoadTileX;
-                endingRoadTilePosY = northBoarderRoadTileY;
             } else if (southChunkHasRoads && westChunkHasRoads) {
-                startingRoadTilePosX = southBoarderRoadTileX;
-                startingRoadTilePosY = southBoarderRoadTileY;
 
-                endingRoadTilePosX = westBoarderRoadTileX;
-                endingRoadTilePosY = westBoarderRoadTileY;
             } else if (southChunkHasRoads && eastChunkHasRoads) {
-                startingRoadTilePosX = southBoarderRoadTileX;
-                startingRoadTilePosY = southBoarderRoadTileY;
 
-                endingRoadTilePosX = eastBoarderRoadTileX;
-                endingRoadTilePosY = eastBoarderRoadTileY;
             } else if (westChunkHasRoads && eastChunkHasRoads) {
-                startingRoadTilePosX = westBoarderRoadTileX;
-                startingRoadTilePosY = westBoarderRoadTileY;
+                boarderRoadTiles.westBoarder = std::make_unique<components::RoadTilePos>();
+                boarderRoadTiles.eastBoarder = std::make_unique<components::RoadTilePos>();
 
-                endingRoadTilePosX = eastBoarderRoadTileX;
-                endingRoadTilePosY = eastBoarderRoadTileY;
+                if (existsInMap(eastChunkPacked, mPackedRoadChunkIndicesToEntity)) {
+                    auto eastChunkID = mPackedRoadChunkIndicesToEntity.at(eastChunkPacked);
+                    const auto &eastChunk = backgroundEntities.get<components::Chunk>(eastChunkID);
+
+                    boarderRoadTiles.eastBoarder->x = eastChunk.boarderRoadTiles.westBoarder->x;
+                    boarderRoadTiles.eastBoarder->y = eastChunk.boarderRoadTiles.westBoarder->y;
+
+                } else {
+                    boarderRoadTiles.eastBoarder->x = eastBoarderRoadTileX;
+                    boarderRoadTiles.eastBoarder->y = eastBoarderRoadTileY;
+                }
+
+                if (existsInMap(westChunkPacked, mPackedRoadChunkIndicesToEntity)) {
+                    auto westChunkID = mPackedRoadChunkIndicesToEntity.at(westChunkPacked);
+                    const auto &westChunk = backgroundEntities.get<components::Chunk>(westChunkID);
+
+                    boarderRoadTiles.westBoarder->x = westChunk.boarderRoadTiles.eastBoarder->x;
+                    boarderRoadTiles.westBoarder->y = westChunk.boarderRoadTiles.eastBoarder->y;
+                } else {
+                    boarderRoadTiles.westBoarder->x = westBoarderRoadTileX;
+                    boarderRoadTiles.westBoarder->y = westBoarderRoadTileY;
+                }
+
+                startingRoadTilePosX = boarderRoadTiles.westBoarder->x;
+                startingRoadTilePosY = boarderRoadTiles.westBoarder->y;
+
+                endingRoadTilePosX = boarderRoadTiles.eastBoarder->x;
+                endingRoadTilePosY = boarderRoadTiles.eastBoarder->y;
             } else {
                 ONI_DEBUG_ASSERT(false);
             }
@@ -274,11 +315,13 @@ namespace oni {
             generateRoadTileBetween(startingRoadTilePosX, startingRoadTilePosY,
                                     endingRoadTilePosX, endingRoadTilePosY,
                                     backgroundEntities);
+
+            return boarderRoadTiles;
         }
 
         void TileWorld::generateRoadTile(const common::int64 tilePosX, const common::int64 tilePosY,
                                          entt::DefaultRegistry &backgroundEntities) {
-            const auto color = math::vec4{0.5f, 0.1f, 0.1f, 0.5f};
+            const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.5f};
             const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
 
             const auto positionInWorld = math::vec3{tilePosX, tilePosY, 1.0f};
@@ -304,7 +347,7 @@ namespace oni {
                 startTilePosX -= mTileSizeX;
             }
 
-            if (startTilePosX == endTilePosX) {
+/*            if (startTilePosX == endTilePosX) {
                 if (startTilePosY > endTilePosY) {
                     startTilePosY -= mTileSizeY;
                 }
@@ -312,7 +355,7 @@ namespace oni {
                     startTilePosY += mTileSizeY;
                 }
             }
-            startTilePosX -= mTileSizeX;
+            startTilePosX -= mTileSizeX;*/
 
             while (startTilePosY < endTilePosY) {
                 generateRoadTile(startTilePosX, startTilePosY, backgroundEntities);
@@ -411,7 +454,7 @@ namespace oni {
         }
 
         bool TileWorld::chunkWithRoads(const common::int64 xIndex, const common::int64 yIndex) const {
-            return xIndex == 0;
+            return yIndex == 0;
         }
     }
 }

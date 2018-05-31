@@ -65,8 +65,9 @@ namespace oni {
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);
 
-            void generateRoadsForChunk(const common::int64 xIndex, const common::int64 yIndex,
-                                       entt::DefaultRegistry &backgroundEntities);
+            components::BoarderRoadTiles generateRoadsForChunk(const common::int64 xChunkIndex,
+                                                               const common::int64 yChunkIndex,
+                                                               entt::DefaultRegistry &backgroundEntities);
 
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);

@@ -6,6 +6,7 @@
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/create-entity.h>
 
 namespace oni {
     namespace components {
@@ -68,27 +69,6 @@ namespace oni {
 
         };
 
-        struct Tile {
-            math::vec4 color{0.5f, 0.5f, 0.5f, 1.0f};
-        };
-
-        struct TileChunk {
-            static const common::uint8 dimensionX{16};
-            static const common::uint8 dimensionY{16};
-
-            std::vector<Tile> tiles{};
-        };
-
-        struct World {
-            static const common::uint16 width{1024};
-            static const common::uint16 height{1024};
-            /*
-             * An array of pointers to TileChunk which is width * height big. If there is no chunk in a position
-             * then the lookup  will return nullptr, i.e., world[x + y*width] == nullptr.
-             */
-            std::vector<std::unique_ptr<TileChunk>> world{};
-        };
-
         struct Placement {
             math::vec3 position{0.0f, 0.0f, 0.0f};
             common::real32 rotation{0.0f};
@@ -102,6 +82,24 @@ namespace oni {
         };
 
         struct TagVehicle {
+        };
+
+        struct RoadTilePos {
+            common::int64 x{0};
+            common::int64 y{0};
+        };
+
+        struct BoarderRoadTiles {
+            std::unique_ptr<RoadTilePos> eastBoarder{};
+            std::unique_ptr<RoadTilePos> southBoarder{};
+            std::unique_ptr<RoadTilePos> westBoarder{};
+            std::unique_ptr<RoadTilePos> northBoarder{};
+        };
+
+        struct Chunk {
+            math::vec3 position{0.0f, 0.0f, 0.0f};
+            common::uint64 packedIndices{0};
+            BoarderRoadTiles boarderRoadTiles{};
         };
 
         struct CarConfig {

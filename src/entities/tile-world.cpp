@@ -159,8 +159,8 @@ namespace oni {
                         auto chunkID = createSpriteStaticEntity(backgroundEntities, color, size, positionInWorld);
 
                         auto boarderRoadTiles = generateRoadsForChunk(i, j, backgroundEntities);
-                        auto chunk = components::Chunk{positionInWorld, packedIndices, std::move(boarderRoadTiles)};
-                        backgroundEntities.assign<components::Chunk>(chunkID, std::move(chunk));
+                        auto chunk = components::Chunk{positionInWorld, packedIndices, boarderRoadTiles};
+                        backgroundEntities.assign<components::Chunk>(chunkID, chunk);
 
                         mPackedRoadChunkIndicesToEntity.emplace(packedIndices, chunkID);
                     }
@@ -238,36 +238,36 @@ namespace oni {
                                         ((std::rand() % (mTilesPerChunkY)) * mTileSizeY - mHalfChunkSizeY);
 
             if (northChunkHasRoads && southChunkHasRoads) {
-                boarderRoadTiles.southBoarder = std::make_unique<components::RoadTilePos>();
-                boarderRoadTiles.northBoarder = std::make_unique<components::RoadTilePos>();
+                boarderRoadTiles.southBoarder = components::RoadTilePos{};
+                boarderRoadTiles.northBoarder = components::RoadTilePos{};
 
                 if (existsInMap(southChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto southChunkID = mPackedRoadChunkIndicesToEntity.at(southChunkPacked);
                     const auto &southChunk = backgroundEntities.get<components::Chunk>(southChunkID);
 
-                    boarderRoadTiles.southBoarder->x = southChunk.boarderRoadTiles.northBoarder->x;
-                    boarderRoadTiles.southBoarder->y = southChunk.boarderRoadTiles.northBoarder->y + mTileSizeY;
+                    boarderRoadTiles.southBoarder.x = southChunk.boarderRoadTiles.northBoarder.x;
+                    boarderRoadTiles.southBoarder.y = southChunk.boarderRoadTiles.northBoarder.y + mTileSizeY;
                 } else {
-                    boarderRoadTiles.southBoarder->x = southBoarderRoadTileX;
-                    boarderRoadTiles.southBoarder->y = southBoarderRoadTileY;
+                    boarderRoadTiles.southBoarder.x = southBoarderRoadTileX;
+                    boarderRoadTiles.southBoarder.y = southBoarderRoadTileY;
                 }
                 if (existsInMap(northChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto northChunkID = mPackedRoadChunkIndicesToEntity.at(northChunkPacked);
                     const auto &northChunk = backgroundEntities.get<components::Chunk>(northChunkID);
 
-                    boarderRoadTiles.northBoarder->x = northChunk.boarderRoadTiles.southBoarder->x;
-                    boarderRoadTiles.northBoarder->y = northChunk.boarderRoadTiles.southBoarder->y - mTileSizeY;
+                    boarderRoadTiles.northBoarder.x = northChunk.boarderRoadTiles.southBoarder.x;
+                    boarderRoadTiles.northBoarder.y = northChunk.boarderRoadTiles.southBoarder.y - mTileSizeY;
 
                 } else {
-                    boarderRoadTiles.northBoarder->x = northBoarderRoadTileX;
-                    boarderRoadTiles.northBoarder->y = northBoarderRoadTileY;
+                    boarderRoadTiles.northBoarder.x = northBoarderRoadTileX;
+                    boarderRoadTiles.northBoarder.y = northBoarderRoadTileY;
                 }
 
-                startingRoadTilePosX = boarderRoadTiles.southBoarder->x;
-                startingRoadTilePosY = boarderRoadTiles.southBoarder->y;
+                startingRoadTilePosX = boarderRoadTiles.southBoarder.x;
+                startingRoadTilePosY = boarderRoadTiles.southBoarder.y;
 
-                endingRoadTilePosX = boarderRoadTiles.northBoarder->x;
-                endingRoadTilePosY = boarderRoadTiles.northBoarder->y;
+                endingRoadTilePosX = boarderRoadTiles.northBoarder.x;
+                endingRoadTilePosY = boarderRoadTiles.northBoarder.y;
             } else if (northChunkHasRoads && eastChunkHasRoads) {
 
             } else if (northChunkHasRoads && westChunkHasRoads) {
@@ -277,37 +277,37 @@ namespace oni {
             } else if (southChunkHasRoads && eastChunkHasRoads) {
 
             } else if (westChunkHasRoads && eastChunkHasRoads) {
-                boarderRoadTiles.westBoarder = std::make_unique<components::RoadTilePos>();
-                boarderRoadTiles.eastBoarder = std::make_unique<components::RoadTilePos>();
+                boarderRoadTiles.westBoarder = components::RoadTilePos{};
+                boarderRoadTiles.eastBoarder = components::RoadTilePos{};
 
                 if (existsInMap(eastChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto eastChunkID = mPackedRoadChunkIndicesToEntity.at(eastChunkPacked);
                     const auto &eastChunk = backgroundEntities.get<components::Chunk>(eastChunkID);
 
-                    boarderRoadTiles.eastBoarder->x = eastChunk.boarderRoadTiles.westBoarder->x;
-                    boarderRoadTiles.eastBoarder->y = eastChunk.boarderRoadTiles.westBoarder->y;
+                    boarderRoadTiles.eastBoarder.x = eastChunk.boarderRoadTiles.westBoarder.x;
+                    boarderRoadTiles.eastBoarder.y = eastChunk.boarderRoadTiles.westBoarder.y;
 
                 } else {
-                    boarderRoadTiles.eastBoarder->x = eastBoarderRoadTileX;
-                    boarderRoadTiles.eastBoarder->y = eastBoarderRoadTileY;
+                    boarderRoadTiles.eastBoarder.x = eastBoarderRoadTileX;
+                    boarderRoadTiles.eastBoarder.y = eastBoarderRoadTileY;
                 }
 
                 if (existsInMap(westChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto westChunkID = mPackedRoadChunkIndicesToEntity.at(westChunkPacked);
                     const auto &westChunk = backgroundEntities.get<components::Chunk>(westChunkID);
 
-                    boarderRoadTiles.westBoarder->x = westChunk.boarderRoadTiles.eastBoarder->x;
-                    boarderRoadTiles.westBoarder->y = westChunk.boarderRoadTiles.eastBoarder->y;
+                    boarderRoadTiles.westBoarder.x = westChunk.boarderRoadTiles.eastBoarder.x;
+                    boarderRoadTiles.westBoarder.y = westChunk.boarderRoadTiles.eastBoarder.y;
                 } else {
-                    boarderRoadTiles.westBoarder->x = westBoarderRoadTileX;
-                    boarderRoadTiles.westBoarder->y = westBoarderRoadTileY;
+                    boarderRoadTiles.westBoarder.x = westBoarderRoadTileX;
+                    boarderRoadTiles.westBoarder.y = westBoarderRoadTileY;
                 }
 
-                startingRoadTilePosX = boarderRoadTiles.westBoarder->x;
-                startingRoadTilePosY = boarderRoadTiles.westBoarder->y;
+                startingRoadTilePosX = boarderRoadTiles.westBoarder.x;
+                startingRoadTilePosY = boarderRoadTiles.westBoarder.y;
 
-                endingRoadTilePosX = boarderRoadTiles.eastBoarder->x;
-                endingRoadTilePosY = boarderRoadTiles.eastBoarder->y;
+                endingRoadTilePosX = boarderRoadTiles.eastBoarder.x;
+                endingRoadTilePosY = boarderRoadTiles.eastBoarder.y;
             } else {
                 ONI_DEBUG_ASSERT(false);
             }

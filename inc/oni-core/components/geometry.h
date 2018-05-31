@@ -90,10 +90,10 @@ namespace oni {
         };
 
         struct BoarderRoadTiles {
-            std::unique_ptr<RoadTilePos> eastBoarder{};
-            std::unique_ptr<RoadTilePos> southBoarder{};
-            std::unique_ptr<RoadTilePos> westBoarder{};
-            std::unique_ptr<RoadTilePos> northBoarder{};
+            RoadTilePos eastBoarder{};
+            RoadTilePos southBoarder{};
+            RoadTilePos westBoarder{};
+            RoadTilePos northBoarder{};
         };
 
         struct Chunk {

@@ -35,20 +35,16 @@ namespace oni {
 
             void tickChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
 
-            /**
-             * Find corresponding tile index for a given x.
-             * @param position in world coordinates
-             * @return index
-             */
             common::int64 positionToIndex(const common::real64 position, const common::uint16 tileSize) const;
 
-            /**
-             * Do the inverse of positionToIndex()
-             * @param index
-             * @return minimum x in the tile corresponding to the given index.
-             */
-            common::real32 indexToPosition(const common::int64 index, const common::uint16 tileSize,
-                                           const common::real32 halfTileSize) const;
+            common::real32 indexToPosition(const common::int64 index, const common::uint16 tileSize) const;
+
+            components::ChunkIndices chunkPositionToIndex(const math::vec2 &position) const;
+
+            math::vec2 chunkIndexToPosition(const components::ChunkIndices &chunkIndices) const;
+
+            math::vec2 roadTileInexToPosition(const components::ChunkIndices &chunkIndices,
+                                               const components::RoadTileIndices roadTileIndices) const;
 
             /**
              * Pack two unique int32 values into unique uint64.
@@ -65,23 +61,26 @@ namespace oni {
             entities::entityID createSkidTileIfMissing(const math::vec2 &position,
                                                        entt::DefaultRegistry &foregroundEntities);
 
-            components::BoarderRoadTiles generateRoadsForChunk(const common::int64 xChunkIndex,
-                                                               const common::int64 yChunkIndex,
-                                                               entt::DefaultRegistry &backgroundEntities);
+            components::BoarderRoadTiles
+            generateRoadsForChunk(const components::ChunkIndices &chunkIndices,
+                                  entt::DefaultRegistry &backgroundEntities);
 
             void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
                                    entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
 
-            void generateRoadTile(const common::int64 tilePosX, const common::int64 tilePosY,
+            void generateRoadTile(const components::ChunkIndices &chunkIndices,
+                                  const components::RoadTileIndices &roadTileIndices,
                                   entt::DefaultRegistry &backgroundEntities);
 
-            void generateRoadTileBetween(common::int64 startTilePosX, common::int64 startTilePosY,
-                                         common::int64 endTilePosX, common::int64 endTilePosY,
-                                         entt::DefaultRegistry &backgroundEntities);
+            void
+            generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
+                                    components::RoadTileIndices startingRoadTileIndices,
+                                    components::RoadTileIndices endingRoadTileIndices,
+                                    entt::DefaultRegistry &backgroundEntities);
 
             bool existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
 
-            bool chunkWithRoads(const common::int64 xIndex, const common::int64 yIndex) const;
+            bool chunkWithRoads(const components::ChunkIndices &chunkIndices) const;
 
         private:
             /**

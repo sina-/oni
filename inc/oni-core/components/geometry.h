@@ -84,16 +84,22 @@ namespace oni {
         struct TagVehicle {
         };
 
-        struct RoadTilePos {
+        struct ChunkIndices {
             common::int64 x{0};
             common::int64 y{0};
         };
 
+        struct RoadTileIndices {
+            // NOTE: This is relative to Chunk
+            common::uint16 x{0};
+            common::uint16 y{0};
+        };
+
         struct BoarderRoadTiles {
-            RoadTilePos eastBoarder{};
-            RoadTilePos southBoarder{};
-            RoadTilePos westBoarder{};
-            RoadTilePos northBoarder{};
+            RoadTileIndices eastBoarder{};
+            RoadTileIndices southBoarder{};
+            RoadTileIndices westBoarder{};
+            RoadTileIndices northBoarder{};
         };
 
         struct Chunk {

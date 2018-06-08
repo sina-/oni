@@ -44,7 +44,7 @@ namespace oni {
             math::vec2 chunkIndexToPosition(const components::ChunkIndices &chunkIndices) const;
 
             math::vec2 roadTileInexToPosition(const components::ChunkIndices &chunkIndices,
-                                               const components::RoadTileIndices roadTileIndices) const;
+                                              const components::RoadTileIndices roadTileIndices) const;
 
             /**
              * Pack two unique int32 values into unique uint64.
@@ -72,11 +72,15 @@ namespace oni {
                                   const components::RoadTileIndices &roadTileIndices,
                                   entt::DefaultRegistry &backgroundEntities);
 
-            void
-            generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
-                                    components::RoadTileIndices startingRoadTileIndices,
-                                    components::RoadTileIndices endingRoadTileIndices,
-                                    entt::DefaultRegistry &backgroundEntities);
+            void generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
+                                          const components::RoadTileIndices &roadTileIndices,
+                                          const components::Texture &texture,
+                                          entt::DefaultRegistry &backgroundEntities);
+
+            void generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
+                                         components::RoadTileIndices startingRoadTileIndices,
+                                         components::RoadTileIndices endingRoadTileIndices,
+                                         entt::DefaultRegistry &backgroundEntities);
 
             bool existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
 
@@ -113,6 +117,14 @@ namespace oni {
 
             const common::uint16 mHalfChunkSizeX{0};
             const common::uint16 mHalfChunkSizeY{0};
+
+            components::Texture mNorthToEast{};
+            components::Texture mSouthToEast{};
+            components::Texture mSouthToNorth{};
+            components::Texture mNorthToSouth{};
+            components::Texture mWestToEast{};
+            components::Texture mWestToNorth{};
+            components::Texture mWestToSouth{};
         };
     }
 }

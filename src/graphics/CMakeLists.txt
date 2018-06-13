@@ -38,7 +38,6 @@ endif ()
 include_directories(${oni_SOURCE_DIR}/lib/freetype-gl/include)
 find_library(FREETYPE_GL freetype-gl PATHS ${oni_SOURCE_DIR}/lib/freetype-gl/bin)
 
-
 include_directories(${oni_SOURCE_DIR}/lib/ant-tweak-bar/include)
 find_library(ANT_TWEAK_BAR AntTweakBar PATHS ${oni_SOURCE_DIR}/lib/ant-tweak-bar/bin)
 

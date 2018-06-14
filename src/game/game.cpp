@@ -84,5 +84,9 @@ namespace oni {
             _display();
         }
 
+        common::real32 Game::getTickFrequency() {
+            return mTickMS;
+        }
+
     }
 }

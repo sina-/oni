@@ -23,6 +23,9 @@ namespace oni {
              */
             virtual bool shouldTerminate() = 0;
 
+        protected:
+            common::real32 getTickFrequency();
+
         private:
             virtual void tick() final;
 
@@ -45,6 +48,7 @@ namespace oni {
              * @param fet
              */
             virtual void showFET(common::int16 fet) = 0;
+
 
         protected:
             utils::HighResolutionTimer mRunTimerA{};

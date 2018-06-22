@@ -159,7 +159,7 @@ namespace oni {
                         auto R = (std::rand() % 255) / 255.0f;
                         auto G = (std::rand() % 255) / 255.0f;
                         auto B = (std::rand() % 255) / 255.0f;
-                        auto color = math::vec4{R, G, B, 0.1f};
+                        auto color = math::vec4{R, G, B, 0.0f};
                         auto size = math::vec2{mChunkSizeX, mChunkSizeY};
                         auto currentChunkIndices = components::ChunkIndices{i, j};
                         auto chunkPosition = chunkIndexToPosition(currentChunkIndices);

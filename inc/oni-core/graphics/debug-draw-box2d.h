@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Box2D/Box2D.h"
+#include <Box2D/Box2D.h>
 
 namespace oni {
     namespace graphics {
+        class SceneManager;
+
         class DebugDrawBox2D : public b2Draw {
         public:
-            DebugDrawBox2D();
+            DebugDrawBox2D(SceneManager *sceneManager);
 
             ~DebugDrawBox2D() override;
 
@@ -24,6 +26,13 @@ namespace oni {
             void DrawTransform(const b2Transform &xf) override;
 
             void DrawPoint(const b2Vec2 &p, float32 size, const b2Color &color) override;
+
+            void End();
+
+            void Begin();
+
+        private:
+            SceneManager *mSceneManager{};
         };
 
     }

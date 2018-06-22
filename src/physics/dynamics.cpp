@@ -25,10 +25,14 @@ namespace oni {
                     carInput.left = 1.0f;
                 }
                 if (input.isPressed(GLFW_KEY_S) || input.isPressed(GLFW_KEY_DOWN)) {
-                    carInput.brake = 1.0f;
+                    carInput.throttle = -1.0f;
                 }
                 if (input.isPressed(GLFW_KEY_D) || input.isPressed(GLFW_KEY_RIGHT)) {
                     carInput.right = 1.0f;
+                }
+                if(input.isPressed(GLFW_KEY_F)){
+                    car.velocity.x *= 1.1f;
+                    car.velocity.y *= 1.1f;
                 }
                 if (input.isPressed(GLFW_KEY_SPACE)) {
                     if (car.accumulatedEBrake < 1.0f) {

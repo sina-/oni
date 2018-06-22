@@ -34,6 +34,8 @@ namespace oni {
 
             void render(entt::DefaultRegistry &registry);
 
+            void renderRaw(const components::Shape &shape, const components::Appearance &appearance);
+
             void lookAt(common::real32 x, common::real32 y);
 
             void lookAt(common::real32 x, common::real32 y, common::real32 distance);
@@ -52,6 +54,14 @@ namespace oni {
 
             void resetCounters();
 
+            // TODO: This is awful and inconsistent with the API of this class where I should only expose render().
+            // Instead of exposing the internals, I can batch the render objects in DebugDrawBox2D and then
+            // pass them to a new render() function that receives a vector of sprites
+            // .
+            void beginColorRendering();
+
+            void endColorRendering();
+
         private:
             void begin(const Shader &shader, Renderer2D &renderer2D);
 
@@ -62,17 +72,18 @@ namespace oni {
             void initializeColorRenderer(const Shader &shader);
 
             bool visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
-                                             const common::real32 halfViewHeight) const;
+                                 const common::real32 halfViewHeight) const;
 
         private:
-            std::unique_ptr<Shader> mColorShader;
-            std::unique_ptr<Shader> mTextureShader;
-            std::unique_ptr<BatchRenderer2D> mColorRenderer;
-            std::unique_ptr<BatchRenderer2D> mTextureRenderer;
+            std::unique_ptr<Shader> mColorShader{};
+            std::unique_ptr<Shader> mTextureShader{};
+            std::unique_ptr<BatchRenderer2D> mColorRenderer{};
+            std::unique_ptr<BatchRenderer2D> mTextureRenderer{};
 
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
+
 
             components::ScreenBounds mScreenBounds{};
             components::Camera mCamera{0.0f, 0.0f, 1.0f};

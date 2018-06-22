@@ -219,7 +219,7 @@ namespace oni {
         void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
             mCamera.x = x;
             mCamera.y = y;
-            mCamera.z = distance * 0.08f;
+            mCamera.z = distance * 0.78f;
         }
 
         const math::mat4 &SceneManager::getProjectionMatrix() const {
@@ -299,6 +299,19 @@ namespace oni {
         void SceneManager::resetCounters() {
             mRenderedSpritesPerFrame = 0;
             mRenderedTexturesPerFrame = 0;
+        }
+
+        void SceneManager::renderRaw(const components::Shape &shape, const components::Appearance &appearance) {
+            mColorRenderer->submit(shape, appearance);
+            ++mRenderedSpritesPerFrame;
+        }
+
+        void SceneManager::beginColorRendering() {
+            begin(*mColorShader, *mColorRenderer);
+        }
+
+        void SceneManager::endColorRendering() {
+            end(*mColorShader, *mColorRenderer);
         }
     }
 }

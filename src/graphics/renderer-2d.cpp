@@ -31,6 +31,7 @@ namespace oni {
         }
 
         void Renderer2D::end() {
+            // TODO: probably you want to flush here
             _end();
         }
     }

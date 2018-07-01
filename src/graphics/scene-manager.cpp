@@ -219,7 +219,7 @@ namespace oni {
         void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
             mCamera.x = x;
             mCamera.y = y;
-            mCamera.z = distance * 0.78f;
+            mCamera.z = 1 / distance;
         }
 
         const math::mat4 &SceneManager::getProjectionMatrix() const {

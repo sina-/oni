@@ -65,6 +65,7 @@ typedef int socklen_t;
 static enet_uint32 timeBase = 0;
 
 int
+
 enet_initialize (void)
 {
     return 0;
@@ -127,6 +128,7 @@ enet_address_set_host (ENetAddress * address, const char * name)
       return -1;
 
     for (result = resultList; result != NULL; result = result -> ai_next)
+
     {
         if (result -> ai_family == AF_INET && result -> ai_addr != NULL && result -> ai_addrlen >= sizeof (struct sockaddr_in))
         {

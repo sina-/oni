@@ -23,7 +23,9 @@ namespace oni {
         private:
             Server();
 
-            ENetHost *mServer;
+            void handle(const common::uint8 *data, ENetPeer *peer);
+
+            ENetHost *mEnetServer;
         };
     }
 }

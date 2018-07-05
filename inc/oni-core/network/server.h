@@ -1,31 +1,20 @@
 #pragma once
 
-#include <enet/enet.h>
-
 #include <oni-core/common/typedefs.h>
+#include <oni-core/network/peer.h>
 
 namespace oni {
     namespace network {
-
-        struct Address {
-            std::string host;
-            common::uint16 port;
-        };
-
-        class Server {
+        class Server : public Peer {
         public:
-            Server(const Address &address, common::uint8 numClients, common::uint8 numChannels);
+            Server(const Address *address, common::uint8 numClients, common::uint8 numChannels);
 
-            void poll();
-
-            ~Server();
+            ~Server() override;
 
         private:
             Server();
 
-            void handle(const common::uint8 *data, ENetPeer *peer);
-
-            ENetHost *mEnetServer;
+            void handle(const common::uint8 *data, ENetPeer *peer) override;
         };
     }
 }

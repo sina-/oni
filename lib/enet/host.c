@@ -26,7 +26,8 @@
     at any given time.
 */
 ENetHost *
-enet_host_create (const ENetAddress * address, size_t peerCount, size_t channelLimit, enet_uint32 incomingBandwidth, enet_uint32 outgoingBandwidth)
+enet_host_create (
+        const ENetAddress * address, size_t peerCount, size_t channelLimit, enet_uint32 incomingBandwidth, enet_uint32 outgoingBandwidth)
 {
     ENetHost * host;
     ENetPeer * currentPeer;

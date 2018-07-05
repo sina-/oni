@@ -3,27 +3,25 @@
 #include <enet/enet.h>
 #include <oni-core/network/server.h>
 #include <oni-core/network/packet.h>
+#include <oni-core/network/peer.h>
 
 namespace oni {
     namespace network {
-        class Client {
+        class Client : public Peer {
         public:
             Client();
 
-            ~Client();
+            ~Client() override;
 
             void connect(const Address &address);
 
             void pingServer();
 
-            void poll();
+        protected:
+            void handle(const common::uint8 *data, ENetPeer *peer) override;
 
-        private:
-            void handle(const common::uint8 *data, ENetPeer *peer);
-
-        private:
-            ENetHost *mEnetClient;
-            ENetPeer *mEnetServer;
+        protected:
+            ENetPeer *mEnetPeer;
         };
     }
 }

@@ -72,6 +72,7 @@ enet_initialize (void)
 }
 
 void
+
 enet_deinitialize (void)
 {
 }

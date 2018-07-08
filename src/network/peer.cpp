@@ -54,7 +54,7 @@ namespace oni {
                                ip,
                                event.channelID);
 
-                        handle(event.packet->data, event.peer);
+                        handle(event.packet, event.peer);
 
                         enet_packet_destroy(event.packet);
                         break;

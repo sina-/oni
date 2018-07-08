@@ -1,8 +1,5 @@
 #pragma once
 
-#include <enet/enet.h>
-#include <oni-core/network/server.h>
-#include <oni-core/network/packet.h>
 #include <oni-core/network/peer.h>
 
 namespace oni {
@@ -18,7 +15,7 @@ namespace oni {
             void pingServer();
 
         protected:
-            void handle(const common::uint8 *data, ENetPeer *peer) override;
+            void handle(const ENetPacket *packet, ENetPeer *peer) override;
 
         protected:
             ENetPeer *mEnetPeer;

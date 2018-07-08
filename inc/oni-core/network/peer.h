@@ -11,6 +11,9 @@ typedef struct _ENetHost ENetHost;
 struct _ENetPeer;
 typedef struct _ENetPeer ENetPeer;
 
+struct _ENetPacket;
+typedef struct _ENetPacket ENetPacket;
+
 namespace oni {
     namespace network {
         struct Address {
@@ -34,7 +37,7 @@ namespace oni {
             void poll();
 
         protected:
-            virtual void handle(const common::uint8 *data, ENetPeer *peer) = 0;
+            virtual void handle(const ENetPacket *packet, ENetPeer *peer) = 0;
 
         protected:
             ENetHost *mEnetHost;

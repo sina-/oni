@@ -1,8 +1,12 @@
 #include <oni-core/network/client.h>
 
 #include <string>
+#include <chrono>
+
+#include <enet/enet.h>
 
 #include <oni-core/io/output.h>
+#include <oni-core/network/packet.h>
 
 namespace oni {
     namespace network {
@@ -32,15 +36,22 @@ namespace oni {
         }
 
         void Client::pingServer() {
+            auto now = std::chrono::system_clock::now().time_since_epoch().count();
+            auto ping = PacketPing{};
 
-            std::string data{"ping"};
-            ENetPacket *packet = enet_packet_create(data.data(), data.size() + 1, ENET_PACKET_FLAG_RELIABLE);
+            ping.header = PacketType::PING;
+            ping.timestamp = static_cast<common::uint32>(now);
+
+            auto pingPacket = PacketData(ping);
+
+            ENetPacket *packet = enet_packet_create(pingPacket.serialize(), pingPacket.getSize(),
+                                                    ENET_PACKET_FLAG_RELIABLE);
             enet_peer_send(mEnetPeer, 0, packet);
 
             enet_host_flush(mEnetHost);
         }
 
-        void Client::handle(const common::uint8 *data, ENetPeer *peer) {
+        void Client::handle(const ENetPacket *packet, ENetPeer *peer) {
             io::printl("Received pong from server!");
         }
 

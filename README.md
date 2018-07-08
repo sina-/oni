@@ -41,3 +41,7 @@ google-pprof --callgrind ./oni-core-demo cpu.profile > gpprof.callgrind.out
 kcachegrind gpprof.callgrind.out
 
 ```
+
+## Using CCache
+`apt install ccache`
+and use `usr/lib/ccache/gcc` and `usr/lib/ccache/g++` as the compilers for the project

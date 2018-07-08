@@ -1,4 +1,4 @@
-include_directories(${oni_SOURCE_DIR}/lib/Box2D)
+include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/Box2D)
 
 file(GLOB COLLISION ${oni_SOURCE_DIR}/lib/Box2D/Box2D/Collision/*.cpp)
 file(GLOB SHAPES ${oni_SOURCE_DIR}/lib/Box2D/Box2D/Collision/Shapes/*.cpp)

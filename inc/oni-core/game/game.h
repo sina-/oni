@@ -33,15 +33,15 @@ namespace oni {
 
             virtual void display() final;
 
-            virtual void _tick(const common::real32 tickTime) = 0;
+            virtual void _tick(common::real32 tickTime) = 0;
 
             virtual void _render() = 0;
 
             virtual void _display() = 0;
 
-            virtual void showFPS(common::uint16 fps) = 0;
+            virtual void showFPS(common::int16 fps) = 0;
 
-            virtual void showTPS(common::uint16 tps) = 0;
+            virtual void showTPS(common::int16 tps) = 0;
 
             /**
              * Accumulated time in ms over 1 second spent sleeping due to excess.

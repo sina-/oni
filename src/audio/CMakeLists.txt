@@ -19,7 +19,7 @@ if (${AUDIO_MANAGER_SOLOUD})
             SDL2)
 
 elseif (${AUDIO_MANAGER_FMOD})
-    include_directories(${oni_SOURCE_DIR}/lib/fmod/inc)
+    include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/fmod/inc)
 
     # You need to get the binary from https://fmod.com
     find_library(FMOD fmodL PATHS ${oni_SOURCE_DIR}/lib/fmod/lib/x86_64)

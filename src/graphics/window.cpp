@@ -17,7 +17,7 @@ namespace oni {
             if (!glfwInit())
                 throw std::runtime_error("Failed to init GLFW!");
 
-            common::int32 monitorCount{};
+/*            common::int32 monitorCount{};
             auto monitors = glfwGetMonitors(&monitorCount);
             const GLFWvidmode *mode = glfwGetVideoMode(monitors[0]);
             glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -26,9 +26,13 @@ namespace oni {
             glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
             mWindow = glfwCreateWindow(mode->width, mode->height, mTitle.c_str(), monitors[0], nullptr);
-
             mWidth = mode->width;
             mHeight = mode->height;
+
+            */
+            mWindow = glfwCreateWindow(gameWidth, gameHeight, mTitle.c_str(), nullptr, nullptr);
+            mWidth = gameWidth;
+            mHeight = gameHeight;
 
             if (!mWindow) {
                 glfwTerminate();

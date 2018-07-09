@@ -2,41 +2,40 @@
 
 namespace oni {
     namespace network {
-        PacketData::PacketData(const Packet &packet_) : header(packet.header), size(sizeof(packet_)),
-                                                        packet(packet_) {
-            data = reinterpret_cast<void *> (&packet);
+        PacketData::PacketData(Packet *packet) : mSize(sizeof(packet)),
+                                                       mPacket(packet) {
+            mData = reinterpret_cast<void *> (&mPacket);
         }
 
-        PacketData::PacketData(void *data_, size_t size_) : data(data_), size(size) {
-            deserialize();
+        PacketData::PacketData(void *data, size_t size) : mData(data), mSize(size) {
+            mPacket = reinterpret_cast<Packet*>(data);
         }
 
         PacketData::~PacketData() {
-
-            data = nullptr;
+            mData = nullptr;
         }
 
-        Packet *PacketData::deserialize() {
-            Packet *packet{};
-
-            switch (header) {
-                case PacketType::PING: {
-                    packet = reinterpret_cast<PacketPing *>(data);
-                }
-                default: {
-                    break;
-                }
-            }
-            header = packet->header;
-            return packet;
+        void *PacketData::serialize() const {
+            return mData;
         }
 
-        void *PacketData::serialize() {
-            return data;
+        size_t PacketData::getSize() const {
+            return mSize;
         }
 
-        size_t PacketData::getSize() {
-            return size;
+        PacketType PacketData::getHeader() const {
+            return mPacket->getHeader();
+        }
+
+        PacketPing::PacketPing(common::uint32 timestamp_) : Packet(PacketType::PING),
+                                                            mTimestamp(timestamp_) {}
+
+        common::uint32 PacketPing::getTimeStamp() const {
+            return mTimestamp;
+        }
+
+        PacketType Packet::getHeader() const {
+            return mHeader;
         }
     }
 }

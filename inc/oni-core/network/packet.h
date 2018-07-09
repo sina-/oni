@@ -7,36 +7,55 @@ namespace oni {
         enum class PacketType {
             PING,
 
-            LAST
+            UNKNOWN
         };
 
-        struct Packet {
-            PacketType header;
+        class Packet {
+        public:
+            explicit Packet(PacketType header_) : mHeader(header_) {}
+
+            PacketType getHeader() const;
+
+        private:
+            PacketType mHeader;
         };
 
-        struct PacketPing : public Packet {
-            common::uint32 timestamp;
+        class PacketPing : public Packet {
+        public:
+            explicit PacketPing(common::uint32 timestamp_);
+
+            common::uint32 getTimeStamp() const;
+
+        private:
+            common::uint32 mTimestamp{};
         };
 
         class PacketData {
         public:
-            explicit PacketData(const Packet &packet_);
+            explicit PacketData(Packet *packet);
 
-            PacketData(void *data_, size_t size_);
+            PacketData(void *data, size_t size);
 
             ~PacketData();
 
-            Packet *deserialize();
+            template<class T>
+            T *deserialize() {
+                static_assert(std::is_base_of<Packet, T>::value, "T must inherit from Packet");
 
-            void *serialize();
+                auto *packet = reinterpret_cast<T *>(mData);
+                return packet;
+            }
 
-            size_t getSize();
+            void *serialize() const;
+
+            size_t getSize() const;
+
+            PacketType getHeader() const;
 
         private:
-            PacketType header{};
-            void *data{};
-            Packet packet{};
-            size_t size{};
+            size_t mSize{};
+            Packet *mPacket{};
+            void *mData{};
         };
     }
 }

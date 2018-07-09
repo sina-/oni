@@ -37,12 +37,10 @@ namespace oni {
 
         void Client::pingServer() {
             auto now = std::chrono::system_clock::now().time_since_epoch().count();
-            auto ping = PacketPing{};
+            auto ping = PacketPing{static_cast<common::uint32>(now)};
 
-            ping.header = PacketType::PING;
-            ping.timestamp = static_cast<common::uint32>(now);
-
-            auto pingPacket = PacketData(ping);
+            // TODO: Packet is passed as raw pointer to PacketData and life times are bind together!
+            auto pingPacket = PacketData(&ping);
 
             ENetPacket *packet = enet_packet_create(pingPacket.serialize(), pingPacket.getSize(),
                                                     ENET_PACKET_FLAG_RELIABLE);

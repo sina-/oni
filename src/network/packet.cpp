@@ -3,12 +3,13 @@
 namespace oni {
     namespace network {
         PacketData::PacketData(Packet *packet) : mSize(sizeof(packet)),
-                                                       mPacket(packet) {
-            mData = reinterpret_cast<void *> (&mPacket);
+                                                 mHeader(packet->getHeader()) {
+            mData = reinterpret_cast<void *> (packet);
         }
 
         PacketData::PacketData(void *data, size_t size) : mData(data), mSize(size) {
-            mPacket = reinterpret_cast<Packet*>(data);
+            // TODO: This is not safe
+            mHeader = *reinterpret_cast<PacketType *>(data);
         }
 
         PacketData::~PacketData() {
@@ -24,7 +25,7 @@ namespace oni {
         }
 
         PacketType PacketData::getHeader() const {
-            return mPacket->getHeader();
+            return mHeader;
         }
 
         PacketPing::PacketPing(common::uint32 timestamp_) : Packet(PacketType::PING),

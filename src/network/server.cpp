@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <iomanip>
 
 #include <enet/enet.h>
 
@@ -39,6 +40,8 @@ namespace oni {
         }
 
         void Server::handle(const PacketPing &packet) {
+            auto time_t = std::time_t{packet.getTimeStamp()};
+            std::cout << std::put_time(std::localtime(&time_t), "%H:%M") << std::endl;
             std::cout << packet.getTimeStamp() << std::endl;
         }
     }

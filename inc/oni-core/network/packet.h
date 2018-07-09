@@ -53,8 +53,8 @@ namespace oni {
             PacketType getHeader() const;
 
         private:
+            PacketType mHeader{PacketType::UNKNOWN};
             size_t mSize{};
-            Packet *mPacket{};
             void *mData{};
         };
     }

@@ -1,38 +1,35 @@
 #include <oni-core/network/packet.h>
 
+#include <cstring>
+
 namespace oni {
     namespace network {
-        PacketData::PacketData(Packet *packet) : mSize(sizeof(packet)),
-                                                 mHeader(packet->getHeader()) {
-            mData = reinterpret_cast<void *> (packet);
+        Packet::Packet(GamePacket *gamePacket) : mSize(sizeof(gamePacket)),
+                                                       mHeader(gamePacket->getHeader()) {
+            mData = new common::uint8[mSize];
+            memcpy(mData, reinterpret_cast<void *> (gamePacket), mSize);
         }
 
-        PacketData::PacketData(void *data, size_t size) : mData(data), mSize(size) {
-            // TODO: This is not safe
-            mHeader = *reinterpret_cast<PacketType *>(data);
+        Packet::Packet(void *data, size_t size) : mSize(size) {
+            mData = new common::uint8[mSize];
+            memcpy(mData, data, mSize);
+
+            if (data && size) {
+                mHeader = *reinterpret_cast<PacketType *>(data);
+            }
         }
 
-        PacketData::~PacketData() {
+        Packet::~Packet() {
+            delete mData;
             mData = nullptr;
         }
 
-        void *PacketData::serialize() const {
+        void *Packet::serialize() const {
             return mData;
         }
 
-        size_t PacketData::getSize() const {
+        size_t Packet::getSize() const {
             return mSize;
-        }
-
-        PacketType PacketData::getHeader() const {
-            return mHeader;
-        }
-
-        PacketPing::PacketPing(common::uint32 timestamp_) : Packet(PacketType::PING),
-                                                            mTimestamp(timestamp_) {}
-
-        common::uint32 PacketPing::getTimeStamp() const {
-            return mTimestamp;
         }
 
         PacketType Packet::getHeader() const {

@@ -1,46 +1,23 @@
 #pragma once
 
-#include <oni-core/common/typedefs.h>
+#include <cstddef>
+
+#include <oni-core/network/game-packet.h>
 
 namespace oni {
     namespace network {
-        enum class PacketType {
-            PING,
-
-            UNKNOWN
-        };
 
         class Packet {
         public:
-            explicit Packet(PacketType header_) : mHeader(header_) {}
+            explicit Packet(GamePacket *gamePacket);
 
-            PacketType getHeader() const;
+            Packet(void *data, std::size_t size);
 
-        private:
-            PacketType mHeader;
-        };
-
-        class PacketPing : public Packet {
-        public:
-            explicit PacketPing(common::uint32 timestamp_);
-
-            common::uint32 getTimeStamp() const;
-
-        private:
-            common::uint32 mTimestamp{};
-        };
-
-        class PacketData {
-        public:
-            explicit PacketData(Packet *packet);
-
-            PacketData(void *data, size_t size);
-
-            ~PacketData();
+            ~Packet();
 
             template<class T>
             T *deserialize() {
-                static_assert(std::is_base_of<Packet, T>::value, "T must inherit from Packet");
+                static_assert(std::is_base_of<GamePacket, T>::value, "T must inherit from GamePacket");
 
                 auto *packet = reinterpret_cast<T *>(mData);
                 return packet;

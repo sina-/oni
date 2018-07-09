@@ -2,10 +2,12 @@
 
 #include <string>
 #include <chrono>
+#include <iostream>
 
 #include <enet/enet.h>
 
 #include <oni-core/io/output.h>
+#include <oni-core/network/game-packet.h>
 #include <oni-core/network/packet.h>
 
 namespace oni {
@@ -37,10 +39,9 @@ namespace oni {
 
         void Client::pingServer() {
             auto now = std::chrono::system_clock::now().time_since_epoch().count();
-            auto ping = PacketPing{static_cast<common::uint32>(now)};
+            auto ping = PingPacket{static_cast<common::uint64>(now)};
 
-            // TODO: Packet is passed as raw pointer to PacketData and life times are bind together!
-            auto pingPacket = PacketData(&ping);
+            auto pingPacket = Packet(&ping);
 
             ENetPacket *packet = enet_packet_create(pingPacket.serialize(), pingPacket.getSize(),
                                                     ENET_PACKET_FLAG_RELIABLE);
@@ -50,7 +51,6 @@ namespace oni {
         }
 
         void Client::handle(const ENetPacket *packet, ENetPeer *peer) {
-            io::printl("Received pong from server!");
         }
 
     }

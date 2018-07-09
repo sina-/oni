@@ -2,7 +2,7 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/peer.h>
-#include <oni-core/network/packet.h>
+#include <oni-core/network/game-packet.h>
 
 namespace oni {
     namespace network {
@@ -17,7 +17,7 @@ namespace oni {
 
             void handle(const ENetPacket *packet, ENetPeer *peer) override;
 
-            void handle(const PacketPing &packet);
+            void handle(const PingPacket &packet);
         };
     }
 }

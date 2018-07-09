@@ -6,6 +6,7 @@
 
 #include <enet/enet.h>
 
+#include <oni-core/network/game-packet.h>
 #include <oni-core/network/packet.h>
 
 namespace oni {
@@ -18,13 +19,12 @@ namespace oni {
                 Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
 
-        void Server::handle(const ENetPacket *packet, ENetPeer *peer) {
-            // TODO: PacketData needs to create a copy of the packet->data instead of just keeping
-            // a reference to it. As it is now, PacketData's life-time is tied to ENetPacket *packet.
-            auto gamePacket = PacketData(packet->data, packet->dataLength);
-            switch (gamePacket.getHeader()) {
+        void Server::handle(const ENetPacket *eNetPacket, ENetPeer *peer) {
+            auto packet = Packet(eNetPacket->data, eNetPacket->dataLength);
+            switch (packet.getHeader()) {
                 case (PacketType::PING): {
-                    auto pingPacket = gamePacket.deserialize<PacketPing>();
+                    auto pingPacket = packet.deserialize<PingPacket>();
+                    std::cout << pingPacket->getTimeStamp() << std::endl;
                     handle(*pingPacket);
                     break;
                 }
@@ -33,16 +33,15 @@ namespace oni {
                 }
             }
 
-            ENetPacket *eNetPacket = enet_packet_create(packet->data, packet->dataLength, ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send(peer, 0, eNetPacket);
+            ENetPacket *eNetPacketToClient = enet_packet_create(eNetPacket->data, eNetPacket->dataLength,
+                                                                ENET_PACKET_FLAG_RELIABLE);
+            enet_peer_send(peer, 0, eNetPacketToClient);
 
             enet_host_flush(mEnetHost);
         }
 
-        void Server::handle(const PacketPing &packet) {
+        void Server::handle(const PingPacket &packet) {
             auto time_t = std::time_t{packet.getTimeStamp()};
-            std::cout << std::put_time(std::localtime(&time_t), "%H:%M") << std::endl;
-            std::cout << packet.getTimeStamp() << std::endl;
         }
     }
 }

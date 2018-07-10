@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
+#include <assert.h>
 
 #include <enet/enet.h>
 
@@ -19,8 +20,15 @@ namespace oni {
                 Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
 
-        void Server::handle(const ENetPacket *eNetPacket, ENetPeer *peer) {
-            auto packet = Packet(eNetPacket->data, eNetPacket->dataLength);
+        void Server::handle(ENetEvent *event) {
+            if (!event->packet->data) {
+                return;
+            }
+            if (!event->packet->dataLength) {
+                return;
+            }
+
+            auto packet = Packet(event->packet->data, event->packet->dataLength);
             switch (packet.getHeader()) {
                 case (PacketType::PING): {
                     auto pingPacket = packet.deserialize<PingPacket>();
@@ -33,9 +41,14 @@ namespace oni {
                 }
             }
 
-            ENetPacket *eNetPacketToClient = enet_packet_create(eNetPacket->data, eNetPacket->dataLength,
-                                                                ENET_PACKET_FLAG_RELIABLE);
-            enet_peer_send(peer, 0, eNetPacketToClient);
+            ENetPacket *packetToClient = enet_packet_create(event->packet->data, event->packet->dataLength,
+                                                            ENET_PACKET_FLAG_RELIABLE);
+
+            assert(packetToClient);
+
+            auto success = enet_peer_send(event->peer, 0, packetToClient);
+
+            assert(success == 0);
 
             enet_host_flush(mEnetHost);
         }

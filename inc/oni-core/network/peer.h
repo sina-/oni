@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
+#include <enet/enet.h>
 
 struct _ENetAddress;
 typedef struct _ENetAddress ENetAddress;
@@ -37,7 +38,7 @@ namespace oni {
             void poll();
 
         protected:
-            virtual void handle(const ENetPacket *packet, ENetPeer *peer) = 0;
+            virtual void handle(ENetEvent *event) = 0;
 
         protected:
             ENetHost *mEnetHost;

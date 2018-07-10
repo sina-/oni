@@ -10,6 +10,7 @@
 #include <oni-core/io/output.h>
 #include <oni-core/network/game-packet.h>
 #include <oni-core/network/packet.h>
+#include <cstring>
 
 namespace oni {
     namespace network {
@@ -40,16 +41,16 @@ namespace oni {
 
         void Client::pingServer() {
             auto now = std::chrono::system_clock::now().time_since_epoch().count();
-            auto pingPacket = PingPacket{static_cast<common::uint64>(now)};
+            auto pingPacket = std::make_unique<PingPacket>(static_cast<common::uint64>(now));
 
-            auto ping = Packet(&pingPacket);
+            auto packet = Packet(pingPacket.get(), sizeof(*(pingPacket.get())));
 
-            ENetPacket *packet = enet_packet_create(ping.serialize(), ping.getSize(),
-                                                    ENET_PACKET_FLAG_RELIABLE);
+            ENetPacket *packetToServer = enet_packet_create(packet.serialize(), packet.getSize(),
+                                                            ENET_PACKET_FLAG_RELIABLE);
 
-            assert(packet);
+            assert(packetToServer);
 
-            auto success = enet_peer_send(mEnetPeer, 0, packet);
+            auto success = enet_peer_send(mEnetPeer, 0, packetToServer);
 
             assert(success == 0);
 
@@ -57,6 +58,22 @@ namespace oni {
         }
 
         void Client::handle(ENetEvent *event) {
+        }
+
+        void Client::sendMessage(const std::string &message) {
+            auto messagePacket = std::make_unique<MessagePacket>(message);
+
+            auto packet = Packet(messagePacket.get(), sizeof(*(messagePacket.get())));
+
+            auto packetToServer = enet_packet_create(packet.serialize(), packet.getSize(), ENET_PACKET_FLAG_RELIABLE);
+
+            assert(packetToServer);
+
+            auto success = enet_peer_send(mEnetPeer, 0, packetToServer);
+
+            assert(success == 0);
+
+            enet_host_flush(mEnetHost);
         }
 
     }

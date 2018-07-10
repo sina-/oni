@@ -6,6 +6,7 @@ namespace oni {
     namespace network {
         enum class PacketType {
             PING,
+            MESSAGE,
 
             UNKNOWN
         };
@@ -28,6 +29,15 @@ namespace oni {
 
         private:
             common::uint64 mTimestamp{};
+        };
+
+        class MessagePacket : public GamePacket {
+        public:
+            explicit MessagePacket(const std::string &message);
+
+            std::string getMessage() const;
+        private:
+            std::string mMessage{};
         };
 
     }

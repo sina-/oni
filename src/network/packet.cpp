@@ -4,13 +4,13 @@
 
 namespace oni {
     namespace network {
-        Packet::Packet(GamePacket *gamePacket) : mSize(sizeof(gamePacket)),
-                                                       mHeader(gamePacket->getHeader()) {
+        Packet::Packet(GamePacket *gamePacket, size_t size) : mSize(size),
+                                                              mHeader(gamePacket->getHeader()) {
             mData = new common::uint8[mSize];
-            memcpy(mData, reinterpret_cast<void *> (gamePacket), mSize);
+            memcpy(mData, (common::uint8 *) (gamePacket), mSize);
         }
 
-        Packet::Packet(void *data, size_t size) : mSize(size) {
+        Packet::Packet(common::uint8 *data, size_t size) : mSize(size) {
             mData = new common::uint8[mSize];
             memcpy(mData, data, mSize);
 

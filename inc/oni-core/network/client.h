@@ -15,6 +15,8 @@ namespace oni {
 
             void pingServer();
 
+            void sendMessage(const std::string &message);
+
         protected:
             void handle(ENetEvent *event) override;
 

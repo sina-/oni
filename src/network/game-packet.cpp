@@ -16,5 +16,10 @@ namespace oni {
             return mHeader;
         }
 
+        MessagePacket::MessagePacket(const std::string &message) : GamePacket(PacketType::MESSAGE), mMessage(message) {}
+
+        std::string MessagePacket::getMessage() const {
+            return mMessage;
+        }
     }
 }

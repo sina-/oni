@@ -19,6 +19,8 @@ namespace oni {
             void handle(ENetEvent *event) override;
 
             void handle(const PingPacket &packet);
+
+            void handle(const MessagePacket &packet);
         };
     }
 }

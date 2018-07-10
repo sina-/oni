@@ -31,9 +31,13 @@ namespace oni {
             auto packet = Packet(event->packet->data, event->packet->dataLength);
             switch (packet.getHeader()) {
                 case (PacketType::PING): {
-                    auto pingPacket = packet.deserialize<PingPacket>();
-                    std::cout << pingPacket->getTimeStamp() << std::endl;
-                    handle(*pingPacket);
+                    auto deserializedPacket = packet.deserialize<PingPacket>();
+                    handle(*deserializedPacket);
+                    break;
+                }
+                case (PacketType::MESSAGE): {
+                    auto deserializedPacket = packet.deserialize<MessagePacket>();
+                    handle(*deserializedPacket);
                     break;
                 }
                 default: {
@@ -55,6 +59,12 @@ namespace oni {
 
         void Server::handle(const PingPacket &packet) {
             auto time_t = std::time_t{packet.getTimeStamp()};
+            std::cout << time_t << std::endl;
+        }
+
+        void Server::handle(const MessagePacket &packet) {
+            // TODO: This segfaults
+            //std::cout << packet.getMessage() << std::endl;
         }
     }
 }

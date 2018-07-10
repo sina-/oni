@@ -9,9 +9,9 @@ namespace oni {
 
         class Packet {
         public:
-            explicit Packet(GamePacket *gamePacket);
+            explicit Packet(GamePacket *gamePacket, size_t size);
 
-            Packet(void *data, std::size_t size);
+            Packet(common::uint8 *data, std::size_t size);
 
             ~Packet();
 

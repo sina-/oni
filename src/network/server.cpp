@@ -3,12 +3,12 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
-#include <assert.h>
+#include <cassert>
 
 #include <enet/enet.h>
 
-#include <oni-core/network/game-packet.h>
 #include <oni-core/network/packet.h>
+#include <oni-core/network/packet-operation.h>
 
 namespace oni {
     namespace network {
@@ -21,6 +21,7 @@ namespace oni {
         }
 
         void Server::handle(ENetEvent *event) {
+            // TODO: Need to gather stats on invalid packets and there source!
             if (!event->packet->data) {
                 return;
             }
@@ -28,16 +29,17 @@ namespace oni {
                 return;
             }
 
-            auto packet = Packet(event->packet->data, event->packet->dataLength);
-            switch (packet.getHeader()) {
+            auto data = event->packet->data;
+            auto header = getHeader(data);
+            switch (header) {
                 case (PacketType::PING): {
-                    auto deserializedPacket = packet.deserialize<PingPacket>();
-                    handle(*deserializedPacket);
+                    auto packet = deserialize<PingPacket>(data);
+                    handle(*packet);
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto deserializedPacket = packet.deserialize<MessagePacket>();
-                    handle(*deserializedPacket);
+                    auto packet = deserialize<MessagePacket>(data);
+                    handle(*packet);
                     break;
                 }
                 default: {

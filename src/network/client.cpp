@@ -3,14 +3,13 @@
 #include <string>
 #include <chrono>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 
 #include <enet/enet.h>
 
 #include <oni-core/io/output.h>
-#include <oni-core/network/game-packet.h>
 #include <oni-core/network/packet.h>
-#include <cstring>
+#include <oni-core/network/packet-operation.h>
 
 namespace oni {
     namespace network {
@@ -41,17 +40,15 @@ namespace oni {
 
         void Client::pingServer() {
             auto now = std::chrono::system_clock::now().time_since_epoch().count();
-            auto pingPacket = std::make_unique<PingPacket>(static_cast<common::uint64>(now));
+            auto pingPacket = PingPacket(static_cast<common::uint64>(now));
 
-            auto packet = Packet(pingPacket.get(), sizeof(*(pingPacket.get())));
+            auto size = sizeof(pingPacket);
 
-            ENetPacket *packetToServer = enet_packet_create(packet.serialize(), packet.getSize(),
-                                                            ENET_PACKET_FLAG_RELIABLE);
+            const auto *data = serialize(&pingPacket);
 
+            ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE);
             assert(packetToServer);
-
             auto success = enet_peer_send(mEnetPeer, 0, packetToServer);
-
             assert(success == 0);
 
             enet_host_flush(mEnetHost);
@@ -61,16 +58,15 @@ namespace oni {
         }
 
         void Client::sendMessage(const std::string &message) {
-            auto messagePacket = std::make_unique<MessagePacket>(message);
+            auto messagePacket = MessagePacket(message);
 
-            auto packet = Packet(messagePacket.get(), sizeof(*(messagePacket.get())));
+            auto size = sizeof(messagePacket);
 
-            auto packetToServer = enet_packet_create(packet.serialize(), packet.getSize(), ENET_PACKET_FLAG_RELIABLE);
+            const auto *data = serialize(&messagePacket);
 
+            auto packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE);
             assert(packetToServer);
-
             auto success = enet_peer_send(mEnetPeer, 0, packetToServer);
-
             assert(success == 0);
 
             enet_host_flush(mEnetHost);

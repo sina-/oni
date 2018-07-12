@@ -2,7 +2,7 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/peer.h>
-#include <oni-core/network/game-packet.h>
+#include <oni-core/network/packet.h>
 #include <enet/enet.h>
 
 namespace oni {

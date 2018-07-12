@@ -18,3 +18,5 @@ add_executable(oni-server ${oni-server_SOURCE_DIR}/main.cpp)
 
 target_link_libraries(oni-server
         oni-core-network)
+
+add_dependencies(oni-server oni-core-network)

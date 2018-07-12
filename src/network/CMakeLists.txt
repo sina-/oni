@@ -4,7 +4,7 @@ include_directories(${oni_SOURCE_DIR}/inc)
 # NOTE: SYSTEM so the warnings are disabled
 include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/enet/include)
 
-add_library(oni-core-network server.cpp client.cpp game-packet.cpp peer.cpp packet.cpp)
+add_library(oni-core-network server.cpp client.cpp packet.cpp peer.cpp packet-operation.cpp)
 
 target_link_libraries(
         oni-core-network

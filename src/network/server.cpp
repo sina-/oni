@@ -47,16 +47,7 @@ namespace oni {
                 }
             }
 
-            ENetPacket *packetToClient = enet_packet_create(event->packet->data, event->packet->dataLength,
-                                                            ENET_PACKET_FLAG_RELIABLE);
-
-            assert(packetToClient);
-
-            auto success = enet_peer_send(event->peer, 0, packetToClient);
-
-            assert(success == 0);
-
-            enet_host_flush(mEnetHost);
+            send(data, event->packet->dataLength, event->peer);
         }
 
         void Server::handle(const PingPacket &packet) {

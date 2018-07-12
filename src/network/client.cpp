@@ -3,7 +3,6 @@
 #include <string>
 #include <chrono>
 #include <iostream>
-#include <cassert>
 
 #include <enet/enet.h>
 
@@ -42,16 +41,7 @@ namespace oni {
             auto now = std::chrono::system_clock::now().time_since_epoch().count();
             auto pingPacket = PingPacket(static_cast<common::uint64>(now));
 
-            auto size = sizeof(pingPacket);
-
-            const auto *data = serialize(&pingPacket);
-
-            ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE);
-            assert(packetToServer);
-            auto success = enet_peer_send(mEnetPeer, 0, packetToServer);
-            assert(success == 0);
-
-            enet_host_flush(mEnetHost);
+            sendPacket<PingPacket>(&pingPacket, mEnetPeer);
         }
 
         void Client::handle(ENetEvent *event) {
@@ -60,16 +50,7 @@ namespace oni {
         void Client::sendMessage(const std::string &message) {
             auto messagePacket = MessagePacket(message);
 
-            auto size = sizeof(messagePacket);
-
-            const auto *data = serialize(&messagePacket);
-
-            auto packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE);
-            assert(packetToServer);
-            auto success = enet_peer_send(mEnetPeer, 0, packetToServer);
-            assert(success == 0);
-
-            enet_host_flush(mEnetHost);
+            sendPacket<MessagePacket>(&messagePacket, mEnetPeer);
         }
 
     }

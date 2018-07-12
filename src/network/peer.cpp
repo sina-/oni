@@ -69,5 +69,14 @@ namespace oni {
                 }
             }
         }
+
+        void Peer::send(const common::uint8 *data, size_t size, ENetPeer *peer) {
+            ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE);
+            assert(packetToServer);
+            auto success = enet_peer_send(peer, 0, packetToServer);
+            assert(success == 0);
+
+            enet_host_flush(mEnetHost);
+        }
     }
 }

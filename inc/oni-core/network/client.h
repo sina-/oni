@@ -1,7 +1,9 @@
 #pragma once
 
-#include <oni-core/network/peer.h>
 #include <enet/enet.h>
+
+#include <oni-core/network/peer.h>
+#include <oni-core/network/packet-operation.h>
 
 namespace oni {
     namespace network {

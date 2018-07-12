@@ -1,7 +1,12 @@
 #pragma once
 
-#include <oni-core/common/typedefs.h>
+#include <cassert>
+
 #include <enet/enet.h>
+
+#include <oni-core/common/typedefs.h>
+#include <oni-core/network/packet.h>
+#include <oni-core/network/packet-operation.h>
 
 struct _ENetAddress;
 typedef struct _ENetAddress ENetAddress;
@@ -39,6 +44,18 @@ namespace oni {
 
         protected:
             virtual void handle(ENetEvent *event) = 0;
+
+            template<class T>
+            void sendPacket(const T *packet, ENetPeer *peer) {
+                static_assert(std::is_base_of<Packet, T>::value, "T must inherit from Packet");
+
+                auto size = sizeof(*packet);
+
+                const auto *data = serialize(packet);
+                send(data, size, peer);
+            }
+
+            void send(const common::uint8 *data, size_t size, ENetPeer *peer);
 
         protected:
             ENetHost *mEnetHost;

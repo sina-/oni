@@ -38,6 +38,8 @@ namespace oni {
             std::string getMessage() const;
 
         private:
+            // TODO: replace this with array<common::uint8>[32] and introduce utility function to split-up
+            // longer text into several packets and just iterate over them when sending the message
             std::string mMessage{};
         };
 

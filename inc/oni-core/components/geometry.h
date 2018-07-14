@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Box2D/Dynamics/b2Body.h>
+
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
@@ -67,6 +69,12 @@ namespace oni {
                 return shape;
             }
 
+        };
+
+        // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D
+        // I don't think there is a better way.
+        struct PhysicalProperties {
+            b2Body *body{};
         };
 
         struct Placement {

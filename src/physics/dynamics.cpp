@@ -1,19 +1,31 @@
 #include <oni-core/physics/dynamics.h>
+
+#include <Box2D/Box2D.h>
+
 #include <oni-core/physics/car.h>
 #include <oni-core/graphics/window.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
+#include <oni-core/graphics/debug-draw-box2d.h>
 
 namespace oni {
     namespace physics {
 
+        Dynamics::Dynamics(std::unique_ptr<graphics::DebugDrawBox2D> debugDrawBox2D, common::real32 tickFreq)
+                : mDebugDraw(std::move(debugDrawBox2D)), mTickFrequency(tickFreq) {
+            b2Vec2 gravity(0.0f, 0.0f);
+            mPhysicsWorld = std::make_unique<b2World>(gravity);
+            mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
+        }
+
         void Dynamics::tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) {
-            auto view = registry.view<components::Placement, components::Car,
+
+            auto carView = registry.view<components::Placement, components::Car,
                     components::CarConfig, components::TagVehicle>();
 
-            for (auto entity: view) {
-                auto &car = view.get<components::Car>(entity);
-                const auto &carConfig = view.get<components::CarConfig>(entity);
+            for (auto entity: carView) {
+                auto &car = carView.get<components::Car>(entity);
+                const auto &carConfig = carView.get<components::CarConfig>(entity);
 
                 auto carInput = components::CarInput();
 
@@ -69,6 +81,60 @@ namespace oni {
 
                 Transformation::updatePlacement(registry, entity, placement);
             }
+
+            mPhysicsWorld->Step(mTickFrequency, 6, 2);
+
+            auto carPhysicsView = registry.view<components::Car, components::TagVehicle, components::PhysicalProperties>();
+
+            for (auto entity: carPhysicsView) {
+                bool collided = false;
+                auto body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
+
+                for (b2ContactEdge *ce = body->GetContactList(); ce; ce = ce->next) {
+                    b2Contact *c = ce->contact;
+                    if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
+                        collided = c->IsTouching();
+                    }
+                }
+
+                auto &car = carPhysicsView.get<components::Car>(entity);
+                // NOTE: > 0.2f is to avoid sticking to objects when velocity is low
+                // TODO: Perhaps it is better to fix this problem by handling user input when there is
+                // collision
+                // TODO: Collision listener could be a better way to handle collisions
+                if (collided && car.velocityAbsolute > 0.2f) {
+                    car.velocity = math::vec2{body->GetLinearVelocity().x, body->GetLinearVelocity().y};
+                    car.angularVelocity = body->GetAngularVelocity();
+                    car.position = math::vec2{body->GetPosition().x, body->GetPosition().y};
+                    car.heading = body->GetAngle();
+                } else {
+                    body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
+                    body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
+                    body->SetTransform(b2Vec2{car.position.x, car.position.y}, static_cast<float32>(car.heading));
+                }
+            }
+
+            auto dynamicEntitiesView = registry.view<components::Placement, components::TagDynamic, components::PhysicalProperties>();
+
+            for (auto entity: dynamicEntitiesView) {
+                auto body = dynamicEntitiesView.get<components::PhysicalProperties>(entity).body;
+                auto position = body->GetPosition();
+                auto placement = components::Placement{};
+                placement.position = math::vec3{position.x, position.y, 1.0f};
+                placement.rotation = body->GetAngle();
+                registry.replace<components::Placement>(entity, placement);
+            }
         }
+
+        void Dynamics::drawDebugData() {
+            mDebugDraw->Begin();
+            mPhysicsWorld->DrawDebugData();
+            mDebugDraw->End();
+        }
+
+        b2World *Dynamics::getPhysicsWorld() {
+            return mPhysicsWorld.get();
+        }
+
     }
 }

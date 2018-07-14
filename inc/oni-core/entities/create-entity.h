@@ -5,6 +5,8 @@
 #include <oni-core/components/visual.h>
 #include <oni-core/common/typedefs.h>
 
+class b2World;
+
 namespace oni {
     namespace graphics {
         class FontManager;
@@ -26,14 +28,29 @@ namespace oni {
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld);
 
-        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry, const components::Texture &entityTexture,
-                                                     const math::vec2 &size, const math::vec3 &positionInWorld, const common::real32 heading,
-                                                     const math::vec3 &scale);
+        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
+                                             const components::Texture &entityTexture,
+                                             const math::vec2 &size, const math::vec3 &positionInWorld,
+                                             const common::real32 heading,
+                                             const math::vec3 &scale);
+
+        entityID createTexturedDynamicPhysicsEntity(entt::DefaultRegistry &registry,
+                                                    b2World &physicsWorld,
+                                                    const components::Texture &entityTexture,
+                                                    const math::vec2 &size, const math::vec3 &positionInWorld,
+                                                    const common::real32 heading,
+                                                    const math::vec3 &scale);
 
         entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
                                             const components::Texture &entityTexture,
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld);
+
+        entityID createTexturedStaticPhysicsEntity(entt::DefaultRegistry &registry,
+                                                   b2World &physicsWorld,
+                                                   const components::Texture &entityTexture,
+                                                   const math::vec2 &size,
+                                                   const math::vec3 &positionInWorld);
 
         entityID createTextEntity(entt::DefaultRegistry &registry,
                                   graphics::FontManager &fontManager,
@@ -48,6 +65,7 @@ namespace oni {
                                         const math::vec3 &positionInWorld);
 
         entityID createVehicleEntity(entt::DefaultRegistry &registry,
+                                     b2World &physicsWorld,
                                      const components::Texture &entityTexture);
     }
 }

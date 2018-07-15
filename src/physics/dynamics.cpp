@@ -23,6 +23,7 @@ namespace oni {
             auto carView = registry.view<components::Placement, components::Car,
                     components::CarConfig, components::TagVehicle>();
 
+            // TODO: LOL you don't want to apply the same input to all the cars! Dispatch them accordingly.
             for (auto entity: carView) {
                 auto &car = carView.get<components::Car>(entity);
                 const auto &carConfig = carView.get<components::CarConfig>(entity);
@@ -86,6 +87,7 @@ namespace oni {
 
             auto carPhysicsView = registry.view<components::Car, components::TagVehicle, components::PhysicalProperties>();
 
+            // Handle collision
             for (auto entity: carPhysicsView) {
                 bool collided = false;
                 auto body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
@@ -114,6 +116,7 @@ namespace oni {
                 }
             }
 
+            // Handle collision for other dynamic entities
             auto dynamicEntitiesView = registry.view<components::Placement, components::TagDynamic, components::PhysicalProperties>();
 
             for (auto entity: dynamicEntitiesView) {
@@ -124,6 +127,21 @@ namespace oni {
                 placement.rotation = body->GetAngle();
                 registry.replace<components::Placement>(entity, placement);
             }
+
+            // Update tires
+            auto carWithTiresView = registry.view<components::Placement, components::Car,
+                    components::CarConfig, components::TagVehicle>();
+            for (auto entity: carWithTiresView) {
+                auto car = carWithTiresView.get<components::Car>(entity);
+                auto &carTireFRPlacement = registry.get<components::Placement>(car.tireFR);
+                // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
+                // There seems to be something wrong with the way tires are created in the beginning
+                carTireFRPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle + math::toRadians(90.0f));
+
+                auto &carTireFLPlacement = registry.get<components::Placement>(car.tireFL);
+                carTireFLPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle + math::toRadians(90.0f));
+            }
+
         }
 
         void Dynamics::drawDebugData() {

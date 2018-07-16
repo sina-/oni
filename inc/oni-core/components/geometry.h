@@ -69,6 +69,11 @@ namespace oni {
                 return shape;
             }
 
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(vertexA, vertexB, vertexC, vertexD);
+            }
+
         };
 
         // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D
@@ -81,26 +86,48 @@ namespace oni {
             math::vec3 position{0.0f, 0.0f, 0.0f};
             common::real32 rotation{0.0f};
             math::vec3 scale{1.0f, 1.0f, 0.0f};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(position, rotation, scale);
+            }
         };
 
         struct TagStatic {
+
+            template<class Archive>
+            void serialize(Archive &archive) {}
         };
 
         struct TagDynamic {
+            template<class Archive>
+            void serialize(Archive &archive) {}
         };
 
         struct TagVehicle {
+            template<class Archive>
+            void serialize(Archive &archive) {}
         };
 
         struct ChunkIndices {
             common::int64 x{0};
             common::int64 y{0};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(x, y);
+            }
         };
 
         struct RoadTileIndices {
             // NOTE: This is relative to Chunk
             common::uint16 x{0};
             common::uint16 y{0};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(x, y);
+            }
         };
 
         struct BoarderRoadTiles {
@@ -108,12 +135,22 @@ namespace oni {
             RoadTileIndices southBoarder{};
             RoadTileIndices westBoarder{};
             RoadTileIndices northBoarder{};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(eastBoarder, southBoarder, westBoarder, northBoarder);
+            }
         };
 
         struct Chunk {
             math::vec3 position{0.0f, 0.0f, 0.0f};
             common::uint64 packedIndices{0};
             BoarderRoadTiles boarderRoadTiles{};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(position, packedIndices, boarderRoadTiles);
+            }
         };
 
         struct CarConfig {
@@ -142,6 +179,35 @@ namespace oni {
 
             common::carSimDouble gearRatio{2.7f};
             common::carSimDouble differentialRatio{3.4f};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(gravity,
+                        mass,
+                        inertialScale,
+                        halfWidth,
+                        cgToFront,
+                        cgToRear,
+                        cgToFrontAxle,
+                        cgToRearAxle,
+                        cgHeight,
+                        wheelRadius,
+                        wheelWidth,
+                        tireGrip,
+                        lockGrip,
+                        engineForce,
+                        brakeForce,
+                        eBrakeForce,
+                        weightTransfer,
+                        maxSteer,
+                        cornerStiffnessFront,
+                        cornerStiffnessRear,
+                        airResist,
+                        rollResist,
+                        gearRatio,
+                        differentialRatio
+                );
+            }
         };
 
         struct Car {
@@ -180,6 +246,43 @@ namespace oni {
             entities::entityID tireFL{};
             entities::entityID tireRR{};
             entities::entityID tireRL{};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(
+                        heading,
+                        velocityAbsolute,
+                        angularVelocity,
+                        steer,
+                        steerAngle,
+                        inertia,
+                        wheelBase,
+                        axleWeightRatioFront,
+                        axleWeightRatioRear,
+                        rpm,
+                        maxVelocityAbsolute,
+                        accumulatedEBrake,
+                        slipAngleFront,
+                        slipAngleRear,
+                        position,
+                        velocity,
+                        velocityLocal,
+                        acceleration,
+                        accelerationLocal,
+                        accelerating,
+                        slippingFront,
+                        slippingRear,
+                        smoothSteer,
+                        safeSteer,
+                        distanceFromCamera,
+
+                        // TODO: Not sure if this will work after serialization and deserialization process since
+                        // entt might create these entities under different id.
+                        tireFR,
+                        tireFL,
+                        tireRR,
+                        tireRL);
+            }
 
             explicit Car(const components::CarConfig &c) {
                 heading = 0.0f;

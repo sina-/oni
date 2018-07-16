@@ -28,29 +28,21 @@ namespace oni {
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld);
 
-        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
-                                             const components::Texture &entityTexture,
-                                             const math::vec2 &size, const math::vec3 &positionInWorld,
-                                             const common::real32 heading,
-                                             const math::vec3 &scale);
+        entityID createDynamicEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+                                     const math::vec3 &positionInWorld,
+                                     const common::real32 heading, const math::vec3 &scale);
 
-        entityID createTexturedDynamicPhysicsEntity(entt::DefaultRegistry &registry,
-                                                    b2World &physicsWorld,
-                                                    const components::Texture &entityTexture,
-                                                    const math::vec2 &size, const math::vec3 &positionInWorld,
-                                                    const common::real32 heading,
-                                                    const math::vec3 &scale);
-
-        entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
-                                            const components::Texture &entityTexture,
+        entityID createDynamicPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
                                             const math::vec2 &size,
-                                            const math::vec3 &positionInWorld);
+                                            const math::vec3 &positionInWorld, const common::real32 heading,
+                                            const math::vec3 &scale);
 
-        entityID createTexturedStaticPhysicsEntity(entt::DefaultRegistry &registry,
-                                                   b2World &physicsWorld,
-                                                   const components::Texture &entityTexture,
-                                                   const math::vec2 &size,
-                                                   const math::vec3 &positionInWorld);
+        entityID createStaticEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+                                    const math::vec3 &positionInWorld);
+
+        entityID createStaticPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+                                           const math::vec2 &size,
+                                           const math::vec3 &positionInWorld);
 
         entityID createTextEntity(entt::DefaultRegistry &registry,
                                   graphics::FontManager &fontManager,
@@ -64,8 +56,10 @@ namespace oni {
                                         const math::vec2 &size,
                                         const math::vec3 &positionInWorld);
 
-        entityID createVehicleEntity(entt::DefaultRegistry &registry,
-                                     b2World &physicsWorld,
-                                     const components::Texture &entityTexture);
+        entityID createVehicleEntity(entt::DefaultRegistry &registry, b2World &physicsWorld);
+
+        void assignTexture(entt::DefaultRegistry &registry,
+                           entityID entity,
+                           const components::Texture &texture);
     }
 }

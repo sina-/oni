@@ -10,6 +10,7 @@
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/graphics/scene-manager.h>
 #include <oni-core/physics/transformation.h>
+#include <oni-core/graphics/texture.h>
 
 namespace oni {
     namespace entities {
@@ -56,11 +57,9 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        entityID createTexturedDynamicEntity(entt::DefaultRegistry &registry,
-                                             const components::Texture &entityTexture,
-                                             const math::vec2 &size, const math::vec3 &positionInWorld,
-                                             const common::real32 heading,
-                                             const math::vec3 &scale) {
+        entityID createDynamicEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+                                     const math::vec3 &positionInWorld,
+                                     const common::real32 heading, const math::vec3 &scale) {
             auto entity = registry.create();
 
             // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
@@ -75,7 +74,6 @@ namespace oni {
             auto entityPlacement = components::Placement{positionInWorld, heading, scale};
 
             registry.assign<components::Shape>(entity, entityShape);
-            registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::Placement>(entity, entityPlacement);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::TagDynamic>(entity, entityDynamic);
@@ -84,12 +82,10 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        entityID createTexturedDynamicPhysicsEntity(entt::DefaultRegistry &registry,
-                                                    b2World &physicsWorld,
-                                                    const components::Texture &entityTexture,
-                                                    const math::vec2 &size, const math::vec3 &positionInWorld,
-                                                    const common::real32 heading,
-                                                    const math::vec3 &scale) {
+        entityID createDynamicPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+                                            const math::vec2 &size,
+                                            const math::vec3 &positionInWorld, const common::real32 heading,
+                                            const math::vec3 &scale) {
             auto entity = registry.create();
 
             // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
@@ -128,7 +124,6 @@ namespace oni {
 
             registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             registry.assign<components::Shape>(entity, entityShape);
-            registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::Placement>(entity, entityPlacement);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::TagDynamic>(entity, entityDynamic);
@@ -136,10 +131,8 @@ namespace oni {
             return entity;
         }
 
-        entityID createTexturedStaticEntity(entt::DefaultRegistry &registry,
-                                            const components::Texture &entityTexture,
-                                            const math::vec2 &size,
-                                            const math::vec3 &positionInWorld) {
+        entityID createStaticEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+                                    const math::vec3 &positionInWorld) {
             auto entity = registry.create();
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityStatic = components::TagStatic{};
@@ -148,18 +141,15 @@ namespace oni {
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
             registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
         }
 
-        entityID createTexturedStaticPhysicsEntity(entt::DefaultRegistry &registry,
-                                                   b2World &physicsWorld,
-                                                   const components::Texture &entityTexture,
-                                                   const math::vec2 &size,
-                                                   const math::vec3 &positionInWorld) {
+        entityID createStaticPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+                                           const math::vec2 &size,
+                                           const math::vec3 &positionInWorld) {
             auto entity = registry.create();
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityStatic = components::TagStatic{};
@@ -186,7 +176,6 @@ namespace oni {
 
             registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::TagStatic>(entity, entityStatic);
 
@@ -217,9 +206,7 @@ namespace oni {
 
         }
 
-        entityID createVehicleEntity(entt::DefaultRegistry &registry,
-                                     b2World &physicsWorld,
-                                     const components::Texture &entityTexture) {
+        entityID createVehicleEntity(entt::DefaultRegistry &registry, b2World &physicsWorld) {
             auto entity = registry.create();
 
             auto carConfig = components::CarConfig();
@@ -295,7 +282,6 @@ namespace oni {
             registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Placement>(entity, entityPlacement);
-            registry.assign<components::Texture>(entity, entityTexture);
             registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             registry.assign<components::Car>(entity, car);
             registry.assign<components::CarConfig>(entity, carConfig);
@@ -303,6 +289,10 @@ namespace oni {
             registry.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
+        }
+
+        void assignTexture(entt::DefaultRegistry &registry, entityID entity, const components::Texture &texture) {
+            registry.assign<components::Texture>(entity, texture);
         }
     }
 

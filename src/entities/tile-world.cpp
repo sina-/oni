@@ -393,8 +393,9 @@ namespace oni {
             const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
 
             const auto positionInWorld = roadTileInexToPosition(chunkIndices, roadTileIndices);
-            const auto roadID = createTexturedStaticEntity(backgroundEntities, texture, roadTileSize,
-                                                           math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
+            const auto roadID = createStaticEntity(backgroundEntities, roadTileSize,
+                                                   math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
+            assignTexture(backgroundEntities, roadID, texture);
 
             const auto packedIndices = packIntegers(roadTileIndices.x, roadTileIndices.y);
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
@@ -503,8 +504,8 @@ namespace oni {
                 const auto skidTexture = graphics::Texture::generate(skidWidthInPixels, skidHeightInPixels,
                                                                      skidDefaultPixel);
 
-                skidTileID = entities::createTexturedStaticEntity(foregroundEntities, skidTexture,
-                                                                  skidTileSize, positionInWorld);
+                skidTileID = entities::createStaticEntity(foregroundEntities, skidTileSize, positionInWorld);
+                entities::assignTexture(foregroundEntities, skidTileID, skidTexture);
                 mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
             } else {
                 skidTileID = mPackedSkidIndicesToEntity.at(packedIndices);

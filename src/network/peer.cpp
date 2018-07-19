@@ -85,7 +85,6 @@ namespace oni {
             auto dataWithHeader = data;
             dataWithHeader.insert(0, 1, static_cast<common::uint8 >(type));
 
-            // NOTE: data needs to be null-terminated for deserialize to work: c_str() takes care of that.
             ENetPacket *packetToServer = enet_packet_create(dataWithHeader.c_str(), dataWithHeader.size(),
                                                             ENET_PACKET_FLAG_RELIABLE | ENET_PACKET_FLAG_NO_ALLOCATE);
             assert(packetToServer);

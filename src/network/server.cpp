@@ -40,7 +40,7 @@ namespace oni {
 
             switch (header) {
                 case (PacketType::PING): {
-                    auto packet = deserialize<PingPacket>(data);
+                    auto packet = deserialize<PingPacket>(data, dataWithoutHeaderSize);
                     std::cout << packet.timestamp << std::endl;
 
                     send(data, event->packet->dataLength, event->peer);
@@ -48,7 +48,7 @@ namespace oni {
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = deserialize<MessagePacket>(data);
+                    auto packet = deserialize<MessagePacket>(data, dataWithoutHeaderSize);
                     std::cout << packet.message << std::endl;
                     break;
                 }

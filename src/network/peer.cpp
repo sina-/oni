@@ -82,32 +82,12 @@ namespace oni {
         }
 
         void Peer::send(PacketType type, const std::string &data, ENetPeer *peer) {
-//            auto header = (common::uint8) (type);
-//            auto headerSize = sizeof(header);
-
             auto dataWithHeader = data;
-            dataWithHeader.insert(0, 1, static_cast<common::uint8>(type));
+            dataWithHeader.insert(0, 1, static_cast<common::uint8 >(type));
 
-            ENetPacket *packetToServer = enet_packet_create(dataWithHeader.data(), dataWithHeader.size(),
-                                                            ENET_PACKET_FLAG_RELIABLE);
-
-/*            std::stringstream storage;
-            storage.str(std::string((char *) ++packetToServer->data, packetToServer->dataLength - 1));
-            //storage.str(dataString);
-
-            PingPacket result;
-            {
-                cereal::PortableBinaryInputArchive input{storage};
-                input(result);
-            }*/
-            if (type == PacketType::MESSAGE) {
-
-                auto d = deserialize<MessagePacket>(++packetToServer->data, packetToServer->dataLength - 1);
-                auto m = d.message;
-            }
-/*            enet_packet_resize(packetToServer, headerSize + data.size());
-            memcpy(&packetToServer->data[1], data.c_str(), data.size());*/
-
+            // NOTE: data needs to be null-terminated for deserialize to work: c_str() takes care of that.
+            ENetPacket *packetToServer = enet_packet_create(dataWithHeader.c_str(), dataWithHeader.size(),
+                                                            ENET_PACKET_FLAG_RELIABLE | ENET_PACKET_FLAG_NO_ALLOCATE);
             assert(packetToServer);
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);

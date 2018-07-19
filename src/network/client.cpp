@@ -46,6 +46,9 @@ namespace oni {
         }
 
         void Client::handle(ENetEvent *event) {
+            // TODO: Refactor server handle function to share parts of the logic that has to do with figuring out
+            // header and reading the data. Client and server will just write logic to handle specific type of
+            // packets: handlePing(), handleMessage()... these functions can be virtual in peer
         }
 
         void Client::sendMessage(const std::string &message) {
@@ -60,6 +63,5 @@ namespace oni {
             auto type = PacketType::WORLD_DATA;
             send(type, data, mEnetPeer);
         }
-
     }
 }

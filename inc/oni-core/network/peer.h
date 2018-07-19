@@ -62,12 +62,7 @@ namespace oni {
             }
 
             template<class T>
-            T deserialize(const common::uint8 *data, size_t size) {
-                // TODO: There is way too much allocation in this function! Can't I just create stream from uint8*?
-
-                //auto stringData = std::string(reinterpret_cast<const char *>(data), size);
-/*                std::istringstream storage;
-                storage.str(stringData);*/
+            T deserialize(const common::uint8 *data) {
                 std::istringstream storage(reinterpret_cast<const char *>(data));
 
                 T result;
@@ -77,8 +72,6 @@ namespace oni {
                 }
 
                 return result;
-/*            static_assert(std::is_base_of<Packet, T>::value, "T must inherit from Packet");*/
-
             }
 
 

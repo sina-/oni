@@ -3,7 +3,6 @@
 #include <enet/enet.h>
 
 #include <oni-core/network/peer.h>
-#include <oni-core/network/packet-operation.h>
 
 namespace oni {
     namespace network {
@@ -18,6 +17,8 @@ namespace oni {
             void pingServer();
 
             void sendMessage(const std::string &message);
+
+            void sendEntities(const std::string &data);
 
         protected:
             void handle(ENetEvent *event) override;

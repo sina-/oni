@@ -1,46 +1,42 @@
 #pragma once
 
+#include <cereal/types/base_class.hpp>
+
 #include <oni-core/common/typedefs.h>
+#include <oni-core/network/packet-types.h>
 
 namespace oni {
     namespace network {
-        enum class PacketType {
-            PING,
-            MESSAGE,
 
-            UNKNOWN
+/*        struct Packet {
+            PacketType header{PacketType::UNKNOWN};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(header);
+            }
+        };*/
+
+        struct PingPacket /*: public Packet */{
+/*            explicit PingPacket(common::uint64 timestamp_) : header(PacketType::PING), timestamp(timestamp_) {}*/
+
+            common::uint64 timestamp{};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(/*cereal::base_class<Packet>(this),*/
+                        timestamp);
+            }
         };
 
-        class Packet {
-        public:
-            explicit Packet(PacketType header);
+        struct MessagePacket /*: public Packet*/ {
+            std::string message{};
 
-            PacketType getHeader() const;
-
-        private:
-            PacketType mHeader;
-        };
-
-        class PingPacket : public Packet {
-        public:
-            explicit PingPacket(common::uint64 timestamp);
-
-            common::uint64 getTimeStamp() const;
-
-        private:
-            common::uint64 mTimestamp{};
-        };
-
-        class MessagePacket : public Packet {
-        public:
-            explicit MessagePacket(const std::string &message);
-
-            std::string getMessage() const;
-
-        private:
-            // TODO: replace this with array<common::uint8>[32] and introduce utility function to split-up
-            // longer text into several packets and just iterate over them when sending the message
-            std::string mMessage{};
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(/*cereal::base_class<Packet>(this),*/
+                        message);
+            }
         };
 
     }

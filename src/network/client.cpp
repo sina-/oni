@@ -8,7 +8,6 @@
 
 #include <oni-core/io/output.h>
 #include <oni-core/network/packet.h>
-#include <oni-core/network/packet-operation.h>
 
 namespace oni {
     namespace network {
@@ -39,18 +38,27 @@ namespace oni {
 
         void Client::pingServer() {
             auto now = std::chrono::system_clock::now().time_since_epoch().count();
-            auto pingPacket = PingPacket(static_cast<common::uint64>(now));
+            auto type = PacketType::PING;
+            auto pingPacket = PingPacket{now};
+            auto data = serialize<PingPacket>(pingPacket);
 
-            sendPacket<PingPacket>(&pingPacket, mEnetPeer);
+            send(type, data, mEnetPeer);
         }
 
         void Client::handle(ENetEvent *event) {
         }
 
         void Client::sendMessage(const std::string &message) {
-            auto messagePacket = MessagePacket(message);
+            auto type = PacketType::MESSAGE;
+            auto messagePacket = MessagePacket{message};
+            auto data = serialize<MessagePacket>(messagePacket);
 
-            sendPacket<MessagePacket>(&messagePacket, mEnetPeer);
+            send(type, data, mEnetPeer);
+        }
+
+        void Client::sendEntities(const std::string &data) {
+            auto type = PacketType::WORLD_DATA;
+            send(type, data, mEnetPeer);
         }
 
     }

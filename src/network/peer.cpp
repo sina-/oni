@@ -1,6 +1,7 @@
 #include <oni-core/network/peer.h>
 
 #include <enet/enet.h>
+#include <cstring>
 
 namespace oni {
     namespace network {
@@ -71,12 +72,56 @@ namespace oni {
         }
 
         void Peer::send(const common::uint8 *data, size_t size, ENetPeer *peer) {
-            ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE);
+            ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE |
+                                                                        ENET_PACKET_FLAG_NO_ALLOCATE);
             assert(packetToServer);
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);
 
             enet_host_flush(mEnetHost);
+        }
+
+        void Peer::send(PacketType type, const std::string &data, ENetPeer *peer) {
+//            auto header = (common::uint8) (type);
+//            auto headerSize = sizeof(header);
+
+            auto dataWithHeader = data;
+            dataWithHeader.insert(0, 1, static_cast<common::uint8>(type));
+
+            ENetPacket *packetToServer = enet_packet_create(dataWithHeader.data(), dataWithHeader.size(),
+                                                            ENET_PACKET_FLAG_RELIABLE);
+
+/*            std::stringstream storage;
+            storage.str(std::string((char *) ++packetToServer->data, packetToServer->dataLength - 1));
+            //storage.str(dataString);
+
+            PingPacket result;
+            {
+                cereal::PortableBinaryInputArchive input{storage};
+                input(result);
+            }*/
+            if (type == PacketType::MESSAGE) {
+
+                auto d = deserialize<MessagePacket>(++packetToServer->data, packetToServer->dataLength - 1);
+                auto m = d.message;
+            }
+/*            enet_packet_resize(packetToServer, headerSize + data.size());
+            memcpy(&packetToServer->data[1], data.c_str(), data.size());*/
+
+            assert(packetToServer);
+            auto success = enet_peer_send(peer, 0, packetToServer);
+            assert(success == 0);
+
+            enet_host_flush(mEnetHost);
+        }
+
+        PacketType Peer::getHeader(const common::uint8 *data) const {
+            if (!data) {
+                return PacketType::UNKNOWN;
+            }
+
+            auto header = static_cast<PacketType>(*data);
+            return header;
         }
     }
 }

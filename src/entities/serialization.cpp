@@ -18,10 +18,11 @@ namespace oni {
                 source.snapshot().entities(output).component<components::Shape>(output);
 
             }
+
             return storage.str();
         }
 
-        void deserialization(entt::DefaultRegistry &destination, std::string data) {
+        void deserialization(entt::DefaultRegistry &destination, const std::string &data) {
             std::stringstream storage;
             storage.str(data);
 

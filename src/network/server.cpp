@@ -6,9 +6,12 @@
 #include <cassert>
 
 #include <enet/enet.h>
+#include <entt/entity/registry.hpp>
+#include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/network/packet.h>
-#include <oni-core/network/packet-operation.h>
+#include <oni-core/entities/serialization.h>
+#include <oni-core/components/geometry.h>
 
 namespace oni {
     namespace network {
@@ -31,33 +34,50 @@ namespace oni {
 
             auto data = event->packet->data;
             auto header = getHeader(data);
+            auto headerSize = 1;
+            auto dataWithoutHeaderSize = event->packet->dataLength - headerSize;
+
+            ++data;
+
             switch (header) {
                 case (PacketType::PING): {
-                    auto packet = deserialize<PingPacket>(data);
-                    handle(*packet);
+                    auto packet = deserialize<PingPacket>(data, dataWithoutHeaderSize);
+                    std::cout << packet.timestamp << std::endl;
+
+                    send(data, event->packet->dataLength, event->peer);
+
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = deserialize<MessagePacket>(data);
-                    handle(*packet);
+                    auto packet = deserialize<MessagePacket>(data, dataWithoutHeaderSize);
+                    std::cout << packet.message << std::endl;
+                    break;
+                }
+                case (PacketType::ENTITY): {
+
+                    auto entityData = std::string(reinterpret_cast<char *>(data), event->packet->dataLength);
+
+                    entt::DefaultRegistry reg;
+                    entities::deserialization(reg, entityData);
+
+                    auto view = reg.view<components::Shape>();
+                    for (auto e: view) {
+                        auto a = reg.get<components::Shape>(e).vertexA;
+                        auto d = reg.get<components::Shape>(e).vertexD;
+                    }
+
                     break;
                 }
                 default: {
+                    // TODO: Need to keep stats on clients with bad packets and block them when threshold reaches.
+                    std::cout << "Unknown packet!" << std::endl;
                     break;
                 }
             }
-
-            send(data, event->packet->dataLength, event->peer);
         }
 
-        void Server::handle(const PingPacket &packet) {
-            auto time_t = std::time_t{packet.getTimeStamp()};
-            std::cout << time_t << std::endl;
-        }
+        void Server::sendWorldData(std::string &&data) const {
 
-        void Server::handle(const MessagePacket &packet) {
-            // TODO: This segfaults
-            //std::cout << packet.getMessage() << std::endl;
         }
     }
 }

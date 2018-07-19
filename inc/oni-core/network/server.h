@@ -11,16 +11,14 @@ namespace oni {
         public:
             Server(const Address *address, common::uint8 numClients, common::uint8 numChannels);
 
+            void sendWorldData(std::string &&data) const;
+
             ~Server() override;
 
         private:
             Server();
 
             void handle(ENetEvent *event) override;
-
-            void handle(const PingPacket &packet);
-
-            void handle(const MessagePacket &packet);
         };
     }
 }

@@ -5,37 +5,25 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet-types.h>
 
+
 namespace oni {
     namespace network {
 
-/*        struct Packet {
-            PacketType header{PacketType::UNKNOWN};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(header);
-            }
-        };*/
-
-        struct PingPacket /*: public Packet */{
-/*            explicit PingPacket(common::uint64 timestamp_) : header(PacketType::PING), timestamp(timestamp_) {}*/
-
+        struct PingPacket {
             common::uint64 timestamp{};
 
             template<class Archive>
             void serialize(Archive &archive) {
-                archive(/*cereal::base_class<Packet>(this),*/
-                        timestamp);
+                archive(timestamp);
             }
         };
 
-        struct MessagePacket /*: public Packet*/ {
-            std::string message{};
+        struct DataPacket {
+            std::string data{};
 
             template<class Archive>
             void serialize(Archive &archive) {
-                archive(/*cereal::base_class<Packet>(this),*/
-                        message);
+                archive(data);
             }
         };
 

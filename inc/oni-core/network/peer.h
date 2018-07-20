@@ -77,9 +77,11 @@ namespace oni {
 
 
             // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
-            void send(PacketType type, const std::string &data, ENetPeer *peer);
+            void send(PacketType type, std::string &&data, ENetPeer *peer);
 
             void send(const common::uint8 *data, size_t size, ENetPeer *peer);
+
+            void broadcast(PacketType type, std::string &&data);
 
         protected:
             ENetHost *mEnetHost;

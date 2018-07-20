@@ -11,7 +11,7 @@ namespace oni {
         public:
             Server(const Address *address, common::uint8 numClients, common::uint8 numChannels);
 
-            void sendWorldData(std::string &&data) const;
+            void sendWorldData(std::string &&data);
 
             ~Server() override;
 

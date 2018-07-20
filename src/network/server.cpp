@@ -48,8 +48,8 @@ namespace oni {
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = deserialize<MessagePacket>(data, dataWithoutHeaderSize);
-                    std::cout << packet.message << std::endl;
+                    auto packet = deserialize<DataPacket>(data, dataWithoutHeaderSize);
+                    std::cout << packet.data << std::endl;
                     break;
                 }
                 case (PacketType::ENTITY): {
@@ -75,8 +75,12 @@ namespace oni {
             }
         }
 
-        void Server::sendWorldData(std::string &&data) const {
+        void Server::sendWorldData(std::string &&data) {
+            auto type = PacketType::WORLD_DATA;
+            auto dataPacket = DataPacket{std::move(data)};
+            auto packet = serialize<DataPacket>(dataPacket);
 
+            broadcast(type, std::move(packet));
         }
     }
 }

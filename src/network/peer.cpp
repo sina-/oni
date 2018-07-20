@@ -49,11 +49,11 @@ namespace oni {
                         break;
                     }
                     case ENET_EVENT_TYPE_RECEIVE: {
-                        printf("A packet of length %u containing %s was received from %s on channel %u.\n",
+/*                        printf("A packet of length %u containing %s was received from %s on channel %u.\n",
                                static_cast<unsigned int>(event.packet->dataLength),
                                event.packet->data,
                                ip,
-                               event.channelID);
+                               event.channelID);*/
 
                         handle(&event);
 
@@ -81,11 +81,10 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        void Peer::send(PacketType type, const std::string &data, ENetPeer *peer) {
-            auto dataWithHeader = data;
-            dataWithHeader.insert(0, 1, static_cast<common::uint8 >(type));
+        void Peer::send(PacketType type, std::string &&data, ENetPeer *peer) {
+            data.insert(0, 1, static_cast<common::uint8 >(type));
 
-            ENetPacket *packetToServer = enet_packet_create(dataWithHeader.c_str(), dataWithHeader.size(),
+            ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(),
                                                             ENET_PACKET_FLAG_RELIABLE | ENET_PACKET_FLAG_NO_ALLOCATE);
             assert(packetToServer);
             auto success = enet_peer_send(peer, 0, packetToServer);
@@ -101,6 +100,16 @@ namespace oni {
 
             auto header = static_cast<PacketType>(*data);
             return header;
+        }
+
+        void Peer::broadcast(PacketType type, std::string &&data) {
+            data.insert(0, 1, static_cast<common::uint8 >(type));
+            ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE |
+                                                                                       ENET_PACKET_FLAG_NO_ALLOCATE);
+            assert(packetToServer);
+            enet_host_broadcast(mEnetHost, 0, packetToServer);
+
+            enet_host_flush(mEnetHost);
         }
     }
 }

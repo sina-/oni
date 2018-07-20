@@ -42,7 +42,7 @@ namespace oni {
             auto pingPacket = PingPacket{now};
             auto data = serialize<PingPacket>(pingPacket);
 
-            send(type, data, mEnetPeer);
+            send(type, std::move(data), mEnetPeer);
         }
 
         void Client::handle(ENetEvent *event) {
@@ -51,17 +51,12 @@ namespace oni {
             // packets: handlePing(), handleMessage()... these functions can be virtual in peer
         }
 
-        void Client::sendMessage(const std::string &message) {
+        void Client::sendMessage(std::string &&message) {
             auto type = PacketType::MESSAGE;
-            auto messagePacket = MessagePacket{message};
-            auto data = serialize<MessagePacket>(messagePacket);
+            auto messagePacket = DataPacket{std::move(message)};
+            auto data = serialize<DataPacket>(messagePacket);
 
-            send(type, data, mEnetPeer);
-        }
-
-        void Client::sendEntities(const std::string &data) {
-            auto type = PacketType::WORLD_DATA;
-            send(type, data, mEnetPeer);
+            send(type, std::move(data), mEnetPeer);
         }
     }
 }

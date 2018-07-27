@@ -3,6 +3,7 @@
 #include <oni-core/graphics/scene-manager.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/shader.h>
+#include <oni-core/graphics/texture-manager.h>
 
 
 namespace oni {

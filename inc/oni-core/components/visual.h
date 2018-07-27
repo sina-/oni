@@ -24,6 +24,15 @@ namespace oni {
         struct TagTextureShaded {
         };
 
+        enum class TextureStatus : common::uint8 {
+            READY = 0,
+            NEEDS_LOADING_USING_PATH = 1,
+            NEEDS_LOADING_USING_DATA = 2,
+            NEEDS_RELOADING_USING_PATH = 3,
+            NEEDS_RELOADING_USING_DATA = 4,
+            INVALID = 5
+        };
+
         struct Texture {
             // TODO: This might need re ordering for better caching.
             GLsizei width{0};
@@ -34,6 +43,8 @@ namespace oni {
             std::string filePath{};
             std::vector<math::vec2> uv{math::vec2{0.0f, 0.0f}, math::vec2{1.0f, 0.0f},
                                        math::vec2{1.0f, 1.0f}, math::vec2{0.0f, 1.0f}};
+            std::vector<common::uint8> data{};
+            TextureStatus status{TextureStatus::INVALID};
         };
 
         struct Text {

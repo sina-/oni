@@ -43,8 +43,8 @@ namespace oni {
 
             math::vec2 chunkIndexToPosition(const components::ChunkIndices &chunkIndices) const;
 
-            math::vec2 roadTileInexToPosition(const components::ChunkIndices &chunkIndices,
-                                              const components::RoadTileIndices roadTileIndices) const;
+            math::vec2 roadTileIndexToPosition(const components::ChunkIndices &chunkIndices,
+                                               const components::RoadTileIndices roadTileIndices) const;
 
             /**
              * Pack two unique int32 values into unique uint64.
@@ -74,7 +74,7 @@ namespace oni {
 
             void generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
                                           const components::RoadTileIndices &roadTileIndices,
-                                          const components::Texture &texture,
+                                          const std::string &texturePath,
                                           entt::DefaultRegistry &backgroundEntities);
 
             void generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
@@ -118,13 +118,13 @@ namespace oni {
             const common::uint16 mHalfChunkSizeX{0};
             const common::uint16 mHalfChunkSizeY{0};
 
-            components::Texture mNorthToEast{};
-            components::Texture mSouthToEast{};
-            components::Texture mSouthToNorth{};
-            components::Texture mNorthToSouth{};
-            components::Texture mWestToEast{};
-            components::Texture mWestToNorth{};
-            components::Texture mWestToSouth{};
+            std::string mNorthToEast{};
+            std::string mSouthToEast{};
+            std::string mSouthToNorth{};
+            std::string mNorthToSouth{};
+            std::string mWestToEast{};
+            std::string mWestToNorth{};
+            std::string mWestToSouth{};
         };
     }
 }

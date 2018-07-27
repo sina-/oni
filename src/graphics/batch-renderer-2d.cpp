@@ -2,7 +2,7 @@
 
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/utils/index-buffer-gen.h>
-#include <oni-core/graphics/texture.h>
+#include <oni-core/graphics/texture-manager.h>
 #include <oni-core/io/input.h>
 #include <oni-core/buffers/buffer.h>
 #include <oni-core/buffers/index-buffer.h>
@@ -209,7 +209,7 @@ namespace oni {
         }
 
         void BatchRenderer2D::_flush() {
-            Texture::bindRange(0, mTextures);
+            TextureManager::bindRange(0, mTextures);
 
             mVAO->bindVAO();
             mIBO->bind();
@@ -219,7 +219,7 @@ namespace oni {
             mIBO->unbind();
             mVAO->unbindVAO();
 
-            Texture::unbind();
+            TextureManager::unbind();
 
             mIndexCount = 0;
 

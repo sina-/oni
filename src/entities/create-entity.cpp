@@ -2,15 +2,7 @@
 
 #include <Box2D/Box2D.h>
 
-// TODO: It sucks that I have to include shader.h just because scene-manager forward declares it and includes it in
-// the scene-manager.cpp only.
-#include <oni-core/graphics/shader.h>
-#include <oni-core/graphics/batch-renderer-2d.h>
-#include <oni-core/graphics/font-manager.h>
-#include <oni-core/utils/oni-assert.h>
-#include <oni-core/graphics/scene-manager.h>
 #include <oni-core/physics/transformation.h>
-#include <oni-core/graphics/texture.h>
 
 namespace oni {
     namespace entities {
@@ -238,7 +230,7 @@ namespace oni {
             auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
             auto carSizeY = carConfig.halfWidth * 2.0f;
 
-            ONI_DEBUG_ASSERT(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
+            assert(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
             auto entityShapeWorld = components::Shape::fromPositionAndSize(
                     math::vec3{static_cast<common::real32> (carX), static_cast<common::real32> (carY)},

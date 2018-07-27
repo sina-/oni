@@ -58,7 +58,7 @@ find_package(OpenGL REQUIRED)
 
 find_package(X11 REQUIRED)
 
-add_library(oni-core-graphics window.cpp shader.cpp batch-renderer-2d.cpp texture.cpp font-manager.cpp renderer-2d.cpp scene-manager.cpp debug-draw-box2d.cpp)
+add_library(oni-core-graphics window.cpp shader.cpp batch-renderer-2d.cpp font-manager.cpp renderer-2d.cpp scene-manager.cpp debug-draw-box2d.cpp texture-manager.cpp)
 
 # Note: without this line, linker will complain about missing function implementations
 target_link_libraries(oni-core-graphics

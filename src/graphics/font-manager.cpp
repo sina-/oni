@@ -3,7 +3,7 @@
 
 #include <oni-core/components/visual.h>
 #include <oni-core/graphics/font-manager.h>
-#include <oni-core/graphics/texture.h>
+#include <oni-core/graphics/texture-manager.h>
 #include <oni-core/utils/oni-assert.h>
 
 namespace oni {
@@ -28,7 +28,7 @@ namespace oni {
 
             ONI_DEBUG_ASSERT(glyph == 0);
 
-            m_FTAtlas->id = graphics::Texture::load(*this);
+            m_FTAtlas->id = TextureManager::load(*this);
 
         }
 

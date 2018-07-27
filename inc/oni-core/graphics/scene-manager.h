@@ -26,6 +26,8 @@ namespace oni {
 
         class Renderer2D;
 
+        class TextureManager;
+
         class SceneManager {
         public:
             explicit SceneManager(const components::ScreenBounds &screenBounds);
@@ -74,11 +76,14 @@ namespace oni {
             bool visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
                                  const common::real32 halfViewHeight) const;
 
+            void prepareTexture(components::Texture& texture);
+
         private:
             std::unique_ptr<Shader> mColorShader{};
             std::unique_ptr<Shader> mTextureShader{};
             std::unique_ptr<BatchRenderer2D> mColorRenderer{};
             std::unique_ptr<BatchRenderer2D> mTextureRenderer{};
+            std::unique_ptr<TextureManager> mTextureManager{};
 
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};

@@ -7,13 +7,7 @@
 #include <Box2D/Box2D.h>
 
 #include <oni-core/game/game.h>
-#include <oni-core/audio/audio-manager.h>
 #include <oni-core/physics/dynamics.h>
-#include <oni-core/graphics/shader.h>
-#include <oni-core/graphics/window.h>
-#include <oni-core/graphics/font-manager.h>
-#include <oni-core/graphics/scene-manager.h>
-#include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/common/typedefs.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/components/geometry.h>

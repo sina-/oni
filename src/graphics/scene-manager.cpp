@@ -2,11 +2,9 @@
 #include <oni-core/graphics/shader.h>
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
+#include <oni-core/graphics/texture-manager.h>
 #include <oni-core/common/consts.h>
-#include <oni-core/io/output.h>
 #include <oni-core/physics/transformation.h>
-#include <oni-core/math/vec2.h>
-#include <oni-core/entities/tile-world.h>
 
 namespace oni {
     namespace graphics {
@@ -33,6 +31,9 @@ namespace oni {
 
             mColorShader = std::make_unique<graphics::Shader>("resources/shaders/basic.vert",
                                                               "resources/shaders/basic.frag");
+
+            mTextureManager = std::make_unique<TextureManager>();
+
             initializeColorRenderer(*mColorShader);
         }
 
@@ -141,7 +142,8 @@ namespace oni {
                 if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
-                const auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                prepareTexture(texture);
 
                 ++mRenderedSpritesPerFrame;
                 ++mRenderedTexturesPerFrame;
@@ -163,7 +165,9 @@ namespace oni {
             for (const auto &entity: dynamicTextureSpriteView) {
                 const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
                 const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
-                const auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+                auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+
+                prepareTexture(texture);
 
                 auto transformation = physics::Transformation::createTransformation(placement.position,
                                                                                     placement.rotation,
@@ -312,6 +316,38 @@ namespace oni {
 
         void SceneManager::endColorRendering() {
             end(*mColorShader, *mColorRenderer);
+        }
+
+        void SceneManager::prepareTexture(components::Texture &texture) {
+            // TODO: implement
+            switch (texture.status) {
+                case components::TextureStatus::READY: {
+                    break;
+                }
+                case components::TextureStatus::NEEDS_LOADING_USING_PATH: {
+                    auto loadedTexture = mTextureManager->findOrLoad(texture.filePath);
+                    texture = *loadedTexture;
+                    break;
+                }
+                case components::TextureStatus::NEEDS_LOADING_USING_DATA: {
+                    assert(texture.width);
+                    assert(texture.height);
+
+                    auto loadedTexture = mTextureManager->loadFromData(texture.width, texture.height, texture.data);
+                    texture = loadedTexture;
+                    break;
+                }
+                case components::TextureStatus::NEEDS_RELOADING_USING_PATH: {
+                    break;
+                }
+                case components::TextureStatus::NEEDS_RELOADING_USING_DATA: {
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
         }
     }
 }

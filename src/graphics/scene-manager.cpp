@@ -356,16 +356,18 @@ namespace oni {
         }
 
         void SceneManager::tick(entt::DefaultRegistry &registry) {
-            auto carView = registry.persistent<components::Car, components::Placement, components::TransformParent>();
+            auto carView = registry.persistent<components::Car, components::Placement>();
             for (auto carEntity: carView) {
                 auto car = carView.get<components::Car>(carEntity);
                 // NOTE: Technically I should use slippingRear, but this gives better effect
                 if (car.slippingFront || true) {
-                    auto carTireRRPlacement = carView.get<components::Placement>(car.tireRR);
-                    auto carTireRLPlacement = carView.get<components::Placement>(car.tireRL);
+                    // TODO: This is not in the view and it will be very slow as more entities are added to the
+                    // registry. Perhaps I can save the tires together with the car
+                    auto carTireRRPlacement = registry.get<components::Placement>(car.tireRR);
+                    auto carTireRLPlacement = registry.get<components::Placement>(car.tireRL);
 
-                    const auto &transformParentRR = carView.get<components::TransformParent>(car.tireRR);
-                    const auto &transformParentRL = carView.get<components::TransformParent>(car.tireRL);
+                    const auto &transformParentRR = registry.get<components::TransformParent>(car.tireRR);
+                    const auto &transformParentRL = registry.get<components::TransformParent>(car.tireRL);
 
                     auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
                     auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
@@ -376,7 +378,7 @@ namespace oni {
                     skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY(), registry);
                     skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY(), registry);
 
-                    auto alpha = static_cast<unsigned char>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+                    auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
 
                     updateSkidTexture(skidMarkRLPos, skidEntityRL, registry, alpha);
                     updateSkidTexture(skidMarkRRPos, skidEntityRR, registry, alpha);
@@ -409,12 +411,11 @@ namespace oni {
                  TODO: This function generates a texture and loads it into video memory, meaning we can not
                  blend two layers of skid mark onto each other
                 */
-                auto skidTexture = components::Texture{};
-                skidTexture.status = components::TextureStatus::NEEDS_LOADING_USING_DATA;
-                skidTexture.width = skidWidthInPixels;
-                skidTexture.height = skidHeightInPixels;
-                skidTexture.data = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
-                                                                          skidDefaultPixel);
+                auto skidData = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
+                                                                       skidDefaultPixel);
+                auto skidTexture = mTextureManager->loadFromData(skidWidthInPixels, skidHeightInPixels, skidData);
+                // TODO: I can blend skid textures using this data
+                skidTexture.data = skidData;
 
                 skidTileID = entities::createStaticEntity(foregroundEntities, skidTileSize, positionInWorld);
                 entities::assignTexture(foregroundEntities, skidTileID, skidTexture);
@@ -443,10 +444,6 @@ namespace oni {
             common::uint16 width = 5;
 
             auto bits = graphics::TextureManager::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
-            skidMarksTexture.data = bits;
-            skidMarksTexture.width = width;
-            skidMarksTexture.height = height;
-            skidMarksTexture.status = components::TextureStatus::NEEDS_RELOADING_USING_DATA;
             // TODO: Need to create skid texture data as it should be and set it.
             mTextureManager->updateSubTexture(skidMarksTexture,
                                               static_cast<GLint>(skidPos.x - width / 2.0f),

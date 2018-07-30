@@ -4,8 +4,6 @@
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/common/consts.h>
-// TODO: Remove this dependency
-#include <oni-core/graphics/texture-manager.h>
 
 
 namespace oni {

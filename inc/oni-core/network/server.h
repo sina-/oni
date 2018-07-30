@@ -18,7 +18,12 @@ namespace oni {
         private:
             Server();
 
-            void handle(ENetEvent *event) override;
+            void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
+
+            void postConnectHook(const ENetEvent *event) override;
+
+            void postDisconnectHook(const ENetEvent *event) override;
+
         };
     }
 }

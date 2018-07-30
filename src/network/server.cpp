@@ -24,38 +24,32 @@ namespace oni {
                 Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
 
-        void Server::handle(ENetEvent *event) {
-            // TODO: Need to gather stats on invalid packets and there source!
-            if (!event->packet->data) {
-                return;
-            }
-            if (!event->packet->dataLength) {
-                return;
-            }
+        void Server::postConnectHook(const ENetEvent *event) {
 
-            auto data = event->packet->data;
-            auto header = getHeader(data);
-            auto headerSize = 1;
-            auto dataWithoutHeaderSize = event->packet->dataLength - headerSize;
-            data += 1;
+        }
 
+        void Server::postDisconnectHook(const ENetEvent *event) {
+
+        }
+
+        void Server::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
             switch (header) {
                 case (PacketType::PING): {
-                    auto packet = deserialize<PingPacket>(data, dataWithoutHeaderSize);
+                    auto packet = deserialize<PingPacket>(data, size);
                     std::cout << packet.timestamp << std::endl;
 
-                    send(data, event->packet->dataLength, event->peer);
+                    send(data, size, peer);
 
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = deserialize<DataPacket>(data, dataWithoutHeaderSize);
+                    auto packet = deserialize<DataPacket>(data, size);
                     std::cout << packet.data << std::endl;
                     break;
                 }
                 case (PacketType::ENTITY): {
 
-                    auto entityData = std::string(reinterpret_cast<char *>(data), event->packet->dataLength);
+                    auto entityData = std::string(reinterpret_cast<char *>(data), size);
 
                     entt::DefaultRegistry reg;
                     entities::deserialization(reg, entityData);

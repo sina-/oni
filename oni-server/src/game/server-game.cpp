@@ -12,6 +12,7 @@
 #include <oni-core/entities/manage-hierarchy.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/network/server.h>
+#include <oni-core/io/input.h>
 
 
 namespace oni {
@@ -106,7 +107,11 @@ namespace oni {
 
         void ServerGame::_tick(const common::real32 tickTime) {
             mServer->poll();
-            //mDynamics->tick(*mForegroundEntities, *mInput, tickTime);
+
+            if (false) {
+                auto input = io::Input{};
+                mDynamics->tick(*mForegroundEntities, input, tickTime);
+            }
 
             // Fake lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));

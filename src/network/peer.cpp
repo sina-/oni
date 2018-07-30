@@ -1,6 +1,5 @@
 #include <oni-core/network/peer.h>
 
-#include <enet/enet.h>
 #include <cstring>
 
 namespace oni {
@@ -46,23 +45,37 @@ namespace oni {
                         printf("A new client connected from %s:%u.\n",
                                ip,
                                event.peer->address.port);
+
+                        postConnectHook(&event);
                         break;
                     }
                     case ENET_EVENT_TYPE_RECEIVE: {
-/*                        printf("A packet of length %u containing %s was received from %s on channel %u.\n",
-                               static_cast<unsigned int>(event.packet->dataLength),
-                               event.packet->data,
-                               ip,
-                               event.channelID);*/
+                        // TODO: Need to gather stats on invalid packets and there source!
+                        if (!event.packet->data) {
+                            return;
+                        }
+                        if (!event.packet->dataLength) {
+                            return;
+                        }
 
-                        handle(&event);
+                        auto data = event.packet->data;
+                        auto header = getHeader(data);
+                        auto headerSize = 1;
+                        auto dataWithoutHeaderSize = event.packet->dataLength - headerSize;
+                        data += 1;
+
+                        handle(event.peer, data, dataWithoutHeaderSize, header);
 
                         enet_packet_destroy(event.packet);
                         break;
                     }
                     case ENET_EVENT_TYPE_DISCONNECT: {
                         printf("%s disconnected.\n", ip);
+
+                        postDisconnectHook(&event);
+
                         event.peer->data = nullptr;
+                        break;
                     }
                     case ENET_EVENT_TYPE_NONE: {
                         break;

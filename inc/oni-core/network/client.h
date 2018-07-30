@@ -18,10 +18,14 @@ namespace oni {
 
             void sendMessage(std::string &&message);
 
-        protected:
-            void handle(ENetEvent *event) override;
+        private:
+            void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
 
-        protected:
+            void postConnectHook(const ENetEvent *event) override;
+
+            void postDisconnectHook(const ENetEvent *event) override;
+
+        private:
             ENetPeer *mEnetPeer;
         };
     }

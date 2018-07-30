@@ -29,7 +29,6 @@ namespace oni {
             common::uint16 port;
         };
 
-
         class Peer {
         protected:
             Peer();
@@ -45,7 +44,7 @@ namespace oni {
             void poll();
 
         protected:
-            virtual void handle(ENetEvent *event) = 0;
+            virtual void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) = 0;
 
             PacketType getHeader(const common::uint8 *data) const;
 
@@ -75,13 +74,16 @@ namespace oni {
                 return result;
             }
 
-
             // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
             void send(PacketType type, std::string &&data, ENetPeer *peer);
 
             void send(const common::uint8 *data, size_t size, ENetPeer *peer);
 
             void broadcast(PacketType type, std::string &&data);
+
+            virtual void postConnectHook(const ENetEvent* event) = 0;
+
+            virtual void postDisconnectHook(const ENetEvent* event) = 0;
 
         protected:
             ENetHost *mEnetHost;

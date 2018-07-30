@@ -46,7 +46,6 @@ namespace oni {
         TileWorld::~TileWorld() = default;
 
 
-
         bool TileWorld::existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const {
             return map.find(packedIndices) != map.end();
         }

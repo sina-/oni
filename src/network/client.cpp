@@ -1,13 +1,12 @@
 #include <oni-core/network/client.h>
 
-#include <string>
 #include <chrono>
-#include <iostream>
 
-#include <enet/enet.h>
+#include <entt/entity/registry.hpp>
 
 #include <oni-core/io/output.h>
-#include <oni-core/network/packet.h>
+#include <oni-core/entities/serialization.h>
+#include <oni-core/components/geometry.h>
 
 namespace oni {
     namespace network {
@@ -45,10 +44,38 @@ namespace oni {
             send(type, std::move(data), mEnetPeer);
         }
 
-        void Client::handle(ENetEvent *event) {
-            // TODO: Refactor server handle function to share parts of the logic that has to do with figuring out
-            // header and reading the data. Client and server will just write logic to handle specific type of
-            // packets: handlePing(), handleMessage()... these functions can be virtual in peer
+        void Client::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
+            switch (header) {
+                case (PacketType::PING): {
+                    auto packet = deserialize<PingPacket>(data, size);
+                    std::cout << packet.timestamp << std::endl;
+
+                    break;
+                }
+                case (PacketType::MESSAGE): {
+                    auto packet = deserialize<DataPacket>(data, size);
+                    std::cout << packet.data << std::endl;
+                    break;
+                }
+                case (PacketType::ENTITY): {
+                    auto entityData = std::string(reinterpret_cast<char *>(data), size);
+
+                    entt::DefaultRegistry reg;
+                    entities::deserialization(reg, entityData);
+
+                    auto view = reg.view<components::Shape>();
+                    for (auto e: view) {
+                        auto a = reg.get<components::Shape>(e).vertexA;
+                        auto d = reg.get<components::Shape>(e).vertexD;
+                    }
+
+                    break;
+                }
+                default: {
+                    std::cout << "Unknown packet!" << std::endl;
+                    break;
+                }
+            }
         }
 
         void Client::sendMessage(std::string &&message) {
@@ -57,6 +84,14 @@ namespace oni {
             auto data = serialize<DataPacket>(messagePacket);
 
             send(type, std::move(data), mEnetPeer);
+        }
+
+        void Client::postConnectHook(const ENetEvent *event) {
+
+        }
+
+        void Client::postDisconnectHook(const ENetEvent *event) {
+
         }
     }
 }

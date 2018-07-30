@@ -54,6 +54,8 @@ include_directories(${GLEW_INCLUDE_DIR})
 
 include_directories(${oni_SOURCE_DIR}/lib/Box2D)
 
+include_directories(${oni_SOURCE_DIR}/lib/cereal)
+
 find_package(OpenGL REQUIRED)
 
 find_package(X11 REQUIRED)

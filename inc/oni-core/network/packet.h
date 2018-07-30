@@ -10,11 +10,20 @@ namespace oni {
     namespace network {
 
         struct PingPacket {
-            common::uint64 timestamp{};
+            common::uint64 timestamp{0};
 
             template<class Archive>
             void serialize(Archive &archive) {
                 archive(timestamp);
+            }
+        };
+
+        struct EntityPacket {
+            common::uint32 entity{};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(entity);
             }
         };
 

@@ -11,7 +11,8 @@
 namespace oni {
     namespace network {
 
-        Client::Client() : Peer::Peer(nullptr, 1, 2, 0, 0) {
+        Client::Client(entt::DefaultRegistry &foregroundEntities) : Peer::Peer(nullptr, 1, 2, 0, 0),
+                                                                    mForegroundEntities{foregroundEntities} {
         }
 
         Client::~Client() = default;
@@ -58,17 +59,26 @@ namespace oni {
                     break;
                 }
                 case (PacketType::ENTITY): {
+                    break;
+                }
+                case (PacketType::CAR_ENTITY_ID): {
+                    auto packet = deserialize<EntityPacket>(data, size);
+                    mCarEntity = packet.entity;
+                    break;
+                }
+                case (PacketType::WORLD_DATA): {
                     auto entityData = std::string(reinterpret_cast<char *>(data), size);
 
-                    entt::DefaultRegistry reg;
-                    entities::deserialization(reg, entityData);
+                    //entt::DefaultRegistry reg;
+                    entities::deserialization(mForegroundEntities, entityData);
 
-                    auto view = reg.view<components::Shape>();
+                    auto view = mForegroundEntities.view<components::Car>();
                     for (auto e: view) {
-                        auto a = reg.get<components::Shape>(e).vertexA;
-                        auto d = reg.get<components::Shape>(e).vertexD;
+                        auto a = mForegroundEntities.get<components::Car>(e).slippingRear;
+                        auto b = mForegroundEntities.get<components::Car>(e).distanceFromCamera;
                     }
 
+                    mForegroundEntitiesReady = true;
                     break;
                 }
                 default: {
@@ -92,6 +102,10 @@ namespace oni {
 
         void Client::postDisconnectHook(const ENetEvent *event) {
 
+        }
+
+        entities::entityID Client::getCarEntity() const {
+            return mCarEntity;
         }
     }
 }

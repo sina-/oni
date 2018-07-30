@@ -211,36 +211,36 @@ namespace oni {
         };
 
         struct Car {
-            common::carSimDouble heading;
-            common::carSimDouble velocityAbsolute;
-            common::carSimDouble angularVelocity; // Angular velocity in radians (rad/s)
-            common::carSimDouble steer; // (-1.0..1.0)
-            common::carSimDouble steerAngle; // (-maxSteer..maxSteer)
-            common::carSimDouble inertia;
-            common::carSimDouble wheelBase;
-            common::carSimDouble axleWeightRatioFront;
-            common::carSimDouble axleWeightRatioRear;
-            common::carSimDouble rpm;
-            common::carSimDouble maxVelocityAbsolute;
-            common::carSimDouble accumulatedEBrake;
-            common::carSimDouble slipAngleFront;
-            common::carSimDouble slipAngleRear;
+            common::carSimDouble heading{};
+            common::carSimDouble velocityAbsolute{};
+            common::carSimDouble angularVelocity{}; // Angular velocity in radians (rad/s)
+            common::carSimDouble steer{}; // (-1.0..1.0)
+            common::carSimDouble steerAngle{}; // (-maxSteer..maxSteer)
+            common::carSimDouble inertia{};
+            common::carSimDouble wheelBase{};
+            common::carSimDouble axleWeightRatioFront{};
+            common::carSimDouble axleWeightRatioRear{};
+            common::carSimDouble rpm{};
+            common::carSimDouble maxVelocityAbsolute{};
+            common::carSimDouble accumulatedEBrake{};
+            common::carSimDouble slipAngleFront{};
+            common::carSimDouble slipAngleRear{};
 
 
-            math::vec2 position;
-            math::vec2 velocity; // m/s
-            math::vec2 velocityLocal; // m/s
-            math::vec2 acceleration;
-            math::vec2 accelerationLocal;
+            math::vec2 position{};
+            math::vec2 velocity{}; // m/s
+            math::vec2 velocityLocal{}; // m/s
+            math::vec2 acceleration{};
+            math::vec2 accelerationLocal{};
 
-            bool accelerating;
-            bool slippingFront;
-            bool slippingRear;
+            bool accelerating{};
+            bool slippingFront{};
+            bool slippingRear{};
 
-            bool smoothSteer;
-            bool safeSteer;
+            bool smoothSteer{};
+            bool safeSteer{};
 
-            common::carSimDouble distanceFromCamera;
+            common::carSimDouble distanceFromCamera{};
 
             entities::entityID tireFR{};
             entities::entityID tireFL{};
@@ -283,6 +283,8 @@ namespace oni {
                         tireRR,
                         tireRL);
             }
+
+            Car() {}
 
             explicit Car(const components::CarConfig &c) {
                 heading = 0.0f;

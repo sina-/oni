@@ -117,10 +117,10 @@ namespace oni {
 
         void Peer::broadcast(PacketType type, std::string &&data) {
             data.insert(0, 1, static_cast<common::uint8 >(type));
-            ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE |
-                                                                                       ENET_PACKET_FLAG_NO_ALLOCATE);
-            assert(packetToServer);
-            enet_host_broadcast(mEnetHost, 0, packetToServer);
+            ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE |
+                                                                                      ENET_PACKET_FLAG_NO_ALLOCATE);
+            assert(packetToPeers);
+            enet_host_broadcast(mEnetHost, 0, packetToPeers);
 
             enet_host_flush(mEnetHost);
         }

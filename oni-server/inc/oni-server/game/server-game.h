@@ -61,7 +61,7 @@ namespace oni {
             entities::entityID mTruckEntity{};
             entities::entityID mBoxEntity{};
 
-            entities::entityID mCarEntity{};
+            std::vector<entities::entityID> mCarEntities{};
 
             components::CarConfig mCarConfigDefault{};
         };

@@ -4,6 +4,8 @@
 #include <vector>
 
 #include <GL/glew.h>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
@@ -22,6 +24,8 @@ namespace oni {
         };
 
         struct TagTextureShaded {
+            template<class Archive>
+            void serialize(Archive &archive) {}
         };
 
         enum class TextureStatus : common::uint8 {
@@ -45,6 +49,11 @@ namespace oni {
                                        math::vec2{1.0f, 1.0f}, math::vec2{0.0f, 1.0f}};
             std::vector<common::uint8> data{};
             TextureStatus status{TextureStatus::INVALID};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(width, height, textureID, format, type, filePath, uv, data, status);
+            }
         };
 
         struct Text {

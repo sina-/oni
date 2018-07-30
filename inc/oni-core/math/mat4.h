@@ -19,6 +19,11 @@ namespace oni {
                 vec4 columns[4];
             };
 
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(columns);
+            }
+
             mat4();
 
             explicit mat4(oni::common::real32 diag);

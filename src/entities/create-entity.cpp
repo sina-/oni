@@ -270,7 +270,6 @@ namespace oni {
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
 
-
             registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             registry.assign<components::Shape>(entity, entityShapeWorld);
             registry.assign<components::Placement>(entity, entityPlacement);

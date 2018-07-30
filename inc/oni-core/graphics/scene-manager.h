@@ -36,6 +36,8 @@ namespace oni {
 
             void render(entt::DefaultRegistry &registry);
 
+            void tick(entt::DefaultRegistry &registry);
+
             void renderRaw(const components::Shape &shape, const components::Appearance &appearance);
 
             void lookAt(common::real32 x, common::real32 y);
@@ -76,7 +78,13 @@ namespace oni {
             bool visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
                                  const common::real32 halfViewHeight) const;
 
-            void prepareTexture(components::Texture& texture);
+            void prepareTexture(components::Texture &texture);
+
+            entities::entityID createSkidTileIfMissing(const math::vec2 &position,
+                                                       entt::DefaultRegistry &foregroundEntities);
+
+            void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
+                                   entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -88,6 +96,14 @@ namespace oni {
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
+
+            std::map<common::uint64, entities::entityID> mPackedSkidIndicesToEntity{};
+
+            const common::uint16 mSkidTileSizeX{0};
+            const common::uint16 mSkidTileSizeY{0};
+
+            const common::real32 mHalfSkidTileSizeX{0.0f};
+            const common::real32 mHalfSkidTileSizeY{0.0f};
 
 
             components::ScreenBounds mScreenBounds{};

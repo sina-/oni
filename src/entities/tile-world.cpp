@@ -9,8 +9,6 @@
 
 
 namespace oni {
-    // TODO: save this as a tag in the world registry
-    static const common::real32 GAME_UNIT_TO_PIXELS = 20.0f;
 
     namespace entities {
 
@@ -18,9 +16,6 @@ namespace oni {
                 mTileSizeX{10}, mTileSizeY{10},
                 //mHalfTileSizeX{mTileSizeX / 2.0f},
                 //mHalfTileSizeY{mTileSizeY / 2.0f},
-                mSkidTileSizeX{64}, mSkidTileSizeY{64},
-                mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
-                mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
                 mTilesPerChunkX{11}, mTilesPerChunkY{11},
                 mChunkSizeX{mTileSizeX * mTilesPerChunkX}, mChunkSizeY{mTileSizeY * mTilesPerChunkY},
                 mHalfChunkSizeX{mChunkSizeX / 2}, mHalfChunkSizeY{mChunkSizeY / 2} {
@@ -52,51 +47,10 @@ namespace oni {
 
         TileWorld::~TileWorld() = default;
 
-        common::int64 TileWorld::positionToIndex(const common::real64 position, const common::uint16 tileSize) const {
-            /**
-             * Tiles in the world map fall under these indices:
-             *
-             * [-halfTileSize * 5, -halfTileSize * 3) -> -2
-             * [-halfTileSize * 3, -halfTileSize * 1) -> -1
-             * [-halfTileSize * 1, +halfTileSize * 1) -> +0
-             * [+halfTileSize * 1, +halfTileSize * 3) -> +1
-             * [+halfTileSize * 3, +halfTileSize * 5) -> +2
-             *
-             * For example for tile size 16:
-             * [-40, -24) -> -2
-             * [-24,  -8) -> -1
-             * [ -8,  +8) -> +0
-             * [ +8, +24) -> +1
-             * [+24, +40) -> +2
-             */
-            auto result = floor(position / tileSize);
-            auto truncated = static_cast<common::int64>(result);
-            return truncated;
-        }
 
-        common::real32 TileWorld::indexToPosition(const common::int64 index, const common::uint16 tileSize) const {
-            return tileSize * index;
-        }
 
         bool TileWorld::existsInMap(const common::uint64 packedIndices, const PackedIndiciesToEntity &map) const {
             return map.find(packedIndices) != map.end();
-        }
-
-        common::packedInt32 TileWorld::packIntegers(const common::int64 x, const common::int64 y) const {
-            // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
-            // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
-            // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
-            // Notice that uint32_t = 2 * max(int32_t).
-            // So it kinda shifts all the values in the reverse order from max(std::uint32_t) / 2 + 1 to max(std::uint32_t)
-            // And that is why this function is bijective, which is an important property since it has to always map
-            // unique inputs to a unique output.
-            // There are other ways to do this: https://stackoverflow.com/a/13871379
-            // I could also just yank the numbers together and save it as a string.
-            auto _x = static_cast<common::uint64>(static_cast<common::uint32>(x)) << 32;
-            auto _y = static_cast<common::uint64>(static_cast<common::uint32>(y));
-            auto result = _x | _y;
-
-            return result;
         }
 
         math::vec2 TileWorld::unpackCoordinates(common::uint64 coord) const {
@@ -113,31 +67,6 @@ namespace oni {
                              entt::DefaultRegistry &foregroundEntities,
                              entt::DefaultRegistry &backgroundEntities) {
             tickChunk(position, backgroundEntities);
-            tickCars(car, foregroundEntities);
-        }
-
-        void TileWorld::tickCars(const components::Car &car, entt::DefaultRegistry &foregroundEntities) {
-            // NOTE: Technically I should use slippingRear, but this gives better effect
-            if (car.slippingFront || true) {
-                auto carTireRRPlacement = foregroundEntities.get<components::Placement>(car.tireRR);
-                auto carTireRLPlacement = foregroundEntities.get<components::Placement>(car.tireRL);
-
-                const auto &transformParentRR = foregroundEntities.get<components::TransformParent>(car.tireRR);
-                const auto &transformParentRL = foregroundEntities.get<components::TransformParent>(car.tireRL);
-
-                auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
-                auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
-
-                entityID skidEntityRL{0};
-                entityID skidEntityRR{0};
-
-                skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY(), foregroundEntities);
-                skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY(), foregroundEntities);
-                auto alpha = static_cast<unsigned char>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-
-                updateSkidTexture(skidMarkRLPos, skidEntityRL, foregroundEntities, alpha);
-                updateSkidTexture(skidMarkRRPos, skidEntityRR, foregroundEntities, alpha);
-            }
         }
 
         void TileWorld::tickChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities) {
@@ -151,7 +80,7 @@ namespace oni {
             // 6--7--8
             for (auto i = chunkIndices.x - 1; i <= chunkIndices.x + 1; ++i) {
                 for (auto j = chunkIndices.y - 1; j <= chunkIndices.y + 1; ++j) {
-                    const auto packedIndices = packIntegers(i, j);
+                    const auto packedIndices = math::packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
                         //generateTilesForChunk(i, j, backgroundEntities);
 
@@ -195,16 +124,16 @@ namespace oni {
             }
 
             auto northChunkIndices = components::ChunkIndices{chunkIndices.x, chunkIndices.y + 1};
-            auto northChunkPacked = packIntegers(chunkIndices.x, chunkIndices.y);
+            auto northChunkPacked = math::packIntegers(chunkIndices.x, chunkIndices.y);
 
             auto southChunkIndices = components::ChunkIndices{chunkIndices.x, chunkIndices.y - 1};
-            auto southChunkPacked = packIntegers(southChunkIndices.x, southChunkIndices.y);
+            auto southChunkPacked = math::packIntegers(southChunkIndices.x, southChunkIndices.y);
 
             auto westChunkIndices = components::ChunkIndices{chunkIndices.x - 1, chunkIndices.y};
-            auto westChunkPacked = packIntegers(westChunkIndices.x, westChunkIndices.y);
+            auto westChunkPacked = math::packIntegers(westChunkIndices.x, westChunkIndices.y);
 
             auto eastChunkIndices = components::ChunkIndices{chunkIndices.x + 1, chunkIndices.y};
-            auto eastChunkPacked = packIntegers(eastChunkIndices.x, eastChunkIndices.y);
+            auto eastChunkPacked = math::packIntegers(eastChunkIndices.x, eastChunkIndices.y);
 
             auto northChunkHasRoads = chunkWithRoads(northChunkIndices);
             auto southChunkHasRoads = chunkWithRoads(southChunkIndices);
@@ -396,13 +325,12 @@ namespace oni {
             const auto roadID = createStaticEntity(backgroundEntities, roadTileSize,
                                                    math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
 
-            // NOTE: SceneManager needs to actually load these textures
             auto texture = components::Texture{};
             texture.filePath = texturePath;
             texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
             assignTexture(backgroundEntities, roadID, texture);
 
-            const auto packedIndices = packIntegers(roadTileIndices.x, roadTileIndices.y);
+            const auto packedIndices = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
         }
 
@@ -416,7 +344,7 @@ namespace oni {
             const auto roadID = createSpriteStaticEntity(backgroundEntities, color, roadTileSize,
                                                          math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
 
-            const auto packedIndices = packIntegers(roadTileIndices.x, roadTileIndices.y);
+            const auto packedIndices = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
         }
 
@@ -475,83 +403,13 @@ namespace oni {
 
                     const auto positionInWorld = math::vec3{i, j, 1.0f};
 
-                    const auto packedIndices = packIntegers(i, j);
+                    const auto packedIndices = math::packIntegers(i, j);
                     const auto tileID = createSpriteStaticEntity(backgroundEntities, color, tileSize,
                                                                  positionInWorld);
 
                     mPackedTileIndicesToEntity.emplace(packedIndices, tileID);
                 }
             }
-        }
-
-        entities::entityID TileWorld::createSkidTileIfMissing(const math::vec2 &position,
-                                                              entt::DefaultRegistry &foregroundEntities) {
-            const auto x = positionToIndex(position.x, mSkidTileSizeX);
-            const auto y = positionToIndex(position.y, mSkidTileSizeY);
-            const auto packedIndices = packIntegers(x, y);
-
-            entities::entityID skidTileID{};
-            if (!existsInMap(packedIndices, mPackedSkidIndicesToEntity)) {
-                const auto skidIndexX = positionToIndex(position.x, mSkidTileSizeX);
-                const auto skidIndexY = positionToIndex(position.y, mSkidTileSizeY);
-                const auto skidTilePosX = indexToPosition(skidIndexX, mSkidTileSizeX);
-                const auto skidTilePosY = indexToPosition(skidIndexY, mSkidTileSizeY);
-                const auto positionInWorld = math::vec3{skidTilePosX, skidTilePosY, 1.0f};
-                const auto skidTileSize = math::vec2{mSkidTileSizeX, mSkidTileSizeY};
-
-                const auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * GAME_UNIT_TO_PIXELS +
-                                                                           common::ep);
-                const auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * GAME_UNIT_TO_PIXELS +
-                                                                            common::ep);
-                const auto skidDefaultPixel = components::PixelRGBA{};
-                /*
-                 TODO: This function generates a texture and loads it into video memory, meaning we can not
-                 blend two layers of skid mark onto each other
-                */
-                auto skidTexture = components::Texture{};
-                skidTexture.status = components::TextureStatus::NEEDS_LOADING_USING_DATA;
-                skidTexture.width = skidWidthInPixels;
-                skidTexture.height = skidHeightInPixels;
-                skidTexture.data = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
-                                                                          skidDefaultPixel);
-
-                skidTileID = entities::createStaticEntity(foregroundEntities, skidTileSize, positionInWorld);
-                entities::assignTexture(foregroundEntities, skidTileID, skidTexture);
-                mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
-            } else {
-                skidTileID = mPackedSkidIndicesToEntity.at(packedIndices);
-            }
-            return skidTileID;
-        }
-
-        void TileWorld::updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
-                                          entt::DefaultRegistry &foregroundEntities, common::uint8 alpha) {
-            auto skidMarksTexture = foregroundEntities.get<components::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = foregroundEntities.get<components::Shape>(
-                    skidTextureEntity).getPosition();
-
-            auto skidPos = position;
-            physics::Transformation::worldToLocalTextureTranslation(skidMarksTexturePos, GAME_UNIT_TO_PIXELS,
-                                                                    skidPos);
-
-            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
-            // squares.
-            //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
-            //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
-            common::uint16 height = 5;
-            common::uint16 width = 5;
-
-            auto bits = graphics::TextureManager::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
-            skidMarksTexture.data = bits;
-            skidMarksTexture.width = width;
-            skidMarksTexture.height = height;
-            skidMarksTexture.status = components::TextureStatus::NEEDS_RELOADING_USING_DATA;
-            // TODO: Need to create skid texture data as it should be and set it.
-/*            graphics::Texture::updateSubTexture(skidMarksTexture,
-                                                static_cast<GLint>(skidPos.x - width / 2.0f),
-                                                static_cast<GLint>(skidPos.y - height / 2.0f),
-                                                width, height, bits);*/
-
         }
 
         bool TileWorld::chunkWithRoads(const components::ChunkIndices &chunkIndices) const {

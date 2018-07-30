@@ -8,9 +8,14 @@
 
 namespace oni {
     namespace graphics {
+        // TODO: save this as a tag in the world registry
+        static const common::real32 GAME_UNIT_TO_PIXELS = 20.0f;
 
         SceneManager::SceneManager(const components::ScreenBounds &screenBounds) :
-        // 64k vertices
+                mSkidTileSizeX{64}, mSkidTileSizeY{64},
+                mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
+                mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
+                // 64k vertices
                 mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds) {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
@@ -349,5 +354,107 @@ namespace oni {
                 }
             }
         }
+
+        void SceneManager::tick(entt::DefaultRegistry &registry) {
+            auto carView = registry.persistent<components::Car, components::Placement, components::TransformParent>();
+            for (auto carEntity: carView) {
+                auto car = carView.get<components::Car>(carEntity);
+                // NOTE: Technically I should use slippingRear, but this gives better effect
+                if (car.slippingFront || true) {
+                    auto carTireRRPlacement = carView.get<components::Placement>(car.tireRR);
+                    auto carTireRLPlacement = carView.get<components::Placement>(car.tireRL);
+
+                    const auto &transformParentRR = carView.get<components::TransformParent>(car.tireRR);
+                    const auto &transformParentRL = carView.get<components::TransformParent>(car.tireRL);
+
+                    auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
+                    auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
+
+                    entities::entityID skidEntityRL{0};
+                    entities::entityID skidEntityRR{0};
+
+                    skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY(), registry);
+                    skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY(), registry);
+
+                    auto alpha = static_cast<unsigned char>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+
+                    updateSkidTexture(skidMarkRLPos, skidEntityRL, registry, alpha);
+                    updateSkidTexture(skidMarkRRPos, skidEntityRR, registry, alpha);
+                }
+            }
+        }
+
+        entities::entityID SceneManager::createSkidTileIfMissing(const math::vec2 &position,
+                                                                 entt::DefaultRegistry &foregroundEntities) {
+            const auto x = math::positionToIndex(position.x, mSkidTileSizeX);
+            const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
+            const auto packedIndices = math::packIntegers(x, y);
+
+            entities::entityID skidTileID{};
+            auto exists = mPackedSkidIndicesToEntity.find(packedIndices) != mPackedSkidIndicesToEntity.end();
+            if (!exists) {
+                const auto skidIndexX = math::positionToIndex(position.x, mSkidTileSizeX);
+                const auto skidIndexY = math::positionToIndex(position.y, mSkidTileSizeY);
+                const auto skidTilePosX = math::indexToPosition(skidIndexX, mSkidTileSizeX);
+                const auto skidTilePosY = math::indexToPosition(skidIndexY, mSkidTileSizeY);
+                const auto positionInWorld = math::vec3{skidTilePosX, skidTilePosY, 1.0f};
+                const auto skidTileSize = math::vec2{mSkidTileSizeX, mSkidTileSizeY};
+
+                const auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * GAME_UNIT_TO_PIXELS +
+                                                                           common::ep);
+                const auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * GAME_UNIT_TO_PIXELS +
+                                                                            common::ep);
+                const auto skidDefaultPixel = components::PixelRGBA{};
+                /*
+                 TODO: This function generates a texture and loads it into video memory, meaning we can not
+                 blend two layers of skid mark onto each other
+                */
+                auto skidTexture = components::Texture{};
+                skidTexture.status = components::TextureStatus::NEEDS_LOADING_USING_DATA;
+                skidTexture.width = skidWidthInPixels;
+                skidTexture.height = skidHeightInPixels;
+                skidTexture.data = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
+                                                                          skidDefaultPixel);
+
+                skidTileID = entities::createStaticEntity(foregroundEntities, skidTileSize, positionInWorld);
+                entities::assignTexture(foregroundEntities, skidTileID, skidTexture);
+                mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
+            } else {
+                skidTileID = mPackedSkidIndicesToEntity.at(packedIndices);
+            }
+            return skidTileID;
+        }
+
+        void SceneManager::updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
+                                             entt::DefaultRegistry &foregroundEntities, common::uint8 alpha) {
+            auto skidMarksTexture = foregroundEntities.get<components::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = foregroundEntities.get<components::Shape>(
+                    skidTextureEntity).getPosition();
+
+            auto skidPos = position;
+            physics::Transformation::worldToLocalTextureTranslation(skidMarksTexturePos, GAME_UNIT_TO_PIXELS,
+                                                                    skidPos);
+
+            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
+            // squares.
+            //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
+            //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
+            common::uint16 height = 5;
+            common::uint16 width = 5;
+
+            auto bits = graphics::TextureManager::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
+            skidMarksTexture.data = bits;
+            skidMarksTexture.width = width;
+            skidMarksTexture.height = height;
+            skidMarksTexture.status = components::TextureStatus::NEEDS_RELOADING_USING_DATA;
+            // TODO: Need to create skid texture data as it should be and set it.
+            mTextureManager->updateSubTexture(skidMarksTexture,
+                                              static_cast<GLint>(skidPos.x - width / 2.0f),
+                                              static_cast<GLint>(skidPos.y - height / 2.0f),
+                                              width, height, bits);
+
+        }
+
+
     }
 }

@@ -36,6 +36,9 @@ namespace oni {
 
             void render(entt::DefaultRegistry &registry);
 
+            void renderStaticTextured(entt::DefaultRegistry& registry, common::real32 halfViewWidth, common::real32 halfViewHeight);
+            void renderDynamicTextured(entt::DefaultRegistry& registry, common::real32 halfViewWidth, common::real32 halfViewHeight);
+
             void tick(entt::DefaultRegistry &registry);
 
             void renderRaw(const components::Shape &shape, const components::Appearance &appearance);
@@ -80,11 +83,10 @@ namespace oni {
 
             void prepareTexture(components::Texture &texture);
 
-            entities::entityID createSkidTileIfMissing(const math::vec2 &position,
-                                                       entt::DefaultRegistry &foregroundEntities);
+            entities::entityID createSkidTileIfMissing(const math::vec2 &position);
 
-            void updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
-                                   entt::DefaultRegistry &foregroundEntities, common::uint8 alpha);
+            void
+            updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity, common::uint8 alpha);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -113,6 +115,8 @@ namespace oni {
 
             common::uint16 mRenderedSpritesPerFrame{0};
             common::uint16 mRenderedTexturesPerFrame{0};
+
+            std::unique_ptr<entt::DefaultRegistry> mSkidEntities{};
         };
     }
 }

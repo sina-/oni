@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <vector>
 
 #include <oni-core/components/input-data.h>
@@ -11,6 +10,11 @@ namespace oni {
         public:
 
             Input();
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(mKeysPressed, mKeysReleased);
+            }
 
             void update(components::oniKeyPress keyPressed, components::oniKeyPress keyReleased);
 

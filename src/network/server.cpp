@@ -22,21 +22,13 @@
 
 namespace oni {
     namespace network {
-        Server::~Server() = default;
-
         Server::Server(const Address *address, common::uint8 numClients, common::uint8 numChannels,
                        entt::DefaultRegistry &foregroundEntities, physics::Dynamics &dynamics) :
                 Peer::Peer(address, numClients, numChannels, 0, 0),
                 mForegroundEntities{foregroundEntities}, mDynamics{dynamics} {
         }
 
-        std::vector<entities::entityID> Server::getCarEntities() const {
-            std::vector<entities::entityID> carEntities{};
-            for (auto entity: mClientToCarEntity) {
-                carEntities.push_back(entity.second);
-            }
-            return carEntities;
-        }
+        Server::~Server() = default;
 
         void Server::postConnectHook(const ENetEvent *event) {
             auto carEntity = entities::createVehicleEntity(mForegroundEntities, *mDynamics.getPhysicsWorld());
@@ -104,7 +96,9 @@ namespace oni {
             car.tireRR = carTireRREntity;
             car.tireRL = carTireRLEntity;
 
-            mClientToCarEntity[event->peer->connectID] = carEntity;
+            mClientCarEntity[event->peer->connectID] = carEntity;
+
+            mClients.push_back(event->peer->connectID);
 
             auto packet = EntityPacket{carEntity};
             auto data = serialize<EntityPacket>(packet);
@@ -113,10 +107,19 @@ namespace oni {
         }
 
         void Server::postDisconnectHook(const ENetEvent *event) {
-
+            auto clientID = event->peer->connectID;
+            mClientCarEntity.erase(clientID);
+            mClientInput.erase(clientID);
+            auto iter = mClients.begin();
+            while (iter != mClients.end()) {
+                if (*iter == clientID) {
+                    mClients.erase(iter);
+                }
+                ++iter;
+            }
         }
 
-        void tick(entt::DefaultRegistry &registry) {
+        void Server::tick(entt::DefaultRegistry &registry) {
 
         }
 
@@ -135,14 +138,22 @@ namespace oni {
                 case (PacketType::MESSAGE): {
                     auto packet = deserialize<DataPacket>(data, size);
                     std::cout << packet.data << std::endl;
+
                     break;
                 }
                 case (PacketType::ENTITY): {
                     break;
                 }
+                case (PacketType::INPUT): {
+                    auto input = deserialize<io::Input>(data, size);
+                    mClientInput[peer->connectID] = input;
+
+                    break;
+                }
                 default: {
                     // TODO: Need to keep stats on clients with bad packets and block them when threshold reaches.
                     std::cout << "Unknown packet!" << std::endl;
+
                     break;
                 }
             }
@@ -153,6 +164,34 @@ namespace oni {
             auto type = PacketType::WORLD_DATA;
 
             broadcast(type, std::move(data));
+        }
+
+        std::vector<entities::entityID> Server::getCarEntities() const {
+            std::vector<entities::entityID> carEntities{};
+            for (auto entity: mClientCarEntity) {
+                carEntities.push_back(entity.second);
+            }
+            return carEntities;
+        }
+
+        const std::vector<clientID> &Server::getClients() const {
+            return mClients;
+        }
+
+        entities::entityID Server::getCarEntity(clientID id) const {
+            if (mClientCarEntity.find(id) != mClientCarEntity.end()) {
+                return mClientCarEntity.at(id);
+            }
+
+            return 0;
+        }
+
+        const io::Input &Server::getClientInput(clientID id) const {
+            if (mClientInput.find(id) != mClientInput.end()) {
+                return mClientInput.at(id);
+            }
+
+            return io::Input{};
         }
     }
 }

@@ -49,7 +49,7 @@ namespace oni {
             PacketType getHeader(const common::uint8 *data) const;
 
             template<class T>
-            std::string serialize(T data) {
+            std::string serialize(const T &data) {
                 std::ostringstream storage;
                 {
                     cereal::PortableBinaryOutputArchive output{storage};
@@ -81,9 +81,9 @@ namespace oni {
 
             void broadcast(PacketType type, std::string &&data);
 
-            virtual void postConnectHook(const ENetEvent* event) = 0;
+            virtual void postConnectHook(const ENetEvent *event) = 0;
 
-            virtual void postDisconnectHook(const ENetEvent* event) = 0;
+            virtual void postDisconnectHook(const ENetEvent *event) = 0;
 
         protected:
             ENetHost *mEnetHost;

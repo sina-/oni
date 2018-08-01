@@ -9,16 +9,23 @@
 #include <oni-core/network/peer.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/io/input.h>
 
 namespace oni {
     namespace physics {
         class Dynamics;
     }
     namespace network {
+        typedef std::map<common::uint32, entities::entityID> clientCarEntityMap;
+        typedef std::map<common::uint32, io::Input> clientInputMap;
+        typedef common::uint32 clientID;
+
         class Server : public Peer {
         public:
             Server(const Address *address, common::uint8 numClients, common::uint8 numChannels,
                    entt::DefaultRegistry &foregroundEntities, physics::Dynamics &dynamics);
+
+            ~Server() override;
 
             void sendWorldData(entt::DefaultRegistry &registry);
 
@@ -26,7 +33,12 @@ namespace oni {
 
             std::vector<entities::entityID> getCarEntities() const;
 
-            ~Server() override;
+            const std::vector<clientID> &getClients() const;
+
+            entities::entityID getCarEntity(clientID id) const;
+
+            const io::Input &getClientInput(clientID id) const;
+
 
         private:
             Server();
@@ -41,7 +53,9 @@ namespace oni {
             entt::DefaultRegistry &mForegroundEntities;
             physics::Dynamics &mDynamics;
 
-            std::map<common::uint32, entities::entityID> mClientToCarEntity{};
+            clientCarEntityMap mClientCarEntity{};
+            clientInputMap mClientInput{};
+            std::vector<clientID> mClients{};
         };
     }
 }

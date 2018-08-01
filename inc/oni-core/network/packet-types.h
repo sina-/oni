@@ -5,13 +5,13 @@
 namespace oni {
     namespace network {
         enum class PacketType : common::uint8 {
-            PING = 0,
-            MESSAGE = 1,
-            ENTITY = 2,
-            CAR_ENTITY_ID = 3,
-            WORLD_DATA = 4,
-
-            UNKNOWN = 5
+            UNKNOWN = 0,
+            PING = 1,
+            MESSAGE = 2,
+            ENTITY = 3,
+            CAR_ENTITY_ID = 4,
+            WORLD_DATA = 5,
+            INPUT = 6,
         };
     }
 }

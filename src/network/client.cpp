@@ -7,6 +7,7 @@
 #include <oni-core/io/output.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/components/geometry.h>
+#include <oni-core/io/input.h>
 
 namespace oni {
     namespace network {
@@ -106,6 +107,13 @@ namespace oni {
 
         entities::entityID Client::getCarEntity() const {
             return mCarEntity;
+        }
+
+        void Client::sendInput(const io::Input *input) {
+            auto type = PacketType::INPUT;
+            auto data = serialize<io::Input>(*input);
+
+            send(type, std::move(data), mEnetPeer);
         }
     }
 }

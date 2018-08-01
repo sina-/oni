@@ -68,17 +68,14 @@ namespace oni {
         void ServerGame::_tick(const common::real32 tickTime) {
             mServer->poll();
 
-            // TODO: Yeah this is very inefficient. Need a better design.
-            mCarEntities = mServer->getCarEntities();
-
             // Fake lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
-            for (auto carEntity: mCarEntities) {
-                if (false) {
-                    auto input = io::Input{};
-                    mDynamics->tick(*mForegroundEntities, input, tickTime);
-                }
+            for (auto client: mServer->getClients()) {
+                auto input = mServer->getClientInput(client);
+                mDynamics->tick(*mForegroundEntities, input, tickTime);
+
+                auto carEntity = mServer->getCarEntity(client);
                 auto car = mForegroundEntities->get<components::Car>(carEntity);
                 auto carPlacement = mForegroundEntities->get<components::Placement>(carEntity);
                 mTileWorld->tick(carPlacement.position.getXY(), car, *mForegroundEntities, *mBackgroundEntities);

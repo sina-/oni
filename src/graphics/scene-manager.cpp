@@ -24,6 +24,8 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
+            mSkidEntities = std::make_unique<entt::DefaultRegistry>();
+
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
             // to provide flexibility in type of shaders users can define and expect to just work by having buffer
@@ -135,70 +137,14 @@ namespace oni {
         }
 
         void SceneManager::render(entt::DefaultRegistry &registry) {
-            begin(*mTextureShader, *mTextureRenderer);
-
             auto halfViewWidth = getViewWidth() / 2.0f;
             auto halfViewHeight = getViewHeight() / 2.0f;
 
-            auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::TagStatic>();
-            for (const auto &entity: staticTextureSpriteView) {
-                const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                    continue;
-                }
-                auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
-                prepareTexture(texture);
+            begin(*mTextureShader, *mTextureRenderer);
 
-                ++mRenderedSpritesPerFrame;
-                ++mRenderedTexturesPerFrame;
-
-                // TODO: submit will fail if we reach maximum number of sprites.
-                // I could also check the number of entities using the view and decide before hand at which point I
-                // flush the renderer and open up room for new sprites.
-
-                // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
-                // Currently the renderer is limited to 32 samplers, I have to either use the reset method
-                // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
-                // by merging many textures to keep below the limit. Other solutions might be looking into other type
-                // of texture storage that can hold bigger number of textures.
-                mTextureRenderer->submit(shape, texture);
-            }
-
-            auto dynamicTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::Placement, components::TagDynamic>();
-            for (const auto &entity: dynamicTextureSpriteView) {
-                const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
-                const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
-                auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
-
-                prepareTexture(texture);
-
-                auto transformation = physics::Transformation::createTransformation(placement.position,
-                                                                                    placement.rotation,
-                                                                                    placement.scale);
-
-                // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
-                // separately for each entity and each time a physics system updates an entity it will automatically
-                // recalculate PlacementWorld for the entity and all its child entities.
-                // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
-                // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
-                if (registry.has<components::TransformParent>(entity)) {
-                    const auto &transformParent = registry.get<components::TransformParent>(entity);
-                    // NOTE: Order matters. First transform by parent's transformation then child.
-                    transformation = transformParent.transform * transformation;
-                }
-
-                auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
-                    continue;
-                }
-
-                ++mRenderedSpritesPerFrame;
-                ++mRenderedTexturesPerFrame;
-
-                mTextureRenderer->submit(shapeTransformed, texture);
-            }
+            renderStaticTextured(registry, halfViewWidth, halfViewHeight);
+            renderStaticTextured(*mSkidEntities, halfViewWidth, halfViewHeight);
+            renderDynamicTextured(registry, halfViewWidth, halfViewHeight);
 
             end(*mTextureShader, *mTextureRenderer);
 
@@ -363,7 +309,7 @@ namespace oni {
                 // Until that is fixed I can't have skids.
 
                 // NOTE: Technically I should use slippingRear, but this gives better effect
-                if (car.slippingFront && false) {
+                if (car.slippingFront || true) {
                     // TODO: This is not in the view and it will be very slow as more entities are added to the
                     // registry. Perhaps I can save the tires together with the car
                     auto carTireRRPlacement = registry.get<components::Placement>(car.tireRR);
@@ -378,19 +324,18 @@ namespace oni {
                     entities::entityID skidEntityRL{0};
                     entities::entityID skidEntityRR{0};
 
-                    skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY(), registry);
-                    skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY(), registry);
+                    skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY());
+                    skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY());
 
                     auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
 
-                    updateSkidTexture(skidMarkRLPos, skidEntityRL, registry, alpha);
-                    updateSkidTexture(skidMarkRRPos, skidEntityRR, registry, alpha);
+                    updateSkidTexture(skidMarkRLPos, skidEntityRL, alpha);
+                    updateSkidTexture(skidMarkRRPos, skidEntityRR, alpha);
                 }
             }
         }
 
-        entities::entityID SceneManager::createSkidTileIfMissing(const math::vec2 &position,
-                                                                 entt::DefaultRegistry &foregroundEntities) {
+        entities::entityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
             const auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             const auto packedIndices = math::packIntegers(x, y);
@@ -420,8 +365,8 @@ namespace oni {
                 // TODO: I can blend skid textures using this data
                 skidTexture.data = skidData;
 
-                skidTileID = entities::createStaticEntity(foregroundEntities, skidTileSize, positionInWorld);
-                entities::assignTexture(foregroundEntities, skidTileID, skidTexture);
+                skidTileID = entities::createStaticEntity(*mSkidEntities, skidTileSize, positionInWorld);
+                entities::assignTexture(*mSkidEntities, skidTileID, skidTexture);
                 mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
             } else {
                 skidTileID = mPackedSkidIndicesToEntity.at(packedIndices);
@@ -430,9 +375,9 @@ namespace oni {
         }
 
         void SceneManager::updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
-                                             entt::DefaultRegistry &foregroundEntities, common::uint8 alpha) {
-            auto skidMarksTexture = foregroundEntities.get<components::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = foregroundEntities.get<components::Shape>(
+                                             common::uint8 alpha) {
+            auto skidMarksTexture = mSkidEntities->get<components::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = mSkidEntities->get<components::Shape>(
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;
@@ -455,6 +400,70 @@ namespace oni {
 
         }
 
+        void SceneManager::renderStaticTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+                                                common::real32 halfViewHeight) {
+            auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
+                    components::Texture, components::TagStatic>();
+            for (const auto &entity: staticTextureSpriteView) {
+                const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
+                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                    continue;
+                }
+                auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                prepareTexture(texture);
 
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
+
+                // TODO: submit will fail if we reach maximum number of sprites.
+                // I could also check the number of entities using the view and decide before hand at which point I
+                // flush the renderer and open up room for new sprites.
+
+                // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
+                // Currently the renderer is limited to 32 samplers, I have to either use the reset method
+                // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
+                // by merging many textures to keep below the limit. Other solutions might be looking into other type
+                // of texture storage that can hold bigger number of textures.
+                mTextureRenderer->submit(shape, texture);
+            }
+        }
+
+        void SceneManager::renderDynamicTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+                                                 common::real32 halfViewHeight) {
+            auto dynamicTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
+                    components::Texture, components::Placement, components::TagDynamic>();
+            for (const auto &entity: dynamicTextureSpriteView) {
+                const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
+                const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
+                auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+
+                prepareTexture(texture);
+
+                auto transformation = physics::Transformation::createTransformation(placement.position,
+                                                                                    placement.rotation,
+                                                                                    placement.scale);
+
+                // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
+                // separately for each entity and each time a physics system updates an entity it will automatically
+                // recalculate PlacementWorld for the entity and all its child entities.
+                // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
+                // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
+                if (registry.has<components::TransformParent>(entity)) {
+                    const auto &transformParent = registry.get<components::TransformParent>(entity);
+                    // NOTE: Order matters. First transform by parent's transformation then child.
+                    transformation = transformParent.transform * transformation;
+                }
+
+                auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
+                if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
+                    continue;
+                }
+
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
+
+                mTextureRenderer->submit(shapeTransformed, texture);
+            }
+        }
     }
 }

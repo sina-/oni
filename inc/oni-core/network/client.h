@@ -6,6 +6,11 @@
 #include <oni-core/entities/create-entity.h>
 
 namespace oni {
+
+    namespace io {
+        class Input;
+    }
+
     namespace network {
         class Client : public Peer {
         public:
@@ -18,6 +23,8 @@ namespace oni {
             void pingServer();
 
             void sendMessage(std::string &&message);
+
+            void sendInput(const io::Input *input);
 
             // TODO: Client shouldn't care about this at all.
             entities::entityID getCarEntity() const;

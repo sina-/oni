@@ -36,8 +36,11 @@ namespace oni {
 
             void render(entt::DefaultRegistry &registry);
 
-            void renderStaticTextured(entt::DefaultRegistry& registry, common::real32 halfViewWidth, common::real32 halfViewHeight);
-            void renderDynamicTextured(entt::DefaultRegistry& registry, common::real32 halfViewWidth, common::real32 halfViewHeight);
+            void renderStaticTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+                                      common::real32 halfViewHeight);
+
+            void renderDynamicTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+                                       common::real32 halfViewHeight);
 
             void tick(entt::DefaultRegistry &registry);
 
@@ -46,6 +49,8 @@ namespace oni {
             void lookAt(common::real32 x, common::real32 y);
 
             void lookAt(common::real32 x, common::real32 y, common::real32 distance);
+
+            const components::Camera &getCamera() const;
 
             const math::mat4 &getProjectionMatrix() const;
 

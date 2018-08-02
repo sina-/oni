@@ -12,8 +12,10 @@
 namespace oni {
     namespace network {
 
-        Client::Client(entt::DefaultRegistry &foregroundEntities) : Peer::Peer(nullptr, 1, 2, 0, 0),
-                                                                    mForegroundEntities{foregroundEntities} {
+        Client::Client(entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities)
+                : Peer::Peer(nullptr, 1, 2, 0, 0),
+                  mForegroundEntities{foregroundEntities},
+                  mBackgroundEntities{backgroundEntities} {
         }
 
         Client::~Client() = default;
@@ -67,19 +69,14 @@ namespace oni {
                     mCarEntity = packet.entity;
                     break;
                 }
-                case (PacketType::WORLD_DATA): {
+                case (PacketType::FOREGROUND_ENTITIES): {
                     auto entityData = std::string(reinterpret_cast<char *>(data), size);
-
-                    //entt::DefaultRegistry reg;
-                    entities::deserialization(mForegroundEntities, entityData);
-
-                    auto view = mForegroundEntities.view<components::Car>();
-                    for (auto e: view) {
-                        auto a = mForegroundEntities.get<components::Car>(e).slippingRear;
-                        auto b = mForegroundEntities.get<components::Car>(e).distanceFromCamera;
-                    }
-
-                    mForegroundEntitiesReady = true;
+                    entities::deserialize(mForegroundEntities, entityData);
+                    break;
+                }
+                case (PacketType::BACKGROUND_ENTITIES): {
+                    auto entityData = std::string(reinterpret_cast<char *>(data), size);
+                    entities::deserialize(mBackgroundEntities, entityData);
                     break;
                 }
                 default: {

@@ -9,6 +9,6 @@ namespace oni {
 
         std::string serialize(entt::DefaultRegistry &source);
 
-        void deserialization(entt::DefaultRegistry &destination, const std::string &data);
+        void deserialize(entt::DefaultRegistry &destination, const std::string &data);
     }
 }

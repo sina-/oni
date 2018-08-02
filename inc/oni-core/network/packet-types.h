@@ -10,8 +10,9 @@ namespace oni {
             MESSAGE = 2,
             ENTITY = 3,
             CAR_ENTITY_ID = 4,
-            WORLD_DATA = 5,
-            INPUT = 6,
+            FOREGROUND_ENTITIES = 5,
+            BACKGROUND_ENTITIES = 6,
+            INPUT = 7,
         };
     }
 }

@@ -38,7 +38,6 @@ namespace oni {
         void ServerGame::loadLevel() {
             auto boxSize = math::vec2{4.0f, 1.0f};
             auto boxPositionInWorld = math::vec3{-0.5f, -2.5f, 1.0f};
-
             std::string boxTexturePath = "resources/images/box/1/box.png";
             auto boxTexture = components::Texture{};
             boxTexture.filePath = boxTexturePath;
@@ -81,7 +80,8 @@ namespace oni {
                 mTileWorld->tick(carPlacement.position.getXY(), car, *mForegroundEntities, *mBackgroundEntities);
             }
 
-            mServer->sendWorldData(*mForegroundEntities);
+            mServer->sendForegroundEntities(*mForegroundEntities);
+            mServer->sendBackgroundEntities(*mBackgroundEntities);
         }
 
         void ServerGame::_display() {}

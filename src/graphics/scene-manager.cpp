@@ -465,5 +465,9 @@ namespace oni {
                 mTextureRenderer->submit(shapeTransformed, texture);
             }
         }
+
+        const components::Camera &SceneManager::getCamera() const {
+            return mCamera;
+        }
     }
 }

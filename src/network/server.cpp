@@ -159,9 +159,16 @@ namespace oni {
             }
         }
 
-        void Server::sendWorldData(entt::DefaultRegistry &registry) {
+        void Server::sendForegroundEntities(entt::DefaultRegistry &registry) {
             auto data = entities::serialize(registry);
-            auto type = PacketType::WORLD_DATA;
+            auto type = PacketType::FOREGROUND_ENTITIES;
+
+            broadcast(type, std::move(data));
+        }
+
+        void Server::sendBackgroundEntities(entt::DefaultRegistry &registry) {
+            auto data = entities::serialize(registry);
+            auto type = PacketType::BACKGROUND_ENTITIES;
 
             broadcast(type, std::move(data));
         }
@@ -186,12 +193,13 @@ namespace oni {
             return 0;
         }
 
-        const io::Input &Server::getClientInput(clientID id) const {
+        io::Input Server::getClientInput(clientID id) const {
             if (mClientInput.find(id) != mClientInput.end()) {
                 return mClientInput.at(id);
             }
 
             return io::Input{};
         }
+
     }
 }

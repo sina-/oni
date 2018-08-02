@@ -27,7 +27,9 @@ namespace oni {
 
             ~Server() override;
 
-            void sendWorldData(entt::DefaultRegistry &registry);
+            void sendForegroundEntities(entt::DefaultRegistry &registry);
+
+            void sendBackgroundEntities(entt::DefaultRegistry &registry);
 
             void tick(entt::DefaultRegistry &registry);
 
@@ -37,7 +39,7 @@ namespace oni {
 
             entities::entityID getCarEntity(clientID id) const;
 
-            const io::Input &getClientInput(clientID id) const;
+            io::Input getClientInput(clientID id) const;
 
 
         private:

@@ -14,7 +14,7 @@ namespace oni {
     namespace network {
         class Client : public Peer {
         public:
-            Client(entt::DefaultRegistry &foregroundEntities);
+            Client(entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities);
 
             ~Client() override;
 
@@ -29,9 +29,6 @@ namespace oni {
             // TODO: Client shouldn't care about this at all.
             entities::entityID getCarEntity() const;
 
-            // TODO: This is messed up
-            bool mForegroundEntitiesReady{false};
-
         private:
             void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
 
@@ -45,6 +42,7 @@ namespace oni {
             entities::entityID mCarEntity{0};
 
             entt::DefaultRegistry &mForegroundEntities;
+            entt::DefaultRegistry &mBackgroundEntities;
 
         };
     }

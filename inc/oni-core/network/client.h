@@ -14,7 +14,7 @@ namespace oni {
     namespace network {
         class Client : public Peer {
         public:
-            Client(entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities);
+            Client();
 
             ~Client() override;
 
@@ -26,8 +26,10 @@ namespace oni {
 
             void sendInput(const io::Input *input);
 
-            // TODO: Client shouldn't care about this at all.
-            entities::entityID getCarEntity() const;
+        public:
+            void registerCarEntityIDPacketHandler(std::function<void(entities::entityID)> &&handler);
+            void registerForegroundEntitiesPacketHandler(std::function<void(std::string&&)> &&handler);
+            void registerBackgroundEntitiesPacketHandler(std::function<void(std::string&&)> &&handler);
 
         private:
             void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
@@ -36,14 +38,15 @@ namespace oni {
 
             void postDisconnectHook(const ENetEvent *event) override;
 
+            void requestSessionSetup();
+
         private:
             ENetPeer *mEnetPeer;
 
-            entities::entityID mCarEntity{0};
-
-            entt::DefaultRegistry &mForegroundEntities;
-            entt::DefaultRegistry &mBackgroundEntities;
-
+        private:
+            std::function<void(entities::entityID)> mCarEntityIDPacketHandler{};
+            std::function<void(std::string &&)> mForegroundEntitiesPacketHandler{};
+            std::function<void(std::string &&)> mBackgroundEntitiesPacketHandler{};
         };
     }
 }

@@ -19,6 +19,10 @@
 
 namespace oni {
     namespace server {
+        typedef std::map<network::clientID, io::Input> ClientInputMap;
+        typedef std::map<network::clientID, entities::entityID> ClientCarEntityMap;
+
+
         class ServerGame : public game::Game {
         public:
             explicit ServerGame(const network::Address &address);
@@ -34,7 +38,7 @@ namespace oni {
             void loadLevel();
 
         protected:
-            void _tick(const common::real32 tickTime) override;
+            void _tick(common::real32 tickTime) override;
 
             void _render() override;
 
@@ -45,6 +49,11 @@ namespace oni {
             void showTPS(int16 tps) override;
 
             void showFET(common::int16 fet) override;
+
+        private:
+            entities::entityID setupSessionPacketHandler(network::clientID clientID);
+
+            void clientInputPacketHandler(network::clientID, io::Input input);
 
         private:
             // TODO: Think about wrapping these in a struct and passing that to the systems and letting the system
@@ -61,7 +70,8 @@ namespace oni {
             entities::entityID mTruckEntity{};
             entities::entityID mBoxEntity{};
 
-            std::vector<entities::entityID> mCarEntities{};
+            ClientInputMap mClientInputMap{};
+            ClientCarEntityMap mClientCarEntityMap{};
 
             components::CarConfig mCarConfigDefault{};
         };

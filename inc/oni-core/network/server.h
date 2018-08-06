@@ -16,14 +16,11 @@ namespace oni {
         class Dynamics;
     }
     namespace network {
-        typedef std::map<common::uint32, entities::entityID> clientCarEntityMap;
-        typedef std::map<common::uint32, io::Input> clientInputMap;
         typedef common::uint32 clientID;
 
         class Server : public Peer {
         public:
-            Server(const Address *address, common::uint8 numClients, common::uint8 numChannels,
-                   entt::DefaultRegistry &foregroundEntities, physics::Dynamics &dynamics);
+            Server(const Address *address, common::uint8 numClients, common::uint8 numChannels);
 
             ~Server() override;
 
@@ -33,14 +30,12 @@ namespace oni {
 
             void tick(entt::DefaultRegistry &registry);
 
-            std::vector<entities::entityID> getCarEntities() const;
-
             const std::vector<clientID> &getClients() const;
 
-            entities::entityID getCarEntity(clientID id) const;
+        public:
+            void registerSetupSessionPacketHandler(std::function<entities::entityID(network::clientID)> &&handler);
 
-            io::Input getClientInput(clientID id) const;
-
+            void registerClientInputPacketHandler(std::function<void(network::clientID, io::Input)> &&handler);
 
         private:
             Server();
@@ -51,13 +46,14 @@ namespace oni {
 
             void postDisconnectHook(const ENetEvent *event) override;
 
-        private:
-            entt::DefaultRegistry &mForegroundEntities;
-            physics::Dynamics &mDynamics;
+            void sendCarEntityID(clientID client, ENetPeer *peer);
 
-            clientCarEntityMap mClientCarEntity{};
-            clientInputMap mClientInput{};
+        private:
             std::vector<clientID> mClients{};
+
+        private:
+            std::function<entities::entityID(network::clientID)> mSetupSessionPacketHandler{};
+            std::function<void(network::clientID, io::Input)> mClientInputPacketHandler{};
         };
     }
 }

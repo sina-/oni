@@ -8,11 +8,11 @@ namespace oni {
             UNKNOWN = 0,
             PING = 1,
             MESSAGE = 2,
-            ENTITY = 3,
+            SETUP_SESSION = 3,
             CAR_ENTITY_ID = 4,
             FOREGROUND_ENTITIES = 5,
             BACKGROUND_ENTITIES = 6,
-            INPUT = 7,
+            CLIENT_INPUT = 7,
         };
     }
 }

@@ -12,10 +12,7 @@
 namespace oni {
     namespace network {
 
-        Client::Client(entt::DefaultRegistry &foregroundEntities, entt::DefaultRegistry &backgroundEntities)
-                : Peer::Peer(nullptr, 1, 2, 0, 0),
-                  mForegroundEntities{foregroundEntities},
-                  mBackgroundEntities{backgroundEntities} {
+        Client::Client() : Peer::Peer(nullptr, 1, 2, 0, 0) {
         }
 
         Client::~Client() = default;
@@ -27,16 +24,18 @@ namespace oni {
 
             mEnetPeer = enet_host_connect(mEnetHost, &enetAddress, 2, 0);
             if (!mEnetPeer) {
-                std::runtime_error(
+                throw std::runtime_error(
                         "Failed to initiate connection to: " + address.host + ":" + std::to_string(address.port));
             }
             ENetEvent event;
             if (enet_host_service(mEnetHost, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
                 io::printl("Connected to: " + address.host + ":" + std::to_string(address.port));
             } else {
-                std::runtime_error(
+                throw std::runtime_error(
                         "Failed connecting to: " + address.host + ":" + std::to_string(address.port));
             }
+
+            requestSessionSetup();
         }
 
         void Client::pingServer() {
@@ -53,7 +52,6 @@ namespace oni {
                 case (PacketType::PING): {
                     auto packet = deserialize<PingPacket>(data, size);
                     std::cout << packet.timestamp << std::endl;
-
                     break;
                 }
                 case (PacketType::MESSAGE): {
@@ -61,22 +59,19 @@ namespace oni {
                     std::cout << packet.data << std::endl;
                     break;
                 }
-                case (PacketType::ENTITY): {
-                    break;
-                }
                 case (PacketType::CAR_ENTITY_ID): {
                     auto packet = deserialize<EntityPacket>(data, size);
-                    mCarEntity = packet.entity;
+                    mCarEntityIDPacketHandler(packet.entity);
                     break;
                 }
                 case (PacketType::FOREGROUND_ENTITIES): {
                     auto entityData = std::string(reinterpret_cast<char *>(data), size);
-                    entities::deserialize(mForegroundEntities, entityData);
+                    mForegroundEntitiesPacketHandler(std::move(entityData));
                     break;
                 }
                 case (PacketType::BACKGROUND_ENTITIES): {
                     auto entityData = std::string(reinterpret_cast<char *>(data), size);
-                    entities::deserialize(mBackgroundEntities, entityData);
+                    mBackgroundEntitiesPacketHandler(std::move(entityData));
                     break;
                 }
                 default: {
@@ -95,22 +90,35 @@ namespace oni {
         }
 
         void Client::postConnectHook(const ENetEvent *event) {
-
         }
 
         void Client::postDisconnectHook(const ENetEvent *event) {
 
         }
 
-        entities::entityID Client::getCarEntity() const {
-            return mCarEntity;
-        }
-
         void Client::sendInput(const io::Input *input) {
-            auto type = PacketType::INPUT;
+            auto type = PacketType::CLIENT_INPUT;
             auto data = serialize<io::Input>(*input);
 
             send(type, std::move(data), mEnetPeer);
+        }
+
+        void Client::requestSessionSetup() {
+            auto type = PacketType::SETUP_SESSION;
+            auto data = std::string{};
+            send(type, std::move(data), mEnetPeer);
+        }
+
+        void Client::registerCarEntityIDPacketHandler(std::function<void(entities::entityID)> &&handler) {
+            mCarEntityIDPacketHandler = std::move(handler);
+        }
+
+        void Client::registerForegroundEntitiesPacketHandler(std::function<void(std::string &&)> &&handler) {
+            mForegroundEntitiesPacketHandler = std::move(handler);
+        }
+
+        void Client::registerBackgroundEntitiesPacketHandler(std::function<void(std::string &&)> &&handler) {
+            mBackgroundEntitiesPacketHandler = std::move(handler);
         }
     }
 }

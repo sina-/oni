@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <oni-core/network/server.h>
 
 #include <stdexcept>
@@ -22,94 +24,18 @@
 
 namespace oni {
     namespace network {
-        Server::Server(const Address *address, common::uint8 numClients, common::uint8 numChannels,
-                       entt::DefaultRegistry &foregroundEntities, physics::Dynamics &dynamics) :
-                Peer::Peer(address, numClients, numChannels, 0, 0),
-                mForegroundEntities{foregroundEntities}, mDynamics{dynamics} {
+        Server::Server(const Address *address, common::uint8 numClients, common::uint8 numChannels) :
+                Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
 
         Server::~Server() = default;
 
         void Server::postConnectHook(const ENetEvent *event) {
-            auto carEntity = entities::createVehicleEntity(mForegroundEntities, *mDynamics.getPhysicsWorld());
-
-            auto carTexture = components::Texture{};
-            std::string carTexturePath = "resources/images/car/1/car.png";
-            carTexture.filePath = carTexturePath;
-            carTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            entities::assignTexture(mForegroundEntities, carEntity, carTexture);
-
-            // IMPORTANT NOTE: Newbie trap! carConfig must be a copy, otherwise createEntity calls will resize the data
-            // storage and the old reference will be invalidated and then we end-up getting garbage :(
-            auto carConfig = mForegroundEntities.get<components::CarConfig>(carEntity);
-
-            std::string carTireTexturePath = "resources/images/car/1/car-tire.png";
-            auto carTireTexture = components::Texture{};
-            carTireTexture.filePath = carTireTexturePath;
-            carTireTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-
-            auto tireRotation = static_cast<common::real32>(math::toRadians(90.0f));
-
-            auto tireSize = math::vec2{};
-            tireSize.x = static_cast<common::real32>(carConfig.wheelWidth);
-            tireSize.y = static_cast<common::real32>(carConfig.wheelRadius * 2);
-
-            auto tireFRPos = math::vec3{};
-            tireFRPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
-            tireFRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
-            auto carTireFREntity = entities::createDynamicEntity(mForegroundEntities, tireSize, tireFRPos,
-                                                                 tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(mForegroundEntities, carEntity,
-                                                                             carTireFREntity);
-            entities::assignTexture(mForegroundEntities, carTireFREntity, carTireTexture);
-
-            auto tireFLPos = math::vec3{};
-            tireFLPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
-            tireFLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
-            auto carTireFLEntity = entities::createDynamicEntity(mForegroundEntities, tireSize, tireFLPos,
-                                                                 tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(mForegroundEntities, carEntity,
-                                                                             carTireFLEntity);
-            entities::assignTexture(mForegroundEntities, carTireFLEntity, carTireTexture);
-
-            auto tireRRPos = math::vec3{};
-            tireRRPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
-            tireRRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
-            auto carTireRREntity = entities::createDynamicEntity(mForegroundEntities, tireSize, tireRRPos,
-                                                                 tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(mForegroundEntities, carEntity,
-                                                                             carTireRREntity);
-            entities::assignTexture(mForegroundEntities, carTireRREntity, carTireTexture);
-
-            auto tireRLPos = math::vec3{};
-            tireRLPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
-            tireRLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
-            auto carTireRLEntity = entities::createDynamicEntity(mForegroundEntities, tireSize, tireRLPos,
-                                                                 tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(mForegroundEntities, carEntity,
-                                                                             carTireRLEntity);
-            entities::assignTexture(mForegroundEntities, carTireRLEntity, carTireTexture);
-
-            auto &car = mForegroundEntities.get<components::Car>(carEntity);
-            car.tireFR = carTireFREntity;
-            car.tireFL = carTireFLEntity;
-            car.tireRR = carTireRREntity;
-            car.tireRL = carTireRLEntity;
-
-            mClientCarEntity[event->peer->connectID] = carEntity;
-
             mClients.push_back(event->peer->connectID);
-
-            auto packet = EntityPacket{carEntity};
-            auto data = serialize<EntityPacket>(packet);
-            auto type = PacketType::CAR_ENTITY_ID;
-            send(type, std::move(data), event->peer);
         }
 
         void Server::postDisconnectHook(const ENetEvent *event) {
             auto clientID = event->peer->connectID;
-            mClientCarEntity.erase(clientID);
-            mClientInput.erase(clientID);
             auto iter = mClients.begin();
             while (iter != mClients.end()) {
                 if (*iter == clientID) {
@@ -141,12 +67,14 @@ namespace oni {
 
                     break;
                 }
-                case (PacketType::ENTITY): {
+                case (PacketType::SETUP_SESSION): {
+                    auto carEntity = mSetupSessionPacketHandler(peer->connectID);
+                    sendCarEntityID(carEntity, peer);
                     break;
                 }
-                case (PacketType::INPUT): {
+                case (PacketType::CLIENT_INPUT): {
                     auto input = deserialize<io::Input>(data, size);
-                    mClientInput[peer->connectID] = input;
+                    mClientInputPacketHandler(peer->connectID, input);
 
                     break;
                 }
@@ -173,33 +101,24 @@ namespace oni {
             broadcast(type, std::move(data));
         }
 
-        std::vector<entities::entityID> Server::getCarEntities() const {
-            std::vector<entities::entityID> carEntities{};
-            for (auto entity: mClientCarEntity) {
-                carEntities.push_back(entity.second);
-            }
-            return carEntities;
-        }
-
         const std::vector<clientID> &Server::getClients() const {
             return mClients;
         }
 
-        entities::entityID Server::getCarEntity(clientID id) const {
-            if (mClientCarEntity.find(id) != mClientCarEntity.end()) {
-                return mClientCarEntity.at(id);
-            }
+        void Server::sendCarEntityID(entities::entityID entityID, ENetPeer *peer) {
+            auto packet = EntityPacket{entityID};
+            auto data = serialize<EntityPacket>(packet);
+            auto type = PacketType::CAR_ENTITY_ID;
 
-            return 0;
+            send(type, std::move(data), peer);
         }
 
-        io::Input Server::getClientInput(clientID id) const {
-            if (mClientInput.find(id) != mClientInput.end()) {
-                return mClientInput.at(id);
-            }
-
-            return io::Input{};
+        void Server::registerSetupSessionPacketHandler(std::function<entities::entityID(network::clientID)> &&handler) {
+            mSetupSessionPacketHandler = std::move(handler);
         }
 
+        void Server::registerClientInputPacketHandler(std::function<void(network::clientID, io::Input)> &&handler) {
+            mClientInputPacketHandler = std::move(handler);
+        }
     }
 }

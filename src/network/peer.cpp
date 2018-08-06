@@ -50,7 +50,7 @@ namespace oni {
                         break;
                     }
                     case ENET_EVENT_TYPE_RECEIVE: {
-                        // TODO: Need to gather stats on invalid packets and there source!
+                        // TODO: Need to gather stats on invalid packets and their sources!
                         if (!event.packet->data) {
                             return;
                         }
@@ -60,11 +60,10 @@ namespace oni {
 
                         auto data = event.packet->data;
                         auto header = getHeader(data);
-                        auto headerSize = 1;
-                        auto dataWithoutHeaderSize = event.packet->dataLength - headerSize;
+                        auto dataHeadless = event.packet->dataLength - 1;
                         data += 1;
 
-                        handle(event.peer, data, dataWithoutHeaderSize, header);
+                        handle(event.peer, data, dataHeadless, header);
 
                         enet_packet_destroy(event.packet);
                         break;

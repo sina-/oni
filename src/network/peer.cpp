@@ -93,11 +93,10 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        void Peer::send(PacketType type, std::string &&data, ENetPeer *peer) {
-            data.insert(0, 1, static_cast<common::uint8 >(type));
+        void Peer::send(PacketType type, std::string &data, ENetPeer *peer) {
+            data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
 
-            ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(),
-                                                            ENET_PACKET_FLAG_RELIABLE | ENET_PACKET_FLAG_NO_ALLOCATE);
+            ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
             assert(packetToServer);
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);
@@ -114,10 +113,9 @@ namespace oni {
             return header;
         }
 
-        void Peer::broadcast(PacketType type, std::string &&data) {
-            data.insert(0, 1, static_cast<common::uint8 >(type));
-            ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE |
-                                                                                      ENET_PACKET_FLAG_NO_ALLOCATE);
+        void Peer::broadcast(PacketType type, std::string &data) {
+            data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
+            ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
             assert(packetToPeers);
             enet_host_broadcast(mEnetHost, 0, packetToPeers);
 

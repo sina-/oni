@@ -88,17 +88,17 @@ namespace oni {
         }
 
         void Server::sendForegroundEntities(entt::DefaultRegistry &registry) {
-            auto data = entities::serialize(registry);
+            std::string data = entities::serialize(registry);
             auto type = PacketType::FOREGROUND_ENTITIES;
 
-            broadcast(type, std::move(data));
+            broadcast(type, data);
         }
 
         void Server::sendBackgroundEntities(entt::DefaultRegistry &registry) {
-            auto data = entities::serialize(registry);
+            std::string data = entities::serialize(registry);
             auto type = PacketType::BACKGROUND_ENTITIES;
 
-            broadcast(type, std::move(data));
+            broadcast(type, data);
         }
 
         const std::vector<clientID> &Server::getClients() const {
@@ -110,7 +110,7 @@ namespace oni {
             auto data = serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;
 
-            send(type, std::move(data), peer);
+            send(type, data, peer);
         }
 
         void Server::registerSetupSessionPacketHandler(std::function<entities::entityID(network::clientID)> &&handler) {

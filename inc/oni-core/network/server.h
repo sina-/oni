@@ -16,7 +16,6 @@ namespace oni {
         class Dynamics;
     }
     namespace network {
-        typedef common::uint32 clientID;
 
         class Server : public Peer {
         public:
@@ -30,12 +29,9 @@ namespace oni {
 
             void tick(entt::DefaultRegistry &registry);
 
-            const std::vector<clientID> &getClients() const;
+            const std::vector<PeerID> &getClients() const;
 
-        public:
-            void registerSetupSessionPacketHandler(std::function<entities::entityID(network::clientID)> &&handler);
-
-            void registerClientInputPacketHandler(std::function<void(network::clientID, io::Input)> &&handler);
+            void sendCarEntityID(entities::EntityID entityID, PeerID id);
 
         private:
             Server();
@@ -46,14 +42,8 @@ namespace oni {
 
             void postDisconnectHook(const ENetEvent *event) override;
 
-            void sendCarEntityID(clientID client, ENetPeer *peer);
-
         private:
-            std::vector<clientID> mClients{};
-
-        private:
-            std::function<entities::entityID(network::clientID)> mSetupSessionPacketHandler{};
-            std::function<void(network::clientID, io::Input)> mClientInputPacketHandler{};
+            std::vector<PeerID> mClients{};
         };
     }
 }

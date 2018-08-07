@@ -242,10 +242,10 @@ namespace oni {
 
             common::carSimDouble distanceFromCamera{};
 
-            entities::entityID tireFR{};
-            entities::entityID tireFL{};
-            entities::entityID tireRR{};
-            entities::entityID tireRL{};
+            entities::EntityID tireFR{};
+            entities::EntityID tireFL{};
+            entities::EntityID tireRR{};
+            entities::EntityID tireRL{};
 
             template<class Archive>
             void serialize(Archive &archive) {

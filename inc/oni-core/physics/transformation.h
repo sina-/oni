@@ -50,11 +50,11 @@ namespace oni {
                                                        math::vec3 &operand);
 
             static void updatePlacement(entt::DefaultRegistry &registry,
-                                        entities::entityID entity,
+                                        entities::EntityID entity,
                                         const components::Placement &placement);
 
             static void updateTransformParent(entt::DefaultRegistry &registry,
-                                              entities::entityID entity,
+                                              entities::EntityID entity,
                                               const components::TransformParent &transformParent);
         };
     }

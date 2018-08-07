@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <map>
 
 #include <enet/enet.h>
 #include <cereal/archives/portable_binary.hpp>
@@ -29,6 +30,22 @@ namespace oni {
             common::uint16 port;
         };
 
+        typedef common::uint32 PeerID;
+
+        template<class T>
+        T deserialize(const std::string &data) {
+            std::istringstream storage;
+            storage.str(data);
+
+            T result;
+            {
+                cereal::PortableBinaryInputArchive input{storage};
+                input(result);
+            }
+
+            return result;
+        }
+
         class Peer {
         protected:
             Peer();
@@ -42,6 +59,8 @@ namespace oni {
             virtual ~Peer();
 
             void poll();
+
+            void registerPacketHandler(PacketType type, std::function<void(PeerID, const std::string &)> &&handler);
 
         protected:
             virtual void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) = 0;
@@ -86,7 +105,9 @@ namespace oni {
             virtual void postDisconnectHook(const ENetEvent *event) = 0;
 
         protected:
-            ENetHost *mEnetHost;
+            ENetHost *mEnetHost{};
+            std::map<PeerID, ENetPeer *> mPeers{};
+            std::map<PacketType, std::function<void(PeerID, const std::string &)>> mPacketHandlers{};
         };
     }
 }

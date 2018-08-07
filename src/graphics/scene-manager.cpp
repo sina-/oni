@@ -321,8 +321,8 @@ namespace oni {
                     auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
                     auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
 
-                    entities::entityID skidEntityRL{0};
-                    entities::entityID skidEntityRR{0};
+                    entities::EntityID skidEntityRL{0};
+                    entities::EntityID skidEntityRR{0};
 
                     skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY());
                     skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY());
@@ -335,12 +335,12 @@ namespace oni {
             }
         }
 
-        entities::entityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
+        entities::EntityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
             const auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             const auto packedIndices = math::packIntegers(x, y);
 
-            entities::entityID skidTileID{};
+            entities::EntityID skidTileID{};
             auto exists = mPackedSkidIndicesToEntity.find(packedIndices) != mPackedSkidIndicesToEntity.end();
             if (!exists) {
                 const auto skidIndexX = math::positionToIndex(position.x, mSkidTileSizeX);
@@ -374,7 +374,7 @@ namespace oni {
             return skidTileID;
         }
 
-        void SceneManager::updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity,
+        void SceneManager::updateSkidTexture(const math::vec3 &position, entities::EntityID skidTextureEntity,
                                              common::uint8 alpha) {
             auto skidMarksTexture = mSkidEntities->get<components::Texture>(skidTextureEntity);
             const auto skidMarksTexturePos = mSkidEntities->get<components::Shape>(

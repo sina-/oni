@@ -34,7 +34,7 @@ namespace oni {
         }
 
         void Transformation::updatePlacement(entt::DefaultRegistry &registry,
-                                             entities::entityID entity,
+                                             entities::EntityID entity,
                                              const components::Placement &placement) {
             registry.replace<components::Placement>(entity, placement);
 
@@ -51,7 +51,7 @@ namespace oni {
         }
 
         void Transformation::updateTransformParent(entt::DefaultRegistry &registry,
-                                                   entities::entityID entity,
+                                                   entities::EntityID entity,
                                                    const components::TransformParent &transformParent) {
             // TODO: This function should recurse
             registry.replace<components::TransformParent>(entity, transformParent);

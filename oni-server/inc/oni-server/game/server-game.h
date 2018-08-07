@@ -19,9 +19,8 @@
 
 namespace oni {
     namespace server {
-        typedef std::map<network::clientID, io::Input> ClientInputMap;
-        typedef std::map<network::clientID, entities::entityID> ClientCarEntityMap;
-
+        typedef std::map<network::PeerID, io::Input> ClientInputMap;
+        typedef std::map<network::PeerID, entities::EntityID> ClientCarEntityMap;
 
         class ServerGame : public game::Game {
         public:
@@ -51,9 +50,9 @@ namespace oni {
             void showFET(common::int16 fet) override;
 
         private:
-            entities::entityID setupSessionPacketHandler(network::clientID clientID);
+            void setupSessionPacketHandler(network::PeerID, const std::string &data);
 
-            void clientInputPacketHandler(network::clientID, io::Input input);
+            void clientInputPacketHandler(network::PeerID, const std::string &data);
 
         private:
             // TODO: Think about wrapping these in a struct and passing that to the systems and letting the system
@@ -67,8 +66,8 @@ namespace oni {
             network::Address mServerAddress{};
             std::unique_ptr<network::Server> mServer{};
 
-            entities::entityID mTruckEntity{};
-            entities::entityID mBoxEntity{};
+            entities::EntityID mTruckEntity{};
+            entities::EntityID mBoxEntity{};
 
             ClientInputMap mClientInputMap{};
             ClientCarEntityMap mClientCarEntityMap{};

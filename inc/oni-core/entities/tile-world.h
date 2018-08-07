@@ -12,7 +12,7 @@
 namespace oni {
     namespace entities {
         class TileWorld {
-            using PackedIndiciesToEntity = typename std::map<common::uint64, entities::entityID>;
+            using PackedIndiciesToEntity = typename std::map<common::uint64, entities::EntityID>;
         public:
 
             TileWorld();

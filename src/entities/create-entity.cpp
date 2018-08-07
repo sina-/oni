@@ -7,7 +7,7 @@
 namespace oni {
     namespace entities {
 
-        entityID createSpriteEntity(entt::DefaultRegistry &registry,
+        EntityID createSpriteEntity(entt::DefaultRegistry &registry,
                                     const math::vec4 &color,
                                     const math::vec2 &size,
                                     const math::vec3 &positionInWorld) {
@@ -26,7 +26,7 @@ namespace oni {
             return entity;
         }
 
-        entityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
+        EntityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
                                           const math::vec4 &color,
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld) {
@@ -49,7 +49,7 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        entityID createDynamicEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+        EntityID createDynamicEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
                                      const math::vec3 &positionInWorld,
                                      const common::real32 heading, const math::vec3 &scale) {
             auto entity = registry.create();
@@ -74,7 +74,7 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        entityID createDynamicPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+        EntityID createDynamicPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld, const common::real32 heading,
                                             const math::vec3 &scale) {
@@ -123,7 +123,7 @@ namespace oni {
             return entity;
         }
 
-        entityID createStaticEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+        EntityID createStaticEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
                                     const math::vec3 &positionInWorld) {
             auto entity = registry.create();
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
@@ -139,7 +139,7 @@ namespace oni {
             return entity;
         }
 
-        entityID createStaticPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+        EntityID createStaticPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
                                            const math::vec2 &size,
                                            const math::vec3 &positionInWorld) {
             auto entity = registry.create();
@@ -174,7 +174,7 @@ namespace oni {
             return entity;
         }
 
-        entityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
+        EntityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
                                   const std::string &text,
                                   const math::vec3 &position) {
             // TODO: This is incompelte
@@ -183,7 +183,7 @@ namespace oni {
             return entity;
         }
 
-        entityID createTextStaticEntity(entt::DefaultRegistry &registry,
+        EntityID createTextStaticEntity(entt::DefaultRegistry &registry,
                                         graphics::FontManager &fontManager,
                                         const std::string &text,
                                         const math::vec3 &position,
@@ -198,7 +198,7 @@ namespace oni {
 
         }
 
-        entityID createVehicleEntity(entt::DefaultRegistry &registry, b2World &physicsWorld) {
+        EntityID createVehicleEntity(entt::DefaultRegistry &registry, b2World &physicsWorld) {
             auto entity = registry.create();
 
             auto carConfig = components::CarConfig();
@@ -282,7 +282,7 @@ namespace oni {
             return entity;
         }
 
-        void assignTexture(entt::DefaultRegistry &registry, entityID entity, const components::Texture &texture) {
+        void assignTexture(entt::DefaultRegistry &registry, EntityID entity, const components::Texture &texture) {
             registry.assign<components::Texture>(entity, texture);
         }
     }

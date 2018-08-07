@@ -26,13 +26,6 @@ namespace oni {
 
             void sendInput(const io::Input *input);
 
-        public:
-            void registerCarEntityIDPacketHandler(std::function<void(entities::entityID)> &&handler);
-
-            void registerForegroundEntitiesPacketHandler(std::function<void(const std::string &)> &&handler);
-
-            void registerBackgroundEntitiesPacketHandler(std::function<void(const std::string &)> &&handler);
-
         private:
             void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
 
@@ -44,11 +37,6 @@ namespace oni {
 
         private:
             ENetPeer *mEnetPeer;
-
-        private:
-            std::function<void(entities::entityID)> mCarEntityIDPacketHandler{};
-            std::function<void(const std::string &)> mForegroundEntitiesPacketHandler{};
-            std::function<void(const std::string &)> mBackgroundEntitiesPacketHandler{};
         };
     }
 }

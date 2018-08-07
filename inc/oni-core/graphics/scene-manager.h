@@ -88,10 +88,10 @@ namespace oni {
 
             void prepareTexture(components::Texture &texture);
 
-            entities::entityID createSkidTileIfMissing(const math::vec2 &position);
+            entities::EntityID createSkidTileIfMissing(const math::vec2 &position);
 
             void
-            updateSkidTexture(const math::vec3 &position, entities::entityID skidTextureEntity, common::uint8 alpha);
+            updateSkidTexture(const math::vec3 &position, entities::EntityID skidTextureEntity, common::uint8 alpha);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -104,7 +104,7 @@ namespace oni {
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            std::map<common::uint64, entities::entityID> mPackedSkidIndicesToEntity{};
+            std::map<common::uint64, entities::EntityID> mPackedSkidIndicesToEntity{};
 
             const common::uint16 mSkidTileSizeX{0};
             const common::uint16 mSkidTileSizeY{0};

@@ -46,6 +46,8 @@ namespace oni {
                                ip,
                                event.peer->address.port);
 
+                        mPeers[event.peer->connectID] = event.peer;
+
                         postConnectHook(&event);
                         break;
                     }
@@ -73,6 +75,7 @@ namespace oni {
 
                         postDisconnectHook(&event);
 
+                        mPeers.erase(event.peer->connectID);
                         event.peer->data = nullptr;
                         break;
                     }
@@ -120,6 +123,11 @@ namespace oni {
             enet_host_broadcast(mEnetHost, 0, packetToPeers);
 
             enet_host_flush(mEnetHost);
+        }
+
+        void Peer::registerPacketHandler(PacketType type, std::function<void(PeerID, const std::string &)> &&handler) {
+            assert(mPacketHandlers.find(type) == mPacketHandlers.end());
+            mPacketHandlers[type] = std::move(handler);
         }
     }
 }

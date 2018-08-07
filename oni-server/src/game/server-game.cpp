@@ -30,10 +30,12 @@ namespace oni {
 
             mServer = std::make_unique<network::Server>(&address, 16, 2);
 
-            mServer->registerSetupSessionPacketHandler(
-                    std::bind(&ServerGame::setupSessionPacketHandler, this, std::placeholders::_1));
-            mServer->registerClientInputPacketHandler(
-                    std::bind(&ServerGame::clientInputPacketHandler, this, std::placeholders::_1, std::placeholders::_2));
+            mServer->registerPacketHandler(network::PacketType::SETUP_SESSION,
+                                           std::bind(&ServerGame::setupSessionPacketHandler, this,
+                                                     std::placeholders::_1, std::placeholders::_2));
+            mServer->registerPacketHandler(network::PacketType::CLIENT_INPUT,
+                                           std::bind(&ServerGame::clientInputPacketHandler, this, std::placeholders::_1,
+                                                     std::placeholders::_2));
 
             loadLevel();
         }
@@ -65,7 +67,7 @@ namespace oni {
             entities::assignTexture(*mForegroundEntities, mTruckEntity, truckTexture);
         }
 
-        entities::entityID ServerGame::setupSessionPacketHandler(network::clientID clientID) {
+        void ServerGame::setupSessionPacketHandler(network::PeerID clientID, const std::string &data) {
             auto carEntity = entities::createVehicleEntity(*mForegroundEntities, *mDynamics->getPhysicsWorld());
 
             auto carTexture = components::Texture{};
@@ -133,10 +135,11 @@ namespace oni {
 
             mClientCarEntityMap[clientID] = carEntity;
 
-            return carEntity;
+            mServer->sendCarEntityID(carEntity, clientID);
         }
 
-        void ServerGame::clientInputPacketHandler(network::clientID clientID, io::Input input) {
+        void ServerGame::clientInputPacketHandler(network::PeerID clientID, const std::string &data) {
+            auto input = network::deserialize<io::Input>(data);
             // TODO: Avoid copy by using a unique_ptr or something
             mClientInputMap[clientID] = input;
         }

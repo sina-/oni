@@ -10,8 +10,8 @@ namespace oni {
     namespace entities {
 
         void TransformationHierarchy::createTransformationHierarchy(entt::DefaultRegistry &registry,
-                                                                    const entities::entityID parent,
-                                                                    const entities::entityID child) {
+                                                                    const entities::EntityID parent,
+                                                                    const entities::EntityID child) {
             if (registry.has<components::TransformChildren>(parent)) {
                 auto transformChildren = registry.get<components::TransformChildren>(parent);
                 transformChildren.children.emplace_back(child);

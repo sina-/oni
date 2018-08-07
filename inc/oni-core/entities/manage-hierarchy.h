@@ -11,8 +11,8 @@ namespace oni {
 
         public:
             static void createTransformationHierarchy(entt::DefaultRegistry &registry,
-                                                      const entities::entityID parent,
-                                                      const entities::entityID child);
+                                                      const entities::EntityID parent,
+                                                      const entities::EntityID child);
         };
     }
 }

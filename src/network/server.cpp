@@ -50,6 +50,7 @@ namespace oni {
         }
 
         void Server::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
+            auto peerID = peer->connectID;
             switch (header) {
                 case (PacketType::PING): {
                     auto packet = deserialize<PingPacket>(data, size);
@@ -68,14 +69,12 @@ namespace oni {
                     break;
                 }
                 case (PacketType::SETUP_SESSION): {
-                    auto carEntity = mSetupSessionPacketHandler(peer->connectID);
-                    sendCarEntityID(carEntity, peer);
+                    mPacketHandlers[PacketType::SETUP_SESSION](peerID, "");
                     break;
                 }
                 case (PacketType::CLIENT_INPUT): {
-                    auto input = deserialize<io::Input>(data, size);
-                    mClientInputPacketHandler(peer->connectID, input);
-
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::CLIENT_INPUT](peerID, dataString);
                     break;
                 }
                 default: {
@@ -101,24 +100,16 @@ namespace oni {
             broadcast(type, data);
         }
 
-        const std::vector<clientID> &Server::getClients() const {
+        const std::vector<PeerID> &Server::getClients() const {
             return mClients;
         }
 
-        void Server::sendCarEntityID(entities::entityID entityID, ENetPeer *peer) {
+        void Server::sendCarEntityID(entities::EntityID entityID, PeerID peerID) {
             auto packet = EntityPacket{entityID};
             auto data = serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;
 
-            send(type, data, peer);
-        }
-
-        void Server::registerSetupSessionPacketHandler(std::function<entities::entityID(network::clientID)> &&handler) {
-            mSetupSessionPacketHandler = std::move(handler);
-        }
-
-        void Server::registerClientInputPacketHandler(std::function<void(network::clientID, io::Input)> &&handler) {
-            mClientInputPacketHandler = std::move(handler);
+            send(type, data, mPeers[peerID]);
         }
     }
 }

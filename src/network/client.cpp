@@ -2,6 +2,11 @@
 
 #include <chrono>
 
+#include <entt/entity/registry.hpp>
+
+#include <oni-core/io/output.h>
+#include <oni-core/entities/serialization.h>
+#include <oni-core/components/geometry.h>
 #include <oni-core/io/input.h>
 
 namespace oni {
@@ -43,6 +48,7 @@ namespace oni {
         }
 
         void Client::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
+            auto peerID = peer->connectID;
             switch (header) {
                 case (PacketType::PING): {
                     auto packet = deserialize<PingPacket>(data, size);
@@ -55,18 +61,18 @@ namespace oni {
                     break;
                 }
                 case (PacketType::CAR_ENTITY_ID): {
-                    auto packet = deserialize<EntityPacket>(data, size);
-                    mCarEntityIDPacketHandler(packet.entity);
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::CAR_ENTITY_ID](peerID, dataString);
                     break;
                 }
                 case (PacketType::FOREGROUND_ENTITIES): {
-                    auto entityData = std::string(reinterpret_cast<char *>(data), size);
-                    mForegroundEntitiesPacketHandler(entityData);
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::FOREGROUND_ENTITIES](peerID, dataString);
                     break;
                 }
                 case (PacketType::BACKGROUND_ENTITIES): {
-                    auto entityData = std::string(reinterpret_cast<char *>(data), size);
-                    mBackgroundEntitiesPacketHandler(entityData);
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::BACKGROUND_ENTITIES](peerID, dataString);
                     break;
                 }
                 default: {
@@ -102,18 +108,6 @@ namespace oni {
             auto type = PacketType::SETUP_SESSION;
             auto data = std::string{};
             send(type, data, mEnetPeer);
-        }
-
-        void Client::registerCarEntityIDPacketHandler(std::function<void(entities::entityID)> &&handler) {
-            mCarEntityIDPacketHandler = std::move(handler);
-        }
-
-        void Client::registerForegroundEntitiesPacketHandler(std::function<void(const std::string &)> &&handler) {
-            mForegroundEntitiesPacketHandler = std::move(handler);
-        }
-
-        void Client::registerBackgroundEntitiesPacketHandler(std::function<void(const std::string &)> &&handler) {
-            mBackgroundEntitiesPacketHandler = std::move(handler);
         }
     }
 }

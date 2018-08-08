@@ -17,7 +17,6 @@ namespace oni {
     namespace entities {
         using EntityID = typename entt::DefaultRegistry::entity_type;
 
-        // TODO: These functions are good candidates for templating.
         EntityID createSpriteEntity(entt::DefaultRegistry &registry,
                                     const math::vec4 &color,
                                     const math::vec2 &size,

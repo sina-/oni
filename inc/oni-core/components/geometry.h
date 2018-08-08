@@ -276,8 +276,6 @@ namespace oni {
                         safeSteer,
                         distanceFromCamera,
 
-                        // TODO: Not sure if this will work after serialization and deserialization process since
-                        // entt might create these entities under different id.
                         tireFR,
                         tireFL,
                         tireRR,

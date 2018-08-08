@@ -23,7 +23,8 @@ namespace oni {
                         components::Shape,
                         components::Texture,
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
-                        // to know what it points to at the moment so I can skip it. But for the future I have to
+                        // to know what it points to at the moment because sever does the physics calculations and only
+                        // send the results back to the client, so I can skip it. But for the future I have to
                         // find a solution to this shit.
                         //components::PhysicalProperties,
                         components::TagDynamic,

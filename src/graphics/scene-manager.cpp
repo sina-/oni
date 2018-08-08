@@ -305,9 +305,6 @@ namespace oni {
             auto carView = registry.persistent<components::Car, components::Placement>();
             for (auto carEntity: carView) {
                 auto car = carView.get<components::Car>(carEntity);
-                // TODO: I can't re-use the same registry as the net code uses as the client internal data
-                // Until that is fixed I can't have skids.
-
                 // NOTE: Technically I should use slippingRear, but this gives better effect
                 if (car.slippingFront || true) {
                     // TODO: This is not in the view and it will be very slow as more entities are added to the
@@ -355,10 +352,6 @@ namespace oni {
                 const auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * GAME_UNIT_TO_PIXELS +
                                                                             common::ep);
                 const auto skidDefaultPixel = components::PixelRGBA{};
-                /*
-                 TODO: This function generates a texture and loads it into video memory, meaning we can not
-                 blend two layers of skid mark onto each other
-                */
                 auto skidData = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
                                                                        skidDefaultPixel);
                 auto skidTexture = mTextureManager->loadFromData(skidWidthInPixels, skidHeightInPixels, skidData);

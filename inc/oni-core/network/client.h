@@ -7,6 +7,9 @@
 
 namespace oni {
 
+    namespace utils {
+        class HighResolutionTimer;
+    }
     namespace io {
         class Input;
     }
@@ -37,6 +40,7 @@ namespace oni {
 
         private:
             ENetPeer *mEnetPeer;
+            std::unique_ptr<utils::HighResolutionTimer> mTimer{};
         };
     }
 }

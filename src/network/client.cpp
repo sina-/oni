@@ -8,11 +8,13 @@
 #include <oni-core/entities/serialization.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/io/input.h>
+#include <oni-core/utils/timer.h>
 
 namespace oni {
     namespace network {
 
         Client::Client() : Peer::Peer(nullptr, 1, 2, 0, 0) {
+            mTimer = std::make_unique<utils::HighResolutionTimer>();
         }
 
         Client::~Client() = default;
@@ -39,10 +41,8 @@ namespace oni {
         }
 
         void Client::pingServer() {
-            auto now = std::chrono::system_clock::now().time_since_epoch().count();
             auto type = PacketType::PING;
-            auto pingPacket = PingPacket{now};
-            auto data = serialize<PingPacket>(pingPacket);
+            auto data = std::string{};
 
             send(type, data, mEnetPeer);
         }
@@ -51,8 +51,9 @@ namespace oni {
             auto peerID = peer->connectID;
             switch (header) {
                 case (PacketType::PING): {
-                    auto packet = deserialize<PingPacket>(data, size);
-                    std::cout << packet.timestamp << std::endl;
+                    auto latency = mTimer->elapsed();
+                    mTimer->restart();
+                    std::cout << latency * 1000 << "ms\n";
                     break;
                 }
                 case (PacketType::MESSAGE): {

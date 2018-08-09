@@ -53,12 +53,10 @@ namespace oni {
             auto peerID = peer->connectID;
             switch (header) {
                 case (PacketType::PING): {
-                    auto packet = deserialize<PingPacket>(data, size);
-                    std::cout << packet.timestamp << std::endl;
+                    auto type = PacketType::PING;
+                    auto pingData = std::string{};
 
-                    // TODO: Can't just send the packet like this, its missing the header and the size is only
-                    // the size of payload
-                    //send(data, size, peer);
+                    send(type, pingData, peer);
 
                     break;
                 }

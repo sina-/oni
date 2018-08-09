@@ -39,9 +39,7 @@ namespace oni {
 
             mRunLag = mRunTimerB.elapsed();
 
-
             auto excess = mTickMS - mRunLag;
-
 
             mFrameExcessTime += excess;
 

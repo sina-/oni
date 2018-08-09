@@ -53,7 +53,7 @@ namespace oni {
                 case (PacketType::PING): {
                     auto latency = mTimer->elapsed();
                     mTimer->restart();
-                    std::cout << latency * 1000 << "ms\n";
+                    mPacketHandlers[PacketType::PING](peerID, std::to_string(latency * 1000));
                     break;
                 }
                 case (PacketType::MESSAGE): {

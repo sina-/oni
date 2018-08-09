@@ -1785,6 +1785,7 @@ enet_host_check_events (ENetHost * host, ENetEvent * event)
     @ingroup host
 */
 int
+
 enet_host_service (ENetHost * host, ENetEvent * event, enet_uint32 timeout)
 {
     enet_uint32 waitCondition;

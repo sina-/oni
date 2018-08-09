@@ -1,6 +1,7 @@
 #include <oni-core/game/game.h>
 
 #include <thread>
+#include <iostream>
 
 #include <oni-core/common/consts.h>
 #include <oni-core/common/typedefs.h>
@@ -38,12 +39,18 @@ namespace oni {
 
             mRunLag = mRunTimerB.elapsed();
 
+
             auto excess = mTickMS - mRunLag;
+
+
             mFrameExcessTime += excess;
 
             if (excess > 0) {
-                auto sleepFor = static_cast<common::uint32>(excess * 1000);
+                auto sleepFor = static_cast<common::uint64>(excess * 1000);
                 std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+            }
+            else {
+                std::cout << "Couldn't sleep :(\n";
             }
 
             // NOTE: Only display the result at the end after mTickMS amount of time has passed.

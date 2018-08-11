@@ -43,6 +43,8 @@ namespace oni {
 
             void _display() override;
 
+            void _poll() override;
+
             void showFPS(int16 fps) override;
 
             void showTPS(int16 tps) override;

@@ -168,6 +168,10 @@ namespace oni {
             mServer->sendBackgroundEntities(*mBackgroundEntities);
         }
 
+        void ServerGame::_poll() {
+
+        }
+
         void ServerGame::_display() {}
 
         void ServerGame::_render() {}
@@ -177,5 +181,6 @@ namespace oni {
         void ServerGame::showTPS(int16 tps) {}
 
         void ServerGame::showFET(common::int16 fet) {}
+
     }
 }

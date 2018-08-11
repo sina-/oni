@@ -11,53 +11,59 @@ namespace oni {
 
         Game::Game() = default;
 
+        Game::Game(common::uint8 tickRate, common::uint8 pollRate) :
+                mTickMS(1.0f / tickRate),
+                mPollMS(1.0f / pollRate) {
+        }
+
         Game::~Game() = default;
 
         void Game::run() {
-            mRunTimerA.restart();
-            mRunTimerB.restart();
-            mFrameTimer.restart();
+            while (!shouldTerminate()) {
+                mRunTimerA.restart();
+                mRunTimerB.restart();
+                mFrameTimer.restart();
 
-            if (1.0f - mRunLagAccumulator <= common::ep) {
-                auto fps = mRunCounter / mRunLagAccumulator;
-                auto tps = 1 * mTickCounter;
-                showFPS(static_cast<common::uint16 >(fps));
-                showTPS(static_cast<common::uint16 >(tps));
-                showFET(static_cast<common::int16>(mFrameExcessTime * 1000));
+                if (1.0f - mRunLagAccumulator <= common::ep) {
+                    auto fps = mRunCounter / mRunLagAccumulator;
+                    auto tps = 1 * mTickCounter;
+                    showFPS(static_cast<common::uint16 >(fps));
+                    showTPS(static_cast<common::uint16 >(tps));
+                    showFET(static_cast<common::int16>(mFrameExcessTime * 1000));
 
-                mRunLagAccumulator = 0;
-                mTickLag = 0;
-                mRunCounter = 0;
-                mTickCounter = 0;
-                mFrameCounter = 0;
-                mFrameExcessTime = 0;
+                    mRunLagAccumulator = 0;
+                    mTickLag = 0;
+                    mRunCounter = 0;
+                    mTickCounter = 0;
+                    mFrameCounter = 0;
+                    mFrameExcessTime = 0;
+                }
+
+                tick();
+
+                render();
+
+                mRunLag = mRunTimerB.elapsed();
+
+                auto excess = mTickMS - mRunLag;
+
+                mFrameExcessTime += excess;
+
+                if (excess > 0) {
+                    auto sleepFor = static_cast<common::uint64>(excess * 1000);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+                } else {
+                    std::cout << "Couldn't sleep :(\n";
+                }
+
+                // NOTE: Only display the result at the end after mTickMS amount of time has passed.
+                display();
+
+                mRunCounter++;
+                mFrameCounter++;
+                mFrameLag += mFrameTimer.elapsed();
+                mRunLagAccumulator += mRunTimerA.elapsed();
             }
-
-            tick();
-
-            render();
-
-            mRunLag = mRunTimerB.elapsed();
-
-            auto excess = mTickMS - mRunLag;
-
-            mFrameExcessTime += excess;
-
-            if (excess > 0) {
-                auto sleepFor = static_cast<common::uint64>(excess * 1000);
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
-            }
-            else {
-                std::cout << "Couldn't sleep :(\n";
-            }
-
-            // NOTE: Only display the result at the end after mTickMS amount of time has passed.
-            display();
-
-            mRunCounter++;
-            mFrameCounter++;
-            mFrameLag += mFrameTimer.elapsed();
-            mRunLagAccumulator += mRunTimerA.elapsed();
         }
 
         void Game::tick() {
@@ -91,6 +97,10 @@ namespace oni {
 
         common::real32 Game::getTickFrequency() {
             return mTickMS;
+        }
+
+        void Game::poll() {
+            _poll();
         }
 
     }

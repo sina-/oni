@@ -44,8 +44,8 @@ namespace oni {
                     carInput.right = 1.0f;
                 }
                 if (input.isPressed(GLFW_KEY_F)) {
-                    car.velocity.x *= 1.1f;
-                    car.velocity.y *= 1.1f;
+                    car.velocity = car.velocity  + math::vec2{static_cast<common::real32>(cos(car.heading)),
+                                                             static_cast<common::real32>(sin(car.heading))};
                 }
                 if (input.isPressed(GLFW_KEY_SPACE)) {
                     if (car.accumulatedEBrake < 1.0f) {

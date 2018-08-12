@@ -22,8 +22,7 @@ namespace oni {
 
             // TODO: probably better to wrap this in a class rather than using it naked, but doing so requires lot of
             // coding and time that is better spent working on other features
-            mForegroundEntities = std::make_unique<entt::DefaultRegistry>();
-            mBackgroundEntities = std::make_unique<entt::DefaultRegistry>();
+            mEntities = std::make_unique<entt::DefaultRegistry>();
 
             mDynamics = std::make_unique<physics::Dynamics>(nullptr, getTickFrequency());
             mTileWorld = std::make_unique<entities::TileWorld>();
@@ -49,10 +48,10 @@ namespace oni {
             auto boxTexture = components::Texture{};
             boxTexture.filePath = boxTexturePath;
             boxTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            mBoxEntity = entities::createStaticPhysicsEntity(*mForegroundEntities,
+            mBoxEntity = entities::createStaticPhysicsEntity(*mEntities,
                                                              *mDynamics->getPhysicsWorld(), boxSize,
                                                              boxPositionInWorld);
-            entities::assignTexture(*mForegroundEntities, mBoxEntity, boxTexture);
+            entities::assignTexture(*mEntities, mBoxEntity, boxTexture);
 
             auto truckSize = math::vec2{1.0f, 3.0f};
             auto truckPositionInWorld = math::vec3{-0.5f, 5.0f, 1.0f};
@@ -60,25 +59,25 @@ namespace oni {
             auto truckTexture = components::Texture{};
             truckTexture.filePath = truckTexturePath;
             truckTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            mTruckEntity = entities::createDynamicPhysicsEntity(*mForegroundEntities,
+            mTruckEntity = entities::createDynamicPhysicsEntity(*mEntities,
                                                                 *mDynamics->getPhysicsWorld(), truckSize,
                                                                 truckPositionInWorld, 0.0f,
                                                                 math::vec3{1.0f, 1.0f, 0.0f});
-            entities::assignTexture(*mForegroundEntities, mTruckEntity, truckTexture);
+            entities::assignTexture(*mEntities, mTruckEntity, truckTexture);
         }
 
         void ServerGame::setupSessionPacketHandler(network::PeerID clientID, const std::string &data) {
-            auto carEntity = entities::createVehicleEntity(*mForegroundEntities, *mDynamics->getPhysicsWorld());
+            auto carEntity = entities::createVehicleEntity(*mEntities, *mDynamics->getPhysicsWorld());
 
             auto carTexture = components::Texture{};
             std::string carTexturePath = "resources/images/car/1/car.png";
             carTexture.filePath = carTexturePath;
             carTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            entities::assignTexture(*mForegroundEntities, carEntity, carTexture);
+            entities::assignTexture(*mEntities, carEntity, carTexture);
 
             // IMPORTANT NOTE: Newbie trap! carConfig must be a copy, otherwise createEntity calls will resize the data
             // storage and the old reference will be invalidated and then we end-up getting garbage :(
-            auto carConfig = mForegroundEntities->get<components::CarConfig>(carEntity);
+            auto carConfig = mEntities->get<components::CarConfig>(carEntity);
 
             std::string carTireTexturePath = "resources/images/car/1/car-tire.png";
             auto carTireTexture = components::Texture{};
@@ -94,40 +93,40 @@ namespace oni {
             auto tireFRPos = math::vec3{};
             tireFRPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
             tireFRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
-            auto carTireFREntity = entities::createDynamicEntity(*mForegroundEntities, tireSize, tireFRPos,
+            auto carTireFREntity = entities::createDynamicEntity(*mEntities, tireSize, tireFRPos,
                                                                  tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(*mForegroundEntities, carEntity,
+            entities::TransformationHierarchy::createTransformationHierarchy(*mEntities, carEntity,
                                                                              carTireFREntity);
-            entities::assignTexture(*mForegroundEntities, carTireFREntity, carTireTexture);
+            entities::assignTexture(*mEntities, carTireFREntity, carTireTexture);
 
             auto tireFLPos = math::vec3{};
             tireFLPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
             tireFLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
-            auto carTireFLEntity = entities::createDynamicEntity(*mForegroundEntities, tireSize, tireFLPos,
+            auto carTireFLEntity = entities::createDynamicEntity(*mEntities, tireSize, tireFLPos,
                                                                  tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(*mForegroundEntities, carEntity,
+            entities::TransformationHierarchy::createTransformationHierarchy(*mEntities, carEntity,
                                                                              carTireFLEntity);
-            entities::assignTexture(*mForegroundEntities, carTireFLEntity, carTireTexture);
+            entities::assignTexture(*mEntities, carTireFLEntity, carTireTexture);
 
             auto tireRRPos = math::vec3{};
             tireRRPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
             tireRRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
-            auto carTireRREntity = entities::createDynamicEntity(*mForegroundEntities, tireSize, tireRRPos,
+            auto carTireRREntity = entities::createDynamicEntity(*mEntities, tireSize, tireRRPos,
                                                                  tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(*mForegroundEntities, carEntity,
+            entities::TransformationHierarchy::createTransformationHierarchy(*mEntities, carEntity,
                                                                              carTireRREntity);
-            entities::assignTexture(*mForegroundEntities, carTireRREntity, carTireTexture);
+            entities::assignTexture(*mEntities, carTireRREntity, carTireTexture);
 
             auto tireRLPos = math::vec3{};
             tireRLPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
             tireRLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
-            auto carTireRLEntity = entities::createDynamicEntity(*mForegroundEntities, tireSize, tireRLPos,
+            auto carTireRLEntity = entities::createDynamicEntity(*mEntities, tireSize, tireRLPos,
                                                                  tireRotation, math::vec3{1.0f, 1.0f, 0.0f});
-            entities::TransformationHierarchy::createTransformationHierarchy(*mForegroundEntities, carEntity,
+            entities::TransformationHierarchy::createTransformationHierarchy(*mEntities, carEntity,
                                                                              carTireRLEntity);
-            entities::assignTexture(*mForegroundEntities, carTireRLEntity, carTireTexture);
+            entities::assignTexture(*mEntities, carTireRLEntity, carTireTexture);
 
-            auto &car = mForegroundEntities->get<components::Car>(carEntity);
+            auto &car = mEntities->get<components::Car>(carEntity);
             car.tireFR = carTireFREntity;
             car.tireFL = carTireFLEntity;
             car.tireRR = carTireRREntity;
@@ -156,16 +155,15 @@ namespace oni {
 
             for (auto client: mServer->getClients()) {
                 auto input = mClientInputMap[client];
-                mDynamics->tick(*mForegroundEntities, input, tickTime);
+                mDynamics->tick(*mEntities, input, tickTime);
 
                 auto carEntity = mClientCarEntityMap[client];
-                auto car = mForegroundEntities->get<components::Car>(carEntity);
-                auto carPlacement = mForegroundEntities->get<components::Placement>(carEntity);
-                mTileWorld->tick(carPlacement.position.getXY(), car, *mForegroundEntities, *mBackgroundEntities);
+                auto car = mEntities->get<components::Car>(carEntity);
+                auto carPlacement = mEntities->get<components::Placement>(carEntity);
+                mTileWorld->tick(carPlacement.position.getXY(), car, *mEntities);
             }
 
-            mServer->sendForegroundEntities(*mForegroundEntities);
-            mServer->sendBackgroundEntities(*mBackgroundEntities);
+            mServer->sendEntities(*mEntities);
         }
 
         void ServerGame::_poll() {

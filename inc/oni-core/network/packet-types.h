@@ -10,8 +10,7 @@ namespace oni {
             MESSAGE = 2,
             SETUP_SESSION = 3,
             CAR_ENTITY_ID = 4,
-            FOREGROUND_ENTITIES = 5,
-            BACKGROUND_ENTITIES = 6,
+            ENTITIES = 5,
             CLIENT_INPUT = 7,
         };
     }

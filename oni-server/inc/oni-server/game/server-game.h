@@ -59,8 +59,7 @@ namespace oni {
         private:
             // TODO: Think about wrapping these in a struct and passing that to the systems and letting the system
             // decide which group of entities it needs to interact with.
-            std::unique_ptr<entt::DefaultRegistry> mForegroundEntities{};
-            std::unique_ptr<entt::DefaultRegistry> mBackgroundEntities{};
+            std::unique_ptr<entt::DefaultRegistry> mEntities{};
 
             std::unique_ptr<physics::Dynamics> mDynamics{};
             std::unique_ptr<entities::TileWorld> mTileWorld{};

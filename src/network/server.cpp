@@ -84,16 +84,9 @@ namespace oni {
             }
         }
 
-        void Server::sendForegroundEntities(entt::DefaultRegistry &registry) {
+        void Server::sendEntities(entt::DefaultRegistry &registry) {
             std::string data = entities::serialize(registry);
-            auto type = PacketType::FOREGROUND_ENTITIES;
-
-            broadcast(type, data);
-        }
-
-        void Server::sendBackgroundEntities(entt::DefaultRegistry &registry) {
-            std::string data = entities::serialize(registry);
-            auto type = PacketType::BACKGROUND_ENTITIES;
+            auto type = PacketType::ENTITIES;
 
             broadcast(type, data);
         }

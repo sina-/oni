@@ -23,9 +23,7 @@ namespace oni {
 
             ~Server() override;
 
-            void sendForegroundEntities(entt::DefaultRegistry &registry);
-
-            void sendBackgroundEntities(entt::DefaultRegistry &registry);
+            void sendEntities(entt::DefaultRegistry &registry);
 
             void tick(entt::DefaultRegistry &registry);
 

@@ -26,12 +26,11 @@ namespace oni {
              */
             // TODO: Instead of a car the function should go through all the car entities in the world and
             // update as needed.
-            void tick(const math::vec2 &position, const components::Car &car, entt::DefaultRegistry &foregroundEntities,
-                      entt::DefaultRegistry &backgroundEntities);
+            void tick(const math::vec2 &position, const components::Car &car, entt::DefaultRegistry &entities);
 
         private:
 
-            void tickChunk(const math::vec2 &position, entt::DefaultRegistry &backgroundEntities);
+            void tickChunk(const math::vec2 &position, entt::DefaultRegistry &entities);
 
             components::ChunkIndices chunkPositionToIndex(const math::vec2 &position) const;
 
@@ -43,26 +42,26 @@ namespace oni {
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
             void generateTilesForChunk(common::int64 xIndex, common::int64 yIndex,
-                                       entt::DefaultRegistry &backgroundEntities);
+                                       entt::DefaultRegistry &entities);
 
             components::BoarderRoadTiles
             generateRoadsForChunk(const components::ChunkIndices &chunkIndices,
-                                  entt::DefaultRegistry &backgroundEntities);
+                                  entt::DefaultRegistry &entities);
 
 
             void generateRoadTile(const components::ChunkIndices &chunkIndices,
                                   const components::RoadTileIndices &roadTileIndices,
-                                  entt::DefaultRegistry &backgroundEntities);
+                                  entt::DefaultRegistry &entities);
 
             void generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
                                           const components::RoadTileIndices &roadTileIndices,
                                           const std::string &texturePath,
-                                          entt::DefaultRegistry &backgroundEntities);
+                                          entt::DefaultRegistry &entities);
 
             void generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
                                          components::RoadTileIndices startingRoadTileIndices,
                                          components::RoadTileIndices endingRoadTileIndices,
-                                         entt::DefaultRegistry &backgroundEntities);
+                                         entt::DefaultRegistry &entities);
 
             bool existsInMap(common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
 

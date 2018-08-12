@@ -5,13 +5,18 @@
 #include <oni-core/components/hierarchy.h>
 
 namespace oni {
-    namespace math {
-        class vec2;
 
-        class vec3;
+    namespace entities {
+        class EntityManager;
+    }
+
+    namespace math {
+        struct vec2;
+
+        struct vec3;
     }
     namespace components {
-        class Shape;
+        struct Shape;
     }
     namespace physics {
         class Transformation {
@@ -49,11 +54,11 @@ namespace oni {
             static void worldToLocalTextureTranslation(const math::vec3 &reference, const common::real32 ratio,
                                                        math::vec3 &operand);
 
-            static void updatePlacement(entt::DefaultRegistry &registry,
+            static void updatePlacement(entities::EntityManager &manager,
                                         entities::EntityID entity,
                                         const components::Placement &placement);
 
-            static void updateTransformParent(entt::DefaultRegistry &registry,
+            static void updateTransformParent(entities::EntityManager &manager,
                                               entities::EntityID entity,
                                               const components::TransformParent &transformParent);
         };

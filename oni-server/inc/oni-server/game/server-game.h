@@ -10,6 +10,7 @@
 #include <oni-core/physics/dynamics.h>
 #include <oni-core/common/typedefs.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/entities/tile-world.h>
 #include <oni-core/graphics/debug-draw-box2d.h>
@@ -57,9 +58,7 @@ namespace oni {
             void clientInputPacketHandler(network::PeerID, const std::string &data);
 
         private:
-            // TODO: Think about wrapping these in a struct and passing that to the systems and letting the system
-            // decide which group of entities it needs to interact with.
-            std::unique_ptr<entt::DefaultRegistry> mEntities{};
+            std::unique_ptr<entities::EntityManager> mEntityManager{};
 
             std::unique_ptr<physics::Dynamics> mDynamics{};
             std::unique_ptr<entities::TileWorld> mTileWorld{};

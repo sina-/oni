@@ -9,13 +9,17 @@ namespace oni {
         class Input;
     }
 
+    namespace entities{
+        class EntityManager;
+    }
+
     namespace physics {
         class Physic {
         protected:
             virtual ~Physic() = default;
 
         public:
-            virtual void tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) = 0;
+            virtual void tick(entities::EntityManager &manager, const io::Input &input, common::real32 tickTime) = 0;
         };
     }
 }

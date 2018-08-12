@@ -3,6 +3,7 @@
 #include <Box2D/Box2D.h>
 
 #include <oni-core/physics/transformation.h>
+#include <oni-core/entities/entity-manager.h>
 
 namespace oni {
     namespace entities {
@@ -26,11 +27,11 @@ namespace oni {
             return entity;
         }
 
-        EntityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
+        EntityID createSpriteStaticEntity(EntityManager &manager,
                                           const math::vec4 &color,
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld) {
-            auto entity = registry.create();
+            auto entity = manager.create();
 
             auto entityAppearance = components::Appearance{color};
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
@@ -39,20 +40,20 @@ namespace oni {
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
-            registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::Appearance>(entity, entityAppearance);
-            registry.assign<components::TagColorShaded>(entity, entityColorShader);
+            manager.assign<components::Shape>(entity, entityShapeWorld);
+            manager.assign<components::Appearance>(entity, entityAppearance);
+            manager.assign<components::TagColorShaded>(entity, entityColorShader);
             // TODO: Is this the correct usage of tags?
-            registry.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        EntityID createDynamicEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+        EntityID createDynamicEntity(EntityManager &manager, const math::vec2 &size,
                                      const math::vec3 &positionInWorld,
                                      const common::real32 heading, const math::vec3 &scale) {
-            auto entity = registry.create();
+            auto entity = manager.create();
 
             // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
             // works out without needing to translate the entity to the center before rotation and then back to its
@@ -65,20 +66,20 @@ namespace oni {
 
             auto entityPlacement = components::Placement{positionInWorld, heading, scale};
 
-            registry.assign<components::Shape>(entity, entityShape);
-            registry.assign<components::Placement>(entity, entityPlacement);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            registry.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::Shape>(entity, entityShape);
+            manager.assign<components::Placement>(entity, entityPlacement);
+            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
+            manager.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        EntityID createDynamicPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+        EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld, const common::real32 heading,
                                             const math::vec3 &scale) {
-            auto entity = registry.create();
+            auto entity = manager.create();
 
             // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
             // works out without needing to translate the entity to the center before rotation and then back to its
@@ -114,35 +115,35 @@ namespace oni {
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
 
-            registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
-            registry.assign<components::Shape>(entity, entityShape);
-            registry.assign<components::Placement>(entity, entityPlacement);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            registry.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
+            manager.assign<components::Shape>(entity, entityShape);
+            manager.assign<components::Placement>(entity, entityPlacement);
+            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
+            manager.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
         }
 
-        EntityID createStaticEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+        EntityID createStaticEntity(EntityManager &manager, const math::vec2 &size,
                                     const math::vec3 &positionInWorld) {
-            auto entity = registry.create();
+            auto entity = manager.create();
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityStatic = components::TagStatic{};
             auto entityTextureShaded = components::TagTextureShaded{};
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
-            registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            registry.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::Shape>(entity, entityShapeWorld);
+            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
+            manager.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
         }
 
-        EntityID createStaticPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+        EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                            const math::vec2 &size,
                                            const math::vec3 &positionInWorld) {
-            auto entity = registry.create();
+            auto entity = manager.create();
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityStatic = components::TagStatic{};
             auto entityTextureShaded = components::TagTextureShaded{};
@@ -166,31 +167,22 @@ namespace oni {
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
 
-            registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
-            registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            registry.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
+            manager.assign<components::Shape>(entity, entityShapeWorld);
+            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
+            manager.assign<components::TagStatic>(entity, entityStatic);
 
             return entity;
         }
 
-        EntityID createTextEntity(entt::DefaultRegistry &registry, graphics::FontManager &fontManager,
-                                  const std::string &text,
-                                  const math::vec3 &position) {
-            // TODO: This is incompelte
-            auto entity = registry.create();
-
-            return entity;
-        }
-
-        EntityID createTextStaticEntity(entt::DefaultRegistry &registry,
+        EntityID createTextStaticEntity(EntityManager &manager,
                                         graphics::FontManager &fontManager,
                                         const std::string &text,
                                         const math::vec3 &position,
                                         const math::vec2 &size,
                                         const math::vec3 &positionInWorld) {
 
-            auto entity = registry.create();
+            auto entity = manager.create();
             // TODO: Text does not have a local and world Shape, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
 
@@ -198,8 +190,8 @@ namespace oni {
 
         }
 
-        EntityID createVehicleEntity(entt::DefaultRegistry &registry, b2World &physicsWorld) {
-            auto entity = registry.create();
+        EntityID createVehicleEntity(EntityManager &manager, b2World &physicsWorld) {
+            auto entity = manager.create();
 
             auto carConfig = components::CarConfig();
             auto entityVehicleTag = components::TagVehicle{};
@@ -270,21 +262,18 @@ namespace oni {
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
 
-            registry.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
-            registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::Placement>(entity, entityPlacement);
-            registry.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            registry.assign<components::Car>(entity, car);
-            registry.assign<components::CarConfig>(entity, carConfig);
-            registry.assign<components::TagVehicle>(entity, entityVehicleTag);
-            registry.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
+            manager.assign<components::Shape>(entity, entityShapeWorld);
+            manager.assign<components::Placement>(entity, entityPlacement);
+            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
+            manager.assign<components::Car>(entity, car);
+            manager.assign<components::CarConfig>(entity, carConfig);
+            manager.assign<components::TagVehicle>(entity, entityVehicleTag);
+            manager.assign<components::TagDynamic>(entity, entityDynamic);
 
             return entity;
         }
 
-        void assignTexture(entt::DefaultRegistry &registry, EntityID entity, const components::Texture &texture) {
-            registry.assign<components::Texture>(entity, texture);
-        }
     }
 
 }

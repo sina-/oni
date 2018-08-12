@@ -1,6 +1,8 @@
+#include <oni-core/entities/tile-world.h>
+
 #include <ctime>
 
-#include <oni-core/entities/tile-world.h>
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/common/consts.h>
@@ -60,12 +62,11 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(const math::vec2 &position, const components::Car &car,
-                             entt::DefaultRegistry &entities) {
-            tickChunk(position, entities);
+        void TileWorld::tick(entities::EntityManager &manager, const components::Car &car, const math::vec2 &position) {
+            tickChunk(manager, position);
         }
 
-        void TileWorld::tickChunk(const math::vec2 &position, entt::DefaultRegistry &entities) {
+        void TileWorld::tickChunk(entities::EntityManager &manager, const math::vec2 &position) {
             const auto chunkIndices = chunkPositionToIndex(position);
 
             // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
@@ -89,11 +90,11 @@ namespace oni {
                         auto currentChunkIndices = components::ChunkIndices{i, j};
                         auto chunkPosition = chunkIndexToPosition(currentChunkIndices);
                         auto positionInWorld = math::vec3{chunkPosition.x, chunkPosition.y, 1.0f};
-                        auto chunkID = createSpriteStaticEntity(entities, color, size, positionInWorld);
+                        auto chunkID = createSpriteStaticEntity(manager, color, size, positionInWorld);
 
-                        auto boarderRoadTiles = generateRoadsForChunk(currentChunkIndices, entities);
+                        auto boarderRoadTiles = generateRoadsForChunk(manager, currentChunkIndices);
                         auto chunk = components::Chunk{positionInWorld, packedIndices, boarderRoadTiles};
-                        entities.assign<components::Chunk>(chunkID, chunk);
+                        manager.assign<components::Chunk>(chunkID, chunk);
 
                         mPackedRoadChunkIndicesToEntity.emplace(packedIndices, chunkID);
                     }
@@ -101,8 +102,8 @@ namespace oni {
             }
         }
 
-        components::BoarderRoadTiles TileWorld::generateRoadsForChunk(const components::ChunkIndices &chunkIndices,
-                                                                      entt::DefaultRegistry &entities) {
+        components::BoarderRoadTiles TileWorld::generateRoadsForChunk(entities::EntityManager &manager,
+                                                                      const components::ChunkIndices &chunkIndices) {
             /**
              * 1. Check if there should be a road in this chunk
              * 2. Find the neighbours connected by road to current chunk
@@ -159,7 +160,7 @@ namespace oni {
 
                 if (existsInMap(southChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto southChunkID = mPackedRoadChunkIndicesToEntity.at(southChunkPacked);
-                    const auto &southChunk = entities.get<components::Chunk>(southChunkID);
+                    const auto &southChunk = manager.get<components::Chunk>(southChunkID);
 
                     boarderRoadTiles.southBoarder.x = southChunk.boarderRoadTiles.northBoarder.x;
                     boarderRoadTiles.southBoarder.y = 0;
@@ -168,7 +169,7 @@ namespace oni {
                 }
                 if (existsInMap(northChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto northChunkID = mPackedRoadChunkIndicesToEntity.at(northChunkPacked);
-                    const auto &northChunk = entities.get<components::Chunk>(northChunkID);
+                    const auto &northChunk = manager.get<components::Chunk>(northChunkID);
 
                     boarderRoadTiles.northBoarder = northChunk.boarderRoadTiles.southBoarder;
 
@@ -193,7 +194,7 @@ namespace oni {
 
                 if (existsInMap(eastChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto eastChunkID = mPackedRoadChunkIndicesToEntity.at(eastChunkPacked);
-                    const auto &eastChunk = entities.get<components::Chunk>(eastChunkID);
+                    const auto &eastChunk = manager.get<components::Chunk>(eastChunkID);
 
                     boarderRoadTiles.eastBoarder.x = mTilesPerChunkX - 1;
                     boarderRoadTiles.eastBoarder.y = eastChunk.boarderRoadTiles.westBoarder.y;
@@ -204,7 +205,7 @@ namespace oni {
 
                 if (existsInMap(westChunkPacked, mPackedRoadChunkIndicesToEntity)) {
                     auto westChunkID = mPackedRoadChunkIndicesToEntity.at(westChunkPacked);
-                    const auto &westChunk = entities.get<components::Chunk>(westChunkID);
+                    const auto &westChunk = manager.get<components::Chunk>(westChunkID);
 
                     boarderRoadTiles.westBoarder.x = 0;
                     boarderRoadTiles.westBoarder.y = westChunk.boarderRoadTiles.eastBoarder.y;
@@ -225,25 +226,25 @@ namespace oni {
                         // Make sure we connect to endingRoadTile
                         if (currentTileY == endingRoadTileIndices.y) {
                             if (previousRoadTexture == mWestToEast) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mWestToEast, entities);
+                                                         mWestToEast);
                             } else if (previousRoadTexture == mSouthToNorth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mSouthToEast, entities);
+                                                         mSouthToEast);
                             } else if (previousRoadTexture == mNorthToSouth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mNorthToEast, entities);
+                                                         mNorthToEast);
                             } else if (previousRoadTexture == mWestToSouth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mNorthToEast, entities);
+                                                         mNorthToEast);
                             } else if (previousRoadTexture == mWestToNorth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mSouthToEast, entities);
+                                                         mSouthToEast);
                             } else {
                                 ONI_DEBUG_ASSERT(false);
                             }
@@ -251,19 +252,19 @@ namespace oni {
                             // We are done
                         } else if (currentTileY > endingRoadTileIndices.y) {
                             if (previousRoadTexture == mWestToEast) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mWestToSouth, entities);
+                                                         mWestToSouth);
                                 previousRoadTexture = mWestToSouth;
                             } else if (previousRoadTexture == mNorthToSouth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mNorthToSouth, entities);
+                                                         mNorthToSouth);
                                 previousRoadTexture = mNorthToSouth;
                             } else if (previousRoadTexture == mWestToSouth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mNorthToSouth, entities);
+                                                         mNorthToSouth);
                                 previousRoadTexture = mNorthToSouth;
                             } else {
                                 ONI_DEBUG_ASSERT(false);
@@ -272,19 +273,19 @@ namespace oni {
                             // go down
                         } else {
                             if (previousRoadTexture == mWestToEast) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mWestToNorth, entities);
+                                                         mWestToNorth);
                                 previousRoadTexture = mWestToNorth;
                             } else if (previousRoadTexture == mSouthToNorth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mSouthToNorth, entities);
+                                                         mSouthToNorth);
                                 previousRoadTexture = mSouthToNorth;
                             } else if (previousRoadTexture == mWestToNorth) {
-                                generateTexturedRoadTile(chunkIndices,
+                                generateTexturedRoadTile(manager, chunkIndices,
                                                          components::RoadTileIndices{currentTileX, currentTileY},
-                                                         mSouthToNorth, entities);
+                                                         mSouthToNorth);
                                 previousRoadTexture = mSouthToNorth;
                             } else {
                                 ONI_DEBUG_ASSERT(false);
@@ -294,9 +295,9 @@ namespace oni {
                         }
                     } else {
                         // TODO: Randomly generate road instead of straight line
-                        generateTexturedRoadTile(chunkIndices,
+                        generateTexturedRoadTile(manager, chunkIndices,
                                                  components::RoadTileIndices{currentTileX, currentTileY},
-                                                 mWestToEast, entities);
+                                                 mWestToEast);
                         ++currentTileX;
                     }
                 }
@@ -311,51 +312,50 @@ namespace oni {
             return boarderRoadTiles;
         }
 
-        void TileWorld::generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
+        void TileWorld::generateTexturedRoadTile(entities::EntityManager &manager,
+                                                 const components::ChunkIndices &chunkIndices,
                                                  const components::RoadTileIndices &roadTileIndices,
-                                                 const std::string &texturePath,
-                                                 entt::DefaultRegistry &entities) {
+                                                 const std::string &texturePath) {
             const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
 
             const auto positionInWorld = roadTileIndexToPosition(chunkIndices, roadTileIndices);
-            const auto roadID = createStaticEntity(entities, roadTileSize,
+            const auto roadID = createStaticEntity(manager, roadTileSize,
                                                    math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
 
             auto texture = components::Texture{};
             texture.filePath = texturePath;
             texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            assignTexture(entities, roadID, texture);
+            manager.assign<components::Texture>(roadID, texture);
 
             const auto packedIndices = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
         }
 
-        void TileWorld::generateRoadTile(const components::ChunkIndices &chunkIndices,
-                                         const components::RoadTileIndices &roadTileIndices,
-                                         entt::DefaultRegistry &entities) {
+        void TileWorld::generateRoadTile(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices,
+                                         const components::RoadTileIndices &roadTileIndices) {
             const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.5f};
             const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
 
             const auto positionInWorld = roadTileIndexToPosition(chunkIndices, roadTileIndices);
-            const auto roadID = createSpriteStaticEntity(entities, color, roadTileSize,
+            const auto roadID = createSpriteStaticEntity(manager, color, roadTileSize,
                                                          math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
 
             const auto packedIndices = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
         }
 
-        void TileWorld::generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
+        void TileWorld::generateRoadTileBetween(entities::EntityManager &manager,
+                                                const components::ChunkIndices &chunkIndices,
                                                 components::RoadTileIndices startingRoadTileIndices,
-                                                components::RoadTileIndices endingRoadTileIndices,
-                                                entt::DefaultRegistry &entities) {
+                                                components::RoadTileIndices endingRoadTileIndices) {
             // Fill between tiles as if we are sweeping the Manhattan distance between them.
             while (startingRoadTileIndices.x < endingRoadTileIndices.x) {
-                generateRoadTile(chunkIndices, startingRoadTileIndices, entities);
+                generateRoadTile(manager, chunkIndices, startingRoadTileIndices);
                 ++startingRoadTileIndices.x;
             }
 
             while (startingRoadTileIndices.x > endingRoadTileIndices.x) {
-                generateRoadTile(chunkIndices, startingRoadTileIndices, entities);
+                generateRoadTile(manager, chunkIndices, startingRoadTileIndices);
                 --startingRoadTileIndices.x;
             }
 
@@ -370,18 +370,18 @@ namespace oni {
             startTilePosX -= mTileSizeX;*/
 
             while (startingRoadTileIndices.y < endingRoadTileIndices.y) {
-                generateRoadTile(chunkIndices, startingRoadTileIndices, entities);
+                generateRoadTile(manager, chunkIndices, startingRoadTileIndices);
                 ++startingRoadTileIndices.y;
             }
 
             while (startingRoadTileIndices.y > endingRoadTileIndices.y) {
-                generateRoadTile(chunkIndices, startingRoadTileIndices, entities);
+                generateRoadTile(manager, chunkIndices, startingRoadTileIndices);
                 --startingRoadTileIndices.y;
             }
         }
 
-        void TileWorld::generateTilesForChunk(const common::int64 xIndex, const common::int64 yIndex,
-                                              entt::DefaultRegistry &entities) {
+        void TileWorld::generateTilesForChunk(entities::EntityManager &manager, const common::int64 xIndex,
+                                              const common::int64 yIndex) {
 
             const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
             const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;
@@ -400,7 +400,7 @@ namespace oni {
                     const auto positionInWorld = math::vec3{i, j, 1.0f};
 
                     const auto packedIndices = math::packIntegers(i, j);
-                    const auto tileID = createSpriteStaticEntity(entities, color, tileSize,
+                    const auto tileID = createSpriteStaticEntity(manager, color, tileSize,
                                                                  positionInWorld);
 
                     mPackedTileIndicesToEntity.emplace(packedIndices, tileID);

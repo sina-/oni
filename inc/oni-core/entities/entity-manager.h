@@ -30,11 +30,15 @@ namespace oni {
             private:
                 friend EntityManager;
 
-                explicit EntityView(entt::PersistentView<Entity, Components...> &view) : mView(view) {}
+                explicit EntityView(entt::PersistentView<Entity, Components...> &view) :
+                        mView(view) {
+
+                }
 
             public:
                 ~EntityView() = default;
 
+                // TODO: Can I avoid creating a vector?
                 std::vector<entities::EntityID> getEntities() {
                     return std::vector<entities::EntityID>(mView.begin(), mView.end());
                 };
@@ -45,7 +49,7 @@ namespace oni {
                 }
 
                 template<class Component>
-                const Component &get(entities::EntityID entityID) noexcept {
+                const Component &get(entities::EntityID entityID) const noexcept {
                     return mView.template get<Component>(entityID);
                 }
 
@@ -57,8 +61,18 @@ namespace oni {
 
             ~EntityManager();
 
+            EntityID create();
+
+            size_t size() const noexcept;
+
+            template<class Component, class... Args>
+            Component &assign(EntityID entityID, Args &&... args) {
+                return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
+            }
+
             template<class... ViewComponents>
             EntityView<EntityType, ViewComponents...> createView() {
+                // TODO: Well this won't work :(
                 auto view = mRegistry->persistent<ViewComponents...>();
                 return EntityView(view);
             }
@@ -69,8 +83,18 @@ namespace oni {
             }
 
             template<class Component>
-            const Component &get(entities::EntityID entityID) noexcept {
+            const Component &get(entities::EntityID entityID) const noexcept {
                 return mRegistry->get<Component>(entityID);
+            }
+
+            template<class Component>
+            bool has(entities::EntityID entityID) const noexcept {
+                return mRegistry->has<Component>(entityID);
+            }
+
+            template<class Component, class... Args>
+            Component &replace(EntityID entityID, Args &&... args) {
+                return mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
             }
 
             template<class Archive, class ...ArchiveComponents>

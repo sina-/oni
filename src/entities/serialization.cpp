@@ -4,6 +4,7 @@
 
 #include <cereal/archives/portable_binary.hpp>
 
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
 
@@ -11,11 +12,11 @@
 namespace oni {
     namespace entities {
 
-        std::string serialize(entt::DefaultRegistry &source) {
+        std::string serialize(entities::EntityManager &manager) {
             std::stringstream storage;
             {
                 cereal::PortableBinaryOutputArchive output{storage};
-                source.snapshot().entities(output).component<
+                manager.snapshot<cereal::PortableBinaryOutputArchive,
                         components::Car,
                         components::CarConfig,
                         components::Placement,
@@ -38,35 +39,13 @@ namespace oni {
             return storage.str();
         }
 
-        template<class... Component>
-        std::string serialize_(entt::DefaultRegistry &source) {
-            std::stringstream storage;
-            {
-                cereal::PortableBinaryOutputArchive output{storage};
-                source.snapshot().entities(output).component<Component...>(output);
-            }
-
-            return storage.str();
-        }
-
-        template<class... Component>
-        std::string deserialize_(entt::DefaultRegistry &destination, const std::string &data) {
+        void deserialize(EntityManager &manager, const std::string &data) {
             std::stringstream storage;
             storage.str(data);
 
             {
                 cereal::PortableBinaryInputArchive input{storage};
-                destination.restore().entities(input).component<Component...>(input);
-            }
-        }
-
-        void deserialize(entt::DefaultRegistry &destination, const std::string &data) {
-            std::stringstream storage;
-            storage.str(data);
-
-            {
-                cereal::PortableBinaryInputArchive input{storage};
-                destination.restore().entities(input).component<
+                manager.restore<cereal::PortableBinaryInputArchive,
                         components::Car,
                         components::CarConfig,
                         components::Placement,

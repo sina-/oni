@@ -75,7 +75,7 @@ namespace oni {
             return stream;
         }
 
-        vec2 vec3::getXY() {
+        vec2 vec3::getXY() const {
             return vec2{x, y};
         }
     }

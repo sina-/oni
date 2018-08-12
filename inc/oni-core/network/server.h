@@ -15,6 +15,9 @@ namespace oni {
     namespace physics {
         class Dynamics;
     }
+    namespace entities {
+        class EntityManager;
+    }
     namespace network {
 
         class Server : public Peer {
@@ -23,9 +26,9 @@ namespace oni {
 
             ~Server() override;
 
-            void sendEntities(entt::DefaultRegistry &registry);
+            void sendEntities(entities::EntityManager &manager);
 
-            void tick(entt::DefaultRegistry &registry);
+            void tick(entities::EntityManager &manager);
 
             const std::vector<PeerID> &getClients() const;
 

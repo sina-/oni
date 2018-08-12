@@ -5,6 +5,7 @@
 #include <oni-core/graphics/texture-manager.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/physics/transformation.h>
+#include <oni-core/entities/entity-manager.h>
 
 namespace oni {
     namespace graphics {
@@ -24,7 +25,7 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            mSkidEntities = std::make_unique<entt::DefaultRegistry>();
+            mSkidEntityManager = std::make_unique<entities::EntityManager>();
 
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
@@ -136,22 +137,22 @@ namespace oni {
             shader.disable();
         }
 
-        void SceneManager::render(entt::DefaultRegistry &registry) {
+        void SceneManager::render(entities::EntityManager &manager) {
             auto halfViewWidth = getViewWidth() / 2.0f;
             auto halfViewHeight = getViewHeight() / 2.0f;
 
             begin(*mTextureShader, *mTextureRenderer);
 
-            renderStaticTextured(registry, halfViewWidth, halfViewHeight);
-            renderStaticTextured(*mSkidEntities, halfViewWidth, halfViewHeight);
-            renderDynamicTextured(registry, halfViewWidth, halfViewHeight);
+            renderStaticTextured(manager, halfViewWidth, halfViewHeight);
+            renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
+            renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
 
             end(*mTextureShader, *mTextureRenderer);
 
             begin(*mColorShader, *mColorRenderer);
-            auto staticSpriteView = registry.persistent<components::TagColorShaded, components::Shape,
+            auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
                     components::Appearance, components::TagStatic>();
-            for (const auto &entity: staticSpriteView) {
+            for (const auto &entity: staticSpriteView.getEntities()) {
                 const auto &shape = staticSpriteView.get<components::Shape>(entity);
                 if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
@@ -301,19 +302,19 @@ namespace oni {
             }
         }
 
-        void SceneManager::tick(entt::DefaultRegistry &registry) {
-            auto carView = registry.persistent<components::Car, components::Placement>();
-            for (auto carEntity: carView) {
-                auto car = carView.get<components::Car>(carEntity);
+        void SceneManager::tick(entities::EntityManager &manager) {
+            auto carView = manager.createView<components::Car, components::Placement>();
+            for (auto carEntity: carView.getEntities()) {
+                const auto car = carView.get<components::Car>(carEntity);
                 // NOTE: Technically I should use slippingRear, but this gives better effect
                 if (car.slippingFront || true) {
                     // TODO: This is not in the view and it will be very slow as more entities are added to the
                     // registry. Perhaps I can save the tires together with the car
-                    auto carTireRRPlacement = registry.get<components::Placement>(car.tireRR);
-                    auto carTireRLPlacement = registry.get<components::Placement>(car.tireRL);
+                    auto carTireRRPlacement = manager.get<components::Placement>(car.tireRR);
+                    auto carTireRLPlacement = manager.get<components::Placement>(car.tireRL);
 
-                    const auto &transformParentRR = registry.get<components::TransformParent>(car.tireRR);
-                    const auto &transformParentRL = registry.get<components::TransformParent>(car.tireRL);
+                    const auto &transformParentRR = manager.get<components::TransformParent>(car.tireRR);
+                    const auto &transformParentRL = manager.get<components::TransformParent>(car.tireRL);
 
                     auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
                     auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
@@ -358,8 +359,8 @@ namespace oni {
                 // TODO: I can blend skid textures using this data
                 skidTexture.data = skidData;
 
-                skidTileID = entities::createStaticEntity(*mSkidEntities, skidTileSize, positionInWorld);
-                entities::assignTexture(*mSkidEntities, skidTileID, skidTexture);
+                skidTileID = entities::createStaticEntity(*mSkidEntityManager, skidTileSize, positionInWorld);
+                mSkidEntityManager->assign<components::Texture>(skidTileID, skidTexture);
                 mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
             } else {
                 skidTileID = mPackedSkidIndicesToEntity.at(packedIndices);
@@ -369,8 +370,8 @@ namespace oni {
 
         void SceneManager::updateSkidTexture(const math::vec3 &position, entities::EntityID skidTextureEntity,
                                              common::uint8 alpha) {
-            auto skidMarksTexture = mSkidEntities->get<components::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = mSkidEntities->get<components::Shape>(
+            auto skidMarksTexture = mSkidEntityManager->get<components::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = mSkidEntityManager->get<components::Shape>(
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;
@@ -393,11 +394,11 @@ namespace oni {
 
         }
 
-        void SceneManager::renderStaticTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+        void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                 common::real32 halfViewHeight) {
-            auto staticTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
+            auto staticTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
                     components::Texture, components::TagStatic>();
-            for (const auto &entity: staticTextureSpriteView) {
+            for (const auto &entity: staticTextureSpriteView.getEntities()) {
                 const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
                 if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
@@ -421,11 +422,11 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderDynamicTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+        void SceneManager::renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                  common::real32 halfViewHeight) {
-            auto dynamicTextureSpriteView = registry.persistent<components::TagTextureShaded, components::Shape,
+            auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
                     components::Texture, components::Placement, components::TagDynamic>();
-            for (const auto &entity: dynamicTextureSpriteView) {
+            for (const auto &entity: dynamicTextureSpriteView.getEntities()) {
                 const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
                 const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
                 auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
@@ -441,8 +442,8 @@ namespace oni {
                 // recalculate PlacementWorld for the entity and all its child entities.
                 // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
                 // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
-                if (registry.has<components::TransformParent>(entity)) {
-                    const auto &transformParent = registry.get<components::TransformParent>(entity);
+                if (manager.has<components::TransformParent>(entity)) {
+                    const auto &transformParent = manager.get<components::TransformParent>(entity);
                     // NOTE: Order matters. First transform by parent's transformation then child.
                     transformation = transformParent.transform * transformation;
                 }

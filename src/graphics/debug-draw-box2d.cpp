@@ -1,4 +1,6 @@
 #include <oni-core/graphics/debug-draw-box2d.h>
+
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/graphics/scene-manager.h>
 #include <oni-core/graphics/batch-renderer-2d.h>

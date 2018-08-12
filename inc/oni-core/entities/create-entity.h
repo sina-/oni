@@ -8,6 +8,10 @@
 class b2World;
 
 namespace oni {
+    namespace entities {
+        class EntityManager;
+    }
+
     namespace graphics {
         class FontManager;
 
@@ -22,43 +26,34 @@ namespace oni {
                                     const math::vec2 &size,
                                     const math::vec3 &positionInWorld);
 
-        EntityID createSpriteStaticEntity(entt::DefaultRegistry &registry,
+        EntityID createSpriteStaticEntity(entities::EntityManager &manager,
                                           const math::vec4 &color,
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld);
 
-        EntityID createDynamicEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+        EntityID createDynamicEntity(EntityManager &manager, const math::vec2 &size,
                                      const math::vec3 &positionInWorld,
                                      const common::real32 heading, const math::vec3 &scale);
 
-        EntityID createDynamicPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+        EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld, const common::real32 heading,
                                             const math::vec3 &scale);
 
-        EntityID createStaticEntity(entt::DefaultRegistry &registry, const math::vec2 &size,
+        EntityID createStaticEntity(EntityManager &manager, const math::vec2 &size,
                                     const math::vec3 &positionInWorld);
 
-        EntityID createStaticPhysicsEntity(entt::DefaultRegistry &registry, b2World &physicsWorld,
+        EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                            const math::vec2 &size,
                                            const math::vec3 &positionInWorld);
 
-        EntityID createTextEntity(entt::DefaultRegistry &registry,
-                                  graphics::FontManager &fontManager,
-                                  const std::string &text,
-                                  const math::vec3 &position);
-
-        EntityID createTextStaticEntity(entt::DefaultRegistry &registry,
+        EntityID createTextStaticEntity(EntityManager &manager,
                                         graphics::FontManager &fontManager,
                                         const std::string &text,
                                         const math::vec3 &position,
                                         const math::vec2 &size,
                                         const math::vec3 &positionInWorld);
 
-        EntityID createVehicleEntity(entt::DefaultRegistry &registry, b2World &physicsWorld);
-
-        void assignTexture(entt::DefaultRegistry &registry,
-                           EntityID entity,
-                           const components::Texture &texture);
+        EntityID createVehicleEntity(EntityManager &manager, b2World &physicsWorld);
     }
 }

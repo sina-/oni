@@ -2,6 +2,7 @@
 
 #include <Box2D/Box2D.h>
 
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/physics/car.h>
 #include <oni-core/graphics/window.h>
 #include <oni-core/components/geometry.h>
@@ -18,13 +19,13 @@ namespace oni {
             mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
         }
 
-        void Dynamics::tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) {
+        void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real32 tickTime) {
 
-            auto carView = registry.view<components::Placement, components::Car,
+            auto carView = manager.createView<components::Placement, components::Car,
                     components::CarConfig, components::TagVehicle>();
 
             // TODO: LOL you don't want to apply the same input to all the cars! Dispatch them accordingly.
-            for (auto entity: carView) {
+            for (auto entity: carView.getEntities()) {
                 auto &car = carView.get<components::Car>(entity);
                 const auto &carConfig = carView.get<components::CarConfig>(entity);
 
@@ -44,7 +45,7 @@ namespace oni {
                     carInput.right = 1.0f;
                 }
                 if (input.isPressed(GLFW_KEY_F)) {
-                    car.velocity = car.velocity  + math::vec2{static_cast<common::real32>(cos(car.heading)),
+                    car.velocity = car.velocity + math::vec2{static_cast<common::real32>(cos(car.heading)),
                                                              static_cast<common::real32>(sin(car.heading))};
                 }
                 if (input.isPressed(GLFW_KEY_SPACE)) {
@@ -80,15 +81,16 @@ namespace oni {
 
                 car.distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
 
-                Transformation::updatePlacement(registry, entity, placement);
+                Transformation::updatePlacement(manager, entity, placement);
             }
 
             mPhysicsWorld->Step(mTickFrequency, 6, 2);
 
-            auto carPhysicsView = registry.view<components::Car, components::TagVehicle, components::PhysicalProperties>();
+            auto carPhysicsView = manager.createView<components::Car, components::TagVehicle,
+                    components::PhysicalProperties>();
 
             // Handle collision
-            for (auto entity: carPhysicsView) {
+            for (auto entity: carPhysicsView.getEntities()) {
                 bool collided = false;
                 auto body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
 
@@ -117,28 +119,29 @@ namespace oni {
             }
 
             // Handle collision for other dynamic entities
-            auto dynamicEntitiesView = registry.view<components::Placement, components::TagDynamic, components::PhysicalProperties>();
+            auto dynamicEntitiesView = manager.createView<components::Placement, components::TagDynamic,
+                    components::PhysicalProperties>();
 
-            for (auto entity: dynamicEntitiesView) {
+            for (auto entity: dynamicEntitiesView.getEntities()) {
                 auto body = dynamicEntitiesView.get<components::PhysicalProperties>(entity).body;
                 auto position = body->GetPosition();
                 auto placement = components::Placement{};
                 placement.position = math::vec3{position.x, position.y, 1.0f};
                 placement.rotation = body->GetAngle();
-                registry.replace<components::Placement>(entity, placement);
+                manager.replace<components::Placement>(entity, placement);
             }
 
             // Update tires
-            auto carWithTiresView = registry.view<components::Placement, components::Car,
+            auto carWithTiresView = manager.createView<components::Placement, components::Car,
                     components::CarConfig, components::TagVehicle>();
-            for (auto entity: carWithTiresView) {
+            for (auto entity: carWithTiresView.getEntities()) {
                 auto car = carWithTiresView.get<components::Car>(entity);
-                auto &carTireFRPlacement = registry.get<components::Placement>(car.tireFR);
+                auto &carTireFRPlacement = manager.get<components::Placement>(car.tireFR);
                 // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
                 // There seems to be something wrong with the way tires are created in the beginning
                 carTireFRPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle + math::toRadians(90.0f));
 
-                auto &carTireFLPlacement = registry.get<components::Placement>(car.tireFL);
+                auto &carTireFLPlacement = manager.get<components::Placement>(car.tireFL);
                 carTireFLPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle + math::toRadians(90.0f));
             }
 

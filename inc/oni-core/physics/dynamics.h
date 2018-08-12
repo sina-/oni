@@ -8,6 +8,7 @@ namespace oni {
     namespace graphics{
         class DebugDrawBox2D;
     }
+
     namespace physics {
         class Dynamics : public Physic {
 
@@ -30,7 +31,7 @@ namespace oni {
             // the cost really.
             b2World * getPhysicsWorld();
 
-            void tick(entt::DefaultRegistry &registry, const io::Input &input, common::real32 tickTime) override;
+            void tick(entities::EntityManager &manager, const io::Input &input, common::real32 tickTime) override;
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};

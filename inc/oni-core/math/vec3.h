@@ -25,7 +25,7 @@ namespace oni {
 
             vec3 &divide(const vec3 &other);
 
-            vec2 getXY();
+            vec2 getXY() const;
 
             friend vec3 operator+(const vec3 &left, const vec3 &right);
 

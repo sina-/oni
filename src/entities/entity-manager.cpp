@@ -8,6 +8,14 @@ namespace oni {
             mRegistry = std::make_unique<entt::DefaultRegistry>();
         }
 
+        EntityID EntityManager::create() {
+            return mRegistry->create();
+        }
+
+        size_t EntityManager::size() const noexcept {
+            return mRegistry->size();
+        }
+
         EntityManager::~EntityManager() = default;
     }
 }

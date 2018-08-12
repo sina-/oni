@@ -1,4 +1,6 @@
 #include <oni-core/physics/transformation.h>
+
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/components/hierarchy.h>
 
@@ -33,28 +35,28 @@ namespace oni {
             Transformation::localToTextureTranslation(ratio, operand);
         }
 
-        void Transformation::updatePlacement(entt::DefaultRegistry &registry,
+        void Transformation::updatePlacement(entities::EntityManager &manager,
                                              entities::EntityID entity,
                                              const components::Placement &placement) {
-            registry.replace<components::Placement>(entity, placement);
+            manager.replace<components::Placement>(entity, placement);
 
-            if (registry.has<components::TransformChildren>(entity)) {
-                auto transformChildren = registry.get<components::TransformChildren>(entity);
+            if (manager.has<components::TransformChildren>(entity)) {
+                auto transformChildren = manager.get<components::TransformChildren>(entity);
                 for (auto child: transformChildren.children) {
-                    auto transformParent = registry.get<components::TransformParent>(child);
+                    auto transformParent = manager.get<components::TransformParent>(child);
                     transformParent.transform = createTransformation(placement.position, placement.rotation,
                                                                      placement.scale);
 
-                    updateTransformParent(registry, child, transformParent);
+                    updateTransformParent(manager, child, transformParent);
                 }
             }
         }
 
-        void Transformation::updateTransformParent(entt::DefaultRegistry &registry,
+        void Transformation::updateTransformParent(entities::EntityManager &manager,
                                                    entities::EntityID entity,
                                                    const components::TransformParent &transformParent) {
             // TODO: This function should recurse
-            registry.replace<components::TransformParent>(entity, transformParent);
+            manager.replace<components::TransformParent>(entity, transformParent);
         }
 
         components::Shape Transformation::shapeTransformation(const math::mat4 &transformation,

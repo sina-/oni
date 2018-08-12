@@ -14,6 +14,7 @@
 
 #include <oni-core/network/packet.h>
 #include <oni-core/entities/serialization.h>
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/entities/manage-hierarchy.h>
 #include <oni-core/physics/dynamics.h>
@@ -45,7 +46,7 @@ namespace oni {
             }
         }
 
-        void Server::tick(entt::DefaultRegistry &registry) {
+        void Server::tick(entities::EntityManager &manager) {
 
         }
 
@@ -84,8 +85,8 @@ namespace oni {
             }
         }
 
-        void Server::sendEntities(entt::DefaultRegistry &registry) {
-            std::string data = entities::serialize(registry);
+        void Server::sendEntities(entities::EntityManager &manager) {
+            std::string data = entities::serialize(manager);
             auto type = PacketType::ENTITIES;
 
             broadcast(type, data);

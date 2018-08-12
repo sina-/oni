@@ -11,6 +11,8 @@
 
 namespace oni {
     namespace entities {
+        class EntityManager;
+
         class TileWorld {
             using PackedIndiciesToEntity = typename std::map<common::uint64, entities::EntityID>;
         public:
@@ -26,11 +28,11 @@ namespace oni {
              */
             // TODO: Instead of a car the function should go through all the car entities in the world and
             // update as needed.
-            void tick(const math::vec2 &position, const components::Car &car, entt::DefaultRegistry &entities);
+            void tick(entities::EntityManager &manager, const components::Car &car, const math::vec2 &position);
 
         private:
 
-            void tickChunk(const math::vec2 &position, entt::DefaultRegistry &entities);
+            void tickChunk(entities::EntityManager &manager, const math::vec2 &position);
 
             components::ChunkIndices chunkPositionToIndex(const math::vec2 &position) const;
 
@@ -41,27 +43,23 @@ namespace oni {
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            void generateTilesForChunk(common::int64 xIndex, common::int64 yIndex,
-                                       entt::DefaultRegistry &entities);
+            void generateTilesForChunk(entities::EntityManager &manager, const common::int64 xIndex,
+                                                   const common::int64 yIndex);
 
             components::BoarderRoadTiles
-            generateRoadsForChunk(const components::ChunkIndices &chunkIndices,
-                                  entt::DefaultRegistry &entities);
+            generateRoadsForChunk(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices);
 
 
-            void generateRoadTile(const components::ChunkIndices &chunkIndices,
-                                  const components::RoadTileIndices &roadTileIndices,
-                                  entt::DefaultRegistry &entities);
+            void generateRoadTile(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices,
+                                              const components::RoadTileIndices &roadTileIndices);
 
-            void generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
-                                          const components::RoadTileIndices &roadTileIndices,
-                                          const std::string &texturePath,
-                                          entt::DefaultRegistry &entities);
+            void generateTexturedRoadTile(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices,
+                                                      const components::RoadTileIndices &roadTileIndices,
+                                                      const std::string &texturePath);
 
-            void generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
-                                         components::RoadTileIndices startingRoadTileIndices,
-                                         components::RoadTileIndices endingRoadTileIndices,
-                                         entt::DefaultRegistry &entities);
+            void generateRoadTileBetween(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices,
+                                                     components::RoadTileIndices startingRoadTileIndices,
+                                                     components::RoadTileIndices endingRoadTileIndices);
 
             bool existsInMap(common::uint64 packedIndices, const PackedIndiciesToEntity &map) const;
 

@@ -88,7 +88,7 @@ namespace oni {
 			return stream;
 		}
 
-        float vec2::len() {
+        float vec2::len() const {
             return std::sqrt(x * x + y * y);
         }
 

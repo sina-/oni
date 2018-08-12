@@ -12,11 +12,11 @@
 
 namespace oni {
     namespace math {
-        class vec2;
+        struct vec2;
     }
 
     namespace entities {
-        class TileWorld;
+        class EntityManager;
     }
 
     namespace graphics {
@@ -34,15 +34,15 @@ namespace oni {
 
             ~SceneManager();
 
-            void render(entt::DefaultRegistry &registry);
+            void render(entities::EntityManager &manager);
 
-            void renderStaticTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+            void renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                       common::real32 halfViewHeight);
 
-            void renderDynamicTextured(entt::DefaultRegistry &registry, common::real32 halfViewWidth,
+            void renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                        common::real32 halfViewHeight);
 
-            void tick(entt::DefaultRegistry &registry);
+            void tick(entities::EntityManager &manager);
 
             void renderRaw(const components::Shape &shape, const components::Appearance &appearance);
 
@@ -121,7 +121,7 @@ namespace oni {
             common::uint16 mRenderedSpritesPerFrame{0};
             common::uint16 mRenderedTexturesPerFrame{0};
 
-            std::unique_ptr<entt::DefaultRegistry> mSkidEntities{};
+            std::unique_ptr<entities::EntityManager> mSkidEntityManager{};
         };
     }
 }

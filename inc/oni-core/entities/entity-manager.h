@@ -25,14 +25,14 @@ namespace oni {
 
         class EntityManager {
         public:
+
             template<class Entity, class... Components>
             class EntityView {
             private:
                 friend EntityManager;
 
-                explicit EntityView(entt::PersistentView<Entity, Components...> &view) :
-                        mView(view) {
-
+                explicit EntityView(entt::Registry<EntityType> &registry) : mView(
+                        registry.persistent<Components...>()) {
                 }
 
             public:
@@ -54,7 +54,7 @@ namespace oni {
                 }
 
             private:
-                entt::PersistentView<Entity, Components...> &mView{};
+                entt::PersistentView<Entity, Components...> mView{};
             };
 
             EntityManager();
@@ -72,9 +72,7 @@ namespace oni {
 
             template<class... ViewComponents>
             EntityView<EntityType, ViewComponents...> createView() {
-                // TODO: Well this won't work :(
-                auto view = mRegistry->persistent<ViewComponents...>();
-                return EntityView(view);
+                return EntityView<EntityType, ViewComponents...>(*mRegistry);
             }
 
             template<class Component>

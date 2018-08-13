@@ -2,8 +2,6 @@
 
 #include <chrono>
 
-#include <entt/entity/registry.hpp>
-
 #include <oni-core/io/output.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/components/geometry.h>

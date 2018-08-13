@@ -2,11 +2,8 @@
 
 #include <map>
 
-#include <entt/entity/registry.hpp>
-
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec4.h>
-#include <oni-core/entities/create-entity.h>
 #include <oni-core/components/geometry.h>
 
 namespace oni {
@@ -14,7 +11,7 @@ namespace oni {
         class EntityManager;
 
         class TileWorld {
-            using PackedIndiciesToEntity = typename std::map<common::uint64, entities::EntityID>;
+            using PackedIndiciesToEntity = typename std::map<common::uint64, common::EntityID>;
         public:
 
             TileWorld();

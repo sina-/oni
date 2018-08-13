@@ -8,8 +8,6 @@
 #include <cassert>
 
 #include <Box2D/Box2D.h>
-#include <enet/enet.h>
-#include <entt/entity/registry.hpp>
 #include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/network/packet.h>
@@ -96,7 +94,7 @@ namespace oni {
             return mClients;
         }
 
-        void Server::sendCarEntityID(entities::EntityID entityID, PeerID peerID) {
+        void Server::sendCarEntityID(common::EntityID entityID, PeerID peerID) {
             auto packet = EntityPacket{entityID};
             auto data = serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;

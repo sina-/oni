@@ -1,6 +1,6 @@
 #pragma once
 
-#include <oni-core/entities/create-entity.h>
+#include <oni-core/common/typedefs.h>
 
 namespace oni {
     namespace entities {
@@ -13,8 +13,8 @@ namespace oni {
 
         public:
             static void createTransformationHierarchy(EntityManager &manager,
-                                                      const entities::EntityID parent,
-                                                      const entities::EntityID child);
+                                                      common::EntityID parent,
+                                                      common::EntityID child);
         };
     }
 }

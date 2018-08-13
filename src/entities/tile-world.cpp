@@ -2,10 +2,11 @@
 
 #include <ctime>
 
+#include <oni-core/components/visual.h>
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/entities/create-entity.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/physics/transformation.h>
-#include <oni-core/common/consts.h>
 
 
 namespace oni {
@@ -90,7 +91,7 @@ namespace oni {
                         auto currentChunkIndices = components::ChunkIndices{i, j};
                         auto chunkPosition = chunkIndexToPosition(currentChunkIndices);
                         auto positionInWorld = math::vec3{chunkPosition.x, chunkPosition.y, 1.0f};
-                        auto chunkID = createSpriteStaticEntity(manager, color, size, positionInWorld);
+                        auto chunkID = entities::createSpriteStaticEntity(manager, color, size, positionInWorld);
 
                         auto boarderRoadTiles = generateRoadsForChunk(manager, currentChunkIndices);
                         auto chunk = components::Chunk{positionInWorld, packedIndices, boarderRoadTiles};

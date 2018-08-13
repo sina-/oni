@@ -6,6 +6,8 @@
 #include <oni-core/common/consts.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/entities/create-entity.h>
+
 
 namespace oni {
     namespace graphics {
@@ -319,8 +321,8 @@ namespace oni {
                     auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
                     auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
 
-                    entities::EntityID skidEntityRL{0};
-                    entities::EntityID skidEntityRR{0};
+                    common::EntityID skidEntityRL{0};
+                    common::EntityID skidEntityRR{0};
 
                     skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY());
                     skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY());
@@ -333,12 +335,12 @@ namespace oni {
             }
         }
 
-        entities::EntityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
+        common::EntityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
             const auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             const auto packedIndices = math::packIntegers(x, y);
 
-            entities::EntityID skidTileID{};
+            common::EntityID skidTileID{};
             auto exists = mPackedSkidIndicesToEntity.find(packedIndices) != mPackedSkidIndicesToEntity.end();
             if (!exists) {
                 const auto skidIndexX = math::positionToIndex(position.x, mSkidTileSizeX);
@@ -368,7 +370,7 @@ namespace oni {
             return skidTileID;
         }
 
-        void SceneManager::updateSkidTexture(const math::vec3 &position, entities::EntityID skidTextureEntity,
+        void SceneManager::updateSkidTexture(const math::vec3 &position, common::EntityID skidTextureEntity,
                                              common::uint8 alpha) {
             auto skidMarksTexture = mSkidEntityManager->get<components::Texture>(skidTextureEntity);
             const auto skidMarksTexturePos = mSkidEntityManager->get<components::Shape>(

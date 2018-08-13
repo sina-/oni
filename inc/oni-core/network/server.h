@@ -3,12 +3,10 @@
 #include <map>
 
 #include <enet/enet.h>
-#include <entt/entity/registry.hpp>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/peer.h>
 #include <oni-core/network/packet.h>
-#include <oni-core/entities/create-entity.h>
 #include <oni-core/io/input.h>
 
 namespace oni {
@@ -32,7 +30,7 @@ namespace oni {
 
             const std::vector<PeerID> &getClients() const;
 
-            void sendCarEntityID(entities::EntityID entityID, PeerID id);
+            void sendCarEntityID(common::EntityID entityID, PeerID id);
 
         private:
             Server();

@@ -6,7 +6,6 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/entities/create-entity.h>
 
 /*
 namespace entt {
@@ -47,12 +46,12 @@ namespace oni {
                 }
 
                 template<class Component>
-                Component &get(entities::EntityID entityID) noexcept {
+                Component &get(common::EntityID entityID) noexcept {
                     return mView.template get<Component>(entityID);
                 }
 
                 template<class Component>
-                const Component &get(entities::EntityID entityID) const noexcept {
+                const Component &get(common::EntityID entityID) const noexcept {
                     return mView.template get<Component>(entityID);
                 }
 
@@ -64,12 +63,12 @@ namespace oni {
 
             ~EntityManager();
 
-            EntityID create();
+            common::EntityID create();
 
             size_t size() const noexcept;
 
             template<class Component, class... Args>
-            Component &assign(EntityID entityID, Args &&... args) {
+            Component &assign(common::EntityID entityID, Args &&... args) {
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
@@ -79,22 +78,22 @@ namespace oni {
             }
 
             template<class Component>
-            Component &get(entities::EntityID entityID) noexcept {
+            Component &get(common::EntityID entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
             }
 
             template<class Component>
-            const Component &get(entities::EntityID entityID) const noexcept {
+            const Component &get(common::EntityID entityID) const noexcept {
                 return mRegistry->get<Component>(entityID);
             }
 
             template<class Component>
-            bool has(entities::EntityID entityID) const noexcept {
+            bool has(common::EntityID entityID) const noexcept {
                 return mRegistry->has<Component>(entityID);
             }
 
             template<class Component, class... Args>
-            Component &replace(EntityID entityID, Args &&... args) {
+            Component &replace(common::EntityID entityID, Args &&... args) {
                 return mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
             }
 

@@ -2,17 +2,18 @@
 
 #include <Box2D/Box2D.h>
 
+#include <oni-core/components/visual.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
 
 namespace oni {
     namespace entities {
 
-        EntityID createSpriteEntity(entt::DefaultRegistry &registry,
+        common::EntityID createSpriteEntity(EntityManager &manager,
                                     const math::vec4 &color,
                                     const math::vec2 &size,
                                     const math::vec3 &positionInWorld) {
-            auto entity = registry.create();
+            auto entity = manager.create();
 
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityAppearance = components::Appearance{color};
@@ -20,14 +21,14 @@ namespace oni {
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
-            registry.assign<components::Shape>(entity, entityShapeWorld);
-            registry.assign<components::Appearance>(entity, entityAppearance);
-            registry.assign<components::TagColorShaded>(entity, entityColorShader);
+            manager.assign<components::Shape>(entity, entityShapeWorld);
+            manager.assign<components::Appearance>(entity, entityAppearance);
+            manager.assign<components::TagColorShaded>(entity, entityColorShader);
 
             return entity;
         }
 
-        EntityID createSpriteStaticEntity(EntityManager &manager,
+        common::EntityID createSpriteStaticEntity(EntityManager &manager,
                                           const math::vec4 &color,
                                           const math::vec2 &size,
                                           const math::vec3 &positionInWorld) {
@@ -50,7 +51,7 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        EntityID createDynamicEntity(EntityManager &manager, const math::vec2 &size,
+        common::EntityID createDynamicEntity(EntityManager &manager, const math::vec2 &size,
                                      const math::vec3 &positionInWorld,
                                      const common::real32 heading, const math::vec3 &scale) {
             auto entity = manager.create();
@@ -75,7 +76,7 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
+        common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld, const common::real32 heading,
                                             const math::vec3 &scale) {
@@ -124,7 +125,7 @@ namespace oni {
             return entity;
         }
 
-        EntityID createStaticEntity(EntityManager &manager, const math::vec2 &size,
+        common::EntityID createStaticEntity(EntityManager &manager, const math::vec2 &size,
                                     const math::vec3 &positionInWorld) {
             auto entity = manager.create();
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
@@ -140,7 +141,7 @@ namespace oni {
             return entity;
         }
 
-        EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
+        common::EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                            const math::vec2 &size,
                                            const math::vec3 &positionInWorld) {
             auto entity = manager.create();
@@ -175,7 +176,7 @@ namespace oni {
             return entity;
         }
 
-        EntityID createTextStaticEntity(EntityManager &manager,
+        common::EntityID createTextStaticEntity(EntityManager &manager,
                                         graphics::FontManager &fontManager,
                                         const std::string &text,
                                         const math::vec3 &position,
@@ -190,7 +191,7 @@ namespace oni {
 
         }
 
-        EntityID createVehicleEntity(EntityManager &manager, b2World &physicsWorld) {
+        common::EntityID createVehicleEntity(EntityManager &manager, b2World &physicsWorld) {
             auto entity = manager.create();
 
             auto carConfig = components::CarConfig();

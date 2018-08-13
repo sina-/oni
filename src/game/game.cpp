@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include <oni-core/common/consts.h>
-#include <oni-core/common/typedefs.h>
 
 namespace oni {
     namespace game {

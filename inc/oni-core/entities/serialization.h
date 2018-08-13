@@ -1,7 +1,5 @@
 #pragma once
 
-#include <entt/entity/registry.hpp>
-
 #include <oni-core/common/typedefs.h>
 
 namespace oni {

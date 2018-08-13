@@ -9,7 +9,6 @@
 #include <oni-core/buffers/vertex-array.h>
 #include <oni-core/utils/oni-assert.h>
 #include <oni-core/components/geometry.h>
-#include <oni-core/components/visual.h>
 
 namespace oni {
     namespace graphics {

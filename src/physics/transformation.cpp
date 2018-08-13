@@ -1,7 +1,6 @@
 #include <oni-core/physics/transformation.h>
 
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/entities/create-entity.h>
 #include <oni-core/components/hierarchy.h>
 
 namespace oni {
@@ -36,7 +35,7 @@ namespace oni {
         }
 
         void Transformation::updatePlacement(entities::EntityManager &manager,
-                                             entities::EntityID entity,
+                                             common::EntityID entity,
                                              const components::Placement &placement) {
             manager.replace<components::Placement>(entity, placement);
 
@@ -53,7 +52,7 @@ namespace oni {
         }
 
         void Transformation::updateTransformParent(entities::EntityManager &manager,
-                                                   entities::EntityID entity,
+                                                   common::EntityID entity,
                                                    const components::TransformParent &transformParent) {
             // TODO: This function should recurse
             manager.replace<components::TransformParent>(entity, transformParent);

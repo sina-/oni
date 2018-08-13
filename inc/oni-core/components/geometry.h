@@ -7,8 +7,6 @@
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
-#include <oni-core/entities/create-entity.h>
-#include <oni-core/entities/create-entity.h>
 
 namespace oni {
     namespace components {
@@ -242,10 +240,10 @@ namespace oni {
 
             common::carSimDouble distanceFromCamera{};
 
-            entities::EntityID tireFR{};
-            entities::EntityID tireFL{};
-            entities::EntityID tireRR{};
-            entities::EntityID tireRL{};
+            common::EntityID tireFR{};
+            common::EntityID tireFL{};
+            common::EntityID tireRR{};
+            common::EntityID tireRL{};
 
             template<class Archive>
             void serialize(Archive &archive) {

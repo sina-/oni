@@ -8,7 +8,7 @@ namespace oni {
             mRegistry = std::make_unique<entt::DefaultRegistry>();
         }
 
-        EntityID EntityManager::create() {
+        common::EntityID EntityManager::create() {
             return mRegistry->create();
         }
 

@@ -7,6 +7,7 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
+#include <oni-core/components/visual.h>
 
 
 namespace oni {

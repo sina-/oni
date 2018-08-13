@@ -6,6 +6,7 @@
 #include <oni-core/io/output.h>
 #include <oni-core/audio/audio-manager-fmod.h>
 #include <oni-core/physics/transformation.h>
+#include <oni-core/components/visual.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/entities/manage-hierarchy.h>
 #include <oni-core/entities/serialization.h>

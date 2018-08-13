@@ -7,6 +7,7 @@
 #include <enet/enet.h>
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet.h>

@@ -1,10 +1,12 @@
+#include <oni-core/graphics/font-manager.h>
+
+#include <cassert>
+
 #include <ftgl/texture-atlas.h>
 #include <ftgl/freetype-gl.h>
 
 #include <oni-core/components/visual.h>
-#include <oni-core/graphics/font-manager.h>
 #include <oni-core/graphics/texture-manager.h>
-#include <oni-core/utils/oni-assert.h>
 
 namespace oni {
     namespace graphics {
@@ -26,7 +28,7 @@ namespace oni {
 
             auto glyph = ftgl::texture_font_load_glyphs(m_FTFont, cache.c_str());
 
-            ONI_DEBUG_ASSERT(glyph == 0);
+            assert(glyph == 0);
 
             m_FTAtlas->id = TextureManager::load(*this);
 
@@ -41,7 +43,7 @@ namespace oni {
             auto glyph = ftgl::texture_font_find_glyph(m_FTFont, &character);
 
             // Make sure the character is pre-loaded and valid.
-            ONI_DEBUG_ASSERT(glyph);
+            assert(glyph);
             return glyph;
         }
 

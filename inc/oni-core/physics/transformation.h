@@ -1,7 +1,7 @@
 #pragma once
 
+#include <oni-core/common/typedefs.h>
 #include <oni-core/components/geometry.h>
-#include <oni-core/entities/create-entity.h>
 #include <oni-core/components/hierarchy.h>
 
 namespace oni {
@@ -55,11 +55,11 @@ namespace oni {
                                                        math::vec3 &operand);
 
             static void updatePlacement(entities::EntityManager &manager,
-                                        entities::EntityID entity,
+                                        common::EntityID entity,
                                         const components::Placement &placement);
 
             static void updateTransformParent(entities::EntityManager &manager,
-                                              entities::EntityID entity,
+                                              common::EntityID entity,
                                               const components::TransformParent &transformParent);
         };
     }

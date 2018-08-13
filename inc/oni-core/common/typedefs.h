@@ -22,10 +22,13 @@ namespace oni {
         typedef float real32;
         typedef double real64;
 
-        typedef real64 carSimDouble;
+        typedef double carSimDouble;
         typedef uint32 oniSoundID;
 
         typedef uint64 packedInt32;
-        typedef std::vector<std::unique_ptr<const components::BufferStructure>> BufferStructures;
+
+        typedef uint32 EntityID;
+
+        using BufferStructures = typename std::vector<std::unique_ptr<const components::BufferStructure>>;
     }
 }

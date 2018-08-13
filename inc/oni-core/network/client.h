@@ -3,7 +3,6 @@
 #include <enet/enet.h>
 
 #include <oni-core/network/peer.h>
-#include <oni-core/entities/create-entity.h>
 
 namespace oni {
 

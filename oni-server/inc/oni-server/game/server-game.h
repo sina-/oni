@@ -3,13 +3,11 @@
 #include <memory>
 
 #include <AntTweakBar.h>
-#include <entt/entt.hpp>
 #include <Box2D/Box2D.h>
 
 #include <oni-core/game/game.h>
 #include <oni-core/physics/dynamics.h>
 #include <oni-core/common/typedefs.h>
-#include <oni-core/entities/create-entity.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/entities/tile-world.h>
@@ -21,7 +19,7 @@
 namespace oni {
     namespace server {
         typedef std::map<network::PeerID, io::Input> ClientInputMap;
-        typedef std::map<network::PeerID, entities::EntityID> ClientCarEntityMap;
+        typedef std::map<network::PeerID, common::EntityID> ClientCarEntityMap;
 
         class ServerGame : public game::Game {
         public:
@@ -66,8 +64,8 @@ namespace oni {
             network::Address mServerAddress{};
             std::unique_ptr<network::Server> mServer{};
 
-            entities::EntityID mTruckEntity{};
-            entities::EntityID mBoxEntity{};
+            common::EntityID mTruckEntity{};
+            common::EntityID mBoxEntity{};
 
             ClientInputMap mClientInputMap{};
             ClientCarEntityMap mClientCarEntityMap{};

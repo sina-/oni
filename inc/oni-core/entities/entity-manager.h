@@ -38,10 +38,13 @@ namespace oni {
             public:
                 ~EntityView() = default;
 
-                // TODO: Can I avoid creating a vector?
-                std::vector<entities::EntityID> getEntities() {
-                    return std::vector<entities::EntityID>(mView.begin(), mView.end());
-                };
+                auto begin() {
+                    return mView.begin();
+                }
+
+                auto end() {
+                    return mView.end();
+                }
 
                 template<class Component>
                 Component &get(entities::EntityID entityID) noexcept {

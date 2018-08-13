@@ -25,7 +25,7 @@ namespace oni {
                     components::CarConfig, components::TagVehicle>();
 
             // TODO: LOL you don't want to apply the same input to all the cars! Dispatch them accordingly.
-            for (auto entity: carView.getEntities()) {
+            for (auto entity: carView) {
                 auto &car = carView.get<components::Car>(entity);
                 const auto &carConfig = carView.get<components::CarConfig>(entity);
 
@@ -90,7 +90,7 @@ namespace oni {
                     components::PhysicalProperties>();
 
             // Handle collision
-            for (auto entity: carPhysicsView.getEntities()) {
+            for (auto entity: carPhysicsView) {
                 bool collided = false;
                 auto body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
 
@@ -122,7 +122,7 @@ namespace oni {
             auto dynamicEntitiesView = manager.createView<components::Placement, components::TagDynamic,
                     components::PhysicalProperties>();
 
-            for (auto entity: dynamicEntitiesView.getEntities()) {
+            for (auto entity: dynamicEntitiesView) {
                 auto body = dynamicEntitiesView.get<components::PhysicalProperties>(entity).body;
                 auto position = body->GetPosition();
                 auto placement = components::Placement{};
@@ -134,7 +134,7 @@ namespace oni {
             // Update tires
             auto carWithTiresView = manager.createView<components::Placement, components::Car,
                     components::CarConfig, components::TagVehicle>();
-            for (auto entity: carWithTiresView.getEntities()) {
+            for (auto entity: carWithTiresView) {
                 auto car = carWithTiresView.get<components::Car>(entity);
                 auto &carTireFRPlacement = manager.get<components::Placement>(car.tireFR);
                 // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.

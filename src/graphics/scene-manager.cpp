@@ -152,7 +152,7 @@ namespace oni {
             begin(*mColorShader, *mColorRenderer);
             auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
                     components::Appearance, components::TagStatic>();
-            for (const auto &entity: staticSpriteView.getEntities()) {
+            for (const auto &entity: staticSpriteView) {
                 const auto &shape = staticSpriteView.get<components::Shape>(entity);
                 if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
@@ -304,7 +304,7 @@ namespace oni {
 
         void SceneManager::tick(entities::EntityManager &manager) {
             auto carView = manager.createView<components::Car, components::Placement>();
-            for (auto carEntity: carView.getEntities()) {
+            for (auto carEntity: carView) {
                 const auto car = carView.get<components::Car>(carEntity);
                 // NOTE: Technically I should use slippingRear, but this gives better effect
                 if (car.slippingFront || true) {
@@ -398,7 +398,7 @@ namespace oni {
                                                 common::real32 halfViewHeight) {
             auto staticTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
                     components::Texture, components::TagStatic>();
-            for (const auto &entity: staticTextureSpriteView.getEntities()) {
+            for (const auto &entity: staticTextureSpriteView) {
                 const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
                 if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
                     continue;
@@ -426,7 +426,7 @@ namespace oni {
                                                  common::real32 halfViewHeight) {
             auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
                     components::Texture, components::Placement, components::TagDynamic>();
-            for (const auto &entity: dynamicTextureSpriteView.getEntities()) {
+            for (const auto &entity: dynamicTextureSpriteView) {
                 const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
                 const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
                 auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);

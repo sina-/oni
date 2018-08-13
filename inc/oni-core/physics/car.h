@@ -34,11 +34,11 @@ namespace oni {
                      const components::CarInput &inputs, common::real32 dt);
 
 
-        common::carSimDouble applySmoothSteer(const components::Car &car,
-                                                  common::carSimDouble steerInput, common::real32 dt);
+        common::CarSimDouble applySmoothSteer(const components::Car &car,
+                                                  common::CarSimDouble steerInput, common::real32 dt);
 
-        common::carSimDouble applySafeSteer(const components::Car &car,
-                                                common::carSimDouble steerInput);
+        common::CarSimDouble applySafeSteer(const components::Car &car,
+                                                common::CarSimDouble steerInput);
 
     }
 }

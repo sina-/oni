@@ -152,31 +152,31 @@ namespace oni {
         };
 
         struct CarConfig {
-            common::carSimDouble gravity{9.81f};
-            common::carSimDouble mass{1200};
-            common::carSimDouble inertialScale{1.0f};
-            common::carSimDouble halfWidth{0.9f};
-            common::carSimDouble cgToFront{2.0f}; // Distance from center of gravity to the front in meters.
-            common::carSimDouble cgToRear{2.0f};
-            common::carSimDouble cgToFrontAxle{1.25f};
-            common::carSimDouble cgToRearAxle{1.25f};
-            common::carSimDouble cgHeight{0.55f};
-            common::carSimDouble wheelRadius{0.3f}; // For rendering only
-            common::carSimDouble wheelWidth{0.2f}; // For rendering only
-            common::carSimDouble tireGrip{2.0f};
-            common::carSimDouble lockGrip{0.6f}; // % of grip when wheel is locked
-            common::carSimDouble engineForce{4000.0f};
-            common::carSimDouble brakeForce{12000.0f};
-            common::carSimDouble eBrakeForce{12000.0f / 5.5f};
-            common::carSimDouble weightTransfer{0.2f};
-            common::carSimDouble maxSteer{0.6f}; // in radians
-            common::carSimDouble cornerStiffnessFront{5.0f};
-            common::carSimDouble cornerStiffnessRear{5.2f};
-            common::carSimDouble airResist{2.5f};
-            common::carSimDouble rollResist{8.0f};
+            common::CarSimDouble gravity{9.81f};
+            common::CarSimDouble mass{1200};
+            common::CarSimDouble inertialScale{1.0f};
+            common::CarSimDouble halfWidth{0.9f};
+            common::CarSimDouble cgToFront{2.0f}; // Distance from center of gravity to the front in meters.
+            common::CarSimDouble cgToRear{2.0f};
+            common::CarSimDouble cgToFrontAxle{1.25f};
+            common::CarSimDouble cgToRearAxle{1.25f};
+            common::CarSimDouble cgHeight{0.55f};
+            common::CarSimDouble wheelRadius{0.3f}; // For rendering only
+            common::CarSimDouble wheelWidth{0.2f}; // For rendering only
+            common::CarSimDouble tireGrip{2.0f};
+            common::CarSimDouble lockGrip{0.6f}; // % of grip when wheel is locked
+            common::CarSimDouble engineForce{4000.0f};
+            common::CarSimDouble brakeForce{12000.0f};
+            common::CarSimDouble eBrakeForce{12000.0f / 5.5f};
+            common::CarSimDouble weightTransfer{0.2f};
+            common::CarSimDouble maxSteer{0.6f}; // in radians
+            common::CarSimDouble cornerStiffnessFront{5.0f};
+            common::CarSimDouble cornerStiffnessRear{5.2f};
+            common::CarSimDouble airResist{2.5f};
+            common::CarSimDouble rollResist{8.0f};
 
-            common::carSimDouble gearRatio{2.7f};
-            common::carSimDouble differentialRatio{3.4f};
+            common::CarSimDouble gearRatio{2.7f};
+            common::CarSimDouble differentialRatio{3.4f};
 
             template<class Archive>
             void serialize(Archive &archive) {
@@ -209,20 +209,20 @@ namespace oni {
         };
 
         struct Car {
-            common::carSimDouble heading{};
-            common::carSimDouble velocityAbsolute{};
-            common::carSimDouble angularVelocity{}; // Angular velocity in radians (rad/s)
-            common::carSimDouble steer{}; // (-1.0..1.0)
-            common::carSimDouble steerAngle{}; // (-maxSteer..maxSteer)
-            common::carSimDouble inertia{};
-            common::carSimDouble wheelBase{};
-            common::carSimDouble axleWeightRatioFront{};
-            common::carSimDouble axleWeightRatioRear{};
-            common::carSimDouble rpm{};
-            common::carSimDouble maxVelocityAbsolute{};
-            common::carSimDouble accumulatedEBrake{};
-            common::carSimDouble slipAngleFront{};
-            common::carSimDouble slipAngleRear{};
+            common::CarSimDouble heading{};
+            common::CarSimDouble velocityAbsolute{};
+            common::CarSimDouble angularVelocity{}; // Angular velocity in radians (rad/s)
+            common::CarSimDouble steer{}; // (-1.0..1.0)
+            common::CarSimDouble steerAngle{}; // (-maxSteer..maxSteer)
+            common::CarSimDouble inertia{};
+            common::CarSimDouble wheelBase{};
+            common::CarSimDouble axleWeightRatioFront{};
+            common::CarSimDouble axleWeightRatioRear{};
+            common::CarSimDouble rpm{};
+            common::CarSimDouble maxVelocityAbsolute{};
+            common::CarSimDouble accumulatedEBrake{};
+            common::CarSimDouble slipAngleFront{};
+            common::CarSimDouble slipAngleRear{};
 
 
             math::vec2 position{};
@@ -238,7 +238,7 @@ namespace oni {
             bool smoothSteer{};
             bool safeSteer{};
 
-            common::carSimDouble distanceFromCamera{};
+            common::CarSimDouble distanceFromCamera{};
 
             common::EntityID tireFR{};
             common::EntityID tireFL{};

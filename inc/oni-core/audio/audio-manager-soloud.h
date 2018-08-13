@@ -19,23 +19,23 @@ namespace oni {
 
             ~AudioManagerSoloud();
 
-            oniSoundID loadSound(const std::string &name) override;
+            OniSoundID loadSound(const std::string &name) override;
 
-            void playSound(oniSoundID id) override;
+            void playSound(OniSoundID id) override;
 
-            oni::common::real64 pauseSound(oniSoundID id) override;
+            oni::common::real64 pauseSound(OniSoundID id) override;
 
-            void stopSound(oniSoundID id) override;
+            void stopSound(OniSoundID id) override;
 
-            void setLoop(oniSoundID id, bool loop) override;
+            void setLoop(OniSoundID id, bool loop) override;
 
-            void setVolume(oniSoundID id, common::real32 volume) override;
+            void setVolume(OniSoundID id, common::real32 volume) override;
 
-            common::real32 getVolume(oniSoundID id) override;
+            common::real32 getVolume(OniSoundID id) override;
 
-            bool isPlaying(oniSoundID id) override;
+            bool isPlaying(OniSoundID id) override;
 
-            void seek(oniSoundID id, oni::common::real64 position) override;
+            void seek(OniSoundID id, oni::common::real64 position) override;
 
         private:
             SoLoud::Soloud mSoloudManager;

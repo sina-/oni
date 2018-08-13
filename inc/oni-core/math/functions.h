@@ -43,7 +43,7 @@ namespace oni {
          * @param x
          * @return pack uint64 value
          */
-        inline common::packedInt32 packIntegers(const common::int64 x, const common::int64 y) {
+        inline common::PackedInt32 packIntegers(const common::int64 x, const common::int64 y) {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1

@@ -20,7 +20,7 @@ namespace entt {
 
 namespace oni {
     namespace entities {
-        typedef common::uint32 EntityType;
+        typedef common::EntityID EntityType;
 
         class EntityManager {
         public:

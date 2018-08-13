@@ -35,7 +35,7 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        oniSoundID AudioManagerFMOD::loadSound(const std::string &name) {
+        OniSoundID AudioManagerFMOD::loadSound(const std::string &name) {
             // TODO: This will break for one-off sound effects, currently all the functions in this
             // class work if the audio is to be looped over.
 
@@ -56,12 +56,12 @@ namespace oni {
             return mChannels.size() - 1;
         }
 
-        void AudioManagerFMOD::playSound(oniSoundID id) {
+        void AudioManagerFMOD::playSound(OniSoundID id) {
             auto result = mChannels[id]->setPaused(false);
             ERRCHECK(result);
         }
 
-        double AudioManagerFMOD::pauseSound(oniSoundID id) {
+        double AudioManagerFMOD::pauseSound(OniSoundID id) {
             auto result = mChannels[id]->setPaused(true);
             ERRCHECK(result);
 
@@ -73,40 +73,40 @@ namespace oni {
             return (static_cast<double>(pos) + common::ep);
         }
 
-        void AudioManagerFMOD::stopSound(oniSoundID id) {
+        void AudioManagerFMOD::stopSound(OniSoundID id) {
             UNUSED(id);
         }
 
-        void AudioManagerFMOD::setLoop(oniSoundID id, bool loop) {
+        void AudioManagerFMOD::setLoop(OniSoundID id, bool loop) {
             UNUSED(id);
             UNUSED(loop);
 
         }
 
-        void AudioManagerFMOD::setVolume(oniSoundID id, common::real32 volume) {
+        void AudioManagerFMOD::setVolume(OniSoundID id, common::real32 volume) {
             auto result = mChannels[id]->setVolume(volume);
             ERRCHECK(result);
         }
 
-        common::real32 AudioManagerFMOD::getVolume(oniSoundID id) {
+        common::real32 AudioManagerFMOD::getVolume(OniSoundID id) {
             UNUSED(id);
             return 0;
         }
 
-        bool AudioManagerFMOD::isPlaying(oniSoundID id) {
+        bool AudioManagerFMOD::isPlaying(OniSoundID id) {
             bool isPaused{false};
             auto result = mChannels[id]->getPaused(&isPaused);
             ERRCHECK(result);
             return !isPaused;
         }
 
-        void AudioManagerFMOD::seek(oniSoundID id, double position) {
+        void AudioManagerFMOD::seek(OniSoundID id, double position) {
             auto result = mChannels[id]->setPosition(static_cast<common::uint32>(position + common::ep),
                                                      FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
         }
 
-        void AudioManagerFMOD::setPitch(oniSoundID id, common::real32 pitch) {
+        void AudioManagerFMOD::setPitch(OniSoundID id, common::real32 pitch) {
             if (pitch > 256) {
                 pitch = 256;
             }

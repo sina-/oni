@@ -22,10 +22,10 @@ namespace oni {
         typedef float real32;
         typedef double real64;
 
-        typedef double carSimDouble;
-        typedef uint32 oniSoundID;
+        typedef double CarSimDouble;
+        typedef uint32 OniSoundID;
 
-        typedef uint64 packedInt32;
+        typedef uint64 PackedInt32;
 
         typedef uint32 EntityID;
 

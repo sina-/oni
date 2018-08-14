@@ -59,17 +59,33 @@ namespace oni {
                 entt::PersistentView<Entity, Components...> mView{};
             };
 
-            EntityManager();
+            EntityManager() {
+                mRegistry = std::make_unique<entt::DefaultRegistry>();
+            }
 
-            ~EntityManager();
+            ~EntityManager() = default;
 
-            common::EntityID create();
+            common::EntityID create() {
+                common::EntityID result{};
+                {
+                    result = mRegistry->create();
+                }
+                return result;
+            }
 
-            size_t size() const noexcept;
+            size_t size() const noexcept{
+                size_t result{0};
+                {
+                   result =  mRegistry->size();
+                }
+                return result;
+            }
 
             template<class Component, class... Args>
-            Component &assign(common::EntityID entityID, Args &&... args) {
-                return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
+            void assign(common::EntityID entityID, Args &&... args) {
+                {
+                    mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
+                }
             }
 
             template<class... ViewComponents>
@@ -89,23 +105,33 @@ namespace oni {
 
             template<class Component>
             bool has(common::EntityID entityID) const noexcept {
-                return mRegistry->has<Component>(entityID);
+                bool result{false};
+                {
+                    result = mRegistry->has<Component>(entityID);
+                }
+                return result;
             }
 
             template<class Component, class... Args>
-            Component &replace(common::EntityID entityID, Args &&... args) {
-                return mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
+            void replace(common::EntityID entityID, Args &&... args) {
+                {
+                    mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
+                }
             }
 
             template<class Archive, class ...ArchiveComponents>
             void restore(Archive &archive) {
-                mRegistry->restore().entities(archive).template component<ArchiveComponents...>(archive);
-            };
+                {
+                    mRegistry->restore().entities(archive).template component<ArchiveComponents...>(archive);
+                }
+            }
 
             template<class Archive, class ...ArchiveComponents>
             void snapshot(Archive &archive) {
-                mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
-            };
+                {
+                    mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
+                }
+            }
 
         private:
             std::unique_ptr<entt::Registry<EntityType>> mRegistry{};

@@ -28,9 +28,9 @@ namespace oni {
 
             std::unique_lock<std::mutex> scopedLock();
 
-            void lock();
+/*            void lock();
 
-            void unlock();
+            void unlock();*/
 
         private:
             ClientCarEntityMap mClientCarEntityMap{};

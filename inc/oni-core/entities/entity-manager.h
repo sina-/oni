@@ -81,7 +81,7 @@ namespace oni {
             size_t size() noexcept {
                 size_t result{0};
                 {
-                    //std::lock_guard<std::mutex> registryLock(mMutex);
+                    auto lock = scopedLock();
                     result = mRegistry->size();
                 }
                 return result;
@@ -156,6 +156,7 @@ namespace oni {
                 return std::unique_lock<std::mutex>(mMutex);
             }
 
+/*
             void lock() {
                 mLock.lock();
             }
@@ -163,6 +164,7 @@ namespace oni {
             void unlock() {
                 mLock.unlock();
             }
+*/
 
         private:
             std::unique_ptr<entt::Registry<EntityType>> mRegistry{};

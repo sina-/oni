@@ -170,27 +170,28 @@ namespace oni {
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
             std::vector<io::Input> clientInput;
-            mClientDataManager->lock();
-            for (auto client: mServer->getClients()) {
-                const auto &input = mClientDataManager->getClientInput(client);
-                clientInput.push_back(input);
+            {
+                auto clientDataLock = mClientDataManager->scopedLock();
+                for (auto client: mServer->getClients()) {
+                    const auto &input = mClientDataManager->getClientInput(client);
+                    clientInput.push_back(input);
+                }
             }
-            mClientDataManager->unlock();
 
             for (const auto &input: clientInput) {
                 mDynamics->tick(*mEntityManager, input, tickTime);
             }
 
             std::vector<math::vec2> tickPositions{};
-            mEntityManager->lock();
-            mClientDataManager->lock();
-            for (auto client: mServer->getClients()) {
-                auto carEntity = mClientDataManager->getEntityID(client);
-                const auto &carPlacement = mEntityManager->get<components::Placement>(carEntity);
-                tickPositions.push_back(carPlacement.position.getXY());
+            {
+                auto registryLock = mEntityManager->scopedLock();
+                auto clientDataLock = mClientDataManager->scopedLock();
+                for (auto client: mServer->getClients()) {
+                    auto carEntity = mClientDataManager->getEntityID(client);
+                    const auto &carPlacement = mEntityManager->get<components::Placement>(carEntity);
+                    tickPositions.push_back(carPlacement.position.getXY());
+                }
             }
-            mEntityManager->unlock();
-            mClientDataManager->unlock();
 
             for (const auto &pos: tickPositions) {
                 mTileWorld->tick(*mEntityManager, pos);

@@ -13,13 +13,13 @@ namespace oni {
             return std::unique_lock<std::mutex>(mMutex);
         }
 
-        void ClientDataManager::lock() {
+/*        void ClientDataManager::lock() {
             mLock.lock();
         }
 
         void ClientDataManager::unlock() {
             mLock.unlock();
-        }
+        }*/
 
         common::EntityID ClientDataManager::getEntityID(common::PeerID clientID) const {
             return mClientCarEntityMap.at(clientID);
@@ -30,6 +30,7 @@ namespace oni {
         }
 
         void ClientDataManager::deleteClient(common::PeerID clientID) {
+            auto clientDataLock = scopedLock();
             mClientCarEntityMap.erase(clientID);
         }
 

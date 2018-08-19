@@ -38,6 +38,8 @@ namespace oni {
                     mFrameExcessTime = 0;
                 }
 
+                poll();
+
                 tick();
 
                 render();

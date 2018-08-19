@@ -11,6 +11,7 @@ namespace oni {
         void TransformationHierarchy::createTransformationHierarchy(EntityManager &manager,
                                                                     const common::EntityID parent,
                                                                     const common::EntityID child) {
+//            auto lock = manager.scopedLock();
             if (manager.has<components::TransformChildren>(parent)) {
                 auto transformChildren = manager.get<components::TransformChildren>(parent);
                 transformChildren.children.emplace_back(child);

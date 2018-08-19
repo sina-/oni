@@ -28,9 +28,9 @@ namespace oni {
 
             void tick(entities::EntityManager &manager);
 
-            const std::vector<PeerID> &getClients() const;
+            const std::vector<common::PeerID> &getClients() const;
 
-            void sendCarEntityID(common::EntityID entityID, PeerID id);
+            void sendCarEntityID(common::EntityID entityID, common::PeerID id);
 
         private:
             Server();
@@ -42,7 +42,7 @@ namespace oni {
             void postDisconnectHook(const ENetEvent *event) override;
 
         private:
-            std::vector<PeerID> mClients{};
+            std::vector<common::PeerID> mClients{};
         };
     }
 }

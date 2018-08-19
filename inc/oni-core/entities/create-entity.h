@@ -12,8 +12,15 @@ namespace oni {
         class EntityManager;
     }
 
+    namespace components {
+        class Texture;
+
+        class CarConfig;
+    }
+
     namespace graphics {
         class FontManager;
+
 
         class SceneManager;
     }
@@ -52,6 +59,9 @@ namespace oni {
                                                 const math::vec2 &size,
                                                 const math::vec3 &positionInWorld);
 
-        common::EntityID createVehicleEntity(EntityManager &manager, b2World &physicsWorld);
+        common::EntityID
+        createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const oni::components::CarConfig &carConfig);
+
+        void assignTexture(EntityManager &manager, common::EntityID entity, const components::Texture &texture);
     }
 }

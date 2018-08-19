@@ -29,6 +29,8 @@ namespace oni {
 
         typedef uint32 EntityID;
 
+        typedef uint32 PeerID;
+
         using BufferStructures = typename std::vector<std::unique_ptr<const components::BufferStructure>>;
     }
 }

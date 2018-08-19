@@ -63,7 +63,7 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(entities::EntityManager &manager, const components::Car &car, const math::vec2 &position) {
+        void TileWorld::tick(entities::EntityManager &manager, const math::vec2 &position) {
             tickChunk(manager, position);
         }
 

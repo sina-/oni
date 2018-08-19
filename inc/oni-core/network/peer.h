@@ -31,8 +31,6 @@ namespace oni {
             common::uint16 port;
         };
 
-        typedef common::uint32 PeerID;
-
         template<class T>
         T deserialize(const std::string &data) {
             std::istringstream storage;
@@ -61,7 +59,7 @@ namespace oni {
 
             void poll();
 
-            void registerPacketHandler(PacketType type, std::function<void(PeerID, const std::string &)> &&handler);
+            void registerPacketHandler(PacketType type, std::function<void(common::PeerID, const std::string &)> &&handler);
 
         protected:
             virtual void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) = 0;
@@ -107,8 +105,8 @@ namespace oni {
 
         protected:
             ENetHost *mEnetHost{};
-            std::map<PeerID, ENetPeer *> mPeers{};
-            std::map<PacketType, std::function<void(PeerID, const std::string &)>> mPacketHandlers{};
+            std::map<common::PeerID, ENetPeer *> mPeers{};
+            std::map<PacketType, std::function<void(common::PeerID, const std::string &)>> mPacketHandlers{};
         };
     }
 }

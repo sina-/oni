@@ -3,10 +3,10 @@
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/texture-manager.h>
-#include <oni-core/common/consts.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/common/consts.h>
 
 
 namespace oni {
@@ -152,18 +152,20 @@ namespace oni {
             end(*mTextureShader, *mTextureRenderer);
 
             begin(*mColorShader, *mColorRenderer);
-            auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
-                    components::Appearance, components::TagStatic>();
-            for (const auto &entity: staticSpriteView) {
-                const auto &shape = staticSpriteView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                    continue;
+            {
+                auto staticSpriteView = manager.createViewScopeLock<components::TagColorShaded, components::Shape,
+                        components::Appearance, components::TagStatic>();
+                for (const auto &entity: staticSpriteView) {
+                    const auto &shape = staticSpriteView.get<components::Shape>(entity);
+                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                        continue;
+                    }
+                    const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
+
+                    ++mRenderedSpritesPerFrame;
+
+                    mColorRenderer->submit(shape, appearance);
                 }
-                const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
-
-                ++mRenderedSpritesPerFrame;
-
-                mColorRenderer->submit(shape, appearance);
             }
 
             end(*mColorShader, *mColorRenderer);
@@ -305,33 +307,48 @@ namespace oni {
         }
 
         void SceneManager::tick(entities::EntityManager &manager) {
-            auto carView = manager.createView<components::Car, components::Placement>();
-            for (auto carEntity: carView) {
-                const auto car = carView.get<components::Car>(carEntity);
-                // NOTE: Technically I should use slippingRear, but this gives better effect
-                if (car.slippingFront || true) {
-                    // TODO: This is not in the view and it will be very slow as more entities are added to the
-                    // registry. Perhaps I can save the tires together with the car
-                    auto carTireRRPlacement = manager.get<components::Placement>(car.tireRR);
-                    auto carTireRLPlacement = manager.get<components::Placement>(car.tireRL);
+            std::vector<components::Placement> carTireRRPlacements{};
+            std::vector<components::Placement> carTireRLPlacements{};
+            std::vector<components::TransformParent> carTireRRTransformParent{};
+            std::vector<components::TransformParent> carTireRLTransformParent{};
+            std::vector<common::uint8> skidOpacity{};
+            {
+                auto carView = manager.createViewScopeLock<components::Car, components::Placement>();
+                for (auto carEntity: carView) {
+                    const auto car = carView.get<components::Car>(carEntity);
+                    // NOTE: Technically I should use slippingRear, but this gives better effect
+                    if (car.slippingFront || true) {
+                        // TODO: This is not in the view and it will be very slow as more entities are added to the
+                        // registry. Perhaps I can save the tires together with the car
+                        const auto &carTireRRPlacement = manager.get<components::Placement>(car.tireRR);
+                        carTireRRPlacements.push_back(carTireRRPlacement);
+                        const auto &carTireRLPlacement = manager.get<components::Placement>(car.tireRL);
+                        carTireRLPlacements.push_back(carTireRLPlacement);
 
-                    const auto &transformParentRR = manager.get<components::TransformParent>(car.tireRR);
-                    const auto &transformParentRL = manager.get<components::TransformParent>(car.tireRL);
+                        const auto &transformParentRR = manager.get<components::TransformParent>(car.tireRR);
+                        carTireRRTransformParent.push_back(transformParentRR);
+                        const auto &transformParentRL = manager.get<components::TransformParent>(car.tireRL);
+                        carTireRLTransformParent.push_back(transformParentRL);
 
-                    auto skidMarkRLPos = transformParentRL.transform * carTireRLPlacement.position;
-                    auto skidMarkRRPos = transformParentRR.transform * carTireRRPlacement.position;
+                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+                        skidOpacity.push_back(alpha);
+                    }
 
-                    common::EntityID skidEntityRL{0};
-                    common::EntityID skidEntityRR{0};
-
-                    skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY());
-                    skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY());
-
-                    auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-
-                    updateSkidTexture(skidMarkRLPos, skidEntityRL, alpha);
-                    updateSkidTexture(skidMarkRRPos, skidEntityRR, alpha);
                 }
+            }
+
+            for (size_t i = 0; i < skidOpacity.size(); ++i) {
+                auto skidMarkRRPos = carTireRRTransformParent[i].transform * carTireRRPlacements[i].position;
+                auto skidMarkRLPos = carTireRLTransformParent[i].transform * carTireRLPlacements[i].position;
+
+                common::EntityID skidEntityRL{0};
+                common::EntityID skidEntityRR{0};
+
+                skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY());
+                skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY());
+
+                updateSkidTexture(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
+                updateSkidTexture(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
             }
         }
 
@@ -398,67 +415,74 @@ namespace oni {
 
         void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                 common::real32 halfViewHeight) {
-            auto staticTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::TagStatic>();
-            for (const auto &entity: staticTextureSpriteView) {
-                const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                    continue;
+            {
+                auto staticTextureSpriteView = manager.createViewScopeLock<components::TagTextureShaded, components::Shape,
+                        components::Texture, components::TagStatic>();
+                for (const auto &entity: staticTextureSpriteView) {
+                    const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
+                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                        continue;
+                    }
+                    auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                    prepareTexture(texture);
+
+                    ++mRenderedSpritesPerFrame;
+                    ++mRenderedTexturesPerFrame;
+
+                    // TODO: submit will fail if we reach maximum number of sprites.
+                    // I could also check the number of entities using the view and decide before hand at which point I
+                    // flush the renderer and open up room for new sprites.
+
+                    // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
+                    // Currently the renderer is limited to 32 samplers, I have to either use the reset method
+                    // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
+                    // by merging many textures to keep below the limit. Other solutions might be looking into other type
+                    // of texture storage that can hold bigger number of textures.
+                    mTextureRenderer->submit(shape, texture);
                 }
-                auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
-                prepareTexture(texture);
-
-                ++mRenderedSpritesPerFrame;
-                ++mRenderedTexturesPerFrame;
-
-                // TODO: submit will fail if we reach maximum number of sprites.
-                // I could also check the number of entities using the view and decide before hand at which point I
-                // flush the renderer and open up room for new sprites.
-
-                // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
-                // Currently the renderer is limited to 32 samplers, I have to either use the reset method
-                // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
-                // by merging many textures to keep below the limit. Other solutions might be looking into other type
-                // of texture storage that can hold bigger number of textures.
-                mTextureRenderer->submit(shape, texture);
             }
         }
 
         void SceneManager::renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                  common::real32 halfViewHeight) {
-            auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::Placement, components::TagDynamic>();
-            for (const auto &entity: dynamicTextureSpriteView) {
-                const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
-                const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
-                auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+            {
+                // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
+                // other systems don't share any entity component, or the shared section is minimum and I can create
+                // copy of that data before starting rendering and only lock the registry at that point
+                auto dynamicTextureSpriteView = manager.createViewScopeLock<components::TagTextureShaded, components::Shape,
+                        components::Texture, components::Placement, components::TagDynamic>();
+                for (const auto &entity: dynamicTextureSpriteView) {
+                    const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
+                    const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
 
-                prepareTexture(texture);
+                    auto transformation = physics::Transformation::createTransformation(placement.position,
+                                                                                        placement.rotation,
+                                                                                        placement.scale);
 
-                auto transformation = physics::Transformation::createTransformation(placement.position,
-                                                                                    placement.rotation,
-                                                                                    placement.scale);
+                    // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
+                    // separately for each entity and each time a physics system updates an entity it will automatically
+                    // recalculate PlacementWorld for the entity and all its child entities.
+                    // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
+                    // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
+                    if (manager.has<components::TransformParent>(entity)) {
+                        const auto &transformParent = manager.get<components::TransformParent>(entity);
+                        // NOTE: Order matters. First transform by parent's transformation then child.
+                        transformation = transformParent.transform * transformation;
+                    }
 
-                // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
-                // separately for each entity and each time a physics system updates an entity it will automatically
-                // recalculate PlacementWorld for the entity and all its child entities.
-                // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
-                // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
-                if (manager.has<components::TransformParent>(entity)) {
-                    const auto &transformParent = manager.get<components::TransformParent>(entity);
-                    // NOTE: Order matters. First transform by parent's transformation then child.
-                    transformation = transformParent.transform * transformation;
+                    auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
+                    if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
+                        continue;
+                    }
+
+                    auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+
+                    prepareTexture(texture);
+                    mTextureRenderer->submit(shapeTransformed, texture);
+
+                    ++mRenderedSpritesPerFrame;
+                    ++mRenderedTexturesPerFrame;
                 }
-
-                auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
-                    continue;
-                }
-
-                ++mRenderedSpritesPerFrame;
-                ++mRenderedTexturesPerFrame;
-
-                mTextureRenderer->submit(shapeTransformed, texture);
             }
         }
 

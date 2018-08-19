@@ -125,7 +125,7 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        void Peer::registerPacketHandler(PacketType type, std::function<void(PeerID, const std::string &)> &&handler) {
+        void Peer::registerPacketHandler(PacketType type, std::function<void(common::PeerID, const std::string &)> &&handler) {
             assert(mPacketHandlers.find(type) == mPacketHandlers.end());
             mPacketHandlers[type] = std::move(handler);
         }

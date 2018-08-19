@@ -14,12 +14,11 @@
 #include <oni-core/graphics/debug-draw-box2d.h>
 #include <oni-core/network/client.h>
 #include <oni-core/network/server.h>
+#include <oni-core/entities/client-data-manager.h>
 
 
 namespace oni {
     namespace server {
-        typedef std::map<network::PeerID, io::Input> ClientInputMap;
-        typedef std::map<network::PeerID, common::EntityID> ClientCarEntityMap;
 
         class ServerGame : public game::Game {
         public:
@@ -51,9 +50,9 @@ namespace oni {
             void showFET(common::int16 fet) override;
 
         private:
-            void setupSessionPacketHandler(network::PeerID, const std::string &data);
+            void setupSessionPacketHandler(common::PeerID, const std::string &data);
 
-            void clientInputPacketHandler(network::PeerID, const std::string &data);
+            void clientInputPacketHandler(common::PeerID, const std::string &data);
 
         private:
             std::unique_ptr<entities::EntityManager> mEntityManager{};
@@ -67,8 +66,7 @@ namespace oni {
             common::EntityID mTruckEntity{};
             common::EntityID mBoxEntity{};
 
-            ClientInputMap mClientInputMap{};
-            ClientCarEntityMap mClientCarEntityMap{};
+            std::unique_ptr<entities::ClientDataManager> mClientDataManager{};
 
             components::CarConfig mCarConfigDefault{};
         };

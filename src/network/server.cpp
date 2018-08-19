@@ -90,11 +90,11 @@ namespace oni {
             broadcast(type, data);
         }
 
-        const std::vector<PeerID> &Server::getClients() const {
+        const std::vector<common::PeerID> &Server::getClients() const {
             return mClients;
         }
 
-        void Server::sendCarEntityID(common::EntityID entityID, PeerID peerID) {
+        void Server::sendCarEntityID(common::EntityID entityID, common::PeerID peerID) {
             auto packet = EntityPacket{entityID};
             auto data = serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;

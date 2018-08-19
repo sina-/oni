@@ -14,6 +14,7 @@ namespace oni {
     namespace entities {
 
         std::string serialize(entities::EntityManager &manager) {
+            manager.lock();
             std::stringstream storage;
             {
                 cereal::PortableBinaryOutputArchive output{storage};
@@ -36,6 +37,7 @@ namespace oni {
                         components::TransformParent
                 >(output);
             }
+            manager.unlock();
 
             return storage.str();
         }
@@ -44,6 +46,7 @@ namespace oni {
             std::stringstream storage;
             storage.str(data);
 
+            manager.lock();
             {
                 cereal::PortableBinaryInputArchive input{storage};
                 manager.restore<cereal::PortableBinaryInputArchive,
@@ -61,6 +64,7 @@ namespace oni {
                         components::TransformParent
                 >(input);
             }
+            manager.unlock();
         }
     }
 }

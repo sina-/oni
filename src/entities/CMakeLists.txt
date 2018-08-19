@@ -6,7 +6,7 @@ include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/entt)
 include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/cereal)
 include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/Box2D)
 
-add_library(oni-core-entities create-entity.cpp manage-hierarchy.cpp tile-world.cpp serialization.cpp)
+add_library(oni-core-entities create-entity.cpp manage-hierarchy.cpp tile-world.cpp serialization.cpp client-data-manager.cpp)
 
 target_link_libraries(
         oni-core-entities

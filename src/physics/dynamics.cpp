@@ -12,8 +12,8 @@
 namespace oni {
     namespace physics {
 
-        Dynamics::Dynamics(std::unique_ptr<graphics::DebugDrawBox2D> debugDrawBox2D, common::real32 tickFreq)
-                : mDebugDraw(std::move(debugDrawBox2D)), mTickFrequency(tickFreq) {
+        Dynamics::Dynamics(common::real32 tickFreq)
+                : mTickFrequency(tickFreq) {
             b2Vec2 gravity(0.0f, 0.0f);
             mPhysicsWorld = std::make_unique<b2World>(gravity);
             mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
@@ -171,6 +171,10 @@ namespace oni {
 
         b2World *Dynamics::getPhysicsWorld() {
             return mPhysicsWorld.get();
+        }
+
+        void Dynamics::setDebugDraw(std::unique_ptr<graphics::DebugDrawBox2D> debugDraw) {
+            mDebugDraw = std::move(debugDraw);
         }
 
     }

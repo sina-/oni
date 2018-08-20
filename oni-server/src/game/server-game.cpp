@@ -23,7 +23,7 @@ namespace oni {
             // coding and time that is better spent working on other features
             mEntityManager = std::make_unique<entities::EntityManager>();
 
-            mDynamics = std::make_unique<physics::Dynamics>(nullptr, getTickFrequency());
+            mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
             mTileWorld = std::make_unique<entities::TileWorld>();
             mClientDataManager = std::make_unique<entities::ClientDataManager>();
 
@@ -163,6 +163,8 @@ namespace oni {
 
         void ServerGame::_poll() {
             mServer->poll();
+
+            mServer->sendEntities(*mEntityManager);
         }
 
         void ServerGame::_tick(const common::real32 tickTime) {
@@ -196,8 +198,6 @@ namespace oni {
             for (const auto &pos: tickPositions) {
                 mTileWorld->tick(*mEntityManager, pos);
             }
-
-            mServer->sendEntities(*mEntityManager);
         }
 
     void ServerGame::_render() {}

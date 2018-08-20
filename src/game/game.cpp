@@ -18,78 +18,131 @@ namespace oni {
         Game::~Game() = default;
 
         void Game::run() {
-            while (!shouldTerminate()) {
-                mRunTimerA.restart();
-                mRunTimerB.restart();
-                mFrameTimer.restart();
+            std::thread pollThread(&Game::poll, this);
+            std::thread tickThread(&Game::tick, this);
+            std::thread renderThread(&Game::render, this);
 
-                if (1.0f - mRunLagAccumulator <= common::ep) {
-                    auto fps = mRunCounter / mRunLagAccumulator;
-                    auto tps = 1 * mTickCounter;
-                    showFPS(static_cast<common::uint16 >(fps));
-                    showTPS(static_cast<common::uint16 >(tps));
-                    showFET(static_cast<common::int16>(mFrameExcessTime * 1000));
+            while (!mShouldTerminate) {
+                if (shouldTerminate()) {
+                    mShouldTerminate = true;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
 
-                    mRunLagAccumulator = 0;
-                    mTickLag = 0;
-                    mRunCounter = 0;
-                    mTickCounter = 0;
-                    mFrameCounter = 0;
-                    mFrameExcessTime = 0;
+            pollThread.join();
+            tickThread.join();
+            renderThread.join();
+        }
+
+        void Game::tick() {
+            utils::HighResolutionTimer tickTimer{};
+            utils::HighResolutionTimer updateTimer{};
+            common::real64 lagAccumulator{0.0f};
+            common::uint16 updateCounter{0};
+
+            while (!mShouldTerminate) {
+                tickTimer.restart();
+                updateTimer.restart();
+
+                if (1.0f - lagAccumulator <= common::ep) {
+                    auto tps = updateCounter / lagAccumulator;
+                    showTPS(static_cast<common::int16>(tps));
+
+                    lagAccumulator = 0.0f;
+                    updateCounter = 0;
                 }
 
-                poll();
+                _tick(mTickMS);
 
-                tick();
+                auto lag = tickTimer.elapsed();
+                auto excess = mTickMS - lag;
 
-                render();
-
-                mRunLag = mRunTimerB.elapsed();
-
-                auto excess = mTickMS - mRunLag;
-
-                mFrameExcessTime += excess;
-
-                if (excess > 0) {
+                if (excess > 0.0f) {
                     auto sleepFor = static_cast<common::uint64>(excess * 1000);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep :(\n";
+                    std::cout << "Couldn't sleep during tick()\n";
+                }
+
+                ++updateCounter;
+                lagAccumulator += updateTimer.elapsed();
+            }
+        }
+
+        void Game::poll() {
+            utils::HighResolutionTimer pollTimer{};
+            utils::HighResolutionTimer updateTimer{};
+            common::real64 lagAccumulator{0.0f};
+            common::uint16 updateCounter{0};
+
+            while (!mShouldTerminate) {
+                pollTimer.restart();
+                updateTimer.restart();
+
+                if (1.0f - lagAccumulator <= common::ep) {
+                    auto pps = updateCounter / lagAccumulator;
+                    // TODO: Send it to GUI
+                    std::cout << "Polling " << pps << " per second.\n";
+
+                    lagAccumulator = 0.0f;
+                    updateCounter = 0;
+                }
+
+                _poll();
+
+                auto lag = pollTimer.elapsed();
+                auto excess = mTickMS - lag;
+
+                if (excess > 0.0f) {
+                    auto sleepFor = static_cast<common::uint64>(excess * 1000);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+                } else {
+                    std::cout << "Couldn't sleep during poll()\n";
+                }
+
+                ++updateCounter;
+                lagAccumulator += updateTimer.elapsed();
+            }
+        }
+
+        void Game::render() {
+            utils::HighResolutionTimer renderTimer{};
+            utils::HighResolutionTimer updateTimer{};
+            common::real64 lagAccumulator{0.0f};
+            common::uint16 updateCounter{0};
+
+            initRenderer();
+
+            while (!mShouldTerminate) {
+                renderTimer.restart();
+                updateTimer.restart();
+
+                if (1.0f - lagAccumulator <= common::ep) {
+                    auto fps = updateCounter / lagAccumulator;
+                    showFPS(static_cast<common::int16>(fps));
+
+                    lagAccumulator = 0.0f;
+                    updateCounter = 0;
+                }
+
+                _render();
+
+                auto lag = renderTimer.elapsed();
+                auto excess = mTickMS - lag;
+
+                if (excess > 0.0f) {
+                    auto sleepFor = static_cast<common::uint64>(excess * 1000);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+                } else {
+                    std::cout << "Couldn't sleep during render()\n";
                 }
 
                 // NOTE: Only display the result at the end after mTickMS amount of time has passed.
                 display();
 
-                mRunCounter++;
-                mFrameCounter++;
-                mFrameLag += mFrameTimer.elapsed();
-                mRunLagAccumulator += mRunTimerA.elapsed();
+                ++updateCounter;
+                lagAccumulator += updateTimer.elapsed();
             }
-        }
-
-        void Game::tick() {
-            //while (mFrameLag > mTickMS) {
-            mTickTimer.restart();
-
-/*                auto correction = std::max((common::real32) mTickLag, mTickMS);
-                correction = std::min(mMinTickMS, correction);
-                _tick(correction, keyPressed);*/
-
-            _tick(mTickMS);
-            mTickLag = mTickTimer.elapsed();
-
-            // If it takes longer than tick frequency to run the simulations, the game will die.
-            //ONI_DEBUG_ASSERT(mTickLag - mTickMS <= ep);
-
-            //mFrameLag -= mTickMS;
-            mTickCounter++;
-            //}
-        }
-
-        void Game::render() {
-            // Add lag
-            //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 20));
-            _render();
         }
 
         void Game::display() {
@@ -100,8 +153,7 @@ namespace oni {
             return mTickMS;
         }
 
-        void Game::poll() {
-            _poll();
+        void Game::initRenderer() {
         }
 
     }

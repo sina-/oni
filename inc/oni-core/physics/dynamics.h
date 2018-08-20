@@ -13,11 +13,13 @@ namespace oni {
         class Dynamics : public Physic {
 
         public:
-            explicit Dynamics(std::unique_ptr<graphics::DebugDrawBox2D> debugDraw, common::real32 tickFreq);
+            explicit Dynamics(common::real32 tickFreq);
 
             ~Dynamics() override = default;
 
             void drawDebugData();
+
+            void setDebugDraw(std::unique_ptr<graphics::DebugDrawBox2D> debugDraw);
 
             // TODO: Ideally I shouldn't expose this dude!
             // TODO: When refactoring create-entity stuff, I can instead just expose a member function that handles

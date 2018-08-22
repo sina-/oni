@@ -167,7 +167,7 @@ namespace oni {
             mServer->sendEntities(*mEntityManager);
         }
 
-        void ServerGame::_tick(const common::real32 tickTime) {
+        void ServerGame::_sim(const common::real32 tickTime) {
             // Fake lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 

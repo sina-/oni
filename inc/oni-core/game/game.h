@@ -11,7 +11,7 @@ namespace oni {
         public:
             Game();
 
-            Game(common::uint8 tickRate, common::uint8 pollRate);
+            Game(common::uint8 simRate, common::uint8 pollRate);
 
             virtual ~Game();
 
@@ -24,7 +24,7 @@ namespace oni {
 
             virtual void initRenderer();
 
-            virtual void tick() final;
+            virtual void sim() final;
 
             virtual void render() final;
 
@@ -32,7 +32,7 @@ namespace oni {
 
             virtual void poll() final;
 
-            virtual void _tick(common::real32 tickTime) = 0;
+            virtual void _sim(common::real32 simTime) = 0;
 
             virtual void _render() = 0;
 

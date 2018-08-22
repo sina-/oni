@@ -35,7 +35,7 @@ namespace oni {
             void loadLevel();
 
         protected:
-            void _tick(common::real32 tickTime) override;
+            void _sim(common::real32 simTime) override;
 
             void _render() override;
 

@@ -11,7 +11,7 @@ namespace oni {
         public:
             Game();
 
-            Game(common::uint8 simRate, common::uint8 pollRate);
+            Game(common::uint8 simRate, common::uint8 pollRate, common::uint8 renderRate);
 
             virtual ~Game();
 
@@ -54,7 +54,8 @@ namespace oni {
         protected:
             // 60Hz
             const common::real32 mTickMS{1 / 60.0f};
-            const common::real32 mPollMS{1 / 30.0f};
+            const common::real32 mRenderMS{1 / 120.0f};
+            const common::real32 mPollMS{1 / 20.0f};
             // 30Hz
             // const common::real32 mMinTickMS{1 / 30.0f};
 

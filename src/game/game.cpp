@@ -10,9 +10,10 @@ namespace oni {
 
         Game::Game() = default;
 
-        Game::Game(common::uint8 simRate, common::uint8 pollRate) :
+        Game::Game(common::uint8 simRate, common::uint8 pollRate, common::uint8 renderRate) :
                 mTickMS(1.0f / simRate),
-                mPollMS(1.0f / pollRate) {
+                mPollMS(1.0f / pollRate),
+                mRenderMS(1.0f / renderRate) {
         }
 
         Game::~Game() = default;
@@ -89,7 +90,7 @@ namespace oni {
                 _poll();
 
                 auto pollDuration = pollTimer.elapsed();
-                auto excess = mTickMS - pollDuration;
+                auto excess = mPollMS - pollDuration;
 
                 if (excess >= 0.0f) {
                     auto sleepFor = static_cast<common::uint64>(excess * 1000);
@@ -125,7 +126,7 @@ namespace oni {
                 _render();
 
                 auto renderDuration = renderTimer.elapsed();
-                auto excess = mTickMS - renderDuration;
+                auto excess = mRenderMS - renderDuration;
 
                 if (excess >= 0.0f) {
                     auto sleepFor = static_cast<common::uint64>(excess * 1000);

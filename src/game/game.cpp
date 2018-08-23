@@ -41,9 +41,6 @@ namespace oni {
             common::uint16 updateCounter{0};
 
             while (!mShouldTerminate) {
-                simTimer.restart();
-                updateTimer.restart();
-
                 auto elapsed = updateTimer.elapsed();
                 if (elapsed >= 1.0f) {
                     auto tps = updateCounter / elapsed;
@@ -52,6 +49,8 @@ namespace oni {
                     updateTimer.restart();
                     updateCounter = 0;
                 }
+
+                simTimer.restart();
 
                 _sim(mTickMS);
 
@@ -75,8 +74,6 @@ namespace oni {
             common::uint16 updateCounter{0};
 
             while (!mShouldTerminate) {
-                pollTimer.restart();
-
                 auto elapsed = updateTimer.elapsed();
                 if (elapsed >= 1.0f) {
                     auto pps = updateCounter / elapsed;
@@ -86,6 +83,8 @@ namespace oni {
                     updateTimer.restart();
                     updateCounter = 0;
                 }
+
+                pollTimer.restart();
 
                 _poll();
 
@@ -111,9 +110,6 @@ namespace oni {
             initRenderer();
 
             while (!mShouldTerminate) {
-                renderTimer.restart();
-                updateTimer.restart();
-
                 auto elapsed = updateTimer.elapsed();
                 if (elapsed >= 1.0f) {
                     auto fps = updateCounter / elapsed;
@@ -122,6 +118,8 @@ namespace oni {
                     updateTimer.elapsed();
                     updateCounter = 0;
                 }
+
+                renderTimer.restart();
 
                 _render();
 

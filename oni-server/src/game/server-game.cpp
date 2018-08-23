@@ -178,6 +178,7 @@ namespace oni {
                     const auto &input = mClientDataManager->getClientInput(client);
                     clientInput.push_back(input);
                 }
+                // TODO: Maybe I should just stack up client input and remove them after the processing is done.
             }
 
             for (const auto &input: clientInput) {

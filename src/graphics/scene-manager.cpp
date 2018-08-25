@@ -133,147 +133,6 @@ namespace oni {
             renderer2D.begin();
         }
 
-        void SceneManager::end(const Shader &shader, Renderer2D &renderer2D) {
-            renderer2D.end();
-            renderer2D.flush();
-            shader.disable();
-        }
-
-        void SceneManager::render(entities::EntityManager &manager) {
-            auto halfViewWidth = getViewWidth() / 2.0f;
-            auto halfViewHeight = getViewHeight() / 2.0f;
-
-            begin(*mTextureShader, *mTextureRenderer);
-
-            renderStaticTextured(manager, halfViewWidth, halfViewHeight);
-            renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
-            renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
-
-            end(*mTextureShader, *mTextureRenderer);
-
-            begin(*mColorShader, *mColorRenderer);
-            {
-                auto staticSpriteView = manager.createViewScopeLock<components::TagColorShaded, components::Shape,
-                        components::Appearance, components::TagStatic>();
-                for (const auto &entity: staticSpriteView) {
-                    const auto &shape = staticSpriteView.get<components::Shape>(entity);
-                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                        continue;
-                    }
-                    const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
-
-                    ++mRenderedSpritesPerFrame;
-
-                    mColorRenderer->submit(shape, appearance);
-                }
-            }
-
-            end(*mColorShader, *mColorRenderer);
-        }
-
-        void SceneManager::lookAt(common::real32 x, common::real32 y) {
-            mCamera.x = x;
-            mCamera.y = y;
-        }
-
-        void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
-            mCamera.x = x;
-            mCamera.y = y;
-            mCamera.z = 1 / distance;
-        }
-
-        const math::mat4 &SceneManager::getProjectionMatrix() const {
-            return mProjectionMatrix;
-        }
-
-        const math::mat4 &SceneManager::getViewMatrix() const {
-            return mViewMatrix;
-        }
-
-        common::uint16 SceneManager::getSpritesPerFrame() const {
-            return mRenderedSpritesPerFrame;
-        }
-
-        common::uint16 SceneManager::getTexturesPerFrame() const {
-            return mRenderedTexturesPerFrame;
-        }
-
-        common::real32 SceneManager::getViewWidth() const {
-            return (mScreenBounds.xMax - mScreenBounds.xMin) * (1.0f / mCamera.z);
-        }
-
-        common::real32 SceneManager::getViewHeight() const {
-            return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
-        }
-
-        bool SceneManager::visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
-                                           const common::real32 halfViewHeight) const {
-            auto x = false;
-
-            auto xMin = shape.vertexA.x;
-            auto xMax = shape.vertexC.x;
-
-            auto viewXMin = mCamera.x - halfViewWidth;
-            auto viewXMax = mCamera.x + halfViewWidth;
-
-            if (xMin >= viewXMin && xMin <= viewXMax) {
-                x = true;
-            }
-
-            if (xMax >= viewXMin && xMax <= viewXMax) {
-                x = true;
-            }
-
-            // Object is bigger than the frustum, i.e., view is inside the object
-            if (viewXMin >= xMin && viewXMax <= xMax) {
-                x = true;
-            }
-
-            if (!x) {
-                return false;
-            }
-
-            auto y = false;
-
-            auto yMin = shape.vertexA.y;
-            auto yMax = shape.vertexC.y;
-
-            auto viewYMin = mCamera.y - halfViewHeight;
-            auto viewYMax = mCamera.y + halfViewHeight;
-
-            if (yMin >= viewYMin && yMin <= viewYMax) {
-                y = true;
-            }
-            if (yMax >= viewYMin && yMax <= viewYMax) {
-                y = true;
-            }
-
-            // Object is bigger than the frustum, i.e., view is inside the object
-            if (viewYMin >= yMin && viewYMax <= yMax) {
-                y = true;
-            }
-
-            return y;
-        }
-
-        void SceneManager::resetCounters() {
-            mRenderedSpritesPerFrame = 0;
-            mRenderedTexturesPerFrame = 0;
-        }
-
-        void SceneManager::renderRaw(const components::Shape &shape, const components::Appearance &appearance) {
-            mColorRenderer->submit(shape, appearance);
-            ++mRenderedSpritesPerFrame;
-        }
-
-        void SceneManager::beginColorRendering() {
-            begin(*mColorShader, *mColorRenderer);
-        }
-
-        void SceneManager::endColorRendering() {
-            end(*mColorShader, *mColorRenderer);
-        }
-
         void SceneManager::prepareTexture(components::Texture &texture) {
             // TODO: implement
             switch (texture.status) {
@@ -305,6 +164,143 @@ namespace oni {
                 }
             }
         }
+
+        void SceneManager::end(const Shader &shader, Renderer2D &renderer2D) {
+            renderer2D.end();
+            renderer2D.flush();
+            shader.disable();
+        }
+
+        void SceneManager::render(entities::EntityManager &manager, common::EntityID lookAtEntity) {
+            auto halfViewWidth = getViewWidth() / 2.0f;
+            auto halfViewHeight = getViewHeight() / 2.0f;
+
+            {
+                auto lock = manager.scopedLock();
+                if (manager.has<components::Placement>(lookAtEntity)) {
+                    const auto &pos = manager.get<components::Placement>(lookAtEntity).position;
+                    lookAt(pos.x, pos.y);
+                }
+
+                begin(*mTextureShader, *mTextureRenderer);
+                renderStaticTextured(manager, halfViewWidth, halfViewHeight);
+                renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
+                renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
+                end(*mTextureShader, *mTextureRenderer);
+            }
+
+            {
+                begin(*mColorShader, *mColorRenderer);
+                renderColored(manager, halfViewWidth, halfViewHeight);
+                end(*mColorShader, *mColorRenderer);
+            }
+        }
+
+        void SceneManager::renderRaw(const components::Shape &shape, const components::Appearance &appearance) {
+            mColorRenderer->submit(shape, appearance);
+            ++mRenderedSpritesPerFrame;
+        }
+
+        void SceneManager::beginColorRendering() {
+            begin(*mColorShader, *mColorRenderer);
+        }
+
+        void SceneManager::endColorRendering() {
+            end(*mColorShader, *mColorRenderer);
+        }
+
+        void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                                common::real32 halfViewHeight) {
+            {
+                auto staticTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
+                        components::Texture, components::TagStatic>();
+                for (const auto &entity: staticTextureSpriteView) {
+                    const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
+                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                        continue;
+                    }
+                    auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
+                    prepareTexture(texture);
+
+                    ++mRenderedSpritesPerFrame;
+                    ++mRenderedTexturesPerFrame;
+
+                    // TODO: submit will fail if we reach maximum number of sprites.
+                    // I could also check the number of entities using the view and decide before hand at which point I
+                    // flush the renderer and open up room for new sprites.
+
+                    // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
+                    // Currently the renderer is limited to 32 samplers, I have to either use the reset method
+                    // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
+                    // by merging many textures to keep below the limit. Other solutions might be looking into other type
+                    // of texture storage that can hold bigger number of textures.
+                    mTextureRenderer->submit(shape, texture);
+                }
+            }
+        }
+
+        void SceneManager::renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                                 common::real32 halfViewHeight) {
+            {
+                // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
+                // other systems don't share any entity component, or the shared section is minimum and I can create
+                // copy of that data before starting rendering and only lock the registry at that point
+                auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
+                        components::Texture, components::Placement, components::TagDynamic>();
+                for (const auto &entity: dynamicTextureSpriteView) {
+                    const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
+                    const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
+
+                    auto transformation = physics::Transformation::createTransformation(placement.position,
+                                                                                        placement.rotation,
+                                                                                        placement.scale);
+
+                    // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
+                    // separately for each entity and each time a physics system updates an entity it will automatically
+                    // recalculate PlacementWorld for the entity and all its child entities.
+                    // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
+                    // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
+                    if (manager.has<components::TransformParent>(entity)) {
+                        const auto &transformParent = manager.get<components::TransformParent>(entity);
+                        // NOTE: Order matters. First transform by parent's transformation then child.
+                        transformation = transformParent.transform * transformation;
+                    }
+
+                    auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
+                    if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
+                        continue;
+                    }
+
+                    auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+
+                    prepareTexture(texture);
+                    mTextureRenderer->submit(shapeTransformed, texture);
+
+                    ++mRenderedSpritesPerFrame;
+                    ++mRenderedTexturesPerFrame;
+                }
+            }
+        }
+
+        void SceneManager::renderColored(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                         common::real32 halfViewHeight) {
+            {
+                auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
+                        components::Appearance, components::TagStatic>();
+                for (const auto &entity: staticSpriteView) {
+                    const auto &shape = staticSpriteView.get<components::Shape>(entity);
+                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                        continue;
+                    }
+                    const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
+
+                    ++mRenderedSpritesPerFrame;
+
+                    mColorRenderer->submit(shape, appearance);
+                }
+            }
+        }
+
 
         void SceneManager::tick(entities::EntityManager &manager) {
             std::vector<components::Placement> carTireRRPlacements{};
@@ -410,84 +406,105 @@ namespace oni {
                                               static_cast<GLint>(skidPos.x - width / 2.0f),
                                               static_cast<GLint>(skidPos.y - height / 2.0f),
                                               width, height, bits);
-
-        }
-
-        void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                                common::real32 halfViewHeight) {
-            {
-                auto staticTextureSpriteView = manager.createViewScopeLock<components::TagTextureShaded, components::Shape,
-                        components::Texture, components::TagStatic>();
-                for (const auto &entity: staticTextureSpriteView) {
-                    const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
-                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                        continue;
-                    }
-                    auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
-                    prepareTexture(texture);
-
-                    ++mRenderedSpritesPerFrame;
-                    ++mRenderedTexturesPerFrame;
-
-                    // TODO: submit will fail if we reach maximum number of sprites.
-                    // I could also check the number of entities using the view and decide before hand at which point I
-                    // flush the renderer and open up room for new sprites.
-
-                    // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
-                    // Currently the renderer is limited to 32 samplers, I have to either use the reset method
-                    // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
-                    // by merging many textures to keep below the limit. Other solutions might be looking into other type
-                    // of texture storage that can hold bigger number of textures.
-                    mTextureRenderer->submit(shape, texture);
-                }
-            }
-        }
-
-        void SceneManager::renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                                 common::real32 halfViewHeight) {
-            {
-                // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
-                // other systems don't share any entity component, or the shared section is minimum and I can create
-                // copy of that data before starting rendering and only lock the registry at that point
-                auto dynamicTextureSpriteView = manager.createViewScopeLock<components::TagTextureShaded, components::Shape,
-                        components::Texture, components::Placement, components::TagDynamic>();
-                for (const auto &entity: dynamicTextureSpriteView) {
-                    const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
-                    const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
-
-                    auto transformation = physics::Transformation::createTransformation(placement.position,
-                                                                                        placement.rotation,
-                                                                                        placement.scale);
-
-                    // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
-                    // separately for each entity and each time a physics system updates an entity it will automatically
-                    // recalculate PlacementWorld for the entity and all its child entities.
-                    // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
-                    // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
-                    if (manager.has<components::TransformParent>(entity)) {
-                        const auto &transformParent = manager.get<components::TransformParent>(entity);
-                        // NOTE: Order matters. First transform by parent's transformation then child.
-                        transformation = transformParent.transform * transformation;
-                    }
-
-                    auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                    if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
-                        continue;
-                    }
-
-                    auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
-
-                    prepareTexture(texture);
-                    mTextureRenderer->submit(shapeTransformed, texture);
-
-                    ++mRenderedSpritesPerFrame;
-                    ++mRenderedTexturesPerFrame;
-                }
-            }
         }
 
         const components::Camera &SceneManager::getCamera() const {
             return mCamera;
         }
+
+        void SceneManager::zoom(common::real32 distance) {
+            mCamera.z = 1 / distance;
+        }
+
+        void SceneManager::lookAt(common::real32 x, common::real32 y) {
+            mCamera.x = x;
+            mCamera.y = y;
+        }
+
+        void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
+            mCamera.x = x;
+            mCamera.y = y;
+            mCamera.z = 1 / distance;
+        }
+
+        const math::mat4 &SceneManager::getProjectionMatrix() const {
+            return mProjectionMatrix;
+        }
+
+        const math::mat4 &SceneManager::getViewMatrix() const {
+            return mViewMatrix;
+        }
+
+        common::uint16 SceneManager::getSpritesPerFrame() const {
+            return mRenderedSpritesPerFrame;
+        }
+
+        common::uint16 SceneManager::getTexturesPerFrame() const {
+            return mRenderedTexturesPerFrame;
+        }
+
+        common::real32 SceneManager::getViewWidth() const {
+            return (mScreenBounds.xMax - mScreenBounds.xMin) * (1.0f / mCamera.z);
+        }
+
+        common::real32 SceneManager::getViewHeight() const {
+            return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
+        }
+
+        bool SceneManager::visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
+                                           const common::real32 halfViewHeight) const {
+            auto x = false;
+
+            auto xMin = shape.vertexA.x;
+            auto xMax = shape.vertexC.x;
+
+            auto viewXMin = mCamera.x - halfViewWidth;
+            auto viewXMax = mCamera.x + halfViewWidth;
+
+            if (xMin >= viewXMin && xMin <= viewXMax) {
+                x = true;
+            }
+
+            if (xMax >= viewXMin && xMax <= viewXMax) {
+                x = true;
+            }
+
+            // Object is bigger than the frustum, i.e., view is inside the object
+            if (viewXMin >= xMin && viewXMax <= xMax) {
+                x = true;
+            }
+
+            if (!x) {
+                return false;
+            }
+
+            auto y = false;
+
+            auto yMin = shape.vertexA.y;
+            auto yMax = shape.vertexC.y;
+
+            auto viewYMin = mCamera.y - halfViewHeight;
+            auto viewYMax = mCamera.y + halfViewHeight;
+
+            if (yMin >= viewYMin && yMin <= viewYMax) {
+                y = true;
+            }
+            if (yMax >= viewYMin && yMax <= viewYMax) {
+                y = true;
+            }
+
+            // Object is bigger than the frustum, i.e., view is inside the object
+            if (viewYMin >= yMin && viewYMax <= yMax) {
+                y = true;
+            }
+
+            return y;
+        }
+
+        void SceneManager::resetCounters() {
+            mRenderedSpritesPerFrame = 0;
+            mRenderedTexturesPerFrame = 0;
+        }
+
     }
 }

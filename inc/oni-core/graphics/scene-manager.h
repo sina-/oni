@@ -32,13 +32,16 @@ namespace oni {
 
             ~SceneManager();
 
-            void render(entities::EntityManager &manager);
+            void render(entities::EntityManager &manager, common::EntityID lookAtEntity);
 
             void renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                       common::real32 halfViewHeight);
 
             void renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                        common::real32 halfViewHeight);
+
+            void renderColored(entities::EntityManager &manager, common::real32 halfViewWidth,
+                               common::real32 halfViewHeight);
 
             void tick(entities::EntityManager &manager);
 
@@ -47,6 +50,8 @@ namespace oni {
             void lookAt(common::real32 x, common::real32 y);
 
             void lookAt(common::real32 x, common::real32 y, common::real32 distance);
+
+            void zoom(common::real32 distance);
 
             const components::Camera &getCamera() const;
 

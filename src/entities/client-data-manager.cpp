@@ -30,7 +30,6 @@ namespace oni {
         }
 
         void ClientDataManager::deleteClient(common::PeerID clientID) {
-            auto clientDataLock = scopedLock();
             mClientCarEntityMap.erase(clientID);
         }
 

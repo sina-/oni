@@ -36,6 +36,9 @@ namespace oni {
                                            std::bind(&ServerGame::clientInputPacketHandler, this, std::placeholders::_1,
                                                      std::placeholders::_2));
 
+            mServer->registerPostDisconnectHook(std::bind(&ServerGame::postDisconnectHook, this,
+                                                          std::placeholders::_1));
+
             loadLevel();
         }
 
@@ -157,6 +160,13 @@ namespace oni {
             mClientDataManager->setClientInput(clientID, input);
         }
 
+        void ServerGame::postDisconnectHook(common::PeerID peerID) {
+            auto clientDataLock = mClientDataManager->scopedLock();
+            auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
+            entities::deleteVehicleEntity(*mEntityManager, *mDynamics->getPhysicsWorld(), clientCarEntityID);
+            mClientDataManager->deleteClient(peerID);
+        }
+
         bool ServerGame::shouldTerminate() {
             return false;
         }
@@ -174,7 +184,7 @@ namespace oni {
             std::vector<io::Input> clientInput;
             {
                 auto clientDataLock = mClientDataManager->scopedLock();
-                for (auto client: mServer->getClients()) {
+                for (const auto &client: mServer->getClients()) {
                     const auto &input = mClientDataManager->getClientInput(client);
                     clientInput.push_back(input);
                 }
@@ -189,27 +199,26 @@ namespace oni {
             {
                 auto registryLock = mEntityManager->scopedLock();
                 auto clientDataLock = mClientDataManager->scopedLock();
-                for (auto client: mServer->getClients()) {
+                for (const auto &client: mServer->getClients()) {
                     auto carEntity = mClientDataManager->getEntityID(client);
                     const auto &carPlacement = mEntityManager->get<components::Placement>(carEntity);
                     tickPositions.push_back(carPlacement.position.getXY());
                 }
             }
 
-            for (const auto &pos: tickPositions) {
+/*            for (const auto &pos: tickPositions) {
                 mTileWorld->tick(*mEntityManager, pos);
-            }
+            }*/
         }
 
-    void ServerGame::_render() {}
+        void ServerGame::_render() {}
 
-    void ServerGame::_display() {}
+        void ServerGame::_display() {}
 
-    void ServerGame::showFPS(int16 fps) {}
+        void ServerGame::showFPS(int16 fps) {}
 
-    void ServerGame::showTPS(int16 tps) {}
+        void ServerGame::showTPS(int16 tps) {}
 
-    void ServerGame::showFET(common::int16 fet) {}
-
-}
+        void ServerGame::showFET(common::int16 fet) {}
+    }
 }

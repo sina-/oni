@@ -42,11 +42,9 @@ namespace oni {
 
                 switch (event.type) {
                     case ENET_EVENT_TYPE_CONNECT: {
-                        printf("A new client connected from %s:%u.\n",
-                               ip,
-                               event.peer->address.port);
+                        printf("A new client connected from %s:%u.\n", ip, event.peer->address.port);
 
-                        mPeers[event.peer->connectID] = event.peer;
+                        mPeers[getPeerID(event.peer->address)] = event.peer;
 
                         postConnectHook(&event);
                         break;
@@ -71,11 +69,11 @@ namespace oni {
                         break;
                     }
                     case ENET_EVENT_TYPE_DISCONNECT: {
-                        printf("%s disconnected.\n", ip);
+                        printf("%s:%u disconnected.\n", ip, event.peer->address.port);
 
                         postDisconnectHook(&event);
 
-                        mPeers.erase(event.peer->connectID);
+                        mPeers.erase(getPeerID(event.peer->address));
                         event.peer->data = nullptr;
                         break;
                     }
@@ -125,9 +123,21 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        void Peer::registerPacketHandler(PacketType type, std::function<void(common::PeerID, const std::string &)> &&handler) {
+        void Peer::registerPacketHandler(PacketType type,
+                                         std::function<void(common::PeerID, const std::string &)> &&handler) {
             assert(mPacketHandlers.find(type) == mPacketHandlers.end());
             mPacketHandlers[type] = std::move(handler);
+        }
+
+        void Peer::registerPostDisconnectHook(std::function<void(common::PeerID)> &&handler) {
+            mPostDisconnectHook = std::move(handler);
+        }
+
+        common::PeerID Peer::getPeerID(const ENetAddress &address) const {
+            char ip[16]{};
+            enet_address_get_host_ip(&address, ip, 16);
+            return std::string(ip) + ":" + std::to_string(address.port);
+
         }
     }
 }

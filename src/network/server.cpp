@@ -30,17 +30,20 @@ namespace oni {
         Server::~Server() = default;
 
         void Server::postConnectHook(const ENetEvent *event) {
-            mClients.push_back(event->peer->connectID);
+            mClients.push_back(getPeerID(event->peer->address));
         }
 
         void Server::postDisconnectHook(const ENetEvent *event) {
-            auto clientID = event->peer->connectID;
-            auto iter = mClients.begin();
-            while (iter != mClients.end()) {
-                if (*iter == clientID) {
-                    mClients.erase(iter);
-                }
-                ++iter;
+            auto clientID = getPeerID(event->peer->address);
+
+            mPostDisconnectHook(clientID);
+
+            auto it = std::find_if(mClients.begin(), mClients.end(), [&](const common::PeerID& peerID) { return (peerID == clientID); });
+            if (it != mClients.end()) {
+                mClients.erase(it);
+            }
+            else {
+                assert(false);
             }
         }
 
@@ -49,7 +52,7 @@ namespace oni {
         }
 
         void Server::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
-            auto peerID = peer->connectID;
+            auto peerID = getPeerID(peer->address);
             switch (header) {
                 case (PacketType::PING): {
                     auto type = PacketType::PING;

@@ -54,6 +54,8 @@ namespace oni {
 
             void clientInputPacketHandler(common::PeerID, const std::string &data);
 
+            void postDisconnectHook(common::PeerID);
+
         private:
             std::unique_ptr<entities::EntityManager> mEntityManager{};
 

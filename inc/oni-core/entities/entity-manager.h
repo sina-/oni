@@ -108,6 +108,16 @@ namespace oni {
                 return EntityView<EntityType, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
 
+
+            template<class Component>
+            void remove(common::EntityID entityID) {
+                mRegistry->remove<Component>(entityID);
+            }
+
+            void destroy(common::EntityID entityID){
+                mRegistry->destroy(entityID);
+            }
+
             template<class Component>
             Component &get(common::EntityID entityID) noexcept {
                 return mRegistry->get<Component>(entityID);

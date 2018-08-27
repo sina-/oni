@@ -62,6 +62,8 @@ namespace oni {
         common::EntityID
         createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const oni::components::CarConfig &carConfig);
 
+        void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
+
         void assignTexture(EntityManager &manager, common::EntityID entity, const components::Texture &texture);
     }
 }

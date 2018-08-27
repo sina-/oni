@@ -177,7 +177,7 @@ namespace oni {
 
             {
                 auto lock = manager.scopedLock();
-                if (manager.has<components::Placement>(lookAtEntity)) {
+                if (lookAtEntity && manager.has<components::Placement>(lookAtEntity)) {
                     const auto &pos = manager.get<components::Placement>(lookAtEntity).position;
                     lookAt(pos.x, pos.y);
                 }
@@ -190,6 +190,7 @@ namespace oni {
             }
 
             {
+                auto lock = manager.scopedLock();
                 begin(*mColorShader, *mColorRenderer);
                 renderColored(manager, halfViewWidth, halfViewHeight);
                 end(*mColorShader, *mColorRenderer);

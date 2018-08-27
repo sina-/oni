@@ -266,6 +266,22 @@ namespace oni {
             return entity;
         }
 
+        void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID) {
+            auto lock = manager.scopedLock();
+
+            auto entityPhysicalProps = manager.get<components::PhysicalProperties>(entityID);
+            physicsWorld.DestroyBody(entityPhysicalProps.body);
+            manager.remove<components::PhysicalProperties>(entityID);
+            manager.remove<components::Shape>(entityID);
+            manager.remove<components::Placement>(entityID);
+            manager.remove<components::TagTextureShaded>(entityID);
+            manager.remove<components::Car>(entityID);
+            manager.remove<components::CarConfig>(entityID);
+            manager.remove<components::TagVehicle>(entityID);
+            manager.remove<components::TagDynamic>(entityID);
+            manager.destroy(entityID);
+        }
+
         void assignTexture(EntityManager &manager, common::EntityID entity, const components::Texture &texture) {
             auto lock = manager.scopedLock();
             manager.assign<components::Texture>(entity, texture);

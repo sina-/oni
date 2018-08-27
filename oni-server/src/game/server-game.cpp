@@ -177,7 +177,7 @@ namespace oni {
             mServer->sendEntities(*mEntityManager);
         }
 
-        void ServerGame::_sim(const common::real32 tickTime) {
+        void ServerGame::_sim(const common::real64 tickTime) {
             // Fake lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
@@ -206,9 +206,9 @@ namespace oni {
                 }
             }
 
-/*            for (const auto &pos: tickPositions) {
+            for (const auto &pos: tickPositions) {
                 mTileWorld->tick(*mEntityManager, pos);
-            }*/
+            }
         }
 
         void ServerGame::_render() {}
@@ -217,8 +217,16 @@ namespace oni {
 
         void ServerGame::showFPS(int16 fps) {}
 
-        void ServerGame::showTPS(int16 tps) {}
+        void ServerGame::showSPS(oni::common::int16 tps) {}
 
-        void ServerGame::showFET(common::int16 fet) {}
+        void ServerGame::showPPS(oni::common::int16 pps) {
+            std::cout << "PPS" << pps << "\n";
+        }
+
+        void ServerGame::showPET(oni::common::int16 pet) {}
+
+        void ServerGame::showSET(oni::common::int16 set) {}
+
+        void ServerGame::showRET(oni::common::int16 ret) {}
     }
 }

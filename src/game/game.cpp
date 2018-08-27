@@ -11,7 +11,7 @@ namespace oni {
         Game::Game() = default;
 
         Game::Game(common::uint8 simRate, common::uint8 pollRate, common::uint8 renderRate) :
-                mTickMS(1.0f / simRate),
+                mSimMS(1.0f / simRate),
                 mPollMS(1.0f / pollRate),
                 mRenderMS(1.0f / renderRate) {
         }
@@ -37,51 +37,60 @@ namespace oni {
 
         void Game::sim() {
             utils::HighResolutionTimer simTimer{};
-            utils::HighResolutionTimer updateTimer{};
+            utils::HighResolutionTimer loopTimer{};
             common::uint16 updateCounter{0};
+            common::real64 excessPerSecond{0.0f};
 
             while (!mShouldTerminate) {
-                auto elapsed = updateTimer.elapsed();
+                auto elapsed = loopTimer.elapsed();
                 if (elapsed >= 1.0f) {
-                    auto tps = updateCounter / elapsed;
-                    showTPS(static_cast<common::int16>(tps));
+                    auto sps = updateCounter / elapsed;
+                    auto set = excessPerSecond / elapsed;
+                    showSPS(static_cast<common::int16>(sps));
+                    showSET(static_cast<common::int16>(set));
 
-                    updateTimer.restart();
+                    loopTimer.restart();
                     updateCounter = 0;
+                    excessPerSecond = 0.0f;
                 }
 
                 simTimer.restart();
 
-                _sim(mTickMS);
+                _sim(mSimMS);
 
                 auto simDuration = simTimer.elapsed();
-                auto excess = mTickMS - simDuration;
+                auto excess = mSimMS - simDuration;
+                excess *= 1000;
 
                 if (excess > 0.0f) {
-                    auto sleepFor = static_cast<common::uint64>(excess * 1000);
+                    auto sleepFor = static_cast<common::int64>(excess);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep during sim()\n";
+                    std::cout << "Couldn't sleep during sim(). Deficit: " << excess << "ms\n";
                 }
 
+                excessPerSecond += excess;
                 ++updateCounter;
             }
         }
 
         void Game::poll() {
             utils::HighResolutionTimer pollTimer{};
-            utils::HighResolutionTimer updateTimer{};
+            utils::HighResolutionTimer loopTimer{};
             common::uint16 updateCounter{0};
+            common::real64 excessPerSecond{0.0f};
 
             while (!mShouldTerminate) {
-                auto elapsed = updateTimer.elapsed();
+                auto elapsed = loopTimer.elapsed();
                 if (elapsed >= 1.0f) {
                     auto pps = updateCounter / elapsed;
-                    // TODO: Send it to GUI
-                    std::cout << "Polling " << pps << " per second.\n";
+                    auto pet = excessPerSecond / elapsed;
+                    showPPS(static_cast<common::int16>(pps));
+                    showPET(static_cast<common::int16>(pet));
 
-                    updateTimer.restart();
+                    loopTimer.restart();
                     updateCounter = 0;
+                    excessPerSecond = 0.0f;
                 }
 
                 pollTimer.restart();
@@ -90,33 +99,39 @@ namespace oni {
 
                 auto pollDuration = pollTimer.elapsed();
                 auto excess = mPollMS - pollDuration;
+                excess *= 1000;
 
                 if (excess >= 0.0f) {
-                    auto sleepFor = static_cast<common::uint64>(excess * 1000);
+                    auto sleepFor = static_cast<common::int64>(excess);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep during poll()\n";
+                    std::cout << "Couldn't sleep during poll(). Deficit: " << excess << "ms\n";
                 }
 
+                excessPerSecond += excess;
                 ++updateCounter;
             }
         }
 
         void Game::render() {
             utils::HighResolutionTimer renderTimer{};
-            utils::HighResolutionTimer updateTimer{};
+            utils::HighResolutionTimer loopTimer{};
             common::uint16 updateCounter{0};
+            common::real64 excessPerSecond{0.0f};
 
             initRenderer();
 
             while (!mShouldTerminate) {
-                auto elapsed = updateTimer.elapsed();
+                auto elapsed = loopTimer.elapsed();
                 if (elapsed >= 1.0f) {
                     auto fps = updateCounter / elapsed;
+                    auto ret = excessPerSecond / elapsed;
                     showFPS(static_cast<common::int16>(fps));
+                    showRET(static_cast<common::int16>(ret));
 
-                    updateTimer.elapsed();
+                    loopTimer.restart();
                     updateCounter = 0;
+                    excessPerSecond = 0.0f;
                 }
 
                 renderTimer.restart();
@@ -125,17 +140,19 @@ namespace oni {
 
                 auto renderDuration = renderTimer.elapsed();
                 auto excess = mRenderMS - renderDuration;
+                excess *= 1000;
 
                 if (excess >= 0.0f) {
-                    auto sleepFor = static_cast<common::uint64>(excess * 1000);
+                    auto sleepFor = static_cast<common::int64>(excess);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep during render()\n";
+                    std::cout << "Couldn't sleep during render(). Deficit: " << excess << "ms\n";
                 }
 
-                // NOTE: Only display the result at the end after mTickMS amount of time has passed.
+                // NOTE: Only display the result at the end after mSimMS amount of time has passed.
                 display();
 
+                excessPerSecond += excess;
                 ++updateCounter;
             }
         }
@@ -145,7 +162,7 @@ namespace oni {
         }
 
         common::real32 Game::getTickFrequency() {
-            return mTickMS;
+            return mSimMS;
         }
 
         void Game::initRenderer() {

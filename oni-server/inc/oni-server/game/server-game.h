@@ -35,7 +35,7 @@ namespace oni {
             void loadLevel();
 
         protected:
-            void _sim(common::real32 simTime) override;
+            void _sim(common::real64 simTime) override;
 
             void _render() override;
 
@@ -43,11 +43,17 @@ namespace oni {
 
             void _poll() override;
 
-            void showFPS(int16 fps) override;
+            void showFPS(oni::common::int16 fps) override;
 
-            void showTPS(int16 tps) override;
+            void showSPS(oni::common::int16 tps) override;
 
-            void showFET(common::int16 fet) override;
+            void showPPS(oni::common::int16 pps) override;
+
+            void showRET(oni::common::int16 ret) override;
+
+            void showPET(oni::common::int16 pet) override;
+
+            void showSET(oni::common::int16 set) override;
 
         private:
             void setupSessionPacketHandler(common::PeerID, const std::string &data);

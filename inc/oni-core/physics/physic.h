@@ -17,7 +17,7 @@ namespace oni {
             virtual ~Physic() = default;
 
         public:
-            virtual void tick(entities::EntityManager &manager, const io::Input &input, common::real32 tickTime) = 0;
+            virtual void tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) = 0;
         };
     }
 }

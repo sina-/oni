@@ -33,7 +33,7 @@ namespace oni {
             // the cost really.
             b2World * getPhysicsWorld();
 
-            void tick(entities::EntityManager &manager, const io::Input &input, common::real32 tickTime) override;
+            void tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) override;
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};

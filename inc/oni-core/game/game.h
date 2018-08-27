@@ -32,7 +32,7 @@ namespace oni {
 
             virtual void poll() final;
 
-            virtual void _sim(common::real32 simTime) = 0;
+            virtual void _sim(common::real64 simTime) = 0;
 
             virtual void _render() = 0;
 
@@ -42,20 +42,21 @@ namespace oni {
 
             virtual void showFPS(common::int16 fps) = 0;
 
-            virtual void showTPS(common::int16 tps) = 0;
+            virtual void showSPS(common::int16 tps) = 0;
 
+            virtual void showPPS(common::int16 pps) = 0;
 
-            /**
-             * Accumulated time in ms over 1 second spent sleeping due to excess.
-             * @param fet
-             */
-            virtual void showFET(common::int16 fet) = 0;
+            virtual void showRET(common::int16 ret) = 0;
+
+            virtual void showSET(common::int16 ret) = 0;
+
+            virtual void showPET(common::int16 ret) = 0;
 
         protected:
             // 60Hz
-            const common::real32 mTickMS{1 / 60.0f};
-            const common::real32 mRenderMS{1 / 60.0f};
-            const common::real32 mPollMS{1 / 20.0f};
+            const common::real64 mSimMS{1 / 60.0f};
+            const common::real64 mRenderMS{1 / 60.0f};
+            const common::real64 mPollMS{1 / 20.0f};
             // 30Hz
             // const common::real32 mMinTickMS{1 / 30.0f};
 

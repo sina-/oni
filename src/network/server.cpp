@@ -64,8 +64,6 @@ namespace oni {
                 }
                 case (PacketType::MESSAGE): {
                     auto packet = deserialize<DataPacket>(data, size);
-                    std::cout << packet.data << std::endl;
-
                     break;
                 }
                 case (PacketType::SETUP_SESSION): {

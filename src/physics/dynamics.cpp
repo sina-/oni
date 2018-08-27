@@ -19,7 +19,7 @@ namespace oni {
             mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
         }
 
-        void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real32 tickTime) {
+        void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) {
             {
                 // NOTE: Need to lock it because network system might remove cars for clients that have disconnected.
                 // TODO: Maybe there is a better way to tick the cars without needing to lock the whole registry!

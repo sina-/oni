@@ -7,7 +7,7 @@ namespace oni {
     namespace physics {
 
         void tickCar(components::Car &car, const components::CarConfig &config,
-                     const components::CarInput &inputs, common::real32 dt) {
+                     const components::CarInput &inputs, common::real64 dt) {
             using common::CarSimDouble;
             CarSimDouble sn = std::sin(car.heading);
             CarSimDouble cs = std::cos(car.heading);
@@ -120,7 +120,7 @@ namespace oni {
         }
 
         common::CarSimDouble applySmoothSteer(const components::Car &car,
-                                              common::CarSimDouble steerInput, common::real32 dt) {
+                                              common::CarSimDouble steerInput, common::real64 dt) {
             common::CarSimDouble steer = 0;
 
             if (std::abs(steerInput) > 0.001) {

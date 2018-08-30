@@ -16,15 +16,15 @@ namespace oni {
 
             ~ClientDataManager();
 
-            void addNewClient(common::PeerID clientID, common::EntityID entityID);
+            void addNewClient(const common::PeerID& clientID, common::EntityID entityID);
 
-            void deleteClient(common::PeerID clientID);
+            void deleteClient(const common::PeerID& clientID);
 
-            void setClientInput(common::PeerID clientID, const io::Input &input);
+            void setClientInput(const common::PeerID& clientID, const io::Input &input);
 
-            const io::Input& getClientInput(common::PeerID clientID);
+            const io::Input& getClientInput(const common::PeerID& clientID);
 
-            common::EntityID getEntityID(common::PeerID clientID) const;
+            common::EntityID getEntityID(const common::PeerID& clientID) const;
 
             std::unique_lock<std::mutex> scopedLock();
 

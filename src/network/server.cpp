@@ -95,7 +95,7 @@ namespace oni {
             return mClients;
         }
 
-        void Server::sendCarEntityID(common::EntityID entityID, common::PeerID peerID) {
+        void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID& peerID) {
             auto packet = EntityPacket{entityID};
             auto data = serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;

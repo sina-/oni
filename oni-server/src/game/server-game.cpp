@@ -69,7 +69,7 @@ namespace oni {
             entities::assignTexture(*mEntityManager, mTruckEntity, truckTexture);
         }
 
-        void ServerGame::setupSessionPacketHandler(common::PeerID clientID, const std::string &data) {
+        void ServerGame::setupSessionPacketHandler(const common::PeerID &clientID, const std::string &data) {
             auto carConfig = components::CarConfig();
             carConfig.cgToRear = 1.25f;
             carConfig.cgToFront = 1.25f;
@@ -154,13 +154,13 @@ namespace oni {
             mServer->sendCarEntityID(carEntity, clientID);
         }
 
-        void ServerGame::clientInputPacketHandler(common::PeerID clientID, const std::string &data) {
+        void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {
             auto input = network::deserialize<io::Input>(data);
             // TODO: Avoid copy by using a unique_ptr or something
             mClientDataManager->setClientInput(clientID, input);
         }
 
-        void ServerGame::postDisconnectHook(common::PeerID peerID) {
+        void ServerGame::postDisconnectHook(const common::PeerID &peerID) {
             auto clientDataLock = mClientDataManager->scopedLock();
             auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
             entities::deleteVehicleEntity(*mEntityManager, *mDynamics->getPhysicsWorld(), clientCarEntityID);
@@ -220,7 +220,7 @@ namespace oni {
         void ServerGame::showSPS(oni::common::int16 tps) {}
 
         void ServerGame::showPPS(oni::common::int16 pps) {
-            std::cout << "PPS" << pps << "\n";
+            std::cout << "PPS " << pps << "\n";
         }
 
         void ServerGame::showPET(oni::common::int16 pet) {}

@@ -56,11 +56,11 @@ namespace oni {
             void showSET(oni::common::int16 set) override;
 
         private:
-            void setupSessionPacketHandler(common::PeerID, const std::string &data);
+            void setupSessionPacketHandler(const common::PeerID&, const std::string &data);
 
-            void clientInputPacketHandler(common::PeerID, const std::string &data);
+            void clientInputPacketHandler(const common::PeerID&, const std::string &data);
 
-            void postDisconnectHook(common::PeerID);
+            void postDisconnectHook(const common::PeerID&);
 
         private:
             std::unique_ptr<entities::EntityManager> mEntityManager{};

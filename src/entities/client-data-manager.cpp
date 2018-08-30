@@ -21,23 +21,23 @@ namespace oni {
             mLock.unlock();
         }*/
 
-        common::EntityID ClientDataManager::getEntityID(common::PeerID clientID) const {
+        common::EntityID ClientDataManager::getEntityID(const common::PeerID &clientID) const {
             return mClientCarEntityMap.at(clientID);
         }
 
-        void ClientDataManager::addNewClient(common::PeerID clientID, common::EntityID entityID) {
+        void ClientDataManager::addNewClient(const common::PeerID &clientID, common::EntityID entityID) {
             mClientCarEntityMap[clientID] = entityID;
         }
 
-        void ClientDataManager::deleteClient(common::PeerID clientID) {
+        void ClientDataManager::deleteClient(const common::PeerID &clientID) {
             mClientCarEntityMap.erase(clientID);
         }
 
-        void ClientDataManager::setClientInput(common::PeerID clientID, const io::Input &input) {
+        void ClientDataManager::setClientInput(const common::PeerID &clientID, const io::Input &input) {
             mClientInputMap[clientID] = input;
         }
 
-        const io::Input &ClientDataManager::getClientInput(common::PeerID clientID) {
+        const io::Input &ClientDataManager::getClientInput(const common::PeerID &clientID) {
             return mClientInputMap[clientID];
         }
 

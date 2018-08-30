@@ -124,12 +124,12 @@ namespace oni {
         }
 
         void Peer::registerPacketHandler(PacketType type,
-                                         std::function<void(common::PeerID, const std::string &)> &&handler) {
+                                         std::function<void(const common::PeerID &, const std::string &)> &&handler) {
             assert(mPacketHandlers.find(type) == mPacketHandlers.end());
             mPacketHandlers[type] = std::move(handler);
         }
 
-        void Peer::registerPostDisconnectHook(std::function<void(common::PeerID)> &&handler) {
+        void Peer::registerPostDisconnectHook(std::function<void(const common::PeerID &)> &&handler) {
             mPostDisconnectHook = std::move(handler);
         }
 

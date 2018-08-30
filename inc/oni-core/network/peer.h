@@ -60,9 +60,9 @@ namespace oni {
             void poll();
 
             void
-            registerPacketHandler(PacketType type, std::function<void(common::PeerID, const std::string &)> &&handler);
+            registerPacketHandler(PacketType type, std::function<void(const common::PeerID&, const std::string &)> &&handler);
 
-            void registerPostDisconnectHook(std::function<void(common::PeerID)> &&handler);
+            void registerPostDisconnectHook(std::function<void(const common::PeerID&)> &&handler);
 
         protected:
             virtual void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) = 0;
@@ -112,7 +112,7 @@ namespace oni {
             ENetHost *mEnetHost{};
             std::map<common::PeerID, ENetPeer *> mPeers{};
             std::map<PacketType, std::function<void(common::PeerID, const std::string &)>> mPacketHandlers{};
-            std::function<void(common::PeerID)> mPostDisconnectHook{};
+            std::function<void(const common::PeerID&)> mPostDisconnectHook{};
         };
     }
 }

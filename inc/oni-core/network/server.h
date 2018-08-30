@@ -30,7 +30,7 @@ namespace oni {
 
             const std::vector<common::PeerID> &getClients() const;
 
-            void sendCarEntityID(common::EntityID entityID, common::PeerID id);
+            void sendCarEntityID(common::EntityID entityID, const common::PeerID& id);
 
         private:
             Server();

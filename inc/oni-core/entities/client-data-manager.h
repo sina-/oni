@@ -8,7 +8,10 @@
 namespace oni {
     namespace entities {
         typedef std::map<common::PeerID, common::EntityID> ClientCarEntityMap;
+        typedef std::vector<common::PeerID> Clients;
         typedef std::map<common::PeerID, io::Input> ClientInputMap;
+        typedef std::vector<io::Input> ClientsInput;
+        typedef std::vector<common::EntityID> ClientsCarEntity;
 
         class ClientDataManager {
         public:
@@ -16,15 +19,21 @@ namespace oni {
 
             ~ClientDataManager();
 
-            void addNewClient(const common::PeerID& clientID, common::EntityID entityID);
+            void addNewClient(const common::PeerID &clientID, common::EntityID entityID);
 
-            void deleteClient(const common::PeerID& clientID);
+            void deleteClient(const common::PeerID &clientID);
 
-            void setClientInput(const common::PeerID& clientID, const io::Input &input);
+            void setClientInput(const common::PeerID &clientID, const io::Input &input);
 
-            const io::Input& getClientInput(const common::PeerID& clientID);
+            const io::Input &getClientInput(const common::PeerID &clientID);
 
-            common::EntityID getEntityID(const common::PeerID& clientID) const;
+            ClientsInput getClientsInput() const;
+
+            ClientsCarEntity getClientsCarEntity() const;
+
+            const Clients &getClients() const;
+
+            common::EntityID getEntityID(const common::PeerID &clientID) const;
 
             std::unique_lock<std::mutex> scopedLock();
 
@@ -35,6 +44,7 @@ namespace oni {
         private:
             ClientCarEntityMap mClientCarEntityMap{};
             ClientInputMap mClientInputMap{};
+            Clients mClients{};
 
             std::mutex mMutex{};
             std::unique_lock<std::mutex> mLock{};

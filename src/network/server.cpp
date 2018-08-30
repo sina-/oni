@@ -30,25 +30,12 @@ namespace oni {
         Server::~Server() = default;
 
         void Server::postConnectHook(const ENetEvent *event) {
-            mClients.push_back(getPeerID(event->peer->address));
         }
 
         void Server::postDisconnectHook(const ENetEvent *event) {
             auto clientID = getPeerID(event->peer->address);
 
             mPostDisconnectHook(clientID);
-
-            auto it = std::find_if(mClients.begin(), mClients.end(), [&](const common::PeerID& peerID) { return (peerID == clientID); });
-            if (it != mClients.end()) {
-                mClients.erase(it);
-            }
-            else {
-                assert(false);
-            }
-        }
-
-        void Server::tick(entities::EntityManager &manager) {
-
         }
 
         void Server::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
@@ -91,11 +78,7 @@ namespace oni {
             broadcast(type, data);
         }
 
-        const std::vector<common::PeerID> &Server::getClients() const {
-            return mClients;
-        }
-
-        void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID& peerID) {
+        void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID &peerID) {
             auto packet = EntityPacket{entityID};
             auto data = serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;

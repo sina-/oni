@@ -181,13 +181,10 @@ namespace oni {
             // Fake lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
-            std::vector<io::Input> clientInput;
+            std::vector<io::Input> clientInput{};
             {
                 auto clientDataLock = mClientDataManager->scopedLock();
-                for (const auto &client: mServer->getClients()) {
-                    const auto &input = mClientDataManager->getClientInput(client);
-                    clientInput.push_back(input);
-                }
+                clientInput = mClientDataManager->getClientsInput();
                 // TODO: Maybe I should just stack up client input and remove them after the processing is done.
             }
 
@@ -199,8 +196,7 @@ namespace oni {
             {
                 auto registryLock = mEntityManager->scopedLock();
                 auto clientDataLock = mClientDataManager->scopedLock();
-                for (const auto &client: mServer->getClients()) {
-                    auto carEntity = mClientDataManager->getEntityID(client);
+                for (const auto &carEntity: mClientDataManager->getClientsCarEntity()) {
                     const auto &carPlacement = mEntityManager->get<components::Placement>(carEntity);
                     tickPositions.push_back(carPlacement.position.getXY());
                 }

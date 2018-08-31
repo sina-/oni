@@ -56,7 +56,7 @@ namespace oni {
             // 60Hz
             const common::real64 mSimMS{1 / 60.0f};
             const common::real64 mRenderMS{1 / 60.0f};
-            const common::real64 mPollMS{1 / 20.0f};
+            const common::real64 mPollMS{1 / 30.0f};
             // 30Hz
             // const common::real32 mMinTickMS{1 / 30.0f};
 

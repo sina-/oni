@@ -186,11 +186,16 @@ namespace oni {
                 renderStaticTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
-                end(*mTextureShader, *mTextureRenderer);
+                // Release the lock as soon as we are done with the registry.
+            }
+
+            end(*mTextureShader, *mTextureRenderer);
+            {
+                auto lock = manager.scopedLock();
                 begin(*mColorShader, *mColorRenderer);
                 renderColored(manager, halfViewWidth, halfViewHeight);
-                end(*mColorShader, *mColorRenderer);
             }
+            end(*mColorShader, *mColorRenderer);
         }
 
         void SceneManager::renderRaw(const components::Shape &shape, const components::Appearance &appearance) {

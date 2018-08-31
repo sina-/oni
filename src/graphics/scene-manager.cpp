@@ -187,10 +187,6 @@ namespace oni {
                 renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
                 end(*mTextureShader, *mTextureRenderer);
-            }
-
-            {
-                auto lock = manager.scopedLock();
                 begin(*mColorShader, *mColorRenderer);
                 renderColored(manager, halfViewWidth, halfViewHeight);
                 end(*mColorShader, *mColorRenderer);

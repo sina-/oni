@@ -80,7 +80,8 @@ namespace oni {
                 for (auto j = chunkIndices.y - 1; j <= chunkIndices.y + 1; ++j) {
                     const auto packedIndices = math::packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
-                        //generateTilesForChunk(i, j, entities);
+
+                        // generateTilesForChunk(manager, i, j);
 
                         // NOTE: Just for debugging
                         auto R = (std::rand() % 255) / 255.0f;
@@ -381,28 +382,32 @@ namespace oni {
             }
         }
 
-        void TileWorld::generateTilesForChunk(entities::EntityManager &manager, const common::int64 xIndex,
-                                              const common::int64 yIndex) {
+        void TileWorld::generateTilesForChunk(entities::EntityManager &manager, common::int64 xChunkIndex,
+                                              common::int64 yChunkIndex) {
 
-            const auto firstTileX = xIndex * mChunkSizeX - mChunkSizeX / 2;
-            const auto lastTileX = xIndex * mChunkSizeX + mChunkSizeX / 2;
-            const auto firstTileY = yIndex * mChunkSizeY - mChunkSizeY / 2;
-            const auto lastTileY = yIndex * mChunkSizeY + mChunkSizeY / 2;
+            auto firstTileX = xChunkIndex * mChunkSizeX - mChunkSizeX / 2;
+            auto lastTileX = xChunkIndex * mChunkSizeX + mChunkSizeX / 2;
+            auto firstTileY = yChunkIndex * mChunkSizeY - mChunkSizeY / 2;
+            auto lastTileY = yChunkIndex * mChunkSizeY + mChunkSizeY / 2;
 
-            const auto tileSize = math::vec2{mTileSizeX, mTileSizeY};
+            auto tileSize = math::vec2{mTileSizeX, mTileSizeY};
 
             for (auto i = firstTileX; i < lastTileX; i += mTileSizeX) {
                 for (auto j = firstTileY; j < lastTileY; j += mTileSizeY) {
-                    const auto R = (std::rand() % 255) / 255.0f;
-                    const auto G = (std::rand() % 255) / 255.0f;
-                    const auto B = (std::rand() % 255) / 255.0f;
-                    const auto color = math::vec4{R, G, B, 1.0f};
+                    auto packedIndices = math::packIntegers(i, j);
+                    // Chunks are created in batch, if single tile is created so are others.
+                    if (existsInMap(packedIndices, mPackedTileIndicesToEntity)) {
+                        return;
+                    }
+                    auto R = (std::rand() % 255) / 255.0f;
+                    auto G = (std::rand() % 255) / 255.0f;
+                    auto B = (std::rand() % 255) / 255.0f;
+                    auto color = math::vec4{R, G, B, 1.0f};
 
-                    const auto positionInWorld = math::vec3{i, j, 1.0f};
+                    auto positionInWorld = math::vec3{i, j, 1.0f};
 
-                    const auto packedIndices = math::packIntegers(i, j);
-                    const auto tileID = createSpriteStaticEntity(manager, color, tileSize,
-                                                                 positionInWorld);
+                    auto tileID = createSpriteStaticEntity(manager, color, tileSize,
+                                                           positionInWorld);
 
                     mPackedTileIndicesToEntity.emplace(packedIndices, tileID);
                 }

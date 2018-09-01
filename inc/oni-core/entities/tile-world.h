@@ -40,8 +40,8 @@ namespace oni {
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
 
-            void generateTilesForChunk(entities::EntityManager &manager, const common::int64 xIndex,
-                                                   const common::int64 yIndex);
+            void generateTilesForChunk(entities::EntityManager &manager, const common::int64 xChunkIndex,
+                                       const common::int64 yChunkIndex);
 
             components::BoarderRoadTiles
             generateRoadsForChunk(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices);

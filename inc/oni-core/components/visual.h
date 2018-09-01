@@ -18,9 +18,16 @@ namespace oni {
         // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
         struct Appearance {
             math::vec4 color{0.0f, 0.0f, 0.0f, 0.0f};
+
+            template<class Archive>
+            void serialize(Archive &archive) {
+                archive(color);
+            }
         };
 
         struct TagColorShaded {
+            template<class Archive>
+            void serialize(Archive &archive) {}
         };
 
         struct TagTextureShaded {

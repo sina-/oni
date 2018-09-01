@@ -24,6 +24,7 @@ namespace oni {
                         components::Placement,
                         components::Chunk,
                         components::Shape,
+                        components::Appearance,
                         components::Texture,
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
                         // to know what it points to at the moment because sever does the physics calculations and only
@@ -33,6 +34,7 @@ namespace oni {
                         components::TagDynamic,
                         components::TagVehicle,
                         components::TagTextureShaded,
+                        components::TagColorShaded,
                         components::TagStatic,
                         components::TransformParent
                 >(output);
@@ -54,11 +56,13 @@ namespace oni {
                         components::Placement,
                         components::Chunk,
                         components::Shape,
+                        components::Appearance,
                         components::Texture,
                         //components::PhysicalProperties,
                         components::TagDynamic,
                         components::TagVehicle,
                         components::TagTextureShaded,
+                        components::TagColorShaded,
                         components::TagStatic,
                         components::TransformParent
                 >(input);

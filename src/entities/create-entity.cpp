@@ -6,6 +6,7 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/components/entity-lifetime.h>
 
 namespace oni {
     namespace entities {
@@ -49,6 +50,7 @@ namespace oni {
             manager.assign<components::TagColorShaded>(entity, entityColorShader);
             // TODO: Is this the correct usage of tags?
             manager.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagNewlyCreated>(entity);
 
             return entity;
         }
@@ -75,6 +77,7 @@ namespace oni {
             manager.assign<components::Placement>(entity, entityPlacement);
             manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             manager.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::TagNewlyCreated>(entity);
 
             return entity;
         }
@@ -126,6 +129,7 @@ namespace oni {
             manager.assign<components::Placement>(entity, entityPlacement);
             manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             manager.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::TagNewlyCreated>(entity);
 
             return entity;
         }
@@ -143,6 +147,7 @@ namespace oni {
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             manager.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagNewlyCreated>(entity);
 
             return entity;
         }
@@ -179,6 +184,7 @@ namespace oni {
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
             manager.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagNewlyCreated>(entity);
 
             return entity;
         }
@@ -262,6 +268,7 @@ namespace oni {
             manager.assign<components::CarConfig>(entity, carConfig);
             manager.assign<components::TagVehicle>(entity, entityVehicleTag);
             manager.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::TagNewlyCreated>(entity);
 
             return entity;
         }

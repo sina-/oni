@@ -74,5 +74,9 @@ namespace oni {
             return entities;
         }
 
+        size_t ClientDataManager::numClients() const {
+            return mClients.size();
+        }
+
     }
 }

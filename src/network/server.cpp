@@ -19,6 +19,7 @@
 
 // TODO: This shouldn't be included here!
 #include <oni-core/graphics/debug-draw-box2d.h>
+#include <oni-core/components/entity-lifetime.h>
 
 
 namespace oni {
@@ -75,7 +76,15 @@ namespace oni {
             std::string data = entities::serialize(manager);
             auto type = PacketType::ENTITIES;
 
-            broadcast(type, data);
+            {
+                auto lock = manager.scopedLock();
+                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
+                //manager.reset<components::TagNewlyCreated>();
+            }
+
+            if (data.size() > 1) {
+                broadcast(type, data);
+            }
         }
 
         void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID &peerID) {

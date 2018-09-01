@@ -174,7 +174,9 @@ namespace oni {
         void ServerGame::_poll() {
             mServer->poll();
 
-            mServer->sendEntities(*mEntityManager);
+            if(mClientDataManager->numClients()){
+                mServer->sendEntities(*mEntityManager);
+            }
         }
 
         void ServerGame::_sim(const common::real64 tickTime) {

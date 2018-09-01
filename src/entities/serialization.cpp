@@ -8,17 +8,18 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
 #include <oni-core/components/visual.h>
+#include <oni-core/components/entity-lifetime.h>
 
 
 namespace oni {
     namespace entities {
 
         std::string serialize(entities::EntityManager &manager) {
-            std::stringstream storage;
+            std::stringstream storage{};
             {
                 auto lock = manager.scopedLock();
                 cereal::PortableBinaryOutputArchive output{storage};
-                manager.snapshot<cereal::PortableBinaryOutputArchive,
+                manager.snapshotNewlyCreated<cereal::PortableBinaryOutputArchive,
                         components::Car,
                         components::CarConfig,
                         components::Placement,
@@ -31,12 +32,12 @@ namespace oni {
                         // send the results back to the client, so I can skip it. But for the future I have to
                         // find a solution to this shit.
                         //components::PhysicalProperties,
+                        components::TransformParent,
                         components::TagDynamic,
                         components::TagVehicle,
                         components::TagTextureShaded,
                         components::TagColorShaded,
-                        components::TagStatic,
-                        components::TransformParent
+                        components::TagStatic
                 >(output);
             }
 
@@ -59,12 +60,12 @@ namespace oni {
                         components::Appearance,
                         components::Texture,
                         //components::PhysicalProperties,
+                        components::TransformParent,
                         components::TagDynamic,
                         components::TagVehicle,
                         components::TagTextureShaded,
                         components::TagColorShaded,
-                        components::TagStatic,
-                        components::TransformParent
+                        components::TagStatic
                 >(input);
             }
         }

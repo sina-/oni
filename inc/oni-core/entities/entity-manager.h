@@ -3,10 +3,12 @@
 #include <memory>
 #include <mutex>
 #include <vector>
+#include <iostream>
 
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/components/entity-lifetime.h>
 
 
 namespace oni {
@@ -22,12 +24,12 @@ namespace oni {
                 friend EntityManager;
 
                 explicit EntityView(entt::Registry<EntityType> &registry) :
-                        mView(registry.persistent<Components...>()) {
+                        mView(registry.view<Components...>(entt::persistent_t{})) {
                 }
 
                 EntityView(entt::Registry<EntityType> &registry,
                            std::unique_lock<std::mutex> registryLock) :
-                        mView(registry.persistent<Components...>()),
+                        mView(registry.view<Components...>(entt::persistent_t{})),
                         mRegistryLock(std::move(registryLock)) {
                 }
 
@@ -64,6 +66,7 @@ namespace oni {
 
             EntityManager() {
                 mRegistry = std::make_unique<entt::DefaultRegistry>();
+                mLoader = std::make_unique<entt::ContinuousLoader<EntityType>>(*mRegistry);
                 mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
             }
 
@@ -114,7 +117,12 @@ namespace oni {
                 mRegistry->remove<Component>(entityID);
             }
 
-            void destroy(common::EntityID entityID){
+            template<class Component>
+            void reset() {
+                mRegistry->reset<Component>();
+            }
+
+            void destroy(common::EntityID entityID) {
                 mRegistry->destroy(entityID);
             }
 
@@ -150,6 +158,8 @@ namespace oni {
             void restore(Archive &archive) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
+/*                    mLoader->entities(archive).template component<ArchiveComponents...>(archive)
+                            .orphans().shrink();*/
                     mRegistry->restore().entities(archive).template component<ArchiveComponents...>(archive);
                 }
             }
@@ -159,6 +169,16 @@ namespace oni {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
+                }
+            }
+
+            template<class Archive, class ...ArchiveComponents>
+            void snapshotNewlyCreated(Archive &archive) {
+                auto view = mRegistry->view<components::TagNewlyCreated>();
+                if (!view.empty()) {
+                    mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
+                                                                                                     view.cbegin(),
+                                                                                                     view.cend());
                 }
             }
 
@@ -178,6 +198,7 @@ namespace oni {
 
         private:
             std::unique_ptr<entt::Registry<EntityType>> mRegistry{};
+            std::unique_ptr<entt::ContinuousLoader<EntityType>> mLoader{};
             std::mutex mMutex{};
             std::unique_lock<std::mutex> mLock{};
         };

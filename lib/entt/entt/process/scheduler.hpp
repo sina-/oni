@@ -5,9 +5,9 @@
 #include <vector>
 #include <memory>
 #include <utility>
-#include <iterator>
 #include <algorithm>
 #include <type_traits>
+#include "../config/config.h"
 #include "process.hpp"
 
 
@@ -42,31 +42,27 @@ namespace entt {
  */
 template<typename Delta>
 class Scheduler final {
-    template<typename T>
-    struct tag { using type = T; };
-
     struct ProcessHandler final {
         using instance_type = std::unique_ptr<void, void(*)(void *)>;
-        using update_type = bool(*)(ProcessHandler &, Delta, void *);
-        using abort_type = void(*)(ProcessHandler &, bool);
+        using update_fn_type = bool(ProcessHandler &, Delta, void *);
+        using abort_fn_type = void(ProcessHandler &, bool);
         using next_type = std::unique_ptr<ProcessHandler>;
 
         instance_type instance;
-        update_type update;
-        abort_type abort;
+        update_fn_type *update;
+        abort_fn_type *abort;
         next_type next;
     };
 
-    template<typename Lambda>
-    struct Then final: Lambda {
-        Then(Lambda &&lambda, ProcessHandler *handler)
-            : Lambda{std::forward<Lambda>(lambda)}, handler{handler}
+    struct Then final {
+        Then(ProcessHandler *handler)
+            : handler{handler}
         {}
 
         template<typename Proc, typename... Args>
         decltype(auto) then(Args &&... args) && {
             static_assert(std::is_base_of<Process<Proc, Delta>, Proc>::value, "!");
-            handler = Lambda::operator()(handler, tag<Proc>{}, std::forward<Args>(args)...);
+            handler = Scheduler::then<Proc>(handler, std::forward<Args>(args)...);
             return std::move(*this);
         }
 
@@ -81,7 +77,7 @@ class Scheduler final {
     };
 
     template<typename Proc>
-    static bool update(ProcessHandler &handler, Delta delta, void *data) {
+    static bool update(ProcessHandler &handler, const Delta delta, void *data) {
         auto *process = static_cast<Proc *>(handler.instance.get());
         process->tick(delta, data);
 
@@ -100,7 +96,7 @@ class Scheduler final {
     }
 
     template<typename Proc>
-    static void abort(ProcessHandler &handler, bool immediately) {
+    static void abort(ProcessHandler &handler, const bool immediately) {
         static_cast<Proc *>(handler.instance.get())->abort(immediately);
     }
 
@@ -109,20 +105,15 @@ class Scheduler final {
         delete static_cast<Proc *>(proc);
     }
 
-    auto then(ProcessHandler *handler) {
-        auto lambda = [](ProcessHandler *handler, auto next, auto... args) {
-            using Proc = typename decltype(next)::type;
+    template<typename Proc, typename... Args>
+    static auto then(ProcessHandler *handler, Args &&... args) {
+        if(handler) {
+            auto proc = typename ProcessHandler::instance_type{new Proc{std::forward<Args>(args)...}, &Scheduler::deleter<Proc>};
+            handler->next.reset(new ProcessHandler{std::move(proc), &Scheduler::update<Proc>, &Scheduler::abort<Proc>, nullptr});
+            handler = handler->next.get();
+        }
 
-            if(handler) {
-                auto proc = typename ProcessHandler::instance_type{new Proc{std::forward<decltype(args)>(args)...}, &Scheduler::deleter<Proc>};
-                handler->next.reset(new ProcessHandler{std::move(proc), &Scheduler::update<Proc>, &Scheduler::abort<Proc>, nullptr});
-                handler = handler->next.get();
-            }
-
-            return handler;
-        };
-
-        return Then<decltype(lambda)>{std::move(lambda), handler};
+        return handler;
     }
 
 public:
@@ -130,7 +121,7 @@ public:
     using size_type = typename std::vector<ProcessHandler>::size_type;
 
     /*! @brief Default constructor. */
-    Scheduler() noexcept= default;
+    Scheduler() ENTT_NOEXCEPT = default;
 
     /*! @brief Copying a scheduler isn't allowed. */
     Scheduler(const Scheduler &) = delete;
@@ -139,14 +130,14 @@ public:
 
     /*! @brief Copying a scheduler isn't allowed. @return This scheduler. */
     Scheduler & operator=(const Scheduler &) = delete;
-    /*! @brief Default move assignament operator. @return This scheduler. */
+    /*! @brief Default move assignment operator. @return This scheduler. */
     Scheduler & operator=(Scheduler &&) = default;
 
     /**
      * @brief Number of processes currently scheduled.
      * @return Number of processes currently scheduled.
      */
-    size_type size() const noexcept {
+    size_type size() const ENTT_NOEXCEPT {
         return handlers.size();
     }
 
@@ -154,7 +145,7 @@ public:
      * @brief Returns true if at least a process is currently scheduled.
      * @return True if there are scheduled processes, false otherwise.
      */
-    bool empty() const noexcept {
+    bool empty() const ENTT_NOEXCEPT {
         return handlers.empty();
     }
 
@@ -201,7 +192,7 @@ public:
         ProcessHandler handler{std::move(proc), &Scheduler::update<Proc>, &Scheduler::abort<Proc>, nullptr};
         handlers.push_back(std::move(handler));
 
-        return then(&handlers.back());
+        return Then{&handlers.back()};
     }
 
     /**
@@ -271,7 +262,7 @@ public:
      * @param delta Elapsed time.
      * @param data Optional data.
      */
-    void update(Delta delta, void *data = nullptr) {
+    void update(const Delta delta, void *data = nullptr) {
         bool clean = false;
 
         for(auto pos = handlers.size(); pos; --pos) {
@@ -297,7 +288,7 @@ public:
      *
      * @param immediately Requests an immediate operation.
      */
-    void abort(bool immediately = false) {
+    void abort(const bool immediately = false) {
         decltype(handlers) exec;
         exec.swap(handlers);
 

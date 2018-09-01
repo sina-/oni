@@ -33,6 +33,8 @@ namespace oni {
 
             const Clients &getClients() const;
 
+            size_t numClients() const;
+
             common::EntityID getEntityID(const common::PeerID &clientID) const;
 
             std::unique_lock<std::mutex> scopedLock();

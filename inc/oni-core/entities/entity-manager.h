@@ -155,30 +155,27 @@ namespace oni {
             }
 
             template<class Archive, class ...ArchiveComponents>
-            void restore(Archive &archive) {
-                {
+            void restore(Archive &archive, bool delta) {
+                if (delta) {
+                    mLoader->entities(archive).template component<ArchiveComponents...>(archive)
+                            .orphans().shrink();
+                } else {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
-/*                    mLoader->entities(archive).template component<ArchiveComponents...>(archive)
-                            .orphans().shrink();*/
                     mRegistry->restore().entities(archive).template component<ArchiveComponents...>(archive);
                 }
             }
 
             template<class Archive, class ...ArchiveComponents>
-            void snapshot(Archive &archive) {
-                {
-                    //std::lock_guard<std::mutex> registryLock(mMutex);
+            void snapshot(Archive &archive, bool delta) {
+                if (delta) {
+                    auto view = mRegistry->view<components::TagNewlyCreated>();
+                    if (!view.empty()) {
+                        mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
+                                                                                                         view.cbegin(),
+                                                                                                         view.cend());
+                    }
+                } else {
                     mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
-                }
-            }
-
-            template<class Archive, class ...ArchiveComponents>
-            void snapshotNewlyCreated(Archive &archive) {
-                auto view = mRegistry->view<components::TagNewlyCreated>();
-                if (!view.empty()) {
-                    mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
-                                                                                                     view.cbegin(),
-                                                                                                     view.cend());
                 }
             }
 

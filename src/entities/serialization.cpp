@@ -14,12 +14,12 @@
 namespace oni {
     namespace entities {
 
-        std::string serialize(entities::EntityManager &manager) {
+        std::string serialize(entities::EntityManager &manager, bool delta) {
             std::stringstream storage{};
             {
                 auto lock = manager.scopedLock();
                 cereal::PortableBinaryOutputArchive output{storage};
-                manager.snapshotNewlyCreated<cereal::PortableBinaryOutputArchive,
+                manager.snapshot<cereal::PortableBinaryOutputArchive,
                         components::Car,
                         components::CarConfig,
                         components::Placement,
@@ -38,13 +38,13 @@ namespace oni {
                         components::TagTextureShaded,
                         components::TagColorShaded,
                         components::TagStatic
-                >(output);
+                >(output, delta);
             }
 
             return storage.str();
         }
 
-        void deserialize(EntityManager &manager, const std::string &data) {
+        void deserialize(EntityManager &manager, const std::string &data, bool delta) {
             std::stringstream storage;
             storage.str(data);
 
@@ -66,7 +66,7 @@ namespace oni {
                         components::TagTextureShaded,
                         components::TagColorShaded,
                         components::TagStatic
-                >(input);
+                >(input, delta);
             }
         }
     }

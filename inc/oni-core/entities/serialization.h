@@ -31,8 +31,8 @@ namespace oni {
             return storage.str();
         }*/
 
-        std::string serialize(entities::EntityManager &manager);
+        std::string serialize(entities::EntityManager &manager, bool delta);
 
-        void deserialize(oni::entities::EntityManager &manager, const std::string &data);
+        void deserialize(oni::entities::EntityManager &manager, const std::string &data, bool delta);
     }
 }

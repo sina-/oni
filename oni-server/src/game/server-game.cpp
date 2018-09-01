@@ -152,6 +152,7 @@ namespace oni {
             mClientDataManager->addNewClient(clientID, carEntity);
 
             mServer->sendCarEntityID(carEntity, clientID);
+            mServer->sendEntitiesAll(*mEntityManager);
         }
 
         void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {
@@ -175,7 +176,7 @@ namespace oni {
             mServer->poll();
 
             if(mClientDataManager->numClients()){
-                mServer->sendEntities(*mEntityManager);
+                mServer->sendEntitiesDelta(*mEntityManager);
             }
         }
 

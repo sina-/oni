@@ -24,7 +24,9 @@ namespace oni {
 
             ~Server() override;
 
-            void sendEntities(entities::EntityManager &manager);
+            void sendEntitiesAll(entities::EntityManager &manager);
+
+            void sendEntitiesDelta(entities::EntityManager &manager);
 
             void sendCarEntityID(common::EntityID entityID, const common::PeerID& id);
 

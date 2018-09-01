@@ -72,14 +72,29 @@ namespace oni {
             }
         }
 
-        void Server::sendEntities(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager);
-            auto type = PacketType::ENTITIES;
+        void Server::sendEntitiesAll(entities::EntityManager &manager) {
+            std::string data = entities::serialize(manager, false);
+            auto type = PacketType::ENTITIES_ALL;
 
             {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                //manager.reset<components::TagNewlyCreated>();
+                manager.reset<components::TagNewlyCreated>();
+            }
+
+            if (data.size() > 1) {
+                broadcast(type, data);
+            }
+        }
+
+        void Server::sendEntitiesDelta(entities::EntityManager &manager) {
+            std::string data = entities::serialize(manager, true);
+            auto type = PacketType::ENTITIES_DELTA;
+
+            {
+                auto lock = manager.scopedLock();
+                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
+                manager.reset<components::TagNewlyCreated>();
             }
 
             if (data.size() > 1) {

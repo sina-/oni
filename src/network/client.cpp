@@ -64,9 +64,14 @@ namespace oni {
                     mPacketHandlers[PacketType::CAR_ENTITY_ID](peerID, dataString);
                     break;
                 }
-                case (PacketType::ENTITIES): {
+                case (PacketType::ENTITIES_ALL): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::ENTITIES](peerID, dataString);
+                    mPacketHandlers[PacketType::ENTITIES_ALL](peerID, dataString);
+                    break;
+                }
+                case (PacketType::ENTITIES_DELTA): {
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::ENTITIES_DELTA](peerID, dataString);
                     break;
                 }
                 default: {

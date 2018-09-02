@@ -20,6 +20,7 @@ namespace oni {
         }
 
         void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) {
+            std::vector<common::EntityID> entitiesToBeUpdated{};
             {
                 // NOTE: Need to lock it because network system might remove cars for clients that have disconnected.
                 // TODO: Maybe there is a better way to tick the cars without needing to lock the whole registry!
@@ -83,10 +84,9 @@ namespace oni {
                     Transformation::updatePlacement(manager, entity, placement);
 
                     auto velocity = car.velocityLocal.len();
-
-
                     car.distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
 
+                    entitiesToBeUpdated.push_back(entity);
                 }
             }
 
@@ -140,6 +140,8 @@ namespace oni {
                     auto &placement = dynamicEntitiesView.get<components::Placement>(entity);
                     placement.position = math::vec3{position.x, position.y, 1.0f};
                     placement.rotation = body->GetAngle();
+
+                    entitiesToBeUpdated.push_back(entity);
                 }
             }
 
@@ -159,6 +161,10 @@ namespace oni {
                     carTireFLPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
                                                                                    math::toRadians(90.0f));
                 }
+            }
+
+            for (auto &&entity: entitiesToBeUpdated) {
+                manager.accommodate<components::TagNewlyCreated>(entity);
             }
 
         }

@@ -50,12 +50,12 @@ namespace oni {
                 }
 
                 template<class Component>
-                Component &get(common::EntityID entityID) noexcept {
+                Component &get(EntityType entityID) noexcept {
                     return mView.template get<Component>(entityID);
                 }
 
                 template<class Component>
-                const Component &get(common::EntityID entityID) const noexcept {
+                const Component &get(EntityType entityID) const noexcept {
                     return mView.template get<Component>(entityID);
                 }
 
@@ -72,8 +72,8 @@ namespace oni {
 
             ~EntityManager() = default;
 
-            common::EntityID create() {
-                common::EntityID result{};
+            EntityType create() {
+                EntityType result{};
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     result = mRegistry->create();
@@ -91,7 +91,7 @@ namespace oni {
             }
 
             template<class Component, class... Args>
-            void assign(common::EntityID entityID, Args &&... args) {
+            void assign(EntityType entityID, Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
@@ -113,7 +113,7 @@ namespace oni {
 
 
             template<class Component>
-            void remove(common::EntityID entityID) {
+            void remove(EntityType entityID) {
                 mRegistry->remove<Component>(entityID);
             }
 
@@ -122,22 +122,26 @@ namespace oni {
                 mRegistry->reset<Component>();
             }
 
-            void destroy(common::EntityID entityID) {
+            void destroy(EntityType entityID) {
                 mRegistry->destroy(entityID);
             }
 
             template<class Component>
-            Component &get(common::EntityID entityID) noexcept {
+            Component &get(EntityType entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
             }
 
+            EntityType map(EntityType entityID) {
+                return mLoader->map(entityID);
+            }
+
 /*            template<class Component>
-            const Component &get(common::EntityID entityID) noexcept {
+            const Component &get(EntityType entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
             }*/
 
             template<class Component>
-            bool has(common::EntityID entityID) noexcept {
+            bool has(EntityType entityID) noexcept {
                 bool result{false};
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
@@ -147,27 +151,33 @@ namespace oni {
             }
 
             template<class Component, class... Args>
-            void replace(common::EntityID entityID, Args &&... args) {
+            void replace(EntityType entityID, Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
                 }
             }
 
-            template<class Archive, class ...ArchiveComponents>
-            void restore(Archive &archive, bool delta) {
-                if (delta) {
-                    mLoader->entities(archive).template component<ArchiveComponents...>(archive)
-                            .orphans().shrink();
-                } else {
+            template<class Component, class... Args>
+            void accommodate(EntityType entityID, Args &&... args) {
+                {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
-                    mRegistry->restore().entities(archive).template component<ArchiveComponents...>(archive);
+                    mRegistry->accommodate<Component>(entityID, std::forward<Args>(args)...);
+                }
+            }
+
+            template<class Archive, class... ArchiveComponents, class... Type, class... Member>
+            void restore(Archive &archive, Member Type::*... member) {
+                {
+                    mLoader->entities(archive).template component<ArchiveComponents...>(archive, member...)
+                            .orphans().shrink();
                 }
             }
 
             template<class Archive, class ...ArchiveComponents>
             void snapshot(Archive &archive, bool delta) {
                 if (delta) {
+                    // TODO: Rather not have this class know about specific components!
                     auto view = mRegistry->view<components::TagNewlyCreated>();
                     if (!view.empty()) {
                         mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,

@@ -66,10 +66,10 @@ namespace oni {
                         components::TagTextureShaded,
                         components::TagColorShaded,
                         components::TagStatic
-                >(input,
-                  // NOTE: Car entity keeps a reference to tire entities but those ids might change during
-                  // client-server sync process, this will make sure that the client side does the correct
-                  // mapping from client side tire ids to server side ids for each Car.
+                >(delta, input,
+                        // NOTE: Car entity keeps a reference to tire entities but those ids might change during
+                        // client-server sync process, this will make sure that the client side does the correct
+                        // mapping from client side tire ids to server side ids for each Car.
                   &components::Car::tireFR,
                   &components::Car::tireFL,
                   &components::Car::tireRR,

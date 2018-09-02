@@ -149,10 +149,10 @@ namespace oni {
             car.tireRR = carTireRREntity;
             car.tireRL = carTireRLEntity;
 
-            mClientDataManager->addNewClient(clientID, carEntity);
-
             mServer->sendCarEntityID(carEntity, clientID);
             mServer->sendEntitiesAll(*mEntityManager);
+
+            mClientDataManager->addNewClient(clientID, carEntity);
         }
 
         void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {

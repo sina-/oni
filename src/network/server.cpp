@@ -76,12 +76,6 @@ namespace oni {
             std::string data = entities::serialize(manager, false);
             auto type = PacketType::ENTITIES_ALL;
 
-            {
-                auto lock = manager.scopedLock();
-                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::TagNewlyCreated>();
-            }
-
             if (data.size() > 1) {
                 broadcast(type, data);
             }
@@ -94,7 +88,7 @@ namespace oni {
             {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::TagNewlyCreated>();
+                manager.reset<components::TagNeedsComponentSync>();
             }
 
             if (data.size() > 1) {

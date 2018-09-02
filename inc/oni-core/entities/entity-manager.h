@@ -90,6 +90,25 @@ namespace oni {
                 return result;
             }
 
+            template<class Component>
+            size_t size() noexcept {
+                size_t result{0};
+                {
+                    auto lock = scopedLock();
+                    result = mRegistry->size<Component>();
+                }
+                return result;
+            }
+
+            size_t alive() noexcept {
+                size_t result{0};
+                {
+                    auto lock = scopedLock();
+                    result = mRegistry->alive();
+                }
+                return result;
+            }
+
             template<class Component, class... Args>
             void assign(EntityType entityID, Args &&... args) {
                 {
@@ -167,10 +186,16 @@ namespace oni {
             }
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
-            void restore(Archive &archive, Member Type::*... member) {
-                {
-                    mLoader->entities(archive).template component<ArchiveComponents...>(archive, member...)
+            void restore(bool delta, Archive &archive, Member Type::*... member) {
+                // TODO: There are at least three distinct restoration: Full snapshot restore where all entities and
+                // components are restored. Components update where there are no new entities and only few components of
+                // already existing entities are updated. New entities where few new entities are added to the registry
+                // along with their components.
+                if (delta) {
+                    mLoader->template component<ArchiveComponents...>(archive, member...)
                             .orphans().shrink();
+                } else {
+                    mLoader->entities(archive).template component<ArchiveComponents...>(archive, member...);
                 }
             }
 
@@ -178,11 +203,11 @@ namespace oni {
             void snapshot(Archive &archive, bool delta) {
                 if (delta) {
                     // TODO: Rather not have this class know about specific components!
-                    auto view = mRegistry->view<components::TagNewlyCreated>();
+                    auto view = mRegistry->view<components::TagNeedsComponentSync>();
                     if (!view.empty()) {
-                        mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
-                                                                                                         view.cbegin(),
-                                                                                                         view.cend());
+                        mRegistry->snapshot().template component<ArchiveComponents...>(archive,
+                                                                                       view.cbegin(),
+                                                                                       view.cend());
                     }
                 } else {
                     mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);

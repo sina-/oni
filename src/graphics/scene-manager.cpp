@@ -261,7 +261,7 @@ namespace oni {
                     // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
                     // separately for each entity and each time a physics system updates an entity it will automatically
                     // recalculate PlacementWorld for the entity and all its child entities.
-                    // TODO: Instead of calling .has(), slow opertaion, split up dynamic entity rendering into two
+                    // TODO: Instead of calling .has(), slow operation, split up dynamic entity rendering into two
                     // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
                     if (manager.has<components::TransformParent>(entity)) {
                         const auto &transformParent = manager.get<components::TransformParent>(entity);

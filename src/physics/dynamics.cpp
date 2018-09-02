@@ -164,7 +164,7 @@ namespace oni {
             }
 
             for (auto &&entity: entitiesToBeUpdated) {
-                manager.accommodate<components::TagNewlyCreated>(entity);
+                manager.accommodate<components::TagNeedsComponentSync>(entity);
             }
 
         }

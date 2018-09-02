@@ -2,12 +2,12 @@
 
 namespace oni {
     namespace components {
-        struct TagNewlyCreated {
+        struct TagNeedsComponentSync {
             template<class Archive>
             void serialize(Archive &archive) {}
         };
 
-        struct TagUpdatedEntity {
+        struct TagNeedsEntitySync {
             template<class Archive>
             void serialize(Archive &archive) {}
         };

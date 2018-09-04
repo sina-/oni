@@ -192,10 +192,9 @@ namespace oni {
                 // already existing entities are updated. New entities where few new entities are added to the registry
                 // along with their components.
                 if (delta) {
-                    mLoader->template component<ArchiveComponents...>(archive, member...)
-                            .orphans().shrink();
+                    mLoader->template component<ArchiveComponents...>(true, archive, member...).orphans();
                 } else {
-                    mLoader->entities(archive).template component<ArchiveComponents...>(archive, member...);
+                    mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
                 }
             }
 

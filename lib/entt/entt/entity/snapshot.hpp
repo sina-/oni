@@ -596,14 +596,20 @@ public:
      * @return A non-const reference to this loader.
      */
     template<typename... Component, typename Archive, typename... Type, typename... Member>
-    ContinuousLoader & component(Archive &archive, Member Type:: *... member) {
+    ContinuousLoader & component(bool keepOld, Archive &archive, Member Type:: *... member) {
         auto apply = [this](const auto entity, const auto &component) {
             registry.template accommodate<std::decay_t<decltype(component)>>(entity, component);
         };
 
         using accumulator_type = int[];
-        accumulator_type accumulator = { 0, (reset<Component>(), assign<Component>(archive, apply, member...), 0)... };
-        (void)accumulator;
+        if(keepOld){
+            accumulator_type accumulator = { 0, (assign<Component>(archive, apply, member...), 0)... };
+            (void)accumulator;
+        }
+        else {
+            accumulator_type accumulator = { 0, (reset<Component>(), assign<Component>(archive, apply, member...), 0)... };
+            (void)accumulator;
+        }
         return *this;
     }
 

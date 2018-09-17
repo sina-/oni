@@ -69,9 +69,14 @@ namespace oni {
                     mPacketHandlers[PacketType::ENTITIES_ALL](peerID, dataString);
                     break;
                 }
-                case (PacketType::ENTITIES_DELTA): {
+                case (PacketType::COMPONENTS_UPDATE): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::ENTITIES_DELTA](peerID, dataString);
+                    mPacketHandlers[PacketType::COMPONENTS_UPDATE](peerID, dataString);
+                    break;
+                }
+                case (PacketType::NEW_ENTITIES): {
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::NEW_ENTITIES](peerID, dataString);
                     break;
                 }
                 default: {

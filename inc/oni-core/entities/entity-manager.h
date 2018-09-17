@@ -186,30 +186,55 @@ namespace oni {
             }
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
-            void restore(bool delta, Archive &archive, Member Type::*... member) {
-                // TODO: There are at least three distinct restoration: Full snapshot restore where all entities and
-                // components are restored. Components update where there are no new entities and only few components of
-                // already existing entities are updated. New entities where few new entities are added to the registry
-                // along with their components.
-                if (delta) {
-                    mLoader->template component<ArchiveComponents...>(true, archive, member...).orphans();
-                } else {
-                    mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
+            void restore(components::LifeTime lifeTime, Archive &archive, Member Type::*... member) {
+                switch (lifeTime) {
+                    case components::LifeTime::NEEDS_FULL_SYNC: {
+                        mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
+                        break;
+                    }
+                    case components::LifeTime::NEEDS_COMPONENT_SYNC: {
+                        mLoader->template component<ArchiveComponents...>(true, archive, member...).orphans();
+                        break;
+                    }
+                    case components::LifeTime::NEEDS_ENTITY_SYNC: {
+                        mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                    }
                 }
             }
 
             template<class Archive, class ...ArchiveComponents>
-            void snapshot(Archive &archive, bool delta) {
-                if (delta) {
-                    // TODO: Rather not have this class know about specific components!
-                    auto view = mRegistry->view<components::TagNeedsComponentSync>();
-                    if (!view.empty()) {
-                        mRegistry->snapshot().template component<ArchiveComponents...>(archive,
-                                                                                       view.cbegin(),
-                                                                                       view.cend());
+            void snapshot(Archive &archive, components::LifeTime lifeTime) {
+                switch (lifeTime) {
+                    case components::LifeTime::NEEDS_COMPONENT_SYNC: {
+                        // TODO: Rather not have this class know about specific components!
+                        auto view = mRegistry->view<components::TagNeedsComponentSync>();
+                        if (!view.empty()) {
+                            mRegistry->snapshot().template component<ArchiveComponents...>(archive,
+                                                                                           view.cbegin(),
+                                                                                           view.cend());
+                        }
+                        break;
                     }
-                } else {
-                    mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
+                    case components::LifeTime::NEEDS_ENTITY_SYNC: {
+                        auto view = mRegistry->view<components::TagNeedsEntitySync>();
+                        if (!view.empty()) {
+                            mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
+                                                                                           view.cbegin(),
+                                                                                           view.cend());
+                        }
+                        break;
+                    }
+                    case components::LifeTime::NEEDS_FULL_SYNC: {
+                        mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                    }
                 }
             }
 

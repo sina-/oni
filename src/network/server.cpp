@@ -73,7 +73,7 @@ namespace oni {
         }
 
         void Server::sendEntitiesAll(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, false);
+            std::string data = entities::serialize(manager, components::LifeTime::NEEDS_FULL_SYNC);
             auto type = PacketType::ENTITIES_ALL;
 
             if (data.size() > 1) {
@@ -81,14 +81,29 @@ namespace oni {
             }
         }
 
-        void Server::sendEntitiesDelta(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, true);
-            auto type = PacketType::ENTITIES_DELTA;
+        void Server::sendComponentsUpdate(entities::EntityManager &manager) {
+            std::string data = entities::serialize(manager, components::LifeTime::NEEDS_COMPONENT_SYNC);
+            auto type = PacketType::COMPONENTS_UPDATE;
 
             {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
                 manager.reset<components::TagNeedsComponentSync>();
+            }
+
+            if (data.size() > 1) {
+                broadcast(type, data);
+            }
+        }
+
+        void Server::sendNewEntities(entities::EntityManager &manager) {
+            std::string data = entities::serialize(manager, components::LifeTime::NEEDS_ENTITY_SYNC);
+            auto type = PacketType::NEW_ENTITIES;
+
+            {
+                auto lock = manager.scopedLock();
+                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
+                manager.reset<components::TagNeedsEntitySync>();
             }
 
             if (data.size() > 1) {

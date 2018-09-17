@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/components/entity-lifetime.h>
 
 namespace oni {
     namespace entities {
@@ -31,8 +32,8 @@ namespace oni {
             return storage.str();
         }*/
 
-        std::string serialize(entities::EntityManager &manager, bool delta);
+        std::string serialize(entities::EntityManager &manager, components::LifeTime lifeTime);
 
-        void deserialize(oni::entities::EntityManager &manager, const std::string &data, bool delta);
+        void deserialize(oni::entities::EntityManager &manager, const std::string &data, components::LifeTime lifeTime);
     }
 }

@@ -26,7 +26,9 @@ namespace oni {
 
             void sendEntitiesAll(entities::EntityManager &manager);
 
-            void sendEntitiesDelta(entities::EntityManager &manager);
+            void sendComponentsUpdate(entities::EntityManager &manager);
+            
+            void sendNewEntities(entities::EntityManager &manager);
 
             void sendCarEntityID(common::EntityID entityID, const common::PeerID& id);
 

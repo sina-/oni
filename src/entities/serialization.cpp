@@ -14,7 +14,7 @@
 namespace oni {
     namespace entities {
 
-        std::string serialize(entities::EntityManager &manager, bool delta) {
+        std::string serialize(entities::EntityManager &manager, components::LifeTime lifeTime) {
             std::stringstream storage{};
             {
                 auto lock = manager.scopedLock();
@@ -38,13 +38,13 @@ namespace oni {
                         components::TagTextureShaded,
                         components::TagColorShaded,
                         components::TagStatic
-                >(output, delta);
+                >(output, lifeTime);
             }
 
             return storage.str();
         }
 
-        void deserialize(EntityManager &manager, const std::string &data, bool delta) {
+        void deserialize(EntityManager &manager, const std::string &data, components::LifeTime lifeTime) {
             std::stringstream storage;
             storage.str(data);
 
@@ -66,7 +66,7 @@ namespace oni {
                         components::TagTextureShaded,
                         components::TagColorShaded,
                         components::TagStatic
-                >(delta, input,
+                >(lifeTime, input,
                         // NOTE: Car entity keeps a reference to tire entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct
                         // mapping from client side tire ids to server side ids for each Car.

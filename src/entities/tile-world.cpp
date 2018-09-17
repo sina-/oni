@@ -81,7 +81,7 @@ namespace oni {
                     const auto packedIndices = math::packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
 
-                        // generateTilesForChunk(manager, i, j);
+                        generateTilesForChunk(manager, i, j);
 
                         // NOTE: Just for debugging
                         auto R = (std::rand() % 255) / 255.0f;

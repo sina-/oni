@@ -12,7 +12,8 @@ namespace oni {
             CAR_ENTITY_ID = 4,
             CLIENT_INPUT = 5,
             ENTITIES_ALL = 6,
-            ENTITIES_DELTA = 7,
+            COMPONENTS_UPDATE = 7,
+            NEW_ENTITIES = 8,
         };
     }
 }

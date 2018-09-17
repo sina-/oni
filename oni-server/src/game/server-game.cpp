@@ -176,7 +176,8 @@ namespace oni {
             mServer->poll();
 
             if(mClientDataManager->numClients()){
-                mServer->sendEntitiesDelta(*mEntityManager);
+                mServer->sendComponentsUpdate(*mEntityManager);
+                mServer->sendNewEntities(*mEntityManager);
             }
         }
 

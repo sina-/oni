@@ -19,7 +19,7 @@
 
 // TODO: This shouldn't be included here!
 #include <oni-core/graphics/debug-draw-box2d.h>
-#include <oni-core/components/entity-lifetime.h>
+#include <oni-core/components/world-data-status.h>
 
 
 namespace oni {
@@ -73,8 +73,8 @@ namespace oni {
         }
 
         void Server::sendEntitiesAll(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::LifeTime::NEEDS_FULL_SYNC);
-            auto type = PacketType::ENTITIES_ALL;
+            std::string data = entities::serialize(manager, components::WorldDataStatus::REPLACE_ALL_ENTITIES);
+            auto type = PacketType::REPLACE_ALL_ENTITIES;
 
             if (data.size() > 1) {
                 broadcast(type, data);
@@ -82,29 +82,39 @@ namespace oni {
         }
 
         void Server::sendComponentsUpdate(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::LifeTime::NEEDS_COMPONENT_SYNC);
-            auto type = PacketType::COMPONENTS_UPDATE;
-
-            {
-                auto lock = manager.scopedLock();
-                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::TagNeedsComponentSync>();
-            }
+            std::string data = entities::serialize(manager, components::WorldDataStatus::ONLY_COMPONENT_UPDATE);
+            auto type = PacketType::ONLY_COMPONENT_UPDATE;
 
             if (data.size() > 1) {
                 broadcast(type, data);
             }
-        }
-
-        void Server::sendNewEntities(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::LifeTime::NEEDS_ENTITY_SYNC);
-            auto type = PacketType::NEW_ENTITIES;
 
             {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::TagNeedsEntitySync>();
+                manager.reset<components::TagOnlyComponentUpdate>();
             }
+        }
+
+        void Server::sendNewEntities(entities::EntityManager &manager) {
+            std::string data = entities::serialize(manager, components::WorldDataStatus::ADD_NEW_ENTITIES);
+            auto type = PacketType::ADD_NEW_ENTITIES;
+
+            if (data.size() > 1) {
+                broadcast(type, data);
+            }
+
+            {
+                auto lock = manager.scopedLock();
+                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
+                manager.reset<components::TagAddNewEntities>();
+            }
+        }
+
+        void Server::sendRemainingEntitiesAfterDelete(entities::EntityManager &manager) {
+            //std::string data = entities::serialize(manager, components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES);
+            auto type = PacketType::DESTROYED_ENTITIES;
+            auto data = serialize<std::vector<common::EntityID>>(manager.getDeletedEntities());
 
             if (data.size() > 1) {
                 broadcast(type, data);

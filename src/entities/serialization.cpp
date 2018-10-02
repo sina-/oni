@@ -8,13 +8,13 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
 #include <oni-core/components/visual.h>
-#include <oni-core/components/entity-lifetime.h>
+#include <oni-core/components/world-data-status.h>
 
 
 namespace oni {
     namespace entities {
 
-        std::string serialize(entities::EntityManager &manager, components::LifeTime lifeTime) {
+        std::string serialize(entities::EntityManager &manager, components::WorldDataStatus lifeTime) {
             std::stringstream storage{};
             {
                 auto lock = manager.scopedLock();
@@ -44,7 +44,7 @@ namespace oni {
             return storage.str();
         }
 
-        void deserialize(EntityManager &manager, const std::string &data, components::LifeTime lifeTime) {
+        void deserialize(EntityManager &manager, const std::string &data, components::WorldDataStatus lifeTime) {
             std::stringstream storage;
             storage.str(data);
 

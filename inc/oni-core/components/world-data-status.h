@@ -2,18 +2,18 @@
 
 namespace oni {
     namespace components {
-        enum class LifeTime {
-            NEEDS_COMPONENT_SYNC = 1,
-            NEEDS_ENTITY_SYNC = 2,
-            NEEDS_FULL_SYNC = 3,
+        enum class WorldDataStatus {
+            ONLY_COMPONENT_UPDATE = 1,
+            ADD_NEW_ENTITIES = 2,
+            REPLACE_ALL_ENTITIES = 3,
         };
 
-        struct TagNeedsComponentSync {
+        struct TagOnlyComponentUpdate {
             template<class Archive>
             void serialize(Archive &archive) {}
         };
 
-        struct TagNeedsEntitySync {
+        struct TagAddNewEntities {
             template<class Archive>
             void serialize(Archive &archive) {}
         };

@@ -30,12 +30,14 @@ namespace oni {
             
             void sendNewEntities(entities::EntityManager &manager);
 
+            void sendRemainingEntitiesAfterDelete(entities::EntityManager &manager);
+
             void sendCarEntityID(common::EntityID entityID, const common::PeerID& id);
 
         private:
             Server();
 
-            void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
+            void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) override;
 
             void postConnectHook(const ENetEvent *event) override;
 

@@ -175,9 +175,23 @@ namespace oni {
         void ServerGame::_poll() {
             mServer->poll();
 
-            if(mClientDataManager->numClients()){
+            if (mClientDataManager->numClients()) {
                 mServer->sendComponentsUpdate(*mEntityManager);
                 mServer->sendNewEntities(*mEntityManager);
+
+                bool needToSendDeleted = false;
+                {
+                    auto lock = mEntityManager->scopedLock();
+                    needToSendDeleted = mEntityManager->numberOfDeletedEntities() > 0;
+                }
+                if (needToSendDeleted) {
+                    mServer->sendRemainingEntitiesAfterDelete(*mEntityManager);
+                    {
+                        auto lock = mEntityManager->scopedLock();
+                        // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
+                        mEntityManager->clearDeletedEntitiesList();
+                    }
+                }
             }
         }
 

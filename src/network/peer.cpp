@@ -1,5 +1,7 @@
 #include <oni-core/network/peer.h>
 
+#include <enet/enet.h>
+
 #include <cstring>
 
 namespace oni {

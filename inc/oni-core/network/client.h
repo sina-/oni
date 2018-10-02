@@ -29,7 +29,7 @@ namespace oni {
             void sendInput(const io::Input *input);
 
         private:
-            void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) override;
+            void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) override;
 
             void postConnectHook(const ENetEvent *event) override;
 

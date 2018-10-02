@@ -8,7 +8,7 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/entity-lifetime.h>
+#include <oni-core/components/world-data-status.h>
 
 
 namespace oni {
@@ -67,7 +67,7 @@ namespace oni {
             EntityManager() {
                 mRegistry = std::make_unique<entt::DefaultRegistry>();
                 mLoader = std::make_unique<entt::ContinuousLoader<EntityType>>(*mRegistry);
-                mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
+                //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
             }
 
             ~EntityManager() = default;
@@ -186,20 +186,24 @@ namespace oni {
             }
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
-            void restore(components::LifeTime lifeTime, Archive &archive, Member Type::*... member) {
+            void restore(components::WorldDataStatus lifeTime, Archive &archive, Member Type::*... member) {
                 switch (lifeTime) {
-                    case components::LifeTime::NEEDS_FULL_SYNC: {
+                    case components::WorldDataStatus::REPLACE_ALL_ENTITIES: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
                         break;
                     }
-                    case components::LifeTime::NEEDS_COMPONENT_SYNC: {
-                        mLoader->template component<ArchiveComponents...>(true, archive, member...).orphans();
+                    case components::WorldDataStatus::ONLY_COMPONENT_UPDATE: {
+                        mLoader->template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
-                    case components::LifeTime::NEEDS_ENTITY_SYNC: {
+                    case components::WorldDataStatus::ADD_NEW_ENTITIES: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
+/*                    case components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES: {
+                        mLoader->entities(archive);
+                        break;
+                    }*/
                     default: {
                         assert(false);
                     }
@@ -207,11 +211,11 @@ namespace oni {
             }
 
             template<class Archive, class ...ArchiveComponents>
-            void snapshot(Archive &archive, components::LifeTime lifeTime) {
+            void snapshot(Archive &archive, components::WorldDataStatus lifeTime) {
                 switch (lifeTime) {
-                    case components::LifeTime::NEEDS_COMPONENT_SYNC: {
+                    case components::WorldDataStatus::ONLY_COMPONENT_UPDATE: {
                         // TODO: Rather not have this class know about specific components!
-                        auto view = mRegistry->view<components::TagNeedsComponentSync>();
+                        auto view = mRegistry->view<components::TagOnlyComponentUpdate>();
                         if (!view.empty()) {
                             mRegistry->snapshot().template component<ArchiveComponents...>(archive,
                                                                                            view.cbegin(),
@@ -219,19 +223,23 @@ namespace oni {
                         }
                         break;
                     }
-                    case components::LifeTime::NEEDS_ENTITY_SYNC: {
-                        auto view = mRegistry->view<components::TagNeedsEntitySync>();
+                    case components::WorldDataStatus::ADD_NEW_ENTITIES: {
+                        auto view = mRegistry->view<components::TagAddNewEntities>();
                         if (!view.empty()) {
                             mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
-                                                                                           view.cbegin(),
-                                                                                           view.cend());
+                                                                                                             view.cbegin(),
+                                                                                                             view.cend());
                         }
                         break;
                     }
-                    case components::LifeTime::NEEDS_FULL_SYNC: {
+                    case components::WorldDataStatus::REPLACE_ALL_ENTITIES: {
                         mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
                         break;
                     }
+/*                    case components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES: {
+                        mRegistry->snapshot().entities(archive).template component<>(archive,);
+                        break;
+                    }*/
                     default: {
                         assert(false);
                     }
@@ -242,6 +250,21 @@ namespace oni {
                 return std::unique_lock<std::mutex>(mMutex);
             }
 
+            void addDeletedEntity(EntityType entity) {
+                mDeletedEntities.push_back(entity);
+            }
+
+            size_t numberOfDeletedEntities() {
+                return mDeletedEntities.size();
+            }
+
+            void clearDeletedEntitiesList() {
+                mDeletedEntities.clear();
+            }
+
+            const std::vector<EntityType> &getDeletedEntities() const {
+                return mDeletedEntities;
+            }
 /*
             void lock() {
                 mLock.lock();
@@ -256,7 +279,9 @@ namespace oni {
             std::unique_ptr<entt::Registry<EntityType>> mRegistry{};
             std::unique_ptr<entt::ContinuousLoader<EntityType>> mLoader{};
             std::mutex mMutex{};
-            std::unique_lock<std::mutex> mLock{};
+            //std::unique_lock<std::mutex> mLock{};
+
+            std::vector<EntityType> mDeletedEntities{};
         };
 
     }

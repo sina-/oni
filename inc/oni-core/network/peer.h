@@ -4,7 +4,6 @@
 #include <sstream>
 #include <map>
 
-#include <enet/enet.h>
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
@@ -23,6 +22,9 @@ typedef struct _ENetPeer ENetPeer;
 
 struct _ENetPacket;
 typedef struct _ENetPacket ENetPacket;
+
+struct _ENetEvent;
+typedef struct _ENetEvent ENetEvent;
 
 namespace oni {
     namespace network {
@@ -65,7 +67,7 @@ namespace oni {
             void registerPostDisconnectHook(std::function<void(const common::PeerID&)> &&handler);
 
         protected:
-            virtual void handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) = 0;
+            virtual void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) = 0;
 
             common::PeerID getPeerID(const ENetAddress &address) const;
 

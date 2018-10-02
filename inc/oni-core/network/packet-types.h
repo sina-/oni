@@ -11,9 +11,12 @@ namespace oni {
             SETUP_SESSION = 3,
             CAR_ENTITY_ID = 4,
             CLIENT_INPUT = 5,
-            ENTITIES_ALL = 6,
-            COMPONENTS_UPDATE = 7,
-            NEW_ENTITIES = 8,
+
+            REPLACE_ALL_ENTITIES = 6,
+            ONLY_COMPONENT_UPDATE = 7,
+            ADD_NEW_ENTITIES = 8,
+            DESTROYED_ENTITIES = 9,
+
         };
     }
 }

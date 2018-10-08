@@ -16,7 +16,6 @@ namespace oni {
                 : mTickFrequency(tickFreq) {
             b2Vec2 gravity(0.0f, 0.0f);
             mPhysicsWorld = std::make_unique<b2World>(gravity);
-            mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
         }
 
         void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) {
@@ -181,6 +180,7 @@ namespace oni {
 
         void Dynamics::setDebugDraw(std::unique_ptr<graphics::DebugDrawBox2D> debugDraw) {
             mDebugDraw = std::move(debugDraw);
+            mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
         }
 
     }

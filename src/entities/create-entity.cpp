@@ -156,9 +156,6 @@ namespace oni {
                                                    const math::vec2 &size,
                                                    const math::vec3 &positionInWorld) {
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-            auto entityStatic = components::TagStatic{};
-            auto entityTextureShaded = components::TagTextureShaded{};
-
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
             b2BodyDef bodyDef;
@@ -169,14 +166,17 @@ namespace oni {
             bodyDef.type = b2_staticBody;
             auto *body = physicsWorld.CreateBody(&bodyDef);
 
-            auto boxShape = std::make_unique<b2PolygonShape>();
-            boxShape->SetAsBox(size.x / 2.0f, size.y / 2.0f);
-            body->CreateFixture(boxShape.get(), 0.0f);
+            auto boxShape = b2PolygonShape();
+            boxShape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
+            body->CreateFixture(&boxShape, 0.0f);
 
             // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
             // There is a way to request it from b2World?
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
+
+            auto entityStatic = components::TagStatic{};
+            auto entityTextureShaded = components::TagTextureShaded{};
 
             auto lock = manager.scopedLock();
             auto entity = manager.create();
@@ -235,18 +235,18 @@ namespace oni {
             bodyDef.bullet = true;
             auto *body = physicsWorld.CreateBody(&bodyDef);
 
-            auto carShape = std::make_unique<b2PolygonShape>();
+            auto carShape = b2PolygonShape();
             auto carSize = entityShapeWorld.getSize();
-            carShape->SetAsBox(carSize.x / 2.0f, carSize.y / 2.0f);
+            carShape.SetAsBox(carSize.x / 2.0f, carSize.y / 2.0f);
 
             b2FixtureDef carCollisionSensorDef;
             carCollisionSensorDef.isSensor = true;
-            carCollisionSensorDef.shape = carShape.get();
+            carCollisionSensorDef.shape = &carShape;
             carCollisionSensorDef.density = 1.0f;
             carCollisionSensorDef.friction = 0.3;
 
             b2FixtureDef carFixtureDef;
-            carFixtureDef.shape = carShape.get();
+            carFixtureDef.shape = &carShape;
             carFixtureDef.density = 1.0f;
             carFixtureDef.friction = 0.3;
 

@@ -87,7 +87,7 @@ namespace oni {
                         auto R = (std::rand() % 255) / 255.0f;
                         auto G = (std::rand() % 255) / 255.0f;
                         auto B = (std::rand() % 255) / 255.0f;
-                        auto color = math::vec4{R, G, B, 0.0f};
+                        auto color = math::vec4{R, G, B, 0.5f};
                         auto size = math::vec2{mChunkSizeX, mChunkSizeY};
                         auto currentChunkIndices = components::ChunkIndices{i, j};
                         auto chunkPosition = chunkIndexToPosition(currentChunkIndices);
@@ -385,10 +385,10 @@ namespace oni {
         void TileWorld::generateTilesForChunk(entities::EntityManager &manager, common::int64 xChunkIndex,
                                               common::int64 yChunkIndex) {
 
-            auto firstTileX = xChunkIndex * mChunkSizeX - mChunkSizeX / 2;
-            auto lastTileX = xChunkIndex * mChunkSizeX + mChunkSizeX / 2;
-            auto firstTileY = yChunkIndex * mChunkSizeY - mChunkSizeY / 2;
-            auto lastTileY = yChunkIndex * mChunkSizeY + mChunkSizeY / 2;
+            auto firstTileX = xChunkIndex * mChunkSizeX;
+            auto lastTileX = xChunkIndex * mChunkSizeX + mChunkSizeX;
+            auto firstTileY = yChunkIndex * mChunkSizeY;
+            auto lastTileY = yChunkIndex * mChunkSizeY + mChunkSizeY;
 
             auto tileSize = math::vec2{mTileSizeX, mTileSizeY};
 

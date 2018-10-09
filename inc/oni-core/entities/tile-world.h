@@ -18,13 +18,6 @@ namespace oni {
 
             ~TileWorld();
 
-            /**
-             * Prepares the chunk in the given position and its neighbours
-             *
-             * @param position location in the world coordinate to tick
-             */
-            // TODO: Instead of a car the function should go through all the car entities in the world and
-            // update as needed.
             void tick(entities::EntityManager &manager, const math::vec2 &position);
 
         private:

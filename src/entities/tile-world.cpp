@@ -13,7 +13,8 @@ namespace oni {
 
     namespace entities {
 
-        TileWorld::TileWorld() :
+        TileWorld::TileWorld(entities::EntityManager &manager) :
+                mEntityManager{manager},
                 mTileSizeX{10}, mTileSizeY{10},
                 //mHalfTileSizeX{mTileSizeX / 2.0f},
                 //mHalfTileSizeY{mTileSizeY / 2.0f},
@@ -44,6 +45,11 @@ namespace oni {
             mWestToEast = "resources/images/road/1/west-to-east.png";
             mWestToNorth = "resources/images/road/1/west-to-north.png";
             mWestToSouth = "resources/images/road/1/west-to-south.png";
+
+            mRaceTrack1 = "resources/images/race-track/2/1.png";
+            mRaceTrack2 = "resources/images/race-track/2/2.png";
+            mRaceTrack3 = "resources/images/race-track/2/3.png";
+            mRaceTrack4 = "resources/images/race-track/2/4.png";
         }
 
         TileWorld::~TileWorld() = default;
@@ -63,11 +69,11 @@ namespace oni {
             return math::vec2{};
         }
 
-        void TileWorld::tick(entities::EntityManager &manager, const math::vec2 &position) {
-            tickChunk(manager, position);
+        void TileWorld::tick(const math::vec2 &position) {
+            tickChunk(position);
         }
 
-        void TileWorld::tickChunk(entities::EntityManager &manager, const math::vec2 &position) {
+        void TileWorld::tickChunk(const math::vec2 &position) {
             const auto chunkIndices = chunkPositionToIndex(position);
 
             // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
@@ -81,12 +87,23 @@ namespace oni {
                     const auto packedIndices = math::packIntegers(i, j);
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
 
-                        generateTilesForChunk(manager, i, j);
+                        auto chunkIndex = components::ChunkIndices{i, j};
+                        auto positionInWorld = chunkIndexToPosition(chunkIndex);
+                        auto roadID = createStaticEntity(manager, math::vec2{mChunkSizeX, mChunkSizeY},
+                                                         math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
+                        mPackedRoadChunkIndicesToEntity.emplace(packedIndices, roadID);
+
+                        auto texture = components::Texture{};
+                        texture.filePath = mRaceTrack1;
+                        texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
+                        manager.assign<components::Texture>(roadID, texture);
+
+                        // generateTilesForChunk(manager, i, j);
 
                         // NOTE: Just for debugging
-                        auto R = (std::rand() % 255) / 255.0f;
-                        auto G = (std::rand() % 255) / 255.0f;
-                        auto B = (std::rand() % 255) / 255.0f;
+/*                        auto R = 100;//(std::rand() % 255) / 255.0f;
+                        auto G = 100;//(std::rand() % 255) / 255.0f;
+                        auto B = 100;//(std::rand() % 255) / 255.0f;
                         auto color = math::vec4{R, G, B, 0.5f};
                         auto size = math::vec2{mChunkSizeX, mChunkSizeY};
                         auto currentChunkIndices = components::ChunkIndices{i, j};
@@ -99,13 +116,13 @@ namespace oni {
                         manager.assign<components::Chunk>(chunkID, chunk);
 
                         mPackedRoadChunkIndicesToEntity.emplace(packedIndices, chunkID);
+                        */
                     }
                 }
             }
         }
 
-        components::BoarderRoadTiles TileWorld::generateRoadsForChunk(entities::EntityManager &manager,
-                                                                      const components::ChunkIndices &chunkIndices) {
+        components::BoarderRoadTiles TileWorld::generateRoadsForChunk(const components::ChunkIndices &chunkIndices) {
             /**
              * 1. Check if there should be a road in this chunk
              * 2. Find the neighbours connected by road to current chunk
@@ -314,8 +331,7 @@ namespace oni {
             return boarderRoadTiles;
         }
 
-        void TileWorld::generateTexturedRoadTile(entities::EntityManager &manager,
-                                                 const components::ChunkIndices &chunkIndices,
+        void TileWorld::generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
                                                  const components::RoadTileIndices &roadTileIndices,
                                                  const std::string &texturePath) {
             const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
@@ -333,21 +349,20 @@ namespace oni {
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
         }
 
-        void TileWorld::generateRoadTile(entities::EntityManager &manager, const components::ChunkIndices &chunkIndices,
+        void TileWorld::generateRoadTile(const components::ChunkIndices &chunkIndices,
                                          const components::RoadTileIndices &roadTileIndices) {
             const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.5f};
             const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
 
             const auto positionInWorld = roadTileIndexToPosition(chunkIndices, roadTileIndices);
-            const auto roadID = createSpriteStaticEntity(manager, color, roadTileSize,
+            const auto roadID = createSpriteStaticEntity(color, roadTileSize,
                                                          math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
 
             const auto packedIndices = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
             mPackedRoadTileToEntity.emplace(packedIndices, roadID);
         }
 
-        void TileWorld::generateRoadTileBetween(entities::EntityManager &manager,
-                                                const components::ChunkIndices &chunkIndices,
+        void TileWorld::generateRoadTileBetween(const components::ChunkIndices &chunkIndices,
                                                 components::RoadTileIndices startingRoadTileIndices,
                                                 components::RoadTileIndices endingRoadTileIndices) {
             // Fill between tiles as if we are sweeping the Manhattan distance between them.
@@ -382,7 +397,7 @@ namespace oni {
             }
         }
 
-        void TileWorld::generateTilesForChunk(entities::EntityManager &manager, common::int64 xChunkIndex,
+        void TileWorld::generateTilesForChunk(common::int64 xChunkIndex,
                                               common::int64 yChunkIndex) {
 
             auto firstTileX = xChunkIndex * mChunkSizeX;

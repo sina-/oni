@@ -18,7 +18,6 @@ namespace oni {
 
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
             auto entityAppearance = components::Appearance{color};
-            auto entityColorShader = components::TagColorShaded{};
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
@@ -26,7 +25,7 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Appearance>(entity, entityAppearance);
-            manager.assign<components::TagColorShaded>(entity, entityColorShader);
+            manager.assign<components::TagColorShaded>(entity);
 
             return entity;
         }
@@ -38,8 +37,6 @@ namespace oni {
 
             auto entityAppearance = components::Appearance{color};
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-            auto entityStatic = components::TagStatic{};
-            auto entityColorShader = components::TagColorShaded{};
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
@@ -47,9 +44,9 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Appearance>(entity, entityAppearance);
-            manager.assign<components::TagColorShaded>(entity, entityColorShader);
+            manager.assign<components::TagColorShaded>(entity);
             // TODO: Is this the correct usage of tags?
-            manager.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagStatic>(entity);
             manager.assign<components::TagAddNewEntities>(entity);
 
             return entity;
@@ -66,8 +63,6 @@ namespace oni {
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
             auto entityShape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
-            auto entityDynamic = components::TagDynamic{};
-            auto entityTextureShaded = components::TagTextureShaded{};
 
             auto entityPlacement = components::Placement{positionInWorld, heading, scale};
 
@@ -75,8 +70,8 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShape);
             manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            manager.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::TagTextureShaded>(entity);
+            manager.assign<components::TagDynamic>(entity);
             manager.assign<components::TagAddNewEntities>(entity);
 
             return entity;
@@ -94,8 +89,6 @@ namespace oni {
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
             auto entityShape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
-            auto entityDynamic = components::TagDynamic{};
-            auto entityTextureShaded = components::TagTextureShaded{};
 
             auto entityPlacement = components::Placement{positionInWorld, heading, scale};
 
@@ -127,8 +120,8 @@ namespace oni {
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShape);
             manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            manager.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::TagTextureShaded>(entity);
+            manager.assign<components::TagDynamic>(entity);
             manager.assign<components::TagAddNewEntities>(entity);
 
             return entity;
@@ -137,16 +130,14 @@ namespace oni {
         common::EntityID createStaticEntity(EntityManager &manager, const math::vec2 &size,
                                             const math::vec3 &positionInWorld) {
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-            auto entityStatic = components::TagStatic{};
-            auto entityTextureShaded = components::TagTextureShaded{};
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
 
             auto lock = manager.scopedLock();
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            manager.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagTextureShaded>(entity);
+            manager.assign<components::TagStatic>(entity);
             manager.assign<components::TagAddNewEntities>(entity);
 
             return entity;
@@ -175,15 +166,12 @@ namespace oni {
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
 
-            auto entityStatic = components::TagStatic{};
-            auto entityTextureShaded = components::TagTextureShaded{};
-
             auto lock = manager.scopedLock();
             auto entity = manager.create();
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
-            manager.assign<components::TagStatic>(entity, entityStatic);
+            manager.assign<components::TagTextureShaded>(entity);
+            manager.assign<components::TagStatic>(entity);
             manager.assign<components::TagAddNewEntities>(entity);
 
             return entity;
@@ -207,9 +195,6 @@ namespace oni {
 
         common::EntityID
         createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const components::CarConfig &carConfig) {
-            auto entityVehicleTag = components::TagVehicle{};
-            auto entityTextureShaded = components::TagTextureShaded{};
-            auto entityDynamic = components::TagDynamic{};
 
             // TODO: This is wrong. Car vertex position must be in local space starting from (0, 0).
             // Model matrix should move the car to this coordinates.
@@ -263,11 +248,11 @@ namespace oni {
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::TagTextureShaded>(entity, entityTextureShaded);
+            manager.assign<components::TagTextureShaded>(entity);
             manager.assign<components::Car>(entity, car);
             manager.assign<components::CarConfig>(entity, carConfig);
-            manager.assign<components::TagVehicle>(entity, entityVehicleTag);
-            manager.assign<components::TagDynamic>(entity, entityDynamic);
+            manager.assign<components::TagVehicle>(entity);
+            manager.assign<components::TagDynamic>(entity);
             manager.assign<components::TagAddNewEntities>(entity);
 
             return entity;

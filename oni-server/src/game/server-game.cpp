@@ -18,13 +18,13 @@ namespace oni {
     namespace server {
         ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
             srand(static_cast<unsigned int>(time(nullptr)));
-
-            // TODO: probably better to wrap this in a class rather than using it naked, but doing so requires lot of
-            // coding and time that is better spent working on other features
             mEntityManager = std::make_unique<entities::EntityManager>();
 
             mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
-            mTileWorld = std::make_unique<entities::TileWorld>();
+            // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
+            // Maybe I can expose subset of functionalities I need from Dynamics class, maybe even better to call it
+            // physics class part of which is dynamics.
+            mTileWorld = std::make_unique<entities::TileWorld>(*mEntityManager, *mDynamics->getPhysicsWorld());
             mClientDataManager = std::make_unique<entities::ClientDataManager>();
 
             mServer = std::make_unique<network::Server>(&address, 16, 2);
@@ -67,6 +67,7 @@ namespace oni {
                                                                 truckPositionInWorld, 0.0f,
                                                                 math::vec3{1.0f, 1.0f, 0.0f});
             entities::assignTexture(*mEntityManager, mTruckEntity, truckTexture);
+
         }
 
         void ServerGame::setupSessionPacketHandler(const common::PeerID &clientID, const std::string &data) {
@@ -221,7 +222,7 @@ namespace oni {
             }
 
             for (const auto &pos: tickPositions) {
-                mTileWorld->tick(*mEntityManager, pos);
+                mTileWorld->tick(pos);
             }
         }
 

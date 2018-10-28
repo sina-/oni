@@ -60,6 +60,9 @@ namespace oni {
 
             void createWall(components::WallTilePosition position, common::int64 xTileIndex, common::int64 yTileIndex);
 
+            void createWall(const std::vector<components::WallTilePosition> &position,
+                            const std::vector<components::TileIndices> &indices);
+
         private:
             entities::EntityManager &mEntityManager;
             b2World &mPhysicsWorld;

@@ -54,7 +54,48 @@ namespace oni {
             mRaceTrack3 = "resources/images/race-track/2/3.png";
             mRaceTrack4 = "resources/images/race-track/2/4.png";
 
-            createWall(components::WallTilePosition::TOP, 1, 1);
+            // createWall(components::WallTilePosition::TOP, 1, 1);
+
+            std::vector<components::WallTilePosition> wallPosInTile{};
+            std::vector<components::TileIndices> wallTiles{};
+
+            wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+            wallTiles.emplace_back(components::TileIndices{-1, -1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+            wallTiles.emplace_back(components::TileIndices{0, -1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+            wallTiles.emplace_back(components::TileIndices{1, -1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+            wallTiles.emplace_back(components::TileIndices{1, -1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+            wallTiles.emplace_back(components::TileIndices{1, 0});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+            wallTiles.emplace_back(components::TileIndices{1, 1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+            wallTiles.emplace_back(components::TileIndices{1, 1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+            wallTiles.emplace_back(components::TileIndices{0, 1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+            wallTiles.emplace_back(components::TileIndices{-1, 1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+            wallTiles.emplace_back(components::TileIndices{-1, 1});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+            wallTiles.emplace_back(components::TileIndices{-1, 0});
+
+            wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+            wallTiles.emplace_back(components::TileIndices{-1, -1});
+
+            createWall(wallPosInTile, wallTiles);
         }
 
         TileWorld::~TileWorld() = default;
@@ -453,7 +494,7 @@ namespace oni {
                                    common::int64 yTileIndex) {
             b2Vec2 vs[4];
 
-            math::vec2 wallSize{};
+            math::vec2 wallTextureSize{};
             math::vec3 wallPositionInWorld{};
             float wallWidth = 0.5f;
 
@@ -461,29 +502,29 @@ namespace oni {
                 case components::WallTilePosition::TOP: {
                     vs[0].Set(xTileIndex * mTileSizeX, yTileIndex * mTileSizeY + mTileSizeY);
                     vs[1].Set(xTileIndex * mTileSizeX + mTileSizeX, yTileIndex * mTileSizeY + mTileSizeY);
-                    wallSize.x = mTileSizeX;
-                    wallSize.y = wallWidth;
+                    wallTextureSize.x = mTileSizeX;
+                    wallTextureSize.y = wallWidth;
                     break;
                 }
                 case components::WallTilePosition::RIGHT: {
                     vs[0].Set(xTileIndex * mTileSizeX + mTileSizeX, yTileIndex * mTileSizeY);
                     vs[1].Set(xTileIndex * mTileSizeX + mTileSizeX, yTileIndex * mTileSizeY + mTileSizeY);
-                    wallSize.x = wallWidth;
-                    wallSize.y = mTileSizeY;
+                    wallTextureSize.x = wallWidth;
+                    wallTextureSize.y = mTileSizeY;
                     break;
                 }
                 case components::WallTilePosition::BOTTOM: {
                     vs[0].Set(xTileIndex * mTileSizeX, yTileIndex * mTileSizeY);
                     vs[1].Set(xTileIndex * mTileSizeX + mTileSizeX, yTileIndex * mTileSizeY);
-                    wallSize.x = mTileSizeX;
-                    wallSize.y = wallWidth;
+                    wallTextureSize.x = mTileSizeX;
+                    wallTextureSize.y = wallWidth;
                     break;
                 }
                 case components::WallTilePosition::LEFT: {
                     vs[0].Set(xTileIndex * mTileSizeX, yTileIndex * mTileSizeY);
                     vs[1].Set(xTileIndex * mTileSizeX, yTileIndex * mTileSizeY + mTileSizeY);
-                    wallSize.x = wallWidth;
-                    wallSize.y = mTileSizeY;
+                    wallTextureSize.x = wallWidth;
+                    wallTextureSize.y = mTileSizeY;
                     break;
                 }
             }
@@ -491,7 +532,7 @@ namespace oni {
             wallPositionInWorld.x = vs[0].x;
             wallPositionInWorld.y = vs[0].y;
 
-            auto entityShapeWorld = components::Shape::fromSizeAndRotation(wallSize, 0);
+            auto entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0);
             physics::Transformation::localToWorldTranslation(wallPositionInWorld, entityShapeWorld);
 
             std::string wallTexturePath = "resources/images/wall/1/1.png";
@@ -517,10 +558,139 @@ namespace oni {
                 mEntityManager.assign<components::TagTextureShaded>(entity);
                 mEntityManager.assign<components::TagStatic>(entity);
                 mEntityManager.assign<components::TagAddNewEntities>(entity);
-
             }
 
             entities::assignTexture(mEntityManager, entity, wallTexture);
+        }
+
+        void TileWorld::createWall(const std::vector<components::WallTilePosition> &position,
+                                   const std::vector<components::TileIndices> &indices) {
+            assert(position.size() == indices.size());
+
+            size_t wallCount = indices.size();
+
+            std::vector<common::EntityID> wallEntities{};
+            wallEntities.reserve(wallCount);
+
+            b2Vec2 corners[wallCount * 2];
+            float wallWidth = 0.5f;
+
+            // TODO: I should create the corners in two pass, first one sets them up as requested by the tiles,
+            // second pass runs through each adjacent node and merges them if they are closer than 0.005 * 0.005 meters.
+            for (size_t i = 0; i < position.size(); ++i) {
+                const auto &wallPos = position[i];
+                const auto &xTileIndex = indices[i].x;
+                const auto &yTileIndex = indices[i].y;
+
+                math::vec2 wallTextureSize{};
+                components::Shape entityShapeWorld{};
+                math::vec3 wallPositionInWorld{};
+                std::string wallTexturePath{};
+
+                // Note the counter clockwise winding: bottom -> right -> top -> left
+                // Meaning right most node in bottom wall should be adjacent to bottom most node in right wall.
+                switch (wallPos) {
+                    case components::WallTilePosition::TOP: {
+                        // TODO: remove +wallWidth and -wallWidth once merging algorithm is in place so the walls are
+                        // created initially equal to tile width and height.
+                        corners[i * 2].Set(xTileIndex * mTileSizeX + mTileSizeX - wallWidth,
+                                           yTileIndex * mTileSizeY + mTileSizeY - wallWidth);
+                        corners[i * 2 + 1].Set(xTileIndex * mTileSizeX + wallWidth,
+                                               yTileIndex * mTileSizeY + mTileSizeY - wallWidth);
+
+                        wallTextureSize.x = mTileSizeX - wallWidth * 2;
+                        wallTextureSize.y = wallWidth;
+                        wallTexturePath = "resources/images/wall/1/horizontal.png";
+                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
+
+                        wallPositionInWorld.x = corners[i * 2 + 1].x;
+                        wallPositionInWorld.y = corners[i * 2 + 1].y;
+                        wallPositionInWorld.z = 1.0f;
+                        break;
+                    }
+                    case components::WallTilePosition::RIGHT: {
+                        corners[i * 2].Set(xTileIndex * mTileSizeX + mTileSizeX - wallWidth,
+                                           yTileIndex * mTileSizeY + wallWidth);
+                        corners[i * 2 + 1].Set(xTileIndex * mTileSizeX + mTileSizeX,
+                                               yTileIndex * mTileSizeY + mTileSizeY - wallWidth);
+
+                        wallTextureSize.x = wallWidth;
+                        wallTextureSize.y = mTileSizeY - wallWidth * 2;
+                        wallTexturePath = "resources/images/wall/1/vertical.png";
+                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
+
+                        wallPositionInWorld.x = corners[i * 2].x;
+                        wallPositionInWorld.y = corners[i * 2].y;
+                        wallPositionInWorld.z = 1.0f;
+                        break;
+                    }
+                    case components::WallTilePosition::BOTTOM: {
+                        corners[i * 2].Set(xTileIndex * mTileSizeX + wallWidth,
+                                           yTileIndex * mTileSizeY);
+                        corners[i * 2 + 1].Set(xTileIndex * mTileSizeX + mTileSizeX - wallWidth,
+                                               yTileIndex * mTileSizeY);
+
+                        wallTextureSize.x = mTileSizeX - wallWidth * 2;
+                        wallTextureSize.y = wallWidth;
+                        wallTexturePath = "resources/images/wall/1/horizontal.png";
+                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
+
+                        wallPositionInWorld.x = corners[i * 2].x;
+                        wallPositionInWorld.y = corners[i * 2].y;
+                        wallPositionInWorld.z = 1.0f;
+                        break;
+                    }
+                    case components::WallTilePosition::LEFT: {
+                        corners[i * 2].Set(xTileIndex * mTileSizeX,
+                                           yTileIndex * mTileSizeY + mTileSizeY - wallWidth);
+                        corners[i * 2 + 1].Set(xTileIndex * mTileSizeX,
+                                               yTileIndex * mTileSizeY + wallWidth);
+
+                        wallTextureSize.x = wallWidth;
+                        wallTextureSize.y = mTileSizeY - wallWidth * 2;
+                        wallTexturePath = "resources/images/wall/1/vertical.png";
+                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
+
+                        wallPositionInWorld.x = corners[i * 2 + 1].x;
+                        wallPositionInWorld.y = corners[i * 2 + 1].y;
+                        wallPositionInWorld.z = 1.0f;
+                        break;
+                    }
+                }
+
+                physics::Transformation::localToWorldTranslation(wallPositionInWorld, entityShapeWorld);
+
+                auto wallTexture = components::Texture{};
+                wallTexture.filePath = wallTexturePath;
+                wallTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+                // TODO: Move this into create-entity.cpp
+                common::EntityID entity{};
+                {
+                    auto lock = mEntityManager.scopedLock();
+                    entity = mEntityManager.create();
+                    mEntityManager.assign<components::Shape>(entity, entityShapeWorld);
+                    mEntityManager.assign<components::TagTextureShaded>(entity);
+                    mEntityManager.assign<components::TagStatic>(entity);
+                    mEntityManager.assign<components::TagAddNewEntities>(entity);
+
+                    wallEntities.push_back(entity);
+                }
+
+                entities::assignTexture(mEntityManager, entity, wallTexture);
+            }
+
+            b2ChainShape chainShape;
+            chainShape.CreateLoop(corners, wallCount * 2);
+
+            b2BodyDef bd;
+            auto chainBox = mPhysicsWorld.CreateBody(&bd);
+            chainBox->CreateFixture(&chainShape, 0.0f);
+
+            for (auto &&entity: wallEntities) {
+                auto entityPhysicalProps = components::PhysicalProperties{chainBox};
+                mEntityManager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
+            }
         }
 
         void TileWorld::generateBackgroundForChunk(common::int64 chunkX, common::int64 chunkY) {
@@ -539,6 +709,5 @@ namespace oni {
 
 
         }
-
     }
 }

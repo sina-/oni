@@ -47,11 +47,14 @@ namespace oni {
                         math::vec3{size.x, size.y, 1},
                         math::vec3{size.x, 0, 1}
                 };
-                if (!static_cast<common::uint16>(rotation)) {
-                    shape.vertexA -= math::vec3{size.x / 2, size.y / 2, 0.0f};
-                    shape.vertexB -= math::vec3{size.x / 2, size.y / 2, 0.0f};
-                    shape.vertexC -= math::vec3{size.x / 2, size.y / 2, 0.0f};
-                    shape.vertexD -= math::vec3{size.x / 2, size.y / 2, 0.0f};
+                // Cast to ignore float inpercision.
+                if (static_cast<common::uint16>(rotation)) {
+                    auto halfSize = math::vec3{size.x / 2.0f, size.y / 2.0f, 0.0f};
+
+                    shape.vertexA -= halfSize;
+                    shape.vertexB -= halfSize;
+                    shape.vertexC -= halfSize;
+                    shape.vertexD -= halfSize;
 
                     auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.0f, 0.0f, 1.0f});
                     shape.vertexA = rotationMat * shape.vertexA;
@@ -59,10 +62,10 @@ namespace oni {
                     shape.vertexC = rotationMat * shape.vertexC;
                     shape.vertexD = rotationMat * shape.vertexD;
 
-                    shape.vertexA += math::vec3{size.x / 2, size.y / 2, 0.0f};
-                    shape.vertexB += math::vec3{size.x / 2, size.y / 2, 0.0f};
-                    shape.vertexC += math::vec3{size.x / 2, size.y / 2, 0.0f};
-                    shape.vertexD += math::vec3{size.x / 2, size.y / 2, 0.0f};
+                    shape.vertexA += halfSize;
+                    shape.vertexB += halfSize;
+                    shape.vertexC += halfSize;
+                    shape.vertexD += halfSize;
                 }
                 return shape;
             }
@@ -126,6 +129,11 @@ namespace oni {
             void serialize(Archive &archive) {
                 archive(x, y);
             }
+        };
+
+        struct TileIndices {
+            common::int64 x{0};
+            common::int64 y{0};
         };
 
         struct BoarderRoadTiles {

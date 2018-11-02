@@ -569,149 +569,79 @@ namespace oni {
             assert(position.size() == indices.size());
 
             size_t wallCount = indices.size();
-            size_t wallCornerCount = wallCount * 2;
 
             std::vector<common::EntityID> wallEntities{};
             wallEntities.reserve(wallCount);
 
-            std::vector<b2Vec2> wallCorners;
-            wallCorners.reserve(wallCornerCount);
             common::real32 wallWidth = 0.5f;
 
-            // TODO: I should create the corners in two pass, first one sets them up as requested by the tiles,
-            // second pass runs through each adjacent node and merges them if they are closer than 0.005 * 0.005 meters.
             for (size_t i = 0; i < wallCount; ++i) {
                 const auto &wallPos = position[i];
                 const auto &xTileIndex = indices[i].x;
                 const auto &yTileIndex = indices[i].y;
 
-                math::vec2 wallTextureSize{};
-                components::Shape entityShapeWorld{};
-                math::vec3 wallPositionInWorld{};
-                std::string wallTexturePath{};
+                math::vec3 wallPositionInWorld;
+                math::vec2 wallSize;
+                std::string wallTexturePath;
 
-                auto bottomRight = math::vec2{xTileIndex * mTileSizeX + mTileSizeX - wallWidth,
-                                              yTileIndex * mTileSizeY + wallWidth};
-
-                auto topRight = math::vec2{xTileIndex * mTileSizeX + mTileSizeX - wallWidth,
-                                           yTileIndex * mTileSizeY + mTileSizeY - wallWidth};
-
-                auto topLeft = math::vec2{xTileIndex * mTileSizeX + wallWidth,
-                                          yTileIndex * mTileSizeY + mTileSizeY - wallWidth};
-
-                auto bottomLeft = math::vec2{xTileIndex * mTileSizeX + wallWidth,
-                                             yTileIndex * mTileSizeY + wallWidth};
+                common::real32 currentTileX = xTileIndex * mTileSizeX;
+                common::real32 currentTileY = yTileIndex * mTileSizeY;
 
                 // Note the counter clockwise winding: bottom -> right -> top -> left
                 // Meaning right most node in bottom wall should be adjacent to bottom most node in right wall.
                 switch (wallPos) {
                     case components::WallTilePosition::RIGHT: {
-                        wallCorners[i * 2].Set(bottomRight.x, bottomRight.y);
-                        wallCorners[i * 2 + 1].Set(topRight.x, topRight.y);
-
-                        wallTextureSize.x = wallWidth;
-                        wallTextureSize.y = mTileSizeY;
+                        wallSize.x = wallWidth;
+                        wallSize.y = mTileSizeY - 2 * wallWidth;
                         wallTexturePath = "resources/images/wall/1/vertical.png";
-                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
 
-                        wallPositionInWorld.x = bottomRight.x;
-                        wallPositionInWorld.y = bottomLeft.y - wallWidth;
+                        wallPositionInWorld.x = currentTileX + mTileSizeX - wallWidth;
+                        wallPositionInWorld.y = currentTileY + wallWidth;
                         wallPositionInWorld.z = 1.0f;
                         break;
                     }
                     case components::WallTilePosition::TOP: {
-                        wallCorners[i * 2].Set(topRight.x, topRight.y);
-                        wallCorners[i * 2 + 1].Set(topLeft.x, topLeft.y);
-
-                        wallTextureSize.x = mTileSizeX;
-                        wallTextureSize.y = wallWidth;
+                        wallSize.x = mTileSizeX - 2 * wallWidth;
+                        wallSize.y = wallWidth;
                         wallTexturePath = "resources/images/wall/1/horizontal.png";
-                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
 
-                        wallPositionInWorld.x = topLeft.x - wallWidth;
-                        wallPositionInWorld.y = topLeft.y;
+                        wallPositionInWorld.x = currentTileX + wallWidth;
+                        wallPositionInWorld.y = currentTileY + mTileSizeY - wallWidth;
                         wallPositionInWorld.z = 1.0f;
                         break;
                     }
                     case components::WallTilePosition::LEFT: {
-                        wallCorners[i * 2].Set(topLeft.x,
-                                               topLeft.y);
-                        wallCorners[i * 2 + 1].Set(bottomLeft.x,
-                                                   bottomLeft.y);
-
-                        wallTextureSize.x = wallWidth;
-                        wallTextureSize.y = mTileSizeY;
+                        wallSize.x = wallWidth;
+                        wallSize.y = mTileSizeY - 2 * wallWidth;
                         wallTexturePath = "resources/images/wall/1/vertical.png";
-                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
 
-                        wallPositionInWorld.x = bottomLeft.x - wallWidth;
-                        wallPositionInWorld.y = bottomLeft.y - wallWidth;
+                        wallPositionInWorld.x = currentTileX;
+                        wallPositionInWorld.y = currentTileY + wallWidth;
                         wallPositionInWorld.z = 1.0f;
                         break;
                     }
                     case components::WallTilePosition::BOTTOM: {
-                        wallCorners[i * 2].Set(bottomLeft.x, bottomLeft.y);
-                        wallCorners[i * 2 + 1].Set(bottomRight.x, bottomRight.y);
-
-                        wallTextureSize.x = mTileSizeX;
-                        wallTextureSize.y = wallWidth;
+                        wallSize.x = mTileSizeX - 2 * wallWidth;
+                        wallSize.y = wallWidth;
                         wallTexturePath = "resources/images/wall/1/horizontal.png";
-                        entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0.0f);
 
-                        wallPositionInWorld.x = bottomLeft.x - wallWidth;
-                        wallPositionInWorld.y = bottomLeft.y - wallWidth;
+                        wallPositionInWorld.x = currentTileX + wallWidth;
+                        wallPositionInWorld.y = currentTileY;
                         wallPositionInWorld.z = 1.0f;
                         break;
                     }
                 }
 
-                physics::Transformation::localToWorldTranslation(wallPositionInWorld, entityShapeWorld);
+                // TODO: Maybe you want to keep these somewhere
+                auto wallEntity = entities::createStaticPhysicsEntity(mEntityManager,
+                                                                      mPhysicsWorld,
+                                                                      wallSize,
+                                                                      wallPositionInWorld);
 
                 auto wallTexture = components::Texture{};
-                wallTexture.filePath = wallTexturePath;
                 wallTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-
-                // TODO: Move this into create-entity.cpp
-                common::EntityID entity{};
-                {
-                    auto lock = mEntityManager.scopedLock();
-                    entity = mEntityManager.create();
-                    mEntityManager.assign<components::Shape>(entity, entityShapeWorld);
-                    mEntityManager.assign<components::TagTextureShaded>(entity);
-                    mEntityManager.assign<components::TagStatic>(entity);
-                    mEntityManager.assign<components::TagAddNewEntities>(entity);
-
-                    wallEntities.push_back(entity);
-                }
-
-                entities::assignTexture(mEntityManager, entity, wallTexture);
-            }
-
-            std::vector<b2Vec2> mergedWallCorners;
-            common::real32 minimumAllowedCornerDistance = b2_linearSlop * b2_linearSlop;
-
-            for (size_t i = 1; i < wallCornerCount; ++i) {
-                const auto &previousCorner = wallCorners[i - 1];
-                const auto &currentCorner = wallCorners[i];
-                auto distance = b2DistanceSquared(previousCorner, currentCorner);
-
-                if (distance <= minimumAllowedCornerDistance) {
-                    continue;
-                } else {
-                    mergedWallCorners.push_back(currentCorner);
-                }
-            }
-
-            b2ChainShape chainShape;
-            chainShape.CreateLoop(mergedWallCorners.data(), static_cast<common::int32>(mergedWallCorners.size()));
-
-            b2BodyDef bd;
-            auto chainBox = mPhysicsWorld.CreateBody(&bd);
-            chainBox->CreateFixture(&chainShape, 0.0f);
-
-            for (auto &&entity: wallEntities) {
-                auto entityPhysicalProps = components::PhysicalProperties{chainBox};
-                mEntityManager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
+                wallTexture.filePath = wallTexturePath;
+                entities::assignTexture(mEntityManager, wallEntity, wallTexture);
             }
         }
 

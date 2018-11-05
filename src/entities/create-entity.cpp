@@ -195,6 +195,7 @@ namespace oni {
 
         common::EntityID
         createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const components::CarConfig &carConfig) {
+            auto carPosition = math::vec3{-70.f, -30.f, 1.f};
 
             // TODO: This is wrong. Car vertex position must be in local space starting from (0, 0).
             // Model matrix should move the car to this coordinates.
@@ -209,13 +210,15 @@ namespace oni {
                     math::vec3{static_cast<common::real32> (carX), static_cast<common::real32> (carY)},
                     math::vec2{static_cast<common::real32> (carSizeX), static_cast<common::real32> (carSizeY)});
             auto car = components::Car(carConfig);
+            car.position.x = carPosition.x;
+            car.position.y = carPosition.y;
 
-            auto entityPlacement = components::Placement{math::vec3{0.0f, 0.0f, 1.0f}, 0.0f, {1.0f, 1.0f, 0.0f}};
+            auto entityPlacement = components::Placement{carPosition};
 
             b2BodyDef bodyDef;
 
-            bodyDef.position.x = 0.0f;
-            bodyDef.position.y = 0.0f;
+            bodyDef.position.x = carPosition.x;
+            bodyDef.position.y = carPosition.y;
             bodyDef.type = b2_dynamicBody;
             bodyDef.bullet = true;
             auto *body = physicsWorld.CreateBody(&bodyDef);

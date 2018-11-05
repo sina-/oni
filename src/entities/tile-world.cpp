@@ -55,46 +55,60 @@ namespace oni {
             mRaceTrack3 = "resources/images/race-track/2/3.png";
             mRaceTrack4 = "resources/images/race-track/2/4.png";
 
-            // createWall(components::WallTilePosition::TOP, 1, 1);
+            for (int i = -2; i <= 2; ++i) {
+                for (int j = -2; j <= 2; ++j) {
+                    generateBackgroundForChunk(i, j);
+                }
+            }
 
             std::vector<components::WallTilePosition> wallPosInTile{};
             std::vector<components::TileIndices> wallTiles{};
 
-            wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
-            wallTiles.emplace_back(components::TileIndices{-1, -1});
+            common::int8 outerTrackWidth = 8;
+            common::int8 outerTrackHeight = 4;
 
-            wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
-            wallTiles.emplace_back(components::TileIndices{0, -1});
+            for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+                wallTiles.emplace_back(components::TileIndices{i, -outerTrackHeight});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
-            wallTiles.emplace_back(components::TileIndices{1, -1});
+            for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+                wallTiles.emplace_back(components::TileIndices{outerTrackWidth, i});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
-            wallTiles.emplace_back(components::TileIndices{1, -1});
+            for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+                wallTiles.emplace_back(components::TileIndices{i, outerTrackHeight});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
-            wallTiles.emplace_back(components::TileIndices{1, 0});
+            for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+                wallTiles.emplace_back(components::TileIndices{-outerTrackWidth, i});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
-            wallTiles.emplace_back(components::TileIndices{1, 1});
+            common::int8 innerTrackWidth = 6;
+            common::int8 innerTrackHeight = 2;
 
-            wallPosInTile.emplace_back(components::WallTilePosition::TOP);
-            wallTiles.emplace_back(components::TileIndices{1, 1});
+            for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+                wallTiles.emplace_back(components::TileIndices{i, -innerTrackHeight});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::TOP);
-            wallTiles.emplace_back(components::TileIndices{0, 1});
+            for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+                wallTiles.emplace_back(components::TileIndices{innerTrackWidth, i});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::TOP);
-            wallTiles.emplace_back(components::TileIndices{-1, 1});
+            for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+                wallTiles.emplace_back(components::TileIndices{i, innerTrackHeight});
+            }
 
-            wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
-            wallTiles.emplace_back(components::TileIndices{-1, 1});
-
-            wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
-            wallTiles.emplace_back(components::TileIndices{-1, 0});
-
-            wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
-            wallTiles.emplace_back(components::TileIndices{-1, -1});
+            for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+                wallTiles.emplace_back(components::TileIndices{-innerTrackWidth, i});
+            }
 
             createWall(wallPosInTile, wallTiles);
         }
@@ -135,7 +149,7 @@ namespace oni {
                     if (!existsInMap(packedIndices, mPackedRoadChunkIndicesToEntity)) {
 
                         //generateBackgroundForChunk(i, j);
-                        generateTilesForChunk(i, j);
+                        //generateTilesForChunk(i, j);
 
                         // NOTE: Just for debugging
 /*                        auto R = 100;//(std::rand() % 255) / 255.0f;

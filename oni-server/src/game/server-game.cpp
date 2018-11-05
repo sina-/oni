@@ -45,6 +45,7 @@ namespace oni {
         ServerGame::~ServerGame() = default;
 
         void ServerGame::loadLevel() {
+            /*
             auto boxSize = math::vec2{4.0f, 1.0f};
             auto boxPositionInWorld = math::vec3{-0.5f, -2.5f, 1.0f};
             std::string boxTexturePath = "resources/images/box/1/box.png";
@@ -55,9 +56,10 @@ namespace oni {
                                                              *mDynamics->getPhysicsWorld(), boxSize,
                                                              boxPositionInWorld);
             entities::assignTexture(*mEntityManager, mBoxEntity, boxTexture);
+            */
 
             auto truckSize = math::vec2{1.0f, 3.0f};
-            auto truckPositionInWorld = math::vec3{-0.5f, 5.0f, 1.0f};
+            auto truckPositionInWorld = math::vec3{-60.0f, -30.0f, 1.0f};
             std::string truckTexturePath = "resources/images/car/2/truck.png";
             auto truckTexture = components::Texture{};
             truckTexture.filePath = truckTexturePath;
@@ -88,12 +90,13 @@ namespace oni {
             carConfig.rollResist = 8.0f;
             carConfig.wheelRadius = 0.25f;
 
+            auto carEntity = entities::createVehicleEntity(*mEntityManager, *mDynamics->getPhysicsWorld(),
+                                                           carConfig);
+
             auto carTexture = components::Texture{};
             std::string carTexturePath = "resources/images/car/1/car.png";
             carTexture.filePath = carTexturePath;
             carTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            auto carEntity = entities::createVehicleEntity(*mEntityManager, *mDynamics->getPhysicsWorld(),
-                                                           carConfig);
             entities::assignTexture(*mEntityManager, carEntity, carTexture);
 
             std::string carTireTexturePath = "resources/images/car/1/car-tire.png";

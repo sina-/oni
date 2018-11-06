@@ -179,7 +179,7 @@ namespace oni {
         void ServerGame::_poll() {
             mServer->poll();
 
-            if (mClientDataManager->numClients()) {
+            if (mClientDataManager->getNumClients()) {
                 mServer->sendComponentsUpdate(*mEntityManager);
                 mServer->sendNewEntities(*mEntityManager);
 
@@ -216,9 +216,14 @@ namespace oni {
 
             std::vector<math::vec2> tickPositions{};
             {
+                // TODO: This is just awful :( so many locks. Accessing entities from registry without a view, which
+                // is slow and by the time the positions are passed to other systems, such as TileWorld, the entities
+                // might not even be there anymore. It won't crash because registry will be locked, but then what is the
+                // point of locking? Maybe I should drop this whole multi-thread everything shenanigans and just do
+                // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
                 auto registryLock = mEntityManager->scopedLock();
                 auto clientDataLock = mClientDataManager->scopedLock();
-                for (const auto &carEntity: mClientDataManager->getClientsCarEntity()) {
+                for (const auto &carEntity: mClientDataManager->getCarEntities()) {
                     const auto &carPlacement = mEntityManager->get<components::Placement>(carEntity);
                     tickPositions.push_back(carPlacement.position.getXY());
                 }

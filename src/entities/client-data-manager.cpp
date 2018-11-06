@@ -66,7 +66,7 @@ namespace oni {
             return inputs;
         }
 
-        ClientsCarEntity ClientDataManager::getClientsCarEntity() const {
+        ClientsCarEntity ClientDataManager::getCarEntities() const {
             ClientsCarEntity entities{};
             for (const auto &entity : mClientCarEntityMap) {
                 entities.push_back(entity.second);
@@ -74,7 +74,7 @@ namespace oni {
             return entities;
         }
 
-        size_t ClientDataManager::numClients() const {
+        size_t ClientDataManager::getNumClients() const {
             return mClients.size();
         }
 

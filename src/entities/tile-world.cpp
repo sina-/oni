@@ -601,8 +601,6 @@ namespace oni {
                 common::real32 currentTileX = xTileIndex * mTileSizeX;
                 common::real32 currentTileY = yTileIndex * mTileSizeY;
 
-                // Note the counter clockwise winding: bottom -> right -> top -> left
-                // Meaning right most node in bottom wall should be adjacent to bottom most node in right wall.
                 switch (wallPos) {
                     case components::WallTilePosition::RIGHT: {
                         wallSize.x = wallWidth;

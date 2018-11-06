@@ -29,11 +29,11 @@ namespace oni {
 
             ClientsInput getClientsInput() const;
 
-            ClientsCarEntity getClientsCarEntity() const;
+            ClientsCarEntity getCarEntities() const;
 
             const Clients &getClients() const;
 
-            size_t numClients() const;
+            size_t getNumClients() const;
 
             common::EntityID getEntityID(const common::PeerID &clientID) const;
 

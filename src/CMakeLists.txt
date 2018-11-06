@@ -1,1 +1,1 @@
-subdirs(audio buffers entities graphics game math io network physics utils)
+subdirs(audio buffers entities graphics game gameplay math io network physics utils)

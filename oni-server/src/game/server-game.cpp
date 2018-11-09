@@ -12,6 +12,7 @@
 #include <oni-core/entities/serialization.h>
 #include <oni-core/network/server.h>
 #include <oni-core/io/input.h>
+#include <oni-core/gameplay/lap-tracker.h>
 
 
 namespace oni {
@@ -26,6 +27,7 @@ namespace oni {
             // physics class part of which is dynamics.
             mTileWorld = std::make_unique<entities::TileWorld>(*mEntityManager, *mDynamics->getPhysicsWorld());
             mClientDataManager = std::make_unique<entities::ClientDataManager>();
+            mLapTracker = std::make_unique<gameplay::LapTracker>(*mEntityManager);
 
             mServer = std::make_unique<network::Server>(&address, 16, 2);
 
@@ -219,7 +221,7 @@ namespace oni {
                 // TODO: This is just awful :( so many locks. Accessing entities from registry without a view, which
                 // is slow and by the time the positions are passed to other systems, such as TileWorld, the entities
                 // might not even be there anymore. It won't crash because registry will be locked, but then what is the
-                // point of locking? Maybe I should drop this whole multi-thread everything shenanigans and just do
+                // point of multi threading? Maybe I should drop this whole multi-thread everything shenanigans and just do
                 // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
                 auto registryLock = mEntityManager->scopedLock();
                 auto clientDataLock = mClientDataManager->scopedLock();
@@ -232,6 +234,8 @@ namespace oni {
             for (const auto &pos: tickPositions) {
                 mTileWorld->tick(pos);
             }
+
+            mLapTracker->tick();
         }
 
         void ServerGame::_render() {}

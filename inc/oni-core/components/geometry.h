@@ -28,7 +28,7 @@ namespace oni {
 
             math::vec3 getPosition() const { return vertexA; }
 
-            math::vec2 getSize() {
+            math::vec2 getSize() const {
                 return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
             }
 
@@ -47,7 +47,7 @@ namespace oni {
                         math::vec3{size.x, size.y, 1},
                         math::vec3{size.x, 0, 1}
                 };
-                // Cast to ignore float inpercision.
+                // Cast to ignore float imprecision.
                 if (static_cast<common::uint16>(rotation)) {
                     auto halfSize = math::vec3{size.x / 2.0f, size.y / 2.0f, 0.0f};
 

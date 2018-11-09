@@ -6,7 +6,7 @@ include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/entt)
 include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/Box2D)
 include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/cereal)
 
-add_library(oni-core-physics dynamics.cpp car.cpp transformation.cpp)
+add_library(oni-core-physics dynamics.cpp car.cpp transformation.cpp collision.cpp)
 
 target_link_libraries(
         oni-core-physics

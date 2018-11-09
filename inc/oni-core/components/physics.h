@@ -13,10 +13,5 @@ namespace oni {
             BOTTOM = 3,
             LEFT = 4,
         };
-
-        struct Checkpoint {
-            math::vec2 position;
-            common::real32 orientation;
-        };
     }
 }

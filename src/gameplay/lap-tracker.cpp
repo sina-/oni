@@ -19,7 +19,7 @@ namespace oni {
             mInitialCheckpoints.push_back(checkpoint1);
         }
 
-        LapTracker::~LapTracker() {};
+        LapTracker::~LapTracker() = default;;
 
         void LapTracker::tick() {
             auto carView = mEntityManager.createViewScopeLock<components::Shape, components::Placement, components::Car>();

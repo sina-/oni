@@ -231,12 +231,12 @@ namespace oni {
             carCollisionSensorDef.isSensor = true;
             carCollisionSensorDef.shape = &carShape;
             carCollisionSensorDef.density = 1.0f;
-            carCollisionSensorDef.friction = 0.3;
+            carCollisionSensorDef.friction = 0.1;
 
             b2FixtureDef carFixtureDef;
             carFixtureDef.shape = &carShape;
             carFixtureDef.density = 1.0f;
-            carFixtureDef.friction = 0.3;
+            carFixtureDef.friction = 0.1;
 
             body->CreateFixture(&carFixtureDef);
             body->CreateFixture(&carCollisionSensorDef);

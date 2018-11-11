@@ -8,6 +8,7 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/graphics/debug-draw-box2d.h>
+#include <oni-core/common/consts.h>
 
 namespace oni {
     namespace physics {
@@ -116,7 +117,8 @@ namespace oni {
                     // collision
                     // TODO: Collision listener could be a better way to handle collisions
                     if (collisionFound && car.velocityAbsolute > 0.2f) {
-                        car.velocity = math::vec2{body->GetLinearVelocity().x, body->GetLinearVelocity().y};
+                        car.velocity = math::vec2{body->GetLinearVelocity().x * 1.01f,
+                                                  body->GetLinearVelocity().y * 1.01f};
                         car.angularVelocity = body->GetAngularVelocity();
                         car.position = math::vec2{body->GetPosition().x, body->GetPosition().y};
                         car.heading = body->GetAngle();
@@ -137,10 +139,13 @@ namespace oni {
                     auto body = dynamicEntitiesView.get<components::PhysicalProperties>(entity).body;
                     auto position = body->GetPosition();
                     auto &placement = dynamicEntitiesView.get<components::Placement>(entity);
-                    placement.position = math::vec3{position.x, position.y, 1.0f};
-                    placement.rotation = body->GetAngle();
+                    if (std::abs(placement.position.x - position.x) > common::ep ||
+                        std::abs(placement.rotation - body->GetAngle()) > common::ep) {
+                        placement.position = math::vec3{position.x, position.y, 1.0f};
+                        placement.rotation = body->GetAngle();
 
-                    entitiesToBeUpdated.push_back(entity);
+                        entitiesToBeUpdated.push_back(entity);
+                    }
                 }
             }
 

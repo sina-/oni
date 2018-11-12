@@ -87,9 +87,7 @@ namespace oni {
 
             if (data.size() > 1) {
                 broadcast(type, data);
-            }
 
-            {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
                 manager.reset<components::TagOnlyComponentUpdate>();
@@ -102,9 +100,7 @@ namespace oni {
 
             if (data.size() > 1) {
                 broadcast(type, data);
-            }
 
-            {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
                 manager.reset<components::TagAddNewEntities>();

@@ -9,6 +9,7 @@
 #include <oni-core/components/hierarchy.h>
 #include <oni-core/components/visual.h>
 #include <oni-core/components/world-data-status.h>
+#include <oni-core/components/gameplay.h>
 
 
 namespace oni {
@@ -23,6 +24,7 @@ namespace oni {
                         components::Car,
                         components::CarConfig,
                         components::Placement,
+                        components::CarLap,
                         //components::Chunk,
                         components::Shape,
                         components::Appearance,
@@ -55,6 +57,7 @@ namespace oni {
                         components::Car,
                         components::CarConfig,
                         components::Placement,
+                        components::CarLap,
                         //components::Chunk,
                         components::Shape,
                         components::Appearance,

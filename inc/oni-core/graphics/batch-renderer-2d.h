@@ -21,7 +21,6 @@ namespace oni {
         class Text;
 
         class Appearance;
-
     }
 
     namespace graphics {
@@ -57,7 +56,7 @@ namespace oni {
 
             // TODO: checkout texture arrays.
             /**
-             * There are 0, 1, ..., mMaxNumTextureSamplers texture samplers are available.
+             * There are 0, 1, ..., mMaxNumTextureSamplers texture samplers available.
              * Each texture is assigned one and the id to the sampler is saved as part of vertex data
              * in the vertex buffer. During rendering in the shader the proper sampler is selected based
              * on the sampler id in the buffer.

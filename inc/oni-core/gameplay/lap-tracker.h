@@ -30,7 +30,6 @@ namespace oni {
             entities::EntityManager &mEntityManager;
             std::deque<components::Shape> mInitialCheckpoints{};
             std::map<common::EntityID, std::deque<components::Shape>> mRemainingCheckpoints{};
-            std::map<common::EntityID, common::uint16> mPlayerLaps{};
         };
     }
 }

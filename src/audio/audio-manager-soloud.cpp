@@ -1,8 +1,7 @@
 #include <algorithm>
 #include <memory>
 
-#include <oni-core/audio/audio-manager-soloud.h>
-#include <oni-core/utils/oni-assert.h>
+#include <oni-audio/audio-manager-soloud.h>
 
 namespace oni {
     namespace audio {

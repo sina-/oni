@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdexcept>
 #include <vector>
 
 #include <GL/glew.h>
@@ -32,11 +31,11 @@ namespace oni {
 
             Buffer(Buffer &) = delete;
 
-            inline void bind() const { glBindBuffer(GL_ARRAY_BUFFER, mBufferID); }
+            void bind();
 
-            inline void unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+            void unbind();
 
-            inline const auto getBufferStructure() const { return &mBufferStructures; }
+            const common::BufferStructures &getBufferStructure() const;
         };
 
     }

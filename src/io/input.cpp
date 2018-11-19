@@ -1,8 +1,8 @@
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 #include <oni-core/io/input.h>
-#include <oni-core/utils/oni-assert.h>
 
 
 namespace oni {
@@ -10,7 +10,7 @@ namespace oni {
         Input::Input() = default;
 
         void Input::update(components::oniKeyPress keyPressed, components::oniKeyPress keyReleased) {
-            ONI_DEBUG_ASSERT(keyPressed != keyReleased);
+            assert(keyPressed != keyReleased);
 
             if (keyPressed > 0) {
                 setPressed(keyPressed);
@@ -19,8 +19,8 @@ namespace oni {
                 setReleased(keyReleased);
             }
 
-            ONI_DEBUG_ASSERT(mKeysPressed.size() < 50);
-            ONI_DEBUG_ASSERT(mKeysReleased.size() < 50);
+            assert(mKeysPressed.size() < 50);
+            assert(mKeysReleased.size() < 50);
         }
 
         bool Input::isPressed(components::oniKeyPress key) const {

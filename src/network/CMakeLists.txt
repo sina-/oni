@@ -1,18 +1,29 @@
-subdirs(${oni_SOURCE_DIR}/lib/enet)
-
-include_directories(${oni_SOURCE_DIR}/inc)
-# NOTE: SYSTEM so the warnings are disabled
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/enet/include)
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/entt)
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/cereal)
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/Box2D)
-
 add_library(oni-core-network server.cpp client.cpp peer.cpp)
 
-target_link_libraries(
-        oni-core-network
-        oni-core-entities
-        enet
+target_compile_features(oni-core-network
+        PUBLIC
+            cxx_std_17
         )
 
-add_dependencies(oni-core-network enet oni-core-entities)
+target_include_directories(oni-core-network
+        PUBLIC
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/enet/include>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
+        PRIVATE SYSTEM
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
+        )
+
+find_library(ENET_LIBRARY enet PATHS ${oni_SOURCE_DIR}/lib/enet/build)
+
+target_link_libraries(oni-core-network
+        PUBLIC
+            ${ENET_LIBRARY}
+        PRIVATE
+            oni-core-entities
+        )
+
+add_dependencies(oni-core-network
+        oni-core-entities
+        )

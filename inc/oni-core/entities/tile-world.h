@@ -63,6 +63,9 @@ namespace oni {
             void createWall(const std::vector<components::WallTilePosition> &position,
                             const std::vector<components::TileIndices> &indices);
 
+            math::vec2 getTileSize() const;
+            math::vec2 getChunkSize() const;
+
         private:
             entities::EntityManager &mEntityManager;
             b2World &mPhysicsWorld;

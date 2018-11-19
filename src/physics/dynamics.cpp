@@ -19,6 +19,10 @@ namespace oni {
             mPhysicsWorld = std::make_unique<b2World>(gravity);
         }
 
+        Dynamics::~Dynamics() {
+
+        }
+
         void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) {
             std::vector<common::EntityID> entitiesToBeUpdated{};
             {

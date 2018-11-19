@@ -1,17 +1,28 @@
-subdirs(${oni_SOURCE_DIR}/lib/Box2D)
-
-include_directories(${oni_SOURCE_DIR}/inc)
-# NOTE: SYSTEM so the warnings are disabled
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/entt)
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/Box2D)
-include_directories(SYSTEM ${oni_SOURCE_DIR}/lib/cereal)
-
 add_library(oni-core-physics dynamics.cpp car.cpp transformation.cpp collision.cpp)
 
-target_link_libraries(
-        oni-core-physics
-        oni-core-entities
-        box2d
+target_compile_features(oni-core-physics
+        PUBLIC
+            cxx_std_17
         )
 
-add_dependencies(oni-core-physics box2d)
+target_include_directories(oni-core-physics
+        PUBLIC
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
+        PRIVATE SYSTEM
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
+        )
+
+find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug)
+
+target_link_libraries(oni-core-physics
+        PRIVATE
+            ${BOX2D_LIBRARY}
+            oni-core-entities
+            oni-core-graphics
+        )
+
+add_dependencies(oni-core-physics
+        oni-core-graphics
+        )

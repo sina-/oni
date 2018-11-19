@@ -1,8 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
-#include <memory>
 
 #include <oni-core/common/typedefs.h>
 

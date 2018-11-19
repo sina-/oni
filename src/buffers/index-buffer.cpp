@@ -1,5 +1,7 @@
 #include <oni-core/buffers/index-buffer.h>
 
+#include <stdexcept>
+
 namespace oni {
     namespace buffers {
         IndexBuffer::IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size) : mBufferID{0},
@@ -22,6 +24,22 @@ namespace oni {
 
             unbind();
 
+        }
+
+        IndexBuffer::~IndexBuffer() {
+            glDeleteBuffers(mSize, &mBufferID);
+        }
+
+        void IndexBuffer::bind() const {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
+        }
+
+        void IndexBuffer::unbind() const {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
+        GLuint IndexBuffer::getCount() const {
+            return mCount;
         }
 
     }

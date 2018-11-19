@@ -4,7 +4,7 @@
 
 namespace oni {
     namespace buffers {
-        VertexArray::VertexArray(std::unique_ptr<const Buffer> vertexBuffer) {
+        VertexArray::VertexArray(std::unique_ptr<Buffer> vertexBuffer) {
             glGenVertexArrays(1, &mArrayID);
 
             mVertexBuffers = std::move(vertexBuffer);
@@ -12,7 +12,7 @@ namespace oni {
             bindVAO();
             mVertexBuffers->bind();
 
-            for (const auto &vertex: *(mVertexBuffers->getBufferStructure())) {
+            for (auto &&vertex: mVertexBuffers->getBufferStructure()) {
                 glEnableVertexAttribArray(vertex->index);
                 glVertexAttribPointer(vertex->index, vertex->componentCount, vertex->componentType, vertex->normalized,
                                       vertex->stride, vertex->offset);

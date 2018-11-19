@@ -242,7 +242,7 @@ namespace oni {
 
         void ServerGame::_display() {}
 
-        void ServerGame::showFPS(int16 fps) {}
+        void ServerGame::showFPS(oni::common::int16 fps) {}
 
         void ServerGame::showSPS(oni::common::int16 tps) {}
 

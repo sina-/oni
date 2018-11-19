@@ -37,6 +37,8 @@ namespace oni {
             public:
                 EntityView(const EntityView &) = delete;
 
+                EntityView(const EntityView &&) = delete;
+
                 EntityView &operator=(const Entity &) = delete;
 
                 ~EntityView() = default;

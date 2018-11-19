@@ -4,8 +4,6 @@
 #include <vector>
 
 #include <GL/glew.h>
-#include <cereal/types/string.hpp>
-#include <cereal/types/vector.hpp>
 
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>

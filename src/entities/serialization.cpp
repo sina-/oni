@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 #include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/entities/entity-manager.h>

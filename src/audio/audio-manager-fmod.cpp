@@ -1,11 +1,13 @@
+#include <oni-core/audio/audio-manager-fmod.h>
+
+#include <cassert>
+
 #include <fmod.hpp>
 
-#include <oni-core/audio/audio-manager-fmod.h>
-#include <oni-core/utils/oni-assert.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/common/defines.h>
 
-#define ERRCHECK(_result) ONI_DEBUG_ASSERT((_result) == FMOD_OK)
+#define ERRCHECK(_result) assert((_result) == FMOD_OK)
 
 namespace oni {
     namespace audio {
@@ -21,7 +23,7 @@ namespace oni {
             common::uint32 version;
             result = system->getVersion(&version);
             ERRCHECK(result);
-            ONI_DEBUG_ASSERT(version >= FMOD_VERSION)
+            assert(version >= FMOD_VERSION);
 
             result = system->init(32, FMOD_INIT_NORMAL, nullptr);
             ERRCHECK(result);
@@ -114,16 +116,16 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        void FMODDeleter::operator()(FMOD::Sound *s) const {
+        void AudioManagerFMOD::FMODDeleter::operator()(FMOD::Sound *s) const {
             s->release();
         }
 
-        void FMODDeleter::operator()(FMOD::System *sys) const {
+        void AudioManagerFMOD::FMODDeleter::operator()(FMOD::System *sys) const {
             sys->close();
             sys->release();
         }
 
-        void FMODDeleter::operator()(FMOD::Channel *channel) const {
+        void AudioManagerFMOD::FMODDeleter::operator()(FMOD::Channel *channel) const {
             UNUSED(channel);
         }
     }

@@ -15,7 +15,7 @@ namespace oni {
         public:
             explicit Dynamics(common::real32 tickFreq);
 
-            ~Dynamics() override = default;
+            ~Dynamics() override;
 
             void drawDebugData();
 

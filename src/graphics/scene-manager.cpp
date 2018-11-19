@@ -1,4 +1,5 @@
 #include <oni-core/graphics/scene-manager.h>
+
 #include <oni-core/graphics/shader.h>
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
@@ -60,14 +61,14 @@ namespace oni {
             }
 
             GLsizei stride = sizeof(components::ColoredVertex);
-            auto position = std::make_unique<const components::BufferStructure>
+            auto position = std::make_unique<components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
                                                  stride,
                                                  static_cast<const GLvoid *>(nullptr)});
-            auto color = std::make_unique<const components::BufferStructure>
+            auto color = std::make_unique<components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(colorIndex), 4, GL_FLOAT, GL_TRUE, stride,
                                                  reinterpret_cast<const GLvoid *>(offsetof(components::ColoredVertex,
-                                                                                           components::ColoredVertex::color))});
+                                                                                           color))});
 
             auto bufferStructures = common::BufferStructures();
             bufferStructures.push_back(std::move(position));
@@ -92,17 +93,17 @@ namespace oni {
             }
 
             GLsizei stride = sizeof(components::TexturedVertex);
-            auto position = std::make_unique<const components::BufferStructure>
+            auto position = std::make_unique<components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
                                                  static_cast<const GLvoid *>(nullptr)});
-            auto samplerID = std::make_unique<const components::BufferStructure>
+            auto samplerID = std::make_unique<components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE, stride,
                                                  reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                                                           components::TexturedVertex::samplerID))});
-            auto uv = std::make_unique<const components::BufferStructure>
+                                                                                           samplerID))});
+            auto uv = std::make_unique<components::BufferStructure>
                     (components::BufferStructure{static_cast<GLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
                                                  reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                                                           components::TexturedVertex::uv))});
+                                                                                           uv))});
 
             auto bufferStructures = common::BufferStructures();
             bufferStructures.push_back(std::move(position));
@@ -364,7 +365,8 @@ namespace oni {
                 const auto skidTilePosX = math::indexToPosition(skidIndexX, mSkidTileSizeX);
                 const auto skidTilePosY = math::indexToPosition(skidIndexY, mSkidTileSizeY);
                 const auto positionInWorld = math::vec3{skidTilePosX, skidTilePosY, 1.0f};
-                const auto skidTileSize = math::vec2{mSkidTileSizeX, mSkidTileSizeY};
+                const auto skidTileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
+                                                     static_cast<common::real32>(mSkidTileSizeY)};
 
                 const auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * GAME_UNIT_TO_PIXELS +
                                                                            common::ep);

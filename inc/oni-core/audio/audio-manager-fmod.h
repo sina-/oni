@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <vector>
 #include <memory>
 
@@ -18,15 +17,6 @@ namespace FMOD {
 namespace oni {
     namespace audio {
         using common::OniSoundID;
-
-        class FMODDeleter {
-        public:
-            void operator()(FMOD::Sound *s) const;
-
-            void operator()(FMOD::System *sys) const;
-
-            void operator()(FMOD::Channel *channel) const;
-        };
 
         class AudioManagerFMOD : public AudioManager {
         public:
@@ -55,9 +45,19 @@ namespace oni {
             void setPitch(OniSoundID id, common::real32 pitch) override;
 
         private:
-            std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
-            std::vector<std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
-            std::vector<std::unique_ptr<FMOD::Channel, FMODDeleter>> mChannels;
+            class FMODDeleter {
+            public:
+                void operator()(FMOD::Sound *s) const;
+
+                void operator()(FMOD::System *sys) const;
+
+                void operator()(FMOD::Channel *channel) const;
+            };
+
+        private:
+            std::unique_ptr <FMOD::System, FMODDeleter> mSystem;
+            std::vector <std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
+            std::vector <std::unique_ptr<FMOD::Channel, FMODDeleter>> mChannels;
         };
     }
 }

@@ -1,4 +1,5 @@
 #include <numeric>
+#include <cassert>
 
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/utils/index-buffer-gen.h>
@@ -7,7 +8,6 @@
 #include <oni-core/buffers/buffer.h>
 #include <oni-core/buffers/index-buffer.h>
 #include <oni-core/buffers/vertex-array.h>
-#include <oni-core/utils/oni-assert.h>
 #include <oni-core/components/geometry.h>
 
 namespace oni {
@@ -24,7 +24,7 @@ namespace oni {
             mMaxIndicesCount = mMaxSpriteCount * 6;
 
             auto maxUIntSize = std::numeric_limits<common::int32>::max();
-            ONI_DEBUG_ASSERT(mMaxIndicesCount < maxUIntSize);
+            assert(mMaxIndicesCount < maxUIntSize);
 
             // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
             mMaxSpriteSize = mMaxVertexSize * 4;
@@ -78,7 +78,7 @@ namespace oni {
         void BatchRenderer2D::_submit(const components::Shape &position, const components::Appearance &appearance) {
             // Check if Buffer can handle the number of vertices.
             // TODO: This seems to trigger even in none-debug mode
-            ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
+            assert(mIndexCount + 6 < mMaxIndicesCount);
 
             auto buffer = static_cast<components::ColoredVertex *>(mBuffer);
 
@@ -126,7 +126,7 @@ namespace oni {
 
         void BatchRenderer2D::_submit(const components::Shape &position, const components::Texture &texture) {
             // Check if Buffer can handle the number of vertices.
-            ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
+            assert(mIndexCount + 6 < mMaxIndicesCount);
 
             auto samplerID = getSamplerID(texture.textureID);
 
@@ -168,7 +168,7 @@ namespace oni {
             auto scaleY = text.yScaling;
 
             for (common::uint32 i = 0; i < text.textContent.size(); i++) {
-                ONI_DEBUG_ASSERT(mIndexCount + 6 < mMaxIndicesCount);
+                assert(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;
                 auto y0 = text.position.y + text.offsetY[i] / scaleY;
@@ -243,7 +243,7 @@ namespace oni {
                 if (mNextSamplerID > mMaxNumTextureSamplers) {
                     reset();
                 }*/
-                ONI_DEBUG_ASSERT(mNextSamplerID <= mMaxNumTextureSamplers);
+                assert(mNextSamplerID <= mMaxNumTextureSamplers);
 
                 mTextures.push_back(textureID);
                 mSamplers.push_back(mNextSamplerID++);

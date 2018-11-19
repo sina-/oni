@@ -12,11 +12,8 @@ namespace oni {
         class Buffer;
 
         class VertexArray {
-            GLuint mArrayID;
-            std::unique_ptr<const Buffer> mVertexBuffers;
-
         public:
-            explicit VertexArray(std::unique_ptr<const Buffer> vertexBuffer);
+            explicit VertexArray(std::unique_ptr<Buffer> vertexBuffer);
 
             ~VertexArray();
 
@@ -28,6 +25,9 @@ namespace oni {
 
             void unbindVBO() const;
 
+        private:
+            GLuint mArrayID;
+            std::unique_ptr<Buffer> mVertexBuffers;
         };
 
     }

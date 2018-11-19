@@ -1,6 +1,7 @@
-#include <oni-core/utils/oni-assert.h>
 #include <oni-core/buffers/buffer.h>
 #include <oni-core/components/buffer.h>
+
+#include <cassert>
 
 namespace oni {
     namespace buffers {
@@ -8,7 +9,7 @@ namespace oni {
                        common::BufferStructures bufferStructures)
                 : mBufferStructures(std::move(bufferStructures)) {
             // Check for supported usages.
-            ONI_DEBUG_ASSERT(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW)
+            assert(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW);
 
             // TODO: Check this comment on how to use OpenGL4.5 to create buffers:
             // http://stackoverflow.com/a/21652955/558366
@@ -30,9 +31,16 @@ namespace oni {
             }
 
             unbind();
-
         }
 
         Buffer::~Buffer() { glDeleteBuffers(1, &mBufferID); }
+
+        void Buffer::bind() { glBindBuffer(GL_ARRAY_BUFFER, mBufferID); }
+
+        void Buffer::unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+
+        const common::BufferStructures &Buffer::getBufferStructure() const {
+            return mBufferStructures;
+        }
     }
 }

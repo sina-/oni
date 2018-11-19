@@ -1,7 +1,10 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <unordered_map>
+
+#include <GL/glew.h>
 
 #include <oni-core/components/visual.h>
 

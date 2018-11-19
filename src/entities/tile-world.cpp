@@ -7,7 +7,6 @@
 #include <oni-core/components/visual.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
-#include <oni-core/utils/oni-assert.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/io/output.h>
 
@@ -23,24 +22,26 @@ namespace oni {
                 //mHalfTileSizeX{mTileSizeX / 2.0f},
                 //mHalfTileSizeY{mTileSizeY / 2.0f},
                 mTilesPerChunkX{11}, mTilesPerChunkY{11},
-                mChunkSizeX{mTileSizeX * mTilesPerChunkX}, mChunkSizeY{mTileSizeY * mTilesPerChunkY},
-                mHalfChunkSizeX{mChunkSizeX / 2}, mHalfChunkSizeY{mChunkSizeY / 2} {
+                mChunkSizeX{static_cast<common::uint16 >(mTileSizeX * mTilesPerChunkX)},
+                mChunkSizeY{static_cast<common::uint16 >(mTileSizeY * mTilesPerChunkY)},
+                mHalfChunkSizeX{static_cast<common::uint16 >(mChunkSizeX / 2)},
+                mHalfChunkSizeY{static_cast<common::uint16>(mChunkSizeY / 2)} {
             std::srand(std::time(nullptr));
 
             // NOTE: A road chunk is filled with road tiles, therefore road chunk size should be,
             // dividable by road tile size.
-            ONI_DEBUG_ASSERT(mTileSizeX <= mChunkSizeX);
-            ONI_DEBUG_ASSERT(mTileSizeY <= mChunkSizeY);
-            ONI_DEBUG_ASSERT(mChunkSizeX % mTileSizeX == 0);
-            ONI_DEBUG_ASSERT(mChunkSizeY % mTileSizeY == 0);
+            assert(mTileSizeX <= mChunkSizeX);
+            assert(mTileSizeY <= mChunkSizeY);
+            assert(mChunkSizeX % mTileSizeX == 0);
+            assert(mChunkSizeY % mTileSizeY == 0);
 
             // NOTE: If number of road tiles in a chunk is not an odd number it means there is no middle
             // tile. For convenience its good to have a middle tile.
-            ONI_DEBUG_ASSERT((mChunkSizeX / mTileSizeX) % 2 == 1);
-            ONI_DEBUG_ASSERT((mChunkSizeY / mTileSizeY) % 2 == 1);
+            assert((mChunkSizeX / mTileSizeX) % 2 == 1);
+            assert((mChunkSizeY / mTileSizeY) % 2 == 1);
 
-            ONI_DEBUG_ASSERT(mChunkSizeX % 2 == 0);
-            ONI_DEBUG_ASSERT(mChunkSizeY % 2 == 0);
+            assert(mChunkSizeX % 2 == 0);
+            assert(mChunkSizeY % 2 == 0);
 
             mNorthToEast = "resources/images/road/1/north-to-east.png";
             mNorthToSouth = "resources/images/road/1/north-to-south.png";
@@ -122,7 +123,7 @@ namespace oni {
 
         math::vec2 TileWorld::unpackCoordinates(common::uint64 coord) const {
             // TODO: This function is incorrect. Need to match it to packIntegers function if I ever use it
-            ONI_DEBUG_ASSERT(false);
+            assert(false);
             //auto x = static_cast<int>(coord >> 32) * mTileSizeX;
             //auto y = static_cast<int>(coord & (0xFFFFFFFF)) * mTileSizeX;
 
@@ -210,19 +211,23 @@ namespace oni {
             auto neighboursRoadStatus = {northChunkHasRoads, southChunkHasRoads, westChunkHasRoads, eastChunkHasRoads};
             auto neighboursWithRoad = std::count_if(neighboursRoadStatus.begin(), neighboursRoadStatus.end(),
                                                     [](bool status) { return status; });
-            ONI_DEBUG_ASSERT(neighboursWithRoad == 2);
+            assert(neighboursWithRoad == 2);
 
             components::RoadTileIndices startingRoadTileIndices{0, 0};
 
             components::RoadTileIndices endingRoadTileIndices{0, 0};
 
-            components::RoadTileIndices northBoarderRoadTileIndices{std::rand() % mTilesPerChunkX, mTilesPerChunkY - 1};
+            components::RoadTileIndices northBoarderRoadTileIndices{static_cast<uint16>(std::rand() % mTilesPerChunkX),
+                                                                    static_cast<uint16>(mTilesPerChunkY - 1)};
 
-            components::RoadTileIndices southBoarderRoadTileIndices{std::rand() % mTilesPerChunkX, 0};
+            components::RoadTileIndices southBoarderRoadTileIndices{static_cast<uint16>(std::rand() % mTilesPerChunkX),
+                                                                    0};
 
-            components::RoadTileIndices westBoarderRoadTileIndices{0, std::rand() % mTilesPerChunkY};
+            components::RoadTileIndices westBoarderRoadTileIndices{0,
+                                                                   static_cast<uint16>(std::rand() % mTilesPerChunkY)};
 
-            components::RoadTileIndices eastBoarderRoadTileIndices{mTilesPerChunkX - 1, std::rand() % mTilesPerChunkY};
+            components::RoadTileIndices eastBoarderRoadTileIndices{static_cast<uint16>(mTilesPerChunkX - 1),
+                                                                   static_cast<uint16>(std::rand() % mTilesPerChunkY)};
 
             if (northChunkHasRoads && southChunkHasRoads) {
                 boarderRoadTiles.southBoarder = components::RoadTileIndices{};
@@ -316,7 +321,7 @@ namespace oni {
                                                          components::RoadTileIndices{currentTileX, currentTileY},
                                                          mSouthToEast);
                             } else {
-                                ONI_DEBUG_ASSERT(false);
+                                assert(false);
                             }
                             break;
                             // We are done
@@ -337,7 +342,7 @@ namespace oni {
                                                          mNorthToSouth);
                                 previousRoadTexture = mNorthToSouth;
                             } else {
-                                ONI_DEBUG_ASSERT(false);
+                                assert(false);
                             }
                             --currentTileY;
                             // go down
@@ -358,7 +363,7 @@ namespace oni {
                                                          mSouthToNorth);
                                 previousRoadTexture = mSouthToNorth;
                             } else {
-                                ONI_DEBUG_ASSERT(false);
+                                assert(false);
                             }
                             ++currentTileY;
                             // go up
@@ -373,7 +378,7 @@ namespace oni {
                 }
 
             } else {
-                ONI_DEBUG_ASSERT(false);
+                assert(false);
             }
 
 /*            generateRoadTileBetween(chunkIndices, startingRoadTileIndices, endingRoadTileIndices,
@@ -385,7 +390,7 @@ namespace oni {
         void TileWorld::generateTexturedRoadTile(const components::ChunkIndices &chunkIndices,
                                                  const components::RoadTileIndices &roadTileIndices,
                                                  const std::string &texturePath) {
-            const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
+            const auto roadTileSize = getTileSize();
 
             const auto positionInWorld = roadTileIndexToPosition(chunkIndices, roadTileIndices);
             const auto roadID = createStaticEntity(mEntityManager, roadTileSize,
@@ -403,7 +408,7 @@ namespace oni {
         void TileWorld::generateRoadTile(const components::ChunkIndices &chunkIndices,
                                          const components::RoadTileIndices &roadTileIndices) {
             const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.5f};
-            const auto roadTileSize = math::vec2{mTileSizeX, mTileSizeY};
+            const auto roadTileSize = getTileSize();
 
             const auto positionInWorld = roadTileIndexToPosition(chunkIndices, roadTileIndices);
             const auto roadID = createSpriteStaticEntity(mEntityManager, color, roadTileSize,
@@ -456,7 +461,7 @@ namespace oni {
             auto firstTileY = yChunkIndex * mChunkSizeY;
             auto lastTileY = yChunkIndex * mChunkSizeY + mChunkSizeY;
 
-            auto tileSize = math::vec2{mTileSizeX, mTileSizeY};
+            auto tileSize = getTileSize();
 
             for (auto i = firstTileX; i < lastTileX; i += mTileSizeX) {
                 for (auto j = firstTileY; j < lastTileY; j += mTileSizeY) {
@@ -470,7 +475,8 @@ namespace oni {
                     auto B = (std::rand() % 255) / 255.0f;
                     auto color = math::vec4{R, G, B, 1.0f};
 
-                    auto positionInWorld = math::vec3{i, j, 1.0f};
+                    auto positionInWorld = math::vec3{static_cast<common::real32>(i), static_cast<common::real32>(j),
+                                                      1.0f};
 
                     auto tileID = createSpriteStaticEntity(mEntityManager, color, tileSize,
                                                            positionInWorld);
@@ -485,7 +491,8 @@ namespace oni {
         }
 
         math::vec2 TileWorld::chunkIndexToPosition(const components::ChunkIndices &chunkIndices) const {
-            return math::vec2{chunkIndices.x * mChunkSizeX, chunkIndices.y * mChunkSizeY};
+            return math::vec2{static_cast<common::real32>(chunkIndices.x * mChunkSizeX),
+                              static_cast<common::real32>(chunkIndices.y * mChunkSizeY)};
         }
 
         components::ChunkIndices TileWorld::chunkPositionToIndex(const math::vec2 &position) const {
@@ -500,7 +507,8 @@ namespace oni {
                                                       const components::RoadTileIndices roadTileIndices) const {
 
             const auto chunkPos = chunkIndexToPosition(chunkIndices);
-            const auto tilePos = math::vec2{roadTileIndices.x * mTileSizeX, roadTileIndices.y * mTileSizeY};
+            const auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndices.x * mTileSizeX),
+                                            static_cast<common::real32>(roadTileIndices.y * mTileSizeY)};
 
             return chunkPos + tilePos;
         }
@@ -660,7 +668,7 @@ namespace oni {
         void TileWorld::generateBackgroundForChunk(common::int64 chunkX, common::int64 chunkY) {
             auto chunkIndex = components::ChunkIndices{chunkX, chunkY};
             auto positionInWorld = chunkIndexToPosition(chunkIndex);
-            auto roadID = createStaticEntity(mEntityManager, math::vec2{mChunkSizeX, mChunkSizeY},
+            auto roadID = createStaticEntity(mEntityManager, getChunkSize(),
                                              math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
 
             auto packedIndices = math::packIntegers(chunkX, chunkY);
@@ -672,6 +680,14 @@ namespace oni {
             mEntityManager.assign<components::Texture>(roadID, texture);
 
 
+        }
+
+        math::vec2 TileWorld::getTileSize() const {
+            return math::vec2{static_cast<common::real32>(mTileSizeX), static_cast<common::real32 >(mTileSizeY)};
+        }
+
+        math::vec2 TileWorld::getChunkSize() const {
+            return math::vec2{static_cast<common::real32>(mChunkSizeX), static_cast<common::real32 >(mChunkSizeY)};
         }
     }
 }

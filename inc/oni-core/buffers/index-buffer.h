@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdexcept>
 #include <vector>
 
 #include <GL/glew.h>
@@ -8,22 +7,23 @@
 namespace oni {
     namespace buffers {
         class IndexBuffer {
-            GLuint mBufferID;
-            GLuint mCount;
-            GLsizei mSize;
-
         public:
             IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size = 1);
 
             IndexBuffer() = default;
 
-            ~IndexBuffer() { glDeleteBuffers(mSize, &mBufferID); }
+            ~IndexBuffer();
 
-            inline void bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID); }
+            void bind() const;
 
-            inline void unbind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
+            void unbind() const;
 
-            inline GLuint getCount() const { return mCount; }
+            GLuint getCount() const;
+
+        private:
+            GLuint mBufferID;
+            GLuint mCount;
+            GLsizei mSize;
         };
 
     }

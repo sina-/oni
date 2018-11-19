@@ -1,0 +1,18 @@
+[submodule "lib/glfw"]
+	path = lib/glfw
+	url = git@github.com:sina-/glfw.git
+[submodule "lib/glew"]
+	path = lib/glew
+	url = git@github.com:sina-/glew.git
+[submodule "lib/box2d"]
+	path = lib/box2d
+	url = git@github.com:sina-/Box2D.git
+[submodule "lib/enet"]
+	path = lib/enet
+	url = git@github.com:sina-/enet.git
+[submodule "lib/freeimage"]
+	path = lib/freeimage
+	url = git@github.com:sina-/freeimage.git
+[submodule "lib/freetype2"]
+	path = lib/freetype2
+	url = git@github.com:sina-/freetype2.git

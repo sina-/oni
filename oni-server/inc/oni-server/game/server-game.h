@@ -2,9 +2,6 @@
 
 #include <memory>
 
-#include <AntTweakBar.h>
-#include <Box2D/Box2D.h>
-
 #include <oni-core/gameplay/lap-tracker.h>
 #include <oni-core/game/game.h>
 #include <oni-core/physics/dynamics.h>
@@ -12,7 +9,6 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/entities/tile-world.h>
-#include <oni-core/graphics/debug-draw-box2d.h>
 #include <oni-core/network/client.h>
 #include <oni-core/network/server.h>
 #include <oni-core/entities/client-data-manager.h>

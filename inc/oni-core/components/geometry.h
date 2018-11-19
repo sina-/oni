@@ -1,12 +1,12 @@
 #pragma once
 
-#include <Box2D/Dynamics/b2Body.h>
-
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
+
+class b2Body;
 
 namespace oni {
     namespace components {

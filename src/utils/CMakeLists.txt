@@ -1,3 +1,11 @@
-include_directories(${oni_SOURCE_DIR}/inc)
-
 add_library(oni-core-utils file.cpp)
+
+target_compile_features(oni-core-utils
+        PUBLIC
+            cxx_std_17
+        )
+
+target_include_directories(oni-core-utils
+        PUBLIC
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
+        )

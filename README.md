@@ -1,22 +1,69 @@
-# Windows (Does not work at the moment)
-```
-mkdir build
-cd build 
-cmake -G "Visual Studio 15 2017" ..
-```
-
 # Linux Debian/Ubuntu
 ```
-sudo apt install libgl1-mesa-dev     \
-                 libglu1-mesa-dev    \
-                 libglfw3-dev        \
-                 libglew-dev         \
-                 libopenal-dev       \
-                 libsdl2-dev         \
-                 libfreeimage3       \
-                 libfreeimage-dev    \
-                 libfreetype6        \
-                 libfreetype6-dev
+sudo apt install gcc 		\
+		 g++		\
+		 make		\
+		 cmake 		\
+		 libx11-dev	\
+		 xorg-dev
+
+sudo apt install linux-headers-`uname -r`
+
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo apt-add-repository deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main
+sudo apt update
+sudo apt install clang-7
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-7 100
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-7 100
+```
+# Build the dependency sub-modules
+## Build GLFW
+```
+cd lib/glfw
+mkdir build
+cd build
+cmake ..
+make
+```
+## Build GLEW
+```
+cd lib/glew
+cd auto
+make
+cd ..
+make glew.lib
+```
+## Build Box2D
+```
+cd lib/box2d
+./premake gmake
+make -C Build
+```
+## Build Enet
+```
+cd lib/enet
+mkdir build
+cd build
+cmake ..
+make
+```
+## Build Freetype2
+```
+cd lib/freetype2
+mkdir build-cmake
+cd build-cmake
+cmake ..
+make
+```
+## Build Freeimage
+```
+cd lib/freeimage
+# add -Wno-narrowing to CXX flags of the paltform you are compiling for, e.g., Makefile.gnu
+CC=clang CXX=clang++ make -j 8
+```
+# Windows
+```
+*To be added*
 ```
 # Note on OpenGL drivers on Linux
 If mesa installation doesn't work, try https://askubuntu.com/questions/61396/how-do-i-install-the-nvidia-drivers
@@ -45,3 +92,4 @@ kcachegrind gpprof.callgrind.out
 ## Using CCache
 `apt install ccache`
 and use `usr/lib/ccache/gcc` and `usr/lib/ccache/g++` as the compilers for the project
+

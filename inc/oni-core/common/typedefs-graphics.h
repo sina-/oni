@@ -4,13 +4,24 @@
 
 namespace oni {
     namespace common{
-        typedef common::uint32 oniGLuint;
-        typedef common::int32 oniGLint;
-        typedef common::uint32 oniGLenum;
-        typedef common::real32 oniGLfloat;
-        typedef common::int32 oniGLsizei;
-        typedef common::uint8 oniGLboolean;
-        typedef std::ptrdiff_t oniGLsizeiptr;
+        typedef unsigned int oniGLenum;
+        typedef unsigned int oniGLbitfield;
+        typedef unsigned int oniGLuint;
+        typedef int oniGLint;
+        typedef int oniGLsizei;
+        typedef unsigned char oniGLboolean;
+        typedef signed char oniGLbyte;
+        typedef short oniGLshort;
+        typedef unsigned char oniGLubyte;
+        typedef unsigned short oniGLushort;
+        typedef unsigned long oniGLulong;
+        typedef float oniGLfloat;
+        typedef float oniGLclampf;
+        typedef double oniGLdouble;
+        typedef double oniGLclampd;
+        typedef char oniGLchar;
         typedef void oniGLvoid;
+        typedef std::ptrdiff_t oniGLintptr;
+        typedef std::ptrdiff_t oniGLsizeiptr;
     }
 }

@@ -4,6 +4,7 @@
 
 #include <ftgl/texture-atlas.h>
 #include <FreeImage.h>
+#include <GL/glew.h>
 
 #include <oni-core/graphics/font-manager.h>
 
@@ -15,8 +16,8 @@ namespace oni {
 
         TextureManager::~TextureManager() = default;
 
-        void TextureManager::bindRange(GLuint first, const std::vector<GLuint> &textures) {
-            glBindTextures(first, static_cast<GLsizei>(textures.size()), textures.data());
+        void TextureManager::bindRange(common::oniGLuint first, const std::vector<common::oniGLuint> &textures) {
+            glBindTextures(first, static_cast<common::oniGLsizei>(textures.size()), textures.data());
         }
 
         const components::Texture *TextureManager::findOrLoad(const std::string &path) {
@@ -41,32 +42,32 @@ namespace oni {
             if (fif == FIF_UNKNOWN)
                 fif = FreeImage_GetFIFFromFilename(path.c_str());
             if (fif == FIF_UNKNOWN) {
-                std::runtime_error("Could not determine image type: " + path);
+                throw std::runtime_error("Could not determine image type: " + path);
             }
 
             if (FreeImage_FIFSupportsReading(fif))
                 dib = FreeImage_Load(fif, path.c_str());
             if (!dib) {
-                std::runtime_error("Could load image: " + path);
+                throw std::runtime_error("Could load image: " + path);
             }
 
             auto bits = FreeImage_GetBits(dib);
-            auto width = static_cast<GLsizei>(FreeImage_GetWidth(dib));
-            auto height = static_cast<GLsizei >(FreeImage_GetHeight(dib));
+            auto width = static_cast<common::oniGLsizei>(FreeImage_GetWidth(dib));
+            auto height = static_cast<common::oniGLsizei >(FreeImage_GetHeight(dib));
 
             if ((bits == nullptr) || (width == 0) || (height == 0)) {
-                std::runtime_error("Image loaded with no data: " + path);
+                throw std::runtime_error("Image loaded with no data: " + path);
             }
 
-            GLuint textureID = 0;
+            common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
             if (!textureID) {
                 throw std::runtime_error("Could not generate texture.");
             }
 
-            GLenum format = GL_BGRA;
-            GLenum type = GL_UNSIGNED_BYTE;
+            common::oniGLenum format = GL_BGRA;
+            common::oniGLenum type = GL_UNSIGNED_BYTE;
 
             bind(textureID);
 
@@ -108,8 +109,8 @@ namespace oni {
         }
 
         void TextureManager::updateSubTexture(const components::Texture &texture,
-                                              const GLint xOffset, const GLint yOffset,
-                                              GLint width, GLint height,
+                                              const common::oniGLint xOffset, const common::oniGLint yOffset,
+                                              common::oniGLint width, common::oniGLint height,
                                               const std::vector<common::uint8> &bits) {
             assert(texture.width > xOffset);
             assert(texture.height > yOffset);
@@ -134,22 +135,22 @@ namespace oni {
                                 bits.data());
         }
 
-        GLuint TextureManager::load(const graphics::FontManager &fontManager) {
+        common::oniGLuint TextureManager::load(const graphics::FontManager &fontManager) {
             // TODO: There is no caching in this function!
 
-            auto width = static_cast<GLsizei>(fontManager.getAtlasWidth());
-            auto height = static_cast<GLsizei>(fontManager.getAtlasHeight());
+            auto width = static_cast<common::oniGLsizei>(fontManager.getAtlasWidth());
+            auto height = static_cast<common::oniGLsizei>(fontManager.getAtlasHeight());
 
-            GLuint textureID = 0;
+            common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
             if (!textureID) {
                 throw std::runtime_error("Could not generate texture.");
             }
 
-            GLint internalFormat = GL_RED;
-            GLenum format = GL_RED;
-            GLenum type = GL_UNSIGNED_BYTE;
+            common::oniGLint internalFormat = GL_RED;
+            common::oniGLenum format = GL_RED;
+            common::oniGLenum type = GL_UNSIGNED_BYTE;
 
             bind(textureID);
 
@@ -170,7 +171,7 @@ namespace oni {
             return mTextureMap.find(path) != mTextureMap.end();
         }
 
-        void TextureManager::bind(GLuint textureID) {
+        void TextureManager::bind(common::oniGLuint textureID) {
             glBindTexture(GL_TEXTURE_2D, textureID);
         }
 
@@ -180,15 +181,15 @@ namespace oni {
 
         components::Texture TextureManager::loadFromData(common::uint16 width, common::uint16 height,
                                                          const std::vector<common::uint8> &data) {
-            GLuint textureID = 0;
+            common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
             if (!textureID) {
                 throw std::runtime_error("Could not generate texture.");
             }
 
-            GLenum format = GL_BGRA;
-            GLenum type = GL_UNSIGNED_BYTE;
+            common::oniGLenum format = GL_BGRA;
+            common::oniGLenum type = GL_UNSIGNED_BYTE;
 
             bind(textureID);
 

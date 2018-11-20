@@ -3,6 +3,7 @@
 #include <thread>
 #include <iostream>
 
+#include <oni-core/utils/timer.h>
 #include <oni-core/common/consts.h>
 
 namespace oni {

@@ -6,21 +6,21 @@ target_compile_features(oni-core-graphics
         )
 
 target_compile_definitions(oni-core-graphics
-        PUBLIC
+        PRIVATE
             GLEW_NO_GLU
         )
 
 target_include_directories(oni-core-graphics
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glfw/include>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glew/include>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
         PRIVATE SYSTEM
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/freetype-gl/include>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/freeimage/Source>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/freetype2/include>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/ant-tweak-bar/include>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glew/include>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glfw/include>
         )
 
 find_library(ANT_TWEAK_BAR AntTweakBar PATHS ${oni_SOURCE_DIR}/lib/ant-tweak-bar/bin)
@@ -29,16 +29,16 @@ find_library(FREETYPE_LIBRARY freetype PATHS ${oni_SOURCE_DIR}/lib/freetype2/bui
 find_library(FREEIMAGE_LIBRARY freeimage PATHS ${oni_SOURCE_DIR}/lib/freeimage)
 find_library(GLFW_LIBRARY glfw3 PATHS ${oni_SOURCE_DIR}/lib/glfw/build/src)
 find_library(GLEW_LIBRARY GLEW PATHS ${oni_SOURCE_DIR}/lib/glew/lib)
+find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug)
 
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
 
 target_link_libraries(oni-core-graphics
-        PUBLIC
+        PRIVATE
             ${GLFW_LIBRARY}
             ${GLEW_LIBRARY}
-        PRIVATE
             # Not sure why this is needed, but bunch of GLFW linking fails without it
             ${CMAKE_DL_LIBS}
             ${X11_LIBRARIES}
@@ -47,9 +47,10 @@ target_link_libraries(oni-core-graphics
             # NOTE: FreeType must be linked after freetype-gl because fucking g++
             ${FREETYPE_LIBRARY}
             ${OPENGL_LIBRARY}
+            ${ANT_TWEAK_BAR}
+            ${BOX2D_LIBRARY}
             # NOTE: For some reason when building glfw from source these are not linked into the binary...
             Xinerama Xrandr Xcursor Xxf86vm
-            ${ANT_TWEAK_BAR}
             oni-core-buffers
             oni-core-math
             oni-core-io

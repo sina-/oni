@@ -2,8 +2,6 @@
 
 #include <map>
 
-#include <GL/glew.h>
-
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/components/buffer.h>
 #include <oni-core/common/typedefs.h>
@@ -29,8 +27,8 @@ namespace oni {
 
         class BatchRenderer2D : public Renderer2D {
         public:
-            BatchRenderer2D(const GLsizei maxSpriteCount, const GLsizei maxNumTextureSamplers,
-                            const GLsizei maxVertexSize,
+            BatchRenderer2D(common::oniGLsizei maxSpriteCount, common::oniGLsizei maxNumTextureSamplers,
+                            common::oniGLsizei maxVertexSize,
                             components::BufferStructures bufferStructures);
 
             ~BatchRenderer2D() override;
@@ -39,7 +37,7 @@ namespace oni {
 
             BatchRenderer2D &operator=(BatchRenderer2D &) = delete;
 
-            std::vector<GLint> generateSamplerIDs();
+            std::vector<common::oniGLint> generateSamplerIDs();
 
         private:
             void _begin() override;
@@ -63,27 +61,27 @@ namespace oni {
              * in the vertex buffer. During rendering in the shader the proper sampler is selected based
              * on the sampler id in the buffer.
              */
-            GLint getSamplerID(GLuint textureID);
+            common::oniGLint getSamplerID(common::oniGLuint textureID);
 
         private:
             // Actual number of indices used.
-            GLsizei mIndexCount;
+            common::oniGLsizei mIndexCount;
 
-            GLsizei mMaxSpriteCount;
-            GLsizei mMaxVertexSize;
-            const GLint mMaxNumTextureSamplers;
-            GLsizei mMaxIndicesCount;
-            GLsizei mMaxSpriteSize;
-            GLsizei mMaxBufferSize;
+            common::oniGLsizei mMaxSpriteCount;
+            common::oniGLsizei mMaxVertexSize;
+            const common::oniGLint mMaxNumTextureSamplers;
+            common::oniGLsizei mMaxIndicesCount;
+            common::oniGLsizei mMaxSpriteSize;
+            common::oniGLsizei mMaxBufferSize;
 
-            GLuint mVDO;
+            common::oniGLuint mVDO;
 
             std::unique_ptr<buffers::VertexArray> mVAO;
             std::unique_ptr<buffers::IndexBuffer> mIBO;
 
-            GLint mNextSamplerID{0};
-            std::vector<GLint> mSamplers{};
-            std::vector<GLuint> mTextures{};
+            common::oniGLint mNextSamplerID{0};
+            std::vector<common::oniGLint> mSamplers{};
+            std::vector<common::oniGLuint> mTextures{};
 
             // The buffer that will hold components::Vertex data, or its variants, in the batch.
             void *mBuffer;

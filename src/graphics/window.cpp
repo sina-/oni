@@ -1,6 +1,13 @@
+#include <oni-core/graphics/window.h>
+
+#include <stdexcept>
+
+#define GLEW_STATIC
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <AntTweakBar.h>
 
-#include <oni-core/graphics/window.h>
 #include <oni-core/common/defines.h>
 
 namespace oni {
@@ -103,7 +110,7 @@ namespace oni {
                 throw std::runtime_error("OpenGL error!");
             } else {
                 //fprintf(stderr, "GL CALLBACK: type = 0x%x, severity = 0x%x, source = 0x%x,message = %s\n",
-                 //       type, severity, source, message);
+                //       type, severity, source, message);
             }
         }
 
@@ -170,6 +177,10 @@ namespace oni {
 
         void Window::display() {
             glfwSwapBuffers(mWindow);
+        }
+
+        Window *Window::getThisFromGLFWWindow(GLFWwindow *window) {
+            return reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
         }
 
     }

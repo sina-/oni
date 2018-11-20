@@ -1,7 +1,8 @@
 #include <oni-core/graphics/scene-manager.h>
 
+#include <GL/glew.h>
+
 #include <oni-core/graphics/shader.h>
-#include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/texture-manager.h>
 #include <oni-core/physics/transformation.h>

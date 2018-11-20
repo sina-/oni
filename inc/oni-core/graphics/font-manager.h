@@ -2,9 +2,8 @@
 
 #include <memory>
 
-#include <GL/glew.h>
-
 #include <oni-core/math/vec3.h>
+#include <oni-core/common/typedefs-graphics.h>
 
 namespace ftgl {
     class texture_atlas_t;
@@ -50,7 +49,7 @@ namespace oni {
 
             unsigned char *getAtlasData() const;
 
-            GLuint getTextureID() const;
+            common::oniGLuint getTextureID() const;
 
         private:
             const ftgl::texture_glyph_t *findGlyph(const char &character) const;

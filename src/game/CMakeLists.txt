@@ -5,12 +5,12 @@ target_compile_features(oni-core-game
             cxx_std_17
         )
 
-find_package(Threads REQUIRED)
-
 target_include_directories(oni-core-game
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
         )
+
+find_package(Threads REQUIRED)
 
 target_link_libraries(oni-core-game
         PRIVATE

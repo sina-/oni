@@ -1,6 +1,7 @@
 #include <oni-core/physics/dynamics.h>
 
 #include <Box2D/Box2D.h>
+#include <GLFW/glfw3.h>
 
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/physics/car.h>

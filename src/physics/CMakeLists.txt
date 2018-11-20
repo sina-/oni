@@ -12,13 +12,16 @@ target_include_directories(oni-core-physics
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glfw/include>
         )
 
 find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug)
+find_library(GLFW_LIBRARY glfw3 PATHS ${oni_SOURCE_DIR}/lib/glfw/build/src)
 
 target_link_libraries(oni-core-physics
         PRIVATE
             ${BOX2D_LIBRARY}
+            ${GLFW_LIBRARY}
             oni-core-entities
             oni-core-graphics
         )

@@ -1,10 +1,11 @@
 #include <numeric>
 #include <cassert>
 
+#include <GL/glew.h>
+
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/utils/index-buffer-gen.h>
 #include <oni-core/graphics/texture-manager.h>
-#include <oni-core/io/input.h>
 #include <oni-core/buffers/buffer.h>
 #include <oni-core/buffers/index-buffer.h>
 #include <oni-core/buffers/vertex-array.h>
@@ -12,8 +13,9 @@
 
 namespace oni {
     namespace graphics {
-        BatchRenderer2D::BatchRenderer2D(const GLsizei maxSpriteCount, const GLint maxNumTextureSamplers,
-                                         const GLsizei maxVertexSize,
+        BatchRenderer2D::BatchRenderer2D(const common::oniGLsizei maxSpriteCount,
+                                         const common::oniGLint maxNumTextureSamplers,
+                                         const common::oniGLsizei maxVertexSize,
                                          components::BufferStructures bufferStructures)
                 : mIndexCount{0},
                   mMaxSpriteCount{maxSpriteCount},
@@ -30,11 +32,12 @@ namespace oni {
             mMaxSpriteSize = mMaxVertexSize * 4;
             mMaxBufferSize = mMaxSpriteSize * mMaxSpriteCount;
 
-            auto vbo = std::make_unique<buffers::Buffer>(std::vector<GLfloat>(), mMaxBufferSize, GL_STATIC_DRAW,
+            auto vbo = std::make_unique<buffers::Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
+                                                         GL_STATIC_DRAW,
                                                          std::move(bufferStructures));
             mVAO = std::make_unique<buffers::VertexArray>(std::move(vbo));
 
-            std::vector<GLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
+            std::vector<common::oniGLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
 
             /**
              * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
@@ -53,7 +56,7 @@ namespace oni {
 
                 offset += 4;
             }*/
-            IndexBufferGen<GLuint> gen;
+            IndexBufferGen<common::oniGLuint> gen;
             std::generate(indices.begin(), indices.end(), gen);
 
             mIBO = std::make_unique<buffers::IndexBuffer>(indices, mMaxIndicesCount);
@@ -235,7 +238,7 @@ namespace oni {
             begin();
         }
 
-        GLint BatchRenderer2D::getSamplerID(GLuint textureID) {
+        common::oniGLint BatchRenderer2D::getSamplerID(common::oniGLuint textureID) {
             auto it = std::find(mTextures.begin(), mTextures.end(), textureID);
             if (it == mTextures.end()) {
                 /*
@@ -254,8 +257,8 @@ namespace oni {
             }
         }
 
-        std::vector<GLint> BatchRenderer2D::generateSamplerIDs() {
-            std::vector<GLint> samplers;
+        std::vector<common::oniGLint> BatchRenderer2D::generateSamplerIDs() {
+            std::vector<common::oniGLint> samplers;
             samplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(samplers.begin(), samplers.end(), 0);

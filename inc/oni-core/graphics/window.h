@@ -1,14 +1,9 @@
 #pragma once
 
-#include <stdexcept>
-#include <functional>
-
-#define GLEW_STATIC
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <oni-core/io/input.h>
+#include <oni-core/common/typedefs-graphics.h>
+
+class GLFWwindow;
 
 namespace oni {
     namespace graphics {
@@ -80,9 +75,7 @@ namespace oni {
 
             const oni::common::real64 &getCursorY() const { return mCursorY; }
 
-            static Window *getThisFromGLFWWindow(GLFWwindow *window) {
-                return reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
-            }
+            static Window *getThisFromGLFWWindow(GLFWwindow *window);
 
             static void windowResizeCallback(GLFWwindow *window, common::int32 width, common::int32 height);
 
@@ -95,12 +88,12 @@ namespace oni {
             static void cursorPosCallback(GLFWwindow *window, oni::common::real64 x, oni::common::real64 y);
 
         private:
-            static void messageCallback(GLenum source,
-                                        GLenum type,
-                                        GLuint id,
-                                        GLenum severity,
-                                        GLsizei length,
-                                        const GLchar *message,
+            static void messageCallback(common::oniGLenum source,
+                                        common::oniGLenum type,
+                                        common::oniGLuint id,
+                                        common::oniGLenum severity,
+                                        common::oniGLsizei length,
+                                        const common::oniGLchar *message,
                                         const void *userParam);
 
         };

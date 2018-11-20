@@ -4,9 +4,7 @@
 #include <memory>
 
 #include <oni-core/components/visual.h>
-#include <oni-core/components/buffer.h>
 #include <oni-core/math/mat4.h>
-#include <oni-core/entities/tile-world.h>
 
 namespace oni {
     namespace math {
@@ -15,6 +13,10 @@ namespace oni {
 
     namespace entities {
         class EntityManager;
+    }
+
+    namespace components{
+        struct Shape;
     }
 
     namespace graphics {

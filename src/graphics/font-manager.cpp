@@ -5,7 +5,6 @@
 #include <ftgl/texture-atlas.h>
 #include <ftgl/freetype-gl.h>
 
-#include <oni-core/components/visual.h>
 #include <oni-core/graphics/texture-manager.h>
 
 namespace oni {

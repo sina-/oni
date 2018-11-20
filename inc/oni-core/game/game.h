@@ -2,7 +2,6 @@
 
 #include <atomic>
 
-#include <oni-core/utils/timer.h>
 #include <oni-core/common/typedefs.h>
 
 namespace oni {

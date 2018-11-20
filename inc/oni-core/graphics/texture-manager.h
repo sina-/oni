@@ -4,8 +4,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include <GL/glew.h>
-
 #include <oni-core/components/visual.h>
 
 namespace oni {
@@ -20,7 +18,7 @@ namespace oni {
             ~TextureManager();
 
             // TODO: This function doesnt fit in the current design
-            static void bindRange(GLuint first, const std::vector<GLuint> &textures);
+            static void bindRange(common::oniGLuint first, const std::vector<common::oniGLuint> &textures);
 
             static void unbind();
 
@@ -35,9 +33,9 @@ namespace oni {
              * @param height in local texture coordinates
              * @param bits data to overwrite the texture with, must match the given region
              */
-            void updateSubTexture(const components::Texture &texture, GLint xOffset,
-                                  GLint yOffset, GLint width,
-                                  GLint height,
+            void updateSubTexture(const components::Texture &texture, common::oniGLint xOffset,
+                                  common::oniGLint yOffset, common::oniGLint width,
+                                  common::oniGLint height,
                                   const std::vector<common::uint8> &bits);
 
             const components::Texture *findOrLoad(const std::string &path);
@@ -51,7 +49,7 @@ namespace oni {
                                                            const components::PixelRGBA &pixel);
 
             // TODO: This function doesnt fit in the current design
-            static GLuint load(const graphics::FontManager &fontManager);
+            static common::oniGLuint load(const graphics::FontManager &fontManager);
 
             size_t numLoadedTexture() const;
 
@@ -60,7 +58,7 @@ namespace oni {
 
             const components::Texture *load(const std::string &path);
 
-            static void bind(GLuint textureID);
+            static void bind(common::oniGLuint textureID);
 
 
         private:

@@ -14,16 +14,10 @@ target_include_directories(oni-server-game
 
 target_link_libraries(oni-server-game
         PRIVATE
-            oni-core-buffers
             oni-core-entities
             oni-core-gameplay
             oni-core-game
-            oni-core-graphics
-            oni-core-math
-            oni-core-io
             oni-core-network
-            oni-core-physics
-            oni-core-utils
         )
 
 add_dependencies(oni-server-game

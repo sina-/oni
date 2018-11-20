@@ -9,9 +9,8 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/entities/tile-world.h>
-#include <oni-core/network/client.h>
-#include <oni-core/network/server.h>
 #include <oni-core/entities/client-data-manager.h>
+#include <oni-core/network/server.h>
 
 
 namespace oni {

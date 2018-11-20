@@ -2,17 +2,12 @@
 
 #include <thread>
 
-#include <oni-core/entities/create-entity.h>
-#include <oni-core/io/output.h>
-#include <oni-core/audio/audio-manager-fmod.h>
-#include <oni-core/physics/transformation.h>
 #include <oni-core/components/visual.h>
 #include <oni-core/common/consts.h>
-#include <oni-core/entities/manage-hierarchy.h>
-#include <oni-core/entities/serialization.h>
-#include <oni-core/network/server.h>
-#include <oni-core/io/input.h>
+#include <oni-core/entities/create-entity.h>
+#include <oni-core/physics/transformation.h>
 #include <oni-core/gameplay/lap-tracker.h>
+#include <oni-core/entities/manage-hierarchy.h>
 
 
 namespace oni {

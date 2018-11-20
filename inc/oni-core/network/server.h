@@ -2,7 +2,6 @@
 
 #include <map>
 
-#include <enet/enet.h>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/peer.h>

@@ -8,7 +8,6 @@ namespace oni {
     namespace io {
         class Input {
         public:
-
             Input();
 
             template<class Archive>

@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include <Box2D/Box2D.h>
+#include <enet/enet.h>
 #include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/network/packet.h>

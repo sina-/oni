@@ -1,7 +1,5 @@
 #pragma once
 
-#include <enet/enet.h>
-
 #include <oni-core/network/peer.h>
 
 namespace oni {

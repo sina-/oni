@@ -52,9 +52,12 @@ target_link_libraries(oni-core-graphics
             ${ANT_TWEAK_BAR}
             oni-core-buffers
             oni-core-io
+            oni-core-utils
             oni-core-entities
         )
 
 add_dependencies(oni-core-graphics
         oni-core-buffers
-        oni-core-io)
+        oni-core-io
+        oni-core-utils
+        )

@@ -21,8 +21,7 @@ target_include_directories(oni-core-buffers
         )
 
 target_link_libraries(oni-core-buffers
-        PUBLIC
-            ${GLEW_LIBRARY}
         PRIVATE
+            ${GLEW_LIBRARY}
             ${GLFW_LIBRARY}
         )

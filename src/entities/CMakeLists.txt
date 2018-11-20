@@ -14,16 +14,14 @@ target_include_directories(oni-core-entities
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
         )
 
+find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug)
+
 target_link_libraries(oni-core-entities
         PRIVATE
-            oni-core-graphics
+            ${BOX2D_LIBRARY}
             oni-core-physics
-            oni-core-math
-            oni-core-io
 )
 
 add_dependencies(oni-core-entities
-        oni-core-graphics
-        oni-core-math
-        oni-core-io
+        oni-core-physics
         )

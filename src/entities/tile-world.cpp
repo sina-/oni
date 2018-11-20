@@ -8,7 +8,6 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/physics/transformation.h>
-#include <oni-core/io/output.h>
 
 
 namespace oni {

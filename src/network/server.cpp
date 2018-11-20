@@ -2,25 +2,14 @@
 
 #include <oni-core/network/server.h>
 
-#include <stdexcept>
 #include <iostream>
-#include <iomanip>
 #include <cassert>
 
-#include <Box2D/Box2D.h>
 #include <enet/enet.h>
-#include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/network/packet.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/components/geometry.h>
-#include <oni-core/entities/manage-hierarchy.h>
-#include <oni-core/physics/dynamics.h>
-
-// TODO: This shouldn't be included here!
-#include <oni-core/graphics/debug-draw-box2d.h>
-#include <oni-core/components/world-data-status.h>
 
 
 namespace oni {
@@ -28,6 +17,8 @@ namespace oni {
         Server::Server(const Address *address, common::uint8 numClients, common::uint8 numChannels) :
                 Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
+
+        Server::Server() = default;
 
         Server::~Server() = default;
 

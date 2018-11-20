@@ -2,11 +2,9 @@
 
 #include <map>
 
-
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/peer.h>
 #include <oni-core/network/packet.h>
-#include <oni-core/io/input.h>
 
 namespace oni {
     namespace physics {

@@ -5,8 +5,6 @@
 #include <enet/enet.h>
 
 #include <oni-core/io/output.h>
-#include <oni-core/entities/serialization.h>
-#include <oni-core/components/geometry.h>
 #include <oni-core/io/input.h>
 #include <oni-core/utils/timer.h>
 

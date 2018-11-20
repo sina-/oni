@@ -4,10 +4,6 @@
 #include <memory>
 
 namespace oni {
-    namespace components {
-        class BufferStructure;
-    }
-
     namespace common {
         typedef std::int64_t int64;
         typedef std::int32_t int32;
@@ -30,7 +26,5 @@ namespace oni {
         typedef uint32 EntityID;
 
         typedef std::string PeerID;
-
-        using BufferStructures = typename std::vector<std::unique_ptr<const components::BufferStructure>>;
     }
 }

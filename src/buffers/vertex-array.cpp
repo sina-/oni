@@ -1,4 +1,7 @@
 #include <oni-core/buffers/buffer.h>
+
+#include <GL/glew.h>
+
 #include <oni-core/components/buffer.h>
 #include <oni-core/buffers/vertex-array.h>
 

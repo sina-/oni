@@ -2,13 +2,13 @@
 
 #include <vector>
 
-#include <GL/glew.h>
+#include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
     namespace buffers {
         class IndexBuffer {
         public:
-            IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size = 1);
+            IndexBuffer(const std::vector<common::oniGLuint> &data, common::oniGLuint count, common::oniGLsizei size = 1);
 
             IndexBuffer() = default;
 
@@ -18,12 +18,12 @@ namespace oni {
 
             void unbind() const;
 
-            GLuint getCount() const;
+            common::oniGLuint getCount() const;
 
         private:
-            GLuint mBufferID;
-            GLuint mCount;
-            GLsizei mSize;
+            common::oniGLuint mBufferID;
+            common::oniGLuint mCount;
+            common::oniGLsizei mSize;
         };
 
     }

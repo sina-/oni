@@ -36,5 +36,7 @@ namespace oni {
             GLsizei stride{0};
             const GLvoid *offset{nullptr};
         };
+
+        typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructures;
     }
 }

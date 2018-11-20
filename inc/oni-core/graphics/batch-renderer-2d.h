@@ -29,7 +29,7 @@ namespace oni {
         public:
             BatchRenderer2D(const GLsizei maxSpriteCount, const GLsizei maxNumTextureSamplers,
                             const GLsizei maxVertexSize,
-                            common::BufferStructures bufferStructures);
+                            components::BufferStructures bufferStructures);
 
             ~BatchRenderer2D() override;
 

@@ -14,7 +14,7 @@ namespace oni {
     namespace graphics {
         BatchRenderer2D::BatchRenderer2D(const GLsizei maxSpriteCount, const GLint maxNumTextureSamplers,
                                          const GLsizei maxVertexSize,
-                                         common::BufferStructures bufferStructures)
+                                         components::BufferStructures bufferStructures)
                 : mIndexCount{0},
                   mMaxSpriteCount{maxSpriteCount},
                   mMaxVertexSize{maxVertexSize},

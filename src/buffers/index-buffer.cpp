@@ -1,12 +1,15 @@
 #include <oni-core/buffers/index-buffer.h>
 
+#include <GL/glew.h>
+
 #include <stdexcept>
 
 namespace oni {
     namespace buffers {
-        IndexBuffer::IndexBuffer(const std::vector<GLuint> &data, GLuint count, GLsizei size) : mBufferID{0},
-                                                                                                mCount{count},
-                                                                                                mSize{size} {
+        IndexBuffer::IndexBuffer(const std::vector<common::oniGLuint> &data, common::oniGLuint count,
+                                 common::oniGLsizei size) : mBufferID{0},
+                                                            mCount{count},
+                                                            mSize{size} {
             auto dataSize = count * sizeof(GLuint);
 
             glGenBuffers(size, &mBufferID);
@@ -38,7 +41,7 @@ namespace oni {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        GLuint IndexBuffer::getCount() const {
+        common::oniGLuint IndexBuffer::getCount() const {
             return mCount;
         }
 

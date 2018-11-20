@@ -1,10 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <memory>
-#include <utility>
 
-#include <GL/glew.h>
+#include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
     namespace buffers {
@@ -26,7 +24,7 @@ namespace oni {
             void unbindVBO() const;
 
         private:
-            GLuint mArrayID;
+            common::oniGLuint mArrayID;
             std::unique_ptr<Buffer> mVertexBuffers;
         };
 

@@ -2,24 +2,28 @@
 
 #include <vector>
 
-#include <GL/glew.h>
-
 #include <oni-core/common/typedefs.h>
+#include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
+    namespace components {
+        struct BufferStructure;
+        typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructures;
+    }
+
     namespace buffers {
 
         /*
          * Great tutorial on OpenGL buffers: https://open.gl/drawing
          */
         class Buffer {
-            GLuint mBufferID;
+            common::oniGLuint mBufferID;
             // TODO: This is un-used by the Buffer class, but VAO which usually has this class uses it.
-            common::BufferStructures mBufferStructures;
+            components::BufferStructures mBufferStructures;
 
         public:
-            Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
-                   common::BufferStructures bufferStructures);
+            Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize, common::oniGLenum usage,
+                   components::BufferStructures bufferStructures);
 
             ~Buffer();
 
@@ -35,7 +39,7 @@ namespace oni {
 
             void unbind();
 
-            const common::BufferStructures &getBufferStructure() const;
+            const components::BufferStructures &getBufferStructure() const;
         };
 
     }

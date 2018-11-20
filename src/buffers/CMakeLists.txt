@@ -6,7 +6,7 @@ target_compile_features(oni-core-buffers
         )
 
 target_compile_definitions(oni-core-buffers
-        PUBLIC
+        PRIVATE
             GLEW_NO_GLU
         )
 
@@ -16,6 +16,7 @@ find_library(GLEW_LIBRARY GLEW PATHS ${oni_SOURCE_DIR}/lib/glew/lib)
 target_include_directories(oni-core-buffers
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
+        PRIVATE
             ${oni_SOURCE_DIR}/lib/glew/include
         )
 

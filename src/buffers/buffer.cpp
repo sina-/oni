@@ -1,12 +1,15 @@
 #include <oni-core/buffers/buffer.h>
-#include <oni-core/components/buffer.h>
 
 #include <cassert>
 
+#include <GL/glew.h>
+
+#include <oni-core/components/buffer.h>
+
 namespace oni {
     namespace buffers {
-        Buffer::Buffer(const std::vector<GLfloat> &data, GLsizeiptr dataSize, GLenum usage,
-                       common::BufferStructures bufferStructures)
+        Buffer::Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize,
+                       common::oniGLenum usage, components::BufferStructures bufferStructures)
                 : mBufferStructures(std::move(bufferStructures)) {
             // Check for supported usages.
             assert(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW);
@@ -39,7 +42,7 @@ namespace oni {
 
         void Buffer::unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
-        const common::BufferStructures &Buffer::getBufferStructure() const {
+        const components::BufferStructures &Buffer::getBufferStructure() const {
             return mBufferStructures;
         }
     }

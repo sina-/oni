@@ -3,8 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <GL/glew.h>
-
+#include <oni-core/common/typedefs-graphics.h>
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
@@ -23,18 +22,18 @@ namespace oni {
 
         struct TexturedVertex {
             math::vec3 position{0.0f, 0.0f, 0.0f};
-            GLint samplerID{0};
+            common::oniGLint samplerID{0};
             // TODO: use UNSIGNED_SHORT
             math::vec2 uv{0.0f, 0.0f};
         };
 
         struct BufferStructure {
-            GLuint index{0};
-            GLint componentCount{0};
-            GLenum componentType{0};
-            GLboolean normalized{0};
-            GLsizei stride{0};
-            const GLvoid *offset{nullptr};
+            common::oniGLuint index{0};
+            common::oniGLint componentCount{0};
+            common::oniGLenum componentType{0};
+            common::oniGLboolean normalized{0};
+            common::oniGLsizei stride{0};
+            const common::oniGLvoid *offset{nullptr};
         };
 
         typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructures;

@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include <GL/glew.h>
+
 #include <oni-core/graphics/renderer-2d.h>
 #include <oni-core/components/buffer.h>
 #include <oni-core/common/typedefs.h>

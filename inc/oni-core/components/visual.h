@@ -3,13 +3,12 @@
 #include <utility>
 #include <vector>
 
-#include <GL/glew.h>
-
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
+#include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
     namespace components {
@@ -44,11 +43,13 @@ namespace oni {
 
         struct Texture {
             // TODO: This might need re ordering for better caching.
-            GLsizei width{0};
-            GLsizei height{0};
-            GLuint textureID{0};
-            GLenum format{GL_BGRA};
-            GLenum type{GL_UNSIGNED_BYTE};
+            common::oniGLsizei width{0};
+            common::oniGLsizei height{0};
+            common::oniGLuint textureID{0};
+            // GL_BGRA
+            common::oniGLenum format{0x80E1};
+            // GL_UNSIGNED_BYTE
+            common::oniGLenum type{0x1401};
             std::string filePath{};
             std::vector<math::vec2> uv{math::vec2{0.0f, 0.0f}, math::vec2{1.0f, 0.0f},
                                        math::vec2{1.0f, 1.0f}, math::vec2{0.0f, 1.0f}};
@@ -63,7 +64,7 @@ namespace oni {
 
         struct Text {
             // TODO: ordering?
-            GLuint textureID{0};
+            common::oniGLuint textureID{0};
             math::vec3 position{0.0f, 0.0f, 0.0f};
             std::string textContent{};
             std::vector<size_t> width{};

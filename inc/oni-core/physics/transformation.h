@@ -1,8 +1,7 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/geometry.h>
-#include <oni-core/components/hierarchy.h>
+#include <oni-core/math/mat4.h>
 
 namespace oni {
 
@@ -17,6 +16,8 @@ namespace oni {
     }
     namespace components {
         struct Shape;
+        struct Placement;
+        struct TransformParent;
     }
     namespace physics {
         class Transformation {

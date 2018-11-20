@@ -9,6 +9,8 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/common/consts.h>
+#include <oni-core/components/geometry.h>
+#include <oni-core/components/hierarchy.h>
 
 
 namespace oni {

@@ -4,10 +4,14 @@
 
 #include <oni-core/components/visual.h>
 #include <oni-core/common/consts.h>
-#include <oni-core/entities/create-entity.h>
-#include <oni-core/physics/transformation.h>
 #include <oni-core/gameplay/lap-tracker.h>
+#include <oni-core/physics/dynamics.h>
+#include <oni-core/network/server.h>
+#include <oni-core/entities/create-entity.h>
 #include <oni-core/entities/manage-hierarchy.h>
+#include <oni-core/entities/client-data-manager.h>
+#include <oni-core/entities/entity-manager.h>
+#include <oni-core/entities/tile-world.h>
 
 
 namespace oni {

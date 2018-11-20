@@ -6,6 +6,11 @@ set(oni_SOURCE_DIR ${oni-server_SOURCE_DIR}/..)
 
 add_executable(oni-server ${oni-server_SOURCE_DIR}/main.cpp)
 
+target_compile_features(oni-server
+        PUBLIC
+            cxx_std_17
+        )
+
 subdirs(${oni_SOURCE_DIR}/src/network)
 subdirs(${oni_SOURCE_DIR}/src/entities)
 subdirs(${oni_SOURCE_DIR}/src/gameplay)
@@ -21,18 +26,7 @@ subdirs(${oni-server_SOURCE_DIR}/src)
 
 target_include_directories(oni-server
         PRIVATE
-            $<BUILD_INTERFACE:${oni-server_SOURCE_DIR}/inc>
-
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/enet/include>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d/Box2D>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
-        )
-
-target_compile_features(oni-server
-        PUBLIC
-            cxx_std_17
         )
 
 target_link_libraries(oni-server

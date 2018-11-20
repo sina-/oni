@@ -8,7 +8,6 @@ target_compile_features(oni-server-game
 target_include_directories(oni-server-game
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
-        PRIVATE
             $<BUILD_INTERFACE:${oni-server_SOURCE_DIR}/inc>
         )
 
@@ -18,8 +17,11 @@ target_link_libraries(oni-server-game
             oni-core-gameplay
             oni-core-game
             oni-core-network
+            oni-core-physics
         )
 
 add_dependencies(oni-server-game
         oni-core-network
+        oni-core-physics
+        oni-core-entities
         )

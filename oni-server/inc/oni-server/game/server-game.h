@@ -2,18 +2,33 @@
 
 #include <memory>
 
-#include <oni-core/gameplay/lap-tracker.h>
 #include <oni-core/game/game.h>
-#include <oni-core/physics/dynamics.h>
 #include <oni-core/common/typedefs.h>
-#include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/geometry.h>
-#include <oni-core/entities/tile-world.h>
-#include <oni-core/entities/client-data-manager.h>
-#include <oni-core/network/server.h>
+#include <oni-core/network/peer.h>
 
 
 namespace oni {
+    namespace gameplay {
+        class LapTracker;
+    }
+
+    namespace network {
+        class Server;
+    }
+
+    namespace entities {
+        class EntityManager;
+
+        class ClientDataManager;
+
+        class TileWorld;
+    }
+
+    namespace physics {
+        class Dynamics;
+    }
+
     namespace server {
 
         class ServerGame : public game::Game {

@@ -2,6 +2,7 @@
 
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/hierarchy.h>
+#include <oni-core/components/geometry.h>
 
 namespace oni {
     namespace physics {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <algorithm>
 
 #include <oni-core/common/typedefs.h>
 

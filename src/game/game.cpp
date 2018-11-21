@@ -37,13 +37,13 @@ namespace oni {
         }
 
         void Game::sim() {
-            utils::HighResolutionTimer simTimer{};
-            utils::HighResolutionTimer loopTimer{};
+            utils::Timer simTimer{};
+            utils::Timer loopTimer{};
             common::uint16 updateCounter{0};
             common::real64 excessPerSecond{0.0f};
 
             while (!mShouldTerminate) {
-                auto elapsed = loopTimer.elapsed();
+                auto elapsed = loopTimer.elapsed_in_seconds();
                 if (elapsed >= 1.0f) {
                     auto sps = updateCounter / elapsed;
                     auto set = excessPerSecond / elapsed;
@@ -59,7 +59,7 @@ namespace oni {
 
                 _sim(mSimMS);
 
-                auto simDuration = simTimer.elapsed();
+                auto simDuration = simTimer.elapsed_in_seconds();
                 auto excess = mSimMS - simDuration;
                 excess *= 1000;
 
@@ -76,13 +76,13 @@ namespace oni {
         }
 
         void Game::poll() {
-            utils::HighResolutionTimer pollTimer{};
-            utils::HighResolutionTimer loopTimer{};
+            utils::Timer pollTimer{};
+            utils::Timer loopTimer{};
             common::uint16 updateCounter{0};
             common::real64 excessPerSecond{0.0f};
 
             while (!mShouldTerminate) {
-                auto elapsed = loopTimer.elapsed();
+                auto elapsed = loopTimer.elapsed_in_seconds();
                 if (elapsed >= 1.0f) {
                     auto pps = updateCounter / elapsed;
                     auto pet = excessPerSecond / elapsed;
@@ -98,7 +98,7 @@ namespace oni {
 
                 _poll();
 
-                auto pollDuration = pollTimer.elapsed();
+                auto pollDuration = pollTimer.elapsed_in_seconds();
                 auto excess = mPollMS - pollDuration;
                 excess *= 1000;
 
@@ -115,15 +115,15 @@ namespace oni {
         }
 
         void Game::render() {
-            utils::HighResolutionTimer renderTimer{};
-            utils::HighResolutionTimer loopTimer{};
+            utils::Timer renderTimer{};
+            utils::Timer loopTimer{};
             common::uint16 updateCounter{0};
             common::real64 excessPerSecond{0.0f};
 
             initRenderer();
 
             while (!mShouldTerminate) {
-                auto elapsed = loopTimer.elapsed();
+                auto elapsed = loopTimer.elapsed_in_seconds();
                 if (elapsed >= 1.0f) {
                     auto fps = updateCounter / elapsed;
                     auto ret = excessPerSecond / elapsed;
@@ -139,7 +139,7 @@ namespace oni {
 
                 _render();
 
-                auto renderDuration = renderTimer.elapsed();
+                auto renderDuration = renderTimer.elapsed_in_seconds();
                 auto excess = mRenderMS - renderDuration;
                 excess *= 1000;
 

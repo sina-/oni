@@ -12,7 +12,7 @@ namespace oni {
     namespace network {
 
         Client::Client() : Peer::Peer(nullptr, 1, 2, 0, 0) {
-            mTimer = std::make_unique<utils::HighResolutionTimer>();
+            mTimer = std::make_unique<utils::Timer>();
         }
 
         Client::~Client() = default;
@@ -49,7 +49,7 @@ namespace oni {
             auto peerID = getPeerID(peer->address);
             switch (header) {
                 case (PacketType::PING): {
-                    auto latency = mTimer->elapsed();
+                    auto latency = mTimer->elapsed_in_seconds();
                     mTimer->restart();
                     mPacketHandlers[PacketType::PING](peerID, std::to_string(latency * 1000));
                     break;

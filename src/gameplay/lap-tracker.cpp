@@ -55,13 +55,24 @@ namespace oni {
                 // for some freaking reason.
                 auto carLapView = mEntityManager.createViewScopeLock<components::CarLap, components::Car>();
                 for (auto &&entity: entitiesToUpdate) {
+                    auto currentTime = mTimeTrackers[entity].elapsed();
+                    auto currentBest = mBestLaps[entity];
+                    if(currentTime < currentBest){
+                        mBestLaps[entity] = currentTime;
+                    }
+                    std::cout << "Lap time: " << currentTime.count() << "s" << "\n";
+                    std::cout << "Current best time: " << mBestLaps[entity].count() << "s" << "\n";
+
                     auto& carLap = carLapView.get<components::CarLap>(entity);
                     ++carLap.lap;
-                    std::cout << "Laps compeleted: " << carLap.lap << "\n";
+                    carLap.currentBestLapTimeS = static_cast<common::uint32>(mBestLaps[entity].count());
+                    carLap.lapTimeS = static_cast<common::uint32>(currentTime.count());
+
+                    std::cout << "Laps completed: " << carLap.lap << "\n";
                     mEntityManager.accommodate<components::TagOnlyComponentUpdate>(entity);
+
                     resetPlayerCheckpoints(entity);
                 }
-
             }
         }
 
@@ -71,11 +82,14 @@ namespace oni {
             carLap.lap = 0;
             mEntityManager.assign<components::CarLap>(carEntity, carLap);
             mEntityManager.accommodate<components::TagOnlyComponentUpdate>(carEntity);
+            mBestLaps[carEntity] = std::chrono::hours(666);
+            mTimeTrackers[carEntity] = utils::Timer();
             resetPlayerCheckpoints(carEntity);
         }
 
         void LapTracker::resetPlayerCheckpoints(common::EntityID carEntity) {
             mRemainingCheckpoints[carEntity] = mInitialCheckpoints;
+            mTimeTrackers[carEntity].restart();
         }
     }
 }

@@ -11,7 +11,6 @@ target_include_directories(oni-core-network
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
         PRIVATE SYSTEM
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/enet/include>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
         )
 
 find_library(ENET_LIBRARY enet PATHS ${oni_SOURCE_DIR}/lib/enet/build)

@@ -7,25 +7,31 @@
 
 namespace oni {
     namespace utils {
-        class HighResolutionTimer {
+        class Timer {
         public:
-            HighResolutionTimer() : mStartTime(now()) {}
+            Timer() : mStartTime(now()) {}
 
             void restart() {
                 mStartTime = now();
             }
 
-            static common::uint64 now() {
-                return common::uint64(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+            static std::chrono::steady_clock::time_point now() {
+                return std::chrono::steady_clock::now();
+            }
+
+            std::chrono::seconds elapsed() const {
+                return std::chrono::duration_cast<std::chrono::seconds>(now() - mStartTime);
             }
 
             // Return elapsed time in seconds
-            oni::common::real64 elapsed() const { return oni::common::real64(now() - mStartTime) * 1e-9; }
+            oni::common::real64 elapsed_in_seconds() const { return (now() - mStartTime).count() * 1e-9; }
 
-            common::uint64 elapsed_nanoseconds() const { return now() - mStartTime; }
+            common::uint64 elapsed_in_nanoseconds() const {
+                return static_cast<common::uint64>((now() - mStartTime).count());
+            }
 
         private:
-            common::uint64 mStartTime{0};
+            std::chrono::steady_clock::time_point mStartTime{};
         };
     }
 }

@@ -2,9 +2,11 @@
 
 #include <map>
 #include <deque>
+#include <chrono>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/components/geometry.h>
+#include <oni-core/utils/timer.h>
 
 namespace oni {
     namespace entities {
@@ -30,6 +32,8 @@ namespace oni {
             entities::EntityManager &mEntityManager;
             std::deque<components::Shape> mInitialCheckpoints{};
             std::map<common::EntityID, std::deque<components::Shape>> mRemainingCheckpoints{};
+            std::map<common::EntityID, std::chrono::seconds> mBestLaps{};
+            std::map<common::EntityID, utils::Timer> mTimeTrackers{};
         };
     }
 }

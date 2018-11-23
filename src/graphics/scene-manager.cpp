@@ -197,6 +197,7 @@ namespace oni {
                 renderStaticTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
+                renderStaticText(manager, halfViewWidth, halfViewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
@@ -216,95 +217,109 @@ namespace oni {
             end(*mColorShader, *mColorRenderer);
         }
 
+        void SceneManager::renderStaticText(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                            common::real32 halfViewHeight) {
+            auto staticTextView = manager.createView<components::TagTextureShaded,
+                    components::Text, components::TagStatic>();
+            for (const auto &entity: staticTextView) {
+/*                const auto &shape = staticTextView.get<components::Shape>(entity);
+                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                    continue;
+                }*/
+                auto &text = staticTextView.get<components::Text>(entity);
+                // TODO: Support text sent from server
+                //prepareTexture(texture);
+
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
+
+                mTextureRenderer->submit(text);
+            }
+        }
+
         void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                 common::real32 halfViewHeight) {
-            {
-                auto staticTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
-                        components::Texture, components::TagStatic>();
-                for (const auto &entity: staticTextureSpriteView) {
-                    const auto &shape = staticTextureSpriteView.get<components::Shape>(entity);
-                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                        continue;
-                    }
-                    auto &texture = staticTextureSpriteView.get<components::Texture>(entity);
-                    prepareTexture(texture);
-
-                    ++mRenderedSpritesPerFrame;
-                    ++mRenderedTexturesPerFrame;
-
-                    // TODO: submit will fail if we reach maximum number of sprites.
-                    // I could also check the number of entities using the view and decide before hand at which point I
-                    // flush the renderer and open up room for new sprites.
-
-                    // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
-                    // Currently the renderer is limited to 32 samplers, I have to either use the reset method
-                    // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
-                    // by merging many textures to keep below the limit. Other solutions might be looking into other type
-                    // of texture storage that can hold bigger number of textures.
-                    mTextureRenderer->submit(shape, texture);
+            auto staticTextureView = manager.createView<components::TagTextureShaded, components::Shape,
+                    components::Texture, components::TagStatic>();
+            for (const auto &entity: staticTextureView) {
+                const auto &shape = staticTextureView.get<components::Shape>(entity);
+                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                    continue;
                 }
+                auto &texture = staticTextureView.get<components::Texture>(entity);
+                prepareTexture(texture);
+
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
+
+                // TODO: submit will fail if we reach maximum number of sprites.
+                // I could also check the number of entities using the view and decide before hand at which point I
+                // flush the renderer and open up room for new sprites.
+
+                // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
+                // Currently the renderer is limited to 32 samplers, I have to either use the reset method
+                // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
+                // by merging many textures to keep below the limit. Other solutions might be looking into other type
+                // of texture storage that can hold bigger number of textures.
+                mTextureRenderer->submit(shape, texture);
             }
         }
 
         void SceneManager::renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                  common::real32 halfViewHeight) {
-            {
-                // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
-                // other systems don't share any entity component, or the shared section is minimum and I can create
-                // copy of that data before starting rendering and only lock the registry at that point
-                auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
-                        components::Texture, components::Placement, components::TagDynamic>();
-                for (const auto &entity: dynamicTextureSpriteView) {
-                    const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
-                    const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
+            // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
+            // other systems don't share any entity component, or the shared section is minimum and I can create
+            // copy of that data before starting rendering and only lock the registry at that point
+            auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
+                    components::Texture, components::Placement, components::TagDynamic>();
+            for (const auto &entity: dynamicTextureSpriteView) {
+                const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
+                const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
 
-                    auto transformation = physics::Transformation::createTransformation(placement.position,
-                                                                                        placement.rotation,
-                                                                                        placement.scale);
+                auto transformation = physics::Transformation::createTransformation(placement.position,
+                                                                                    placement.rotation,
+                                                                                    placement.scale);
 
-                    // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
-                    // separately for each entity and each time a physics system updates an entity it will automatically
-                    // recalculate PlacementWorld for the entity and all its child entities.
-                    // TODO: Instead of calling .has(), slow operation, split up dynamic entity rendering into two
-                    // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
-                    if (manager.has<components::TransformParent>(entity)) {
-                        const auto &transformParent = manager.get<components::TransformParent>(entity);
-                        // NOTE: Order matters. First transform by parent's transformation then child.
-                        transformation = transformParent.transform * transformation;
-                    }
-
-                    auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                    if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
-                        continue;
-                    }
-
-                    auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
-
-                    prepareTexture(texture);
-                    mTextureRenderer->submit(shapeTransformed, texture);
-
-                    ++mRenderedSpritesPerFrame;
-                    ++mRenderedTexturesPerFrame;
+                // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
+                // separately for each entity and each time a physics system updates an entity it will automatically
+                // recalculate PlacementWorld for the entity and all its child entities.
+                // TODO: Instead of calling .has(), slow operation, split up dynamic entity rendering into two
+                // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
+                if (manager.has<components::TransformParent>(entity)) {
+                    const auto &transformParent = manager.get<components::TransformParent>(entity);
+                    // NOTE: Order matters. First transform by parent's transformation then child.
+                    transformation = transformParent.transform * transformation;
                 }
+
+                auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
+                if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
+                    continue;
+                }
+
+                auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+
+                prepareTexture(texture);
+                mTextureRenderer->submit(shapeTransformed, texture);
+
+                ++mRenderedSpritesPerFrame;
+                ++mRenderedTexturesPerFrame;
             }
         }
 
         void SceneManager::renderColored(entities::EntityManager &manager, common::real32 halfViewWidth,
                                          common::real32 halfViewHeight) {
-            {
-                auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
-                        components::Appearance, components::TagStatic>();
-                for (const auto &entity: staticSpriteView) {
-                    const auto &shape = staticSpriteView.get<components::Shape>(entity);
-                    if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                        continue;
-                    }
-                    const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
-
-                    ++mRenderedSpritesPerFrame;
-
-                    mColorRenderer->submit(shape, appearance);
+            auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
+                    components::Appearance, components::TagStatic>();
+            for (const auto &entity: staticSpriteView) {
+                const auto &shape = staticSpriteView.get<components::Shape>(entity);
+                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                    continue;
                 }
+                const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
+
+                ++mRenderedSpritesPerFrame;
+
+                mColorRenderer->submit(shape, appearance);
             }
         }
 
@@ -461,6 +476,8 @@ namespace oni {
 
         bool SceneManager::visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
                                            const common::real32 halfViewHeight) const {
+            // TODO: Garbage collision detection, use the same method used in lap tracker for figuring out if a check
+            // point is reached.
             auto x = false;
 
             auto xMin = shape.vertexA.x;

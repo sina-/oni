@@ -13,7 +13,7 @@ target_include_directories(oni-core-network
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/enet/include>
         )
 
-find_library(ENET_LIBRARY enet PATHS ${oni_SOURCE_DIR}/lib/enet/build)
+find_library(ENET_LIBRARY enet PATHS ${oni_SOURCE_DIR}/lib/enet/build NO_DEFAULT_PATH)
 
 target_link_libraries(oni-core-network
         PRIVATE

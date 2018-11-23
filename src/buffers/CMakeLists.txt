@@ -10,8 +10,8 @@ target_compile_definitions(oni-core-buffers
             GLEW_NO_GLU
         )
 
-find_library(GLFW_LIBRARY glfw3 PATHS ${oni_SOURCE_DIR}/lib/glfw/bin/x64/linux)
-find_library(GLEW_LIBRARY GLEW PATHS ${oni_SOURCE_DIR}/lib/glew/lib)
+find_library(GLFW_LIBRARY glfw3 PATHS ${oni_SOURCE_DIR}/lib/glfw/bin/x64/linux NO_DEFAULT_PATH)
+find_library(GLEW_LIBRARY GLEW PATHS ${oni_SOURCE_DIR}/lib/glew/lib NO_DEFAULT_PATH)
 
 target_include_directories(oni-core-buffers
         PUBLIC

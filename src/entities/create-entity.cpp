@@ -5,6 +5,7 @@
 #include <oni-core/components/visual.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
+#include <oni-core/graphics/font-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/world-data-status.h>
 
@@ -189,8 +190,18 @@ namespace oni {
             // TODO: Text does not have a local and world Shape, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
 
-            return entity;
+/*            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
 
+            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);*/
+            auto textComponent = fontManager.createTextFromString(text, positionInWorld);
+
+            //manager.assign<components::Shape>(entity, entityShapeWorld);
+            manager.assign<components::Text>(entity, textComponent);
+            manager.assign<components::TagTextureShaded>(entity);
+            manager.assign<components::TagStatic>(entity);
+            manager.assign<components::TagAddNewEntities>(entity);
+
+            return entity;
         }
 
         common::EntityID

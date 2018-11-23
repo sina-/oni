@@ -13,7 +13,7 @@ target_include_directories(oni-core-audio
         )
 
 # You need to get the binary from https://fmod.com
-find_library(FMOD fmodL PATHS ${oni_SOURCE_DIR}/lib/fmod/lib/x86_64)
+find_library(FMOD fmodL PATHS ${oni_SOURCE_DIR}/lib/fmod/lib/x86_64 NO_DEFAULT_PATH)
 
 target_link_libraries(oni-core-audio
         PRIVATE

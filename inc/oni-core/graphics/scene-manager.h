@@ -39,6 +39,9 @@ namespace oni {
             void renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                       common::real32 halfViewHeight);
 
+            void renderStaticText(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                  common::real32 halfViewHeight);
+
             void renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                        common::real32 halfViewHeight);
 

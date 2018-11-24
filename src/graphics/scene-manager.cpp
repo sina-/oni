@@ -130,11 +130,17 @@ namespace oni {
             mTextureRenderer = std::move(renderer);
         }
 
-        void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D) {
+        void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale) {
             shader.enable();
 
-            auto view = math::mat4::scale(math::vec3{mCamera.z, mCamera.z, 1.0f}) *
-                        math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
+            auto view = math::mat4::identity();
+            if (scale) {
+                view = view * math::mat4::scale(math::vec3{mCamera.z, mCamera.z, 1.0f});
+            }
+
+            if (translate) {
+                view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
+            }
             auto mvp = mProjectionMatrix * view;
             shader.setUniformMat4("mvp", mvp);
             renderer2D.begin();
@@ -184,7 +190,7 @@ namespace oni {
 
             {
                 auto lock = manager.scopedLock();
-                begin(*mColorShader, *mColorRenderer);
+                begin(*mColorShader, *mColorRenderer, true, true);
                 renderColored(manager, halfViewWidth, halfViewHeight);
             }
             end(*mColorShader, *mColorRenderer);
@@ -196,15 +202,19 @@ namespace oni {
                     lookAt(pos.x, pos.y);
                 }
 
-                begin(*mTextureShader, *mTextureRenderer);
+                begin(*mTextureShader, *mTextureRenderer, true, true);
                 renderStaticTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticTextured(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticText(manager, halfViewWidth, halfViewHeight);
-                renderStaticText(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
+            end(*mTextureShader, *mTextureRenderer);
+
+            // Render UI text with fixed camera
+            begin(*mTextureShader, *mTextureRenderer, false, false);
+            renderStaticText(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
             end(*mTextureShader, *mTextureRenderer);
         }
 
@@ -214,7 +224,7 @@ namespace oni {
         }
 
         void SceneManager::beginColorRendering() {
-            begin(*mColorShader, *mColorRenderer);
+            begin(*mColorShader, *mColorRenderer, true, false);
         }
 
         void SceneManager::endColorRendering() {
@@ -226,13 +236,7 @@ namespace oni {
             auto staticTextView = manager.createView<components::TagTextureShaded,
                     components::Text, components::TagStatic>();
             for (const auto &entity: staticTextView) {
-/*                const auto &shape = staticTextView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
-                    continue;
-                }*/
                 auto &text = staticTextView.get<components::Text>(entity);
-                // TODO: Support text sent from server
-                //prepareTexture(texture);
 
                 ++mRenderedSpritesPerFrame;
                 ++mRenderedTexturesPerFrame;
@@ -395,14 +399,21 @@ namespace oni {
             auto exists = mCarEntityToLapText.find(carEntityID) != mCarEntityToLapText.end();
             if (!exists) {
                 CarLapTextEntities carLapText{0};
-                math::vec3 renderPos{-30.f, -35.f, 1.f};
-/*                carLapText.lap = mFontManager.createTextFromString(std::to_string(carLap.lap), renderPos);
-                carLapText.lapTime = mFontManager.createTextFromString(std::to_string(carLap.lapTimeS), renderPos);
-                carLapText.lapBestTime = mFontManager.createTextFromString(std::to_string(carLap.currentBestLapTimeS),
-                                                                           renderPos);*/
+                math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, 1.f};
+                math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, 1.f};
+                math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, 1.f};
+
                 carLapText.lapEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
-                                                                        std::to_string(carLap.lap),
-                                                                        renderPos, math::vec2{1.f, 1.f}, renderPos);
+                                                                        "Lap: " + std::to_string(carLap.lap),
+                                                                        math::vec2{1.f, 1.f}, lapRenderPos);
+                carLapText.lapTimeEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
+                                                                            "Lap time: " +
+                                                                            std::to_string(carLap.lapTimeS),
+                                                                            math::vec2{1.f, 1.f}, lapTimeRenderPos);
+                carLapText.lapBestTimeEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
+                                                                                "Best time: " + std::to_string(
+                                                                                        carLap.currentBestLapTimeS),
+                                                                                math::vec2{1.f, 1.f}, bestTimeRenderPos);
                 mCarEntityToLapText[carEntityID] = carLapText;
             }
             return mCarEntityToLapText.at(carEntityID);
@@ -411,8 +422,14 @@ namespace oni {
         void SceneManager::updateLapText(const components::CarLap &carLap,
                                          const SceneManager::CarLapTextEntities &carLapTextEntities) {
             // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
-            auto &lap = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapEntity);
-            mFontManager.updateText(std::to_string(carLap.lap), lap);
+            auto &lapText = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapEntity);
+            mFontManager.updateText("Lap: " + std::to_string(carLap.lap), lapText);
+
+            auto &lapTimeText = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapTimeEntity);
+            mFontManager.updateText("Lap time: " + std::to_string(carLap.lapTimeS) + "s", lapTimeText);
+
+            auto &bestTimeText = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapBestTimeEntity);
+            mFontManager.updateText("Best time: " + std::to_string(carLap.currentBestLapTimeS) + "s", bestTimeText);
         }
 
         common::EntityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {

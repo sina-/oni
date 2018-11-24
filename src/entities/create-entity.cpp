@@ -181,22 +181,13 @@ namespace oni {
         common::EntityID createTextStaticEntity(EntityManager &manager,
                                                 graphics::FontManager &fontManager,
                                                 const std::string &text,
-                                                const math::vec3 &position,
                                                 const math::vec2 &size,
                                                 const math::vec3 &positionInWorld) {
-
-            // TODO: Text does not have a local and world Shape, have to fix that before implementing
-            // similar initialization and handling as normal static Textures.
-
-/*            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-
-            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);*/
             auto textComponent = fontManager.createTextFromString(text, positionInWorld);
 
             auto lock = manager.scopedLock();
             auto entity = manager.create();
 
-            //manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Text>(entity, textComponent);
             manager.assign<components::TagTextureShaded>(entity);
             manager.assign<components::TagStatic>(entity);
@@ -205,8 +196,9 @@ namespace oni {
             return entity;
         }
 
-        common::EntityID
-        createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const components::CarConfig &carConfig) {
+        common::EntityID createVehicleEntity(EntityManager &manager,
+                                             b2World &physicsWorld,
+                                             const components::CarConfig &carConfig) {
             auto carPosition = math::vec3{-70.f, -30.f, 1.f};
 
             // TODO: This is wrong. Car vertex position must be in local space starting from (0, 0).

@@ -93,7 +93,7 @@ namespace oni {
             };
 
         private:
-            void begin(const Shader &shader, Renderer2D &renderer2D);
+            void begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale);
 
             void end(const Shader &shader, Renderer2D &renderer2D);
 

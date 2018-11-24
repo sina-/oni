@@ -51,12 +51,8 @@ namespace oni {
                                                    const math::vec2 &size,
                                                    const math::vec3 &positionInWorld);
 
-        common::EntityID createTextStaticEntity(EntityManager &manager,
-                                                graphics::FontManager &fontManager,
-                                                const std::string &text,
-                                                const math::vec3 &position,
-                                                const math::vec2 &size,
-                                                const math::vec3 &positionInWorld);
+        common::EntityID createTextStaticEntity(EntityManager &manager, graphics::FontManager &fontManager, const std::string &text,
+                                                        const math::vec2 &size, const math::vec3 &positionInWorld);
 
         common::EntityID
         createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const oni::components::CarConfig &carConfig);

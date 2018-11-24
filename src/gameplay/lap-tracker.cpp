@@ -29,7 +29,10 @@ namespace oni {
                 for (auto &&entity: carView) {
 
                     // TODO: This is obsolete if registry is only modified from one thread. Then I can expose addNewPlayer()
-                    // and let the new play routine handle player additions and just have an assert here.
+                    // and let the new play routine handle player additions and just have an assert that mRemainingCheckpoints
+                    // has this entity.
+                    // I can't addNewPlayer from server-game because player creation and laptracker tick is called from
+                    // different threads and laptracker is not thread safe.
                     if (mRemainingCheckpoints.find(entity) == mRemainingCheckpoints.end()) {
                         addNewPlayer(entity);
                     }
@@ -80,6 +83,8 @@ namespace oni {
             auto carLap = components::CarLap{};
             carLap.entityID = carEntity;
             carLap.lap = 0;
+            carLap.currentBestLapTimeS = 0;
+            carLap.lapTimeS = 0;
             mEntityManager.assign<components::CarLap>(carEntity, carLap);
             mEntityManager.accommodate<components::TagOnlyComponentUpdate>(carEntity);
             mBestLaps[carEntity] = std::chrono::hours(666);

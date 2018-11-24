@@ -13,9 +13,8 @@ namespace oni {
     }
 
     namespace components {
-        class Texture;
-
-        class CarConfig;
+        struct Texture;
+        struct CarConfig;
     }
 
     namespace graphics {

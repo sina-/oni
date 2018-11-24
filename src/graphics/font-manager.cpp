@@ -30,7 +30,6 @@ namespace oni {
             assert(glyph == 0);
 
             m_FTAtlas->id = TextureManager::load(*this);
-
         }
 
         FontManager::~FontManager() {
@@ -62,7 +61,7 @@ namespace oni {
 
         components::Text FontManager::createTextFromString(const std::string &text, const math::vec3 &position) {
             auto textComponent = components::Text();
-            for (auto character: text) {
+            for (auto&& character: text) {
                 auto glyph = findGlyph(character);
                 textComponent.height.emplace_back(glyph->height);
                 textComponent.width.emplace_back(glyph->width);

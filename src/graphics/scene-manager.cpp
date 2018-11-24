@@ -5,12 +5,14 @@
 #include <oni-core/graphics/shader.h>
 #include <oni-core/graphics/batch-renderer-2d.h>
 #include <oni-core/graphics/texture-manager.h>
+#include <oni-core/graphics/font-manager.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
+#include <oni-core/components/gameplay.h>
 
 
 namespace oni {
@@ -18,12 +20,13 @@ namespace oni {
         // TODO: save this as a tag in the world registry
         static const common::real32 GAME_UNIT_TO_PIXELS = 20.0f;
 
-        SceneManager::SceneManager(const components::ScreenBounds &screenBounds) :
+        SceneManager::SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager) :
                 mSkidTileSizeX{64}, mSkidTileSizeY{64},
                 mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
                 mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
                 // 64k vertices
-                mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds) {
+                mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds),
+                mFontManager(fontManager) {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
                                                          screenBounds.yMax, -1.0f, 1.0f);
@@ -31,7 +34,7 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            mSkidEntityManager = std::make_unique<entities::EntityManager>();
+            mInternalEntityRegistry = std::make_unique<entities::EntityManager>();
 
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
@@ -195,9 +198,10 @@ namespace oni {
 
                 begin(*mTextureShader, *mTextureRenderer);
                 renderStaticTextured(manager, halfViewWidth, halfViewHeight);
-                renderStaticTextured(*mSkidEntityManager, halfViewWidth, halfViewHeight);
+                renderStaticTextured(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticText(manager, halfViewWidth, halfViewHeight);
+                renderStaticText(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
@@ -332,7 +336,7 @@ namespace oni {
             std::vector<common::uint8> skidOpacity{};
             {
                 auto carView = manager.createViewScopeLock<components::Car, components::Placement>();
-                for (auto carEntity: carView) {
+                for (auto &&carEntity: carView) {
                     const auto car = carView.get<components::Car>(carEntity);
                     // NOTE: Technically I should use slippingRear, but this gives better effect
                     if (car.slippingFront || true) {
@@ -368,6 +372,47 @@ namespace oni {
                 updateSkidTexture(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
                 updateSkidTexture(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
             }
+            {
+                auto carLapView = manager.createViewScopeLock<components::Car, components::CarLap>();
+                for (auto &&carEntity: carLapView) {
+                    // TODO: This will render all player laps on top of each other. I should render the data in rows
+                    // instead. Something like:
+                    /**
+                     * Player Name: lap, lap time, best time
+                     *
+                     * Player 1: 4, 1:12, :1:50
+                     * Player 2: 5, 0:02, :1:50
+                     */
+                    const auto &carLap = carLapView.get<components::CarLap>(carEntity);
+                    const auto &carLapText = createLapTextIfMissing(carEntity, carLap);
+                    updateLapText(carLap, carLapText);
+                }
+            }
+        }
+
+        const SceneManager::CarLapTextEntities &SceneManager::createLapTextIfMissing(common::EntityID carEntityID,
+                                                                                     const components::CarLap &carLap) {
+            auto exists = mCarEntityToLapText.find(carEntityID) != mCarEntityToLapText.end();
+            if (!exists) {
+                CarLapTextEntities carLapText{0};
+                math::vec3 renderPos{-30.f, -35.f, 1.f};
+/*                carLapText.lap = mFontManager.createTextFromString(std::to_string(carLap.lap), renderPos);
+                carLapText.lapTime = mFontManager.createTextFromString(std::to_string(carLap.lapTimeS), renderPos);
+                carLapText.lapBestTime = mFontManager.createTextFromString(std::to_string(carLap.currentBestLapTimeS),
+                                                                           renderPos);*/
+                carLapText.lapEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
+                                                                        std::to_string(carLap.lap),
+                                                                        renderPos, math::vec2{1.f, 1.f}, renderPos);
+                mCarEntityToLapText[carEntityID] = carLapText;
+            }
+            return mCarEntityToLapText.at(carEntityID);
+        }
+
+        void SceneManager::updateLapText(const components::CarLap &carLap,
+                                         const SceneManager::CarLapTextEntities &carLapTextEntities) {
+            // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
+            auto &lap = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapEntity);
+            mFontManager.updateText(std::to_string(carLap.lap), lap);
         }
 
         common::EntityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
@@ -375,7 +420,6 @@ namespace oni {
             const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             const auto packedIndices = math::packIntegers(x, y);
 
-            common::EntityID skidTileID{};
             auto exists = mPackedSkidIndicesToEntity.find(packedIndices) != mPackedSkidIndicesToEntity.end();
             if (!exists) {
                 const auto skidIndexX = math::positionToIndex(position.x, mSkidTileSizeX);
@@ -397,19 +441,18 @@ namespace oni {
                 // TODO: I can blend skid textures using this data
                 skidTexture.data = skidData;
 
-                skidTileID = entities::createStaticEntity(*mSkidEntityManager, skidTileSize, positionInWorld);
-                mSkidEntityManager->assign<components::Texture>(skidTileID, skidTexture);
+                auto skidTileID = entities::createStaticEntity(*mInternalEntityRegistry, skidTileSize, positionInWorld);
+                mInternalEntityRegistry->assign<components::Texture>(skidTileID, skidTexture);
                 mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
-            } else {
-                skidTileID = mPackedSkidIndicesToEntity.at(packedIndices);
             }
-            return skidTileID;
+
+            return mPackedSkidIndicesToEntity.at(packedIndices);
         }
 
         void SceneManager::updateSkidTexture(const math::vec3 &position, common::EntityID skidTextureEntity,
                                              common::uint8 alpha) {
-            auto skidMarksTexture = mSkidEntityManager->get<components::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = mSkidEntityManager->get<components::Shape>(
+            auto skidMarksTexture = mInternalEntityRegistry->get<components::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = mInternalEntityRegistry->get<components::Shape>(
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;

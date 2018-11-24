@@ -185,8 +185,6 @@ namespace oni {
                                                 const math::vec2 &size,
                                                 const math::vec3 &positionInWorld) {
 
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
             // TODO: Text does not have a local and world Shape, have to fix that before implementing
             // similar initialization and handling as normal static Textures.
 
@@ -194,6 +192,9 @@ namespace oni {
 
             physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);*/
             auto textComponent = fontManager.createTextFromString(text, positionInWorld);
+
+            auto lock = manager.scopedLock();
+            auto entity = manager.create();
 
             //manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Text>(entity, textComponent);

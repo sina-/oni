@@ -15,7 +15,7 @@ namespace oni {
 
             auto result = enet_initialize();
             if (result) {
-                std::runtime_error("An error occurred while initializing server.\n");
+                throw std::runtime_error("An error occurred while initializing server.\n");
             }
             if (address) {
                 auto enetAddress = ENetAddress{};

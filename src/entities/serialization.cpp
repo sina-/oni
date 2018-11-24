@@ -78,7 +78,9 @@ namespace oni {
                   &components::Car::tireFR,
                   &components::Car::tireFL,
                   &components::Car::tireRR,
-                  &components::Car::tireRL);
+                  &components::Car::tireRL,
+                  &components::CarLap::entityID
+                  );
             }
         }
     }

@@ -253,6 +253,8 @@ namespace oni {
             common::EntityID tireRR{};
             common::EntityID tireRL{};
 
+            bool isColliding{false};
+
             template<class Archive>
             void serialize(Archive &archive) {
                 archive(
@@ -285,7 +287,10 @@ namespace oni {
                         tireFR,
                         tireFL,
                         tireRR,
-                        tireRL);
+                        tireRL,
+
+                        isColliding
+                        );
             }
 
             Car() {}
@@ -324,6 +329,8 @@ namespace oni {
                 slippingRear = false;
 
                 distanceFromCamera = 1.0f;
+
+                isColliding = false;
             }
         };
 

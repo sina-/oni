@@ -20,11 +20,10 @@ namespace oni {
             mPhysicsWorld = std::make_unique<b2World>(gravity);
         }
 
-        Dynamics::~Dynamics() {
-
-        }
+        Dynamics::~Dynamics() = default;
 
         void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) {
+            auto carInput = components::CarInput();
             std::vector<common::EntityID> entitiesToBeUpdated{};
             {
                 // NOTE: Need to lock it because network system might remove cars for clients that have disconnected.
@@ -39,8 +38,6 @@ namespace oni {
                 for (auto entity: carView) {
                     auto &car = carView.get<components::Car>(entity);
                     const auto &carConfig = carView.get<components::CarConfig>(entity);
-
-                    auto carInput = components::CarInput();
 
                     if (input.isPressed(GLFW_KEY_W) || input.isPressed(GLFW_KEY_UP)) {
                         // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
@@ -96,7 +93,10 @@ namespace oni {
             }
 
             {
-                // TODO: manager has pointers to mPhysicsWorld internal data structures :(
+                // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
+                // One way to hide it is to provide a function in physics library that creates physical entities
+                // for a given entity id an maintains an internal mapping between them without leaking the
+                // implementation to outside.
                 mPhysicsWorld->Step(mTickFrequency, 6, 2);
             }
 
@@ -106,31 +106,45 @@ namespace oni {
 
                 // Handle collision
                 for (auto entity: carPhysicsView) {
-                    bool collisionFound = false;
-                    auto body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
-
-                    for (b2ContactEdge *ce = body->GetContactList(); ce; ce = ce->next) {
-                        b2Contact *c = ce->contact;
-                        if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
-                            collisionFound = c->IsTouching();
-                        }
-                    }
-
+                    auto *body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
                     auto &car = carPhysicsView.get<components::Car>(entity);
-                    // NOTE: > 0.2f is to avoid sticking to objects when velocity is low
-                    // TODO: Perhaps it is better to fix this problem by handling user input when there is
-                    // collision
-                    // TODO: Collision listener could be a better way to handle collisions
-                    if (collisionFound && car.velocityAbsolute > 0.2f) {
-                        car.velocity = math::vec2{body->GetLinearVelocity().x * 1.01f,
-                                                  body->GetLinearVelocity().y * 1.01f};
-                        car.angularVelocity = body->GetAngularVelocity();
-                        car.position = math::vec2{body->GetPosition().x, body->GetPosition().y};
-                        car.heading = body->GetAngle();
+                    // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
+                    // just apply force to box2d representation of
+                    // physical body without syncing car dynamics with box2d physics, that way the next turn if the
+                    // car was heading out of collision  the car will start sliding out and things will run smoothly.
+                    // If the car is indeed heading against other objects, it will be stuck as it was. This greatly
+                    // improves game feeling when there are collisions and solves lot of stickiness issues.
+                    if (car.isColliding) {
+                        // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
+                        // carconfig?
+                        body->ApplyForceToCenter(
+                                b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 * carInput.throttle),
+                                       static_cast<common::real32>(std::sin(car.heading) * 30 * carInput.throttle)),
+                                true);
+                        car.isColliding = false;
                     } else {
-                        body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
-                        body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
-                        body->SetTransform(b2Vec2{car.position.x, car.position.y}, static_cast<float32>(car.heading));
+                        bool collisionFound = false;
+                        for (b2ContactEdge *ce = body->GetContactList(); ce && !collisionFound; ce = ce->next) {
+                            b2Contact *c = ce->contact;
+                            if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
+                                collisionFound = c->IsTouching();
+                            }
+                        }
+
+                        // TODO: Collision listener could be a better way to handle collisions
+                        if (collisionFound) {
+                            car.velocity = math::vec2{body->GetLinearVelocity().x,
+                                                      body->GetLinearVelocity().y};
+                            car.angularVelocity = body->GetAngularVelocity();
+                            car.position = math::vec2{body->GetPosition().x, body->GetPosition().y};
+                            car.heading = body->GetAngle();
+                            car.isColliding = true;
+                        } else {
+                            body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
+                            body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
+                            body->SetTransform(b2Vec2{car.position.x, car.position.y},
+                                               static_cast<float32>(car.heading));
+                        }
                     }
                 }
             }

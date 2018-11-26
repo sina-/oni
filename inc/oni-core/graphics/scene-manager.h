@@ -17,7 +17,7 @@ namespace oni {
 
     namespace components {
         struct Shape;
-        struct CarLap;
+        struct CarLapInfo;
     }
 
     namespace graphics {
@@ -33,7 +33,8 @@ namespace oni {
 
         class SceneManager {
         public:
-            SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager);
+            SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
+                                     common::real32 gameUnitToPixels);
 
             ~SceneManager();
 
@@ -86,7 +87,7 @@ namespace oni {
             void endColorRendering();
 
         private:
-            struct CarLapTextEntities {
+            struct RaceInfoEntities {
                 common::EntityID lapEntity{0};
                 common::EntityID lapTimeEntity{0};
                 common::EntityID lapBestTimeEntity{0};
@@ -101,22 +102,22 @@ namespace oni {
 
             void initializeColorRenderer(const Shader &shader);
 
-            bool visibleToCamera(const components::Shape &shape, common::real32 halfViewWidth,
-                                 common::real32 halfViewHeight) const;
+            bool isVisible(const components::Shape &shape, common::real32 halfViewWidth,
+                           common::real32 halfViewHeight) const;
 
             void prepareTexture(components::Texture &texture);
 
-            common::EntityID createSkidTileIfMissing(const math::vec2 &position);
+            common::EntityID createSkidlineIfMissing(const math::vec2 &position);
 
-            const CarLapTextEntities &createLapTextIfMissing(common::EntityID carEntityID,
-                                                             const components::CarLap &carLap);
+            const RaceInfoEntities &createLapTextIfMissing(common::EntityID carEntityID,
+                                                           const components::CarLapInfo &carLap);
 
-            void updateSkidTexture(const math::vec3 &position,
-                                   common::EntityID skidTextureEntity,
-                                   common::uint8 alpha);
+            void updateSkidlines(const math::vec3 &position,
+                                 common::EntityID skidTextureEntity,
+                                 common::uint8 alpha);
 
-            void updateLapText(const components::CarLap &carLap,
-                               const CarLapTextEntities &carLapTextEntities);
+            void updateRaceInfo(const components::CarLapInfo &carLap,
+                                const RaceInfoEntities &carLapTextEntities);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -130,25 +131,24 @@ namespace oni {
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            std::map<common::uint64, common::EntityID> mPackedSkidIndicesToEntity{};
-            std::map<common::EntityID, CarLapTextEntities> mCarEntityToLapText{};
+            std::map<common::uint64, common::EntityID> mSkidlineLookup{};
+            std::map<common::EntityID, RaceInfoEntities> mLapInfoLookup{};
 
             const common::uint16 mSkidTileSizeX{0};
             const common::uint16 mSkidTileSizeY{0};
-
             const common::real32 mHalfSkidTileSizeX{0.0f};
             const common::real32 mHalfSkidTileSizeY{0.0f};
-
 
             components::ScreenBounds mScreenBounds{};
             components::Camera mCamera{0.0f, 0.0f, 1.0f};
 
             const common::uint16 mMaxSpriteCount{0};
+            const common::real32 mGameUnitToPixels{0};
 
             common::uint16 mRenderedSpritesPerFrame{0};
             common::uint16 mRenderedTexturesPerFrame{0};
 
-            std::unique_ptr<entities::EntityManager> mInternalEntityRegistry{};
+            std::unique_ptr<entities::EntityManager> mInternalRegistry{};
         };
     }
 }

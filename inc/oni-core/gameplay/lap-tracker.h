@@ -33,7 +33,7 @@ namespace oni {
             std::deque<components::Shape> mInitialCheckpoints{};
             std::map<common::EntityID, std::deque<components::Shape>> mRemainingCheckpoints{};
             std::map<common::EntityID, std::chrono::seconds> mBestLaps{};
-            std::map<common::EntityID, utils::Timer> mTimeTrackers{};
+            std::map<common::EntityID, utils::Timer> mTimers{};
         };
     }
 }

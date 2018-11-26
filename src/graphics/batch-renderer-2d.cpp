@@ -16,7 +16,7 @@ namespace oni {
         BatchRenderer2D::BatchRenderer2D(const common::oniGLsizei maxSpriteCount,
                                          const common::oniGLint maxNumTextureSamplers,
                                          const common::oniGLsizei maxVertexSize,
-                                         components::BufferStructures bufferStructures)
+                                         components::BufferStructureList bufferStructures)
                 : mIndexCount{0},
                   mMaxSpriteCount{maxSpriteCount},
                   mMaxVertexSize{maxVertexSize},

@@ -43,7 +43,7 @@ namespace oni {
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = deserialize<DataPacket>(data, size);
+                    auto packet = entities::deserialize<DataPacket>(data, size);
                     break;
                 }
                 case (PacketType::SETUP_SESSION): {
@@ -102,7 +102,7 @@ namespace oni {
         void Server::sendRemainingEntitiesAfterDelete(entities::EntityManager &manager) {
             //std::string data = entities::serialize(manager, components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES);
             auto type = PacketType::DESTROYED_ENTITIES;
-            auto data = serialize<std::vector<common::EntityID>>(manager.getDeletedEntities());
+            auto data = entities::serialize<std::vector<common::EntityID>>(manager.getDeletedEntities());
 
             if (data.size() > 1) {
                 broadcast(type, data);
@@ -111,7 +111,7 @@ namespace oni {
 
         void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID &peerID) {
             auto packet = EntityPacket{entityID};
-            auto data = serialize<EntityPacket>(packet);
+            auto data = entities::serialize<EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;
 
             send(type, data, mPeers[peerID]);

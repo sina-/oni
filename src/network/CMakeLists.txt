@@ -8,7 +8,6 @@ target_compile_features(oni-core-network
 target_include_directories(oni-core-network
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
         PRIVATE SYSTEM
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/enet/include>
         )

@@ -26,7 +26,7 @@ namespace oni {
                         components::Car,
                         components::CarConfig,
                         components::Placement,
-                        components::CarLap,
+                        components::CarLapInfo,
                         //components::Chunk,
                         components::Shape,
                         components::Appearance,
@@ -59,7 +59,7 @@ namespace oni {
                         components::Car,
                         components::CarConfig,
                         components::Placement,
-                        components::CarLap,
+                        components::CarLapInfo,
                         //components::Chunk,
                         components::Shape,
                         components::Appearance,
@@ -79,7 +79,7 @@ namespace oni {
                   &components::Car::tireFL,
                   &components::Car::tireRR,
                   &components::Car::tireRL,
-                  &components::CarLap::entityID
+                  &components::CarLapInfo::entityID
                   );
             }
         }

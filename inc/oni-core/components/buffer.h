@@ -36,6 +36,6 @@ namespace oni {
             const common::oniGLvoid *offset{nullptr};
         };
 
-        typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructures;
+        typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructureList;
     }
 }

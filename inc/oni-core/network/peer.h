@@ -1,12 +1,7 @@
 #pragma once
 
 #include <cassert>
-#include <sstream>
 #include <map>
-
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/vector.hpp>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet.h>
@@ -33,20 +28,6 @@ namespace oni {
             common::uint16 port;
         };
 
-        template<class T>
-        T deserialize(const std::string &data) {
-            std::istringstream storage;
-            storage.str(data);
-
-            T result;
-            {
-                cereal::PortableBinaryInputArchive input{storage};
-                input(result);
-            }
-
-            return result;
-        }
-
         class Peer {
         protected:
             Peer();
@@ -72,32 +53,6 @@ namespace oni {
             common::PeerID getPeerID(const ENetAddress &address) const;
 
             PacketType getHeader(const common::uint8 *data) const;
-
-            template<class T>
-            std::string serialize(const T &data) {
-                std::ostringstream storage;
-                {
-                    cereal::PortableBinaryOutputArchive output{storage};
-
-                    output(data);
-                }
-
-                return storage.str();
-            }
-
-            template<class T>
-            T deserialize(const common::uint8 *data, size_t size) {
-                std::istringstream storage;
-                storage.str(std::string(reinterpret_cast<const char *>(data), size));
-
-                T result;
-                {
-                    cereal::PortableBinaryInputArchive input{storage};
-                    input(result);
-                }
-
-                return result;
-            }
 
             // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
             void send(PacketType type, std::string &data, ENetPeer *peer);

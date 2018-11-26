@@ -17,16 +17,15 @@
 
 namespace oni {
     namespace graphics {
-        // TODO: save this as a tag in the world registry
-        static const common::real32 GAME_UNIT_TO_PIXELS = 20.0f;
-
-        SceneManager::SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager) :
+        SceneManager::SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
+                                   common::real32 gameUnitToPixels) :
                 mSkidTileSizeX{64}, mSkidTileSizeY{64},
                 mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
                 mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
                 // 64k vertices
                 mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds),
-                mFontManager(fontManager) {
+                mFontManager(fontManager),
+                mGameUnitToPixels{gameUnitToPixels} {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
                                                          screenBounds.yMax, -1.0f, 1.0f);
@@ -34,7 +33,7 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            mInternalEntityRegistry = std::make_unique<entities::EntityManager>();
+            mInternalRegistry = std::make_unique<entities::EntityManager>();
 
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
@@ -66,17 +65,19 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
-            GLsizei stride = sizeof(components::ColoredVertex);
+            common::oniGLsizei stride = sizeof(components::ColoredVertex);
             auto position = std::make_unique<components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
+                    (components::BufferStructure{static_cast<common::oniGLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
                                                  stride,
-                                                 static_cast<const GLvoid *>(nullptr)});
+                                                 static_cast<const common::oniGLvoid *>(nullptr)});
             auto color = std::make_unique<components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(colorIndex), 4, GL_FLOAT, GL_TRUE, stride,
-                                                 reinterpret_cast<const GLvoid *>(offsetof(components::ColoredVertex,
-                                                                                           color))});
+                    (components::BufferStructure{static_cast<common::oniGLuint>(colorIndex), 4, GL_FLOAT, GL_TRUE,
+                                                 stride,
+                                                 reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                                                         components::ColoredVertex,
+                                                         color))});
 
-            auto bufferStructures = components::BufferStructures();
+            auto bufferStructures = components::BufferStructureList();
             bufferStructures.push_back(std::move(position));
             bufferStructures.push_back(std::move(color));
 
@@ -98,20 +99,24 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
-            GLsizei stride = sizeof(components::TexturedVertex);
+            common::oniGLsizei stride = sizeof(components::TexturedVertex);
             auto position = std::make_unique<components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE, stride,
-                                                 static_cast<const GLvoid *>(nullptr)});
+                    (components::BufferStructure{static_cast<common::oniGLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
+                                                 stride,
+                                                 static_cast<const common::oniGLvoid *>(nullptr)});
             auto samplerID = std::make_unique<components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE, stride,
-                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                                                           samplerID))});
+                    (components::BufferStructure{static_cast<common::oniGLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE,
+                                                 stride,
+                                                 reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                                                         components::TexturedVertex,
+                                                         samplerID))});
             auto uv = std::make_unique<components::BufferStructure>
-                    (components::BufferStructure{static_cast<GLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
-                                                 reinterpret_cast<const GLvoid *>(offsetof(components::TexturedVertex,
-                                                                                           uv))});
+                    (components::BufferStructure{static_cast<common::oniGLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
+                                                 reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                                                         components::TexturedVertex,
+                                                         uv))});
 
-            auto bufferStructures = components::BufferStructures();
+            auto bufferStructures = components::BufferStructureList();
             bufferStructures.push_back(std::move(position));
             bufferStructures.push_back(std::move(samplerID));
             bufferStructures.push_back(std::move(uv));
@@ -204,7 +209,7 @@ namespace oni {
 
                 begin(*mTextureShader, *mTextureRenderer, true, true);
                 renderStaticTextured(manager, halfViewWidth, halfViewHeight);
-                renderStaticTextured(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
+                renderStaticTextured(*mInternalRegistry, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticText(manager, halfViewWidth, halfViewHeight);
                 // Release the lock as soon as we are done with the registry.
@@ -214,7 +219,7 @@ namespace oni {
 
             // Render UI text with fixed camera
             begin(*mTextureShader, *mTextureRenderer, false, false);
-            renderStaticText(*mInternalEntityRegistry, halfViewWidth, halfViewHeight);
+            renderStaticText(*mInternalRegistry, halfViewWidth, halfViewHeight);
             end(*mTextureShader, *mTextureRenderer);
         }
 
@@ -251,7 +256,7 @@ namespace oni {
                     components::Texture, components::TagStatic>();
             for (const auto &entity: staticTextureView) {
                 const auto &shape = staticTextureView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
                 auto &texture = staticTextureView.get<components::Texture>(entity);
@@ -278,11 +283,11 @@ namespace oni {
             // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
             // other systems don't share any entity component, or the shared section is minimum and I can create
             // copy of that data before starting rendering and only lock the registry at that point
-            auto dynamicTextureSpriteView = manager.createView<components::TagTextureShaded, components::Shape,
+            auto view = manager.createView<components::TagTextureShaded, components::Shape,
                     components::Texture, components::Placement, components::TagDynamic>();
-            for (const auto &entity: dynamicTextureSpriteView) {
-                const auto &shape = dynamicTextureSpriteView.get<components::Shape>(entity);
-                const auto &placement = dynamicTextureSpriteView.get<components::Placement>(entity);
+            for (const auto &entity: view) {
+                const auto &shape = view.get<components::Shape>(entity);
+                const auto &placement = view.get<components::Placement>(entity);
 
                 auto transformation = physics::Transformation::createTransformation(placement.position,
                                                                                     placement.rotation,
@@ -300,11 +305,11 @@ namespace oni {
                 }
 
                 auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                if (!visibleToCamera(shapeTransformed, halfViewWidth, halfViewHeight)) {
+                if (!isVisible(shapeTransformed, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
 
-                auto &texture = dynamicTextureSpriteView.get<components::Texture>(entity);
+                auto &texture = view.get<components::Texture>(entity);
 
                 prepareTexture(texture);
                 mTextureRenderer->submit(shapeTransformed, texture);
@@ -320,7 +325,7 @@ namespace oni {
                     components::Appearance, components::TagStatic>();
             for (const auto &entity: staticSpriteView) {
                 const auto &shape = staticSpriteView.get<components::Shape>(entity);
-                if (!visibleToCamera(shape, halfViewWidth, halfViewHeight)) {
+                if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
                 const auto &appearance = staticSpriteView.get<components::Appearance>(entity);
@@ -370,14 +375,14 @@ namespace oni {
                 common::EntityID skidEntityRL{0};
                 common::EntityID skidEntityRR{0};
 
-                skidEntityRL = createSkidTileIfMissing(skidMarkRLPos.getXY());
-                skidEntityRR = createSkidTileIfMissing(skidMarkRRPos.getXY());
+                skidEntityRL = createSkidlineIfMissing(skidMarkRLPos.getXY());
+                skidEntityRR = createSkidlineIfMissing(skidMarkRRPos.getXY());
 
-                updateSkidTexture(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
-                updateSkidTexture(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
+                updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
+                updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
             }
             {
-                auto carLapView = manager.createViewScopeLock<components::Car, components::CarLap>();
+                auto carLapView = manager.createViewScopeLock<components::Car, components::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -387,57 +392,58 @@ namespace oni {
                      * Player 1: 4, 1:12, :1:50
                      * Player 2: 5, 0:02, :1:50
                      */
-                    const auto &carLap = carLapView.get<components::CarLap>(carEntity);
+                    const auto &carLap = carLapView.get<components::CarLapInfo>(carEntity);
                     const auto &carLapText = createLapTextIfMissing(carEntity, carLap);
-                    updateLapText(carLap, carLapText);
+                    updateRaceInfo(carLap, carLapText);
                 }
             }
         }
 
-        const SceneManager::CarLapTextEntities &SceneManager::createLapTextIfMissing(common::EntityID carEntityID,
-                                                                                     const components::CarLap &carLap) {
-            auto exists = mCarEntityToLapText.find(carEntityID) != mCarEntityToLapText.end();
+        const SceneManager::RaceInfoEntities &SceneManager::createLapTextIfMissing(common::EntityID carEntityID,
+                                                                                   const components::CarLapInfo &carLap) {
+            auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
-                CarLapTextEntities carLapText{0};
+                RaceInfoEntities carLapText{0};
                 math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, 1.f};
                 math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, 1.f};
                 math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, 1.f};
 
-                carLapText.lapEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
+                carLapText.lapEntity = entities::createTextStaticEntity(*mInternalRegistry, mFontManager,
                                                                         "Lap: " + std::to_string(carLap.lap),
                                                                         math::vec2{1.f, 1.f}, lapRenderPos);
-                carLapText.lapTimeEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
+                carLapText.lapTimeEntity = entities::createTextStaticEntity(*mInternalRegistry, mFontManager,
                                                                             "Lap time: " +
                                                                             std::to_string(carLap.lapTimeS),
                                                                             math::vec2{1.f, 1.f}, lapTimeRenderPos);
-                carLapText.lapBestTimeEntity = entities::createTextStaticEntity(*mInternalEntityRegistry, mFontManager,
+                carLapText.lapBestTimeEntity = entities::createTextStaticEntity(*mInternalRegistry, mFontManager,
                                                                                 "Best time: " + std::to_string(
-                                                                                        carLap.currentBestLapTimeS),
-                                                                                math::vec2{1.f, 1.f}, bestTimeRenderPos);
-                mCarEntityToLapText[carEntityID] = carLapText;
+                                                                                        carLap.bestLapTimeS),
+                                                                                math::vec2{1.f, 1.f},
+                                                                                bestTimeRenderPos);
+                mLapInfoLookup[carEntityID] = carLapText;
             }
-            return mCarEntityToLapText.at(carEntityID);
+            return mLapInfoLookup.at(carEntityID);
         }
 
-        void SceneManager::updateLapText(const components::CarLap &carLap,
-                                         const SceneManager::CarLapTextEntities &carLapTextEntities) {
+        void SceneManager::updateRaceInfo(const components::CarLapInfo &carLap,
+                                          const SceneManager::RaceInfoEntities &carLapTextEntities) {
             // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
-            auto &lapText = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapEntity);
+            auto &lapText = mInternalRegistry->get<components::Text>(carLapTextEntities.lapEntity);
             mFontManager.updateText("Lap: " + std::to_string(carLap.lap), lapText);
 
-            auto &lapTimeText = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapTimeEntity);
+            auto &lapTimeText = mInternalRegistry->get<components::Text>(carLapTextEntities.lapTimeEntity);
             mFontManager.updateText("Lap time: " + std::to_string(carLap.lapTimeS) + "s", lapTimeText);
 
-            auto &bestTimeText = mInternalEntityRegistry->get<components::Text>(carLapTextEntities.lapBestTimeEntity);
-            mFontManager.updateText("Best time: " + std::to_string(carLap.currentBestLapTimeS) + "s", bestTimeText);
+            auto &bestTimeText = mInternalRegistry->get<components::Text>(carLapTextEntities.lapBestTimeEntity);
+            mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        common::EntityID SceneManager::createSkidTileIfMissing(const math::vec2 &position) {
+        common::EntityID SceneManager::createSkidlineIfMissing(const math::vec2 &position) {
             const auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             const auto packedIndices = math::packIntegers(x, y);
 
-            auto exists = mPackedSkidIndicesToEntity.find(packedIndices) != mPackedSkidIndicesToEntity.end();
+            auto exists = mSkidlineLookup.find(packedIndices) != mSkidlineLookup.end();
             if (!exists) {
                 const auto skidIndexX = math::positionToIndex(position.x, mSkidTileSizeX);
                 const auto skidIndexY = math::positionToIndex(position.y, mSkidTileSizeY);
@@ -447,9 +453,9 @@ namespace oni {
                 const auto skidTileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
                                                      static_cast<common::real32>(mSkidTileSizeY)};
 
-                const auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * GAME_UNIT_TO_PIXELS +
+                const auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * mGameUnitToPixels +
                                                                            common::ep);
-                const auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * GAME_UNIT_TO_PIXELS +
+                const auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * mGameUnitToPixels +
                                                                             common::ep);
                 const auto skidDefaultPixel = components::PixelRGBA{};
                 auto skidData = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
@@ -458,36 +464,36 @@ namespace oni {
                 // TODO: I can blend skid textures using this data
                 skidTexture.data = skidData;
 
-                auto skidTileID = entities::createStaticEntity(*mInternalEntityRegistry, skidTileSize, positionInWorld);
-                mInternalEntityRegistry->assign<components::Texture>(skidTileID, skidTexture);
-                mPackedSkidIndicesToEntity.emplace(packedIndices, skidTileID);
+                auto skidTileID = entities::createStaticEntity(*mInternalRegistry, skidTileSize, positionInWorld);
+                mInternalRegistry->assign<components::Texture>(skidTileID, skidTexture);
+                mSkidlineLookup.emplace(packedIndices, skidTileID);
             }
 
-            return mPackedSkidIndicesToEntity.at(packedIndices);
+            return mSkidlineLookup.at(packedIndices);
         }
 
-        void SceneManager::updateSkidTexture(const math::vec3 &position, common::EntityID skidTextureEntity,
-                                             common::uint8 alpha) {
-            auto skidMarksTexture = mInternalEntityRegistry->get<components::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = mInternalEntityRegistry->get<components::Shape>(
+        void SceneManager::updateSkidlines(const math::vec3 &position, common::EntityID skidTextureEntity,
+                                           common::uint8 alpha) {
+            auto skidMarksTexture = mInternalRegistry->get<components::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = mInternalRegistry->get<components::Shape>(
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;
-            physics::Transformation::worldToLocalTextureTranslation(skidMarksTexturePos, GAME_UNIT_TO_PIXELS,
-                                                                    skidPos);
+            physics::Transformation::worldToTextureCoordinate(skidMarksTexturePos, mGameUnitToPixels,
+                                                              skidPos);
 
             // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
             // squares.
-            //auto width = static_cast<int>(carConfig.wheelRadius * GAME_UNIT_TO_PIXELS * 2);
-            //auto height = static_cast<int>(carConfig.wheelWidth * GAME_UNIT_TO_PIXELS / 2);
+            //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
+            //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
             common::uint16 height = 5;
             common::uint16 width = 5;
 
             auto bits = graphics::TextureManager::generateBits(width, height, components::PixelRGBA{0, 0, 0, alpha});
             // TODO: Need to create skid texture data as it should be and set it.
             mTextureManager->updateSubTexture(skidMarksTexture,
-                                              static_cast<GLint>(skidPos.x - width / 2.0f),
-                                              static_cast<GLint>(skidPos.y - height / 2.0f),
+                                              static_cast<common::oniGLint>(skidPos.x - width / 2.0f),
+                                              static_cast<common::oniGLint>(skidPos.y - height / 2.0f),
                                               width, height, bits);
         }
 
@@ -534,8 +540,8 @@ namespace oni {
             return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
         }
 
-        bool SceneManager::visibleToCamera(const components::Shape &shape, const common::real32 halfViewWidth,
-                                           const common::real32 halfViewHeight) const {
+        bool SceneManager::isVisible(const components::Shape &shape, common::real32 halfViewWidth,
+                                     common::real32 halfViewHeight) const {
             // TODO: Garbage collision detection, use the same method used in lap tracker for figuring out if a check
             // point is reached.
             auto x = false;

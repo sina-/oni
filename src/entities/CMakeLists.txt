@@ -9,8 +9,8 @@ target_include_directories(oni-core-entities
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
-        PRIVATE
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
+        PRIVATE
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
         )
 

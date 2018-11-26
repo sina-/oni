@@ -1,5 +1,11 @@
 #pragma once
 
+#include <sstream>
+
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
+
 #include <oni-core/common/typedefs.h>
 #include <oni-core/components/world-data-status.h>
 
@@ -35,5 +41,45 @@ namespace oni {
         std::string serialize(entities::EntityManager &manager, components::WorldDataStatus lifeTime);
 
         void deserialize(oni::entities::EntityManager &manager, const std::string &data, components::WorldDataStatus lifeTime);
+
+        template<class T>
+        T deserialize(const std::string &data) {
+            std::istringstream storage;
+            storage.str(data);
+
+            T result;
+            {
+                cereal::PortableBinaryInputArchive input{storage};
+                input(result);
+            }
+            return result;
+        }
+
+        template<class T>
+        T deserialize(const common::uint8 *data, size_t size) {
+            std::istringstream storage;
+            storage.str(std::string(reinterpret_cast<const char *>(data), size));
+
+            T result;
+            {
+                cereal::PortableBinaryInputArchive input{storage};
+                input(result);
+            }
+            return result;
+        }
+
+
+        template<class T>
+        std::string serialize(const T &data) {
+            std::ostringstream storage;
+            {
+                cereal::PortableBinaryOutputArchive output{storage};
+
+                output(data);
+            }
+            return storage.str();
+        }
+
+
     }
 }

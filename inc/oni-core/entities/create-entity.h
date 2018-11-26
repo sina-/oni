@@ -20,7 +20,6 @@ namespace oni {
     namespace graphics {
         class FontManager;
 
-
         class SceneManager;
     }
 

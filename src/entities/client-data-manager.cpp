@@ -25,17 +25,17 @@ namespace oni {
         }*/
 
         common::EntityID ClientDataManager::getEntityID(const common::PeerID &clientID) const {
-            return mClientCarEntityMap.at(clientID);
+            return mClientToCarEntity.at(clientID);
         }
 
         void ClientDataManager::addNewClient(const common::PeerID &clientID, common::EntityID entityID) {
-            mClientCarEntityMap[clientID] = entityID;
+            mClientToCarEntity[clientID] = entityID;
             mClients.push_back(clientID);
         }
 
         void ClientDataManager::deleteClient(const common::PeerID &clientID) {
-            mClientCarEntityMap.erase(clientID);
-            mClientInputMap.erase(clientID);
+            mClientToCarEntity.erase(clientID);
+            mClientToInput.erase(clientID);
 
             auto it = std::find_if(mClients.begin(), mClients.end(),
                                    [&](const common::PeerID &peerID) { return (peerID == clientID); });
@@ -47,28 +47,28 @@ namespace oni {
         }
 
         void ClientDataManager::setClientInput(const common::PeerID &clientID, const io::Input &input) {
-            mClientInputMap[clientID] = input;
+            mClientToInput[clientID] = input;
         }
 
         const io::Input &ClientDataManager::getClientInput(const common::PeerID &clientID) {
-            return mClientInputMap[clientID];
+            return mClientToInput[clientID];
         }
 
-        const Clients &ClientDataManager::getClients() const {
+        const ClientList &ClientDataManager::getClients() const {
             return mClients;
         }
 
-        ClientsInput ClientDataManager::getClientsInput() const {
-            ClientsInput inputs{};
-            for (const auto &input : mClientInputMap) {
+        ClientInputList ClientDataManager::getClientsInput() const {
+            ClientInputList inputs{};
+            for (const auto &input : mClientToInput) {
                 inputs.push_back(input.second);
             }
             return inputs;
         }
 
-        ClientsCarEntity ClientDataManager::getCarEntities() const {
-            ClientsCarEntity entities{};
-            for (const auto &entity : mClientCarEntityMap) {
+        CarEntities ClientDataManager::getCarEntities() const {
+            CarEntities entities{};
+            for (const auto &entity : mClientToCarEntity) {
                 entities.push_back(entity.second);
             }
             return entities;

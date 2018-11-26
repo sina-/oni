@@ -30,7 +30,7 @@ namespace oni {
             static components::Shape shapeTransformation(const math::mat4 &transformation,
                                                          const components::Shape &shape);
 
-            static math::mat4 createTransformation(const math::vec3 &position, const common::real32 rotation,
+            static math::mat4 createTransformation(const math::vec3 &position, common::real32 rotation,
                                                    const math::vec3 &scale);
 
             static void worldToLocalTranslation(const math::vec3 &reference, math::vec3 &operand);
@@ -39,7 +39,7 @@ namespace oni {
 
             static void localToWorldTranslation(const math::vec3 &reference, components::Shape &shape);
 
-            static void localToTextureTranslation(const common::real32 ratio, math::vec3 &operand);
+            static void localToTextureTranslation(common::real32 ratio, math::vec3 &operand);
 
             /**
              * Translates operand in the world coordinates to local coordinates of reference in texture coordinates.
@@ -52,8 +52,8 @@ namespace oni {
              * @param ratio each game unit is worth this many texture pixels
              * @param operand input as world coordinate and outputs as local texture coordinates
              */
-            static void worldToLocalTextureTranslation(const math::vec3 &reference, const common::real32 ratio,
-                                                       math::vec3 &operand);
+            static void worldToTextureCoordinate(const math::vec3 &reference, common::real32 ratio,
+                                                 math::vec3 &operand);
 
             static void updatePlacement(entities::EntityManager &manager,
                                         common::EntityID entity,

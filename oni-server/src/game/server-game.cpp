@@ -12,6 +12,7 @@
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/tile-world.h>
+#include <oni-core/entities/serialization.h>
 
 
 namespace oni {
@@ -161,7 +162,7 @@ namespace oni {
         }
 
         void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {
-            auto input = network::deserialize<io::Input>(data);
+            auto input = entities::deserialize<io::Input>(data);
             // TODO: Avoid copy by using a unique_ptr or something
             mClientDataManager->setClientInput(clientID, input);
         }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cereal/types/base_class.hpp>
-
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet-types.h>
 

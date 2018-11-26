@@ -110,7 +110,7 @@ namespace oni {
             void serialize(Archive &archive) {}
         };
 
-        struct ChunkIndices {
+        struct ChunkIndex {
             common::int64 x{0};
             common::int64 y{0};
 
@@ -120,7 +120,7 @@ namespace oni {
             }
         };
 
-        struct RoadTileIndices {
+        struct RoadTileIndex {
             // NOTE: This is relative to Chunk
             common::uint16 x{0};
             common::uint16 y{0};
@@ -131,16 +131,16 @@ namespace oni {
             }
         };
 
-        struct TileIndices {
+        struct TileIndex {
             common::int64 x{0};
             common::int64 y{0};
         };
 
         struct BoarderRoadTiles {
-            RoadTileIndices eastBoarder{};
-            RoadTileIndices southBoarder{};
-            RoadTileIndices westBoarder{};
-            RoadTileIndices northBoarder{};
+            RoadTileIndex eastBoarder{};
+            RoadTileIndex southBoarder{};
+            RoadTileIndex westBoarder{};
+            RoadTileIndex northBoarder{};
 
             template<class Archive>
             void serialize(Archive &archive) {

@@ -7,6 +7,7 @@
 #include <oni-core/io/output.h>
 #include <oni-core/io/input.h>
 #include <oni-core/utils/timer.h>
+#include <oni-core/entities/serialization.h>
 
 namespace oni {
     namespace network {
@@ -55,7 +56,7 @@ namespace oni {
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = deserialize<DataPacket>(data, size);
+                    auto packet = entities::deserialize<DataPacket>(data, size);
                     std::cout << packet.data << std::endl;
                     break;
                 }
@@ -94,7 +95,7 @@ namespace oni {
         void Client::sendMessage(std::string &&message) {
             auto type = PacketType::MESSAGE;
             auto messagePacket = DataPacket{std::move(message)};
-            auto data = serialize<DataPacket>(messagePacket);
+            auto data = entities::serialize<DataPacket>(messagePacket);
 
             send(type, data, mEnetPeer);
         }
@@ -108,7 +109,7 @@ namespace oni {
 
         void Client::sendInput(const io::Input *input) {
             auto type = PacketType::CLIENT_INPUT;
-            auto data = serialize<io::Input>(*input);
+            auto data = entities::serialize<io::Input>(*input);
 
             send(type, data, mEnetPeer);
         }

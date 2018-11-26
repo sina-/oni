@@ -29,8 +29,8 @@ namespace oni {
             operand.y *= ratio;
         }
 
-        void Transformation::worldToLocalTextureTranslation(const math::vec3 &reference, const common::real32 ratio,
-                                                            math::vec3 &operand) {
+        void Transformation::worldToTextureCoordinate(const math::vec3 &reference, common::real32 ratio,
+                                                      math::vec3 &operand) {
             Transformation::worldToLocalTranslation(reference, operand);
             Transformation::localToTextureTranslation(ratio, operand);
         }

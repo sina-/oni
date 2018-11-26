@@ -8,7 +8,7 @@
 namespace oni {
     namespace components {
         struct BufferStructure;
-        typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructures;
+        typedef std::vector<std::unique_ptr<components::BufferStructure>> BufferStructureList;
     }
 
     namespace buffers {
@@ -17,13 +17,9 @@ namespace oni {
          * Great tutorial on OpenGL buffers: https://open.gl/drawing
          */
         class Buffer {
-            common::oniGLuint mBufferID;
-            // TODO: This is un-used by the Buffer class, but VAO which usually has this class uses it.
-            components::BufferStructures mBufferStructures;
-
         public:
             Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize, common::oniGLenum usage,
-                   components::BufferStructures bufferStructures);
+                   components::BufferStructureList bufferStructures);
 
             ~Buffer();
 
@@ -39,7 +35,13 @@ namespace oni {
 
             void unbind();
 
-            const components::BufferStructures &getBufferStructure() const;
+            const components::BufferStructureList &getBufferStructure() const;
+
+        private:
+            common::oniGLuint mBufferID;
+            // TODO: This is un-used by the Buffer class, but VAO which usually has this class uses it.
+            components::BufferStructureList mBufferStructureList;
+
         };
 
     }

@@ -109,11 +109,13 @@ namespace oni {
                     auto *body = carPhysicsView.get<components::PhysicalProperties>(entity).body;
                     auto &car = carPhysicsView.get<components::Car>(entity);
                     // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
-                    // just apply force to box2d representation of
-                    // physical body without syncing car dynamics with box2d physics, that way the next turn if the
-                    // car was heading out of collision  the car will start sliding out and things will run smoothly.
-                    // If the car is indeed heading against other objects, it will be stuck as it was. This greatly
-                    // improves game feeling when there are collisions and solves lot of stickiness issues.
+                    // just apply user input to box2d representation of physical body without syncing
+                    // car dynamics with box2d physics, that way the next tick if the
+                    // car was heading out of collision it will start sliding out and things will run smoothly according
+                    // to car dynamics calculation. If the car is still heading against other objects, it will be
+                    // stuck as it was and I will skip dynamics and just sync it to  position and orientation
+                    // from box2d. This greatly improves game feeling when there are collisions and
+                    // solves lot of stickiness issues.
                     if (car.isColliding) {
                         // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
                         // carconfig?

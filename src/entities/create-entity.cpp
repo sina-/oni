@@ -54,30 +54,6 @@ namespace oni {
         }
 
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        common::EntityID createDynamicEntity(EntityManager &manager, const math::vec2 &size,
-                                             const math::vec3 &positionInWorld,
-                                             const common::real32 heading, const math::vec3 &scale) {
-
-            // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
-            // works out without needing to translate the entity to the center before rotation and then back to its
-            // position in the local space.
-            auto halfSizeX = size.x / 2;
-            auto halfSizeY = size.y / 2;
-            auto entityShape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
-
-            auto entityPlacement = components::Placement{positionInWorld, heading, scale};
-
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-            manager.assign<components::Shape>(entity, entityShape);
-            manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::Tag_Dynamic>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
-        }
-
-        // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
         common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                     const math::vec2 &size,
                                                     const math::vec3 &positionInWorld, const common::real32 heading,
@@ -121,21 +97,6 @@ namespace oni {
             manager.assign<components::Shape>(entity, entityShape);
             manager.assign<components::Placement>(entity, entityPlacement);
             manager.assign<components::Tag_Dynamic>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
-        }
-
-        common::EntityID _createStaticEntity(EntityManager &manager, const math::vec2 &size,
-                                            const math::vec3 &positionInWorld) {
-            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-
-            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
-
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-            manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::Tag_Static>(entity);
             manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
@@ -245,7 +206,6 @@ namespace oni {
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             auto entityPhysicalProps = components::PhysicalProperties{body};
 
-            auto lock = manager.scopedLock();
             auto entity = manager.create();
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShapeWorld);
@@ -276,7 +236,15 @@ namespace oni {
             manager.addDeletedEntity(entityID);
         }
 
-        void assignTexture(EntityManager &manager, common::EntityID entity, const components::Texture &texture) {
+        void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
+            components::Texture texture;
+            texture.filePath = path;
+            texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
+            manager.assign<components::Texture>(entity, texture);
+            manager.assign<components::Tag_TextureShaded>(entity);
+        }
+
+        void assignTextureLoaded(EntityManager &manager, common::EntityID entity, const components::Texture &texture) {
             manager.assign<components::Texture>(entity, texture);
             manager.assign<components::Tag_TextureShaded>(entity);
         }
@@ -290,6 +258,9 @@ namespace oni {
         void assignShapeLocal(EntityManager &manager,
                               common::EntityID entityID,
                               const math::vec2 &size) {
+            // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
+            // works out without needing to translate the entity to the center before rotation and then back to its
+            // position in the local space.
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
             auto shape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
@@ -368,11 +339,6 @@ namespace oni {
             }
             manager.assign<components::PhysicalProperties>(entityID, body);
         }
-
-        void assignTagStatic(EntityManager &manager, common::EntityID entityID) {
-            manager.assign<components::Tag_Static>(entityID);
-        }
-
     }
 
 

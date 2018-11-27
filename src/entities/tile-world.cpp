@@ -394,7 +394,7 @@ namespace oni {
             auto lock = mEntityManager.scopedLock();
             auto entityID = entities::createEntity(mEntityManager);
             entities::assignShapeWold(mEntityManager, entityID, tileSize, worldPos);
-            entities::assignTagStatic(mEntityManager, entityID);
+            entities::assignTag<components::Tag_Static>(mEntityManager, entityID);
 
             auto texture = components::Texture{};
             texture.filePath = texturePath;
@@ -558,11 +558,6 @@ namespace oni {
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(wallTextureSize, 0);
             physics::Transformation::localToWorldTranslation(wallPositionInWorld, entityShapeWorld);
 
-            std::string wallTexturePath = "resources/images/wall/1/1.png";
-            auto wallTexture = components::Texture{};
-            wallTexture.filePath = wallTexturePath;
-            wallTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-
             b2ChainShape chainShape;
             chainShape.CreateChain(vs, 2);
 
@@ -583,7 +578,7 @@ namespace oni {
                 mEntityManager.assign<components::Tag_NewEntity>(entity);
             }
 
-            entities::assignTexture(mEntityManager, entity, wallTexture);
+            entities::assignTextureToLoad(mEntityManager, entity, "resources/images/wall/1/1.png");
         }
 
         void TileWorld::createWall(const std::vector<components::WallTilePosition> &position,
@@ -658,29 +653,23 @@ namespace oni {
                                                                       wallSize,
                                                                       wallPositionInWorld);
 
-                auto wallTexture = components::Texture{};
-                wallTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-                wallTexture.filePath = wallTexturePath;
-                entities::assignTexture(mEntityManager, wallEntity, wallTexture);
+                entities::assignTextureToLoad(mEntityManager, wallEntity, wallTexturePath);
             }
         }
 
         void TileWorld::generateChunkBackground(common::int64 chunkX, common::int64 chunkY) {
             auto chunkIndex = components::ChunkIndex{chunkX, chunkY};
             auto worldPos = chunkIndexToPos(chunkIndex);
+
             auto lock = mEntityManager.scopedLock();
             auto entityID = entities::createEntity(mEntityManager);
             entities::assignShapeWold(mEntityManager, entityID, getChunkSize(),
                                       math::vec3{worldPos.x, worldPos.y, 1.f});
-            entities::assignTagStatic(mEntityManager, entityID);
+            entities::assignTextureToLoad(mEntityManager, entityID, mRaceTrack1);
+            entities::assignTag<components::Tag_Static>(mEntityManager, entityID);
 
             auto packed = math::packIntegers(chunkX, chunkY);
             mChunkLookup.emplace(packed, entityID);
-
-            auto texture = components::Texture{};
-            texture.filePath = mRaceTrack1;
-            texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            entities::assignTexture(mEntityManager, entityID, texture);
         }
 
         math::vec2 TileWorld::getTileSize() const {

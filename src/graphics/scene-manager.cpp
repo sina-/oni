@@ -13,6 +13,7 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
 #include <oni-core/components/gameplay.h>
+#include <oni-core/components/tag.h>
 
 
 namespace oni {
@@ -457,17 +458,16 @@ namespace oni {
                 auto heightInPixels = static_cast<common::uint16>(mSkidTileSizeY * mGameUnitToPixels +
                                                                   common::ep);
                 auto defaultColor = components::PixelRGBA{};
+                // TODO: I can blend skid textures using this data
                 auto data = graphics::TextureManager::generateBits(widthInPixels, heightInPixels,
                                                                    defaultColor);
-                auto skidTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
-                // TODO: I can blend skid textures using this data
-                skidTexture.data = data;
 
+                auto texture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
                 auto lock = mInternalRegistry->scopedLock();
                 auto entityID = entities::createEntity(*mInternalRegistry);
                 entities::assignShapeWold(*mInternalRegistry, entityID, tileSize, worldPos);
-                entities::assignTagStatic(*mInternalRegistry, entityID);
-                entities::assignTexture(*mInternalRegistry, entityID, skidTexture);
+                entities::assignTextureLoaded(*mInternalRegistry, entityID, texture);
+                entities::assignTag<components::Tag_Static>(*mInternalRegistry, entityID);
                 mSkidlineLookup.emplace(packedIndices, entityID);
             }
 

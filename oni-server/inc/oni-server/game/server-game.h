@@ -73,6 +73,10 @@ namespace oni {
 
             void postDisconnectHook(const common::PeerID &);
 
+            common::EntityID createCar();
+
+            common::EntityID createTire(common::EntityID carEntityID, const math::vec3 &pos, const math::vec2 &size);
+
         private:
             std::unique_ptr<entities::EntityManager> mEntityManager{};
 

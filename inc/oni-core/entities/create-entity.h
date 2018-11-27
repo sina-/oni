@@ -5,6 +5,8 @@
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/components/physics.h>
+#include <oni-core/common/typedefs-graphics.h>
+#include <oni-core/entities/entity-manager.h>
 
 class b2World;
 
@@ -52,7 +54,10 @@ namespace oni {
                                       bool highPrecisionPhysics
         );
 
-        void assignTagStatic(EntityManager& manager, common::EntityID entityID);
+        template<class T>
+        void assignTag(EntityManager &manager, common::EntityID entityID){
+            manager.assign<T>(entityID);
+        }
 
         common::EntityID createSpriteEntity(EntityManager &manager,
                                             const math::vec4 &color,
@@ -60,21 +65,14 @@ namespace oni {
                                             const math::vec3 &positionInWorld);
 
         common::EntityID createSpriteStaticEntity(entities::EntityManager &manager,
-                                                   const math::vec4 &color,
-                                                   const math::vec2 &size,
-                                                   const math::vec3 &positionInWorld);
-
-        common::EntityID createDynamicEntity(EntityManager &manager, const math::vec2 &size,
-                                             const math::vec3 &positionInWorld,
-                                             common::real32 heading, const math::vec3 &scale);
+                                                  const math::vec4 &color,
+                                                  const math::vec2 &size,
+                                                  const math::vec3 &positionInWorld);
 
         common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                     const math::vec2 &size,
                                                     const math::vec3 &positionInWorld, common::real32 heading,
                                                     const math::vec3 &scale);
-
-        common::EntityID _createStaticEntity(EntityManager &manager, const math::vec2 &size,
-                                            const math::vec3 &positionInWorld);
 
         common::EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                    const math::vec2 &size,
@@ -89,6 +87,10 @@ namespace oni {
 
         void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
 
-        void assignTexture(EntityManager &manager, common::EntityID entity, const components::Texture &texture);
+        void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path);
+
+        void assignTextureLoaded(EntityManager &manager,
+                                 common::EntityID entity,
+                                 const components::Texture &texture);
     }
 }

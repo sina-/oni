@@ -41,11 +41,11 @@ namespace oni {
             const components::Texture *findOrLoad(const std::string &path);
 
             static components::Texture loadFromData(common::uint16 width, common::uint16 height,
-                                                    const std::vector<common::uint8> &data);
+                                                    const common::TextureData &data);
 
             // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random
             // data generations of all types
-            static std::vector<common::uint8> generateBits(common::uint16 width, common::uint16 height,
+            static common::TextureData generateBits(common::uint16 width, common::uint16 height,
                                                            const components::PixelRGBA &pixel);
 
             // TODO: This function doesnt fit in the current design

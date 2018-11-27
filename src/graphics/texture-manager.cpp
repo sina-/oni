@@ -89,11 +89,11 @@ namespace oni {
             return &mTextureMap[path];
         }
 
-        std::vector<common::uint8> TextureManager::generateBits(const common::uint16 width, const common::uint16 height,
-                                                                const components::PixelRGBA &pixel) {
+        common::TextureData TextureManager::generateBits(const common::uint16 width, const common::uint16 height,
+                                                         const components::PixelRGBA &pixel) {
             // Elements in pixel
             common::uint8 eip = 4;
-            std::vector<common::uint8> bits(static_cast<common::uint32>(eip * width * height), 0);
+            common::TextureData bits(static_cast<common::uint32>(eip * width * height), 0);
             common::uint16 stride = width * eip;
 
             for (common::uint32 y = 0; y < height; ++y) {
@@ -180,7 +180,7 @@ namespace oni {
         }
 
         components::Texture TextureManager::loadFromData(common::uint16 width, common::uint16 height,
-                                                         const std::vector<common::uint8> &data) {
+                                                         const common::TextureData &data) {
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 

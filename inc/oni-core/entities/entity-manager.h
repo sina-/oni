@@ -9,6 +9,7 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/components/world-data-status.h>
+#include <oni-core/components/tag.h>
 
 
 namespace oni {
@@ -217,7 +218,7 @@ namespace oni {
                 switch (lifeTime) {
                     case components::WorldDataStatus::ONLY_COMPONENT_UPDATE: {
                         // TODO: Rather not have this class know about specific components!
-                        auto view = mRegistry->view<components::TagOnlyComponentUpdate>();
+                        auto view = mRegistry->view<components::Tag_OnlyComponentUpdate>();
                         if (!view.empty()) {
                             mRegistry->snapshot().template component<ArchiveComponents...>(archive,
                                                                                            view.cbegin(),
@@ -226,7 +227,7 @@ namespace oni {
                         break;
                     }
                     case components::WorldDataStatus::ADD_NEW_ENTITIES: {
-                        auto view = mRegistry->view<components::TagAddNewEntities>();
+                        auto view = mRegistry->view<components::Tag_NewEntity>();
                         if (!view.empty()) {
                             mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
                                                                                                              view.cbegin(),

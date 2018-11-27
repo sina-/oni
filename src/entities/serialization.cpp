@@ -37,11 +37,11 @@ namespace oni {
                         // find a solution to this shit.
                         //components::PhysicalProperties,
                         components::TransformParent,
-                        components::TagDynamic,
-                        components::TagVehicle,
-                        components::TagTextureShaded,
-                        components::TagColorShaded,
-                        components::TagStatic
+                        components::Tag_Dynamic,
+                        components::Tag_Vehicle,
+                        components::Tag_TextureShaded,
+                        components::Tag_ColorShaded,
+                        components::Tag_Static
                 >(output, lifeTime);
             }
 
@@ -66,11 +66,11 @@ namespace oni {
                         components::Texture,
                         //components::PhysicalProperties,
                         components::TransformParent,
-                        components::TagDynamic,
-                        components::TagVehicle,
-                        components::TagTextureShaded,
-                        components::TagColorShaded,
-                        components::TagStatic
+                        components::Tag_Dynamic,
+                        components::Tag_Vehicle,
+                        components::Tag_TextureShaded,
+                        components::Tag_ColorShaded,
+                        components::Tag_Static
                 >(lifeTime, input,
                         // NOTE: Car entity keeps a reference to tire entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct

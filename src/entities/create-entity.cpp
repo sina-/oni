@@ -26,7 +26,7 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Appearance>(entity, entityAppearance);
-            manager.assign<components::TagColorShaded>(entity);
+            manager.assign<components::Tag_ColorShaded>(entity);
 
             return entity;
         }
@@ -45,10 +45,10 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Appearance>(entity, entityAppearance);
-            manager.assign<components::TagColorShaded>(entity);
+            manager.assign<components::Tag_ColorShaded>(entity);
             // TODO: Is this the correct usage of tags?
-            manager.assign<components::TagStatic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Static>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
@@ -71,9 +71,8 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShape);
             manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::TagTextureShaded>(entity);
-            manager.assign<components::TagDynamic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Dynamic>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
@@ -102,14 +101,14 @@ namespace oni {
 
             auto *body = physicsWorld.CreateBody(&bodyDef);
 
-            auto truckShape = std::make_unique<b2PolygonShape>();
-            truckShape->SetAsBox(size.x / 2.0f, size.y / 2.0f);
+            auto shape = b2PolygonShape();
+            shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
-            b2FixtureDef truckFixtureDef;
-            truckFixtureDef.shape = truckShape.get();
-            truckFixtureDef.density = 10.0f;
-            truckFixtureDef.friction = 10.9f;
-            body->CreateFixture(&truckFixtureDef);
+            b2FixtureDef fixture;
+            fixture.shape = &shape;
+            fixture.density = 10.0f;
+            fixture.friction = 10.9f;
+            body->CreateFixture(&fixture);
 
             // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
             // There is a way to request it from b2World?
@@ -121,14 +120,13 @@ namespace oni {
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShape);
             manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::TagTextureShaded>(entity);
-            manager.assign<components::TagDynamic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Dynamic>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
 
-        common::EntityID createStaticEntity(EntityManager &manager, const math::vec2 &size,
+        common::EntityID _createStaticEntity(EntityManager &manager, const math::vec2 &size,
                                             const math::vec3 &positionInWorld) {
             auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
 
@@ -137,9 +135,8 @@ namespace oni {
             auto lock = manager.scopedLock();
             auto entity = manager.create();
             manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::TagTextureShaded>(entity);
-            manager.assign<components::TagStatic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Static>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
@@ -171,9 +168,8 @@ namespace oni {
             auto entity = manager.create();
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::TagTextureShaded>(entity);
-            manager.assign<components::TagStatic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Static>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
@@ -189,9 +185,8 @@ namespace oni {
             auto entity = manager.create();
 
             manager.assign<components::Text>(entity, textComponent);
-            manager.assign<components::TagTextureShaded>(entity);
-            manager.assign<components::TagStatic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Static>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
@@ -255,12 +250,11 @@ namespace oni {
             manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
             manager.assign<components::Shape>(entity, entityShapeWorld);
             manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::TagTextureShaded>(entity);
             manager.assign<components::Car>(entity, car);
             manager.assign<components::CarConfig>(entity, carConfig);
-            manager.assign<components::TagVehicle>(entity);
-            manager.assign<components::TagDynamic>(entity);
-            manager.assign<components::TagAddNewEntities>(entity);
+            manager.assign<components::Tag_Vehicle>(entity);
+            manager.assign<components::Tag_Dynamic>(entity);
+            manager.assign<components::Tag_NewEntity>(entity);
 
             return entity;
         }
@@ -273,19 +267,110 @@ namespace oni {
             manager.remove<components::PhysicalProperties>(entityID);
             manager.remove<components::Shape>(entityID);
             manager.remove<components::Placement>(entityID);
-            manager.remove<components::TagTextureShaded>(entityID);
             manager.remove<components::Car>(entityID);
             manager.remove<components::CarConfig>(entityID);
-            manager.remove<components::TagVehicle>(entityID);
-            manager.remove<components::TagDynamic>(entityID);
+            manager.remove<components::Tag_Vehicle>(entityID);
+            manager.remove<components::Tag_Dynamic>(entityID);
             manager.destroy(entityID);
 
             manager.addDeletedEntity(entityID);
         }
 
         void assignTexture(EntityManager &manager, common::EntityID entity, const components::Texture &texture) {
-            auto lock = manager.scopedLock();
             manager.assign<components::Texture>(entity, texture);
+            manager.assign<components::Tag_TextureShaded>(entity);
+        }
+
+        common::EntityID createEntity(EntityManager &manager) {
+            auto entityID = manager.create();
+            manager.assign<components::Tag_NewEntity>(entityID);
+            return entityID;
+        }
+
+        void assignShapeLocal(EntityManager &manager,
+                              common::EntityID entityID,
+                              const math::vec2 &size) {
+            auto halfSizeX = size.x / 2;
+            auto halfSizeY = size.y / 2;
+            auto shape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
+            manager.assign<components::Shape>(entityID, shape);
+        }
+
+        void assignShapeWold(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
+                             const math::vec3 &worldPos) {
+            auto shape = components::Shape::fromSizeAndRotation(size, 0);
+
+            physics::Transformation::localToWorldTranslation(worldPos, shape);
+            manager.assign<components::Shape>(entityID, shape);
+        }
+
+        void assignPlacement(EntityManager &manager,
+                             common::EntityID entityID,
+                             const math::vec3 &worldPos,
+                             const math::vec3 &scale,
+                             common::real32 heading) {
+            manager.assign<components::Placement>(entityID, worldPos, heading, scale);
+        }
+
+        void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color) {
+            manager.assign<components::Appearance>(entityID, color);
+        }
+
+        void assignPhysicalProperties(EntityManager &manager,
+                                      b2World &physicsWorld,
+                                      common::EntityID entityID,
+                                      const math::vec3 &worldPos,
+                                      const math::vec2 &size,
+                                      components::BodyType bodyType,
+                                      bool highPrecisionPhysics) {
+            b2PolygonShape shape{};
+            shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
+            b2Body *body{};
+
+            b2BodyDef bodyDef;
+            bodyDef.bullet = highPrecisionPhysics;
+            bodyDef.linearDamping = 2.0f;
+            bodyDef.angularDamping = 2.0f;
+
+            b2FixtureDef fixtureDef;
+            // NOTE: Box2D will create a copy of the shape, so it is safe to pass a local ref.
+            fixtureDef.shape = &shape;
+            fixtureDef.density = 1.0f;
+            fixtureDef.friction = 0.1;
+
+            switch (bodyType) {
+                case components::BodyType::DYNAMIC : {
+                    bodyDef.position.x = worldPos.x;
+                    bodyDef.position.y = worldPos.y;
+                    bodyDef.type = b2_dynamicBody;
+                    body = physicsWorld.CreateBody(&bodyDef);
+                    body->CreateFixture(&fixtureDef);
+                    break;
+                }
+                case components::BodyType::STATIC: {
+                    // NOTE: for static entities position in world is the bottom left corner of the sprite. But
+                    // bodyDef.position is the center of gravity of the entity.
+                    bodyDef.position.x = worldPos.x + size.x / 2.0f;
+                    bodyDef.position.y = worldPos.y + size.y / 2.0f;
+                    bodyDef.type = b2_staticBody;
+                    body = physicsWorld.CreateBody(&bodyDef);
+                    body->CreateFixture(&shape, 0.f);
+                    break;
+                }
+                case components::BodyType::KINEMATIC: {
+                    bodyDef.position.x = worldPos.x;
+                    bodyDef.position.y = worldPos.y;
+                    bodyDef.type = b2_kinematicBody;
+                    body = physicsWorld.CreateBody(&bodyDef);
+                    body->CreateFixture(&fixtureDef);
+                    break;
+                }
+            }
+            manager.assign<components::PhysicalProperties>(entityID, body);
+        }
+
+        void assignTagStatic(EntityManager &manager, common::EntityID entityID) {
+            manager.assign<components::Tag_Static>(entityID);
         }
 
     }

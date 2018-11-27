@@ -31,7 +31,7 @@ namespace oni {
 
             math::vec2 chunkIndexToPos(const components::ChunkIndex &chunkIndices) const;
 
-            math::vec2 roadTileIndexToPos(const components::ChunkIndex &chunkIndices,
+            math::vec3 roadTileIndexToPos(const components::ChunkIndex &chunkIndices,
                                           components::RoadTileIndex roadTileIndices) const;
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
@@ -76,7 +76,7 @@ namespace oni {
              */
             PackedIndexToEntityID mTileLookup{};
             PackedIndexToEntityID mRoadLookup{};
-            PackedIndexToEntityID mRoadInChunkLookup{};
+            PackedIndexToEntityID mChunkLookup{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};

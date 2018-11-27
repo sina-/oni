@@ -146,28 +146,27 @@ namespace oni {
             for (auto i = chunkIndices.x - 1; i <= chunkIndices.x + 1; ++i) {
                 for (auto j = chunkIndices.y - 1; j <= chunkIndices.y + 1; ++j) {
                     auto chunkIndex = math::packIntegers(i, j);
-                    if (!existsInMap(chunkIndex, mRoadInChunkLookup)) {
+                    if (!existsInMap(chunkIndex, mChunkLookup)) {
 
-                        //generateBackgroundForChunk(i, j);
+                        // generateChunkBackground(i, j);
                         //generateTilesForChunk(i, j);
-
+/*
                         // NOTE: Just for debugging
-/*                        auto R = 100;//(std::rand() % 255) / 255.0f;
+                        auto R = 100;//(std::rand() % 255) / 255.0f;
                         auto G = 100;//(std::rand() % 255) / 255.0f;
                         auto B = 100;//(std::rand() % 255) / 255.0f;
                         auto color = math::vec4{R, G, B, 0.5f};
                         auto size = math::vec2{mChunkSizeX, mChunkSizeY};
                         auto currentChunkIndices = components::ChunkIndex{i, j};
                         auto chunkPosition = chunkIndexToPosition(currentChunkIndices);
-                        auto positionInWorld = math::vec3{chunkPosition.x, chunkPosition.y, 1.0f};
-                        auto chunkID = entities::createSpriteStaticEntity(manager, color, size, positionInWorld);
+                        auto worldPos = math::vec3{chunkPosition.x, chunkPosition.y, 1.0f};
+                        auto chunkID = entities::createSpriteStaticEntity(manager, color, size, worldPos);
 
                         auto boarderRoadTiles = generateRoadsForChunk(manager, currentChunkIndices);
-                        auto chunk = components::Chunk{positionInWorld, packedIndex, boarderRoadTiles};
+                        auto chunk = components::Chunk{worldPos, packedIndex, boarderRoadTiles};
                         manager.assign<components::Chunk>(chunkID, chunk);
 
-                        mRoadInChunkLookup.emplace(packedIndex, chunkID);
-                        */
+                        mChunkLookup.emplace(packedIndex, chunkID);*/
                     }
                 }
             }
@@ -217,23 +216,23 @@ namespace oni {
             components::RoadTileIndex endingRoadTileIndices{0, 0};
 
             components::RoadTileIndex northBoarderRoadTileIndices{static_cast<uint16>(std::rand() % mTilesPerChunkX),
-                                                                    static_cast<uint16>(mTilesPerChunkY - 1)};
+                                                                  static_cast<uint16>(mTilesPerChunkY - 1)};
 
             components::RoadTileIndex southBoarderRoadTileIndices{static_cast<uint16>(std::rand() % mTilesPerChunkX),
-                                                                    0};
+                                                                  0};
 
             components::RoadTileIndex westBoarderRoadTileIndices{0,
-                                                                   static_cast<uint16>(std::rand() % mTilesPerChunkY)};
+                                                                 static_cast<uint16>(std::rand() % mTilesPerChunkY)};
 
             components::RoadTileIndex eastBoarderRoadTileIndices{static_cast<uint16>(mTilesPerChunkX - 1),
-                                                                   static_cast<uint16>(std::rand() % mTilesPerChunkY)};
+                                                                 static_cast<uint16>(std::rand() % mTilesPerChunkY)};
 
             if (northChunkHasRoads && southChunkHasRoads) {
                 boarderRoadTiles.southBoarder = components::RoadTileIndex{};
                 boarderRoadTiles.northBoarder = components::RoadTileIndex{};
 
-                if (existsInMap(southChunkPacked, mRoadInChunkLookup)) {
-                    auto southChunkID = mRoadInChunkLookup.at(southChunkPacked);
+                if (existsInMap(southChunkPacked, mChunkLookup)) {
+                    auto southChunkID = mChunkLookup.at(southChunkPacked);
                     const auto &southChunk = mEntityManager.get<components::Chunk>(southChunkID);
 
                     boarderRoadTiles.southBoarder.x = southChunk.boarderRoadTiles.northBoarder.x;
@@ -241,8 +240,8 @@ namespace oni {
                 } else {
                     boarderRoadTiles.southBoarder = southBoarderRoadTileIndices;
                 }
-                if (existsInMap(northChunkPacked, mRoadInChunkLookup)) {
-                    auto northChunkID = mRoadInChunkLookup.at(northChunkPacked);
+                if (existsInMap(northChunkPacked, mChunkLookup)) {
+                    auto northChunkID = mChunkLookup.at(northChunkPacked);
                     const auto &northChunk = mEntityManager.get<components::Chunk>(northChunkID);
 
                     boarderRoadTiles.northBoarder = northChunk.boarderRoadTiles.southBoarder;
@@ -266,8 +265,8 @@ namespace oni {
                 boarderRoadTiles.westBoarder = components::RoadTileIndex{};
                 boarderRoadTiles.eastBoarder = components::RoadTileIndex{};
 
-                if (existsInMap(eastChunkPacked, mRoadInChunkLookup)) {
-                    auto eastChunkID = mRoadInChunkLookup.at(eastChunkPacked);
+                if (existsInMap(eastChunkPacked, mChunkLookup)) {
+                    auto eastChunkID = mChunkLookup.at(eastChunkPacked);
                     const auto &eastChunk = mEntityManager.get<components::Chunk>(eastChunkID);
 
                     boarderRoadTiles.eastBoarder.x = mTilesPerChunkX - 1;
@@ -277,8 +276,8 @@ namespace oni {
                     boarderRoadTiles.eastBoarder = eastBoarderRoadTileIndices;
                 }
 
-                if (existsInMap(westChunkPacked, mRoadInChunkLookup)) {
-                    auto westChunkID = mRoadInChunkLookup.at(westChunkPacked);
+                if (existsInMap(westChunkPacked, mChunkLookup)) {
+                    auto westChunkID = mChunkLookup.at(westChunkPacked);
                     const auto &westChunk = mEntityManager.get<components::Chunk>(westChunkID);
 
                     boarderRoadTiles.westBoarder.x = 0;
@@ -389,19 +388,21 @@ namespace oni {
         void TileWorld::generateTexturedRoadTile(const components::ChunkIndex &chunkIndices,
                                                  const components::RoadTileIndex &roadTileIndices,
                                                  const std::string &texturePath) {
-            const auto roadTileSize = getTileSize();
+            auto tileSize = getTileSize();
 
-            const auto positionInWorld = roadTileIndexToPos(chunkIndices, roadTileIndices);
-            const auto roadID = createStaticEntity(mEntityManager, roadTileSize,
-                                                   math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
+            auto worldPos = roadTileIndexToPos(chunkIndices, roadTileIndices);
+            auto lock = mEntityManager.scopedLock();
+            auto entityID = entities::createEntity(mEntityManager);
+            entities::assignShapeWold(mEntityManager, entityID, tileSize, worldPos);
+            entities::assignTagStatic(mEntityManager, entityID);
 
             auto texture = components::Texture{};
             texture.filePath = texturePath;
             texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            mEntityManager.assign<components::Texture>(roadID, texture);
+            mEntityManager.assign<components::Texture>(entityID, texture);
 
             const auto packedIndex = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
-            mRoadLookup.emplace(packedIndex, roadID);
+            mRoadLookup.emplace(packedIndex, entityID);
         }
 
         void TileWorld::generateRoadTile(const components::ChunkIndex &chunkIndices,
@@ -409,9 +410,9 @@ namespace oni {
             const auto color = math::vec4{0.1f, 0.1f, 0.1f, 0.5f};
             const auto roadTileSize = getTileSize();
 
-            const auto positionInWorld = roadTileIndexToPos(chunkIndices, roadTileIndices);
+            const auto worldPos = roadTileIndexToPos(chunkIndices, roadTileIndices);
             const auto roadID = createSpriteStaticEntity(mEntityManager, color, roadTileSize,
-                                                         math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
+                                                         worldPos);
 
             const auto packedIndex = math::packIntegers(roadTileIndices.x, roadTileIndices.y);
             mRoadLookup.emplace(packedIndex, roadID);
@@ -474,11 +475,11 @@ namespace oni {
                     auto B = (std::rand() % 255) / 255.0f;
                     auto color = math::vec4{R, G, B, 1.0f};
 
-                    auto positionInWorld = math::vec3{static_cast<common::real32>(i), static_cast<common::real32>(j),
-                                                      1.0f};
+                    auto worldPos = math::vec3{static_cast<common::real32>(i), static_cast<common::real32>(j),
+                                               1.0f};
 
                     auto tileID = createSpriteStaticEntity(mEntityManager, color, tileSize,
-                                                           positionInWorld);
+                                                           worldPos);
 
                     mTileLookup.emplace(packedIndex, tileID);
                 }
@@ -502,14 +503,14 @@ namespace oni {
             return components::ChunkIndex{xIndex, yIndex};
         }
 
-        math::vec2 TileWorld::roadTileIndexToPos(const components::ChunkIndex &chunkIndices,
+        math::vec3 TileWorld::roadTileIndexToPos(const components::ChunkIndex &chunkIndices,
                                                  components::RoadTileIndex roadTileIndices) const {
 
-            const auto chunkPos = chunkIndexToPos(chunkIndices);
-            const auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndices.x * mTileSizeX),
-                                            static_cast<common::real32>(roadTileIndices.y * mTileSizeY)};
-
-            return chunkPos + tilePos;
+            auto chunkPos = chunkIndexToPos(chunkIndices);
+            auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndices.x * mTileSizeX),
+                                      static_cast<common::real32>(roadTileIndices.y * mTileSizeY)};
+            math::vec3 pos{chunkPos.x + tilePos.x, chunkPos.y + tilePos.y, 1.f};
+            return pos;
         }
 
         void TileWorld::createWall(components::WallTilePosition position, common::int64 xTileIndex,
@@ -577,9 +578,9 @@ namespace oni {
                 entity = mEntityManager.create();
                 mEntityManager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
                 mEntityManager.assign<components::Shape>(entity, entityShapeWorld);
-                mEntityManager.assign<components::TagTextureShaded>(entity);
-                mEntityManager.assign<components::TagStatic>(entity);
-                mEntityManager.assign<components::TagAddNewEntities>(entity);
+                mEntityManager.assign<components::Tag_TextureShaded>(entity);
+                mEntityManager.assign<components::Tag_Static>(entity);
+                mEntityManager.assign<components::Tag_NewEntity>(entity);
             }
 
             entities::assignTexture(mEntityManager, entity, wallTexture);
@@ -666,19 +667,20 @@ namespace oni {
 
         void TileWorld::generateChunkBackground(common::int64 chunkX, common::int64 chunkY) {
             auto chunkIndex = components::ChunkIndex{chunkX, chunkY};
-            auto positionInWorld = chunkIndexToPos(chunkIndex);
-            auto roadID = createStaticEntity(mEntityManager, getChunkSize(),
-                                             math::vec3{positionInWorld.x, positionInWorld.y, 1.0f});
+            auto worldPos = chunkIndexToPos(chunkIndex);
+            auto lock = mEntityManager.scopedLock();
+            auto entityID = entities::createEntity(mEntityManager);
+            entities::assignShapeWold(mEntityManager, entityID, getChunkSize(),
+                                      math::vec3{worldPos.x, worldPos.y, 1.f});
+            entities::assignTagStatic(mEntityManager, entityID);
 
-            auto packedIndex = math::packIntegers(chunkX, chunkY);
-            mRoadInChunkLookup.emplace(packedIndex, roadID);
+            auto packed = math::packIntegers(chunkX, chunkY);
+            mChunkLookup.emplace(packed, entityID);
 
             auto texture = components::Texture{};
             texture.filePath = mRaceTrack1;
             texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            mEntityManager.assign<components::Texture>(roadID, texture);
-
-
+            entities::assignTexture(mEntityManager, entityID, texture);
         }
 
         math::vec2 TileWorld::getTileSize() const {

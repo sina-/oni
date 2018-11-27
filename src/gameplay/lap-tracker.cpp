@@ -72,7 +72,7 @@ namespace oni {
                     carLap.lapTimeS = static_cast<common::uint32>(currentTime.count());
 
                     std::cout << "Laps completed: " << carLap.lap << "\n";
-                    mEntityManager.accommodate<components::TagOnlyComponentUpdate>(entity);
+                    mEntityManager.accommodate<components::Tag_OnlyComponentUpdate>(entity);
 
                     resetPlayerCheckpoints(entity);
                 }
@@ -86,7 +86,7 @@ namespace oni {
             carLap.bestLapTimeS = 0;
             carLap.lapTimeS = 0;
             mEntityManager.assign<components::CarLapInfo>(carEntity, carLap);
-            mEntityManager.accommodate<components::TagOnlyComponentUpdate>(carEntity);
+            mEntityManager.accommodate<components::Tag_OnlyComponentUpdate>(carEntity);
             mBestLaps[carEntity] = std::chrono::hours(666);
             mTimers[carEntity] = utils::Timer();
             resetPlayerCheckpoints(carEntity);

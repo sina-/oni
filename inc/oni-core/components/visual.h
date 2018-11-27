@@ -22,16 +22,6 @@ namespace oni {
             }
         };
 
-        struct TagColorShaded {
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
-
-        struct TagTextureShaded {
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
-
         enum class TextureStatus : common::uint8 {
             READY = 0,
             NEEDS_LOADING_USING_PATH = 1,

@@ -82,7 +82,7 @@ namespace oni {
 
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::TagOnlyComponentUpdate>();
+                manager.reset<components::Tag_OnlyComponentUpdate>();
             }
         }
 
@@ -95,7 +95,7 @@ namespace oni {
 
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::TagAddNewEntities>();
+                manager.reset<components::Tag_NewEntity>();
             }
         }
 

@@ -57,7 +57,7 @@ namespace oni {
                                                    const components::TransformParent &transformParent) {
             // TODO: This function should recurse
             manager.replace<components::TransformParent>(entity, transformParent);
-            manager.accommodate<components::TagOnlyComponentUpdate>(entity);
+            manager.accommodate<components::Tag_OnlyComponentUpdate>(entity);
         }
 
         components::Shape Transformation::shapeTransformation(const math::mat4 &transformation,

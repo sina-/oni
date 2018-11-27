@@ -7,15 +7,5 @@ namespace oni {
             ADD_NEW_ENTITIES = 2,
             REPLACE_ALL_ENTITIES = 3,
         };
-
-        struct TagOnlyComponentUpdate {
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
-
-        struct TagAddNewEntities {
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
     }
 }

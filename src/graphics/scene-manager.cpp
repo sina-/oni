@@ -238,8 +238,7 @@ namespace oni {
 
         void SceneManager::renderStaticText(entities::EntityManager &manager, common::real32 halfViewWidth,
                                             common::real32 halfViewHeight) {
-            auto staticTextView = manager.createView<components::TagTextureShaded,
-                    components::Text, components::TagStatic>();
+            auto staticTextView = manager.createView<components::Text, components::Tag_Static>();
             for (const auto &entity: staticTextView) {
                 auto &text = staticTextView.get<components::Text>(entity);
 
@@ -252,8 +251,8 @@ namespace oni {
 
         void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                 common::real32 halfViewHeight) {
-            auto staticTextureView = manager.createView<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::TagStatic>();
+            auto staticTextureView = manager.createView<components::Tag_TextureShaded, components::Shape,
+                    components::Texture, components::Tag_Static>();
             for (const auto &entity: staticTextureView) {
                 const auto &shape = staticTextureView.get<components::Shape>(entity);
                 if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
@@ -283,8 +282,8 @@ namespace oni {
             // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
             // other systems don't share any entity component, or the shared section is minimum and I can create
             // copy of that data before starting rendering and only lock the registry at that point
-            auto view = manager.createView<components::TagTextureShaded, components::Shape,
-                    components::Texture, components::Placement, components::TagDynamic>();
+            auto view = manager.createView<components::Tag_TextureShaded, components::Shape,
+                    components::Texture, components::Placement, components::Tag_Dynamic>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<components::Shape>(entity);
                 const auto &placement = view.get<components::Placement>(entity);
@@ -321,8 +320,8 @@ namespace oni {
 
         void SceneManager::renderColored(entities::EntityManager &manager, common::real32 halfViewWidth,
                                          common::real32 halfViewHeight) {
-            auto staticSpriteView = manager.createView<components::TagColorShaded, components::Shape,
-                    components::Appearance, components::TagStatic>();
+            auto staticSpriteView = manager.createView<components::Tag_ColorShaded, components::Shape,
+                    components::Appearance, components::Tag_Static>();
             for (const auto &entity: staticSpriteView) {
                 const auto &shape = staticSpriteView.get<components::Shape>(entity);
                 if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
@@ -439,34 +438,37 @@ namespace oni {
         }
 
         common::EntityID SceneManager::createSkidlineIfMissing(const math::vec2 &position) {
-            const auto x = math::positionToIndex(position.x, mSkidTileSizeX);
-            const auto y = math::positionToIndex(position.y, mSkidTileSizeY);
-            const auto packedIndices = math::packIntegers(x, y);
+            auto x = math::positionToIndex(position.x, mSkidTileSizeX);
+            auto y = math::positionToIndex(position.y, mSkidTileSizeY);
+            auto packedIndices = math::packIntegers(x, y);
 
             auto exists = mSkidlineLookup.find(packedIndices) != mSkidlineLookup.end();
             if (!exists) {
-                const auto skidIndexX = math::positionToIndex(position.x, mSkidTileSizeX);
-                const auto skidIndexY = math::positionToIndex(position.y, mSkidTileSizeY);
-                const auto skidTilePosX = math::indexToPosition(skidIndexX, mSkidTileSizeX);
-                const auto skidTilePosY = math::indexToPosition(skidIndexY, mSkidTileSizeY);
-                const auto positionInWorld = math::vec3{skidTilePosX, skidTilePosY, 1.0f};
-                const auto skidTileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
-                                                     static_cast<common::real32>(mSkidTileSizeY)};
+                auto xIndex = math::positionToIndex(position.x, mSkidTileSizeX);
+                auto yIndex = math::positionToIndex(position.y, mSkidTileSizeY);
+                auto tilePosX = math::indexToPosition(xIndex, mSkidTileSizeX);
+                auto tilePosY = math::indexToPosition(yIndex, mSkidTileSizeY);
+                auto worldPos = math::vec3{tilePosX, tilePosY, 1.0f};
+                auto tileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
+                                           static_cast<common::real32>(mSkidTileSizeY)};
 
-                const auto skidWidthInPixels = static_cast<common::uint16>(mSkidTileSizeX * mGameUnitToPixels +
-                                                                           common::ep);
-                const auto skidHeightInPixels = static_cast<common::uint16>(mSkidTileSizeY * mGameUnitToPixels +
-                                                                            common::ep);
-                const auto skidDefaultPixel = components::PixelRGBA{};
-                auto skidData = graphics::TextureManager::generateBits(skidWidthInPixels, skidHeightInPixels,
-                                                                       skidDefaultPixel);
-                auto skidTexture = mTextureManager->loadFromData(skidWidthInPixels, skidHeightInPixels, skidData);
+                auto widthInPixels = static_cast<common::uint16>(mSkidTileSizeX * mGameUnitToPixels +
+                                                                 common::ep);
+                auto heightInPixels = static_cast<common::uint16>(mSkidTileSizeY * mGameUnitToPixels +
+                                                                  common::ep);
+                auto defaultColor = components::PixelRGBA{};
+                auto data = graphics::TextureManager::generateBits(widthInPixels, heightInPixels,
+                                                                   defaultColor);
+                auto skidTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
                 // TODO: I can blend skid textures using this data
-                skidTexture.data = skidData;
+                skidTexture.data = data;
 
-                auto skidTileID = entities::createStaticEntity(*mInternalRegistry, skidTileSize, positionInWorld);
-                mInternalRegistry->assign<components::Texture>(skidTileID, skidTexture);
-                mSkidlineLookup.emplace(packedIndices, skidTileID);
+                auto lock = mInternalRegistry->scopedLock();
+                auto entityID = entities::createEntity(*mInternalRegistry);
+                entities::assignShapeWold(*mInternalRegistry, entityID, tileSize, worldPos);
+                entities::assignTagStatic(*mInternalRegistry, entityID);
+                entities::assignTexture(*mInternalRegistry, entityID, skidTexture);
+                mSkidlineLookup.emplace(packedIndices, entityID);
             }
 
             return mSkidlineLookup.at(packedIndices);

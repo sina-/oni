@@ -32,7 +32,7 @@ namespace oni {
                 // operate on and do all the calculation and then lock the registry and update all the corresponding
                 // entities.
                 auto carView = manager.createViewScopeLock<components::Placement, components::Car,
-                        components::CarConfig, components::TagVehicle>();
+                        components::CarConfig, components::Tag_Vehicle>();
 
                 // TODO: LOL you don't want to apply the same input to all the cars! Dispatch them accordingly.
                 for (auto entity: carView) {
@@ -101,7 +101,7 @@ namespace oni {
             }
 
             {
-                auto carPhysicsView = manager.createViewScopeLock<components::Car, components::TagVehicle,
+                auto carPhysicsView = manager.createViewScopeLock<components::Car, components::Tag_Vehicle,
                         components::PhysicalProperties>();
 
                 // Handle collision
@@ -119,6 +119,7 @@ namespace oni {
                     if (car.isColliding) {
                         // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
                         // carconfig?
+                        // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
                         body->ApplyForceToCenter(
                                 b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 * carInput.throttle),
                                        static_cast<common::real32>(std::sin(car.heading) * 30 * carInput.throttle)),
@@ -153,7 +154,7 @@ namespace oni {
 
             {
                 // Handle collision for other dynamic entities
-                auto dynamicEntitiesView = manager.createViewScopeLock<components::Placement, components::TagDynamic,
+                auto dynamicEntitiesView = manager.createViewScopeLock<components::Placement, components::Tag_Dynamic,
                         components::PhysicalProperties>();
 
                 for (auto entity: dynamicEntitiesView) {
@@ -175,7 +176,7 @@ namespace oni {
             {
                 // Update tires
                 auto carWithTiresView = manager.createViewScopeLock<components::Placement, components::Car,
-                        components::CarConfig, components::TagVehicle>();
+                        components::CarConfig, components::Tag_Vehicle>();
                 for (auto entity: carWithTiresView) {
                     auto car = carWithTiresView.get<components::Car>(entity);
                     auto &carTireFRPlacement = manager.get<components::Placement>(car.tireFR);
@@ -191,7 +192,7 @@ namespace oni {
             }
 
             for (auto &&entity: entitiesToBeUpdated) {
-                manager.accommodate<components::TagOnlyComponentUpdate>(entity);
+                manager.accommodate<components::Tag_OnlyComponentUpdate>(entity);
             }
 
         }

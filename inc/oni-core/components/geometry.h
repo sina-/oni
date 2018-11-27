@@ -94,22 +94,6 @@ namespace oni {
             }
         };
 
-        struct TagStatic {
-
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
-
-        struct TagDynamic {
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
-
-        struct TagVehicle {
-            template<class Archive>
-            void serialize(Archive &archive) {}
-        };
-
         struct ChunkIndex {
             common::int64 x{0};
             common::int64 y{0};

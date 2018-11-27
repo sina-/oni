@@ -13,5 +13,11 @@ namespace oni {
             BOTTOM = 3,
             LEFT = 4,
         };
+
+        enum class BodyType : common::int8 {
+            STATIC = 1,
+            KINEMATIC = 2,
+            DYNAMIC = 3,
+        };
     }
 }

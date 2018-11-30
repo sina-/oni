@@ -51,8 +51,7 @@ namespace oni {
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
                                       components::BodyType bodyType,
-                                      bool highPrecisionPhysics
-        );
+                                      bool highPrecisionPhysics);
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path);
 
@@ -66,14 +65,14 @@ namespace oni {
                         const std::string &text,
                         const math::vec3 &worldPos);
 
+        void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos, const components::CarConfig &carConfig);
+
         template<class T>
         void assignTag(EntityManager &manager, common::EntityID entityID) {
             manager.assign<T>(entityID);
         }
 
-        common::EntityID
-        createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const oni::components::CarConfig &carConfig);
-
+        // TODO: This is still the old structure. Maybe break up the logic per component and move it into server-game.cpp
         void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
     }
 }

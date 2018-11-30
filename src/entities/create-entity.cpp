@@ -22,73 +22,6 @@ namespace oni {
             manager.assign<components::Text>(entity, textComponent);
         }
 
-        common::EntityID createVehicleEntity(EntityManager &manager,
-                                             b2World &physicsWorld,
-                                             const components::CarConfig &carConfig) {
-            auto carPosition = math::vec3{-70.f, -30.f, 1.f};
-
-            // TODO: This is wrong. Car vertex position must be in local space starting from (0, 0).
-            // Model matrix should move the car to this coordinates.
-            auto carX = -carConfig.cgToRear;
-            auto carY = -carConfig.halfWidth;
-            auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
-            auto carSizeY = carConfig.halfWidth * 2.0f;
-
-            assert(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
-
-            auto entityShapeWorld = components::Shape::fromPositionAndSize(
-                    math::vec3{static_cast<common::real32> (carX), static_cast<common::real32> (carY)},
-                    math::vec2{static_cast<common::real32> (carSizeX), static_cast<common::real32> (carSizeY)});
-            auto car = components::Car(carConfig);
-            car.position.x = carPosition.x;
-            car.position.y = carPosition.y;
-
-            auto entityPlacement = components::Placement{carPosition};
-
-            b2BodyDef bodyDef;
-
-            bodyDef.position.x = carPosition.x;
-            bodyDef.position.y = carPosition.y;
-            bodyDef.type = b2_dynamicBody;
-            bodyDef.bullet = true;
-            auto *body = physicsWorld.CreateBody(&bodyDef);
-
-            auto carShape = b2PolygonShape();
-            auto carSize = entityShapeWorld.getSize();
-            carShape.SetAsBox(carSize.x / 2.0f, carSize.y / 2.0f);
-
-            b2FixtureDef carCollisionSensorDef;
-            carCollisionSensorDef.isSensor = true;
-            carCollisionSensorDef.shape = &carShape;
-            carCollisionSensorDef.density = 1.0f;
-            carCollisionSensorDef.friction = 0.1;
-
-            b2FixtureDef carFixtureDef;
-            carFixtureDef.shape = &carShape;
-            carFixtureDef.density = 1.0f;
-            carFixtureDef.friction = 0.1;
-
-            body->CreateFixture(&carFixtureDef);
-            body->CreateFixture(&carCollisionSensorDef);
-
-            // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
-            // There is a way to request it from b2World?
-            // NOTE: This is non-owning pointer. physicsWorld owns it.
-            auto entityPhysicalProps = components::PhysicalProperties{body};
-
-            auto entity = manager.create();
-            manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
-            manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::Car>(entity, car);
-            manager.assign<components::CarConfig>(entity, carConfig);
-            manager.assign<components::Tag_Vehicle>(entity);
-            manager.assign<components::Tag_Dynamic>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
-        }
-
         void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID) {
             auto lock = manager.scopedLock();
 
@@ -165,15 +98,22 @@ namespace oni {
                                       const math::vec2 &size,
                                       components::BodyType bodyType,
                                       bool highPrecisionPhysics) {
+            // TODO: Lot of hardcoded stuff here, these needs to be configurable.
+
             b2PolygonShape shape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
+
+            // NOTE: This is non-owning pointer. physicsWorld owns it.
             b2Body *body{};
 
             b2BodyDef bodyDef;
             bodyDef.bullet = highPrecisionPhysics;
-            // TODO: Lot of hardcoded stuff here, these needs to be configurable.
-            bodyDef.linearDamping = 2.0f;
-            bodyDef.angularDamping = 2.0f;
+            // TODO: This is just really a hack to distinguish between player car and the truck. Should have possibility
+            // to provide is as part of physics definition.
+            if (!highPrecisionPhysics) {
+                bodyDef.linearDamping = 2.0f;
+                bodyDef.angularDamping = 2.0f;
+            }
 
             b2FixtureDef fixtureDef;
             // NOTE: Box2D will create a copy of the shape, so it is safe to pass a local ref.
@@ -187,7 +127,15 @@ namespace oni {
                     bodyDef.position.y = worldPos.y;
                     bodyDef.type = b2_dynamicBody;
                     body = physicsWorld.CreateBody(&bodyDef);
+
+                    b2FixtureDef collisionSensorDef;
+                    collisionSensorDef.isSensor = true;
+                    collisionSensorDef.shape = &shape;
+                    collisionSensorDef.density = 1.0f;
+                    collisionSensorDef.friction = 0.1;
+
                     body->CreateFixture(&fixtureDef);
+                    body->CreateFixture(&collisionSensorDef);
                     break;
                 }
                 case components::BodyType::STATIC: {
@@ -209,7 +157,19 @@ namespace oni {
                     break;
                 }
             }
+
+            // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
+            // There is a way to request it from b2World?
             manager.assign<components::PhysicalProperties>(entityID, body);
+        }
+
+        void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
+                       const components::CarConfig &carConfig) {
+            auto car = components::Car(carConfig);
+            car.position.x = worldPos.x;
+            car.position.y = worldPos.y;
+            manager.assign<components::Car>(entityID, car);
+            manager.assign<components::CarConfig>(entityID, carConfig);
         }
     }
 

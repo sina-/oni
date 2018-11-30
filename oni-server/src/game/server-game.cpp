@@ -187,11 +187,26 @@ namespace oni {
             carConfig.rollResist = 8.0f;
             carConfig.wheelRadius = 0.25f;
 
-            auto carEntityID = entities::createVehicleEntity(*mEntityManager, *mDynamics->getPhysicsWorld(),
-                                                             carConfig);
+            // TODO: All cars spawn in the same location!
+            auto carPosition = math::vec3{-70.f, -30.f, 1.f};
+
+            auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
+            auto carSizeY = carConfig.halfWidth * 2.0f;
+            auto carSize = math::vec2{static_cast<common::real32>(carSizeX), static_cast<common::real32>(carSizeY)};
+            assert(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
             std::string carTexturePath = "resources/images/car/1/car.png";
+
+            auto carEntityID = entities::createEntity(*mEntityManager);
+            entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID, carPosition,
+                                               carSize,
+                                               components::BodyType::DYNAMIC, true);
+            entities::assignShapeLocal(*mEntityManager, carEntityID, carSize);
+            entities::assignPlacement(*mEntityManager, carEntityID, carPosition, math::vec3{1.f, 1.f, 0.f}, 0.f);
+            entities::assignCar(*mEntityManager, carEntityID, carPosition, carConfig);
             entities::assignTextureToLoad(*mEntityManager, carEntityID, carTexturePath);
+            entities::assignTag<components::Tag_Dynamic>(*mEntityManager, carEntityID);
+            entities::assignTag<components::Tag_Vehicle>(*mEntityManager, carEntityID);
 
             math::vec2 tireSize;
             tireSize.x = static_cast<common::real32>(carConfig.wheelWidth);

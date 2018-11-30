@@ -12,74 +12,6 @@
 namespace oni {
     namespace entities {
 
-        common::EntityID createSpriteEntity(EntityManager &manager,
-                                            const math::vec4 &color,
-                                            const math::vec2 &size,
-                                            const math::vec3 &positionInWorld) {
-
-            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-            auto entityAppearance = components::Appearance{color};
-
-            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
-
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-            manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::Appearance>(entity, entityAppearance);
-            manager.assign<components::Tag_ColorShaded>(entity);
-
-            return entity;
-        }
-
-        // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
-        common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
-                                                    const math::vec2 &size,
-                                                    const math::vec3 &positionInWorld, const common::real32 heading,
-                                                    const math::vec3 &scale) {
-
-            // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
-            // works out without needing to translate the entity to the center before rotation and then back to its
-            // position in the local space.
-            auto halfSizeX = size.x / 2;
-            auto halfSizeY = size.y / 2;
-            auto entityShape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
-
-            auto entityPlacement = components::Placement{positionInWorld, heading, scale};
-
-            b2BodyDef bodyDef;
-            bodyDef.position.x = positionInWorld.x;
-            bodyDef.position.y = positionInWorld.y;
-            bodyDef.linearDamping = 2.0f;
-            bodyDef.angularDamping = 2.0f;
-            bodyDef.type = b2_dynamicBody;
-
-            auto *body = physicsWorld.CreateBody(&bodyDef);
-
-            auto shape = b2PolygonShape();
-            shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
-
-            b2FixtureDef fixture;
-            fixture.shape = &shape;
-            fixture.density = 10.0f;
-            fixture.friction = 10.9f;
-            body->CreateFixture(&fixture);
-
-            // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
-            // There is a way to request it from b2World?
-            // NOTE: This is non-owning pointer. physicsWorld owns it.
-            auto entityPhysicalProps = components::PhysicalProperties{body};
-
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-            manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
-            manager.assign<components::Shape>(entity, entityShape);
-            manager.assign<components::Placement>(entity, entityPlacement);
-            manager.assign<components::Tag_Dynamic>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
-        }
-
         common::EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                    const math::vec2 &size,
                                                    const math::vec3 &positionInWorld) {
@@ -245,8 +177,8 @@ namespace oni {
             manager.assign<components::Shape>(entityID, shape);
         }
 
-        void assignShapeWold(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
-                             const math::vec3 &worldPos) {
+        void assignShapeWorld(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
+                              const math::vec3 &worldPos) {
             auto shape = components::Shape::fromSizeAndRotation(size, 0);
 
             physics::Transformation::localToWorldTranslation(worldPos, shape);
@@ -279,6 +211,7 @@ namespace oni {
 
             b2BodyDef bodyDef;
             bodyDef.bullet = highPrecisionPhysics;
+            // TODO: Lot of hardcoded stuff here, these needs to be configurable.
             bodyDef.linearDamping = 2.0f;
             bodyDef.angularDamping = 2.0f;
 

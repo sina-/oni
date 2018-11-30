@@ -465,7 +465,7 @@ namespace oni {
                 auto texture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
                 auto lock = mInternalRegistry->scopedLock();
                 auto entityID = entities::createEntity(*mInternalRegistry);
-                entities::assignShapeWold(*mInternalRegistry, entityID, tileSize, worldPos);
+                entities::assignShapeWorld(*mInternalRegistry, entityID, tileSize, worldPos);
                 entities::assignTextureLoaded(*mInternalRegistry, entityID, texture);
                 entities::assignTag<components::Tag_Static>(*mInternalRegistry, entityID);
                 mSkidlineLookup.emplace(packedIndices, entityID);

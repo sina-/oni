@@ -672,7 +672,7 @@ namespace oni {
         common::EntityID TileWorld::generateSprite(math::vec4 color, math::vec2 tileSize, math::vec3 worldPos) {
             auto lock = mEntityManager.scopedLock();
             auto entity = entities::createEntity(mEntityManager);
-            entities::assignShapeWold(mEntityManager, entity, tileSize, worldPos);
+            entities::assignShapeWorld(mEntityManager, entity, tileSize, worldPos);
             entities::assignAppearance(mEntityManager, entity, color);
             entities::assignTag<components::Tag_Static>(mEntityManager, entity);
 
@@ -684,7 +684,7 @@ namespace oni {
                                                     const std::string &path) {
             auto lock = mEntityManager.scopedLock();
             auto entityID = entities::createEntity(mEntityManager);
-            entities::assignShapeWold(mEntityManager, entityID, size, worldPos);
+            entities::assignShapeWorld(mEntityManager, entityID, size, worldPos);
             entities::assignTextureToLoad(mEntityManager, entityID, path);
             entities::assignTag<components::Tag_Static>(mEntityManager, entityID);
 

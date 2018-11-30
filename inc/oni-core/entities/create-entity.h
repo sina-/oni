@@ -32,10 +32,10 @@ namespace oni {
 
         void assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size);
 
-        void assignShapeWold(EntityManager &manager,
-                             common::EntityID entityID,
-                             const math::vec2 &size,
-                             const math::vec3 &worldPos);
+        void assignShapeWorld(EntityManager &manager,
+                              common::EntityID entityID,
+                              const math::vec2 &size,
+                              const math::vec3 &worldPos);
 
         void assignPlacement(EntityManager &manager,
                              common::EntityID entityID,
@@ -54,20 +54,16 @@ namespace oni {
                                       bool highPrecisionPhysics
         );
 
+        void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path);
+
+        void assignTextureLoaded(EntityManager &manager,
+                                 common::EntityID entity,
+                                 const components::Texture &texture);
+
         template<class T>
-        void assignTag(EntityManager &manager, common::EntityID entityID){
+        void assignTag(EntityManager &manager, common::EntityID entityID) {
             manager.assign<T>(entityID);
         }
-
-        common::EntityID createSpriteEntity(EntityManager &manager,
-                                            const math::vec4 &color,
-                                            const math::vec2 &size,
-                                            const math::vec3 &positionInWorld);
-
-        common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
-                                                    const math::vec2 &size,
-                                                    const math::vec3 &positionInWorld, common::real32 heading,
-                                                    const math::vec3 &scale);
 
         common::EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                    const math::vec2 &size,
@@ -81,11 +77,5 @@ namespace oni {
         createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const oni::components::CarConfig &carConfig);
 
         void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
-
-        void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path);
-
-        void assignTextureLoaded(EntityManager &manager,
-                                 common::EntityID entity,
-                                 const components::Texture &texture);
     }
 }

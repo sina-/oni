@@ -60,15 +60,7 @@ namespace oni {
             entities::assignTexture(*mEntityManager, mBoxEntity, boxTexture);
             */
 
-            auto truckSize = math::vec2{1.0f, 3.0f};
-            auto truckPositionInWorld = math::vec3{-60.0f, -30.0f, 1.0f};
-            mTruckEntity = entities::createDynamicPhysicsEntity(*mEntityManager,
-                                                                *mDynamics->getPhysicsWorld(), truckSize,
-                                                                truckPositionInWorld, 0.0f,
-                                                                math::vec3{1.0f, 1.0f, 0.0f});
-            std::string truckTexturePath = "resources/images/car/2/truck.png";
-            entities::assignTextureToLoad(*mEntityManager, mTruckEntity, truckTexturePath);
-
+            mTruckEntity = createTruck();
         }
 
         void ServerGame::setupSessionPacketHandler(const common::PeerID &clientID, const std::string &data) {
@@ -248,6 +240,23 @@ namespace oni {
             entities::assignTag<components::Tag_Dynamic>(*mEntityManager, entityID);
 
             entities::TransformationHierarchy::createTransformationHierarchy(*mEntityManager, carEntityID, entityID);
+            return entityID;
+        }
+
+        common::EntityID ServerGame::createTruck() {
+            math::vec2 size{1.0f, 3.0f};
+            math::vec3 worldPos{-60.0f, -30.0f, 1.0f};
+            std::string truckTexturePath = "resources/images/car/2/truck.png";
+
+            auto lock = mEntityManager->scopedLock();
+            auto entityID = entities::createEntity(*mEntityManager);
+            entities::assignShapeLocal(*mEntityManager, entityID, size);
+            entities::assignPlacement(*mEntityManager, entityID, worldPos, {1.f, 1.f, 0.f}, 0.f);
+            entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), entityID, worldPos, size,
+                                               components::BodyType::DYNAMIC, false);
+            entities::assignTextureToLoad(*mEntityManager, entityID, truckTexturePath);
+            entities::assignTag<components::Tag_Dynamic>(*mEntityManager, entityID);
+
             return entityID;
         }
     }

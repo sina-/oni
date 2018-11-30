@@ -77,6 +77,8 @@ namespace oni {
 
             common::EntityID createTire(common::EntityID carEntityID, const math::vec3 &pos, const math::vec2 &size);
 
+            common::EntityID createTruck();
+
         private:
             std::unique_ptr<entities::EntityManager> mEntityManager{};
 

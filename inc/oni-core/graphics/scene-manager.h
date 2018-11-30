@@ -34,7 +34,7 @@ namespace oni {
         class SceneManager {
         public:
             SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
-                                     common::real32 gameUnitToPixels);
+                         common::real32 gameUnitToPixels);
 
             ~SceneManager();
 
@@ -111,6 +111,8 @@ namespace oni {
 
             const RaceInfoEntities &createLapTextIfMissing(common::EntityID carEntityID,
                                                            const components::CarLapInfo &carLap);
+
+            common::EntityID createText(const math::vec3 &worldPos, const std::string &text);
 
             void updateSkidlines(const math::vec3 &position,
                                  common::EntityID skidTextureEntity,

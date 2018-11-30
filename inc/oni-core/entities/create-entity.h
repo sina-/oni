@@ -60,14 +60,16 @@ namespace oni {
                                  common::EntityID entity,
                                  const components::Texture &texture);
 
+        void assignText(EntityManager &manager,
+                        graphics::FontManager &fontManager,
+                        common::EntityID entity,
+                        const std::string &text,
+                        const math::vec3 &worldPos);
+
         template<class T>
         void assignTag(EntityManager &manager, common::EntityID entityID) {
             manager.assign<T>(entityID);
         }
-
-        common::EntityID
-        createTextStaticEntity(EntityManager &manager, graphics::FontManager &fontManager, const std::string &text,
-                               const math::vec2 &size, const math::vec3 &positionInWorld);
 
         common::EntityID
         createVehicleEntity(EntityManager &manager, b2World &physicsWorld, const oni::components::CarConfig &carConfig);

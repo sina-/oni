@@ -12,21 +12,14 @@
 namespace oni {
     namespace entities {
 
-        common::EntityID createTextStaticEntity(EntityManager &manager,
-                                                graphics::FontManager &fontManager,
-                                                const std::string &text,
-                                                const math::vec2 &size,
-                                                const math::vec3 &positionInWorld) {
-            auto textComponent = fontManager.createTextFromString(text, positionInWorld);
 
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-
+        void assignText(EntityManager &manager,
+                        graphics::FontManager &fontManager,
+                        common::EntityID entity,
+                        const std::string &text,
+                        const math::vec3 &worldPos) {
+            auto textComponent = fontManager.createTextFromString(text, worldPos);
             manager.assign<components::Text>(entity, textComponent);
-            manager.assign<components::Tag_Static>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
         }
 
         common::EntityID createVehicleEntity(EntityManager &manager,

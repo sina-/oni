@@ -408,18 +408,10 @@ namespace oni {
                 math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, 1.f};
                 math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, 1.f};
 
-                carLapText.lapEntity = entities::createTextStaticEntity(*mInternalRegistry, mFontManager,
-                                                                        "Lap: " + std::to_string(carLap.lap),
-                                                                        math::vec2{1.f, 1.f}, lapRenderPos);
-                carLapText.lapTimeEntity = entities::createTextStaticEntity(*mInternalRegistry, mFontManager,
-                                                                            "Lap time: " +
-                                                                            std::to_string(carLap.lapTimeS),
-                                                                            math::vec2{1.f, 1.f}, lapTimeRenderPos);
-                carLapText.lapBestTimeEntity = entities::createTextStaticEntity(*mInternalRegistry, mFontManager,
-                                                                                "Best time: " + std::to_string(
-                                                                                        carLap.bestLapTimeS),
-                                                                                math::vec2{1.f, 1.f},
-                                                                                bestTimeRenderPos);
+                carLapText.lapEntity = createText(lapRenderPos, "Lap: " + std::to_string(carLap.lap));
+                carLapText.lapTimeEntity = createText(lapTimeRenderPos, "Lap time: " + std::to_string(carLap.lapTimeS));
+                carLapText.lapBestTimeEntity = createText(bestTimeRenderPos,
+                                                          "Best time: " + std::to_string(carLap.bestLapTimeS));
                 mLapInfoLookup[carEntityID] = carLapText;
             }
             return mLapInfoLookup.at(carEntityID);
@@ -597,6 +589,13 @@ namespace oni {
         void SceneManager::resetCounters() {
             mRenderedSpritesPerFrame = 0;
             mRenderedTexturesPerFrame = 0;
+        }
+
+        common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
+            auto entity = entities::createEntity(*mInternalRegistry);
+            entities::assignText(*mInternalRegistry, mFontManager, entity, text, worldPos);
+            entities::assignTag<components::Tag_Static>(*mInternalRegistry, entity);
+            return entity;
         }
 
     }

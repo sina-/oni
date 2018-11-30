@@ -571,6 +571,8 @@ namespace oni {
 
             common::real32 wallWidth = 0.5f;
 
+            auto lock = mEntityManager.scopedLock();
+
             for (size_t i = 0; i < wallCount; ++i) {
                 auto &wallPos = position[i];
                 auto &xTileIndex = indices[i].x;
@@ -626,13 +628,13 @@ namespace oni {
                     }
                 }
 
-                // TODO: Maybe you want to keep these somewhere
-                auto wallEntity = entities::createStaticPhysicsEntity(mEntityManager,
-                                                                      mPhysicsWorld,
-                                                                      wallSize,
-                                                                      wallPositionInWorld);
-
-                entities::assignTextureToLoad(mEntityManager, wallEntity, wallTexturePath);
+                auto entityID = entities::createEntity(mEntityManager);
+                entities::assignShapeWorld(mEntityManager, entityID, wallSize, wallPositionInWorld);
+                entities::assignTextureToLoad(mEntityManager, entityID, wallTexturePath);
+                entities::assignPhysicalProperties(mEntityManager, mPhysicsWorld,
+                                                   entityID, wallPositionInWorld, wallSize,
+                                                   components::BodyType::STATIC, false);
+                entities::assignTag<components::Tag_Static>(mEntityManager, entityID);
             }
         }
 

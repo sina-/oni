@@ -65,10 +65,6 @@ namespace oni {
             manager.assign<T>(entityID);
         }
 
-        common::EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
-                                                   const math::vec2 &size,
-                                                   const math::vec3 &positionInWorld);
-
         common::EntityID
         createTextStaticEntity(EntityManager &manager, graphics::FontManager &fontManager, const std::string &text,
                                const math::vec2 &size, const math::vec3 &positionInWorld);

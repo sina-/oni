@@ -12,39 +12,6 @@
 namespace oni {
     namespace entities {
 
-        common::EntityID createStaticPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
-                                                   const math::vec2 &size,
-                                                   const math::vec3 &positionInWorld) {
-            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
-
-            b2BodyDef bodyDef;
-            // NOTE: for static entities position in world is the bottom left corner of the sprite. But
-            // bodyDef.position is the center of gravity of the entity.
-            bodyDef.position.x = positionInWorld.x + size.x / 2.0f;
-            bodyDef.position.y = positionInWorld.y + size.y / 2.0f;
-            bodyDef.type = b2_staticBody;
-            auto *body = physicsWorld.CreateBody(&bodyDef);
-
-            auto boxShape = b2PolygonShape();
-            boxShape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
-            body->CreateFixture(&boxShape, 0.0f);
-
-            // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
-            // There is a way to request it from b2World?
-            // NOTE: This is non-owning pointer. physicsWorld owns it.
-            auto entityPhysicalProps = components::PhysicalProperties{body};
-
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-            manager.assign<components::PhysicalProperties>(entity, entityPhysicalProps);
-            manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::Tag_Static>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
-        }
-
         common::EntityID createTextStaticEntity(EntityManager &manager,
                                                 graphics::FontManager &fontManager,
                                                 const std::string &text,

@@ -31,28 +31,6 @@ namespace oni {
             return entity;
         }
 
-        common::EntityID createSpriteStaticEntity(EntityManager &manager,
-                                                  const math::vec4 &color,
-                                                  const math::vec2 &size,
-                                                  const math::vec3 &positionInWorld) {
-
-            auto entityAppearance = components::Appearance{color};
-            auto entityShapeWorld = components::Shape::fromSizeAndRotation(size, 0);
-
-            physics::Transformation::localToWorldTranslation(positionInWorld, entityShapeWorld);
-
-            auto lock = manager.scopedLock();
-            auto entity = manager.create();
-            manager.assign<components::Shape>(entity, entityShapeWorld);
-            manager.assign<components::Appearance>(entity, entityAppearance);
-            manager.assign<components::Tag_ColorShaded>(entity);
-            // TODO: Is this the correct usage of tags?
-            manager.assign<components::Tag_Static>(entity);
-            manager.assign<components::Tag_NewEntity>(entity);
-
-            return entity;
-        }
-
         // TODO: The use of heading is totally bunkers. Sometimes its in radians and other times in degree!
         common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                     const math::vec2 &size,
@@ -285,6 +263,7 @@ namespace oni {
 
         void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color) {
             manager.assign<components::Appearance>(entityID, color);
+            manager.assign<components::Tag_ColorShaded>(entityID);
         }
 
         void assignPhysicalProperties(EntityManager &manager,

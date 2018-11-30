@@ -64,11 +64,6 @@ namespace oni {
                                             const math::vec2 &size,
                                             const math::vec3 &positionInWorld);
 
-        common::EntityID createSpriteStaticEntity(entities::EntityManager &manager,
-                                                  const math::vec4 &color,
-                                                  const math::vec2 &size,
-                                                  const math::vec3 &positionInWorld);
-
         common::EntityID createDynamicPhysicsEntity(EntityManager &manager, b2World &physicsWorld,
                                                     const math::vec2 &size,
                                                     const math::vec3 &positionInWorld, common::real32 heading,

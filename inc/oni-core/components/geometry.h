@@ -120,7 +120,7 @@ namespace oni {
             common::int64 y{0};
         };
 
-        struct BoarderRoadTiles {
+        struct EdgeRoadTile {
             RoadTileIndex eastBoarder{};
             RoadTileIndex southBoarder{};
             RoadTileIndex westBoarder{};
@@ -134,12 +134,12 @@ namespace oni {
 
         struct Chunk {
             math::vec3 position{0.0f, 0.0f, 0.0f};
-            common::uint64 packedIndices{0};
-            BoarderRoadTiles boarderRoadTiles{};
+            common::uint64 index{0};
+            EdgeRoadTile edgeRoad{};
 
             template<class Archive>
             void serialize(Archive &archive) {
-                archive(position, packedIndices, boarderRoadTiles);
+                archive(position, index, edgeRoad);
             }
         };
 
@@ -274,7 +274,7 @@ namespace oni {
                         tireRL,
 
                         isColliding
-                        );
+                );
             }
 
             Car() {}

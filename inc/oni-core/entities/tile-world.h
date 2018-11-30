@@ -14,7 +14,6 @@ namespace oni {
         class EntityManager;
 
         class TileWorld {
-            using PackedIndexToEntityID = typename std::map<common::uint64, common::EntityID>;
         public:
 
             TileWorld(entities::EntityManager &manager, b2World &physicsWorld);
@@ -29,9 +28,9 @@ namespace oni {
 
             components::ChunkIndex chunkPosToIndex(const math::vec2 &position) const;
 
-            math::vec2 chunkIndexToPos(const components::ChunkIndex &chunkIndices) const;
+            math::vec3 chunkIndexToPos(const components::ChunkIndex &chunkIndex) const;
 
-            math::vec3 roadTileIndexToPos(const components::ChunkIndex &chunkIndices,
+            math::vec3 roadTileIndexToPos(const components::ChunkIndex &chunkIndex,
                                           components::RoadTileIndex roadTileIndices) const;
 
             math::vec2 unpackCoordinates(common::uint64 coord) const;
@@ -39,24 +38,32 @@ namespace oni {
             void generateTilesForChunk(common::int64 xChunkIndex,
                                        common::int64 yChunkIndex);
 
-            components::BoarderRoadTiles generateRoadsForChunk(const components::ChunkIndex &chunkIndices);
+            common::EntityID generateSprite(math::vec4 color, math::vec2 tileSize, math::vec3 worldPos);
 
-            void generateChunkBackground(common::int64 chunkX, common::int64 chunkY);
+            common::EntityID generateTexture(const math::vec2 &size,
+                                             const math::vec3 &worldPos,
+                                             const std::string &path);
 
-            void generateRoadTile(const components::ChunkIndex &chunkIndices,
-                                  const components::RoadTileIndex &roadTileIndices);
+            void generateRoadsForChunk(common::int64 chunkX, common::int64 chunkY);
 
-            void generateTexturedRoadTile(const components::ChunkIndex &chunkIndices,
-                                          const components::RoadTileIndex &roadTileIndices,
+            void generateChunkTexture(common::int64 chunkX, common::int64 chunkY);
+
+            void generateChunkSprite(common::int64 chunkX, common::int64 chunkY);
+
+            void generateRoadTile(const components::ChunkIndex &chunkIndex,
+                                  const components::RoadTileIndex &roadTileIndex);
+
+            void generateTexturedRoadTile(const components::ChunkIndex &chunkIndex,
+                                          const components::RoadTileIndex &roadTileIndex,
                                           const std::string &texturePath);
 
-            void generateRoadTileBetween(const components::ChunkIndex &chunkIndices,
-                                         components::RoadTileIndex startingRoadTileIndices,
-                                         components::RoadTileIndex endingRoadTileIndices);
+            void generateRoadTileBetween(const components::ChunkIndex &chunkIndex,
+                                         components::RoadTileIndex startingRoadTileIndex,
+                                         components::RoadTileIndex endingRoadTileIndex);
 
-            bool existsInMap(common::uint64 packedIndex, const PackedIndexToEntityID &map) const;
+            bool existsInMap(common::uint64 packedIndex, const std::map<common::uint64, common::EntityID> &map) const;
 
-            bool shouldGenerateRoad(const components::ChunkIndex &chunkIndices) const;
+            bool shouldGenerateRoad(const components::ChunkIndex &chunkIndex) const;
 
             void createWall(components::WallTilePosition position, common::int64 xTileIndex, common::int64 yTileIndex);
 
@@ -64,6 +71,7 @@ namespace oni {
                             const std::vector<components::TileIndex> &indices);
 
             math::vec2 getTileSize() const;
+
             math::vec2 getChunkSize() const;
 
         private:
@@ -74,9 +82,9 @@ namespace oni {
              * packed into a uint64 and the lookup table mCoordToTileLookup returns the entity ID
              * corresponding to the tile.
              */
-            PackedIndexToEntityID mTileLookup{};
-            PackedIndexToEntityID mRoadLookup{};
-            PackedIndexToEntityID mChunkLookup{};
+            std::map<common::uint64, common::EntityID> mTileLookup{};
+            std::map<common::uint64, common::EntityID> mRoadLookup{};
+            std::map<common::uint64, common::EntityID> mChunkLookup{};
 
             const common::uint16 mTileSizeX{0};
             const common::uint16 mTileSizeY{0};

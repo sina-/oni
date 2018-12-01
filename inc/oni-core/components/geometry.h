@@ -70,11 +70,6 @@ namespace oni {
                 return shape;
             }
 
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(vertexA, vertexB, vertexC, vertexD);
-            }
-
         };
 
         // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D
@@ -87,32 +82,17 @@ namespace oni {
             math::vec3 position{0.0f, 0.0f, 0.0f};
             common::real32 rotation{0.0f};
             math::vec3 scale{1.0f, 1.0f, 0.0f};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(position, rotation, scale);
-            }
         };
 
         struct ChunkIndex {
             common::int64 x{0};
             common::int64 y{0};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(x, y);
-            }
         };
 
         struct RoadTileIndex {
             // NOTE: This is relative to Chunk
             common::uint16 x{0};
             common::uint16 y{0};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(x, y);
-            }
         };
 
         struct TileIndex {
@@ -125,22 +105,12 @@ namespace oni {
             RoadTileIndex southBoarder{};
             RoadTileIndex westBoarder{};
             RoadTileIndex northBoarder{};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(eastBoarder, southBoarder, westBoarder, northBoarder);
-            }
         };
 
         struct Chunk {
             math::vec3 position{0.0f, 0.0f, 0.0f};
             common::uint64 index{0};
             EdgeRoadTile edgeRoad{};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(position, index, edgeRoad);
-            }
         };
 
         struct CarConfig {
@@ -170,34 +140,6 @@ namespace oni {
             common::CarSimDouble gearRatio{2.7f};
             common::CarSimDouble differentialRatio{3.4f};
 
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(gravity,
-                        mass,
-                        inertialScale,
-                        halfWidth,
-                        cgToFront,
-                        cgToRear,
-                        cgToFrontAxle,
-                        cgToRearAxle,
-                        cgHeight,
-                        wheelRadius,
-                        wheelWidth,
-                        tireGrip,
-                        lockGrip,
-                        engineForce,
-                        brakeForce,
-                        eBrakeForce,
-                        weightTransfer,
-                        maxSteer,
-                        cornerStiffnessFront,
-                        cornerStiffnessRear,
-                        airResist,
-                        rollResist,
-                        gearRatio,
-                        differentialRatio
-                );
-            }
         };
 
         struct Car {
@@ -239,44 +181,6 @@ namespace oni {
 
             bool isColliding{false};
 
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(
-                        heading,
-                        velocityAbsolute,
-                        angularVelocity,
-                        steer,
-                        steerAngle,
-                        inertia,
-                        wheelBase,
-                        axleWeightRatioFront,
-                        axleWeightRatioRear,
-                        rpm,
-                        maxVelocityAbsolute,
-                        accumulatedEBrake,
-                        slipAngleFront,
-                        slipAngleRear,
-                        position,
-                        velocity,
-                        velocityLocal,
-                        acceleration,
-                        accelerationLocal,
-                        accelerating,
-                        slippingFront,
-                        slippingRear,
-                        smoothSteer,
-                        safeSteer,
-                        distanceFromCamera,
-
-                        tireFR,
-                        tireFL,
-                        tireRR,
-                        tireRL,
-
-                        isColliding
-                );
-            }
-
             Car() {}
 
             explicit Car(const components::CarConfig &c) {
@@ -317,7 +221,5 @@ namespace oni {
                 isColliding = false;
             }
         };
-
-
     }
 }

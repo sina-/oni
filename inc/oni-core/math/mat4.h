@@ -15,14 +15,9 @@ namespace oni {
             // https://stackoverflow.com/a/18177444
             union {
                 // Column major ordering
-                std::array<oni::common::real32, 4 * 4> elements;
+                std::array<oni::common::real32, 4 * 4> elements{};
                 vec4 columns[4];
             };
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(columns);
-            }
 
             mat4();
 

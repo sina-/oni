@@ -12,11 +12,6 @@ namespace oni {
             oni::common::real32 y{0.0f};
             oni::common::real32 z{0.0f};
 
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(x, y, z);
-            }
-
             vec3 &add(const vec3 &other);
 
             vec3 &subtract(const vec3 &other);

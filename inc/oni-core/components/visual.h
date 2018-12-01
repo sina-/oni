@@ -15,11 +15,6 @@ namespace oni {
         // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
         struct Appearance {
             math::vec4 color{0.0f, 0.0f, 0.0f, 0.0f};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(color);
-            }
         };
 
         enum class TextureStatus : common::uint8 {
@@ -45,11 +40,6 @@ namespace oni {
                                        math::vec2{1.0f, 1.0f}, math::vec2{0.0f, 1.0f}};
             std::vector<common::uint8> data{};
             TextureStatus status{TextureStatus::INVALID};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(width, height, textureID, format, type, filePath, uv, data, status);
-            }
         };
 
         struct Text {
@@ -66,7 +56,6 @@ namespace oni {
             std::vector<math::vec4> uv{};
             common::real32 xScaling{1.0f};
             common::real32 yScaling{1.0f};
-
         };
 
         struct PixelRGBA {

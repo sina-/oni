@@ -13,11 +13,6 @@ namespace oni {
             // problem is to have a map of parentEntity-to-transform and when a parent
             // transform is updated we only propagate that down the hierarchy.
             math::mat4 transform{math::mat4::identity()};
-
-            template<class Archive>
-            void serialize(Archive &archive) {
-                archive(parent, transform);
-            }
         };
 
         struct TransformChildren {

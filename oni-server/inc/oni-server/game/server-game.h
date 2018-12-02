@@ -77,6 +77,10 @@ namespace oni {
 
             common::EntityID createTire(common::EntityID carEntityID, const math::vec3 &pos, const math::vec2 &size);
 
+            void removeCar(common::EntityID entityID);
+
+            void removeTire(common::EntityID carEntityID, common::EntityID tireEntityID);
+
             common::EntityID createTruck();
 
         private:

@@ -11,8 +11,6 @@
 
 namespace oni {
     namespace entities {
-
-
         void assignText(EntityManager &manager,
                         graphics::FontManager &fontManager,
                         common::EntityID entity,
@@ -20,23 +18,6 @@ namespace oni {
                         const math::vec3 &worldPos) {
             auto textComponent = fontManager.createTextFromString(text, worldPos);
             manager.assign<components::Text>(entity, textComponent);
-        }
-
-        void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID) {
-            auto lock = manager.scopedLock();
-
-            auto entityPhysicalProps = manager.get<components::PhysicalProperties>(entityID);
-            physicsWorld.DestroyBody(entityPhysicalProps.body);
-            manager.remove<components::PhysicalProperties>(entityID);
-            manager.remove<components::Shape>(entityID);
-            manager.remove<components::Placement>(entityID);
-            manager.remove<components::Car>(entityID);
-            manager.remove<components::CarConfig>(entityID);
-            manager.remove<components::Tag_Vehicle>(entityID);
-            manager.remove<components::Tag_Dynamic>(entityID);
-            manager.destroy(entityID);
-
-            manager.addDeletedEntity(entityID);
         }
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
@@ -56,6 +37,11 @@ namespace oni {
             auto entityID = manager.create();
             manager.assign<components::Tag_NewEntity>(entityID);
             return entityID;
+        }
+
+        void destroyEntity(EntityManager &manager, common::EntityID entityID) {
+            manager.destroy(entityID);
+            manager.addDeletedEntity(entityID);
         }
 
         void assignShapeLocal(EntityManager &manager,
@@ -170,6 +156,37 @@ namespace oni {
             car.position.y = worldPos.y;
             manager.assign<components::Car>(entityID, car);
             manager.assign<components::CarConfig>(entityID, carConfig);
+        }
+
+        void removeShape(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<components::Shape>(entityID);
+        }
+
+        void removePlacement(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<components::Placement>(entityID);
+        }
+
+        void removeAppearance(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<components::Appearance>(entityID);
+        }
+
+        void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID) {
+            auto entityPhysicalProps = manager.get<components::PhysicalProperties>(entityID);
+            physicsWorld.DestroyBody(entityPhysicalProps.body);
+            manager.remove<components::PhysicalProperties>(entityID);
+        }
+
+        void removeTexture(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<components::Texture>(entityID);
+        }
+
+        void removeText(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<components::Text>(entityID);
+        }
+
+        void removeCar(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<components::Car>(entityID);
+            manager.remove<components::CarConfig>(entityID);
         }
     }
 

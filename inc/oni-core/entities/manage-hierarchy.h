@@ -5,16 +5,10 @@
 namespace oni {
     namespace entities {
         class EntityManager;
+        void createTransformationHierarchy(EntityManager &manager,
+                                           common::EntityID parent,
+                                           common::EntityID child);
 
-        class TransformationHierarchy {
-            TransformationHierarchy() = default;
-
-            ~TransformationHierarchy() = default;
-
-        public:
-            static void createTransformationHierarchy(EntityManager &manager,
-                                                      common::EntityID parent,
-                                                      common::EntityID child);
-        };
-    }
+        void removeTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child);
+    };
 }

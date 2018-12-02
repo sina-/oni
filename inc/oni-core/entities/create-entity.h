@@ -30,7 +30,11 @@ namespace oni {
 
         common::EntityID createEntity(EntityManager &manager);
 
+        void destroyEntity(EntityManager &manager, common::EntityID entityID);
+
         void assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size);
+
+        void removeShape(EntityManager &manager, common::EntityID entityID);
 
         void assignShapeWorld(EntityManager &manager,
                               common::EntityID entityID,
@@ -43,7 +47,11 @@ namespace oni {
                              const math::vec3 &scale,
                              common::real32 heading);
 
+        void removePlacement(EntityManager &manager, common::EntityID entityID);
+
         void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color);
+
+        void removeAppearance(EntityManager &manager, common::EntityID entityID);
 
         void assignPhysicalProperties(EntityManager &manager,
                                       b2World &physicsWorld,
@@ -53,11 +61,15 @@ namespace oni {
                                       components::BodyType bodyType,
                                       bool highPrecisionPhysics);
 
+        void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
+
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path);
 
         void assignTextureLoaded(EntityManager &manager,
                                  common::EntityID entity,
                                  const components::Texture &texture);
+
+        void removeTexture(EntityManager &manager, common::EntityID entityID);
 
         void assignText(EntityManager &manager,
                         graphics::FontManager &fontManager,
@@ -65,14 +77,21 @@ namespace oni {
                         const std::string &text,
                         const math::vec3 &worldPos);
 
-        void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos, const components::CarConfig &carConfig);
+        void removeText(EntityManager &manager, common::EntityID entityID);
+
+        void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
+                       const components::CarConfig &carConfig);
+
+        void removeCar(EntityManager &manager, common::EntityID entityID);
 
         template<class T>
         void assignTag(EntityManager &manager, common::EntityID entityID) {
             manager.assign<T>(entityID);
         }
 
-        // TODO: This is still the old structure. Maybe break up the logic per component and move it into server-game.cpp
-        void deleteVehicleEntity(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
+        template<class T>
+        void removeTag(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<T>(entityID);
+        }
     }
 }

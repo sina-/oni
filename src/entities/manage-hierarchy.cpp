@@ -7,10 +7,9 @@
 
 namespace oni {
     namespace entities {
-
-        void TransformationHierarchy::createTransformationHierarchy(EntityManager &manager,
-                                                                    const common::EntityID parent,
-                                                                    const common::EntityID child) {
+        void createTransformationHierarchy(EntityManager &manager,
+                                           const common::EntityID parent,
+                                           const common::EntityID child) {
 //            auto lock = manager.scopedLock();
             if (manager.has<components::TransformChildren>(parent)) {
                 auto transformChildren = manager.get<components::TransformChildren>(parent);
@@ -26,6 +25,15 @@ namespace oni {
 
             auto transformParent = components::TransformParent{parent, math::mat4::identity()};
             manager.assign<components::TransformParent>(child, transformParent);
+        }
+
+        void removeTransformationHierarchy(EntityManager &manager,
+                                           common::EntityID parent,
+                                           common::EntityID child) {
+            if (manager.has<components::TransformChildren>(parent)) {
+                manager.remove<components::TransformChildren>(parent);
+            }
+            manager.remove<components::TransformParent>(child);
         }
     }
 }

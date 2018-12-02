@@ -81,7 +81,8 @@ namespace oni {
         void ServerGame::postDisconnectHook(const common::PeerID &peerID) {
             auto clientDataLock = mClientDataManager->scopedLock();
             auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
-            entities::deleteVehicleEntity(*mEntityManager, *mDynamics->getPhysicsWorld(), clientCarEntityID);
+
+            removeCar(clientCarEntityID);
             mClientDataManager->deleteClient(peerID);
         }
 
@@ -241,6 +242,31 @@ namespace oni {
             return carEntityID;
         }
 
+        void ServerGame::removeCar(common::EntityID carEntityID) {
+            auto lock = mEntityManager->scopedLock();
+
+            const auto &car = mEntityManager->get<components::Car>(carEntityID);
+            auto tireFL = car.tireFL;
+            auto tireFR = car.tireFR;
+            auto tireRL = car.tireRL;
+            auto tireRR = car.tireRR;
+
+            removeTire(carEntityID, tireFL);
+            removeTire(carEntityID, tireFR);
+            removeTire(carEntityID, tireRL);
+            removeTire(carEntityID, tireRR);
+
+            entities::removeShape(*mEntityManager, carEntityID);
+            entities::removePlacement(*mEntityManager, carEntityID);
+            entities::removeTexture(*mEntityManager, carEntityID);
+            entities::removePhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID);
+            entities::removeTag<components::Tag_Dynamic>(*mEntityManager, carEntityID);
+            entities::removeTag<components::Tag_Vehicle>(*mEntityManager, carEntityID);
+            entities::removeCar(*mEntityManager, carEntityID);
+
+            entities::destroyEntity(*mEntityManager, carEntityID);
+        }
+
         common::EntityID ServerGame::createTire(common::EntityID carEntityID,
                                                 const math::vec3 &pos,
                                                 const math::vec2 &size) {
@@ -254,8 +280,19 @@ namespace oni {
             entities::assignTextureToLoad(*mEntityManager, entityID, carTireTexturePath);
             entities::assignTag<components::Tag_Dynamic>(*mEntityManager, entityID);
 
-            entities::TransformationHierarchy::createTransformationHierarchy(*mEntityManager, carEntityID, entityID);
+            entities::createTransformationHierarchy(*mEntityManager, carEntityID, entityID);
+
             return entityID;
+        }
+
+        void ServerGame::removeTire(common::EntityID carEntityID, common::EntityID tireEntityID) {
+            entities::removeShape(*mEntityManager, tireEntityID);
+            entities::removePlacement(*mEntityManager, tireEntityID);
+            entities::removeTexture(*mEntityManager, tireEntityID);
+            entities::removeTransformationHierarchy(*mEntityManager, carEntityID, tireEntityID);
+            entities::removeTag<components::Tag_Dynamic>(*mEntityManager, tireEntityID);
+
+            entities::destroyEntity(*mEntityManager, tireEntityID);
         }
 
         common::EntityID ServerGame::createTruck() {

@@ -100,7 +100,6 @@ namespace oni {
         }
 
         void Server::sendRemainingEntitiesAfterDelete(entities::EntityManager &manager) {
-            //std::string data = entities::serialize(manager, components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES);
             auto type = PacketType::DESTROYED_ENTITIES;
             auto data = entities::serialize<std::vector<common::EntityID>>(manager.getDeletedEntities());
 

@@ -8,7 +8,6 @@
 #include <oni-core/physics/dynamics.h>
 #include <oni-core/network/server.h>
 #include <oni-core/entities/create-entity.h>
-#include <oni-core/entities/manage-hierarchy.h>
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/tile-world.h>
@@ -278,9 +277,8 @@ namespace oni {
             entities::assignShapeLocal(*mEntityManager, entityID, size);
             entities::assignPlacement(*mEntityManager, entityID, pos, scale, heading);
             entities::assignTextureToLoad(*mEntityManager, entityID, carTireTexturePath);
+            entities::assignTransformationHierarchy(*mEntityManager, carEntityID, entityID);
             entities::assignTag<components::Tag_Dynamic>(*mEntityManager, entityID);
-
-            entities::createTransformationHierarchy(*mEntityManager, carEntityID, entityID);
 
             return entityID;
         }

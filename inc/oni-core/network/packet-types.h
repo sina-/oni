@@ -4,7 +4,7 @@
 
 namespace oni {
     namespace network {
-        enum class PacketType : common::int8 {
+        enum class PacketType : common::uint8 {
             UNKNOWN = 0,
             PING = 1,
             MESSAGE = 2,

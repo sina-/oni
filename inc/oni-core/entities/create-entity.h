@@ -93,5 +93,9 @@ namespace oni {
         void removeTag(EntityManager &manager, common::EntityID entityID) {
             manager.remove<T>(entityID);
         }
+
+        void assignTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child);
+
+        void removeTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child);
     }
 }

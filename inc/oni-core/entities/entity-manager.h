@@ -10,7 +10,6 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/components/world-data-status.h>
 #include <oni-core/components/tag.h>
-#include "manage-hierarchy.h"
 
 
 namespace oni {

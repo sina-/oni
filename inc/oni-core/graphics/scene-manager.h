@@ -116,7 +116,7 @@ namespace oni {
 
             void prepareTexture(components::Texture &texture);
 
-            common::EntityID createSkidlineIfMissing(const math::vec2 &position);
+            common::EntityID createOrGetSkidTile(const math::vec2 &position);
 
             const RaceInfoEntities &createLapTextIfMissing(common::EntityID carEntityID,
                                                            const components::CarLapInfo &carLap);

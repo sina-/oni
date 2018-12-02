@@ -395,7 +395,6 @@ namespace oni {
                         auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
                         skidOpacity.push_back(alpha);
                     }
-
                 }
             }
 
@@ -406,8 +405,8 @@ namespace oni {
                 common::EntityID skidEntityRL{0};
                 common::EntityID skidEntityRR{0};
 
-                skidEntityRL = createSkidlineIfMissing(skidMarkRLPos.getXY());
-                skidEntityRR = createSkidlineIfMissing(skidMarkRRPos.getXY());
+                skidEntityRL = createOrGetSkidTile(skidMarkRLPos.getXY());
+                skidEntityRR = createOrGetSkidTile(skidMarkRRPos.getXY());
 
                 updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
                 updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
@@ -461,17 +460,15 @@ namespace oni {
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        common::EntityID SceneManager::createSkidlineIfMissing(const math::vec2 &position) {
+        common::EntityID SceneManager::createOrGetSkidTile(const math::vec2 &position) {
             auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             auto packedIndices = math::packIntegers(x, y);
 
             auto exists = mSkidlineLookup.find(packedIndices) != mSkidlineLookup.end();
             if (!exists) {
-                auto xIndex = math::positionToIndex(position.x, mSkidTileSizeX);
-                auto yIndex = math::positionToIndex(position.y, mSkidTileSizeY);
-                auto tilePosX = math::indexToPosition(xIndex, mSkidTileSizeX);
-                auto tilePosY = math::indexToPosition(yIndex, mSkidTileSizeY);
+                auto tilePosX = math::indexToPosition(x, mSkidTileSizeX);
+                auto tilePosY = math::indexToPosition(y, mSkidTileSizeY);
                 auto worldPos = math::vec3{tilePosX, tilePosY, 1.0f};
                 auto tileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
                                            static_cast<common::real32>(mSkidTileSizeY)};

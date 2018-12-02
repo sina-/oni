@@ -23,8 +23,8 @@ namespace oni {
             enet_address_set_host(&enetAddress, address.host.c_str());
             enetAddress.port = address.port;
 
-            mEnetPeer = enet_host_connect(mEnetHost, &enetAddress, 2, 0);
-            if (!mEnetPeer) {
+            mEnetServer = enet_host_connect(mEnetHost, &enetAddress, 2, 0);
+            if (!mEnetServer) {
                 throw std::runtime_error(
                         "Failed to initiate connection to: " + address.host + ":" + std::to_string(address.port));
             }
@@ -39,11 +39,15 @@ namespace oni {
             requestSessionSetup();
         }
 
+        void Client::disconnect() {
+            enet_peer_disconnect_now(mEnetServer, 0);
+        }
+
         void Client::pingServer() {
             auto type = PacketType::PING;
             auto data = std::string{};
 
-            send(type, data, mEnetPeer);
+            send(type, data, mEnetServer);
         }
 
         void Client::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
@@ -97,7 +101,7 @@ namespace oni {
             auto messagePacket = DataPacket{std::move(message)};
             auto data = entities::serialize<DataPacket>(messagePacket);
 
-            send(type, data, mEnetPeer);
+            send(type, data, mEnetServer);
         }
 
         void Client::postConnectHook(const ENetEvent *event) {
@@ -111,13 +115,13 @@ namespace oni {
             auto type = PacketType::CLIENT_INPUT;
             auto data = entities::serialize<io::Input>(*input);
 
-            send(type, data, mEnetPeer);
+            send(type, data, mEnetServer);
         }
 
         void Client::requestSessionSetup() {
             auto type = PacketType::SETUP_SESSION;
             auto data = std::string{};
-            send(type, data, mEnetPeer);
+            send(type, data, mEnetServer);
         }
     }
 }

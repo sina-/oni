@@ -29,6 +29,5 @@ namespace oni {
                 archive(data);
             }
         };
-
     }
 }

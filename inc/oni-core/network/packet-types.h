@@ -16,7 +16,6 @@ namespace oni {
             ONLY_COMPONENT_UPDATE = 7,
             ADD_NEW_ENTITIES = 8,
             DESTROYED_ENTITIES = 9,
-
         };
     }
 }

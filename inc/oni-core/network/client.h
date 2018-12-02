@@ -20,6 +20,8 @@ namespace oni {
 
             void connect(const Address &address);
 
+            void disconnect();
+
             void pingServer();
 
             void sendMessage(std::string &&message);
@@ -36,7 +38,7 @@ namespace oni {
             void requestSessionSetup();
 
         private:
-            ENetPeer *mEnetPeer;
+            ENetPeer *mEnetServer;
             std::unique_ptr<utils::Timer> mTimer{};
         };
     }

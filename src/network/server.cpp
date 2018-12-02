@@ -99,7 +99,7 @@ namespace oni {
             }
         }
 
-        void Server::sendRemainingEntitiesAfterDelete(entities::EntityManager &manager) {
+        void Server::broadCastDeletedEntities(entities::EntityManager &manager) {
             auto type = PacketType::DESTROYED_ENTITIES;
             auto data = entities::serialize<std::vector<common::EntityID>>(manager.getDeletedEntities());
 

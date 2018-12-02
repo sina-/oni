@@ -257,8 +257,8 @@ namespace oni {
                 mDeletedEntities.push_back(entity);
             }
 
-            size_t numberOfDeletedEntities() {
-                return mDeletedEntities.size();
+            bool containsDeletedEntities() {
+                return !mDeletedEntities.empty();
             }
 
             void clearDeletedEntitiesList() {

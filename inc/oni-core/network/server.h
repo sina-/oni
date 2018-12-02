@@ -27,7 +27,7 @@ namespace oni {
             
             void sendNewEntities(entities::EntityManager &manager);
 
-            void sendRemainingEntitiesAfterDelete(entities::EntityManager &manager);
+            void broadCastDeletedEntities(entities::EntityManager &manager);
 
             void sendCarEntityID(common::EntityID entityID, const common::PeerID& id);
 

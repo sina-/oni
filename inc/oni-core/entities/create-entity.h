@@ -71,12 +71,6 @@ namespace oni {
 
         void removeTexture(EntityManager &manager, common::EntityID entityID);
 
-        void assignText(EntityManager &manager,
-                        graphics::FontManager &fontManager,
-                        common::EntityID entity,
-                        const std::string &text,
-                        const math::vec3 &worldPos);
-
         void removeText(EntityManager &manager, common::EntityID entityID);
 
         void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,

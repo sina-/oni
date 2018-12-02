@@ -53,7 +53,6 @@ target_link_libraries(oni-core-graphics
             Xinerama Xrandr Xcursor Xxf86vm
             oni-core-buffers
             oni-core-math
-            oni-core-io
             oni-core-utils
             oni-core-entities
         )
@@ -61,6 +60,5 @@ target_link_libraries(oni-core-graphics
 add_dependencies(oni-core-graphics
         oni-core-buffers
         oni-core-math
-        oni-core-io
         oni-core-utils
         )

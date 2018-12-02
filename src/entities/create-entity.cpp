@@ -5,21 +5,12 @@
 #include <oni-core/components/visual.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
-#include <oni-core/graphics/font-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/components/world-data-status.h>
 #include <oni-core/components/hierarchy.h>
 
 namespace oni {
     namespace entities {
-        void assignText(EntityManager &manager,
-                        graphics::FontManager &fontManager,
-                        common::EntityID entity,
-                        const std::string &text,
-                        const math::vec3 &worldPos) {
-            auto textComponent = fontManager.createTextFromString(text, worldPos);
-            manager.assign<components::Text>(entity, textComponent);
-        }
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
             components::Texture texture;

@@ -18,6 +18,10 @@ namespace oni {
         class Text;
     }
 
+    namespace entities{
+        class EntityManager;
+    }
+
     namespace graphics {
         class FontManager {
 
@@ -39,7 +43,7 @@ namespace oni {
 
             FontManager &operator=(FontManager &) = delete;
 
-            components::Text createTextFromString(const std::string &text, const math::vec3 &position);
+            common::EntityID createTextFromString(entities::EntityManager &manager, const std::string &text, const math::vec3 &position);
 
             void updateText(const std::string &textContent, components::Text &text);
 
@@ -53,6 +57,8 @@ namespace oni {
 
         private:
             const ftgl::texture_glyph_t *findGlyph(const char &character) const;
+
+            components::Text createTextComponent(const std::string &text, const math::vec3 &position);
         };
     }
 }

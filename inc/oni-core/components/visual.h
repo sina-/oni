@@ -56,6 +56,7 @@ namespace oni {
             std::vector<math::vec4> uv{};
             common::real32 xScaling{1.0f};
             common::real32 yScaling{1.0f};
+            common::EntityID entityID{0};
         };
 
         struct PixelRGBA {

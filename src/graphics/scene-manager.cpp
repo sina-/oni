@@ -1,3 +1,4 @@
+#include <oni-core/physics/dynamics.h>
 #include <oni-core/graphics/scene-manager.h>
 
 #include <GL/glew.h>
@@ -14,11 +15,13 @@
 #include <oni-core/components/hierarchy.h>
 #include <oni-core/components/gameplay.h>
 #include <oni-core/components/tag.h>
+#include <oni-core/graphics/debug-draw-box2d.h>
 
 
 namespace oni {
     namespace graphics {
         SceneManager::SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
+                                   b2World &physicsWorld,
                                    common::real32 gameUnitToPixels) :
                 mSkidTileSizeX{64}, mSkidTileSizeY{64},
                 mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
@@ -26,6 +29,7 @@ namespace oni {
                 // 64k vertices
                 mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds),
                 mFontManager(fontManager),
+                mPhysicsWorld(physicsWorld),
                 mGameUnitToPixels{gameUnitToPixels} {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
@@ -52,6 +56,12 @@ namespace oni {
             mTextureManager = std::make_unique<TextureManager>();
 
             initializeColorRenderer(*mColorShader);
+
+            mDebugDrawBox2D = std::make_unique<DebugDrawBox2D>(this);
+            mDebugDrawBox2D->AppendFlags(b2Draw::e_shapeBit);
+            //mDebugDrawBox2D->AppendFlags(b2Draw::e_aabbBit);
+            mDebugDrawBox2D->AppendFlags(b2Draw::e_pairBit);
+            mDebugDrawBox2D->AppendFlags(b2Draw::e_centerOfMassBit);
         }
 
         SceneManager::~SceneManager() = default;
@@ -190,6 +200,12 @@ namespace oni {
             shader.disable();
         }
 
+        void SceneManager::renderPhysicsDebugData() {
+            mDebugDrawBox2D->Begin();
+            mPhysicsWorld.DrawDebugData();
+            mDebugDrawBox2D->End();
+        }
+
         void SceneManager::render(entities::EntityManager &manager, common::EntityID lookAtEntity) {
             auto halfViewWidth = getViewWidth() / 2.0f;
             auto halfViewHeight = getViewHeight() / 2.0f;
@@ -210,18 +226,33 @@ namespace oni {
 
                 begin(*mTextureShader, *mTextureRenderer, true, true);
                 renderStaticTextured(manager, halfViewWidth, halfViewHeight);
-                renderStaticTextured(*mInternalRegistry, halfViewWidth, halfViewHeight);
                 renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
                 renderStaticText(manager, halfViewWidth, halfViewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
             end(*mTextureShader, *mTextureRenderer);
+        }
 
-            // Render UI text with fixed camera
-            begin(*mTextureShader, *mTextureRenderer, false, false);
-            renderStaticText(*mInternalRegistry, halfViewWidth, halfViewHeight);
+        void SceneManager::renderInternal() {
+            auto halfViewWidth = getViewWidth() / 2.0f;
+            auto halfViewHeight = getViewHeight() / 2.0f;
+
+            {
+                auto lock = mInternalRegistry->scopedLock();
+                begin(*mTextureShader, *mTextureRenderer, true, true);
+                renderStaticTextured(*mInternalRegistry, halfViewWidth, halfViewHeight);
+            }
             end(*mTextureShader, *mTextureRenderer);
+
+            {
+                auto lock = mInternalRegistry->scopedLock();
+                // Render UI text with fixed camera
+                begin(*mTextureShader, *mTextureRenderer, false, false);
+                renderStaticText(*mInternalRegistry, halfViewWidth, halfViewHeight);
+            }
+            end(*mTextureShader, *mTextureRenderer);
+
         }
 
         void SceneManager::renderRaw(const components::Shape &shape, const components::Appearance &appearance) {
@@ -592,11 +623,8 @@ namespace oni {
         }
 
         common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
-            auto entity = entities::createEntity(*mInternalRegistry);
-            entities::assignText(*mInternalRegistry, mFontManager, entity, text, worldPos);
-            entities::assignTag<components::Tag_Static>(*mInternalRegistry, entity);
-            return entity;
+            auto entityID = mFontManager.createTextFromString(*mInternalRegistry,text, worldPos);
+            return entityID;
         }
-
     }
 }

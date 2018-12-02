@@ -6,6 +6,8 @@
 #include <oni-core/components/visual.h>
 #include <oni-core/math/mat4.h>
 
+class b2World;
+
 namespace oni {
     namespace math {
         struct vec2;
@@ -31,14 +33,21 @@ namespace oni {
 
         class FontManager;
 
+        class DebugDrawBox2D;
+
         class SceneManager {
         public:
             SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
+                         b2World &physicsWorld,
                          common::real32 gameUnitToPixels);
 
             ~SceneManager();
 
             void render(entities::EntityManager &manager, common::EntityID lookAtEntity);
+
+            void renderInternal();
+
+            void renderPhysicsDebugData();
 
             void renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
                                       common::real32 halfViewHeight);
@@ -127,7 +136,9 @@ namespace oni {
             std::unique_ptr<BatchRenderer2D> mColorRenderer{};
             std::unique_ptr<BatchRenderer2D> mTextureRenderer{};
             std::unique_ptr<TextureManager> mTextureManager{};
+            std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
             FontManager &mFontManager;
+            b2World &mPhysicsWorld;
 
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};

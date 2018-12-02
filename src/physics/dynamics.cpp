@@ -197,20 +197,8 @@ namespace oni {
 
         }
 
-        void Dynamics::drawDebugData() {
-            mDebugDraw->Begin();
-            mPhysicsWorld->DrawDebugData();
-            mDebugDraw->End();
-        }
-
         b2World *Dynamics::getPhysicsWorld() {
             return mPhysicsWorld.get();
         }
-
-        void Dynamics::setDebugDraw(std::unique_ptr<graphics::DebugDrawBox2D> debugDraw) {
-            mDebugDraw = std::move(debugDraw);
-            mPhysicsWorld->SetDebugDraw(mDebugDraw.get());
-        }
-
     }
 }

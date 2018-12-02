@@ -16,16 +16,16 @@ target_include_directories(oni-core-physics
         )
 
 find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug NO_DEFAULT_PATH)
-find_library(GLFW_LIBRARY glfw3 PATHS ${oni_SOURCE_DIR}/lib/glfw/build/src NO_DEFAULT_PATH)
 
 target_link_libraries(oni-core-physics
         PRIVATE
             ${BOX2D_LIBRARY}
-            ${GLFW_LIBRARY}
             oni-core-entities
-            oni-core-graphics
+            oni-core-math
+            oni-core-io
         )
 
 add_dependencies(oni-core-physics
-        oni-core-graphics
+        oni-core-io
+        oni-core-math
         )

@@ -5,10 +5,6 @@
 class b2World;
 
 namespace oni {
-    namespace graphics{
-        class DebugDrawBox2D;
-    }
-
     namespace physics {
         class Dynamics : public Physic {
 
@@ -16,10 +12,6 @@ namespace oni {
             explicit Dynamics(common::real32 tickFreq);
 
             ~Dynamics() override;
-
-            void drawDebugData();
-
-            void setDebugDraw(std::unique_ptr<graphics::DebugDrawBox2D> debugDraw);
 
             // TODO: Ideally I shouldn't expose this dude!
             // TODO: When refactoring create-entity stuff, I can instead just expose a member function that handles
@@ -37,7 +29,6 @@ namespace oni {
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};
-            std::unique_ptr<graphics::DebugDrawBox2D> mDebugDraw{};
             common::real32 mTickFrequency{};
         };
     }

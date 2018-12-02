@@ -6,11 +6,14 @@
 #include <ftgl/freetype-gl.h>
 
 #include <oni-core/graphics/texture-manager.h>
+#include <oni-core/components/tag.h>
+#include <oni-core/entities/create-entity.h>
 
 namespace oni {
     namespace graphics {
 
-        FontManager::FontManager(std::string font, unsigned char size, common::real32 gameWidth, common::real32 gameHeight)
+        FontManager::FontManager(std::string font, unsigned char size, common::real32 gameWidth,
+                                 common::real32 gameHeight)
 //                m_FTAtlas(, ftgl::texture_atlas_delete),
 //                m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/Vera.ttf"),
 //                         ftgl::texture_font_delete) {
@@ -23,7 +26,7 @@ namespace oni {
             mGameHeight = gameHeight;
 
             std::string cache = " !\"#$%&'()*+,-./0123456789:;<=>?@"
-                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
             auto glyph = ftgl::texture_font_load_glyphs(m_FTFont, cache.c_str());
 
@@ -59,9 +62,24 @@ namespace oni {
 
         GLuint FontManager::getTextureID() const { return m_FTAtlas->id; }
 
-        components::Text FontManager::createTextFromString(const std::string &text, const math::vec3 &position) {
-            auto textComponent = components::Text();
-            for (auto&& character: text) {
+        common::EntityID FontManager::createTextFromString(entities::EntityManager &manager, const std::string &text,
+                                                           const math::vec3 &position) {
+            auto textComponent = createTextComponent(text, position);
+            auto lock = manager.scopedLock();
+            auto entity = entities::createEntity(manager);
+            manager.assign<components::Text>(entity, textComponent);
+            entities::assignTag<components::Tag_Static>(manager, entity);
+
+            return entity;
+        }
+
+        void FontManager::updateText(const std::string &textContent, components::Text &text) {
+            text = createTextComponent(textContent, text.position);
+        }
+
+        components::Text FontManager::createTextComponent(const std::string &text, const math::vec3 &position) {
+            components::Text textComponent{};
+            for (auto &&character: text) {
                 auto glyph = findGlyph(character);
                 textComponent.height.emplace_back(glyph->height);
                 textComponent.width.emplace_back(glyph->width);
@@ -76,11 +94,8 @@ namespace oni {
             textComponent.textureID = m_FTAtlas->id;
             textComponent.textContent = text;
             textComponent.position = position;
-            return textComponent;
-        }
 
-        void FontManager::updateText(const std::string &textContent, components::Text &text) {
-            text = createTextFromString(textContent, text.position);
+            return textComponent;
         }
     }
 }

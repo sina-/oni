@@ -25,6 +25,8 @@ namespace oni {
 
             void setReleased(components::oniKeyPress key);
 
+            void reset();
+
         private:
             std::vector<components::oniKeyPress> mKeysPressed;
             std::vector<components::oniKeyPress> mKeysReleased;

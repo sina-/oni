@@ -44,9 +44,10 @@ namespace oni {
 
                 switch (event.type) {
                     case ENET_EVENT_TYPE_CONNECT: {
-                        printf("A new client connected from %s:%u.\n", ip, event.peer->address.port);
-
-                        mPeers[getPeerID(event.peer->address)] = event.peer;
+                        const auto &peedID = getPeerID(*event.peer);
+                        printf("A new client connected from %s:%u with client ID: %s.\n", ip, event.peer->address.port,
+                               peedID.c_str());
+                        mPeers[peedID] = event.peer;
 
                         postConnectHook(&event);
                         break;
@@ -71,12 +72,14 @@ namespace oni {
                         break;
                     }
                     case ENET_EVENT_TYPE_DISCONNECT: {
-                        printf("%s:%u disconnected.\n", ip, event.peer->address.port);
-
+                        const auto &peerID = getPeerID(*event.peer);
+                        printf("%s:%u disconnected. Client ID: %s \n", ip, event.peer->address.port, peerID.c_str());
                         postDisconnectHook(&event);
 
-                        mPeers.erase(getPeerID(event.peer->address));
+                        mPeers.erase(peerID);
                         event.peer->data = nullptr;
+
+                        enet_peer_reset(event.peer);
                         break;
                     }
                     case ENET_EVENT_TYPE_NONE: {
@@ -135,11 +138,8 @@ namespace oni {
             mPostDisconnectHook = std::move(handler);
         }
 
-        common::PeerID Peer::getPeerID(const ENetAddress &address) const {
-            char ip[16]{};
-            enet_address_get_host_ip(&address, ip, 16);
-            return std::string(ip) + ":" + std::to_string(address.port);
-
+        common::PeerID Peer::getPeerID(const ENetPeer &peer) const {
+            return std::to_string(peer.connectID);
         }
     }
 }

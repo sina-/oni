@@ -50,7 +50,7 @@ namespace oni {
         protected:
             virtual void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) = 0;
 
-            common::PeerID getPeerID(const ENetAddress &address) const;
+            common::PeerID getPeerID(const ENetPeer &peer) const;
 
             PacketType getHeader(const common::uint8 *data) const;
 

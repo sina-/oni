@@ -1,17 +1,22 @@
 #pragma once
 
-#include <oni-core/physics/physic.h>
+#include <oni-core/entities/client-data-manager.h>
 
 class b2World;
 
 namespace oni {
+    namespace entities{
+        class EntityManager;
+        class ClientDataManager;
+    }
+
     namespace physics {
-        class Dynamics : public Physic {
+        class Dynamics{
 
         public:
             explicit Dynamics(common::real32 tickFreq);
 
-            ~Dynamics() override;
+            ~Dynamics();
 
             // TODO: Ideally I shouldn't expose this dude!
             // TODO: When refactoring create-entity stuff, I can instead just expose a member function that handles
@@ -23,9 +28,11 @@ namespace oni {
             // I could also just make sure the one function that deletes stuff also gets a reference to b2World and
             // make sure things are deleted. So the bigger decision is to make sure all that refactoring is worth
             // the cost really.
-            b2World * getPhysicsWorld();
+            b2World *getPhysicsWorld();
 
-            void tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) override;
+            void tick(entities::EntityManager &manager,
+                      entities::ClientDataManager &clientData,
+                      common::real64 tickTime);
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};

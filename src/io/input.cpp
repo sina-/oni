@@ -48,5 +48,10 @@ namespace oni {
                 mKeysPressed.erase(std::find(mKeysPressed.begin(), mKeysPressed.end(), key));
             }
         }
+
+        void Input::reset() {
+            mKeysPressed.clear();
+            mKeysReleased.clear();
+        }
     }
 }

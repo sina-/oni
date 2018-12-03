@@ -51,7 +51,7 @@ namespace oni {
         }
 
         void Client::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
-            auto peerID = getPeerID(peer->address);
+            auto peerID = getPeerID(*peer);
             switch (header) {
                 case (PacketType::PING): {
                     auto latency = mTimer->elapsed_in_seconds();

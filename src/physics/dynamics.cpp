@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/entities/client-data-manager.h>
 #include <oni-core/physics/car.h>
 #include <oni-core/graphics/window.h>
 #include <oni-core/components/geometry.h>
@@ -22,8 +23,10 @@ namespace oni {
 
         Dynamics::~Dynamics() = default;
 
-        void Dynamics::tick(entities::EntityManager &manager, const io::Input &input, common::real64 tickTime) {
-            auto carInput = components::CarInput();
+        void Dynamics::tick(entities::EntityManager &manager,
+                            entities::ClientDataManager &clientData,
+                            common::real64 tickTime) {
+            std::map<common::EntityID, components::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
             {
                 // NOTE: Need to lock it because network system might remove cars for clients that have disconnected.
@@ -34,23 +37,25 @@ namespace oni {
                 auto carView = manager.createViewScopeLock<components::Placement, components::Car,
                         components::CarConfig, components::Tag_Vehicle>();
 
-                // TODO: LOL you don't want to apply the same input to all the cars! Dispatch them accordingly.
-                for (auto entity: carView) {
+                for (auto&& entity: carView) {
+                    auto clientLock = clientData.scopedLock();
+                    const auto &input = clientData.getClientInput(entity);
+
                     auto &car = carView.get<components::Car>(entity);
                     const auto &carConfig = carView.get<components::CarConfig>(entity);
 
                     if (input.isPressed(GLFW_KEY_W) || input.isPressed(GLFW_KEY_UP)) {
                         // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
-                        carInput.throttle = 1.0f;
+                        carInput[entity].throttle = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_A) || input.isPressed(GLFW_KEY_LEFT)) {
-                        carInput.left = 1.0f;
+                        carInput[entity].left = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_S) || input.isPressed(GLFW_KEY_DOWN)) {
-                        carInput.throttle = -1.0f;
+                        carInput[entity].throttle = -1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_D) || input.isPressed(GLFW_KEY_RIGHT)) {
-                        carInput.right = 1.0f;
+                        carInput[entity].right = 1.0f;
                     }
                     if (input.isPressed(GLFW_KEY_F)) {
                         car.velocity = car.velocity + math::vec2{static_cast<common::real32>(cos(car.heading)),
@@ -60,17 +65,18 @@ namespace oni {
                         if (car.accumulatedEBrake < 1.0f) {
                             car.accumulatedEBrake += 0.01f;
                         }
-                        carInput.eBrake = static_cast<common::real32>(car.accumulatedEBrake);
+                        carInput[entity].eBrake = static_cast<common::real32>(car.accumulatedEBrake);
                     } else {
                         car.accumulatedEBrake = 0.0f;
                     }
 
-                    auto steerInput = carInput.left - carInput.right;
+                    auto steerInput = carInput[entity].left - carInput[entity].right;
                     if (car.smoothSteer) {
                         car.steer = applySmoothSteer(car, steerInput, tickTime);
                     } else {
                         car.steer = steerInput;
                     }
+
 
                     if (car.safeSteer) {
                         car.steer = applySafeSteer(car, steerInput);
@@ -78,7 +84,7 @@ namespace oni {
 
                     car.steerAngle = car.steer * carConfig.maxSteer;
 
-                    tickCar(car, carConfig, carInput, tickTime);
+                    tickCar(car, carConfig, carInput[entity], tickTime);
 
                     auto placement = components::Placement{math::vec3{car.position.x, car.position.y, 1.0f},
                                                            static_cast<const common::real32>(car.heading),
@@ -121,8 +127,8 @@ namespace oni {
                         // carconfig?
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
                         body->ApplyForceToCenter(
-                                b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 * carInput.throttle),
-                                       static_cast<common::real32>(std::sin(car.heading) * 30 * carInput.throttle)),
+                                b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 * carInput[entity].throttle),
+                                       static_cast<common::real32>(std::sin(car.heading) * 30 * carInput[entity].throttle)),
                                 true);
                         car.isColliding = false;
                     } else {

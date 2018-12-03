@@ -26,13 +26,13 @@ namespace oni {
         }
 
         void Server::postDisconnectHook(const ENetEvent *event) {
-            auto clientID = getPeerID(event->peer->address);
+            auto clientID = getPeerID(*event->peer);
 
             mPostDisconnectHook(clientID);
         }
 
         void Server::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
-            auto peerID = getPeerID(peer->address);
+            auto peerID = getPeerID(*peer);
             switch (header) {
                 case (PacketType::PING): {
                     auto type = PacketType::PING;

@@ -8,9 +8,9 @@
 namespace oni {
     namespace entities {
         typedef std::map<common::PeerID, common::EntityID> ClientToCarEntity;
+        typedef std::map<common::EntityID, common::PeerID> CarEntityToClient;
+        typedef std::map<common::EntityID, io::Input> CarEntityToInput;
         typedef std::vector<common::PeerID> ClientList;
-        typedef std::map<common::PeerID, io::Input> ClientToInput;
-        typedef std::vector<io::Input> ClientInputList;
         typedef std::vector<common::EntityID> CarEntities;
 
         class ClientDataManager {
@@ -25,17 +25,17 @@ namespace oni {
 
             void setClientInput(const common::PeerID &clientID, const io::Input &input);
 
-            const io::Input &getClientInput(const common::PeerID &clientID);
+            const io::Input &getClientInput(const common::EntityID &entityID) const;
 
-            ClientInputList getClientsInput() const;
+            void resetClientsInput();
 
             CarEntities getCarEntities() const;
-
-            const ClientList &getClients() const;
 
             size_t getNumClients() const;
 
             common::EntityID getEntityID(const common::PeerID &clientID) const;
+
+            common::PeerID getPeerID(const common::EntityID &entityID) const;
 
             std::unique_lock<std::mutex> scopedLock();
 
@@ -45,7 +45,8 @@ namespace oni {
 
         private:
             ClientToCarEntity mClientToCarEntity{};
-            ClientToInput mClientToInput{};
+            CarEntityToClient mCarEntityToClient{};
+            CarEntityToInput mCarEntityToInput{};
             ClientList mClients{};
 
             std::mutex mMutex{};

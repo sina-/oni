@@ -68,12 +68,14 @@ namespace oni {
             mServer->sendCarEntityID(carEntity, clientID);
             mServer->sendEntitiesAll(*mEntityManager);
 
+            auto lock = mClientDataManager->scopedLock();
             mClientDataManager->addNewClient(clientID, carEntity);
         }
 
         void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {
             auto input = entities::deserialize<io::Input>(data);
             // TODO: Avoid copy by using a unique_ptr or something
+            auto lock = mClientDataManager->scopedLock();
             mClientDataManager->setClientInput(clientID, input);
         }
 
@@ -109,16 +111,7 @@ namespace oni {
             // Fake lag
             //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
-            std::vector<io::Input> clientInput{};
-            {
-                auto clientDataLock = mClientDataManager->scopedLock();
-                clientInput = mClientDataManager->getClientsInput();
-                // TODO: Maybe I should just stack up client input and remove them after the processing is done.
-            }
-
-            for (const auto &input: clientInput) {
-                mDynamics->tick(*mEntityManager, input, tickTime);
-            }
+            mDynamics->tick(*mEntityManager, *mClientDataManager, tickTime);
 
             std::vector<math::vec2> tickPositions{};
             {

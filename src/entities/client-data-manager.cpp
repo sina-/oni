@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <iostream>
 
 namespace oni {
     namespace entities {
@@ -25,21 +26,24 @@ namespace oni {
         }*/
 
         common::EntityID ClientDataManager::getEntityID(const common::PeerID &clientID) const {
+            assert(mClientToCarEntity.find(clientID) != mClientToCarEntity.end());
             return mClientToCarEntity.at(clientID);
         }
 
         void ClientDataManager::addNewClient(const common::PeerID &clientID, common::EntityID entityID) {
             mClientToCarEntity[clientID] = entityID;
+            mCarEntityToClient[entityID] = clientID;
+            mCarEntityToInput[entityID] = io::Input{};
             mClients.push_back(clientID);
         }
 
         void ClientDataManager::deleteClient(const common::PeerID &clientID) {
+            mCarEntityToInput.erase(mClientToCarEntity.at(clientID));
             mClientToCarEntity.erase(clientID);
-            mClientToInput.erase(clientID);
 
-            auto it = std::find_if(mClients.begin(), mClients.end(),
-                                   [&](const common::PeerID &peerID) { return (peerID == clientID); });
-            if (it != mClients.end()) {
+            if (auto it = std::find_if(mClients.begin(), mClients.end(),
+                                       [&](const common::PeerID &peerID) { return (peerID == clientID); });
+                    it != mClients.end()) {
                 mClients.erase(it);
             } else {
                 assert(false);
@@ -47,23 +51,7 @@ namespace oni {
         }
 
         void ClientDataManager::setClientInput(const common::PeerID &clientID, const io::Input &input) {
-            mClientToInput[clientID] = input;
-        }
-
-        const io::Input &ClientDataManager::getClientInput(const common::PeerID &clientID) {
-            return mClientToInput[clientID];
-        }
-
-        const ClientList &ClientDataManager::getClients() const {
-            return mClients;
-        }
-
-        ClientInputList ClientDataManager::getClientsInput() const {
-            ClientInputList inputs{};
-            for (const auto &input : mClientToInput) {
-                inputs.push_back(input.second);
-            }
-            return inputs;
+            mCarEntityToInput[mClientToCarEntity.at(clientID)] = input;
         }
 
         CarEntities ClientDataManager::getCarEntities() const {
@@ -78,5 +66,20 @@ namespace oni {
             return mClients.size();
         }
 
+        void ClientDataManager::resetClientsInput() {
+            for (auto &&input:mCarEntityToInput) {
+                input.second.reset();
+            }
+        }
+
+        const io::Input &ClientDataManager::getClientInput(const common::EntityID &entityID) const {
+            assert(mCarEntityToInput.find(entityID) != mCarEntityToInput.end());
+            return mCarEntityToInput.at(entityID);
+        }
+
+        common::PeerID ClientDataManager::getPeerID(const common::EntityID &entityID) const {
+            assert(mCarEntityToClient.find(entityID) != mCarEntityToClient.end());
+            return mCarEntityToClient.at(entityID);
+        }
     }
 }

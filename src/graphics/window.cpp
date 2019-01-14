@@ -80,8 +80,11 @@ namespace oni {
             // This will disable v-sync.
             glfwSwapInterval(0.0);
 
-
             glEnable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
+            glDepthFunc(GL_LEQUAL);
+            glDepthRange(0.f, 1.f);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             glEnable(GL_DEBUG_OUTPUT);
@@ -133,8 +136,9 @@ namespace oni {
         }
 
         void Window::clear() const {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
+            glClearDepth(1.f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
         void Window::windowResizeCallback(GLFWwindow *window, common::int32 width, common::int32 height) {

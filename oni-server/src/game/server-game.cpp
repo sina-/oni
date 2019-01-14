@@ -57,13 +57,12 @@ namespace oni {
                 auto box2 = entities::createEntity(*mEntityManager);
                 auto boxSize = math::vec2{4.0f, 1.0f};
                 auto box1PosInWorld = math::vec3{-70.f, -25.f, 0.5f};
-                auto box2PosInWorld = math::vec3{-70.f, -25.f, 0.3f};
+                auto box2PosInWorld = math::vec3{-70.f, -25.f, 0.4f};
                 std::string boxTexturePath = "resources/images/box/1/box.png";
 
-                entities::assignShapeLocal(*mEntityManager, box1, boxSize);
+                entities::assignShapeWorld(*mEntityManager, box1, boxSize, box1PosInWorld);
                 entities::assignTextureToLoad(*mEntityManager, box1, boxTexturePath);
-                entities::assignPlacement(*mEntityManager, box1, box1PosInWorld, {1.f, 1.f, 0.f}, 0.f);
-                entities::assignTag<components::Tag_Dynamic>(*mEntityManager, box1);
+                entities::assignTag<components::Tag_Static>(*mEntityManager, box1);
 
                 entities::assignShapeLocal(*mEntityManager, box2, boxSize);
                 entities::assignTextureToLoad(*mEntityManager, box2, boxTexturePath);

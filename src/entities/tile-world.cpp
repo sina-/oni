@@ -439,7 +439,7 @@ namespace oni {
                                    common::int64 yTileIndex) {
             b2Vec2 vs[4];
 
-            math::vec2 wallTextureSize{};
+            math::vec3 wallTextureSize{};
             math::vec3 wallPositionInWorld{};
             float wallWidth = 0.5f;
 

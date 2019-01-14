@@ -50,7 +50,8 @@ namespace oni {
 
         void assignShapeWorld(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
                               const math::vec3 &worldPos) {
-            auto shape = components::Shape::fromSizeAndRotation(size, 0);
+            auto sizeWithZ = math::vec3{size.x, size.y, worldPos.z};
+            auto shape = components::Shape::fromSizeAndRotation(sizeWithZ, 0);
 
             physics::Transformation::localToWorldTranslation(worldPos, shape);
             manager.assign<components::Shape>(entityID, shape);

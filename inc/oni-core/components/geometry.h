@@ -40,12 +40,12 @@ namespace oni {
                         math::vec3{position.x + size.x, position.y, position.z}};
             }
 
-            static Shape fromSizeAndRotation(const math::vec2 &size, const common::real32 rotation) {
+            static Shape fromSizeAndRotation(const math::vec3 &size, const common::real32 rotation) {
                 auto shape = Shape{
-                        math::vec3{0, 0, 1},
-                        math::vec3{0, size.y, 1},
-                        math::vec3{size.x, size.y, 1},
-                        math::vec3{size.x, 0, 1}
+                        math::vec3{0, 0, size.z},
+                        math::vec3{0, size.y, size.z},
+                        math::vec3{size.x, size.y, size.z},
+                        math::vec3{size.x, 0, size.z}
                 };
                 // Cast to ignore float imprecision.
                 if (static_cast<common::uint16>(rotation)) {

@@ -22,6 +22,8 @@ namespace oni {
 
             void tick(const math::vec2 &position);
 
+            void generateDemoRaceCourse();
+
         private:
 
             void tickChunk(const math::vec2 &position);

@@ -12,6 +12,7 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/tile-world.h>
 #include <oni-core/entities/serialization.h>
+#include <oni-core/physics/transformation.h>
 
 
 namespace oni {
@@ -46,20 +47,29 @@ namespace oni {
         ServerGame::~ServerGame() = default;
 
         void ServerGame::loadLevel() {
-            /*
-            auto boxSize = math::vec2{4.0f, 1.0f};
-            auto boxPositionInWorld = math::vec3{-0.5f, -2.5f, 1.0f};
-            std::string boxTexturePath = "resources/images/box/1/box.png";
-            auto boxTexture = components::Texture{};
-            boxTexture.filePath = boxTexturePath;
-            boxTexture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            mBoxEntity = entities::createStaticPhysicsEntity(*mEntityManager,
-                                                             *mDynamics->getPhysicsWorld(), boxSize,
-                                                             boxPositionInWorld);
-            entities::assignTexture(*mEntityManager, mBoxEntity, boxTexture);
-            */
-
             mTruckEntity = createTruck();
+
+            mTileWorld->generateDemoRaceCourse();
+
+/*            {
+                auto lock = mEntityManager->scopedLock();
+                auto box1 = entities::createEntity(*mEntityManager);
+                auto box2 = entities::createEntity(*mEntityManager);
+                auto boxSize = math::vec2{4.0f, 1.0f};
+                auto box1PosInWorld = math::vec3{-70.f, -25.f, 0.5f};
+                auto box2PosInWorld = math::vec3{-70.f, -25.f, 0.3f};
+                std::string boxTexturePath = "resources/images/box/1/box.png";
+
+                entities::assignShapeLocal(*mEntityManager, box1, boxSize);
+                entities::assignTextureToLoad(*mEntityManager, box1, boxTexturePath);
+                entities::assignPlacement(*mEntityManager, box1, box1PosInWorld, {1.f, 1.f, 0.f}, 0.f);
+                entities::assignTag<components::Tag_Dynamic>(*mEntityManager, box1);
+
+                entities::assignShapeLocal(*mEntityManager, box2, boxSize);
+                entities::assignTextureToLoad(*mEntityManager, box2, boxTexturePath);
+                entities::assignPlacement(*mEntityManager, box2, box2PosInWorld, {1.f, 1.f, 0.f}, math::toRadians(90.f));
+                entities::assignTag<components::Tag_Dynamic>(*mEntityManager, box2);
+            }*/
         }
 
         void ServerGame::setupSessionPacketHandler(const common::PeerID &clientID, const std::string &data) {

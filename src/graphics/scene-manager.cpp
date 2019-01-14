@@ -163,7 +163,6 @@ namespace oni {
         }
 
         void SceneManager::prepareTexture(components::Texture &texture) {
-            // TODO: implement
             switch (texture.status) {
                 case components::TextureStatus::READY: {
                     break;

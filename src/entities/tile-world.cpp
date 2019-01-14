@@ -54,63 +54,6 @@ namespace oni {
             mRaceTrack2 = "resources/images/race-track/2/2.png";
             mRaceTrack3 = "resources/images/race-track/2/3.png";
             mRaceTrack4 = "resources/images/race-track/2/4.png";
-
-            for (int i = -2; i <= 2; ++i) {
-                for (int j = -2; j <= 2; ++j) {
-                    generateChunkTexture(i, j);
-                }
-            }
-
-            std::vector<components::WallTilePosition> wallPosInTile{};
-            std::vector<components::TileIndex> wallTiles{};
-
-            common::int8 outerTrackWidth = 8;
-            common::int8 outerTrackHeight = 4;
-
-            for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
-                wallTiles.emplace_back(components::TileIndex{i, -outerTrackHeight});
-            }
-
-            for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
-                wallTiles.emplace_back(components::TileIndex{outerTrackWidth, i});
-            }
-
-            for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::TOP);
-                wallTiles.emplace_back(components::TileIndex{i, outerTrackHeight});
-            }
-
-            for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
-                wallTiles.emplace_back(components::TileIndex{-outerTrackWidth, i});
-            }
-
-            common::int8 innerTrackWidth = 6;
-            common::int8 innerTrackHeight = 2;
-
-            for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
-                wallTiles.emplace_back(components::TileIndex{i, -innerTrackHeight});
-            }
-
-            for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
-                wallTiles.emplace_back(components::TileIndex{innerTrackWidth, i});
-            }
-
-            for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::TOP);
-                wallTiles.emplace_back(components::TileIndex{i, innerTrackHeight});
-            }
-
-            for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
-                wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
-                wallTiles.emplace_back(components::TileIndex{-innerTrackWidth, i});
-            }
-
-            createWall(wallPosInTile, wallTiles);
         }
 
         TileWorld::~TileWorld() = default;
@@ -691,6 +634,65 @@ namespace oni {
             entities::assignTag<components::Tag_Static>(mEntityManager, entityID);
 
             return entityID;
+        }
+
+        void TileWorld::generateDemoRaceCourse() {
+            for (int i = -2; i <= 2; ++i) {
+                for (int j = -2; j <= 2; ++j) {
+                    generateChunkTexture(i, j);
+                }
+            }
+
+            std::vector<components::WallTilePosition> wallPosInTile{};
+            std::vector<components::TileIndex> wallTiles{};
+
+            common::int8 outerTrackWidth = 8;
+            common::int8 outerTrackHeight = 4;
+
+            for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+                wallTiles.emplace_back(components::TileIndex{i, -outerTrackHeight});
+            }
+
+            for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+                wallTiles.emplace_back(components::TileIndex{outerTrackWidth, i});
+            }
+
+            for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+                wallTiles.emplace_back(components::TileIndex{i, outerTrackHeight});
+            }
+
+            for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+                wallTiles.emplace_back(components::TileIndex{-outerTrackWidth, i});
+            }
+
+            common::int8 innerTrackWidth = 6;
+            common::int8 innerTrackHeight = 2;
+
+            for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::BOTTOM);
+                wallTiles.emplace_back(components::TileIndex{i, -innerTrackHeight});
+            }
+
+            for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::RIGHT);
+                wallTiles.emplace_back(components::TileIndex{innerTrackWidth, i});
+            }
+
+            for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::TOP);
+                wallTiles.emplace_back(components::TileIndex{i, innerTrackHeight});
+            }
+
+            for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
+                wallPosInTile.emplace_back(components::WallTilePosition::LEFT);
+                wallTiles.emplace_back(components::TileIndex{-innerTrackWidth, i});
+            }
+
+            createWall(wallPosInTile, wallTiles);
         }
     }
 }

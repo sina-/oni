@@ -6,7 +6,7 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/components/world-data-status.h>
+#include <oni-core/components/snapshot-type.h>
 #include <oni-core/components/hierarchy.h>
 
 namespace oni {

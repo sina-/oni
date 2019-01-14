@@ -7,7 +7,7 @@
 #include <cereal/types/vector.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/world-data-status.h>
+#include <oni-core/components/snapshot-type.h>
 
 namespace oni {
     namespace entities {
@@ -38,9 +38,9 @@ namespace oni {
             return storage.str();
         }*/
 
-        std::string serialize(entities::EntityManager &manager, components::WorldDataStatus lifeTime);
+        std::string serialize(entities::EntityManager &manager, components::SnapshotType snapshotType);
 
-        void deserialize(oni::entities::EntityManager &manager, const std::string &data, components::WorldDataStatus lifeTime);
+        void deserialize(oni::entities::EntityManager &manager, const std::string &data, components::SnapshotType snapshotType);
 
         template<class T>
         T deserialize(const std::string &data) {

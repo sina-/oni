@@ -215,6 +215,7 @@ namespace oni {
                 begin(*mColorShader, *mColorRenderer, true, true);
                 renderColored(manager, halfViewWidth, halfViewHeight);
             }
+
             end(*mColorShader, *mColorRenderer);
 
             {

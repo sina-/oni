@@ -10,7 +10,7 @@
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/hierarchy.h>
 #include <oni-core/components/visual.h>
-#include <oni-core/components/world-data-status.h>
+#include <oni-core/components/snapshot-type.h>
 #include <oni-core/components/gameplay.h>
 
 
@@ -154,7 +154,7 @@ namespace oni {
 
     namespace entities {
 
-        std::string serialize(entities::EntityManager &manager, components::WorldDataStatus lifeTime) {
+        std::string serialize(entities::EntityManager &manager, components::SnapshotType snapshotType) {
             std::stringstream storage{};
             {
                 auto lock = manager.scopedLock();
@@ -179,13 +179,13 @@ namespace oni {
                         components::Tag_TextureShaded,
                         components::Tag_ColorShaded,
                         components::Tag_Static
-                >(output, lifeTime);
+                >(output, snapshotType);
             }
 
             return storage.str();
         }
 
-        void deserialize(EntityManager &manager, const std::string &data, components::WorldDataStatus lifeTime) {
+        void deserialize(EntityManager &manager, const std::string &data, components::SnapshotType snapshotType) {
             std::stringstream storage;
             storage.str(data);
 
@@ -208,7 +208,7 @@ namespace oni {
                         components::Tag_TextureShaded,
                         components::Tag_ColorShaded,
                         components::Tag_Static
-                >(lifeTime, input,
+                >(snapshotType, input,
                         // NOTE: Car entity keeps a reference to tire entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct
                         // mapping from client side tire ids to server side ids for each Car.

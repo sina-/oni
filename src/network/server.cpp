@@ -65,7 +65,7 @@ namespace oni {
         }
 
         void Server::sendEntitiesAll(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::WorldDataStatus::REPLACE_ALL_ENTITIES);
+            std::string data = entities::serialize(manager, components::SnapshotType::ENTIRE_REGISTRY);
             auto type = PacketType::REPLACE_ALL_ENTITIES;
 
             if (data.size() > 1) {
@@ -74,7 +74,7 @@ namespace oni {
         }
 
         void Server::sendComponentsUpdate(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::WorldDataStatus::ONLY_COMPONENT_UPDATE);
+            std::string data = entities::serialize(manager, components::SnapshotType::ONLY_COMPONENTS);
             auto type = PacketType::ONLY_COMPONENT_UPDATE;
 
             if (data.size() > 1) {
@@ -87,7 +87,7 @@ namespace oni {
         }
 
         void Server::sendNewEntities(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::WorldDataStatus::ADD_NEW_ENTITIES);
+            std::string data = entities::serialize(manager, components::SnapshotType::ONLY_NEW_ENTITIES);
             auto type = PacketType::ADD_NEW_ENTITIES;
 
             if (data.size() > 1) {

@@ -8,7 +8,7 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/world-data-status.h>
+#include <oni-core/components/snapshot-type.h>
 #include <oni-core/components/tag.h>
 
 
@@ -189,21 +189,21 @@ namespace oni {
             }
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
-            void restore(components::WorldDataStatus lifeTime, Archive &archive, Member Type::*... member) {
-                switch (lifeTime) {
-                    case components::WorldDataStatus::REPLACE_ALL_ENTITIES: {
+            void restore(components::SnapshotType snapshotType, Archive &archive, Member Type::*... member) {
+                switch (snapshotType) {
+                    case components::SnapshotType::ENTIRE_REGISTRY: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
                         break;
                     }
-                    case components::WorldDataStatus::ONLY_COMPONENT_UPDATE: {
+                    case components::SnapshotType::ONLY_COMPONENTS: {
                         mLoader->template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
-                    case components::WorldDataStatus::ADD_NEW_ENTITIES: {
+                    case components::SnapshotType::ONLY_NEW_ENTITIES: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
-/*                    case components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES: {
+/*                    case components::SnapshotType::REMOVE_NON_EXISTING_ENTITIES: {
                         mLoader->entities(archive);
                         break;
                     }*/
@@ -214,9 +214,9 @@ namespace oni {
             }
 
             template<class Archive, class ...ArchiveComponents>
-            void snapshot(Archive &archive, components::WorldDataStatus lifeTime) {
-                switch (lifeTime) {
-                    case components::WorldDataStatus::ONLY_COMPONENT_UPDATE: {
+            void snapshot(Archive &archive, components::SnapshotType snapshotType) {
+                switch (snapshotType) {
+                    case components::SnapshotType::ONLY_COMPONENTS: {
                         // TODO: Rather not have this class know about specific components!
                         auto view = mRegistry->view<components::Tag_OnlyComponentUpdate>();
                         if (!view.empty()) {
@@ -226,7 +226,7 @@ namespace oni {
                         }
                         break;
                     }
-                    case components::WorldDataStatus::ADD_NEW_ENTITIES: {
+                    case components::SnapshotType::ONLY_NEW_ENTITIES: {
                         auto view = mRegistry->view<components::Tag_NewEntity>();
                         if (!view.empty()) {
                             mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
@@ -235,11 +235,11 @@ namespace oni {
                         }
                         break;
                     }
-                    case components::WorldDataStatus::REPLACE_ALL_ENTITIES: {
+                    case components::SnapshotType::ENTIRE_REGISTRY: {
                         mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
                         break;
                     }
-/*                    case components::WorldDataStatus::REMOVE_NON_EXISTING_ENTITIES: {
+/*                    case components::SnapshotType::REMOVE_NON_EXISTING_ENTITIES: {
                         mRegistry->snapshot().entities(archive).template component<>(archive,);
                         break;
                     }*/
@@ -268,6 +268,7 @@ namespace oni {
             const std::vector<EntityType> &getDeletedEntities() const {
                 return mDeletedEntities;
             }
+
 /*
             void lock() {
                 mLock.lock();
@@ -277,6 +278,10 @@ namespace oni {
                 mLock.unlock();
             }
 */
+            template<class Component, class Comparator>
+            void sort(Comparator comparator) {
+                mRegistry->sort<Component, Comparator>(std::move(comparator));
+            }
 
         private:
             std::unique_ptr<entt::Registry<EntityType>> mRegistry{};

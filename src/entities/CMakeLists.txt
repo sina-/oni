@@ -1,4 +1,4 @@
-add_library(oni-core-entities create-entity.cpp tile-world.cpp serialization.cpp client-data-manager.cpp)
+add_library(oni-core-entities create-entity.cpp serialization.cpp client-data-manager.cpp)
 
 target_compile_features(oni-core-entities
         PUBLIC

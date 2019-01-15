@@ -10,9 +10,11 @@
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/entities/tile-world.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/physics/transformation.h>
+
+#include <oni-server/entities/tile-world.h>
+#include <oni-server/common/defines.h>
 
 
 namespace oni {

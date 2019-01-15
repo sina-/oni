@@ -28,9 +28,9 @@ namespace oni {
 
             void tickChunk(const math::vec2 &position);
 
-            components::ChunkIndex chunkPosToIndex(const math::vec2 &position) const;
+            components::ChunkIndex backgroundChunkPosToIndex(const math::vec2 &position) const;
 
-            math::vec3 chunkIndexToPos(const components::ChunkIndex &chunkIndex) const;
+            math::vec3 backgroundChunkIndexToPos(const components::ChunkIndex &chunkIndex) const;
 
             math::vec3 roadTileIndexToPos(const components::ChunkIndex &chunkIndex,
                                           components::RoadTileIndex roadTileIndices) const;
@@ -48,9 +48,9 @@ namespace oni {
 
             void generateRoadsForChunk(common::int64 chunkX, common::int64 chunkY);
 
-            void generateChunkTexture(common::int64 chunkX, common::int64 chunkY);
+            void generateChunkBackgroundTexture(common::int64 chunkX, common::int64 chunkY);
 
-            void generateChunkSprite(common::int64 chunkX, common::int64 chunkY);
+            void generateChunkBackgroundSprite(common::int64 chunkX, common::int64 chunkY);
 
             void generateRoadTile(const components::ChunkIndex &chunkIndex,
                                   const components::RoadTileIndex &roadTileIndex);
@@ -115,6 +115,10 @@ namespace oni {
             std::string mRaceTrack2{};
             std::string mRaceTrack3{};
             std::string mRaceTrack4{};
+
+            common::real32 mBackgroundZ{};
+            common::real32 mRoadZ{};
+            common::real32 mWallZ{};
         };
     }
 }

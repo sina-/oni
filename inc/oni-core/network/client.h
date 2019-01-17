@@ -28,6 +28,8 @@ namespace oni {
 
             void sendInput(const io::Input *input);
 
+            void requestZLevelDelta();
+
         private:
             void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) override;
 

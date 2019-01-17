@@ -7,6 +7,7 @@
 #include <oni-core/io/output.h>
 #include <oni-core/io/input.h>
 #include <oni-core/utils/timer.h>
+#include <oni-core/network/packet.h>
 #include <oni-core/entities/serialization.h>
 
 namespace oni {
@@ -89,6 +90,11 @@ namespace oni {
                     mPacketHandlers[PacketType::DESTROYED_ENTITIES](peerID, dataString);
                     break;
                 }
+                case (PacketType::Z_LEVEL_DELTA): {
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::Z_LEVEL_DELTA](peerID, dataString);
+                    break;
+                }
                 default: {
                     std::cout << "Unknown packet!" << std::endl;
                     break;
@@ -122,6 +128,13 @@ namespace oni {
             auto type = PacketType::SETUP_SESSION;
             auto data = std::string{};
             send(type, data, mEnetServer);
+        }
+
+        void Client::requestZLevelDelta() {
+            auto type = PacketType::Z_LEVEL_DELTA;
+            auto data = std::string{};
+            send(type, data, mEnetServer);
+
         }
     }
 }

@@ -6,7 +6,7 @@
 int main() {
 
     auto address = oni::network::Address{"127.0.0.1", 6666};
-    auto server = std::make_unique<oni::server::ServerGame>(address);
+    auto server = std::make_unique<oni::server::game::ServerGame>(address);
     server->run();
 
     return 0;

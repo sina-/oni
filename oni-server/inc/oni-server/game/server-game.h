@@ -6,6 +6,8 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/network/peer.h>
+#include <oni-server/entities/tile-world.h>
+#include <oni-core/components/visual.h>
 
 
 namespace oni {
@@ -21,8 +23,6 @@ namespace oni {
         class EntityManager;
 
         class ClientDataManager;
-
-        class TileWorld;
     }
 
     namespace physics {
@@ -30,75 +30,83 @@ namespace oni {
     }
 
     namespace server {
+        namespace game {
 
-        class ServerGame : public game::Game {
-        public:
-            explicit ServerGame(const network::Address &address);
+            class ServerGame : public oni::game::Game {
+            public:
+                explicit ServerGame(const oni::network::Address &address);
 
-            ~ServerGame() override;
+                ~ServerGame() override;
 
-            ServerGame(const ServerGame &) = delete;
+                ServerGame(const ServerGame &) = delete;
 
-            ServerGame &operator=(ServerGame &) = delete;
+                ServerGame &operator=(ServerGame &) = delete;
 
-            bool shouldTerminate() override;
+                bool shouldTerminate() override;
 
-            void loadLevel();
+                void loadLevel();
 
-        protected:
-            void _sim(common::real64 simTime) override;
+            protected:
+                void _sim(oni::common::real64 simTime) override;
 
-            void _render() override;
+                void _render() override;
 
-            void _display() override;
+                void _display() override;
 
-            void _poll() override;
+                void _poll() override;
 
-            void showFPS(oni::common::int16 fps) override;
+                void showFPS(oni::common::int16 fps) override;
 
-            void showSPS(oni::common::int16 tps) override;
+                void showSPS(oni::common::int16 tps) override;
 
-            void showPPS(oni::common::int16 pps) override;
+                void showPPS(oni::common::int16 pps) override;
 
-            void showRET(oni::common::int16 ret) override;
+                void showRET(oni::common::int16 ret) override;
 
-            void showPET(oni::common::int16 pet) override;
+                void showPET(oni::common::int16 pet) override;
 
-            void showSET(oni::common::int16 set) override;
+                void showSET(oni::common::int16 set) override;
 
-        private:
-            void setupSessionPacketHandler(const common::PeerID &, const std::string &data);
+            private:
+                void setupSessionPacketHandler(const oni::common::PeerID &, const std::string &);
 
-            void clientInputPacketHandler(const common::PeerID &, const std::string &data);
+                void clientInputPacketHandler(const oni::common::PeerID &, const std::string &);
 
-            void postDisconnectHook(const common::PeerID &);
+                void zLevelDeltaRequestPacketHandler(const oni::common::PeerID &, const std::string &);
 
-            common::EntityID createCar();
+                void postDisconnectHook(const oni::common::PeerID &);
 
-            common::EntityID createTire(common::EntityID carEntityID, const math::vec3 &pos, const math::vec2 &size);
+                oni::common::EntityID createCar();
 
-            void removeCar(common::EntityID entityID);
+                oni::common::EntityID
+                createTire(oni::common::EntityID carEntityID, const oni::math::vec3 &pos, const oni::math::vec2 &size);
 
-            void removeTire(common::EntityID carEntityID, common::EntityID tireEntityID);
+                void removeCar(oni::common::EntityID entityID);
 
-            common::EntityID createTruck();
+                void removeTire(oni::common::EntityID carEntityID, oni::common::EntityID tireEntityID);
 
-        private:
-            std::unique_ptr<entities::EntityManager> mEntityManager{};
+                oni::common::EntityID createTruck();
 
-            std::unique_ptr<physics::Dynamics> mDynamics{};
-            std::unique_ptr<entities::TileWorld> mTileWorld{};
-            std::unique_ptr<gameplay::LapTracker> mLapTracker{};
+            private:
+                std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
 
-            network::Address mServerAddress{};
-            std::unique_ptr<network::Server> mServer{};
+                std::unique_ptr<oni::physics::Dynamics> mDynamics{};
+                std::unique_ptr<server::entities::TileWorld> mTileWorld{};
+                std::unique_ptr<oni::gameplay::LapTracker> mLapTracker{};
 
-            common::EntityID mTruckEntity{};
-            common::EntityID mBoxEntity{};
+                network::Address mServerAddress{};
+                std::unique_ptr<oni::network::Server> mServer{};
 
-            std::unique_ptr<entities::ClientDataManager> mClientDataManager{};
+                oni::common::EntityID mTruckEntity{};
+                oni::common::EntityID mBoxEntity{};
 
-            components::CarConfig mCarConfigDefault{};
-        };
+                std::unique_ptr<oni::entities::ClientDataManager> mClientDataManager{};
+
+                oni::components::CarConfig mCarConfigDefault{};
+
+                oni::components::ZLevel mZLevel{};
+                oni::common::real32 mVehicleZ{};
+            };
+        }
     }
 }

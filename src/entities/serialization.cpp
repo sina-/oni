@@ -151,9 +151,7 @@ namespace oni {
             archive(vec4.x, vec4.y, vec4.z, vec4.w);
         }
     }
-
     namespace entities {
-
         std::string serialize(entities::EntityManager &manager, components::SnapshotType snapshotType) {
             std::stringstream storage{};
             {

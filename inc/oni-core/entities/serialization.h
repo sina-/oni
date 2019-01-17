@@ -8,8 +8,28 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/components/snapshot-type.h>
+#include <oni-core/network/packet.h>
 
 namespace oni {
+    namespace network {
+        // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
+        // other compilation units such as server.cpp
+        template<class Archive>
+        void serialize(Archive &archive, DataPacket &packet) {
+            archive(packet.data);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, EntityPacket &packet) {
+            archive(packet.entity);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, ZLevelDeltaPacket &packet) {
+            archive(packet.major, packet.minor);
+        }
+    }
+
     namespace entities {
         class EntityManager;
 

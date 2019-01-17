@@ -22,7 +22,8 @@ namespace oni {
     namespace graphics {
         SceneManager::SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
                                    b2World &physicsWorld,
-                                   common::real32 gameUnitToPixels) :
+                                   common::real32 gameUnitToPixels
+        ) :
                 mSkidTileSizeX{64}, mSkidTileSizeY{64},
                 mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
                 mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
@@ -377,6 +378,14 @@ namespace oni {
             {
                 auto carView = manager.createViewScopeLock<components::Car, components::Placement>();
                 for (auto &&carEntity: carView) {
+
+                    // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
+                    // TODO: A better way is no not call tick before we know we have all the information to do actual
+                    // work. Kinda like a level loading screen.
+                    if(mZLevel.majorLevelDelta <= common::ep){
+                        continue;
+                    }
+
                     const auto car = carView.get<components::Car>(carEntity);
                     // NOTE: Technically I should use slippingRear, but this gives better effect
                     if (car.slippingFront || true) {
@@ -469,7 +478,7 @@ namespace oni {
             if (!exists) {
                 auto tilePosX = math::indexToPosition(x, mSkidTileSizeX);
                 auto tilePosY = math::indexToPosition(y, mSkidTileSizeY);
-                auto worldPos = math::vec3{tilePosX, tilePosY, 1.0f};
+                auto worldPos = math::vec3{tilePosX, tilePosY, mZLevel.level_1};
                 auto tileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
                                            static_cast<common::real32>(mSkidTileSizeY)};
 
@@ -620,8 +629,12 @@ namespace oni {
         }
 
         common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
-            auto entityID = mFontManager.createTextFromString(*mInternalRegistry,text, worldPos);
+            auto entityID = mFontManager.createTextFromString(*mInternalRegistry, text, worldPos);
             return entityID;
+        }
+
+        void SceneManager::setZLevel(const components::ZLevel &zLevel) {
+            mZLevel = zLevel;
         }
     }
 }

@@ -11,7 +11,6 @@ subdirs(${oni_SOURCE_DIR}/src/game)
 subdirs(${oni_SOURCE_DIR}/src/utils)
 subdirs(${oni_SOURCE_DIR}/src/physics)
 subdirs(${oni_SOURCE_DIR}/src/math)
-subdirs(${oni_SOURCE_DIR}/src/buffers)
 subdirs(${oni_SOURCE_DIR}/src/io)
 
 add_subdirectory(${oni-server_SOURCE_DIR}/src/game)

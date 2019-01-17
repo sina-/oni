@@ -1,5 +1,3 @@
-#include <utility>
-
 #include <oni-core/network/server.h>
 
 #include <iostream>
@@ -7,9 +5,9 @@
 
 #include <enet/enet.h>
 
+#include <oni-core/entities/entity-manager.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/entities/serialization.h>
-#include <oni-core/entities/entity-manager.h>
 
 
 namespace oni {
@@ -53,6 +51,11 @@ namespace oni {
                 case (PacketType::CLIENT_INPUT): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
                     mPacketHandlers[PacketType::CLIENT_INPUT](peerID, dataString);
+                    break;
+                }
+                case (PacketType::Z_LEVEL_DELTA): {
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::Z_LEVEL_DELTA](peerID, dataString);
                     break;
                 }
                 default: {
@@ -99,7 +102,7 @@ namespace oni {
             }
         }
 
-        void Server::broadCastDeletedEntities(entities::EntityManager &manager) {
+        void Server::broadcastDeletedEntities(entities::EntityManager &manager) {
             auto type = PacketType::DESTROYED_ENTITIES;
             auto data = entities::serialize<std::vector<common::EntityID>>(manager.getDeletedEntities());
 
@@ -110,8 +113,15 @@ namespace oni {
 
         void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID &peerID) {
             auto packet = EntityPacket{entityID};
-            auto data = entities::serialize<EntityPacket>(packet);
+            auto data = entities::serialize<network::EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;
+
+            send(type, data, mPeers[peerID]);
+        }
+
+        void Server::sendZLevelDelta(const common::PeerID &peerID, const ZLevelDeltaPacket &packet) {
+            auto data = entities::serialize<ZLevelDeltaPacket>(packet);
+            auto type = PacketType::Z_LEVEL_DELTA;
 
             send(type, data, mPeers[peerID]);
         }

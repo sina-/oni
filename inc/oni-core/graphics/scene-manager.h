@@ -37,9 +37,10 @@ namespace oni {
 
         class SceneManager {
         public:
-            SceneManager(const components::ScreenBounds &screenBounds, FontManager &fontManager,
-                         b2World &physicsWorld,
-                         common::real32 gameUnitToPixels);
+            SceneManager(const components::ScreenBounds &, FontManager &,
+                         b2World &,
+                         common::real32
+            );
 
             ~SceneManager();
 
@@ -84,6 +85,8 @@ namespace oni {
             common::uint16 getSpritesPerFrame() const;
 
             common::uint16 getTexturesPerFrame() const;
+
+            void setZLevel(const components::ZLevel&);
 
             void resetCounters();
 
@@ -162,6 +165,8 @@ namespace oni {
             common::uint16 mRenderedTexturesPerFrame{0};
 
             std::unique_ptr<entities::EntityManager> mInternalRegistry{};
+
+            components::ZLevel mZLevel{};
         };
     }
 }

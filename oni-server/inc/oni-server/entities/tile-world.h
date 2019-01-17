@@ -6,119 +6,131 @@
 #include <oni-core/math/vec4.h>
 #include <oni-core/components/geometry.h>
 #include <oni-core/components/physics.h>
+#include <oni-core/components/visual.h>
 
 class b2World;
 
 namespace oni {
     namespace entities {
         class EntityManager;
+    }
 
-        class TileWorld {
-        public:
+    namespace server {
+        namespace entities {
 
-            TileWorld(entities::EntityManager &manager, b2World &physicsWorld);
+            class TileWorld {
+            public:
 
-            ~TileWorld();
+                TileWorld(oni::entities::EntityManager &, b2World &, const oni::components::ZLevel &);
 
-            void tick(const math::vec2 &position);
+                ~TileWorld();
 
-            void generateDemoRaceCourse();
+                void tick(const oni::math::vec2 &position);
 
-        private:
+                void generateDemoRaceCourse();
 
-            void tickChunk(const math::vec2 &position);
+            private:
 
-            components::ChunkIndex backgroundChunkPosToIndex(const math::vec2 &position) const;
+                void tickChunk(const oni::math::vec2 &position);
 
-            math::vec3 backgroundChunkIndexToPos(const components::ChunkIndex &chunkIndex) const;
+                oni::components::ChunkIndex backgroundChunkPosToIndex(const oni::math::vec2 &position) const;
 
-            math::vec3 roadTileIndexToPos(const components::ChunkIndex &chunkIndex,
-                                          components::RoadTileIndex roadTileIndices) const;
+                oni::math::vec3 backgroundChunkIndexToPos(const oni::components::ChunkIndex &chunkIndex) const;
 
-            math::vec2 unpackCoordinates(common::uint64 coord) const;
+                oni::math::vec3 roadTileIndexToPos(const oni::components::ChunkIndex &chunkIndex,
+                                                   oni::components::RoadTileIndex roadTileIndices) const;
 
-            void generateTilesForChunk(common::int64 xChunkIndex,
-                                       common::int64 yChunkIndex);
+                oni::math::vec2 unpackCoordinates(oni::common::uint64 coord) const;
 
-            common::EntityID generateSprite(math::vec4 color, math::vec2 tileSize, math::vec3 worldPos);
+                void generateTilesForChunk(oni::common::int64 xChunkIndex,
+                                           oni::common::int64 yChunkIndex);
 
-            common::EntityID generateTexture(const math::vec2 &size,
-                                             const math::vec3 &worldPos,
-                                             const std::string &path);
+                oni::common::EntityID
+                generateSprite(oni::math::vec4 color, oni::math::vec2 tileSize, oni::math::vec3 worldPos);
 
-            void generateRoadsForChunk(common::int64 chunkX, common::int64 chunkY);
+                oni::common::EntityID generateTexture(const oni::math::vec2 &size,
+                                                      const oni::math::vec3 &worldPos,
+                                                      const std::string &path);
 
-            void generateChunkBackgroundTexture(common::int64 chunkX, common::int64 chunkY);
+                void generateRoadsForChunk(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-            void generateChunkBackgroundSprite(common::int64 chunkX, common::int64 chunkY);
+                void generateChunkBackgroundTexture(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-            void generateRoadTile(const components::ChunkIndex &chunkIndex,
-                                  const components::RoadTileIndex &roadTileIndex);
+                void generateChunkBackgroundSprite(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-            void generateTexturedRoadTile(const components::ChunkIndex &chunkIndex,
-                                          const components::RoadTileIndex &roadTileIndex,
-                                          const std::string &texturePath);
+                void generateRoadTile(const oni::components::ChunkIndex &chunkIndex,
+                                      const oni::components::RoadTileIndex &roadTileIndex);
 
-            void generateRoadTileBetween(const components::ChunkIndex &chunkIndex,
-                                         components::RoadTileIndex startingRoadTileIndex,
-                                         components::RoadTileIndex endingRoadTileIndex);
+                void generateTexturedRoadTile(const oni::components::ChunkIndex &chunkIndex,
+                                              const oni::components::RoadTileIndex &roadTileIndex,
+                                              const std::string &texturePath);
 
-            bool existsInMap(common::uint64 packedIndex, const std::map<common::uint64, common::EntityID> &map) const;
+                void generateRoadTileBetween(const oni::components::ChunkIndex &chunkIndex,
+                                             oni::components::RoadTileIndex startingRoadTileIndex,
+                                             oni::components::RoadTileIndex endingRoadTileIndex);
 
-            bool shouldGenerateRoad(const components::ChunkIndex &chunkIndex) const;
+                bool
+                existsInMap(oni::common::uint64 packedIndex,
+                            const std::map<oni::common::uint64, oni::common::EntityID> &map) const;
 
-            void createWall(components::WallTilePosition position, common::int64 xTileIndex, common::int64 yTileIndex);
+                bool shouldGenerateRoad(const oni::components::ChunkIndex &chunkIndex) const;
 
-            void createWall(const std::vector<components::WallTilePosition> &position,
-                            const std::vector<components::TileIndex> &indices);
+                void
+                createWall(oni::components::WallTilePosition position, oni::common::int64 xTileIndex,
+                           oni::common::int64 yTileIndex);
 
-            math::vec2 getTileSize() const;
+                void createWall(const std::vector<oni::components::WallTilePosition> &position,
+                                const std::vector<oni::components::TileIndex> &indices);
 
-            math::vec2 getChunkSize() const;
+                oni::math::vec2 getTileSize() const;
 
-        private:
-            entities::EntityManager &mEntityManager;
-            b2World &mPhysicsWorld;
-            /**
-             * A tile is determined by its lower left coordinate in the world. This coordinate is
-             * packed into a uint64 and the lookup table mCoordToTileLookup returns the entity ID
-             * corresponding to the tile.
-             */
-            std::map<common::uint64, common::EntityID> mTileLookup{};
-            std::map<common::uint64, common::EntityID> mRoadLookup{};
-            std::map<common::uint64, common::EntityID> mChunkLookup{};
+                oni::math::vec2 getChunkSize() const;
 
-            const common::uint16 mTileSizeX{0};
-            const common::uint16 mTileSizeY{0};
+            private:
+                oni::entities::EntityManager &mEntityManager;
+                b2World &mPhysicsWorld;
+                /**
+                 * A tile is determined by its lower left coordinate in the world. This coordinate is
+                 * packed into a uint64 and the lookup table mCoordToTileLookup returns the entity ID
+                 * corresponding to the tile.
+                 */
+                std::map<oni::common::uint64, oni::common::EntityID> mTileLookup{};
+                std::map<oni::common::uint64, oni::common::EntityID> mRoadLookup{};
+                std::map<oni::common::uint64, oni::common::EntityID> mChunkLookup{};
 
-            //const common::real32 mHalfTileSizeX{0.0f};
-            //const common::real32 mHalfTileSizeY{0.0f};
+                const oni::common::uint16 mTileSizeX{0};
+                const oni::common::uint16 mTileSizeY{0};
 
-            const common::uint16 mTilesPerChunkX{0};
-            const common::uint16 mTilesPerChunkY{0};
+                //const oni::common::real32 mHalfTileSizeX{0.0f};
+                //const oni::common::real32 mHalfTileSizeY{0.0f};
 
-            const common::uint16 mChunkSizeX{0};
-            const common::uint16 mChunkSizeY{0};
+                const oni::common::uint16 mTilesPerChunkX{0};
+                const oni::common::uint16 mTilesPerChunkY{0};
 
-            const common::uint16 mHalfChunkSizeX{0};
-            const common::uint16 mHalfChunkSizeY{0};
+                const oni::common::uint16 mChunkSizeX{0};
+                const oni::common::uint16 mChunkSizeY{0};
 
-            std::string mNorthToEast{};
-            std::string mSouthToEast{};
-            std::string mSouthToNorth{};
-            std::string mNorthToSouth{};
-            std::string mWestToEast{};
-            std::string mWestToNorth{};
-            std::string mWestToSouth{};
+                const oni::common::uint16 mHalfChunkSizeX{0};
+                const oni::common::uint16 mHalfChunkSizeY{0};
 
-            std::string mRaceTrack1{};
-            std::string mRaceTrack2{};
-            std::string mRaceTrack3{};
-            std::string mRaceTrack4{};
+                std::string mNorthToEast{};
+                std::string mSouthToEast{};
+                std::string mSouthToNorth{};
+                std::string mNorthToSouth{};
+                std::string mWestToEast{};
+                std::string mWestToNorth{};
+                std::string mWestToSouth{};
 
-            common::real32 mBackgroundZ{};
-            common::real32 mRoadZ{};
-            common::real32 mWallZ{};
-        };
+                std::string mRaceTrack1{};
+                std::string mRaceTrack2{};
+                std::string mRaceTrack3{};
+                std::string mRaceTrack4{};
+
+                oni::components::ZLevel mZLevel{};
+                oni::common::real32 mBackgroundZ{};
+                oni::common::real32 mRoadZ{};
+                oni::common::real32 mWallZ{};
+            };
+        }
     }
 }

@@ -17,28 +17,30 @@ namespace oni {
 
         class Server : public Peer {
         public:
-            Server(const Address *address, common::uint8 numClients, common::uint8 numChannels);
+            Server(const Address *, common::uint8, common::uint8);
 
             ~Server() override;
 
-            void sendEntitiesAll(entities::EntityManager &manager);
+            void sendEntitiesAll(entities::EntityManager &);
 
-            void sendComponentsUpdate(entities::EntityManager &manager);
-            
-            void sendNewEntities(entities::EntityManager &manager);
+            void sendComponentsUpdate(entities::EntityManager &);
 
-            void broadCastDeletedEntities(entities::EntityManager &manager);
+            void sendNewEntities(entities::EntityManager &);
 
-            void sendCarEntityID(common::EntityID entityID, const common::PeerID& id);
+            void broadcastDeletedEntities(entities::EntityManager &);
+
+            void sendCarEntityID(common::EntityID, const common::PeerID &);
+
+            void sendZLevelDelta(const common::PeerID &, const network::ZLevelDeltaPacket &);
 
         private:
             Server();
 
-            void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) override;
+            void handle(ENetPeer *, common::uint8 *, size_t, PacketType) override;
 
-            void postConnectHook(const ENetEvent *event) override;
+            void postConnectHook(const ENetEvent *) override;
 
-            void postDisconnectHook(const ENetEvent *event) override;
+            void postDisconnectHook(const ENetEvent *) override;
         };
     }
 }

@@ -37,7 +37,7 @@ namespace oni {
                 auto carView = manager.createViewScopeLock<components::Placement, components::Car,
                         components::CarConfig, components::Tag_Vehicle>();
 
-                for (auto&& entity: carView) {
+                for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
                     const auto &input = clientData.getClientInput(entity);
 
@@ -86,9 +86,13 @@ namespace oni {
 
                     tickCar(car, carConfig, carInput[entity], tickTime);
 
-                    auto placement = components::Placement{math::vec3{car.position.x, car.position.y, 1.0f},
-                                                           static_cast<const common::real32>(car.heading),
-                                                           math::vec3{1.0f, 1.0f, 0.0f}};
+                    auto &carPlacement = carView.get<components::Placement>(entity);
+                    auto placement = components::Placement{
+                            math::vec3{car.position.x, car.position.y,
+                                    // TODO: Perhaps better to have car.position to be the canonical z value?
+                                       carPlacement.position.z},
+                            static_cast<const common::real32>(car.heading),
+                            math::vec3{1.0f, 1.0f, 0.0f}};
                     Transformation::updatePlacement(manager, entity, placement);
 
                     auto velocity = car.velocityLocal.len();
@@ -127,8 +131,10 @@ namespace oni {
                         // carconfig?
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
                         body->ApplyForceToCenter(
-                                b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 * carInput[entity].throttle),
-                                       static_cast<common::real32>(std::sin(car.heading) * 30 * carInput[entity].throttle)),
+                                b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 *
+                                                                   carInput[entity].throttle),
+                                       static_cast<common::real32>(std::sin(car.heading) * 30 *
+                                                                   carInput[entity].throttle)),
                                 true);
                         car.isColliding = false;
                     } else {
@@ -171,7 +177,7 @@ namespace oni {
                     // TODO: Maybe I can query box2d to find-out if an entity is updated
                     if (std::abs(placement.position.x - position.x) > common::ep ||
                         std::abs(placement.rotation - body->GetAngle()) > common::ep) {
-                        placement.position = math::vec3{position.x, position.y, 1.0f};
+                        placement.position = math::vec3{position.x, position.y, placement.position.z};
                         placement.rotation = body->GetAngle();
 
                         entitiesToBeUpdated.push_back(entity);

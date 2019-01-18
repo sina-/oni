@@ -32,7 +32,7 @@ namespace oni {
 
         void destroyEntity(EntityManager &manager, common::EntityID entityID);
 
-        void assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size);
+        void assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size, common::real32);
 
         void removeShape(EntityManager &manager, common::EntityID entityID);
 

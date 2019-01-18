@@ -170,6 +170,8 @@ namespace oni {
             auto scaleX = text.xScaling;
             auto scaleY = text.yScaling;
 
+            common::real32 z = 1.f;
+
             for (common::uint32 i = 0; i < text.textContent.size(); i++) {
                 assert(mIndexCount + 6 < mMaxIndicesCount);
 
@@ -183,22 +185,22 @@ namespace oni {
                 auto u1 = text.uv[i].z;
                 auto v1 = text.uv[i].w;
 
-                buffer->position = math::vec3{x0, y0, 1};
+                buffer->position = math::vec3{x0, y0, z};
                 buffer->uv = math::vec2{u0, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                buffer->position = math::vec3{x0, y1, 1};
+                buffer->position = math::vec3{x0, y1, z};
                 buffer->uv = math::vec2{u0, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                buffer->position = math::vec3{x1, y1, 1};
+                buffer->position = math::vec3{x1, y1, z};
                 buffer->uv = math::vec2{u1, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
-                buffer->position = math::vec3{x1, y0, 1};
+                buffer->position = math::vec3{x1, y0, z};
                 buffer->uv = math::vec2{u1, v0};
                 buffer->samplerID = samplerID;
                 buffer++;

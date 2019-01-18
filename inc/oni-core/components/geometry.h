@@ -49,7 +49,7 @@ namespace oni {
                 };
                 // Cast to ignore float imprecision.
                 if (static_cast<common::uint16>(rotation)) {
-                    auto halfSize = math::vec3{size.x / 2.0f, size.y / 2.0f, 0.0f};
+                    auto halfSize = math::vec3{size.x / 2.0f, size.y / 2.0f, size.z};
 
                     shape.vertexA -= halfSize;
                     shape.vertexB -= halfSize;

@@ -370,6 +370,13 @@ namespace oni {
 
 
         void SceneManager::tick(entities::EntityManager &manager) {
+            // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
+            // TODO: A better way is no not call tick before we know we have all the information to do actual
+            // work. Kinda like a level loading screen.
+            if(mZLevel.majorLevelDelta <= common::ep){
+                return;
+            }
+
             std::vector<components::Placement> carTireRRPlacements{};
             std::vector<components::Placement> carTireRLPlacements{};
             std::vector<components::TransformParent> carTireRRTransformParent{};
@@ -378,13 +385,6 @@ namespace oni {
             {
                 auto carView = manager.createViewScopeLock<components::Car, components::Placement>();
                 for (auto &&carEntity: carView) {
-
-                    // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
-                    // TODO: A better way is no not call tick before we know we have all the information to do actual
-                    // work. Kinda like a level loading screen.
-                    if(mZLevel.majorLevelDelta <= common::ep){
-                        continue;
-                    }
 
                     const auto car = carView.get<components::Car>(carEntity);
                     // NOTE: Technically I should use slippingRear, but this gives better effect
@@ -443,9 +443,9 @@ namespace oni {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
                 RaceInfoEntities carLapText{0};
-                math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, 1.f};
-                math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, 1.f};
-                math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, 1.f};
+                math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, mZLevel.level_8};
+                math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, mZLevel.level_8};
+                math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, mZLevel.level_8};
 
                 carLapText.lapEntity = createText(lapRenderPos, "Lap: " + std::to_string(carLap.lap));
                 carLapText.lapTimeEntity = createText(lapTimeRenderPos, "Lap time: " + std::to_string(carLap.lapTimeS));

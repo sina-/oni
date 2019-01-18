@@ -38,13 +38,15 @@ namespace oni {
 
         void assignShapeLocal(EntityManager &manager,
                               common::EntityID entityID,
-                              const math::vec2 &size) {
+                              const math::vec2 &size,
+                              common::real32 z
+                              ) {
             // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
             // works out without needing to translate the entity to the center before rotation and then back to its
             // position in the local space.
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
-            auto shape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, 1.0}, size);
+            auto shape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
             manager.assign<components::Shape>(entityID, shape);
         }
 

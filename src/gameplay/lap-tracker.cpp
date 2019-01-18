@@ -8,7 +8,9 @@
 namespace oni {
     namespace gameplay {
 
-        LapTracker::LapTracker(entities::EntityManager &entityManager) : mEntityManager(entityManager) {
+        LapTracker::LapTracker(entities::EntityManager &entityManager, const components::ZLevel &zLevel)
+                : mEntityManager(entityManager) {
+            mZLevel = zLevel;
             auto checkpoint1 = components::Shape::fromPositionAndSize(math::vec3{70, -40}, math::vec2{20, 20});
             auto checkpoint2 = components::Shape::fromPositionAndSize(math::vec3{70, 30}, math::vec2{20, 20});
             auto checkpoint3 = components::Shape::fromPositionAndSize(math::vec3{-80, 30}, math::vec2{20, 20});
@@ -60,13 +62,13 @@ namespace oni {
                 for (auto &&entity: entitiesToUpdate) {
                     auto currentTime = mTimers[entity].elapsed();
                     auto currentBest = mBestLaps[entity];
-                    if(currentTime < currentBest){
+                    if (currentTime < currentBest) {
                         mBestLaps[entity] = currentTime;
                     }
                     std::cout << "Lap time: " << currentTime.count() << "s" << "\n";
                     std::cout << "Current best time: " << mBestLaps[entity].count() << "s" << "\n";
 
-                    auto& carLap = carLapView.get<components::CarLapInfo>(entity);
+                    auto &carLap = carLapView.get<components::CarLapInfo>(entity);
                     ++carLap.lap;
                     carLap.bestLapTimeS = static_cast<common::uint32>(mBestLaps[entity].count());
                     carLap.lapTimeS = static_cast<common::uint32>(currentTime.count());

@@ -51,7 +51,7 @@ namespace oni {
                 mTileWorld = std::make_unique<oni::server::entities::TileWorld>(*mEntityManager,
                                                                                 *mDynamics->getPhysicsWorld(), mZLevel);
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
-                mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager);
+                mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager, mZLevel);
 
                 mServer = std::make_unique<oni::network::Server>(&address, 16, 2);
 
@@ -235,7 +235,7 @@ namespace oni {
                                                         carPosition,
                                                         carSize,
                                                         oni::components::BodyType::DYNAMIC, true);
-                oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize);
+                oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize, mVehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, carEntityID, carPosition, math::vec3{1.f, 1.f, 0.f},
                                                0.f);
                 oni::entities::assignCar(*mEntityManager, carEntityID, carPosition, carConfig);
@@ -313,7 +313,7 @@ namespace oni {
                 std::string carTireTexturePath = "resources/images/car/1/car-tire.png";
 
                 auto entityID = createEntity(*mEntityManager);
-                oni::entities::assignShapeLocal(*mEntityManager, entityID, size);
+                oni::entities::assignShapeLocal(*mEntityManager, entityID, size, mVehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, entityID, pos, scale, heading);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, carTireTexturePath);
                 oni::entities::assignTransformationHierarchy(*mEntityManager, carEntityID, entityID);
@@ -339,7 +339,7 @@ namespace oni {
 
                 auto lock = mEntityManager->scopedLock();
                 auto entityID = oni::entities::createEntity(*mEntityManager);
-                oni::entities::assignShapeLocal(*mEntityManager, entityID, size);
+                oni::entities::assignShapeLocal(*mEntityManager, entityID, size, mVehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, entityID, worldPos, {1.f, 1.f, 0.f}, 0.f);
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), entityID,
                                                         worldPos,

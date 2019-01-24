@@ -4,9 +4,9 @@
 
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec4.h>
-#include <oni-core/components/geometry.h>
-#include <oni-core/components/physics.h>
-#include <oni-core/components/visual.h>
+#include <oni-core/component/geometry.h>
+#include <oni-core/component/physic.h>
+#include <oni-core/component/visual.h>
 
 class b2World;
 
@@ -21,7 +21,7 @@ namespace oni {
             class TileWorld {
             public:
 
-                TileWorld(oni::entities::EntityManager &, b2World &, const oni::components::ZLevel &);
+                TileWorld(oni::entities::EntityManager &, b2World &, const oni::component::ZLevel &);
 
                 ~TileWorld();
 
@@ -33,12 +33,12 @@ namespace oni {
 
                 void tickChunk(const oni::math::vec2 &position);
 
-                oni::components::ChunkIndex backgroundChunkPosToIndex(const oni::math::vec2 &position) const;
+                oni::component::ChunkIndex backgroundChunkPosToIndex(const oni::math::vec2 &position) const;
 
-                oni::math::vec3 backgroundChunkIndexToPos(const oni::components::ChunkIndex &chunkIndex) const;
+                oni::math::vec3 backgroundChunkIndexToPos(const oni::component::ChunkIndex &chunkIndex) const;
 
-                oni::math::vec3 roadTileIndexToPos(const oni::components::ChunkIndex &chunkIndex,
-                                                   oni::components::RoadTileIndex roadTileIndices) const;
+                oni::math::vec3 roadTileIndexToPos(const oni::component::ChunkIndex &chunkIndex,
+                                                   oni::component::RoadTileIndex roadTileIndices) const;
 
                 oni::math::vec2 unpackCoordinates(oni::common::uint64 coord) const;
 
@@ -58,29 +58,29 @@ namespace oni {
 
                 void generateChunkBackgroundSprite(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-                void generateRoadTile(const oni::components::ChunkIndex &chunkIndex,
-                                      const oni::components::RoadTileIndex &roadTileIndex);
+                void generateRoadTile(const oni::component::ChunkIndex &chunkIndex,
+                                      const oni::component::RoadTileIndex &roadTileIndex);
 
-                void generateTexturedRoadTile(const oni::components::ChunkIndex &chunkIndex,
-                                              const oni::components::RoadTileIndex &roadTileIndex,
+                void generateTexturedRoadTile(const oni::component::ChunkIndex &chunkIndex,
+                                              const oni::component::RoadTileIndex &roadTileIndex,
                                               const std::string &texturePath);
 
-                void generateRoadTileBetween(const oni::components::ChunkIndex &chunkIndex,
-                                             oni::components::RoadTileIndex startingRoadTileIndex,
-                                             oni::components::RoadTileIndex endingRoadTileIndex);
+                void generateRoadTileBetween(const oni::component::ChunkIndex &chunkIndex,
+                                             oni::component::RoadTileIndex startingRoadTileIndex,
+                                             oni::component::RoadTileIndex endingRoadTileIndex);
 
                 bool
                 existsInMap(oni::common::uint64 packedIndex,
                             const std::map<oni::common::uint64, oni::common::EntityID> &map) const;
 
-                bool shouldGenerateRoad(const oni::components::ChunkIndex &chunkIndex) const;
+                bool shouldGenerateRoad(const oni::component::ChunkIndex &chunkIndex) const;
 
                 void
-                createWall(oni::components::WallTilePosition position, oni::common::int64 xTileIndex,
+                createWall(oni::component::WallTilePosition position, oni::common::int64 xTileIndex,
                            oni::common::int64 yTileIndex);
 
-                void createWall(const std::vector<oni::components::WallTilePosition> &position,
-                                const std::vector<oni::components::TileIndex> &indices);
+                void createWall(const std::vector<oni::component::WallTilePosition> &position,
+                                const std::vector<oni::component::TileIndex> &indices);
 
                 oni::math::vec2 getTileSize() const;
 
@@ -126,7 +126,7 @@ namespace oni {
                 std::string mRaceTrack3{};
                 std::string mRaceTrack4{};
 
-                oni::components::ZLevel mZLevel{};
+                oni::component::ZLevel mZLevel{};
                 oni::common::real32 mBackgroundZ{};
                 oni::common::real32 mRoadZ{};
                 oni::common::real32 mWallZ{};

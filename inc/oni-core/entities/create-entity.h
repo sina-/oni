@@ -4,7 +4,7 @@
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
-#include <oni-core/components/physics.h>
+#include <oni-core/component/physic.h>
 #include <oni-core/common/typedefs-graphics.h>
 #include <oni-core/entities/entity-manager.h>
 
@@ -15,12 +15,12 @@ namespace oni {
         class EntityManager;
     }
 
-    namespace components {
+    namespace component {
         struct Texture;
         struct CarConfig;
     }
 
-    namespace graphics {
+    namespace graphic {
         class FontManager;
 
         class SceneManager;
@@ -58,7 +58,7 @@ namespace oni {
                                       common::EntityID,
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
-                                      components::BodyType bodyType,
+                                      component::BodyType bodyType,
                                       bool highPrecisionPhysics);
 
         void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
@@ -67,14 +67,14 @@ namespace oni {
 
         void assignTextureLoaded(EntityManager &manager,
                                  common::EntityID entity,
-                                 const components::Texture &texture);
+                                 const component::Texture &texture);
 
         void removeTexture(EntityManager &manager, common::EntityID entityID);
 
         void removeText(EntityManager &manager, common::EntityID entityID);
 
         void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                       const components::CarConfig &carConfig);
+                       const component::CarConfig &carConfig);
 
         void removeCar(EntityManager &manager, common::EntityID entityID);
 

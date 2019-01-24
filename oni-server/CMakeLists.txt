@@ -9,7 +9,7 @@ subdirs(${oni_SOURCE_DIR}/src/entities)
 subdirs(${oni_SOURCE_DIR}/src/gameplay)
 subdirs(${oni_SOURCE_DIR}/src/game)
 subdirs(${oni_SOURCE_DIR}/src/utils)
-subdirs(${oni_SOURCE_DIR}/src/physics)
+subdirs(${oni_SOURCE_DIR}/src/physic)
 subdirs(${oni_SOURCE_DIR}/src/math)
 subdirs(${oni_SOURCE_DIR}/src/io)
 

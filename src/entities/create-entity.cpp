@@ -2,32 +2,32 @@
 
 #include <Box2D/Box2D.h>
 
-#include <oni-core/components/visual.h>
-#include <oni-core/components/geometry.h>
-#include <oni-core/physics/transformation.h>
+#include <oni-core/component/visual.h>
+#include <oni-core/component/geometry.h>
+#include <oni-core/physic/transformation.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/components/snapshot-type.h>
-#include <oni-core/components/hierarchy.h>
+#include <oni-core/component/snapshot-type.h>
+#include <oni-core/component/hierarchy.h>
 
 namespace oni {
     namespace entities {
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
-            components::Texture texture;
+            component::Texture texture;
             texture.filePath = path;
-            texture.status = components::TextureStatus::NEEDS_LOADING_USING_PATH;
-            manager.assign<components::Texture>(entity, texture);
-            manager.assign<components::Tag_TextureShaded>(entity);
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            manager.assign<component::Texture>(entity, texture);
+            manager.assign<component::Tag_TextureShaded>(entity);
         }
 
-        void assignTextureLoaded(EntityManager &manager, common::EntityID entity, const components::Texture &texture) {
-            manager.assign<components::Texture>(entity, texture);
-            manager.assign<components::Tag_TextureShaded>(entity);
+        void assignTextureLoaded(EntityManager &manager, common::EntityID entity, const component::Texture &texture) {
+            manager.assign<component::Texture>(entity, texture);
+            manager.assign<component::Tag_TextureShaded>(entity);
         }
 
         common::EntityID createEntity(EntityManager &manager) {
             auto entityID = manager.create();
-            manager.assign<components::Tag_NewEntity>(entityID);
+            manager.assign<component::Tag_NewEntity>(entityID);
             return entityID;
         }
 
@@ -46,17 +46,17 @@ namespace oni {
             // position in the local space.
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
-            auto shape = components::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
-            manager.assign<components::Shape>(entityID, shape);
+            auto shape = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
+            manager.assign<component::Shape>(entityID, shape);
         }
 
         void assignShapeWorld(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
                               const math::vec3 &worldPos) {
             auto sizeWithZ = math::vec3{size.x, size.y, worldPos.z};
-            auto shape = components::Shape::fromSizeAndRotation(sizeWithZ, 0);
+            auto shape = component::Shape::fromSizeAndRotation(sizeWithZ, 0);
 
-            physics::Transformation::localToWorldTranslation(worldPos, shape);
-            manager.assign<components::Shape>(entityID, shape);
+            physic::Transformation::localToWorldTranslation(worldPos, shape);
+            manager.assign<component::Shape>(entityID, shape);
         }
 
         void assignPlacement(EntityManager &manager,
@@ -64,12 +64,12 @@ namespace oni {
                              const math::vec3 &worldPos,
                              const math::vec3 &scale,
                              common::real32 heading) {
-            manager.assign<components::Placement>(entityID, worldPos, heading, scale);
+            manager.assign<component::Placement>(entityID, worldPos, heading, scale);
         }
 
         void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color) {
-            manager.assign<components::Appearance>(entityID, color);
-            manager.assign<components::Tag_ColorShaded>(entityID);
+            manager.assign<component::Appearance>(entityID, color);
+            manager.assign<component::Tag_ColorShaded>(entityID);
         }
 
         void assignPhysicalProperties(EntityManager &manager,
@@ -77,7 +77,7 @@ namespace oni {
                                       common::EntityID entityID,
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
-                                      components::BodyType bodyType,
+                                      component::BodyType bodyType,
                                       bool highPrecisionPhysics) {
             // TODO: Lot of hardcoded stuff here, these needs to be configurable.
 
@@ -103,7 +103,7 @@ namespace oni {
             fixtureDef.friction = 0.1;
 
             switch (bodyType) {
-                case components::BodyType::DYNAMIC : {
+                case component::BodyType::DYNAMIC : {
                     bodyDef.position.x = worldPos.x;
                     bodyDef.position.y = worldPos.y;
                     bodyDef.type = b2_dynamicBody;
@@ -119,7 +119,7 @@ namespace oni {
                     body->CreateFixture(&collisionSensorDef);
                     break;
                 }
-                case components::BodyType::STATIC: {
+                case component::BodyType::STATIC: {
                     // NOTE: for static entities position in world is the bottom left corner of the sprite. But
                     // bodyDef.position is the center of gravity of the entity.
                     bodyDef.position.x = worldPos.x + size.x / 2.0f;
@@ -129,7 +129,7 @@ namespace oni {
                     body->CreateFixture(&shape, 0.f);
                     break;
                 }
-                case components::BodyType::KINEMATIC: {
+                case component::BodyType::KINEMATIC: {
                     bodyDef.position.x = worldPos.x;
                     bodyDef.position.y = worldPos.y;
                     bodyDef.type = b2_kinematicBody;
@@ -141,71 +141,71 @@ namespace oni {
 
             // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
             // There is a way to request it from b2World?
-            manager.assign<components::PhysicalProperties>(entityID, body);
+            manager.assign<component::PhysicalProperties>(entityID, body);
         }
 
         void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                       const components::CarConfig &carConfig) {
-            auto car = components::Car(carConfig);
+                       const component::CarConfig &carConfig) {
+            auto car = component::Car(carConfig);
             car.position.x = worldPos.x;
             car.position.y = worldPos.y;
-            manager.assign<components::Car>(entityID, car);
-            manager.assign<components::CarConfig>(entityID, carConfig);
+            manager.assign<component::Car>(entityID, car);
+            manager.assign<component::CarConfig>(entityID, carConfig);
         }
 
         void removeShape(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<components::Shape>(entityID);
+            manager.remove<component::Shape>(entityID);
         }
 
         void removePlacement(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<components::Placement>(entityID);
+            manager.remove<component::Placement>(entityID);
         }
 
         void removeAppearance(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<components::Appearance>(entityID);
+            manager.remove<component::Appearance>(entityID);
         }
 
         void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID) {
-            auto entityPhysicalProps = manager.get<components::PhysicalProperties>(entityID);
+            auto entityPhysicalProps = manager.get<component::PhysicalProperties>(entityID);
             physicsWorld.DestroyBody(entityPhysicalProps.body);
-            manager.remove<components::PhysicalProperties>(entityID);
+            manager.remove<component::PhysicalProperties>(entityID);
         }
 
         void removeTexture(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<components::Texture>(entityID);
+            manager.remove<component::Texture>(entityID);
         }
 
         void removeText(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<components::Text>(entityID);
+            manager.remove<component::Text>(entityID);
         }
 
         void removeCar(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<components::Car>(entityID);
-            manager.remove<components::CarConfig>(entityID);
+            manager.remove<component::Car>(entityID);
+            manager.remove<component::CarConfig>(entityID);
         }
 
         void assignTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child) {
-            if (manager.has<components::TransformChildren>(parent)) {
-                auto transformChildren = manager.get<components::TransformChildren>(parent);
+            if (manager.has<component::TransformChildren>(parent)) {
+                auto transformChildren = manager.get<component::TransformChildren>(parent);
                 transformChildren.children.emplace_back(child);
-                manager.replace<components::TransformChildren>(parent, transformChildren);
+                manager.replace<component::TransformChildren>(parent, transformChildren);
             } else {
-                auto transformChildren = components::TransformChildren{};
+                auto transformChildren = component::TransformChildren{};
                 transformChildren.children.emplace_back(child);
-                manager.assign<components::TransformChildren>(parent, transformChildren);
+                manager.assign<component::TransformChildren>(parent, transformChildren);
             }
 
-            assert(!manager.has<components::TransformParent>(child));
+            assert(!manager.has<component::TransformParent>(child));
 
-            auto transformParent = components::TransformParent{parent, math::mat4::identity()};
-            manager.assign<components::TransformParent>(child, transformParent);
+            auto transformParent = component::TransformParent{parent, math::mat4::identity()};
+            manager.assign<component::TransformParent>(child, transformParent);
         }
 
         void removeTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child) {
-            if (manager.has<components::TransformChildren>(parent)) {
-                manager.remove<components::TransformChildren>(parent);
+            if (manager.has<component::TransformChildren>(parent)) {
+                manager.remove<component::TransformChildren>(parent);
             }
-            manager.remove<components::TransformParent>(child);
+            manager.remove<component::TransformParent>(child);
         }
     }
 

@@ -14,11 +14,11 @@ target_link_libraries(oni-core-gameplay
         PRIVATE
             oni-core-math
             oni-core-entities
-            oni-core-physics
+            oni-core-physic
 )
 
 add_dependencies(oni-core-gameplay
         oni-core-math
         oni-core-entities
-        oni-core-physics
+        oni-core-physic
         )

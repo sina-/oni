@@ -2,16 +2,16 @@
 
 #include <thread>
 
-#include <oni-core/components/visual.h>
+#include <oni-core/component/visual.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/gameplay/lap-tracker.h>
-#include <oni-core/physics/dynamics.h>
+#include <oni-core/physic/dynamics.h>
 #include <oni-core/network/server.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/serialization.h>
-#include <oni-core/physics/transformation.h>
+#include <oni-core/physic/transformation.h>
 
 #include <oni-server/entities/tile-world.h>
 
@@ -44,7 +44,7 @@ namespace oni {
 
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
 
-                mDynamics = std::make_unique<oni::physics::Dynamics>(getTickFrequency());
+                mDynamics = std::make_unique<oni::physic::Dynamics>(getTickFrequency());
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionalities I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
@@ -169,7 +169,7 @@ namespace oni {
                     auto registryLock = mEntityManager->scopedLock();
                     auto clientDataLock = mClientDataManager->scopedLock();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
-                        const auto &carPlacement = mEntityManager->get<oni::components::Placement>(carEntity);
+                        const auto &carPlacement = mEntityManager->get<oni::component::Placement>(carEntity);
                         tickPositions.push_back(carPlacement.position.getXY());
                     }
                 }
@@ -202,7 +202,7 @@ namespace oni {
             oni::common::EntityID ServerGame::createCar() {
                 auto lock = mEntityManager->scopedLock();
 
-                auto carConfig = oni::components::CarConfig();
+                auto carConfig = oni::component::CarConfig();
                 carConfig.cgToRear = 1.25f;
                 carConfig.cgToFront = 1.25f;
                 carConfig.cgToFrontAxle = 1.15f;
@@ -234,14 +234,14 @@ namespace oni {
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID,
                                                         carPosition,
                                                         carSize,
-                                                        oni::components::BodyType::DYNAMIC, true);
+                                                        oni::component::BodyType::DYNAMIC, true);
                 oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize, mVehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, carEntityID, carPosition, math::vec3{1.f, 1.f, 0.f},
                                                0.f);
                 oni::entities::assignCar(*mEntityManager, carEntityID, carPosition, carConfig);
                 oni::entities::assignTextureToLoad(*mEntityManager, carEntityID, carTexturePath);
-                oni::entities::assignTag<components::Tag_Dynamic>(*mEntityManager, carEntityID);
-                oni::entities::assignTag<components::Tag_Vehicle>(*mEntityManager, carEntityID);
+                oni::entities::assignTag<component::Tag_Dynamic>(*mEntityManager, carEntityID);
+                oni::entities::assignTag<component::Tag_Vehicle>(*mEntityManager, carEntityID);
 
                 oni::math::vec2 tireSize;
                 tireSize.x = static_cast<oni::common::real32>(carConfig.wheelWidth);
@@ -271,7 +271,7 @@ namespace oni {
                 tireRLPos.z = mVehicleZ;
                 auto carTireRLEntity = createTire(carEntityID, tireRLPos, tireSize);
 
-                auto &car = mEntityManager->get<oni::components::Car>(carEntityID);
+                auto &car = mEntityManager->get<oni::component::Car>(carEntityID);
                 car.tireFR = carTireFREntity;
                 car.tireFL = carTireFLEntity;
                 car.tireRR = carTireRREntity;
@@ -283,7 +283,7 @@ namespace oni {
             void ServerGame::removeCar(oni::common::EntityID carEntityID) {
                 auto lock = mEntityManager->scopedLock();
 
-                const auto &car = mEntityManager->get<oni::components::Car>(carEntityID);
+                const auto &car = mEntityManager->get<oni::component::Car>(carEntityID);
                 auto tireFL = car.tireFL;
                 auto tireFR = car.tireFR;
                 auto tireRL = car.tireRL;
@@ -298,8 +298,8 @@ namespace oni {
                 oni::entities::removePlacement(*mEntityManager, carEntityID);
                 oni::entities::removeTexture(*mEntityManager, carEntityID);
                 oni::entities::removePhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID);
-                oni::entities::removeTag<oni::components::Tag_Dynamic>(*mEntityManager, carEntityID);
-                oni::entities::removeTag<oni::components::Tag_Vehicle>(*mEntityManager, carEntityID);
+                oni::entities::removeTag<oni::component::Tag_Dynamic>(*mEntityManager, carEntityID);
+                oni::entities::removeTag<oni::component::Tag_Vehicle>(*mEntityManager, carEntityID);
                 oni::entities::removeCar(*mEntityManager, carEntityID);
 
                 oni::entities::destroyEntity(*mEntityManager, carEntityID);
@@ -317,7 +317,7 @@ namespace oni {
                 oni::entities::assignPlacement(*mEntityManager, entityID, pos, scale, heading);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, carTireTexturePath);
                 oni::entities::assignTransformationHierarchy(*mEntityManager, carEntityID, entityID);
-                oni::entities::assignTag<oni::components::Tag_Dynamic>(*mEntityManager, entityID);
+                oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);
 
                 return entityID;
             }
@@ -327,7 +327,7 @@ namespace oni {
                 oni::entities::removePlacement(*mEntityManager, tireEntityID);
                 oni::entities::removeTexture(*mEntityManager, tireEntityID);
                 oni::entities::removeTransformationHierarchy(*mEntityManager, carEntityID, tireEntityID);
-                oni::entities::removeTag<components::Tag_Dynamic>(*mEntityManager, tireEntityID);
+                oni::entities::removeTag<component::Tag_Dynamic>(*mEntityManager, tireEntityID);
 
                 oni::entities::destroyEntity(*mEntityManager, tireEntityID);
             }
@@ -344,9 +344,9 @@ namespace oni {
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), entityID,
                                                         worldPos,
                                                         size,
-                                                        oni::components::BodyType::DYNAMIC, false);
+                                                        oni::component::BodyType::DYNAMIC, false);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, truckTexturePath);
-                oni::entities::assignTag<oni::components::Tag_Dynamic>(*mEntityManager, entityID);
+                oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);
 
                 return entityID;
             }

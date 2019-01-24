@@ -19,9 +19,9 @@ find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86
 target_link_libraries(oni-core-entities
         PRIVATE
             ${BOX2D_LIBRARY}
-            oni-core-physics
+            oni-core-physic
 )
 
 add_dependencies(oni-core-entities
-        oni-core-physics
+        oni-core-physic
         )

@@ -4,10 +4,10 @@
 
 #include <oni-core/game/game.h>
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/geometry.h>
+#include <oni-core/component/geometry.h>
 #include <oni-core/network/peer.h>
 #include <oni-server/entities/tile-world.h>
-#include <oni-core/components/visual.h>
+#include <oni-core/component/visual.h>
 
 
 namespace oni {
@@ -25,7 +25,7 @@ namespace oni {
         class ClientDataManager;
     }
 
-    namespace physics {
+    namespace physic {
         class Dynamics;
     }
 
@@ -90,7 +90,7 @@ namespace oni {
             private:
                 std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
 
-                std::unique_ptr<oni::physics::Dynamics> mDynamics{};
+                std::unique_ptr<oni::physic::Dynamics> mDynamics{};
                 std::unique_ptr<server::entities::TileWorld> mTileWorld{};
                 std::unique_ptr<oni::gameplay::LapTracker> mLapTracker{};
 
@@ -102,9 +102,9 @@ namespace oni {
 
                 std::unique_ptr<oni::entities::ClientDataManager> mClientDataManager{};
 
-                oni::components::CarConfig mCarConfigDefault{};
+                oni::component::CarConfig mCarConfigDefault{};
 
-                oni::components::ZLevel mZLevel{};
+                oni::component::ZLevel mZLevel{};
                 oni::common::real32 mVehicleZ{};
             };
         }

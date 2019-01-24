@@ -8,8 +8,8 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/snapshot-type.h>
-#include <oni-core/components/tag.h>
+#include <oni-core/component/snapshot-type.h>
+#include <oni-core/component/tag.h>
 
 
 namespace oni {
@@ -189,17 +189,17 @@ namespace oni {
             }
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
-            void restore(components::SnapshotType snapshotType, Archive &archive, Member Type::*... member) {
+            void restore(component::SnapshotType snapshotType, Archive &archive, Member Type::*... member) {
                 switch (snapshotType) {
-                    case components::SnapshotType::ENTIRE_REGISTRY: {
+                    case component::SnapshotType::ENTIRE_REGISTRY: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
                         break;
                     }
-                    case components::SnapshotType::ONLY_COMPONENTS: {
+                    case component::SnapshotType::ONLY_COMPONENTS: {
                         mLoader->template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
-                    case components::SnapshotType::ONLY_NEW_ENTITIES: {
+                    case component::SnapshotType::ONLY_NEW_ENTITIES: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
@@ -214,11 +214,11 @@ namespace oni {
             }
 
             template<class Archive, class ...ArchiveComponents>
-            void snapshot(Archive &archive, components::SnapshotType snapshotType) {
+            void snapshot(Archive &archive, component::SnapshotType snapshotType) {
                 switch (snapshotType) {
-                    case components::SnapshotType::ONLY_COMPONENTS: {
+                    case component::SnapshotType::ONLY_COMPONENTS: {
                         // TODO: Rather not have this class know about specific components!
-                        auto view = mRegistry->view<components::Tag_OnlyComponentUpdate>();
+                        auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
                         if (!view.empty()) {
                             mRegistry->snapshot().template component<ArchiveComponents...>(archive,
                                                                                            view.cbegin(),
@@ -226,8 +226,8 @@ namespace oni {
                         }
                         break;
                     }
-                    case components::SnapshotType::ONLY_NEW_ENTITIES: {
-                        auto view = mRegistry->view<components::Tag_NewEntity>();
+                    case component::SnapshotType::ONLY_NEW_ENTITIES: {
+                        auto view = mRegistry->view<component::Tag_NewEntity>();
                         if (!view.empty()) {
                             mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
                                                                                                              view.cbegin(),
@@ -235,7 +235,7 @@ namespace oni {
                         }
                         break;
                     }
-                    case components::SnapshotType::ENTIRE_REGISTRY: {
+                    case component::SnapshotType::ENTIRE_REGISTRY: {
                         mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
                         break;
                     }

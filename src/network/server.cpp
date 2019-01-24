@@ -68,7 +68,7 @@ namespace oni {
         }
 
         void Server::sendEntitiesAll(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::SnapshotType::ENTIRE_REGISTRY);
+            std::string data = entities::serialize(manager, component::SnapshotType::ENTIRE_REGISTRY);
             auto type = PacketType::REPLACE_ALL_ENTITIES;
 
             if (data.size() > 1) {
@@ -77,7 +77,7 @@ namespace oni {
         }
 
         void Server::sendComponentsUpdate(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::SnapshotType::ONLY_COMPONENTS);
+            std::string data = entities::serialize(manager, component::SnapshotType::ONLY_COMPONENTS);
             auto type = PacketType::ONLY_COMPONENT_UPDATE;
 
             if (data.size() > 1) {
@@ -85,12 +85,12 @@ namespace oni {
 
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::Tag_OnlyComponentUpdate>();
+                manager.reset<component::Tag_OnlyComponentUpdate>();
             }
         }
 
         void Server::sendNewEntities(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, components::SnapshotType::ONLY_NEW_ENTITIES);
+            std::string data = entities::serialize(manager, component::SnapshotType::ONLY_NEW_ENTITIES);
             auto type = PacketType::ADD_NEW_ENTITIES;
 
             if (data.size() > 1) {
@@ -98,7 +98,7 @@ namespace oni {
 
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<components::Tag_NewEntity>();
+                manager.reset<component::Tag_NewEntity>();
             }
         }
 

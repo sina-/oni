@@ -9,7 +9,7 @@ namespace oni {
     namespace io {
         Input::Input() = default;
 
-        void Input::update(components::oniKeyPress keyPressed, components::oniKeyPress keyReleased) {
+        void Input::update(component::oniKeyPress keyPressed, component::oniKeyPress keyReleased) {
             assert(keyPressed != keyReleased);
 
             if (keyPressed > 0) {
@@ -23,15 +23,15 @@ namespace oni {
             assert(mKeysReleased.size() < 50);
         }
 
-        bool Input::isPressed(components::oniKeyPress key) const {
+        bool Input::isPressed(component::oniKeyPress key) const {
             return std::find(mKeysPressed.begin(), mKeysPressed.end(), key) != mKeysPressed.end();
         }
 
-        bool Input::isReleased(components::oniKeyPress key) const {
+        bool Input::isReleased(component::oniKeyPress key) const {
             return std::find(mKeysReleased.begin(), mKeysReleased.end(), key) != mKeysReleased.end();
         }
 
-        void Input::setPressed(components::oniKeyPress key) {
+        void Input::setPressed(component::oniKeyPress key) {
             if (!isPressed(key)) {
                 mKeysPressed.push_back(key);
             }
@@ -40,7 +40,7 @@ namespace oni {
             }
         }
 
-        void Input::setReleased(components::oniKeyPress key) {
+        void Input::setReleased(component::oniKeyPress key) {
             if (!isReleased(key)) {
                 mKeysReleased.push_back(key);
             }

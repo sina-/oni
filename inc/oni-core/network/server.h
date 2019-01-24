@@ -7,7 +7,7 @@
 #include <oni-core/network/packet.h>
 
 namespace oni {
-    namespace physics {
+    namespace physic {
         class Dynamics;
     }
     namespace entities {

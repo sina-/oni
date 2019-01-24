@@ -5,9 +5,9 @@
 #include <chrono>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/components/geometry.h>
+#include <oni-core/component/geometry.h>
 #include <oni-core/utils/timer.h>
-#include <oni-core/components/visual.h>
+#include <oni-core/component/visual.h>
 
 namespace oni {
     namespace entities {
@@ -17,7 +17,7 @@ namespace oni {
     namespace gameplay {
         class LapTracker {
         public:
-            explicit LapTracker(entities::EntityManager &entityManager, const components::ZLevel&);
+            explicit LapTracker(entities::EntityManager &entityManager, const component::ZLevel&);
 
             ~LapTracker();
 
@@ -31,11 +31,11 @@ namespace oni {
 
         private:
             entities::EntityManager &mEntityManager;
-            std::deque<components::Shape> mInitialCheckpoints{};
-            std::map<common::EntityID, std::deque<components::Shape>> mRemainingCheckpoints{};
+            std::deque<component::Shape> mInitialCheckpoints{};
+            std::map<common::EntityID, std::deque<component::Shape>> mRemainingCheckpoints{};
             std::map<common::EntityID, std::chrono::seconds> mBestLaps{};
             std::map<common::EntityID, utils::Timer> mTimers{};
-            components::ZLevel mZLevel{};
+            component::ZLevel mZLevel{};
         };
     }
 }

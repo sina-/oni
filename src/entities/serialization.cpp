@@ -7,32 +7,32 @@
 #include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/components/geometry.h>
-#include <oni-core/components/hierarchy.h>
-#include <oni-core/components/visual.h>
-#include <oni-core/components/snapshot-type.h>
-#include <oni-core/components/gameplay.h>
+#include <oni-core/component/geometry.h>
+#include <oni-core/component/hierarchy.h>
+#include <oni-core/component/visual.h>
+#include <oni-core/component/snapshot-type.h>
+#include <oni-core/component/gameplay.h>
 
 
 namespace oni {
-    namespace components {
+    namespace component {
         template<class Archive>
-        void serialize(Archive &archive, components::CarLapInfo &carLapInfo) {
+        void serialize(Archive &archive, component::CarLapInfo &carLapInfo) {
             archive(carLapInfo.entityID, carLapInfo.lap, carLapInfo.lapTimeS, carLapInfo.bestLapTimeS);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::Shape &shape) {
+        void serialize(Archive &archive, component::Shape &shape) {
             archive(shape.vertexA, shape.vertexB, shape.vertexC, shape.vertexD);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::Placement &placement) {
+        void serialize(Archive &archive, component::Placement &placement) {
             archive(placement.position, placement.rotation, placement.scale);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::CarConfig &carConfig) {
+        void serialize(Archive &archive, component::CarConfig &carConfig) {
             archive(carConfig.gravity,
                     carConfig.mass,
                     carConfig.inertialScale,
@@ -61,7 +61,7 @@ namespace oni {
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::Car &car) {
+        void serialize(Archive &archive, component::Car &car) {
             archive(
                     car.heading,
                     car.velocityAbsolute,
@@ -99,32 +99,32 @@ namespace oni {
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::TransformParent &transformParent) {
+        void serialize(Archive &archive, component::TransformParent &transformParent) {
             archive(transformParent.parent, transformParent.transform);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::Tag_Static &) {}
+        void serialize(Archive &archive, component::Tag_Static &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, components::Tag_Dynamic &) {}
+        void serialize(Archive &archive, component::Tag_Dynamic &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, components::Tag_Vehicle &) {}
+        void serialize(Archive &archive, component::Tag_Vehicle &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, components::Tag_TextureShaded &) {}
+        void serialize(Archive &archive, component::Tag_TextureShaded &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, components::Tag_ColorShaded &) {}
+        void serialize(Archive &archive, component::Tag_ColorShaded &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, components::Appearance &appearance) {
+        void serialize(Archive &archive, component::Appearance &appearance) {
             archive(appearance.color);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, components::Texture &texture) {
+        void serialize(Archive &archive, component::Texture &texture) {
             archive(texture.width, texture.height, texture.textureID, texture.format, texture.type, texture.filePath,
                     texture.uv, texture.data, texture.status);
         }
@@ -152,38 +152,38 @@ namespace oni {
         }
     }
     namespace entities {
-        std::string serialize(entities::EntityManager &manager, components::SnapshotType snapshotType) {
+        std::string serialize(entities::EntityManager &manager, component::SnapshotType snapshotType) {
             std::stringstream storage{};
             {
                 auto lock = manager.scopedLock();
                 cereal::PortableBinaryOutputArchive output{storage};
                 manager.snapshot<cereal::PortableBinaryOutputArchive,
-                        components::Car,
-                        components::CarConfig,
-                        components::Placement,
-                        components::CarLapInfo,
+                        component::Car,
+                        component::CarConfig,
+                        component::Placement,
+                        component::CarLapInfo,
                         //components::Chunk,
-                        components::Shape,
-                        components::Appearance,
-                        components::Texture,
+                        component::Shape,
+                        component::Appearance,
+                        component::Texture,
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
                         // to know what it points to at the moment because sever does the physics calculations and only
                         // send the results back to the client, so I can skip it. But for the future I have to
                         // find a solution to this shit.
                         //components::PhysicalProperties,
-                        components::TransformParent,
-                        components::Tag_Dynamic,
-                        components::Tag_Vehicle,
-                        components::Tag_TextureShaded,
-                        components::Tag_ColorShaded,
-                        components::Tag_Static
+                        component::TransformParent,
+                        component::Tag_Dynamic,
+                        component::Tag_Vehicle,
+                        component::Tag_TextureShaded,
+                        component::Tag_ColorShaded,
+                        component::Tag_Static
                 >(output, snapshotType);
             }
 
             return storage.str();
         }
 
-        void deserialize(EntityManager &manager, const std::string &data, components::SnapshotType snapshotType) {
+        void deserialize(EntityManager &manager, const std::string &data, component::SnapshotType snapshotType) {
             std::stringstream storage;
             storage.str(data);
 
@@ -191,30 +191,30 @@ namespace oni {
                 auto lock = manager.scopedLock();
                 cereal::PortableBinaryInputArchive input{storage};
                 manager.restore<cereal::PortableBinaryInputArchive,
-                        components::Car,
-                        components::CarConfig,
-                        components::Placement,
-                        components::CarLapInfo,
+                        component::Car,
+                        component::CarConfig,
+                        component::Placement,
+                        component::CarLapInfo,
                         //components::Chunk,
-                        components::Shape,
-                        components::Appearance,
-                        components::Texture,
+                        component::Shape,
+                        component::Appearance,
+                        component::Texture,
                         //components::PhysicalProperties,
-                        components::TransformParent,
-                        components::Tag_Dynamic,
-                        components::Tag_Vehicle,
-                        components::Tag_TextureShaded,
-                        components::Tag_ColorShaded,
-                        components::Tag_Static
+                        component::TransformParent,
+                        component::Tag_Dynamic,
+                        component::Tag_Vehicle,
+                        component::Tag_TextureShaded,
+                        component::Tag_ColorShaded,
+                        component::Tag_Static
                 >(snapshotType, input,
                         // NOTE: Car entity keeps a reference to tire entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct
                         // mapping from client side tire ids to server side ids for each Car.
-                  &components::Car::tireFR,
-                  &components::Car::tireFL,
-                  &components::Car::tireRR,
-                  &components::Car::tireRL,
-                  &components::CarLapInfo::entityID
+                  &component::Car::tireFR,
+                  &component::Car::tireFL,
+                  &component::Car::tireRR,
+                  &component::Car::tireRL,
+                  &component::CarLapInfo::entityID
                 );
             }
         }

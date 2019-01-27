@@ -1,9 +1,9 @@
-#include <oni-core/physic/collision.h>
+#include <oni-core/physics/collision.h>
 
 #include <oni-core/component/geometry.h>
 
 namespace oni {
-    namespace physic {
+    namespace physics {
 
         bool collides(const component::Shape &first, const component::Shape &second) {
             // TODO: Obvious optimization is to store the center in Shape instead of recalculation every tick.

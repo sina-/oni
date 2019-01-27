@@ -1,19 +1,19 @@
-#include <oni-core/physic/dynamics.h>
+#include <oni-core/physics/dynamics.h>
 
 #include <Box2D/Box2D.h>
 #include <GLFW/glfw3.h>
 
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/client-data-manager.h>
-#include <oni-core/physic/car.h>
+#include <oni-core/physics/car.h>
 #include <oni-core/graphic/window.h>
 #include <oni-core/graphic/debug-draw-box2d.h>
 #include <oni-core/component/geometry.h>
-#include <oni-core/physic/transformation.h>
+#include <oni-core/physics/transformation.h>
 #include <oni-core/common/consts.h>
 
 namespace oni {
-    namespace physic {
+    namespace physics {
 
         Dynamics::Dynamics(common::real32 tickFreq)
                 : mTickFrequency(tickFreq) {

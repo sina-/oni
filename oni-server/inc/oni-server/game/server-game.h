@@ -25,7 +25,7 @@ namespace oni {
         class ClientDataManager;
     }
 
-    namespace physic {
+    namespace physics {
         class Dynamics;
     }
 
@@ -90,7 +90,7 @@ namespace oni {
             private:
                 std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
 
-                std::unique_ptr<oni::physic::Dynamics> mDynamics{};
+                std::unique_ptr<oni::physics::Dynamics> mDynamics{};
                 std::unique_ptr<server::entities::TileWorld> mTileWorld{};
                 std::unique_ptr<oni::gameplay::LapTracker> mLapTracker{};
 

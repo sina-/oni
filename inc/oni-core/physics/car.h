@@ -17,7 +17,7 @@ namespace oni {
         class CarInput;
 
     }
-    namespace physic {
+    namespace physics {
 
         template<class T>
         common::int32 sign(T n) {

@@ -5,13 +5,13 @@
 #include <oni-core/component/visual.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/gameplay/lap-tracker.h>
-#include <oni-core/physic/dynamics.h>
+#include <oni-core/physics/dynamics.h>
 #include <oni-core/network/server.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/serialization.h>
-#include <oni-core/physic/transformation.h>
+#include <oni-core/physics/transformation.h>
 
 #include <oni-server/entities/tile-world.h>
 
@@ -44,7 +44,7 @@ namespace oni {
 
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
 
-                mDynamics = std::make_unique<oni::physic::Dynamics>(getTickFrequency());
+                mDynamics = std::make_unique<oni::physics::Dynamics>(getTickFrequency());
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionalities I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.

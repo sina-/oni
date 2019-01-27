@@ -1,11 +1,11 @@
-#include <oni-core/physic/transformation.h>
+#include <oni-core/physics/transformation.h>
 
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/geometry.h>
 
 namespace oni {
-    namespace physic {
+    namespace physics {
 
         void Transformation::worldToLocalTranslation(const math::vec3 &reference, math::vec3 &operand) {
             operand.x -= reference.x;
@@ -18,10 +18,10 @@ namespace oni {
         }
 
         void Transformation::localToWorldTranslation(const math::vec3 &reference, component::Shape &shape) {
-            physic::Transformation::localToWorldTranslation(reference, shape.vertexA);
-            physic::Transformation::localToWorldTranslation(reference, shape.vertexB);
-            physic::Transformation::localToWorldTranslation(reference, shape.vertexC);
-            physic::Transformation::localToWorldTranslation(reference, shape.vertexD);
+            physics::Transformation::localToWorldTranslation(reference, shape.vertexA);
+            physics::Transformation::localToWorldTranslation(reference, shape.vertexB);
+            physics::Transformation::localToWorldTranslation(reference, shape.vertexC);
+            physics::Transformation::localToWorldTranslation(reference, shape.vertexD);
         }
 
         void Transformation::localToTextureTranslation(const common::real32 ratio, math::vec3 &operand) {

@@ -11,7 +11,7 @@ namespace oni {
         class ClientDataManager;
     }
 
-    namespace physic {
+    namespace physics {
         class Dynamics {
 
         public:

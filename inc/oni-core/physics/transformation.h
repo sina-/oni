@@ -19,7 +19,7 @@ namespace oni {
         struct Placement;
         struct TransformParent;
     }
-    namespace physic {
+    namespace physics {
         class Transformation {
             Transformation() = default;
 

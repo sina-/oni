@@ -18,13 +18,13 @@ target_link_libraries(oni-server-game
             oni-core-gameplay
             oni-core-game
             oni-core-network
-            oni-core-physic
+            oni-core-physics
             oni-server-entities
         )
 
 add_dependencies(oni-server-game
         oni-core-network
-        oni-core-physic
+        oni-core-physics
         oni-core-entities
         oni-server-entities
         )

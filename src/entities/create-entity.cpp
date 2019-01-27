@@ -4,7 +4,7 @@
 
 #include <oni-core/component/visual.h>
 #include <oni-core/component/geometry.h>
-#include <oni-core/physic/transformation.h>
+#include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/component/snapshot-type.h>
 #include <oni-core/component/hierarchy.h>
@@ -55,7 +55,7 @@ namespace oni {
             auto sizeWithZ = math::vec3{size.x, size.y, worldPos.z};
             auto shape = component::Shape::fromSizeAndRotation(sizeWithZ, 0);
 
-            physic::Transformation::localToWorldTranslation(worldPos, shape);
+            physics::Transformation::localToWorldTranslation(worldPos, shape);
             manager.assign<component::Shape>(entityID, shape);
         }
 

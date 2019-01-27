@@ -5,7 +5,7 @@ namespace oni {
         class Shape;
     }
 
-    namespace physic{
+    namespace physics{
         bool collides(const component::Shape& first, const component::Shape& second);
     }
 }

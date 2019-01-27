@@ -1,10 +1,10 @@
-#include <oni-core/physic/car.h>
+#include <oni-core/physics/car.h>
 #include <oni-core/component/input-data.h>
 #include <oni-core/component/geometry.h>
 
 
 namespace oni {
-    namespace physic {
+    namespace physics {
 
         void tickCar(component::Car &car, const component::CarConfig &config,
                      const component::CarInput &inputs, common::real64 dt) {

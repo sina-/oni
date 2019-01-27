@@ -7,7 +7,7 @@
 #include <oni-core/component/visual.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
-#include <oni-core/physic/transformation.h>
+#include <oni-core/physics/transformation.h>
 
 
 namespace oni {
@@ -491,7 +491,7 @@ namespace oni {
                 wallPositionInWorld.y = vs[0].y;
 
                 auto entityShapeWorld = oni::component::Shape::fromSizeAndRotation(wallTextureSize, 0);
-                physic::Transformation::localToWorldTranslation(wallPositionInWorld, entityShapeWorld);
+                physics::Transformation::localToWorldTranslation(wallPositionInWorld, entityShapeWorld);
 
                 b2ChainShape chainShape;
                 chainShape.CreateChain(vs, 2);

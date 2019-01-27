@@ -511,9 +511,9 @@ namespace oni {
                     mEntityManager.assign<oni::component::Tag_TextureShaded>(entity);
                     mEntityManager.assign<oni::component::Tag_Static>(entity);
                     mEntityManager.assign<oni::component::Tag_NewEntity>(entity);
+                    oni::entities::assignTextureToLoad(mEntityManager, entity, "resources/images/wall/1/1.png");
                 }
 
-                oni::entities::assignTextureToLoad(mEntityManager, entity, "resources/images/wall/1/1.png");
             }
 
             void TileWorld::createWall(const std::vector<oni::component::WallTilePosition> &position,

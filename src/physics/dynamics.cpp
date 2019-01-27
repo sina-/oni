@@ -209,6 +209,7 @@ namespace oni {
             }
 
             for (auto &&entity: entitiesToBeUpdated) {
+                auto lock = manager.scopedLock();
                 manager.accommodate<component::Tag_OnlyComponentUpdate>(entity);
             }
 

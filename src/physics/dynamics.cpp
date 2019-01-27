@@ -1,3 +1,4 @@
+
 #include <oni-core/physics/dynamics.h>
 
 #include <Box2D/Box2D.h>
@@ -11,6 +12,7 @@
 #include <oni-core/component/geometry.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/common/consts.h>
+#include <oni-core/physics/projectile.h>
 
 namespace oni {
     namespace physics {
@@ -19,6 +21,7 @@ namespace oni {
                 : mTickFrequency(tickFreq) {
             b2Vec2 gravity(0.0f, 0.0f);
             mPhysicsWorld = std::make_unique<b2World>(gravity);
+            mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
         }
 
         Dynamics::~Dynamics() = default;
@@ -101,6 +104,8 @@ namespace oni {
                     entitiesToBeUpdated.push_back(entity);
                 }
             }
+
+            mProjectile->tick(manager, clientData, tickTime);
 
             {
                 // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(

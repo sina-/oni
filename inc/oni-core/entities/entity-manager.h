@@ -44,6 +44,10 @@ namespace oni {
 
                 ~EntityView() = default;
 
+                size_t size() noexcept {
+                    return mView.size();
+                }
+
                 auto begin() {
                     return mView.begin();
                 }

@@ -7,6 +7,7 @@ class b2World;
 
 namespace oni {
     namespace math {
+        struct vec2;
         struct vec3;
     }
     namespace entities {
@@ -25,7 +26,7 @@ namespace oni {
             void tick(entities::EntityManager &, entities::ClientDataManager &, common::real64 tickTime);
 
         private:
-            common::EntityID createBullet(entities::EntityManager &, const component::Placement &);
+            common::EntityID createBullet(entities::EntityManager &, const component::Placement &, common::real32);
 
         private:
             b2World *mPhysicsWorld{};

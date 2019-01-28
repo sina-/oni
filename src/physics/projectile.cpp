@@ -19,30 +19,49 @@ namespace oni {
         void Projectile::tick(entities::EntityManager &manager,
                               entities::ClientDataManager &clientData,
                               common::real64 tickTime) {
-            auto carView = manager.createViewScopeLock<component::Placement, component::Car, component::Tag_Vehicle>();
+            auto carView = manager.createViewScopeLock<
+                    component::Placement, component::Car, component::CarConfig, component::Tag_Vehicle>();
+
+            common::real32 bulletSpeed{200.f};
 
             for (auto &&entity: carView) {
                 auto clientLock = clientData.scopedLock();
                 const auto &input = clientData.getClientInput(entity);
 
                 if (input.isPressed(GLFW_KEY_F)) {
-                    auto carPlacement = carView.get<component::Placement>(entity);
+                    auto &carPlacement = carView.get<component::Placement>(entity);
+                    auto &carConfig = carView.get<component::CarConfig>(entity);
+                    auto &car = carView.get<component::Car>(entity);
                     auto &heading = carView.get<component::Car>(entity).heading;
-                    auto bulletID = createBullet(manager, carPlacement);
+                    // NOTE: Car rotates around its center of gravity, that means radius of the circle traversed by the
+                    // car nose is half bounding rectangle's diagonal.
+                    // Using car heading direction and its diagonal we could find the position
+                    // of car nose, which is where we like to spawn the bullet projectiles.
+                    common::real32 carHalfX =
+                            static_cast<common::real32 >(carConfig.cgToFront + carConfig.cgToRear) / 2.f;
+                    common::real32 carHalfY = static_cast<common::real32>(carConfig.halfWidth);
+                    common::real32 offset = std::sqrt(carHalfX * carHalfX + carHalfY * carHalfY);
+                    auto bulletID = createBullet(manager, carPlacement, offset);
                     auto *body = manager.get<component::PhysicalProperties>(bulletID).body;
                     body->ApplyForceToCenter(
-                            b2Vec2(static_cast<common::real32>(std::cos(heading) * 200),
-                                   static_cast<common::real32>(std::sin(heading) * 200)),
+                            b2Vec2(car.velocity.x + static_cast<common::real32>(std::cos(heading) * bulletSpeed),
+                                   car.velocity.y + static_cast<common::real32>(std::sin(heading) * bulletSpeed)),
                             true);
                 }
             }
         }
 
-        common::EntityID
-        Projectile::createBullet(entities::EntityManager &manager, const component::Placement &carPlacement) {
+        common::EntityID Projectile::createBullet(
+                entities::EntityManager &manager,
+                const component::Placement &carPlacement,
+                common::real32 offset
+        ) {
             auto &carPos = carPlacement.position;
-            math::vec3 bulletPos{carPos.x + 2.f, carPos.y, carPos.z};
             math::vec2 bulletSize{0.3f, 0.1f};
+            common::real32 bulletOffset = std::sqrt(bulletSize.x * bulletSize.x / 4 + bulletSize.y * bulletSize.y / 4);
+            math::vec3 bulletPos{carPos.x + (offset + bulletOffset) * std::cos(carPlacement.rotation),
+                                 carPos.y + (offset + bulletOffset) * std::sin(carPlacement.rotation),
+                                 carPos.z};
 
             std::string bulletTexture = "resources/images/bullet/1.png";
 

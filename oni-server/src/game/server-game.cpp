@@ -220,6 +220,7 @@ namespace oni {
                 carConfig.wheelRadius = 0.25f;
 
                 // TODO: All cars spawn in the same location!
+                // NOTE: This is the center of car sprite.
                 auto carPosition = oni::math::vec3{-70.f, -30.f, mVehicleZ};
 
                 auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
@@ -227,6 +228,7 @@ namespace oni {
                 auto carSize = oni::math::vec2{static_cast<oni::common::real32>(carSizeX),
                                                static_cast<oni::common::real32>(carSizeY)};
                 assert(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
+                common::real32 heading = 0.f;
 
                 std::string carTexturePath = "resources/images/car/1/car.png";
 
@@ -234,6 +236,7 @@ namespace oni {
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID,
                                                         carPosition,
                                                         carSize,
+                                                        heading,
                                                         oni::component::BodyType::DYNAMIC, true);
                 oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize, mVehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, carEntityID, carPosition, math::vec3{1.f, 1.f, 0.f},
@@ -335,6 +338,7 @@ namespace oni {
             oni::common::EntityID ServerGame::createTruck() {
                 oni::math::vec2 size{1.0f, 3.0f};
                 oni::math::vec3 worldPos{-60.0f, -30.0f, mVehicleZ};
+                oni::common::real32 heading = 0.f;
                 std::string truckTexturePath = "resources/images/car/2/truck.png";
 
                 auto lock = mEntityManager->scopedLock();
@@ -344,6 +348,7 @@ namespace oni {
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), entityID,
                                                         worldPos,
                                                         size,
+                                                        heading,
                                                         oni::component::BodyType::DYNAMIC, false);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, truckTexturePath);
                 oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);

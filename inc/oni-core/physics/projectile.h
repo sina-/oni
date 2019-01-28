@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/component/geometry.h>
 
 class b2World;
 
@@ -24,7 +25,7 @@ namespace oni {
             void tick(entities::EntityManager &, entities::ClientDataManager &, common::real64 tickTime);
 
         private:
-            common::EntityID createBullet(entities::EntityManager &, const math::vec3 &pos);
+            common::EntityID createBullet(entities::EntityManager &, const component::Placement &);
 
         private:
             b2World *mPhysicsWorld{};

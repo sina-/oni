@@ -21,8 +21,6 @@ namespace oni {
     }
 
     namespace graphic {
-        class FontManager;
-
         class SceneManager;
     }
 
@@ -32,7 +30,11 @@ namespace oni {
 
         void destroyEntity(EntityManager &manager, common::EntityID entityID);
 
-        void assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size, common::real32);
+        void
+        assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size, common::real32);
+
+        void assignShapeRotatedLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
+                                     common::real32, common::real32);
 
         void removeShape(EntityManager &manager, common::EntityID entityID);
 
@@ -58,6 +60,7 @@ namespace oni {
                                       common::EntityID,
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
+                                      common::real32 heading,
                                       component::BodyType bodyType,
                                       bool highPrecisionPhysics);
 

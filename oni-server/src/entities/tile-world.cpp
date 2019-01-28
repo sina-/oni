@@ -526,6 +526,7 @@ namespace oni {
                 wallEntities.reserve(wallCount);
 
                 oni::common::real32 wallWidth = 0.5f;
+                common::real32 heading = 0.f; // For static objects facing angle does not matter.
 
                 auto lock = mEntityManager.scopedLock();
 
@@ -589,6 +590,7 @@ namespace oni {
                     oni::entities::assignTextureToLoad(mEntityManager, entityID, wallTexturePath);
                     oni::entities::assignPhysicalProperties(mEntityManager, mPhysicsWorld,
                                                             entityID, wallPositionInWorld, wallSize,
+                                                            heading,
                                                             oni::component::BodyType::STATIC, false);
                     oni::entities::assignTag<oni::component::Tag_Static>(mEntityManager, entityID);
                 }

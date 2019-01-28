@@ -80,7 +80,7 @@ namespace oni {
 
         struct Placement {
             math::vec3 position{0.0f, 0.0f, 0.0f};
-            common::real32 rotation{0.0f};
+            common::real32 rotation{0.0f}; // In radians
             math::vec3 scale{1.0f, 1.0f, 0.0f};
         };
 
@@ -143,7 +143,7 @@ namespace oni {
         };
 
         struct Car {
-            common::CarSimDouble heading{};
+            common::CarSimDouble heading{}; // In radians
             common::CarSimDouble velocityAbsolute{};
             common::CarSimDouble angularVelocity{}; // Angular velocity in radians (rad/s)
             common::CarSimDouble steer{}; // (-1.0..1.0)

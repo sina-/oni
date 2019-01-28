@@ -22,5 +22,8 @@ namespace oni {
 
         struct Tag_OnlyComponentUpdate {
         };
+
+        struct Tag_Bullet{
+        };
     }
 }

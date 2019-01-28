@@ -177,13 +177,14 @@ namespace oni {
                 for (auto entity: dynamicEntitiesView) {
                     auto body = dynamicEntitiesView.get<component::PhysicalProperties>(entity).body;
                     auto position = body->GetPosition();
-                    auto &placement = dynamicEntitiesView.get<component::Placement>(entity);
+                    auto placement = dynamicEntitiesView.get<component::Placement>(entity);
 
                     // TODO: Maybe I can query box2d to find-out if an entity is updated
                     if (std::abs(placement.position.x - position.x) > common::ep ||
                         std::abs(placement.rotation - body->GetAngle()) > common::ep) {
                         placement.position = math::vec3{position.x, position.y, placement.position.z};
                         placement.rotation = body->GetAngle();
+                        Transformation::updatePlacement(manager, entity, placement);
 
                         entitiesToBeUpdated.push_back(entity);
                     }

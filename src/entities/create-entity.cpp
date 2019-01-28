@@ -40,13 +40,23 @@ namespace oni {
                               common::EntityID entityID,
                               const math::vec2 &size,
                               common::real32 z
-                              ) {
+        ) {
             // NOTE: For dynamic entities, it is important to align object center to (0, 0) so that MVP transformation
             // works out without needing to translate the entity to the center before rotation and then back to its
             // position in the local space.
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
             auto shape = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
+            manager.assign<component::Shape>(entityID, shape);
+        }
+
+        void assignShapeRotatedLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
+                                     common::real32 z, common::real32 angle) {
+            auto halfSizeX = size.x / 2;
+            auto halfSizeY = size.y / 2;
+            auto shape = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
+            physics::Transformation::shapeTransformation(
+                    math::mat4::rotation(math::toRadians(angle), math::vec3{0.f, 0.f, 1.f}), shape);
             manager.assign<component::Shape>(entityID, shape);
         }
 
@@ -77,6 +87,7 @@ namespace oni {
                                       common::EntityID entityID,
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
+                                      common::real32 heading,
                                       component::BodyType bodyType,
                                       bool highPrecisionPhysics) {
             // TODO: Lot of hardcoded stuff here, these needs to be configurable.
@@ -89,6 +100,7 @@ namespace oni {
 
             b2BodyDef bodyDef;
             bodyDef.bullet = highPrecisionPhysics;
+            bodyDef.angle = heading;
             // TODO: This is just really a hack to distinguish between player car and the truck. Should have possibility
             // to provide is as part of physics definition.
             if (!highPrecisionPhysics) {

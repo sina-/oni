@@ -6,8 +6,6 @@
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
 
-class b2Body;
-
 namespace oni {
     namespace component {
 
@@ -70,12 +68,6 @@ namespace oni {
                 return shape;
             }
 
-        };
-
-        // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D
-        // I don't think there is a better way.
-        struct PhysicalProperties {
-            b2Body *body{};
         };
 
         struct Placement {

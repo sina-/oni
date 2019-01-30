@@ -232,12 +232,20 @@ namespace oni {
 
                 std::string carTexturePath = "resources/images/car/1/car.png";
 
+                oni::component::PhysicalProperties properties;
+                properties.friction = 1.f;
+                properties.density = 0.1f;
+                properties.angularDamping = 2.f;
+                properties.linearDamping = 2.f;
+                properties.bullet = true;
+                properties.bodyType = oni::component::BodyType::DYNAMIC;
+
                 auto carEntityID = oni::entities::createEntity(*mEntityManager);
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID,
                                                         carPosition,
                                                         carSize,
                                                         heading,
-                                                        oni::component::BodyType::DYNAMIC, true);
+                                                        properties);
                 oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize, mVehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, carEntityID, carPosition, math::vec3{1.f, 1.f, 0.f},
                                                0.f);
@@ -340,6 +348,13 @@ namespace oni {
                 oni::math::vec3 worldPos{-60.0f, -30.0f, mVehicleZ};
                 oni::common::real32 heading = 0.f;
                 std::string truckTexturePath = "resources/images/car/2/truck.png";
+                oni::component::PhysicalProperties properties;
+                properties.friction = 1.f;
+                properties.density = 0.1f;
+                properties.angularDamping = 2.f;
+                properties.linearDamping = 2.f;
+                properties.bullet = false;
+                properties.bodyType = oni::component::BodyType::DYNAMIC;
 
                 auto lock = mEntityManager->scopedLock();
                 auto entityID = oni::entities::createEntity(*mEntityManager);
@@ -349,7 +364,7 @@ namespace oni {
                                                         worldPos,
                                                         size,
                                                         heading,
-                                                        oni::component::BodyType::DYNAMIC, false);
+                                                        properties);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, truckTexturePath);
                 oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);
 

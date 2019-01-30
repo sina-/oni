@@ -503,10 +503,11 @@ namespace oni {
                 // TODO: Move this into create-entity.cpp
                 oni::common::EntityID entity{};
                 {
-                    auto entityPhysicalProps = oni::component::PhysicalProperties{chainBox};
+                    oni::component::PhysicalProperties properties;
+                    properties.body = chainBox;
                     auto lock = mEntityManager.scopedLock();
                     entity = mEntityManager.create();
-                    mEntityManager.assign<oni::component::PhysicalProperties>(entity, entityPhysicalProps);
+                    mEntityManager.assign<oni::component::PhysicalProperties>(entity, properties);
                     mEntityManager.assign<oni::component::Shape>(entity, entityShapeWorld);
                     mEntityManager.assign<oni::component::Tag_TextureShaded>(entity);
                     mEntityManager.assign<oni::component::Tag_Static>(entity);
@@ -585,13 +586,17 @@ namespace oni {
                         }
                     }
 
+                    oni::component::PhysicalProperties properties;
+                    properties.bullet = false;
+                    properties.bodyType = oni::component::BodyType::STATIC;
+
                     auto entityID = oni::entities::createEntity(mEntityManager);
                     oni::entities::assignShapeWorld(mEntityManager, entityID, wallSize, wallPositionInWorld);
                     oni::entities::assignTextureToLoad(mEntityManager, entityID, wallTexturePath);
                     oni::entities::assignPhysicalProperties(mEntityManager, mPhysicsWorld,
                                                             entityID, wallPositionInWorld, wallSize,
                                                             heading,
-                                                            oni::component::BodyType::STATIC, false);
+                                                            properties);
                     oni::entities::assignTag<oni::component::Tag_Static>(mEntityManager, entityID);
                 }
             }

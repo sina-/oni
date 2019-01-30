@@ -88,10 +88,8 @@ namespace oni {
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
                                       common::real32 heading,
-                                      component::BodyType bodyType,
-                                      bool highPrecisionPhysics) {
-            // TODO: Lot of hardcoded stuff here, these needs to be configurable.
-
+                                      const component::PhysicalProperties &properties
+        ) {
             b2PolygonShape shape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
@@ -99,22 +97,18 @@ namespace oni {
             b2Body *body{};
 
             b2BodyDef bodyDef;
-            bodyDef.bullet = highPrecisionPhysics;
+            bodyDef.bullet = properties.bullet;
             bodyDef.angle = heading;
-            // TODO: This is just really a hack to distinguish between player car and the truck. Should have possibility
-            // to provide is as part of physics definition.
-            if (!highPrecisionPhysics) {
-                bodyDef.linearDamping = 2.0f;
-                bodyDef.angularDamping = 2.0f;
-            }
+            bodyDef.linearDamping = properties.linearDamping;
+            bodyDef.angularDamping = properties.angularDamping;
 
             b2FixtureDef fixtureDef;
             // NOTE: Box2D will create a copy of the shape, so it is safe to pass a local ref.
             fixtureDef.shape = &shape;
-            fixtureDef.density = 1.0f;
-            fixtureDef.friction = 0.1;
+            fixtureDef.density = properties.density;
+            fixtureDef.friction = properties.friction;
 
-            switch (bodyType) {
+            switch (properties.bodyType) {
                 case component::BodyType::DYNAMIC : {
                     bodyDef.position.x = worldPos.x;
                     bodyDef.position.y = worldPos.y;
@@ -124,8 +118,8 @@ namespace oni {
                     b2FixtureDef collisionSensorDef;
                     collisionSensorDef.isSensor = true;
                     collisionSensorDef.shape = &shape;
-                    collisionSensorDef.density = 1.0f;
-                    collisionSensorDef.friction = 0.1;
+                    collisionSensorDef.density = properties.density;
+                    collisionSensorDef.friction = properties.friction;
 
                     body->CreateFixture(&fixtureDef);
                     body->CreateFixture(&collisionSensorDef);
@@ -150,10 +144,12 @@ namespace oni {
                     break;
                 }
             }
+            auto physicalProperties = properties;
+            physicalProperties.body = body;
 
             // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
             // There is a way to request it from b2World?
-            manager.assign<component::PhysicalProperties>(entityID, body);
+            manager.assign<component::PhysicalProperties>(entityID, physicalProperties);
         }
 
         void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,

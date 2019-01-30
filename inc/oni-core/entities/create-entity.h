@@ -61,8 +61,8 @@ namespace oni {
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
                                       common::real32 heading,
-                                      component::BodyType bodyType,
-                                      bool highPrecisionPhysics);
+                                      const component::PhysicalProperties &
+        );
 
         void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
 

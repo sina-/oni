@@ -65,12 +65,20 @@ namespace oni {
 
             std::string bulletTexture = "resources/images/bullet/1.png";
 
+            oni::component::PhysicalProperties properties;
+            properties.friction = 1.f;
+            properties.density = 0.1f;
+            properties.angularDamping = 2.f;
+            properties.linearDamping = 0.1f;
+            properties.bullet = true;
+            properties.bodyType = oni::component::BodyType::DYNAMIC;
+
             auto bulletID = oni::entities::createEntity(manager);
             oni::entities::assignPhysicalProperties(manager, *mPhysicsWorld, bulletID,
                                                     bulletPos,
                                                     bulletSize,
                                                     carPlacement.rotation,
-                                                    oni::component::BodyType::DYNAMIC, true);
+                                                    properties);
             oni::entities::assignShapeLocal(manager, bulletID, bulletSize, carPos.z);
             oni::entities::assignPlacement(manager, bulletID, bulletPos, math::vec3{1.f, 1.f, 0.f},
                                            carPlacement.rotation);

@@ -13,6 +13,7 @@
 #include <oni-core/physics/transformation.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/physics/projectile.h>
+#include <oni-core/component/physic.h>
 
 namespace oni {
     namespace physics {

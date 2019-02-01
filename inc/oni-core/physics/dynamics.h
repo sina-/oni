@@ -14,6 +14,8 @@ namespace oni {
     namespace physics {
         class Projectile;
 
+        class CollisionHandler;
+
         class Dynamics {
 
         public:
@@ -39,8 +41,9 @@ namespace oni {
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};
-            common::real32 mTickFrequency{};
             std::unique_ptr<Projectile> mProjectile{};
+            std::unique_ptr<CollisionHandler> mCollisionHandler{};
+            common::real32 mTickFrequency{};
         };
     }
 }

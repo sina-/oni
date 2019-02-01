@@ -17,12 +17,69 @@
 
 namespace oni {
     namespace physics {
+        class CollisionHandler : public b2ContactListener {
+        public:
+            void BeginContact(b2Contact *contact) override {
+                auto *fixtureA = contact->GetFixtureA();
+                auto *fixtureB = contact->GetFixtureB();
+
+                //if (fixtureA->IsSensor()) {
+                    void *userData = fixtureA->GetBody()->GetUserData();
+                    if (userData) {
+                        bool *colliding = static_cast<bool *> (userData);
+                        *colliding = true;
+                    }
+                //}
+
+                //if (fixtureB->IsSensor()) {
+                    userData = fixtureB->GetBody()->GetUserData();
+                    if (userData) {
+                        bool *colliding = static_cast<bool *> (userData);
+                        *colliding = true;
+                    }
+                //}
+            }
+
+            void EndContact(b2Contact *contact) override {
+                auto *fixtureA = contact->GetFixtureA();
+                auto *fixtureB = contact->GetFixtureB();
+
+                //if (fixtureA->IsSensor()) {
+                    void *userData = fixtureA->GetBody()->GetUserData();
+                    if (userData) {
+                        bool *colliding = static_cast<bool *> (userData);
+                        *colliding = false;
+                    }
+                //}
+
+                //if (fixtureB->IsSensor()) {
+                    userData = fixtureB->GetBody()->GetUserData();
+                    if (userData) {
+                        bool *colliding = static_cast<bool *> (userData);
+                        *colliding = false;
+                    }
+                //}
+            }
+
+/*            void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) override {
+                std::cout << "PreSolve\n";
+            }
+
+            void PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) override {
+                std::cout << "PostSolve\n";
+            }*/
+        };
 
         Dynamics::Dynamics(common::real32 tickFreq)
                 : mTickFrequency(tickFreq) {
             b2Vec2 gravity(0.0f, 0.0f);
+            mCollisionHandler = std::make_unique<CollisionHandler>();
             mPhysicsWorld = std::make_unique<b2World>(gravity);
             mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
+
+            // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
+            // skipping some of them!
+            // mPhysicsWorld->SetContactListener(mCollisionHandler.get());
         }
 
         Dynamics::~Dynamics() = default;
@@ -109,6 +166,8 @@ namespace oni {
             mProjectile->tick(manager, clientData, tickTime);
 
             {
+                // NOTE: Step() function will modify collision status of entities, so we have to lock the registry.
+                auto lock = manager.scopedLock();
                 // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
                 // One way to hide it is to provide a function in physics library that creates physical entities
                 // for a given entity id an maintains an internal mapping between them without leaking the
@@ -122,7 +181,7 @@ namespace oni {
 
                 // Handle collision
                 for (auto entity: carPhysicsView) {
-                    auto *body = carPhysicsView.get<component::PhysicalProperties>(entity).body;
+                    auto &props = carPhysicsView.get<component::PhysicalProperties>(entity);
                     auto &car = carPhysicsView.get<component::Car>(entity);
                     // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
                     // just apply user input to box2d representation of physical body without syncing
@@ -136,7 +195,7 @@ namespace oni {
                         // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
                         // carconfig?
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
-                        body->ApplyForceToCenter(
+                        props.body->ApplyForceToCenter(
                                 b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 *
                                                                    carInput[entity].throttle),
                                        static_cast<common::real32>(std::sin(car.heading) * 30 *
@@ -145,26 +204,26 @@ namespace oni {
                         car.isColliding = false;
                     } else {
                         bool collisionFound = false;
-                        for (b2ContactEdge *ce = body->GetContactList(); ce && !collisionFound; ce = ce->next) {
+                        for (b2ContactEdge *ce = props.body->GetContactList();
+                             ce && !collisionFound; ce = ce->next) {
                             b2Contact *c = ce->contact;
-                            if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
-                                collisionFound = c->IsTouching();
-                            }
+                            //if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
+                            collisionFound = c->IsTouching();
+                            //}
                         }
 
-                        // TODO: Collision listener could be a better way to handle collisions
                         if (collisionFound) {
-                            car.velocity = math::vec2{body->GetLinearVelocity().x,
-                                                      body->GetLinearVelocity().y};
-                            car.angularVelocity = body->GetAngularVelocity();
-                            car.position = math::vec2{body->GetPosition().x, body->GetPosition().y};
-                            car.heading = body->GetAngle();
+                            car.velocity = math::vec2{props.body->GetLinearVelocity().x,
+                                                      props.body->GetLinearVelocity().y};
+                            car.angularVelocity = props.body->GetAngularVelocity();
+                            car.position = math::vec2{props.body->GetPosition().x, props.body->GetPosition().y};
+                            car.heading = props.body->GetAngle();
                             car.isColliding = true;
                         } else {
-                            body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
-                            body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
-                            body->SetTransform(b2Vec2{car.position.x, car.position.y},
-                                               static_cast<float32>(car.heading));
+                            props.body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
+                            props.body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
+                            props.body->SetTransform(b2Vec2{car.position.x, car.position.y},
+                                                     static_cast<float32>(car.heading));
                         }
                     }
                 }
@@ -221,4 +280,5 @@ namespace oni {
             return mPhysicsWorld.get();
         }
     }
+
 }

@@ -88,7 +88,7 @@ namespace oni {
                                       const math::vec3 &worldPos,
                                       const math::vec2 &size,
                                       common::real32 heading,
-                                      const component::PhysicalProperties &properties
+                                      component::PhysicalProperties &properties
         ) {
             b2PolygonShape shape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
@@ -115,14 +115,14 @@ namespace oni {
                     bodyDef.type = b2_dynamicBody;
                     body = physicsWorld.CreateBody(&bodyDef);
 
-                    b2FixtureDef collisionSensorDef;
-                    collisionSensorDef.isSensor = true;
-                    collisionSensorDef.shape = &shape;
-                    collisionSensorDef.density = properties.density;
-                    collisionSensorDef.friction = properties.friction;
+                    b2FixtureDef collisionSensor;
+                    collisionSensor.isSensor = true;
+                    collisionSensor.shape = &shape;
+                    collisionSensor.density = properties.density;
+                    collisionSensor.friction = properties.friction;
 
                     body->CreateFixture(&fixtureDef);
-                    body->CreateFixture(&collisionSensorDef);
+                    body->CreateFixture(&collisionSensor);
                     break;
                 }
                 case component::BodyType::STATIC: {
@@ -144,12 +144,15 @@ namespace oni {
                     break;
                 }
             }
-            auto physicalProperties = properties;
-            physicalProperties.body = body;
+            properties.body = body;
 
             // TODO: Is there a better way to share the body pointer? Ownership is fucked up right now. Maybe
             // There is a way to request it from b2World?
-            manager.assign<component::PhysicalProperties>(entityID, physicalProperties);
+            manager.assign<component::PhysicalProperties>(entityID, properties);
+
+            // NOTE: Need to re-read it since assign creates a copy
+            auto &props = manager.get<component::PhysicalProperties>(entityID);
+            body->SetUserData(static_cast<void *>(&props.colliding));
         }
 
         void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,

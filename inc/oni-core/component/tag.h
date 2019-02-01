@@ -8,9 +8,6 @@ namespace oni {
         struct Tag_Dynamic {
         };
 
-        struct Tag_Vehicle {
-        };
-
         struct Tag_ColorShaded {
         };
 
@@ -21,9 +18,6 @@ namespace oni {
         };
 
         struct Tag_OnlyComponentUpdate {
-        };
-
-        struct Tag_Bullet{
         };
     }
 }

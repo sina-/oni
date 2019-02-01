@@ -1,19 +1,17 @@
-
 #include <oni-core/physics/dynamics.h>
 
 #include <Box2D/Box2D.h>
 #include <GLFW/glfw3.h>
 
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/entities/client-data-manager.h>
-#include <oni-core/physics/car.h>
-#include <oni-core/graphic/window.h>
-#include <oni-core/graphic/debug-draw-box2d.h>
 #include <oni-core/component/geometry.h>
-#include <oni-core/physics/transformation.h>
-#include <oni-core/common/consts.h>
-#include <oni-core/physics/projectile.h>
 #include <oni-core/component/physic.h>
+#include <oni-core/common/consts.h>
+#include <oni-core/graphic/window.h>
+#include <oni-core/physics/car.h>
+#include <oni-core/physics/transformation.h>
+#include <oni-core/physics/projectile.h>
+#include <oni-core/entities/create-entity.h>
 
 namespace oni {
     namespace physics {
@@ -24,19 +22,19 @@ namespace oni {
                 auto *fixtureB = contact->GetFixtureB();
 
                 //if (fixtureA->IsSensor()) {
-                    void *userData = fixtureA->GetBody()->GetUserData();
-                    if (userData) {
-                        bool *colliding = static_cast<bool *> (userData);
-                        *colliding = true;
-                    }
+                void *userData = fixtureA->GetBody()->GetUserData();
+                if (userData) {
+                    bool *colliding = static_cast<bool *> (userData);
+                    *colliding = true;
+                }
                 //}
 
                 //if (fixtureB->IsSensor()) {
-                    userData = fixtureB->GetBody()->GetUserData();
-                    if (userData) {
-                        bool *colliding = static_cast<bool *> (userData);
-                        *colliding = true;
-                    }
+                userData = fixtureB->GetBody()->GetUserData();
+                if (userData) {
+                    bool *colliding = static_cast<bool *> (userData);
+                    *colliding = true;
+                }
                 //}
             }
 
@@ -45,19 +43,19 @@ namespace oni {
                 auto *fixtureB = contact->GetFixtureB();
 
                 //if (fixtureA->IsSensor()) {
-                    void *userData = fixtureA->GetBody()->GetUserData();
-                    if (userData) {
-                        bool *colliding = static_cast<bool *> (userData);
-                        *colliding = false;
-                    }
+                void *userData = fixtureA->GetBody()->GetUserData();
+                if (userData) {
+                    bool *colliding = static_cast<bool *> (userData);
+                    *colliding = false;
+                }
                 //}
 
                 //if (fixtureB->IsSensor()) {
-                    userData = fixtureB->GetBody()->GetUserData();
-                    if (userData) {
-                        bool *colliding = static_cast<bool *> (userData);
-                        *colliding = false;
-                    }
+                userData = fixtureB->GetBody()->GetUserData();
+                if (userData) {
+                    bool *colliding = static_cast<bool *> (userData);
+                    *colliding = false;
+                }
                 //}
             }
 
@@ -77,6 +75,50 @@ namespace oni {
             mPhysicsWorld = std::make_unique<b2World>(gravity);
             mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
 
+            mCollisionHandlers[component::PhysicalCategory::BULLET] =
+                    std::bind(&Dynamics::handleBulletCollision, this,
+                              std::placeholders::_1,
+                              std::placeholders::_2,
+                              std::placeholders::_3,
+                              std::placeholders::_4,
+                              std::placeholders::_5
+                    );
+
+            mCollisionHandlers[component::PhysicalCategory::VEHICLE] =
+                    std::bind(&Dynamics::handleVehicleCollision, this,
+                              std::placeholders::_1,
+                              std::placeholders::_2,
+                              std::placeholders::_3,
+                              std::placeholders::_4,
+                              std::placeholders::_5
+                    );
+
+            mCollisionHandlers[component::PhysicalCategory::RACE_CAR] =
+                    std::bind(&Dynamics::handleRaceCarCollision, this,
+                              std::placeholders::_1,
+                              std::placeholders::_2,
+                              std::placeholders::_3,
+                              std::placeholders::_4,
+                              std::placeholders::_5
+                    );
+
+            mCollisionHandlers[component::PhysicalCategory::WALL] =
+                    std::bind(&Dynamics::handleCollision, this,
+                              std::placeholders::_1,
+                              std::placeholders::_2,
+                              std::placeholders::_3,
+                              std::placeholders::_4,
+                              std::placeholders::_5
+                    );
+
+            mCollisionHandlers[component::PhysicalCategory::GENERIC] =
+                    std::bind(&Dynamics::handleCollision, this,
+                              std::placeholders::_1,
+                              std::placeholders::_2,
+                              std::placeholders::_3,
+                              std::placeholders::_4,
+                              std::placeholders::_5
+                    );
             // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
             // skipping some of them!
             // mPhysicsWorld->SetContactListener(mCollisionHandler.get());
@@ -95,8 +137,7 @@ namespace oni {
                 // One solutions could be, if this loop is very heavy, is to create a copy of all the data I need to
                 // operate on and do all the calculation and then lock the registry and update all the corresponding
                 // entities.
-                auto carView = manager.createViewScopeLock<component::Placement, component::Car,
-                        component::CarConfig, component::Tag_Vehicle>();
+                auto carView = manager.createViewScopeLock<component::Placement, component::Car, component::CarConfig>();
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
@@ -176,8 +217,7 @@ namespace oni {
             }
 
             {
-                auto carPhysicsView = manager.createViewScopeLock<component::Car, component::Tag_Vehicle,
-                        component::PhysicalProperties>();
+                auto carPhysicsView = manager.createViewScopeLock<component::Car, component::PhysicalProperties>();
 
                 // Handle collision
                 for (auto entity: carPhysicsView) {
@@ -203,16 +243,7 @@ namespace oni {
                                 true);
                         car.isColliding = false;
                     } else {
-                        bool collisionFound = false;
-                        for (b2ContactEdge *ce = props.body->GetContactList();
-                             ce && !collisionFound; ce = ce->next) {
-                            b2Contact *c = ce->contact;
-                            //if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
-                            collisionFound = c->IsTouching();
-                            //}
-                        }
-
-                        if (collisionFound) {
+                        if (auto colliding = isColliding(props.body)) {
                             car.velocity = math::vec2{props.body->GetLinearVelocity().x,
                                                       props.body->GetLinearVelocity().y};
                             car.angularVelocity = props.body->GetAngularVelocity();
@@ -231,32 +262,35 @@ namespace oni {
 
             {
                 // Handle collision for other dynamic entities
-                auto dynamicEntitiesView = manager.createViewScopeLock<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createViewScopeLock<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
 
-                for (auto entity: dynamicEntitiesView) {
-                    auto body = dynamicEntitiesView.get<component::PhysicalProperties>(entity).body;
-                    auto position = body->GetPosition();
-                    auto placement = dynamicEntitiesView.get<component::Placement>(entity);
+                for (auto entity: view) {
+                    auto &props = view.get<component::PhysicalProperties>(entity);
+                    auto &position = props.body->GetPosition();
+                    auto &placement = view.get<component::Placement>(entity);
 
-                    // TODO: Maybe I can query box2d to find-out if an entity is updated
                     if (std::abs(placement.position.x - position.x) > common::ep ||
-                        std::abs(placement.rotation - body->GetAngle()) > common::ep) {
+                        std::abs(placement.rotation - props.body->GetAngle()) > common::ep) {
                         placement.position = math::vec3{position.x, position.y, placement.position.z};
-                        placement.rotation = body->GetAngle();
+                        placement.rotation = props.body->GetAngle();
                         Transformation::updatePlacement(manager, entity, placement);
-
-                        entitiesToBeUpdated.push_back(entity);
                     }
+
+                    mCollisionHandlers[props.physicalCategory](manager,
+                                                                entitiesToBeUpdated,
+                                                                entity,
+                                                                props, placement);
                 }
             }
 
             {
                 // Update tires
-                auto carWithTiresView = manager.createViewScopeLock<component::Placement, component::Car,
-                        component::CarConfig, component::Tag_Vehicle>();
-                for (auto entity: carWithTiresView) {
-                    auto car = carWithTiresView.get<component::Car>(entity);
+                auto view = manager.createViewScopeLock<component::Placement, component::Car,
+                        component::CarConfig>();
+                for (
+                    auto entity : view) {
+                    auto car = view.get<component::Car>(entity);
                     auto &carTireFRPlacement = manager.get<component::Placement>(car.tireFR);
                     // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
                     // There seems to be something wrong with the way tires are created in the beginning
@@ -269,7 +303,7 @@ namespace oni {
                 }
             }
 
-            for (auto &&entity: entitiesToBeUpdated) {
+            for (auto &&entity : entitiesToBeUpdated) {
                 auto lock = manager.scopedLock();
                 manager.accommodate<component::Tag_OnlyComponentUpdate>(entity);
             }
@@ -278,6 +312,56 @@ namespace oni {
 
         b2World *Dynamics::getPhysicsWorld() {
             return mPhysicsWorld.get();
+        }
+
+        bool Dynamics::isColliding(b2Body *body) {
+            bool colliding{false};
+            for (b2ContactEdge *ce = body->GetContactList();
+                 ce && !colliding; ce = ce->next) {
+                b2Contact *c = ce->contact;
+                //if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
+                colliding = c->IsTouching();
+                //}
+            }
+            return colliding;
+        }
+
+        void Dynamics::handleBulletCollision(entities::EntityManager &manager,
+                                             std::vector<common::EntityID> &entitiesToBeUpdated,
+                                             common::EntityID entity,
+                                             component::PhysicalProperties &props,
+                                             component::Placement &placement) {
+            if (isColliding(props.body)) {
+                mProjectile->destroyBullet(manager, entity);
+                entities::destroyEntity(manager, entity);
+            } else {
+                entitiesToBeUpdated.push_back(entity);
+            }
+        }
+
+        void
+        Dynamics::handleVehicleCollision(entities::EntityManager &manager,
+                                         std::vector<common::EntityID> &entitiesToBeUpdated,
+                                         common::EntityID entity,
+                                         component::PhysicalProperties &props,
+                                         component::Placement &placement) {
+            entitiesToBeUpdated.push_back(entity);
+        }
+
+        void Dynamics::handleCollision(entities::EntityManager &manager,
+                                       std::vector<common::EntityID> &entitiesToBeUpdated,
+                                       common::EntityID entity,
+                                       component::PhysicalProperties &props,
+                                       component::Placement &placement) {
+            entitiesToBeUpdated.push_back(entity);
+        }
+
+        void
+        Dynamics::handleRaceCarCollision(entities::EntityManager &manager,
+                                         std::vector<common::EntityID> &entitiesToBeUpdated,
+                                         common::EntityID entity,
+                                         component::PhysicalProperties &props,
+                                         component::Placement &placement) {
         }
     }
 

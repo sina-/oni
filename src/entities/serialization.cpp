@@ -110,9 +110,6 @@ namespace oni {
         void serialize(Archive &archive, component::Tag_Dynamic &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, component::Tag_Vehicle &) {}
-
-        template<class Archive>
         void serialize(Archive &archive, component::Tag_TextureShaded &) {}
 
         template<class Archive>
@@ -173,7 +170,6 @@ namespace oni {
                         //components::PhysicalProperties,
                         component::TransformParent,
                         component::Tag_Dynamic,
-                        component::Tag_Vehicle,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
                         component::Tag_Static
@@ -202,7 +198,6 @@ namespace oni {
                         //components::PhysicalProperties,
                         component::TransformParent,
                         component::Tag_Dynamic,
-                        component::Tag_Vehicle,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
                         component::Tag_Static

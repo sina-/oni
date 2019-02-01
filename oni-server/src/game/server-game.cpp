@@ -239,6 +239,7 @@ namespace oni {
                 properties.linearDamping = 2.f;
                 properties.bullet = true;
                 properties.bodyType = oni::component::BodyType::DYNAMIC;
+                properties.physicalCategory = oni::component::PhysicalCategory::RACE_CAR;
 
                 auto carEntityID = oni::entities::createEntity(*mEntityManager);
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID,
@@ -252,7 +253,6 @@ namespace oni {
                 oni::entities::assignCar(*mEntityManager, carEntityID, carPosition, carConfig);
                 oni::entities::assignTextureToLoad(*mEntityManager, carEntityID, carTexturePath);
                 oni::entities::assignTag<component::Tag_Dynamic>(*mEntityManager, carEntityID);
-                oni::entities::assignTag<component::Tag_Vehicle>(*mEntityManager, carEntityID);
 
                 oni::math::vec2 tireSize;
                 tireSize.x = static_cast<oni::common::real32>(carConfig.wheelWidth);
@@ -310,7 +310,6 @@ namespace oni {
                 oni::entities::removeTexture(*mEntityManager, carEntityID);
                 oni::entities::removePhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID);
                 oni::entities::removeTag<oni::component::Tag_Dynamic>(*mEntityManager, carEntityID);
-                oni::entities::removeTag<oni::component::Tag_Vehicle>(*mEntityManager, carEntityID);
                 oni::entities::removeCar(*mEntityManager, carEntityID);
 
                 oni::entities::destroyEntity(*mEntityManager, carEntityID);
@@ -355,6 +354,7 @@ namespace oni {
                 properties.linearDamping = 2.f;
                 properties.bullet = false;
                 properties.bodyType = oni::component::BodyType::DYNAMIC;
+                properties.physicalCategory = oni::component::PhysicalCategory::VEHICLE;
 
                 auto lock = mEntityManager->scopedLock();
                 auto entityID = oni::entities::createEntity(*mEntityManager);

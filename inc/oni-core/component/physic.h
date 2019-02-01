@@ -21,6 +21,14 @@ namespace oni {
             DYNAMIC = 3,
         };
 
+        enum class PhysicalCategory : common::int8 {
+            GENERIC = 1,
+            VEHICLE = 2,
+            RACE_CAR = 3,
+            BULLET = 4,
+            WALL = 5,
+        };
+
         struct PhysicalProperties {
             common::real32 linearDamping{0.f};
             common::real32 angularDamping{0.f};
@@ -28,6 +36,7 @@ namespace oni {
             common::real32 friction{0.1f};
             bool bullet{false};
             bool colliding{false};
+            PhysicalCategory physicalCategory{PhysicalCategory::GENERIC};
             BodyType bodyType{BodyType::STATIC};
             // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D
             // I don't think there is a better way.

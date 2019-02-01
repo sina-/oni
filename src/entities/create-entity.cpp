@@ -32,8 +32,10 @@ namespace oni {
         }
 
         void destroyEntity(EntityManager &manager, common::EntityID entityID) {
+            if (!manager.has<component::Tag_NewEntity>(entityID)) {
+                manager.addDeletedEntity(entityID);
+            }
             manager.destroy(entityID);
-            manager.addDeletedEntity(entityID);
         }
 
         void assignShapeLocal(EntityManager &manager,

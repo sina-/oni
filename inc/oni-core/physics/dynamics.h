@@ -1,14 +1,20 @@
 #pragma once
 
 #include <oni-core/entities/client-data-manager.h>
+#include <oni-core/component/physic.h>
 
 class b2World;
+
+class b2Body;
 
 namespace oni {
     namespace entities {
         class EntityManager;
 
         class ClientDataManager;
+    }
+    namespace component {
+        struct Placement;
     }
 
     namespace physics {
@@ -40,9 +46,45 @@ namespace oni {
                       common::real64 tickTime);
 
         private:
+            void handleBulletCollision(entities::EntityManager &,
+                                       std::vector<common::EntityID> &,
+                                       common::EntityID,
+                                       component::PhysicalProperties &,
+                                       component::Placement &);
+
+            void handleVehicleCollision(entities::EntityManager &,
+                                        std::vector<common::EntityID> &,
+                                        common::EntityID,
+                                        component::PhysicalProperties &,
+                                        component::Placement &);
+
+            void handleRaceCarCollision(entities::EntityManager &,
+                                        std::vector<common::EntityID> &,
+                                        common::EntityID,
+                                        component::PhysicalProperties &,
+                                        component::Placement &);
+
+            void handleCollision(entities::EntityManager &,
+                                 std::vector<common::EntityID> &,
+                                 common::EntityID,
+                                 component::PhysicalProperties &,
+                                 component::Placement &);
+
+            bool isColliding(b2Body *);
+
+
+        private:
             std::unique_ptr<b2World> mPhysicsWorld{};
             std::unique_ptr<Projectile> mProjectile{};
             std::unique_ptr<CollisionHandler> mCollisionHandler{};
+
+            std::map<component::PhysicalCategory,
+                    std::function<void(entities::EntityManager &,
+                                       std::vector<common::EntityID> &,
+                                       common::EntityID,
+                                       component::PhysicalProperties &,
+                                       component::Placement &
+                    )>> mCollisionHandlers{};
             common::real32 mTickFrequency{};
         };
     }

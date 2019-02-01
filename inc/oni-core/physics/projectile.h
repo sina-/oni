@@ -25,6 +25,8 @@ namespace oni {
 
             void tick(entities::EntityManager &, entities::ClientDataManager &, common::real64 tickTime);
 
+            void destroyBullet(entities::EntityManager&, common::EntityID);
+
         private:
             common::EntityID createBullet(entities::EntityManager &, const component::Placement &, common::real32);
 

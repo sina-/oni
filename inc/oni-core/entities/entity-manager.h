@@ -89,30 +89,23 @@ namespace oni {
             }
 
             size_t size() noexcept {
-                size_t result{0};
-                {
-                    auto lock = scopedLock();
-                    result = mRegistry->size();
-                }
+                auto result = mRegistry->size();
+                return result;
+            }
+
+            size_t capacity() noexcept {
+                auto result = mRegistry->capacity();
                 return result;
             }
 
             template<class Component>
             size_t size() noexcept {
-                size_t result{0};
-                {
-                    auto lock = scopedLock();
-                    result = mRegistry->size<Component>();
-                }
+                auto result = mRegistry->size<Component>();
                 return result;
             }
 
             size_t alive() noexcept {
-                size_t result{0};
-                {
-                    auto lock = scopedLock();
-                    result = mRegistry->alive();
-                }
+                auto result = mRegistry->alive();
                 return result;
             }
 

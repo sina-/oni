@@ -10,7 +10,7 @@ namespace oni {
                                  common::oniGLsizei size) : mBufferID{0},
                                                             mCount{count},
                                                             mSize{size} {
-            auto dataSize = count * sizeof(GLuint);
+            auto dataSize = mCount * sizeof(GLuint);
 
             glGenBuffers(size, &mBufferID);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
@@ -40,10 +40,5 @@ namespace oni {
         void IndexBuffer::unbind() const {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
-
-        common::oniGLuint IndexBuffer::getCount() const {
-            return mCount;
-        }
-
     }
 }

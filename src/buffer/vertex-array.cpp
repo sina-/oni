@@ -7,12 +7,13 @@
 
 namespace oni {
     namespace buffer {
-        VertexArray::VertexArray(std::unique_ptr<Buffer> vertexBuffer,
-                                 const std::vector<component::BufferStructure> &bufferStructure) {
+        VertexArray::VertexArray(
+                const std::vector<component::BufferStructure> &bufferStructure,
+                common::oniGLsizei maxBufferSize) : mMaxBufferSize{maxBufferSize} {
+            mVertexBuffers = std::make_unique<buffer::Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
+                                                              GL_STATIC_DRAW);
             mBufferStructure = bufferStructure;
             glGenVertexArrays(1, &mArrayID);
-
-            mVertexBuffers = std::move(vertexBuffer);
 
             bindVAO();
             mVertexBuffers->bind();

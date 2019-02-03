@@ -11,7 +11,9 @@ namespace oni {
 
         class VertexArray {
         public:
-            explicit VertexArray(std::unique_ptr<Buffer> vertexBuffer, const std::vector<component::BufferStructure> &);
+            VertexArray(
+                    const std::vector<component::BufferStructure> &,
+                    common::oniGLsizei maxBufferSize);
 
             ~VertexArray();
 
@@ -24,9 +26,10 @@ namespace oni {
             void unbindVBO() const;
 
         private:
-            common::oniGLuint mArrayID;
+            common::oniGLuint mArrayID{0};
             std::unique_ptr<Buffer> mVertexBuffers;
             std::vector<component::BufferStructure> mBufferStructure;
+            common::oniGLsizei mMaxBufferSize{0};
         };
 
     }

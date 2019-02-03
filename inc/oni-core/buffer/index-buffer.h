@@ -18,8 +18,6 @@ namespace oni {
 
             void unbind() const;
 
-            common::oniGLuint getCount() const;
-
         private:
             common::oniGLuint mBufferID;
             common::oniGLuint mCount;

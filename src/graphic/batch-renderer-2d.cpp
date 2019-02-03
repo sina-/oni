@@ -31,9 +31,7 @@ namespace oni {
             mMaxSpriteSize = mMaxVertexSize * 4;
             mMaxBufferSize = mMaxSpriteSize * mMaxSpriteCount;
 
-            auto vbo = std::make_unique<buffer::Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
-                                                        GL_STATIC_DRAW);
-            mVAO = std::make_unique<buffer::VertexArray>(std::move(vbo), bufferStructure);
+            mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructure, mMaxBufferSize);
 
             std::vector<common::oniGLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
 
@@ -50,21 +48,19 @@ namespace oni {
                 offset += 4;
             }
 
-            mIBO = std::make_unique<buffer::IndexBuffer>(indices, mMaxIndicesCount);
+            mIndexBuffer = std::make_unique<buffer::IndexBuffer>(indices, mMaxIndicesCount);
 
             mBuffer = nullptr;
         }
 
-        BatchRenderer2D::~BatchRenderer2D() {
-            glDeleteBuffers(1, &mVDO);
-        }
+        BatchRenderer2D::~BatchRenderer2D() = default;
 
         void BatchRenderer2D::_begin() {
             mNextSamplerID = 0;
             mSamplers.clear();
             mTextures.clear();
 
-            mVAO->bindVBO();
+            mVertexArray->bindVBO();
             // Data written to mBuffer has to match the structure of VBO.
             mBuffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
@@ -206,13 +202,13 @@ namespace oni {
         void BatchRenderer2D::_flush() {
             TextureManager::bindRange(0, mTextures);
 
-            mVAO->bindVAO();
-            mIBO->bind();
+            mVertexArray->bindVAO();
+            mIndexBuffer->bind();
 
             glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, nullptr);
 
-            mIBO->unbind();
-            mVAO->unbindVAO();
+            mIndexBuffer->unbind();
+            mVertexArray->unbindVAO();
 
             TextureManager::unbind();
 
@@ -222,7 +218,7 @@ namespace oni {
 
         void BatchRenderer2D::_end() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
-            mVAO->unbindVBO();
+            mVertexArray->unbindVBO();
         }
 
         void BatchRenderer2D::reset() {

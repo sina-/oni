@@ -66,19 +66,17 @@ namespace oni {
 
         private:
             // Actual number of indices used.
-            common::oniGLsizei mIndexCount;
+            common::oniGLsizei mIndexCount{0};
 
-            common::oniGLsizei mMaxSpriteCount;
-            common::oniGLsizei mMaxVertexSize;
+            common::oniGLsizei mMaxSpriteCount{0};
+            common::oniGLsizei mMaxVertexSize{0};
             const common::oniGLint mMaxNumTextureSamplers;
-            common::oniGLsizei mMaxIndicesCount;
-            common::oniGLsizei mMaxSpriteSize;
-            common::oniGLsizei mMaxBufferSize;
+            common::oniGLsizei mMaxIndicesCount{0};
+            common::oniGLsizei mMaxSpriteSize{0};
+            common::oniGLsizei mMaxBufferSize{0};
 
-            common::oniGLuint mVDO;
-
-            std::unique_ptr<buffer::VertexArray> mVAO;
-            std::unique_ptr<buffer::IndexBuffer> mIBO;
+            std::unique_ptr<buffer::VertexArray> mVertexArray;
+            std::unique_ptr<buffer::IndexBuffer> mIndexBuffer;
 
             common::oniGLint mNextSamplerID{0};
             std::vector<common::oniGLint> mSamplers{};

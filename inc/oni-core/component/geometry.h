@@ -171,6 +171,8 @@ namespace oni {
             common::EntityID tireRR{};
             common::EntityID tireRL{};
 
+            common::EntityID gunEntity{};
+
             bool isColliding{false};
 
             Car() {}

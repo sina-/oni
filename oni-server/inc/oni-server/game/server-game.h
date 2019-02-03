@@ -31,6 +31,7 @@ namespace oni {
 
     namespace server {
         namespace game {
+            using EntityID = oni::common::EntityID;
 
             class ServerGame : public oni::game::Game {
             public:
@@ -76,16 +77,19 @@ namespace oni {
 
                 void postDisconnectHook(const oni::common::PeerID &);
 
-                oni::common::EntityID createCar();
+                EntityID createCar();
 
-                oni::common::EntityID
-                createTire(oni::common::EntityID carEntityID, const oni::math::vec3 &pos, const oni::math::vec2 &size);
+                EntityID createTire(EntityID carEntityID, const oni::math::vec3 &pos, const oni::math::vec2 &size);
 
-                void removeCar(oni::common::EntityID entityID);
+                EntityID createGun(EntityID carEntityID, const oni::math::vec3 &pos, const oni::math::vec2 &size);
 
-                void removeTire(oni::common::EntityID carEntityID, oni::common::EntityID tireEntityID);
+                void removeTire(EntityID carEntityID, EntityID tireEntityID);
 
-                oni::common::EntityID createTruck();
+                void removeCar(EntityID entityID);
+
+                void removeGun(EntityID carEntityID, EntityID entityID);
+
+                EntityID createTruck();
 
             private:
                 std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
@@ -97,8 +101,8 @@ namespace oni {
                 network::Address mServerAddress{};
                 std::unique_ptr<oni::network::Server> mServer{};
 
-                oni::common::EntityID mTruckEntity{};
-                oni::common::EntityID mBoxEntity{};
+                EntityID mTruckEntity{};
+                EntityID mBoxEntity{};
 
                 std::unique_ptr<oni::entities::ClientDataManager> mClientDataManager{};
 

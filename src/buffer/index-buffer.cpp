@@ -2,21 +2,33 @@
 
 #include <GL/glew.h>
 
-#include <stdexcept>
-
 namespace oni {
     namespace buffer {
-        IndexBuffer::IndexBuffer(const std::vector<common::oniGLuint> &data, common::oniGLuint count,
+        IndexBuffer::IndexBuffer(common::oniGLuint count,
                                  common::oniGLsizei size) : mBufferID{0},
                                                             mCount{count},
                                                             mSize{size} {
+
+            std::vector<common::oniGLuint> indices(mCount);
+            common::oniGLushort offset = 0;
+            for (auto i = 0; i < mCount; i += 6) {
+                indices[i + 0] = offset + 0;
+                indices[i + 1] = offset + 1;
+                indices[i + 2] = offset + 2;
+
+                indices[i + 3] = offset + 2;
+                indices[i + 4] = offset + 3;
+                indices[i + 5] = offset + 0;
+
+                offset += 4;
+            }
             auto dataSize = mCount * sizeof(GLuint);
 
             glGenBuffers(size, &mBufferID);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
             // NOTE: dataSize type should match the enum passed to draw call!
             // Otherwise its UB and you get garbage rendered.
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, data.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices.data(), GL_STATIC_DRAW);
 
             GLint actualSize{0};
             glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);

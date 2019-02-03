@@ -33,22 +33,7 @@ namespace oni {
 
             mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructure, mMaxBufferSize);
 
-            std::vector<common::oniGLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
-
-            common::oniGLushort offset = 0;
-            for (auto i = 0; i < mMaxIndicesCount; i += 6) {
-                indices[i + 0] = offset + 0;
-                indices[i + 1] = offset + 1;
-                indices[i + 2] = offset + 2;
-
-                indices[i + 3] = offset + 2;
-                indices[i + 4] = offset + 3;
-                indices[i + 5] = offset + 0;
-
-                offset += 4;
-            }
-
-            mIndexBuffer = std::make_unique<buffer::IndexBuffer>(indices, mMaxIndicesCount);
+            mIndexBuffer = std::make_unique<buffer::IndexBuffer>(mMaxIndicesCount);
 
             mBuffer = nullptr;
         }

@@ -8,7 +8,7 @@ namespace oni {
     namespace buffer {
         class IndexBuffer {
         public:
-            IndexBuffer(const std::vector<common::oniGLuint> &data, common::oniGLuint count, common::oniGLsizei size = 1);
+            IndexBuffer(common::oniGLuint count, common::oniGLsizei size = 1);
 
             IndexBuffer() = default;
 

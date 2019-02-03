@@ -35,7 +35,5 @@ namespace oni {
             common::oniGLsizei stride{0};
             const common::oniGLvoid *offset{nullptr};
         };
-
-        typedef std::vector<std::unique_ptr<component::BufferStructure>> BufferStructureList;
     }
 }

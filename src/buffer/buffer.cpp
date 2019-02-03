@@ -9,8 +9,7 @@
 namespace oni {
     namespace buffer {
         Buffer::Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize,
-                       common::oniGLenum usage, component::BufferStructureList bufferStructures)
-                : mBufferStructureList(std::move(bufferStructures)) {
+                       common::oniGLenum usage) {
             // Check for supported usages.
             assert(usage == GL_STATIC_DRAW || usage == GL_DYNAMIC_DRAW);
 
@@ -41,9 +40,5 @@ namespace oni {
         void Buffer::bind() { glBindBuffer(GL_ARRAY_BUFFER, mBufferID); }
 
         void Buffer::unbind() { glBindBuffer(GL_ARRAY_BUFFER, 0); }
-
-        const component::BufferStructureList &Buffer::getBufferStructure() const {
-            return mBufferStructureList;
-        }
     }
 }

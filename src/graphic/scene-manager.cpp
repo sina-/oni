@@ -46,13 +46,13 @@ namespace oni {
             // to provide flexibility in type of shaders users can define and expect to just work by having buffer
             // structure and what not set up automatically.
             mTextureShader = std::make_unique<graphic::Shader>("resources/shaders/texture.vert",
-                                                                "resources/shaders/texture.frag");
+                                                               "resources/shaders/texture.frag");
             initializeTextureRenderer(*mTextureShader);
             // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
             // shader prior to render series of calls. Maybe shader should be built into the renderer.
 
             mColorShader = std::make_unique<graphic::Shader>("resources/shaders/basic.vert",
-                                                              "resources/shaders/basic.frag");
+                                                             "resources/shaders/basic.frag");
 
             mTextureManager = std::make_unique<TextureManager>();
 
@@ -78,26 +78,34 @@ namespace oni {
             }
 
             common::oniGLsizei stride = sizeof(component::ColoredVertex);
-            auto position = std::make_unique<component::BufferStructure>
-                    (component::BufferStructure{static_cast<common::oniGLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
-                                                 stride,
-                                                 static_cast<const common::oniGLvoid *>(nullptr)});
-            auto color = std::make_unique<component::BufferStructure>
-                    (component::BufferStructure{static_cast<common::oniGLuint>(colorIndex), 4, GL_FLOAT, GL_TRUE,
-                                                 stride,
-                                                 reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                                                         component::ColoredVertex,
-                                                         color))});
 
-            auto bufferStructures = component::BufferStructureList();
-            bufferStructures.push_back(std::move(position));
-            bufferStructures.push_back(std::move(color));
+            component::BufferStructure position;
+            position.index = static_cast<common::oniGLuint>(positionIndex);
+            position.componentCount = 3;
+            position.componentType = GL_FLOAT;
+            position.normalized = GL_FALSE;
+            position.stride = stride;
+            position.offset = static_cast<const common::oniGLvoid *>(nullptr);
+
+            component::BufferStructure color;
+            color.index = static_cast<common::oniGLuint>(colorIndex);
+            color.componentCount = 4;
+            color.componentType = GL_FLOAT;
+            color.normalized = GL_TRUE;
+            color.stride = stride;
+            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ColoredVertex,
+                    color));
+
+            std::vector<component::BufferStructure> bufferStructures;
+            bufferStructures.push_back(position);
+            bufferStructures.push_back(color);
 
             mColorRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
                     common::maxNumTextureSamplers,
                     sizeof(component::ColoredVertex),
-                    std::move(bufferStructures));
+                    bufferStructures);
         }
 
         void SceneManager::initializeTextureRenderer(const Shader &shader) {
@@ -112,33 +120,46 @@ namespace oni {
             }
 
             common::oniGLsizei stride = sizeof(component::TexturedVertex);
-            auto position = std::make_unique<component::BufferStructure>
-                    (component::BufferStructure{static_cast<common::oniGLuint>(positionIndex), 3, GL_FLOAT, GL_FALSE,
-                                                 stride,
-                                                 static_cast<const common::oniGLvoid *>(nullptr)});
-            auto samplerID = std::make_unique<component::BufferStructure>
-                    (component::BufferStructure{static_cast<common::oniGLuint>(samplerIDIndex), 1, GL_FLOAT, GL_FALSE,
-                                                 stride,
-                                                 reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                                                         component::TexturedVertex,
-                                                         samplerID))});
-            auto uv = std::make_unique<component::BufferStructure>
-                    (component::BufferStructure{static_cast<common::oniGLuint>(uvIndex), 2, GL_FLOAT, GL_FALSE, stride,
-                                                 reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                                                         component::TexturedVertex,
-                                                         uv))});
 
-            auto bufferStructures = component::BufferStructureList();
-            bufferStructures.push_back(std::move(position));
-            bufferStructures.push_back(std::move(samplerID));
-            bufferStructures.push_back(std::move(uv));
+            component::BufferStructure position;
+            position.index = static_cast<common::oniGLuint>(positionIndex);
+            position.componentCount = 3;
+            position.componentType = GL_FLOAT;
+            position.normalized = GL_FALSE;
+            position.stride = stride;
+            position.offset = static_cast<const common::oniGLvoid *>(nullptr);
+
+            component::BufferStructure sampler;
+            sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
+            sampler.componentCount = 1;
+            sampler.componentType = GL_FLOAT;
+            sampler.normalized = GL_FALSE;
+            sampler.stride = stride;
+            sampler.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::TexturedVertex,
+                    samplerID));
+
+            component::BufferStructure uv;
+            uv.index = static_cast<common::oniGLuint>(uvIndex);
+            uv.componentCount = 2;
+            uv.componentType = GL_FLOAT;
+            uv.normalized = GL_FALSE;
+            uv.stride = stride;
+            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::TexturedVertex,
+                    uv));
+
+            std::vector<component::BufferStructure> bufferStructure;
+            bufferStructure.push_back(position);
+            bufferStructure.push_back(sampler);
+            bufferStructure.push_back(uv);
 
             auto renderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
                     // TODO: If there are more than this number of textures to render in a draw call, it will fail
                     common::maxNumTextureSamplers,
                     sizeof(component::TexturedVertex),
-                    std::move(bufferStructures));
+                    bufferStructure);
 
             shader.enable();
             shader.setUniformiv("samplers", renderer->generateSamplerIDs());
@@ -373,7 +394,7 @@ namespace oni {
             // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
             // TODO: A better way is no not call tick before we know we have all the information to do actual
             // work. Kinda like a level loading screen.
-            if(mZLevel.majorLevelDelta <= common::ep){
+            if (mZLevel.majorLevelDelta <= common::ep) {
                 return;
             }
 
@@ -489,7 +510,7 @@ namespace oni {
                 auto defaultColor = component::PixelRGBA{};
                 // TODO: I can blend skid textures using this data
                 auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels,
-                                                                   defaultColor);
+                                                                  defaultColor);
 
                 auto texture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
                 auto lock = mInternalRegistry->scopedLock();

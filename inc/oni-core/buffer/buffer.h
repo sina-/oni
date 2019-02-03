@@ -6,11 +6,6 @@
 #include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
-    namespace component {
-        struct BufferStructure;
-        typedef std::vector<std::unique_ptr<component::BufferStructure>> BufferStructureList;
-    }
-
     namespace buffer {
 
         /*
@@ -18,8 +13,7 @@ namespace oni {
          */
         class Buffer {
         public:
-            Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize, common::oniGLenum usage,
-                   component::BufferStructureList bufferStructures);
+            Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize, common::oniGLenum usage);
 
             ~Buffer();
 
@@ -35,13 +29,8 @@ namespace oni {
 
             void unbind();
 
-            const component::BufferStructureList &getBufferStructure() const;
-
         private:
             common::oniGLuint mBufferID;
-            // TODO: This is un-used by the Buffer class, but VAO which usually has this class uses it.
-            component::BufferStructureList mBufferStructureList;
-
         };
 
     }

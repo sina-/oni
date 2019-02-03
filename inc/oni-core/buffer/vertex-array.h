@@ -11,7 +11,7 @@ namespace oni {
 
         class VertexArray {
         public:
-            explicit VertexArray(std::unique_ptr<Buffer> vertexBuffer);
+            explicit VertexArray(std::unique_ptr<Buffer> vertexBuffer, const std::vector<component::BufferStructure> &);
 
             ~VertexArray();
 
@@ -26,6 +26,7 @@ namespace oni {
         private:
             common::oniGLuint mArrayID;
             std::unique_ptr<Buffer> mVertexBuffers;
+            std::vector<component::BufferStructure> mBufferStructure;
         };
 
     }

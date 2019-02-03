@@ -15,7 +15,7 @@ namespace oni {
         BatchRenderer2D::BatchRenderer2D(const common::oniGLsizei maxSpriteCount,
                                          const common::oniGLint maxNumTextureSamplers,
                                          const common::oniGLsizei maxVertexSize,
-                                         component::BufferStructureList bufferStructures)
+                                         std::vector<component::BufferStructure> bufferStructure)
                 : mIndexCount{0},
                   mMaxSpriteCount{maxSpriteCount},
                   mMaxVertexSize{maxVertexSize},
@@ -32,9 +32,8 @@ namespace oni {
             mMaxBufferSize = mMaxSpriteSize * mMaxSpriteCount;
 
             auto vbo = std::make_unique<buffer::Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
-                                                         GL_STATIC_DRAW,
-                                                         std::move(bufferStructures));
-            mVAO = std::make_unique<buffer::VertexArray>(std::move(vbo));
+                                                        GL_STATIC_DRAW);
+            mVAO = std::make_unique<buffer::VertexArray>(std::move(vbo), bufferStructure);
 
             std::vector<common::oniGLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
 

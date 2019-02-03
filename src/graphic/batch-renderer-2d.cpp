@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 
 #include <oni-core/graphic/batch-renderer-2d.h>
-#include <oni-core/graphic/util/index-buffer-gen.h>
 #include <oni-core/graphic/texture-manager.h>
 #include <oni-core/buffer/buffer.h>
 #include <oni-core/buffer/index-buffer.h>
@@ -39,25 +38,18 @@ namespace oni {
 
             std::vector<common::oniGLuint> indices(static_cast<unsigned long>(mMaxIndicesCount));
 
-            /**
-             * This for loop is equivalent to IndexBufferGen and easier to understand but the later is
-             * more fun and educational.
-             */
-            /*
-            GLushort offset = 0;
+            common::oniGLushort offset = 0;
             for (auto i = 0; i < mMaxIndicesCount; i += 6) {
                 indices[i + 0] = offset + 0;
                 indices[i + 1] = offset + 1;
                 indices[i + 2] = offset + 2;
 
-                indices[i + 4] = offset + 2;
-                indices[i + 5] = offset + 3;
-                indices[i + 6] = offset + 0;
+                indices[i + 3] = offset + 2;
+                indices[i + 4] = offset + 3;
+                indices[i + 5] = offset + 0;
 
                 offset += 4;
-            }*/
-            IndexBufferGen<common::oniGLuint> gen;
-            std::generate(indices.begin(), indices.end(), gen);
+            }
 
             mIBO = std::make_unique<buffer::IndexBuffer>(indices, mMaxIndicesCount);
 

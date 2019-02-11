@@ -27,10 +27,13 @@ namespace oni {
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
-                    const auto &input = clientData.getClientInput(entity);
+                    auto *input = clientData.getClientInput(entity);
+                    if (!input) {
+                        continue;
+                    }
 
                     // TODO: This will spawn bullets very fast, infact so fast that they will overlap each other.
-                    if (input.isPressed(GLFW_KEY_F)) {
+                    if (input->isPressed(GLFW_KEY_F)) {
                         auto &carPlacement = carView.get<component::Placement>(entity);
                         auto &carConfig = carView.get<component::CarConfig>(entity);
                         auto &car = carView.get<component::Car>(entity);

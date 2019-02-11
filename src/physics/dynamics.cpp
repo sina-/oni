@@ -141,29 +141,34 @@ namespace oni {
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
-                    const auto &input = clientData.getClientInput(entity);
+                    auto input = clientData.getClientInput(entity);
+                    // NOTE: This could happen just at the moment when a client joins, an entity is created by the
+                    // client data structures are not initialized.
+                    if (!input) {
+                        continue;
+                    }
 
                     auto &car = carView.get<component::Car>(entity);
                     const auto &carConfig = carView.get<component::CarConfig>(entity);
 
-                    if (input.isPressed(GLFW_KEY_W) || input.isPressed(GLFW_KEY_UP)) {
+                    if (input->isPressed(GLFW_KEY_W) || input->isPressed(GLFW_KEY_UP)) {
                         // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
                         carInput[entity].throttle = 1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_A) || input.isPressed(GLFW_KEY_LEFT)) {
+                    if (input->isPressed(GLFW_KEY_A) || input->isPressed(GLFW_KEY_LEFT)) {
                         carInput[entity].left = 1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_S) || input.isPressed(GLFW_KEY_DOWN)) {
+                    if (input->isPressed(GLFW_KEY_S) || input->isPressed(GLFW_KEY_DOWN)) {
                         carInput[entity].throttle = -1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_D) || input.isPressed(GLFW_KEY_RIGHT)) {
+                    if (input->isPressed(GLFW_KEY_D) || input->isPressed(GLFW_KEY_RIGHT)) {
                         carInput[entity].right = 1.0f;
                     }
-                    if (input.isPressed(GLFW_KEY_LEFT_SHIFT)) {
+                    if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
                         car.velocity = car.velocity + math::vec2{static_cast<common::real32>(cos(car.heading)),
                                                                  static_cast<common::real32>(sin(car.heading))};
                     }
-                    if (input.isPressed(GLFW_KEY_SPACE)) {
+                    if (input->isPressed(GLFW_KEY_SPACE)) {
                         if (car.accumulatedEBrake < 1.0f) {
                             car.accumulatedEBrake += 0.01f;
                         }
@@ -278,9 +283,9 @@ namespace oni {
                     }
 
                     mCollisionHandlers[props.physicalCategory](manager,
-                                                                entitiesToBeUpdated,
-                                                                entity,
-                                                                props, placement);
+                                                               entitiesToBeUpdated,
+                                                               entity,
+                                                               props, placement);
                 }
             }
 

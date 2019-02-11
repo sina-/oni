@@ -72,9 +72,12 @@ namespace oni {
             }
         }
 
-        const io::Input &ClientDataManager::getClientInput(const common::EntityID &entityID) const {
-            assert(mCarEntityToInput.find(entityID) != mCarEntityToInput.end());
-            return mCarEntityToInput.at(entityID);
+        const io::Input *ClientDataManager::getClientInput(const common::EntityID &entityID) const {
+            auto input = mCarEntityToInput.find(entityID);
+            if(input == mCarEntityToInput.end()){
+                return nullptr;
+            }
+            return &mCarEntityToInput.at(entityID);
         }
 
         common::PeerID ClientDataManager::getPeerID(const common::EntityID &entityID) const {

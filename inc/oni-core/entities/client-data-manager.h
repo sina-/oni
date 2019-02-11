@@ -25,7 +25,7 @@ namespace oni {
 
             void setClientInput(const common::PeerID &clientID, const io::Input &input);
 
-            const io::Input &getClientInput(const common::EntityID &entityID) const;
+            const io::Input *getClientInput(const common::EntityID &entityID) const;
 
             void resetClientsInput();
 

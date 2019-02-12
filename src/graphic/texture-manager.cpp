@@ -17,7 +17,9 @@ namespace oni {
         TextureManager::~TextureManager() = default;
 
         void TextureManager::bindRange(common::oniGLuint first, const std::vector<common::oniGLuint> &textures) {
-            glBindTextures(first, static_cast<common::oniGLsizei>(textures.size()), textures.data());
+            if(!textures.empty()){
+                glBindTextures(first, static_cast<common::oniGLsizei>(textures.size()), textures.data());
+            }
         }
 
         const component::Texture *TextureManager::findOrLoad(const std::string &path) {

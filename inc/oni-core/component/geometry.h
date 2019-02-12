@@ -8,7 +8,11 @@
 
 namespace oni {
     namespace component {
+        struct Point {
+            math::vec3 vertex{0.f, 0.f, 0.f};
+        };
 
+        // TODO: Rename this into Sprite
         struct Shape {
             /**
              *    NOTE: Local coordinates for dynamic objects and world coordinates for static objects.
@@ -19,10 +23,10 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            math::vec3 vertexA{0.0f, 0.0f, 0.0f};
-            math::vec3 vertexB{0.0f, 0.0f, 0.0f};
-            math::vec3 vertexC{0.0f, 0.0f, 0.0f};
-            math::vec3 vertexD{0.0f, 0.0f, 0.0f};
+            math::vec3 vertexA{0.f, 0.f, 0.f};
+            math::vec3 vertexB{0.f, 0.f, 0.f};
+            math::vec3 vertexC{0.f, 0.f, 0.f};
+            math::vec3 vertexD{0.f, 0.f, 0.f};
 
             math::vec3 getPosition() const { return vertexA; }
 
@@ -54,7 +58,7 @@ namespace oni {
                     shape.vertexC -= halfSize;
                     shape.vertexD -= halfSize;
 
-                    auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.0f, 0.0f, 1.0f});
+                    auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.f, 0.f, 1.0f});
                     shape.vertexA = rotationMat * shape.vertexA;
                     shape.vertexB = rotationMat * shape.vertexB;
                     shape.vertexC = rotationMat * shape.vertexC;
@@ -71,9 +75,9 @@ namespace oni {
         };
 
         struct Placement {
-            math::vec3 position{0.0f, 0.0f, 0.0f};
-            common::real32 rotation{0.0f}; // In radians
-            math::vec3 scale{1.0f, 1.0f, 0.0f};
+            math::vec3 position{0.f, 0.f, 0.f};
+            common::real32 rotation{0.f}; // In radians
+            math::vec3 scale{1.0f, 1.0f, 0.f};
         };
 
         struct ChunkIndex {
@@ -100,11 +104,12 @@ namespace oni {
         };
 
         struct Chunk {
-            math::vec3 position{0.0f, 0.0f, 0.0f};
+            math::vec3 position{0.f, 0.f, 0.f};
             common::uint64 index{0};
             EdgeRoadTile edgeRoad{};
         };
 
+        // TODO: Why the shit is this here?
         struct CarConfig {
             common::CarSimDouble gravity{9.81f};
             common::CarSimDouble mass{1200};
@@ -119,9 +124,9 @@ namespace oni {
             common::CarSimDouble wheelWidth{0.2f}; // For rendering only
             common::CarSimDouble tireGrip{2.0f};
             common::CarSimDouble lockGrip{0.6f}; // % of grip when wheel is locked
-            common::CarSimDouble engineForce{4000.0f};
-            common::CarSimDouble brakeForce{12000.0f};
-            common::CarSimDouble eBrakeForce{12000.0f / 5.5f};
+            common::CarSimDouble engineForce{4000.f};
+            common::CarSimDouble brakeForce{12000.f};
+            common::CarSimDouble eBrakeForce{12000.f / 5.5f};
             common::CarSimDouble weightTransfer{0.2f};
             common::CarSimDouble maxSteer{0.6f}; // in radians
             common::CarSimDouble cornerStiffnessFront{5.0f};
@@ -178,32 +183,32 @@ namespace oni {
             Car() {}
 
             explicit Car(const component::CarConfig &c) {
-                heading = 0.0f;
-                velocityAbsolute = 0.0f;
-                angularVelocity = 0.0f;
-                steer = 0.0f;
-                steerAngle = 0.0f;
+                heading = 0.f;
+                velocityAbsolute = 0.f;
+                angularVelocity = 0.f;
+                steer = 0.f;
+                steerAngle = 0.f;
                 inertia = c.mass * c.inertialScale;
                 wheelBase = c.cgToFrontAxle + c.cgToRearAxle;
                 axleWeightRatioFront = c.cgToRearAxle / wheelBase;
                 axleWeightRatioRear = c.cgToFrontAxle / wheelBase;
-                slipAngleFront = 0.0f;
-                slipAngleRear = 0.0f;
+                slipAngleFront = 0.f;
+                slipAngleRear = 0.f;
 
-                position = math::vec2{0.0f, 0.0f};
-                velocity = math::vec2{0.0f, 0.0f};
-                velocityLocal = math::vec2{0.0f, 0.0f};
-                acceleration = math::vec2{0.0f, 0.0f};
-                accelerationLocal = math::vec2{0.0f, 0.0f};
+                position = math::vec2{0.f, 0.f};
+                velocity = math::vec2{0.f, 0.f};
+                velocityLocal = math::vec2{0.f, 0.f};
+                acceleration = math::vec2{0.f, 0.f};
+                accelerationLocal = math::vec2{0.f, 0.f};
 
-                rpm = 0.0f;
+                rpm = 0.f;
                 accelerating = false;
                 // Formula for solving quadratic equation: -c.airResistance*v^2 - c.rollResistance*v + c.engineForce = 0
                 // Notice we are only interested in the positive answer.
                 maxVelocityAbsolute = (c.rollResist -
                                        std::sqrt(c.rollResist * c.rollResist + 4 * c.airResist * c.engineForce)) /
                                       (-2 * c.airResist);
-                accumulatedEBrake = 0.0f;
+                accumulatedEBrake = 0.f;
 
                 smoothSteer = true;
                 safeSteer = true;

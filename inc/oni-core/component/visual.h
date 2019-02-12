@@ -14,7 +14,11 @@ namespace oni {
     namespace component {
         // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
         struct Appearance {
-            math::vec4 color{0.0f, 0.0f, 0.0f, 0.0f};
+            math::vec4 color{0.f, 0.f, 0.f, 0.f};
+        };
+
+        struct Particle {
+            common::real32 life{0.f};
         };
 
         enum class TextureStatus : common::uint8 {
@@ -36,8 +40,8 @@ namespace oni {
             // GL_UNSIGNED_BYTE
             common::oniGLenum type{0x1401};
             std::string filePath{};
-            std::vector<math::vec2> uv{math::vec2{0.0f, 0.0f}, math::vec2{1.0f, 0.0f},
-                                       math::vec2{1.0f, 1.0f}, math::vec2{0.0f, 1.0f}};
+            std::vector<math::vec2> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},
+                                       math::vec2{1.f, 1.f}, math::vec2{0.f, 1.f}};
             std::vector<common::uint8> data{};
             TextureStatus status{TextureStatus::INVALID};
         };
@@ -45,7 +49,7 @@ namespace oni {
         struct Text {
             // TODO: ordering?
             common::oniGLuint textureID{0};
-            math::vec3 position{0.0f, 0.0f, 0.0f};
+            math::vec3 position{0.f, 0.f, 0.f};
             std::string textContent{};
             std::vector<size_t> width{};
             std::vector<size_t> height{};
@@ -54,8 +58,8 @@ namespace oni {
             std::vector<common::real32> advanceX{};
             std::vector<common::real32> advanceY{};
             std::vector<math::vec4> uv{};
-            common::real32 xScaling{1.0f};
-            common::real32 yScaling{1.0f};
+            common::real32 xScaling{1.f};
+            common::real32 yScaling{1.f};
             common::EntityID entityID{0};
         };
 
@@ -79,7 +83,7 @@ namespace oni {
             common::real32 z;
         };
 
-        struct ZLevel{
+        struct ZLevel {
             oni::common::real32 majorLevelDelta{0.f};
             oni::common::real32 minorLevelDelta{0.f};
 

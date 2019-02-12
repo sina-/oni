@@ -4,10 +4,10 @@
 
 namespace oni {
     namespace graphic {
-        Shader::Shader(std::string &&vertPath, std::string &&fragPath) :
-                mVertPath{std::move(vertPath)}, mFragPath{std::move(fragPath)} {
-
+        Shader::Shader(const std::string &vertPath, const std::string &geomPath, const std::string &fragPath) :
+                mVertPath(vertPath), mGeomPath(geomPath), mFragPath(fragPath) {
             auto program = glCreateProgram();
+
             auto vertex = glCreateShader(GL_VERTEX_SHADER);
             auto fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -37,24 +37,34 @@ namespace oni {
                 }
             };
 
+            common::oniGLuint geometry = 0;
+            bool doGeometryShading = !geomPath.empty();
+            if(doGeometryShading){
+                geometry = glCreateShader(GL_GEOMETRY_SHADER);
+                auto geomSource = read_file(mGeomPath);
+                auto geomSourceChar = geomSource.c_str();
+                glShaderSource(geometry, 1, &geomSourceChar, nullptr);
+                glCompileShader(geometry);
+                checkStatusOrThrow(geometry);
+            }
+
             checkStatusOrThrow(vertex);
             checkStatusOrThrow(fragment);
 
             glAttachShader(program, vertex);
             glAttachShader(program, fragment);
+            if(doGeometryShading){
+                glAttachShader(program, geometry);
+            }
 
             glLinkProgram(program);
             glValidateProgram(program);
-
-            glDeleteShader(vertex);
-            glDeleteShader(fragment);
 
             mProgram = program;
 
             // Test if the shader can be linked.
             enable();
             disable();
-
         }
 
         Shader::~Shader() {
@@ -107,11 +117,14 @@ namespace oni {
         }
 
         void Shader::setUniformiv(const common::oniGLchar *name, const std::vector<GLint> &textureIDs) const {
-            glUniform1iv(getUniformLocation(name), static_cast<common::oniGLsizei>(textureIDs.size()), textureIDs.data());
+            glUniform1iv(getUniformLocation(name), static_cast<common::oniGLsizei>(textureIDs.size()),
+                         textureIDs.data());
         }
 
-        void Shader::setUniformuiv(const common::oniGLchar *name, const std::vector<common::oniGLuint> &textureIDs) const {
-            glUniform1uiv(getUniformLocation(name), static_cast<common::oniGLsizei>(textureIDs.size()), textureIDs.data());
+        void
+        Shader::setUniformuiv(const common::oniGLchar *name, const std::vector<common::oniGLuint> &textureIDs) const {
+            glUniform1uiv(getUniformLocation(name), static_cast<common::oniGLsizei>(textureIDs.size()),
+                          textureIDs.data());
         }
 
         void Shader::setUniformui(const common::oniGLchar *name, common::oniGLuint textureID) const {

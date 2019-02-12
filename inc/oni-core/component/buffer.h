@@ -12,19 +12,25 @@
 namespace oni {
     namespace component {
         struct Vertex {
-            math::vec3 position{0.0f, 0.0f, 0.0f};
+            math::vec3 position{0.f, 0.f, 0.f};
         };
 
         struct ColoredVertex {
-            math::vec3 position{0.0f, 0.0f, 0.0f};
-            math::vec4 color{0.0f, 0.0f, 0.0f, 0.0f};
+            math::vec3 position{0.f, 0.f, 0.f};
+            math::vec4 color{0.f, 0.f, 0.f, 0.f};
         };
 
         struct TexturedVertex {
-            math::vec3 position{0.0f, 0.0f, 0.0f};
+            math::vec3 position{0.f, 0.f, 0.f};
             common::oniGLint samplerID{0};
             // TODO: use UNSIGNED_SHORT
-            math::vec2 uv{0.0f, 0.0f};
+            math::vec2 uv{0.f, 0.f};
+        };
+
+        struct ParticleVertex {
+            math::vec3 position{0.f, 0.f, 0.f};
+            math::vec4 color{0.f, 0.f, 0.f, 0.f};
+            common::real32 time{0.f};
         };
 
         struct BufferStructure {

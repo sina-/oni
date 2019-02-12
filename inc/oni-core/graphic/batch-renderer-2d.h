@@ -15,13 +15,15 @@ namespace oni {
     }
 
     namespace component {
-        class Texture;
+        struct Texture;
 
-        class Shape;
+        struct Point;
 
-        class Text;
+        struct Shape;
 
-        class Appearance;
+        struct Text;
+
+        struct Appearance;
     }
 
     namespace graphic {
@@ -30,7 +32,9 @@ namespace oni {
         public:
             BatchRenderer2D(common::oniGLsizei maxSpriteCount, common::oniGLsizei maxNumTextureSamplers,
                             common::oniGLsizei maxVertexSize,
-                            std::vector<component::BufferStructure> bufferStructures);
+                            const std::vector<component::BufferStructure> &bufferStructures,
+                            PrimitiveType type
+            );
 
             ~BatchRenderer2D() override;
 
@@ -44,6 +48,9 @@ namespace oni {
             void _begin() override;
 
             void _submit(const component::Shape &position, const component::Appearance &color) override;
+
+            void
+            _submit(const component::Point &point, const component::Appearance &color, common::real32 time) override;
 
             void _submit(const component::Shape &position, const component::Texture &texture) override;
 
@@ -65,15 +72,15 @@ namespace oni {
             common::oniGLint getSamplerID(common::oniGLuint textureID);
 
         private:
+            PrimitiveType mPrimitiveType{PrimitiveType::UNKNOWN};
             // Actual number of indices used.
             common::oniGLsizei mIndexCount{0};
 
-            common::oniGLsizei mMaxSpriteCount{0};
+            common::oniGLsizei mMaxPrimitiveCount{0};
             common::oniGLsizei mMaxVertexSize{0};
             const common::oniGLint mMaxNumTextureSamplers;
             common::oniGLsizei mMaxIndicesCount{0};
-            common::oniGLsizei mMaxSpriteSize{0};
-            common::oniGLsizei mMaxBufferSize{0};
+            common::oniGLsizei mMaxPrimitiveSize{0};
 
             std::unique_ptr<buffer::VertexArray> mVertexArray;
             std::unique_ptr<buffer::IndexBuffer> mIndexBuffer;

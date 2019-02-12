@@ -50,17 +50,20 @@ namespace oni {
 
             void renderPhysicsDebugData();
 
-            void renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
+            void renderStaticTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
                                       common::real32 halfViewHeight);
 
             void renderStaticText(entities::EntityManager &manager, common::real32 halfViewWidth,
                                   common::real32 halfViewHeight);
 
-            void renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
+            void renderDynamicTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
                                        common::real32 halfViewHeight);
 
-            void renderColored(entities::EntityManager &manager, common::real32 halfViewWidth,
-                               common::real32 halfViewHeight);
+            void renderColorSprites(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                    common::real32 halfViewHeight);
+
+            void renderParticles(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                 common::real32 halfViewHeight);
 
             void tick(entities::EntityManager &manager);
 
@@ -84,9 +87,11 @@ namespace oni {
 
             common::uint16 getSpritesPerFrame() const;
 
+            common::uint16 getParticlesPerFrame() const;
+
             common::uint16 getTexturesPerFrame() const;
 
-            void setZLevel(const component::ZLevel&);
+            void setZLevel(const component::ZLevel &);
 
             void resetCounters();
 
@@ -110,9 +115,11 @@ namespace oni {
 
             void end(const Shader &shader, Renderer2D &renderer2D);
 
-            void initializeTextureRenderer(const Shader &shader);
+            void initializeTextureRenderer();
 
-            void initializeColorRenderer(const Shader &shader);
+            void initializeColorRenderer();
+
+            void initializeParticleRenderer();
 
             bool isVisible(const component::Shape &shape, common::real32 halfViewWidth,
                            common::real32 halfViewHeight) const;
@@ -136,8 +143,10 @@ namespace oni {
         private:
             std::unique_ptr<Shader> mColorShader{};
             std::unique_ptr<Shader> mTextureShader{};
+            std::unique_ptr<Shader> mParticleShader{};
             std::unique_ptr<BatchRenderer2D> mColorRenderer{};
             std::unique_ptr<BatchRenderer2D> mTextureRenderer{};
+            std::unique_ptr<BatchRenderer2D> mParticleRenderer{};
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
             FontManager &mFontManager;
@@ -163,6 +172,7 @@ namespace oni {
 
             common::uint16 mRenderedSpritesPerFrame{0};
             common::uint16 mRenderedTexturesPerFrame{0};
+            common::uint16 mRenderedParticlesPerFrame{0};
 
             std::unique_ptr<entities::EntityManager> mInternalRegistry{};
 

@@ -10,7 +10,6 @@
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/visual.h>
-#include <oni-core/component/snapshot-type.h>
 #include <oni-core/component/gameplay.h>
 
 
@@ -24,6 +23,11 @@ namespace oni {
         template<class Archive>
         void serialize(Archive &archive, component::Shape &shape) {
             archive(shape.vertexA, shape.vertexB, shape.vertexC, shape.vertexD);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, component::Point &point) {
+            archive(point.vertex);
         }
 
         template<class Archive>
@@ -116,6 +120,9 @@ namespace oni {
         void serialize(Archive &archive, component::Tag_ColorShaded &) {}
 
         template<class Archive>
+        void serialize(Archive &archive, component::Tag_Particle &) {}
+
+        template<class Archive>
         void serialize(Archive &archive, component::Appearance &appearance) {
             archive(appearance.color);
         }
@@ -161,6 +168,7 @@ namespace oni {
                         component::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
+                        component::Particle,
                         component::Appearance,
                         component::Texture,
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
@@ -172,7 +180,8 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_Static
+                        component::Tag_Static,
+                        component::Tag_Particle
                 >(output, snapshotType);
             }
 
@@ -193,6 +202,7 @@ namespace oni {
                         component::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
+                        component::Particle,
                         component::Appearance,
                         component::Texture,
                         //components::PhysicalProperties,
@@ -200,7 +210,8 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_Static
+                        component::Tag_Static,
+                        component::Tag_Particle
                 >(snapshotType, input,
                         // NOTE: Car entity keeps a reference to tire entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct

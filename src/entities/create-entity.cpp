@@ -48,27 +48,27 @@ namespace oni {
             // position in the local space.
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
-            auto shape = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
-            manager.assign<component::Shape>(entityID, shape);
+            auto sprite = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
+            manager.assign<component::Shape>(entityID, sprite);
         }
 
         void assignShapeRotatedLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
                                      common::real32 z, common::real32 angle) {
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
-            auto shape = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
+            auto sprite = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
             physics::Transformation::shapeTransformation(
-                    math::mat4::rotation(math::toRadians(angle), math::vec3{0.f, 0.f, 1.f}), shape);
-            manager.assign<component::Shape>(entityID, shape);
+                    math::mat4::rotation(math::toRadians(angle), math::vec3{0.f, 0.f, 1.f}), sprite);
+            manager.assign<component::Shape>(entityID, sprite);
         }
 
         void assignShapeWorld(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
                               const math::vec3 &worldPos) {
             auto sizeWithZ = math::vec3{size.x, size.y, worldPos.z};
-            auto shape = component::Shape::fromSizeAndRotation(sizeWithZ, 0);
+            auto sprite = component::Shape::fromSizeAndRotation(sizeWithZ, 0);
 
-            physics::Transformation::localToWorldTranslation(worldPos, shape);
-            manager.assign<component::Shape>(entityID, shape);
+            physics::Transformation::localToWorldTranslation(worldPos, sprite);
+            manager.assign<component::Shape>(entityID, sprite);
         }
 
         void assignPlacement(EntityManager &manager,

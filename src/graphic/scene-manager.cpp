@@ -46,17 +46,23 @@ namespace oni {
             // to provide flexibility in type of shaders users can define and expect to just work by having buffer
             // structure and what not set up automatically.
             mTextureShader = std::make_unique<graphic::Shader>("resources/shaders/texture.vert",
+                                                               "",
                                                                "resources/shaders/texture.frag");
-            initializeTextureRenderer(*mTextureShader);
+            initializeTextureRenderer();
             // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
             // shader prior to render series of calls. Maybe shader should be built into the renderer.
 
             mColorShader = std::make_unique<graphic::Shader>("resources/shaders/basic.vert",
+                                                             "",
                                                              "resources/shaders/basic.frag");
+            initializeColorRenderer();
+
+            mParticleShader = std::make_unique<graphic::Shader>("resources/shaders/particle.vert",
+                                                                "resources/shaders/particle.geom",
+                                                                "resources/shaders/particle.frag");
+            initializeParticleRenderer();
 
             mTextureManager = std::make_unique<TextureManager>();
-
-            initializeColorRenderer(*mColorShader);
 
             mDebugDrawBox2D = std::make_unique<DebugDrawBox2D>(this);
             mDebugDrawBox2D->AppendFlags(b2Draw::e_shapeBit);
@@ -67,8 +73,63 @@ namespace oni {
 
         SceneManager::~SceneManager() = default;
 
-        void SceneManager::initializeColorRenderer(const Shader &shader) {
-            auto program = shader.getProgram();
+        void SceneManager::initializeParticleRenderer() {
+            auto program = mParticleShader->getProgram();
+
+            auto positionIndex = glGetAttribLocation(program, "position");
+            auto colorIndex = glGetAttribLocation(program, "color");
+            auto timeIndex = glGetAttribLocation(program, "time");
+
+            if (positionIndex == -1 || colorIndex == -1 || timeIndex == -1) {
+                throw std::runtime_error("Invalid attribute name.");
+            }
+
+            common::oniGLsizei stride = sizeof(component::ParticleVertex);
+
+            component::BufferStructure position;
+            position.index = static_cast<common::oniGLuint>(positionIndex);
+            position.componentCount = 3;
+            position.componentType = GL_FLOAT;
+            position.normalized = GL_FALSE;
+            position.stride = stride;
+            position.offset = static_cast<const common::oniGLvoid *>(nullptr);
+
+            component::BufferStructure color;
+            color.index = static_cast<common::oniGLuint>(colorIndex);
+            color.componentCount = 4;
+            color.componentType = GL_FLOAT;
+            color.normalized = GL_TRUE;
+            color.stride = stride;
+            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ParticleVertex,
+                    color));
+
+            component::BufferStructure time;
+            time.index = static_cast<common::oniGLuint>(timeIndex);
+            time.componentCount = 1;
+            time.componentType = GL_FLOAT;
+            time.normalized = GL_FALSE;
+            time.stride = stride;
+            time.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ParticleVertex,
+                    time));
+
+            std::vector<component::BufferStructure> bufferStructures;
+            bufferStructures.push_back(position);
+            bufferStructures.push_back(color);
+            bufferStructures.push_back(time);
+
+            mParticleRenderer = std::make_unique<BatchRenderer2D>(
+                    mMaxSpriteCount,
+                    0,
+                    sizeof(component::ParticleVertex),
+                    bufferStructures,
+                    PrimitiveType::POINT
+            );
+        }
+
+        void SceneManager::initializeColorRenderer() {
+            auto program = mColorShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
@@ -105,11 +166,13 @@ namespace oni {
                     mMaxSpriteCount,
                     common::maxNumTextureSamplers,
                     sizeof(component::ColoredVertex),
-                    bufferStructures);
+                    bufferStructures,
+                    PrimitiveType::TRIANGLE
+            );
         }
 
-        void SceneManager::initializeTextureRenderer(const Shader &shader) {
-            auto program = shader.getProgram();
+        void SceneManager::initializeTextureRenderer() {
+            auto program = mTextureShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
@@ -154,18 +217,17 @@ namespace oni {
             bufferStructure.push_back(sampler);
             bufferStructure.push_back(uv);
 
-            auto renderer = std::make_unique<BatchRenderer2D>(
+            mTextureRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
                     // TODO: If there are more than this number of textures to render in a draw call, it will fail
                     common::maxNumTextureSamplers,
                     sizeof(component::TexturedVertex),
-                    bufferStructure);
+                    bufferStructure,
+                    PrimitiveType::TRIANGLE);
 
-            shader.enable();
-            shader.setUniformiv("samplers", renderer->generateSamplerIDs());
-            shader.disable();
-
-            mTextureRenderer = std::move(renderer);
+            mTextureShader->enable();
+            mTextureShader->setUniformiv("samplers", mTextureRenderer->generateSamplerIDs());
+            mTextureShader->disable();
         }
 
         void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale) {
@@ -234,10 +296,18 @@ namespace oni {
             {
                 auto lock = manager.scopedLock();
                 begin(*mColorShader, *mColorRenderer, true, true);
-                renderColored(manager, halfViewWidth, halfViewHeight);
+                renderColorSprites(manager, halfViewWidth, halfViewHeight);
             }
 
             end(*mColorShader, *mColorRenderer);
+
+            {
+                auto lock = manager.scopedLock();
+                begin(*mParticleShader, *mParticleRenderer, true, true);
+                renderParticles(manager, halfViewWidth, halfViewHeight);
+            }
+
+            end(*mParticleShader, *mParticleRenderer);
 
             {
                 auto lock = manager.scopedLock();
@@ -247,8 +317,8 @@ namespace oni {
                 }
 
                 begin(*mTextureShader, *mTextureRenderer, true, true);
-                renderStaticTextured(manager, halfViewWidth, halfViewHeight);
-                renderDynamicTextured(manager, halfViewWidth, halfViewHeight);
+                renderStaticTextures(manager, halfViewWidth, halfViewHeight);
+                renderDynamicTextures(manager, halfViewWidth, halfViewHeight);
                 renderStaticText(manager, halfViewWidth, halfViewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
@@ -263,7 +333,7 @@ namespace oni {
             {
                 auto lock = mInternalRegistry->scopedLock();
                 begin(*mTextureShader, *mTextureRenderer, true, true);
-                renderStaticTextured(*mInternalRegistry, halfViewWidth, halfViewHeight);
+                renderStaticTextures(*mInternalRegistry, halfViewWidth, halfViewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
@@ -303,7 +373,7 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderStaticTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
+        void SceneManager::renderStaticTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                 common::real32 halfViewHeight) {
             auto staticTextureView = manager.createView<component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::Tag_Static>();
@@ -331,7 +401,7 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderDynamicTextured(entities::EntityManager &manager, common::real32 halfViewWidth,
+        void SceneManager::renderDynamicTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
                                                  common::real32 halfViewHeight) {
             // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
             // other systems don't share any entity component, or the shared section is minimum and I can create
@@ -372,21 +442,38 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderColored(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                         common::real32 halfViewHeight) {
-            auto staticSpriteView = manager.createView<component::Tag_ColorShaded, component::Shape,
+        void SceneManager::renderColorSprites(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                              common::real32 halfViewHeight) {
+            auto view = manager.createView<component::Tag_ColorShaded, component::Shape,
                     component::Appearance, component::Tag_Static>();
-            for (const auto &entity: staticSpriteView) {
-                const auto &shape = staticSpriteView.get<component::Shape>(entity);
+            for (const auto &entity: view) {
+                const auto &shape = view.get<component::Shape>(entity);
                 if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
                     continue;
                 }
-                const auto &appearance = staticSpriteView.get<component::Appearance>(entity);
+                const auto &appearance = view.get<component::Appearance>(entity);
 
                 ++mRenderedSpritesPerFrame;
 
                 mColorRenderer->submit(shape, appearance);
             }
+        }
+
+        void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 halfViewWidth,
+                                           common::real32 halfViewHeight) {
+            auto view = manager.createView<component::Point, component::Appearance, component::Tag_Particle>();
+            for (const auto &entity: view) {
+                const auto &point = view.get<component::Point>(entity);
+/*                if (!isVisible(point, halfViewWidth, halfViewHeight)) {
+                    continue;
+                }*/
+                const auto &appearance = view.get<component::Appearance>(entity);
+
+                ++mRenderedParticlesPerFrame;
+
+                mParticleRenderer->submit(point, appearance, 1.f);
+            }
+
         }
 
 
@@ -578,6 +665,10 @@ namespace oni {
 
         common::uint16 SceneManager::getSpritesPerFrame() const {
             return mRenderedSpritesPerFrame;
+        }
+
+        common::uint16 SceneManager::getParticlesPerFrame() const {
+            return mRenderedParticlesPerFrame;
         }
 
         common::uint16 SceneManager::getTexturesPerFrame() const {

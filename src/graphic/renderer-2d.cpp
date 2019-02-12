@@ -18,6 +18,10 @@ namespace oni {
             _submit(position, color);
         }
 
+        void Renderer2D::submit(const component::Point &point, const component::Appearance &color, common::real32 time) {
+            _submit(point, color, time);
+        }
+
         void Renderer2D::submit(const component::Shape &position, const component::Texture &texture) {
             _submit(position, texture);
         }

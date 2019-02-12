@@ -13,14 +13,8 @@
 namespace oni {
     namespace graphic {
         class Shader {
-            common::oniGLuint mProgram;
-            const std::string mVertPath;
-            const std::string mFragPath;
-
-            common::oniGLint getUniformLocation(const common::oniGLchar *name) const;
-
         public:
-            Shader(std::string &&vertPath, std::string &&fragPath);
+            Shader(const std::string &vertPath, const std::string &geomPath, const std::string &fragPath);
 
             ~Shader();
 
@@ -52,6 +46,14 @@ namespace oni {
 
             void setUniformui(const common::oniGLchar *name, common::oniGLuint textureID) const;
 
+        private:
+            common::oniGLint getUniformLocation(const common::oniGLchar *name) const;
+
+        private:
+            common::oniGLuint mProgram;
+            std::string mVertPath;
+            std::string mGeomPath;
+            std::string mFragPath;
         };
     }
 }

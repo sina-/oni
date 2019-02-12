@@ -15,25 +15,47 @@ namespace oni {
         BatchRenderer2D::BatchRenderer2D(const common::oniGLsizei maxSpriteCount,
                                          const common::oniGLint maxNumTextureSamplers,
                                          const common::oniGLsizei maxVertexSize,
-                                         std::vector<component::BufferStructure> bufferStructure)
+                                         const std::vector<component::BufferStructure> &bufferStructure,
+                                         PrimitiveType type)
                 : mIndexCount{0},
-                  mMaxSpriteCount{maxSpriteCount},
+                  mMaxPrimitiveCount{maxSpriteCount},
                   mMaxVertexSize{maxVertexSize},
-                  mMaxNumTextureSamplers{maxNumTextureSamplers} {
+                  mMaxNumTextureSamplers{maxNumTextureSamplers},
+                  mPrimitiveType{type} {
 
-            // Each sprite has 6 indices.
-            mMaxIndicesCount = mMaxSpriteCount * 6;
+            switch (type) {
+                case PrimitiveType::POINT: {
+                    mMaxIndicesCount = 0;
+                    mMaxPrimitiveSize = mMaxVertexSize * 1;
+                    break;
+                }
+                case PrimitiveType::LINE: {
+                    mMaxIndicesCount = 0;
+                    mMaxPrimitiveSize = mMaxVertexSize * 2;
+                    break;
+                }
+                case PrimitiveType::TRIANGLE: {
+                    // Each sprite has 6 indices.
+                    mMaxIndicesCount = mMaxPrimitiveCount * 6;
+
+                    // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
+                    mMaxPrimitiveSize = mMaxVertexSize * 4;
+
+                    break;
+                }
+                default:
+                    assert(false && "Invalid PrimitiveType");
+            }
 
             auto maxUIntSize = std::numeric_limits<common::int32>::max();
             assert(mMaxIndicesCount < maxUIntSize);
 
-            // Each sprite has 4 vertices (6 in reality but 4 of them share the same data).
-            mMaxSpriteSize = mMaxVertexSize * 4;
-            mMaxBufferSize = mMaxSpriteSize * mMaxSpriteCount;
+            common::oniGLsizei maxBufferSize{mMaxPrimitiveSize * mMaxPrimitiveCount};
+            mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructure, maxBufferSize);
 
-            mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructure, mMaxBufferSize);
-
-            mIndexBuffer = std::make_unique<buffer::IndexBuffer>(mMaxIndicesCount);
+            if (mMaxIndicesCount) {
+                mIndexBuffer = std::make_unique<buffer::IndexBuffer>(mMaxIndicesCount);
+            }
 
             mBuffer = nullptr;
         }
@@ -97,6 +119,23 @@ namespace oni {
              *    2 +---+ 3
              **/
             mIndexCount += 6;
+        }
+
+        void BatchRenderer2D::_submit(const component::Point &point, const component::Appearance &appearance,
+                                      common::real32 time) {
+            assert(mIndexCount + 1 < mMaxIndicesCount);
+
+            auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
+
+            buffer->position = point.vertex;
+            buffer->color = appearance.color;
+            buffer->time = time;
+            buffer++;
+
+            // Update the mBuffer to point to the head.
+            mBuffer = static_cast<void *>(buffer);
+
+            mIndexCount += 1;
         }
 
         void BatchRenderer2D::_submit(const component::Shape &position, const component::Texture &texture) {
@@ -188,17 +227,36 @@ namespace oni {
             TextureManager::bindRange(0, mTextures);
 
             mVertexArray->bindVAO();
-            mIndexBuffer->bind();
+            if (mIndexBuffer) {
+                mIndexBuffer->bind();
+            }
 
-            glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, nullptr);
+            switch (mPrimitiveType) {
+                case PrimitiveType::POINT: {
+                    glDrawElements(GL_POINTS, mIndexCount, GL_UNSIGNED_INT, nullptr);
+                    break;
+                }
+                case PrimitiveType::LINE: {
+                    glDrawElements(GL_LINES, mIndexCount, GL_UNSIGNED_INT, nullptr);
+                    break;
+                }
+                case PrimitiveType::TRIANGLE: {
+                    glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, nullptr);
+                    break;
+                }
+                default: {
+                    assert(false && "Invalid primitive type");
+                }
+            };
 
-            mIndexBuffer->unbind();
+            if (mIndexBuffer) {
+                mIndexBuffer->unbind();
+            }
             mVertexArray->unbindVAO();
 
             TextureManager::unbind();
 
             mIndexCount = 0;
-
         }
 
         void BatchRenderer2D::_end() {
@@ -232,8 +290,7 @@ namespace oni {
         }
 
         std::vector<common::oniGLint> BatchRenderer2D::generateSamplerIDs() {
-            std::vector<common::oniGLint> samplers;
-            samplers.assign(static_cast<common::uint32>(mMaxNumTextureSamplers), 0);
+            std::vector<common::oniGLint> samplers(mMaxNumTextureSamplers, 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(samplers.begin(), samplers.end(), 0);
             return samplers;

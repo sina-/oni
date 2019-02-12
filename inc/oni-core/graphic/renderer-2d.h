@@ -1,5 +1,7 @@
 #pragma once
 
+#include <oni-core/common/typedefs.h>
+
 namespace oni {
 
     namespace component {
@@ -10,9 +12,18 @@ namespace oni {
         class Text;
 
         class Shape;
+
+        class Point;
     }
 
     namespace graphic {
+        enum class PrimitiveType : common::uint8 {
+            POINT = 0,
+            LINE = 1,
+            TRIANGLE = 2,
+            UNKNOWN = 3
+        };
+
         class Renderer2D {
         protected:
             Renderer2D();
@@ -26,6 +37,8 @@ namespace oni {
             void begin();
 
             void submit(const component::Shape &position, const component::Appearance &color);
+
+            void submit(const component::Point &point, const component::Appearance &color, common::real32 time);
 
             void submit(const component::Shape &position, const component::Texture &texture);
 
@@ -45,6 +58,9 @@ namespace oni {
             virtual void _begin() = 0;
 
             virtual void _submit(const component::Shape &position, const component::Appearance &color) = 0;
+
+            virtual void
+            _submit(const component::Point &point, const component::Appearance &color, common::real32 time) = 0;
 
             virtual void _submit(const component::Shape &position, const component::Texture &texture) = 0;
 

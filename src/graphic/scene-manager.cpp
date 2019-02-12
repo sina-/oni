@@ -737,6 +737,7 @@ namespace oni {
 
         void SceneManager::resetCounters() {
             mRenderedSpritesPerFrame = 0;
+            mRenderedParticlesPerFrame = 0;
             mRenderedTexturesPerFrame = 0;
         }
 

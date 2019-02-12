@@ -25,12 +25,12 @@ namespace oni {
 
             switch (type) {
                 case PrimitiveType::POINT: {
-                    mMaxIndicesCount = 0;
+                    mMaxIndicesCount = mMaxPrimitiveCount;
                     mMaxPrimitiveSize = mMaxVertexSize * 1;
                     break;
                 }
                 case PrimitiveType::LINE: {
-                    mMaxIndicesCount = 0;
+                    mMaxIndicesCount = mMaxPrimitiveCount;
                     mMaxPrimitiveSize = mMaxVertexSize * 2;
                     break;
                 }
@@ -53,7 +53,7 @@ namespace oni {
             common::oniGLsizei maxBufferSize{mMaxPrimitiveSize * mMaxPrimitiveCount};
             mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructure, maxBufferSize);
 
-            if (mMaxIndicesCount) {
+            if (mMaxIndicesCount > mMaxPrimitiveCount) {
                 mIndexBuffer = std::make_unique<buffer::IndexBuffer>(mMaxIndicesCount);
             }
 
@@ -233,11 +233,11 @@ namespace oni {
 
             switch (mPrimitiveType) {
                 case PrimitiveType::POINT: {
-                    glDrawElements(GL_POINTS, mIndexCount, GL_UNSIGNED_INT, nullptr);
+                    glDrawArrays(GL_POINTS, 0, mIndexCount);
                     break;
                 }
                 case PrimitiveType::LINE: {
-                    glDrawElements(GL_LINES, mIndexCount, GL_UNSIGNED_INT, nullptr);
+                    glDrawArrays(GL_LINES, 0, mIndexCount);
                     break;
                 }
                 case PrimitiveType::TRIANGLE: {

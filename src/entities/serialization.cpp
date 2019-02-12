@@ -168,7 +168,7 @@ namespace oni {
                         component::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
-                        component::Particle,
+                        component::Point,
                         component::Appearance,
                         component::Texture,
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
@@ -202,7 +202,7 @@ namespace oni {
                         component::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
-                        component::Particle,
+                        component::Point,
                         component::Appearance,
                         component::Texture,
                         //components::PhysicalProperties,

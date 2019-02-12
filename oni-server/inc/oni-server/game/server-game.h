@@ -110,6 +110,7 @@ namespace oni {
 
                 oni::component::ZLevel mZLevel{};
                 oni::common::real32 mVehicleZ{};
+                oni::common::real32 mPartizleZ{};
             };
         }
     }

@@ -160,12 +160,12 @@ namespace oni {
                         0};
 
                 oni::component::RoadTileIndex westBoarderRoadTileIndex{0,
-                                                                        static_cast<uint16>(std::rand() %
-                                                                                            mTilesPerChunkY)};
+                                                                       static_cast<uint16>(std::rand() %
+                                                                                           mTilesPerChunkY)};
 
                 oni::component::RoadTileIndex eastBoarderRoadTileIndex{static_cast<uint16>(mTilesPerChunkX - 1),
-                                                                        static_cast<uint16>(std::rand() %
-                                                                                            mTilesPerChunkY)};
+                                                                       static_cast<uint16>(std::rand() %
+                                                                                           mTilesPerChunkY)};
 
                 if (northChunkHasRoads && southChunkHasRoads) {
                     edgeRoads.southBoarder = oni::component::RoadTileIndex{};
@@ -341,7 +341,7 @@ namespace oni {
 
             void TileWorld::generateRoadTile(const oni::component::ChunkIndex &chunkIndex,
                                              const oni::component::RoadTileIndex &roadTileIndex) {
-                auto color = oni::math::vec4{0.1f, 0.1f, 0.1f, 0.5f};
+                oni::math::vec4 color{0.1f, 0.1f, 0.1f, 0.5f};
                 auto roadTileSize = getTileSize();
 
                 auto worldPos = roadTileIndexToPos(chunkIndex, roadTileIndex);

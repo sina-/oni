@@ -40,6 +40,7 @@ namespace oni {
                     mZLevel.level_9 = mZLevel.level_8 + mZLevel.majorLevelDelta;
 
                     mVehicleZ = mZLevel.level_2;
+                    mPartizleZ = mVehicleZ + mVehicleZ + mZLevel.majorLevelDelta;
                 }
 
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
@@ -79,6 +80,15 @@ namespace oni {
                 mTruckEntity = createTruck();
 
                 mTileWorld->generateDemoRaceCourse();
+
+                auto entity = oni::entities::createEntity(*mEntityManager);
+                oni::math::vec3 pos{-70.f, -30.f, mPartizleZ};
+                oni::math::vec4 color{0.1f, 0.1f, 0.1f, 0.5f};
+                oni::entities::assignPoint(*mEntityManager, entity, pos);
+                oni::entities::assignAppearance(*mEntityManager, entity, color);
+                oni::entities::removeTag<oni::component::Tag_ColorShaded>(*mEntityManager, entity);
+                oni::entities::assignTag<oni::component::Tag_Particle>(*mEntityManager, entity);
+
 
 /*            {
                 auto lock = mEntityManager->scopedLock();

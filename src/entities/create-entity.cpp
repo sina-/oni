@@ -71,6 +71,14 @@ namespace oni {
             manager.assign<component::Shape>(entityID, sprite);
         }
 
+        void assignPoint(EntityManager &manager,
+                         common::EntityID entityID,
+                         const math::vec3 &pos) {
+            auto point = component::Point{};
+            point.vertex = pos;
+            manager.assign<component::Point>(entityID, point);
+        }
+
         void assignPlacement(EntityManager &manager,
                              common::EntityID entityID,
                              const math::vec3 &worldPos,

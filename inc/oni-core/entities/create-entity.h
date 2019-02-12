@@ -43,6 +43,10 @@ namespace oni {
                               const math::vec2 &size,
                               const math::vec3 &worldPos);
 
+        void assignPoint(EntityManager &manager,
+                         common::EntityID entityID,
+                         const math::vec3 &pos);
+
         void assignPlacement(EntityManager &manager,
                              common::EntityID entityID,
                              const math::vec3 &worldPos,

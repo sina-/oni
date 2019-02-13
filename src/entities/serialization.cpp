@@ -134,27 +134,6 @@ namespace oni {
         }
     }
 
-    namespace math {
-        template<class Archive>
-        void serialize(Archive &archive, math::mat4 &mat4) {
-            archive(mat4.columns);
-        }
-
-        template<class Archive>
-        void serialize(Archive &archive, math::vec2 &vec2) {
-            archive(vec2.x, vec2.y);
-        }
-
-        template<class Archive>
-        void serialize(Archive &archive, math::vec3 &vec3) {
-            archive(vec3.x, vec3.y, vec3.z);
-        }
-
-        template<class Archive>
-        void serialize(Archive &archive, math::vec4 &vec4) {
-            archive(vec4.x, vec4.y, vec4.z, vec4.w);
-        }
-    }
     namespace entities {
         std::string serialize(entities::EntityManager &manager, component::SnapshotType snapshotType) {
             std::stringstream storage{};

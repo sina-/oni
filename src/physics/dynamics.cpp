@@ -12,6 +12,7 @@
 #include <oni-core/physics/transformation.h>
 #include <oni-core/physics/projectile.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/component/visual.h>
 
 namespace oni {
     namespace physics {
@@ -336,9 +337,16 @@ namespace oni {
                                              common::EntityID entity,
                                              component::PhysicalProperties &props,
                                              component::Placement &placement) {
+
             if (isColliding(props.body)) {
                 mProjectile->destroyBullet(manager, entity);
                 entities::destroyEntity(manager, entity);
+
+                auto entity = entities::createEntity(manager, false);
+                // TODO: Proper Z level!
+                common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
+                math::vec3 pos{placement.position.x, placement.position.y, particleZ};
+                entities::assignParticle(manager, entity, pos);
             } else {
                 entitiesToBeUpdated.push_back(entity);
             }

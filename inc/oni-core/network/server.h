@@ -5,6 +5,7 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/peer.h>
 #include <oni-core/network/packet.h>
+#include <oni-core/component/visual.h>
 
 namespace oni {
     namespace physics {
@@ -32,6 +33,8 @@ namespace oni {
             void sendCarEntityID(common::EntityID, const common::PeerID &);
 
             void sendZLevelDelta(const common::PeerID &, const network::ZLevelDeltaPacket &);
+
+            void broadcastSpawnParticle(entities::EntityManager &manager);
 
         private:
             Server();

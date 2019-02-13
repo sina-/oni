@@ -25,9 +25,11 @@ namespace oni {
             manager.assign<component::Tag_TextureShaded>(entity);
         }
 
-        common::EntityID createEntity(EntityManager &manager) {
+        common::EntityID createEntity(EntityManager &manager, bool tagAsNew) {
             auto entityID = manager.create();
-            manager.assign<component::Tag_NewEntity>(entityID);
+            if (tagAsNew) {
+                manager.assign<component::Tag_NewEntity>(entityID);
+            }
             return entityID;
         }
 
@@ -174,6 +176,14 @@ namespace oni {
             manager.assign<component::CarConfig>(entityID, carConfig);
         }
 
+        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos) {
+            component::Particle particle{};
+            particle.pos = worldPos;
+            particle.life = 1.f;
+            manager.assign<component::Particle>(entityID, particle);
+            manager.assign<component::Tag_Particle>(entityID);
+        }
+
         void removeShape(EntityManager &manager, common::EntityID entityID) {
             manager.remove<component::Shape>(entityID);
         }
@@ -229,6 +239,4 @@ namespace oni {
             manager.remove<component::TransformParent>(child);
         }
     }
-
-
 }

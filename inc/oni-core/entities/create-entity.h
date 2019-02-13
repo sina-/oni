@@ -26,7 +26,7 @@ namespace oni {
 
     namespace entities {
 
-        common::EntityID createEntity(EntityManager &manager);
+        common::EntityID createEntity(EntityManager &manager, bool tagAsNew = true);
 
         void destroyEntity(EntityManager &manager, common::EntityID entityID);
 
@@ -54,6 +54,8 @@ namespace oni {
                              common::real32 heading);
 
         void removePlacement(EntityManager &manager, common::EntityID entityID);
+
+        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos);
 
         void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color);
 

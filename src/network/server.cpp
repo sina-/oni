@@ -1,12 +1,8 @@
 #include <oni-core/network/server.h>
 
-#include <iostream>
-#include <cassert>
-
 #include <enet/enet.h>
 
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/network/packet.h>
 #include <oni-core/entities/serialization.h>
 
 
@@ -124,6 +120,27 @@ namespace oni {
             auto type = PacketType::Z_LEVEL_DELTA;
 
             send(type, data, mPeers[peerID]);
+        }
+
+        void Server::broadcastSpawnParticle(entities::EntityManager &manager) {
+            std::vector<component::Particle> particles;
+            {
+                // TODO: Same silly requirement of two component is minimum for a view!
+                auto view = manager.createViewScopeLock<component::Particle, component::Tag_Particle>();
+                for (auto &&entity: view) {
+                    particles.emplace_back(view.get<component::Particle>(entity));
+                }
+                manager.reset<component::Particle>();
+                manager.reset<component::Tag_Particle>();
+            }
+
+            // TODO: This is just way to many packets. I should batch them together.
+            for (auto &&particle: particles) {
+                auto data = entities::serialize<component::Particle>(particle);
+                auto type = PacketType::SPAWN_PARTICLE;
+
+                broadcast(type, data);
+            }
         }
     }
 }

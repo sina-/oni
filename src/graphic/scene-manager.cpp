@@ -485,6 +485,11 @@ namespace oni {
                 return;
             }
 
+            // TODO: Update particles
+            {
+
+            }
+
             std::vector<component::Placement> carTireRRPlacements{};
             std::vector<component::Placement> carTireRLPlacements{};
             std::vector<component::TransformParent> carTireRRTransformParent{};

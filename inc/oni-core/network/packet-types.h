@@ -18,6 +18,7 @@ namespace oni {
             DESTROYED_ENTITIES = 9,
 
             Z_LEVEL_DELTA = 10,
+            SPAWN_PARTICLE = 11,
         };
     }
 }

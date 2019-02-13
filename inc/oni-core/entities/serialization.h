@@ -9,11 +9,12 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/snapshot-type.h>
 #include <oni-core/network/packet.h>
+#include <oni-core/component/visual.h>
 
 namespace oni {
+    // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
+    // other compilation units such as server.cpp
     namespace network {
-        // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
-        // other compilation units such as server.cpp
         template<class Archive>
         void serialize(Archive &archive, DataPacket &packet) {
             archive(packet.data);
@@ -27,6 +28,35 @@ namespace oni {
         template<class Archive>
         void serialize(Archive &archive, ZLevelDeltaPacket &packet) {
             archive(packet.major, packet.minor);
+        }
+    }
+
+    namespace math {
+        template<class Archive>
+        void serialize(Archive &archive, mat4 &mat4) {
+            archive(mat4.columns);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, vec2 &vec2) {
+            archive(vec2.x, vec2.y);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, vec3 &vec3) {
+            archive(vec3.x, vec3.y, vec3.z);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, vec4 &vec4) {
+            archive(vec4.x, vec4.y, vec4.z, vec4.w);
+        }
+    }
+
+    namespace component {
+        template<class Archive>
+        void serialize(Archive &archive, Particle &particle) {
+            archive(particle.pos, particle.life);
         }
     }
 

@@ -9,7 +9,7 @@
 namespace oni {
     namespace network {
         struct EntityPacket {
-            common::uint32 entity{};
+            common::uint32 entity{0};
         };
 
         struct DataPacket {
@@ -17,8 +17,8 @@ namespace oni {
         };
 
         struct ZLevelDeltaPacket {
-            common::real32 major{};
-            common::real32 minor{};
+            common::real32 major{0.f};
+            common::real32 minor{0.f};
         };
     }
 }

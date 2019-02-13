@@ -95,6 +95,11 @@ namespace oni {
                     mPacketHandlers[PacketType::Z_LEVEL_DELTA](peerID, dataString);
                     break;
                 }
+                case (PacketType::SPAWN_PARTICLE): {
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::SPAWN_PARTICLE](peerID, dataString);
+                    break;
+                }
                 default: {
                     std::cout << "Unknown packet!" << std::endl;
                     break;

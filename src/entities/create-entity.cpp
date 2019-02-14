@@ -76,8 +76,7 @@ namespace oni {
         void assignPoint(EntityManager &manager,
                          common::EntityID entityID,
                          const math::vec3 &pos) {
-            auto point = component::Point{};
-            point.vertex = pos;
+            component::Point point{pos.x, pos.y, pos.z};
             manager.assign<component::Point>(entityID, point);
         }
 
@@ -176,10 +175,11 @@ namespace oni {
             manager.assign<component::CarConfig>(entityID, carConfig);
         }
 
-        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos) {
+        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
+                            common::real32 life) {
             component::Particle particle{};
             particle.pos = worldPos;
-            particle.life = 1.f;
+            particle.life = life;
             manager.assign<component::Particle>(entityID, particle);
             manager.assign<component::Tag_Particle>(entityID);
         }

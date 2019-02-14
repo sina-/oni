@@ -8,9 +8,7 @@
 
 namespace oni {
     namespace component {
-        struct Point {
-            math::vec3 vertex{0.f, 0.f, 0.f};
-        };
+        using Point = math::vec3;
 
         // TODO: Rename this into Sprite
         struct Shape {

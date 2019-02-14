@@ -3,7 +3,7 @@
 #include <oni-core/common/typedefs.h>
 
 namespace oni {
-    namespace common{
+    namespace common {
         typedef unsigned int oniGLenum;
         typedef unsigned int oniGLbitfield;
         typedef unsigned int oniGLuint;

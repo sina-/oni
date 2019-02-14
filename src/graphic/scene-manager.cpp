@@ -79,9 +79,9 @@ namespace oni {
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
-            auto timeIndex = glGetAttribLocation(program, "time");
+            auto lifeIndex = glGetAttribLocation(program, "life");
 
-            if (positionIndex == -1 || colorIndex == -1 || timeIndex == -1) {
+            if (positionIndex == -1 || colorIndex == -1 || lifeIndex == -1) {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
@@ -105,20 +105,20 @@ namespace oni {
                     component::ParticleVertex,
                     color));
 
-            component::BufferStructure time;
-            time.index = static_cast<common::oniGLuint>(timeIndex);
-            time.componentCount = 1;
-            time.componentType = GL_FLOAT;
-            time.normalized = GL_FALSE;
-            time.stride = stride;
-            time.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+            component::BufferStructure life;
+            life.index = static_cast<common::oniGLuint>(lifeIndex);
+            life.componentCount = 1;
+            life.componentType = GL_FLOAT;
+            life.normalized = GL_FALSE;
+            life.stride = stride;
+            life.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
                     component::ParticleVertex,
-                    time));
+                    life));
 
             std::vector<component::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
-            bufferStructures.push_back(time);
+            bufferStructures.push_back(life);
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
@@ -465,17 +465,19 @@ namespace oni {
 
         void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
                                            common::real32 viewHeight) {
-            auto view = manager.createView<component::Point, component::Appearance, component::Tag_Particle>();
+            auto view = manager.createView<component::Particle, component::Tag_Particle>();
             for (const auto &entity: view) {
-                const auto &point = view.get<component::Point>(entity);
-                if (!math::collides(point, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                const auto &particle = view.get<component::Particle>(entity);
+                if (!math::collides(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
-                const auto &appearance = view.get<component::Appearance>(entity);
+
+                component::Appearance appearance;
+                appearance.color = math::vec4{1.f, 1.f, 1.f, 0.8f};
 
                 ++mRenderedParticlesPerFrame;
 
-                mParticleRenderer->submit(point, appearance, 1.f);
+                mParticleRenderer->submit(particle, appearance);
             }
 
         }

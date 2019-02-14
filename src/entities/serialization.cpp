@@ -27,7 +27,7 @@ namespace oni {
 
         template<class Archive>
         void serialize(Archive &archive, component::Point &point) {
-            archive(point.vertex);
+            archive(point);
         }
 
         template<class Archive>

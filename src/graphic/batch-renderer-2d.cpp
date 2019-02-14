@@ -121,15 +121,14 @@ namespace oni {
             mIndexCount += 6;
         }
 
-        void BatchRenderer2D::_submit(const component::Point &point, const component::Appearance &appearance,
-                                      common::real32 time) {
+        void BatchRenderer2D::_submit(const component::Particle &particle, const component::Appearance &appearance) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
             auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
 
-            buffer->position = point.vertex;
+            buffer->position = particle.pos;
             buffer->color = appearance.color;
-            buffer->time = time;
+            buffer->life = particle.life;
             buffer++;
 
             // Update the mBuffer to point to the head.

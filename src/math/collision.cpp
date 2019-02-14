@@ -1,6 +1,7 @@
 #include <oni-core/math/collision.h>
 
 #include <oni-core/component/geometry.h>
+#include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
     namespace math {
@@ -26,8 +27,8 @@ namespace oni {
             auto firstCenterY = (first.vertexA.y + first.vertexC.y) / 2.0f;
             auto firstSize = first.getSize();
 
-            return (std::abs(firstCenterX - second.vertex.x) * 2 < (firstSize.x)) &&
-                   (std::abs(firstCenterY - second.vertex.y) * 2 < (firstSize.y));
+            return (std::abs(firstCenterX - second.x) * 2 < (firstSize.x)) &&
+                   (std::abs(firstCenterY - second.y) * 2 < (firstSize.y));
         }
 
         bool collides(const component::Shape &first,
@@ -43,8 +44,8 @@ namespace oni {
 
         bool collides(const component::Point &first, common::real32 x, common::real32 y, common::real32 lengthX,
                       common::real32 lengthY) {
-            return (std::abs(first.vertex.x - x) * 2 < lengthX) &&
-                   (std::abs(first.vertex.y - y) * 2 < lengthY);
+            return (std::abs(first.x - x) * 2 < lengthX) &&
+                   (std::abs(first.y - y) * 2 < lengthY);
         }
     }
 }

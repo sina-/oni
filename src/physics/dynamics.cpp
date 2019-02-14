@@ -346,7 +346,7 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
-                entities::assignParticle(manager, entity, pos);
+                entities::assignParticle(manager, entity, pos, 1.f);
             } else {
                 entitiesToBeUpdated.push_back(entity);
             }

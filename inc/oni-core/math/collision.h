@@ -1,12 +1,13 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/math/vec3.h>
 
 namespace oni {
     namespace component {
         class Shape;
 
-        class Point;
+        using Point = math::vec3;
     }
 
     namespace math {

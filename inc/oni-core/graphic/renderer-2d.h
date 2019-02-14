@@ -13,7 +13,7 @@ namespace oni {
 
         class Shape;
 
-        class Point;
+        class Particle;
     }
 
     namespace graphic {
@@ -38,7 +38,7 @@ namespace oni {
 
             void submit(const component::Shape &position, const component::Appearance &color);
 
-            void submit(const component::Point &point, const component::Appearance &color, common::real32 time);
+            void submit(const component::Particle &, const component::Appearance &color);
 
             void submit(const component::Shape &position, const component::Texture &texture);
 
@@ -59,8 +59,7 @@ namespace oni {
 
             virtual void _submit(const component::Shape &position, const component::Appearance &color) = 0;
 
-            virtual void
-            _submit(const component::Point &point, const component::Appearance &color, common::real32 time) = 0;
+            virtual void _submit(const component::Particle &, const component::Appearance &color) = 0;
 
             virtual void _submit(const component::Shape &position, const component::Texture &texture) = 0;
 

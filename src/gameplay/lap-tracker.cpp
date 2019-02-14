@@ -3,7 +3,7 @@
 #include <oni-core/component/gameplay.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/physics/transformation.h>
-#include <oni-core/physics/collision.h>
+#include <oni-core/math/collision.h>
 
 namespace oni {
     namespace gameplay {
@@ -44,7 +44,7 @@ namespace oni {
                     auto entityPlacement = carView.get<component::Placement>(entity);
                     physics::Transformation::localToWorldTranslation(entityPlacement.position, carShapeWorld);
 
-                    if (physics::collides(nextCheckpoint, carShapeWorld)) {
+                    if (math::collides(nextCheckpoint, carShapeWorld)) {
                         mRemainingCheckpoints[entity].pop_back();
                         std::cout << "Remaining checkpoints: " << mRemainingCheckpoints[entity].size() << "\n";
                     }

@@ -159,8 +159,7 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_Static,
-                        component::Tag_Particle
+                        component::Tag_Static
                 >(output, snapshotType);
             }
 
@@ -189,8 +188,7 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_Static,
-                        component::Tag_Particle
+                        component::Tag_Static
                 >(snapshotType, input,
                         // NOTE: Car entity keeps a reference to tire entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct

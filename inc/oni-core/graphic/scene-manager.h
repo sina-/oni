@@ -50,20 +50,20 @@ namespace oni {
 
             void renderPhysicsDebugData();
 
-            void renderStaticTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                      common::real32 halfViewHeight);
+            void renderStaticTextures(entities::EntityManager &manager, common::real32 viewWidth,
+                                      common::real32 viewHeight);
 
-            void renderStaticText(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                  common::real32 halfViewHeight);
+            void renderStaticText(entities::EntityManager &manager, common::real32 viewWidth,
+                                  common::real32 viewHeight);
 
-            void renderDynamicTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                       common::real32 halfViewHeight);
+            void renderDynamicTextures(entities::EntityManager &manager, common::real32 viewWidth,
+                                       common::real32 viewHeight);
 
-            void renderColorSprites(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                    common::real32 halfViewHeight);
+            void renderColorSprites(entities::EntityManager &manager, common::real32 viewWidth,
+                                    common::real32 viewHeight);
 
-            void renderParticles(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                 common::real32 halfViewHeight);
+            void renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
+                                 common::real32 viewHeight);
 
             void tick(entities::EntityManager &manager);
 
@@ -111,7 +111,7 @@ namespace oni {
             };
 
         private:
-            void begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale);
+            void begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale, bool setMVP);
 
             void end(const Shader &shader, Renderer2D &renderer2D);
 
@@ -120,9 +120,6 @@ namespace oni {
             void initializeColorRenderer();
 
             void initializeParticleRenderer();
-
-            bool isVisible(const component::Shape &shape, common::real32 halfViewWidth,
-                           common::real32 halfViewHeight) const;
 
             void prepareTexture(component::Texture &texture);
 

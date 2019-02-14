@@ -16,6 +16,7 @@
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/gameplay.h>
 #include <oni-core/component/tag.h>
+#include <oni-core/math/collision.h>
 
 
 namespace oni {
@@ -230,7 +231,8 @@ namespace oni {
             mTextureShader->disable();
         }
 
-        void SceneManager::begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale) {
+        void
+        SceneManager::begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale, bool setMVP) {
             shader.enable();
 
             auto view = math::mat4::identity();
@@ -241,8 +243,10 @@ namespace oni {
             if (translate) {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
-            auto mvp = mProjectionMatrix * view;
-            shader.setUniformMat4("mvp", mvp);
+            if (setMVP) {
+                auto mvp = mProjectionMatrix * view;
+                shader.setUniformMat4("mvp", mvp);
+            }
             renderer2D.begin();
         }
 
@@ -290,21 +294,21 @@ namespace oni {
         }
 
         void SceneManager::render(entities::EntityManager &manager, common::EntityID lookAtEntity) {
-            auto halfViewWidth = getViewWidth() / 2.0f;
-            auto halfViewHeight = getViewHeight() / 2.0f;
+            auto viewWidth = getViewWidth();
+            auto viewHeight = getViewHeight();
 
             {
                 auto lock = manager.scopedLock();
-                begin(*mColorShader, *mColorRenderer, true, true);
-                renderColorSprites(manager, halfViewWidth, halfViewHeight);
+                begin(*mColorShader, *mColorRenderer, true, true, true);
+                renderColorSprites(manager, viewWidth, viewHeight);
             }
 
             end(*mColorShader, *mColorRenderer);
 
             {
                 auto lock = manager.scopedLock();
-                begin(*mParticleShader, *mParticleRenderer, true, true);
-                renderParticles(manager, halfViewWidth, halfViewHeight);
+                begin(*mParticleShader, *mParticleRenderer, true, true, true);
+                renderParticles(manager, viewWidth, viewHeight);
             }
 
             end(*mParticleShader, *mParticleRenderer);
@@ -316,10 +320,10 @@ namespace oni {
                     lookAt(pos.x, pos.y);
                 }
 
-                begin(*mTextureShader, *mTextureRenderer, true, true);
-                renderStaticTextures(manager, halfViewWidth, halfViewHeight);
-                renderDynamicTextures(manager, halfViewWidth, halfViewHeight);
-                renderStaticText(manager, halfViewWidth, halfViewHeight);
+                begin(*mTextureShader, *mTextureRenderer, true, true, true);
+                renderStaticTextures(manager, viewWidth, viewHeight);
+                renderDynamicTextures(manager, viewWidth, viewHeight);
+                renderStaticText(manager, viewWidth, viewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
@@ -327,21 +331,21 @@ namespace oni {
         }
 
         void SceneManager::renderInternal() {
-            auto halfViewWidth = getViewWidth() / 2.0f;
-            auto halfViewHeight = getViewHeight() / 2.0f;
+            auto viewWidth = getViewWidth();
+            auto viewHeight = getViewHeight();
 
             {
                 auto lock = mInternalRegistry->scopedLock();
-                begin(*mTextureShader, *mTextureRenderer, true, true);
-                renderStaticTextures(*mInternalRegistry, halfViewWidth, halfViewHeight);
+                begin(*mTextureShader, *mTextureRenderer, true, true, true);
+                renderStaticTextures(*mInternalRegistry, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
             {
                 auto lock = mInternalRegistry->scopedLock();
                 // Render UI text with fixed camera
-                begin(*mTextureShader, *mTextureRenderer, false, false);
-                renderStaticText(*mInternalRegistry, halfViewWidth, halfViewHeight);
+                begin(*mTextureShader, *mTextureRenderer, false, false, true);
+                renderStaticText(*mInternalRegistry, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
@@ -353,15 +357,15 @@ namespace oni {
         }
 
         void SceneManager::beginColorRendering() {
-            begin(*mColorShader, *mColorRenderer, true, false);
+            begin(*mColorShader, *mColorRenderer, true, false, true);
         }
 
         void SceneManager::endColorRendering() {
             end(*mColorShader, *mColorRenderer);
         }
 
-        void SceneManager::renderStaticText(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                            common::real32 halfViewHeight) {
+        void SceneManager::renderStaticText(entities::EntityManager &manager, common::real32 viewWidth,
+                                            common::real32 viewHeight) {
             auto staticTextView = manager.createView<component::Text, component::Tag_Static>();
             for (const auto &entity: staticTextView) {
                 auto &text = staticTextView.get<component::Text>(entity);
@@ -373,13 +377,13 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderStaticTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                                common::real32 halfViewHeight) {
+        void SceneManager::renderStaticTextures(entities::EntityManager &manager, common::real32 viewWidth,
+                                                common::real32 viewHeight) {
             auto staticTextureView = manager.createView<component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::Tag_Static>();
             for (const auto &entity: staticTextureView) {
                 const auto &shape = staticTextureView.get<component::Shape>(entity);
-                if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
+                if (!math::collides(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
                 auto &texture = staticTextureView.get<component::Texture>(entity);
@@ -401,8 +405,8 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderDynamicTextures(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                                 common::real32 halfViewHeight) {
+        void SceneManager::renderDynamicTextures(entities::EntityManager &manager, common::real32 viewWidth,
+                                                 common::real32 viewHeight) {
             // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
             // other systems don't share any entity component, or the shared section is minimum and I can create
             // copy of that data before starting rendering and only lock the registry at that point
@@ -428,7 +432,7 @@ namespace oni {
                 }
 
                 auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                if (!isVisible(shapeTransformed, halfViewWidth, halfViewHeight)) {
+                if (!math::collides(shapeTransformed, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
 
@@ -442,13 +446,13 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderColorSprites(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                              common::real32 halfViewHeight) {
+        void SceneManager::renderColorSprites(entities::EntityManager &manager, common::real32 viewWidth,
+                                              common::real32 viewHeight) {
             auto view = manager.createView<component::Tag_ColorShaded, component::Shape,
                     component::Appearance, component::Tag_Static>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<component::Shape>(entity);
-                if (!isVisible(shape, halfViewWidth, halfViewHeight)) {
+                if (!math::collides(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
                 const auto &appearance = view.get<component::Appearance>(entity);
@@ -459,14 +463,14 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 halfViewWidth,
-                                           common::real32 halfViewHeight) {
+        void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
+                                           common::real32 viewHeight) {
             auto view = manager.createView<component::Point, component::Appearance, component::Tag_Particle>();
             for (const auto &entity: view) {
                 const auto &point = view.get<component::Point>(entity);
-/*                if (!isVisible(point, halfViewWidth, halfViewHeight)) {
+                if (!math::collides(point, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
-                }*/
+                }
                 const auto &appearance = view.get<component::Appearance>(entity);
 
                 ++mRenderedParticlesPerFrame;
@@ -686,58 +690,6 @@ namespace oni {
 
         common::real32 SceneManager::getViewHeight() const {
             return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
-        }
-
-        bool SceneManager::isVisible(const component::Shape &shape, common::real32 halfViewWidth,
-                                     common::real32 halfViewHeight) const {
-            // TODO: Garbage collision detection, use the same method used in lap tracker for figuring out if a check
-            // point is reached.
-            auto x = false;
-
-            auto xMin = shape.vertexA.x;
-            auto xMax = shape.vertexC.x;
-
-            auto viewXMin = mCamera.x - halfViewWidth;
-            auto viewXMax = mCamera.x + halfViewWidth;
-
-            if (xMin >= viewXMin && xMin <= viewXMax) {
-                x = true;
-            }
-
-            if (xMax >= viewXMin && xMax <= viewXMax) {
-                x = true;
-            }
-
-            // Object is bigger than the frustum, i.e., view is inside the object
-            if (viewXMin >= xMin && viewXMax <= xMax) {
-                x = true;
-            }
-
-            if (!x) {
-                return false;
-            }
-
-            auto y = false;
-
-            auto yMin = shape.vertexA.y;
-            auto yMax = shape.vertexC.y;
-
-            auto viewYMin = mCamera.y - halfViewHeight;
-            auto viewYMax = mCamera.y + halfViewHeight;
-
-            if (yMin >= viewYMin && yMin <= viewYMax) {
-                y = true;
-            }
-            if (yMax >= viewYMin && yMax <= viewYMax) {
-                y = true;
-            }
-
-            // Object is bigger than the frustum, i.e., view is inside the object
-            if (viewYMin >= yMin && viewYMax <= yMax) {
-                y = true;
-            }
-
-            return y;
         }
 
         void SceneManager::resetCounters() {

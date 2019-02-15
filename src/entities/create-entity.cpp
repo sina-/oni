@@ -108,7 +108,7 @@ namespace oni {
             b2Body *body{};
 
             b2BodyDef bodyDef;
-            bodyDef.bullet = properties.bullet;
+            bodyDef.bullet = properties.highPrecision;
             bodyDef.angle = heading;
             bodyDef.linearDamping = properties.linearDamping;
             bodyDef.angularDamping = properties.angularDamping;
@@ -131,6 +131,10 @@ namespace oni {
                     collisionSensor.shape = &shape;
                     collisionSensor.density = properties.density;
                     collisionSensor.friction = properties.friction;
+
+                    if (!properties.collisionWithinCategory) {
+                        collisionSensor.filter.groupIndex = -static_cast<common::int16>(properties.physicalCategory);
+                    }
 
                     body->CreateFixture(&fixtureDef);
                     body->CreateFixture(&collisionSensor);

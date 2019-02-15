@@ -8,20 +8,20 @@ class b2Body;
 namespace oni {
     namespace component {
         // TODO: Not sure if this is the right place to define this
-        enum class WallTilePosition : common::int8 {
+        enum class WallTilePosition : common::uint8 {
             TOP = 1,
             RIGHT = 2,
             BOTTOM = 3,
             LEFT = 4,
         };
 
-        enum class BodyType : common::int8 {
+        enum class BodyType : common::uint8 {
             STATIC = 1,
             KINEMATIC = 2,
             DYNAMIC = 3,
         };
 
-        enum class PhysicalCategory : common::int8 {
+        enum class PhysicalCategory : common::uint8 {
             GENERIC = 1,
             VEHICLE = 2,
             RACE_CAR = 3,
@@ -34,8 +34,9 @@ namespace oni {
             common::real32 angularDamping{0.f};
             common::real32 density{1.f};
             common::real32 friction{0.1f};
-            bool bullet{false};
+            bool highPrecision{false};
             bool colliding{false};
+            bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other
             PhysicalCategory physicalCategory{PhysicalCategory::GENERIC};
             BodyType bodyType{BodyType::STATIC};
             // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D

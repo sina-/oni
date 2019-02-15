@@ -325,9 +325,9 @@ namespace oni {
             for (b2ContactEdge *ce = body->GetContactList();
                  ce && !colliding; ce = ce->next) {
                 b2Contact *c = ce->contact;
-                //if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
-                colliding = c->IsTouching();
-                //}
+//                if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
+                    colliding = c->IsTouching();
+//                }
             }
             return colliding;
         }
@@ -339,14 +339,15 @@ namespace oni {
                                              component::Placement &placement) {
 
             if (isColliding(props.body)) {
-                mProjectile->destroyBullet(manager, entity);
-                entities::destroyEntity(manager, entity);
-
-                auto entity = entities::createEntity(manager, false);
+                auto particleEntity = entities::createEntity(manager, false);
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
-                entities::assignParticle(manager, entity, pos, 1.f);
+                entities::assignParticle(manager, particleEntity, pos, 1.f);
+
+                mProjectile->destroyBullet(manager, entity);
+                entities::destroyEntity(manager, entity);
+
             } else {
                 entitiesToBeUpdated.push_back(entity);
             }

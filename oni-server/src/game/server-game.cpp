@@ -238,7 +238,7 @@ namespace oni {
                 properties.density = 0.1f;
                 properties.angularDamping = 2.f;
                 properties.linearDamping = 2.f;
-                properties.bullet = true;
+                properties.highPrecision = true;
                 properties.bodyType = oni::component::BodyType::DYNAMIC;
                 properties.physicalCategory = oni::component::PhysicalCategory::RACE_CAR;
 
@@ -394,7 +394,7 @@ namespace oni {
                 properties.density = 0.1f;
                 properties.angularDamping = 2.f;
                 properties.linearDamping = 2.f;
-                properties.bullet = false;
+                properties.highPrecision = false;
                 properties.bodyType = oni::component::BodyType::DYNAMIC;
                 properties.physicalCategory = oni::component::PhysicalCategory::VEHICLE;
 

@@ -587,7 +587,7 @@ namespace oni {
                     }
 
                     oni::component::PhysicalProperties properties;
-                    properties.bullet = false;
+                    properties.highPrecision = false;
                     properties.bodyType = oni::component::BodyType::STATIC;
                     properties.physicalCategory = oni::component::PhysicalCategory::WALL;
 

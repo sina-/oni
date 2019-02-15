@@ -77,9 +77,10 @@ namespace oni {
             properties.density = 0.1f;
             properties.angularDamping = 2.f;
             properties.linearDamping = 0.1f;
-            properties.bullet = true;
+            properties.highPrecision = true;
             properties.bodyType = oni::component::BodyType::DYNAMIC;
             properties.physicalCategory = oni::component::PhysicalCategory::BULLET;
+            properties.collisionWithinCategory = false;
 
             auto bulletID = oni::entities::createEntity(manager);
             entities::assignPhysicalProperties(manager, *mPhysicsWorld, bulletID,

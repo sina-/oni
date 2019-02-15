@@ -16,7 +16,7 @@
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/gameplay.h>
 #include <oni-core/component/tag.h>
-#include <oni-core/math/collision.h>
+#include <oni-core/math/intesects.h>
 
 
 namespace oni {
@@ -383,7 +383,7 @@ namespace oni {
                     component::Texture, component::Tag_Static>();
             for (const auto &entity: staticTextureView) {
                 const auto &shape = staticTextureView.get<component::Shape>(entity);
-                if (!math::collides(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                if (!math::intersects(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
                 auto &texture = staticTextureView.get<component::Texture>(entity);
@@ -432,7 +432,7 @@ namespace oni {
                 }
 
                 auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
-                if (!math::collides(shapeTransformed, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                if (!math::intersects(shapeTransformed, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
 
@@ -452,7 +452,7 @@ namespace oni {
                     component::Appearance, component::Tag_Static>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<component::Shape>(entity);
-                if (!math::collides(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                if (!math::intersects(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
                 const auto &appearance = view.get<component::Appearance>(entity);
@@ -468,7 +468,7 @@ namespace oni {
             auto view = manager.createView<component::Particle, component::Tag_Particle>();
             for (const auto &entity: view) {
                 const auto &particle = view.get<component::Particle>(entity);
-                if (!math::collides(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
 

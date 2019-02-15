@@ -137,7 +137,7 @@ namespace oni {
 
                 renderTimer.restart();
 
-                _render();
+                _render(mSimMS);
 
                 auto renderDuration = renderTimer.elapsed_in_seconds();
                 auto excess = mRenderMS - renderDuration;

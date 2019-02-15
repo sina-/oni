@@ -182,7 +182,7 @@ namespace oni {
                 mLapTracker->tick();
             }
 
-            void ServerGame::_render() {}
+            void ServerGame::_render(oni::common::real64 simTime) {}
 
             void ServerGame::_display() {}
 

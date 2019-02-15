@@ -188,6 +188,11 @@ namespace oni {
             manager.assign<component::Tag_Particle>(entityID);
         }
 
+        void removeParticle(EntityManager &manager, common::EntityID entityID) {
+            manager.remove<component::Tag_Particle>(entityID);
+            manager.remove<component::Particle>(entityID);
+        }
+
         void removeShape(EntityManager &manager, common::EntityID entityID) {
             manager.remove<component::Shape>(entityID);
         }

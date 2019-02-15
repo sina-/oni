@@ -50,7 +50,7 @@ namespace oni {
             protected:
                 void _sim(oni::common::real64 simTime) override;
 
-                void _render() override;
+                void _render(oni::common::real64 simTime) override;
 
                 void _display() override;
 

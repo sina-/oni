@@ -33,7 +33,7 @@ namespace oni {
 
             virtual void _sim(common::real64 simTime) = 0;
 
-            virtual void _render() = 0;
+            virtual void _render(common::real64 simTime) = 0;
 
             virtual void _display() = 0;
 

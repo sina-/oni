@@ -65,7 +65,7 @@ namespace oni {
             void renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
                                  common::real32 viewHeight);
 
-            void tick(entities::EntityManager &manager);
+            void tick(entities::EntityManager &manager, common::real64 tickTime);
 
             void renderRaw(const component::Shape &shape, const component::Appearance &appearance);
 

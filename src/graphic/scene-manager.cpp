@@ -15,7 +15,6 @@
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/gameplay.h>
-#include <oni-core/component/tag.h>
 #include <oni-core/math/intesects.h>
 
 
@@ -483,7 +482,7 @@ namespace oni {
         }
 
 
-        void SceneManager::tick(entities::EntityManager &manager) {
+        void SceneManager::tick(entities::EntityManager &manager, common::real64 tickTime) {
             // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
             // TODO: A better way is no not call tick before we know we have all the information to do actual
             // work. Kinda like a level loading screen.
@@ -491,8 +490,16 @@ namespace oni {
                 return;
             }
 
-            // TODO: Update particles
             {
+                auto view = manager.createView<component::Particle, component::Tag_Particle>();
+                for (const auto &entity: view) {
+                    auto &particle = view.get<component::Particle>(entity);
+                    // TODO: Maybe you want a single place to store these variables?
+                    particle.life -= 0.5f * tickTime;
+                    if (particle.life < 0.f) {
+                        entities::removeParticle(manager, entity);
+                    }
+                }
 
             }
 

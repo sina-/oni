@@ -10,11 +10,12 @@ sudo apt install gcc 		\
 sudo apt install linux-headers-`uname -r`
 
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-add-repository deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main
+sudo apt-add-repository 'deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-8 main'
+sudo apt-add-repository 'deb-src http://apt.llvm.org/stretch/ llvm-toolchain-stretch-8 main'
 sudo apt update
-sudo apt install clang-7
-sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-7 100
-sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-7 100
+sudo apt install clang-8
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-8 100
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-8 100
 ```
 # Build the dependency sub-modules
 ## Build GLFW

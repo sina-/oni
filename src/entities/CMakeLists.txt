@@ -1,14 +1,15 @@
 add_library(oni-core-entities create-entity.cpp serialization.cpp client-data-manager.cpp)
 
 target_compile_features(oni-core-entities
-        PUBLIC
+        INTERFACE
             cxx_std_17
         )
 
+set(LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY true)
 target_include_directories(oni-core-entities
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
+            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt/src>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
         PRIVATE
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>

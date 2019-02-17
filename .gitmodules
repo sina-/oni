@@ -16,3 +16,6 @@
 [submodule "lib/freetype2"]
 	path = lib/freetype2
 	url = git@github.com:sina-/freetype2.git
+[submodule "lib/webgl-noise"]
+	path = lib/webgl-noise
+	url = git@github.com:sina-/webgl-noise.git

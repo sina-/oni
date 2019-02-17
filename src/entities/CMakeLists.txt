@@ -5,7 +5,6 @@ target_compile_features(oni-core-entities
             cxx_std_17
         )
 
-set(LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY true)
 target_include_directories(oni-core-entities
         PUBLIC
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>

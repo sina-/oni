@@ -20,7 +20,7 @@ add_executable(oni-server ${oni-server_SOURCE_DIR}/main.cpp)
 
 target_compile_features(oni-server
         PUBLIC
-        cxx_std_17
+            cxx_std_17
         )
 
 

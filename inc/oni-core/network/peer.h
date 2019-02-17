@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <map>
+#include <functional>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet.h>

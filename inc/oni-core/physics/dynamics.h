@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/component/physic.h>
 

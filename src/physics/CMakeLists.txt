@@ -10,7 +10,6 @@ target_include_directories(oni-core-physics
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
         PRIVATE SYSTEM
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
-            $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/entt>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
             $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glfw/include>
         )

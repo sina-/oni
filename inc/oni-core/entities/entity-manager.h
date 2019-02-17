@@ -24,13 +24,13 @@ namespace oni {
             private:
                 friend EntityManager;
 
-                explicit EntityView(entt::Registry<EntityType> &registry) :
-                        mView(registry.view<Components...>(entt::persistent_t{})) {
+                explicit EntityView(entt::registry<EntityType> &registry) :
+                        mView(registry.view<Components...>()) {
                 }
 
-                EntityView(entt::Registry<EntityType> &registry,
+                EntityView(entt::registry<EntityType> &registry,
                            std::unique_lock<std::mutex> registryLock) :
-                        mView(registry.view<Components...>(entt::persistent_t{})),
+                        mView(registry.view<Components...>()),
                         mRegistryLock(std::move(registryLock)) {
                 }
 
@@ -67,13 +67,13 @@ namespace oni {
                 }
 
             private:
-                entt::PersistentView<Entity, Components...> mView{};
+                entt::view<Entity, Components...> mView{};
                 std::unique_lock<std::mutex> mRegistryLock{};
             };
 
             EntityManager() {
-                mRegistry = std::make_unique<entt::DefaultRegistry>();
-                mLoader = std::make_unique<entt::ContinuousLoader<EntityType>>(*mRegistry);
+                mRegistry = std::make_unique<entt::registry<common::uint32 >>();
+                mLoader = std::make_unique<entt::continuous_loader<EntityType>>(*mRegistry);
                 //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
             }
 
@@ -181,7 +181,7 @@ namespace oni {
             void accommodate(EntityType entityID, Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
-                    mRegistry->accommodate<Component>(entityID, std::forward<Args>(args)...);
+                    mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
                 }
             }
 
@@ -218,8 +218,8 @@ namespace oni {
                         auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
                         if (!view.empty()) {
                             mRegistry->snapshot().template component<ArchiveComponents...>(archive,
-                                                                                           view.cbegin(),
-                                                                                           view.cend());
+                                                                                           view.begin(),
+                                                                                           view.end());
                         }
                         break;
                     }
@@ -227,8 +227,8 @@ namespace oni {
                         auto view = mRegistry->view<component::Tag_NewEntity>();
                         if (!view.empty()) {
                             mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
-                                                                                                             view.cbegin(),
-                                                                                                             view.cend());
+                                                                                                             view.begin(),
+                                                                                                             view.end());
                         }
                         break;
                     }
@@ -281,8 +281,8 @@ namespace oni {
             }
 
         private:
-            std::unique_ptr<entt::Registry<EntityType>> mRegistry{};
-            std::unique_ptr<entt::ContinuousLoader<EntityType>> mLoader{};
+            std::unique_ptr<entt::registry<EntityType>> mRegistry{};
+            std::unique_ptr<entt::continuous_loader<EntityType>> mLoader{};
             std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
 

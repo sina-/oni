@@ -1,16 +1,23 @@
 # Linux Debian/Ubuntu
 ```
-sudo apt install gcc 		\
-		 g++		\
-		 make		\
-		 cmake 		\
-		 libx11-dev	\
-		 xorg-dev
+sudo apt install gcc-8 		 \
+		 g++-8		 \
+		 make		 \
+		 cmake 		 \
+		 libx11-dev	 \
+		 xorg-dev	 \
+                 libxrandr-dev   \
+                 libxinerama-dev \
+                 libxcursor-dev  \
+                 libxi-dev       \
+                 libxxf86vm-dev  \
+                 mesa-common-dev
 
 sudo apt install linux-headers-`uname -r`
 
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-add-repository deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main
+sudo apt-add-repository 'deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main'
+sudo apt-add-repository 'deb-src http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main'
 sudo apt update
 sudo apt install clang-7
 sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-7 100

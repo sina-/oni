@@ -19,6 +19,10 @@ namespace oni {
         struct Placement;
     }
 
+    namespace math {
+        class Rand;
+    }
+
     namespace physics {
         class Projectile;
 
@@ -88,6 +92,8 @@ namespace oni {
                                        component::Placement &
                     )>> mCollisionHandlers{};
             common::real32 mTickFrequency{};
+
+            std::unique_ptr<math::Rand> mRand{};
         };
     }
 }

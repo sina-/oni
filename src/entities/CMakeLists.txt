@@ -1,7 +1,7 @@
 add_library(oni-core-entities create-entity.cpp serialization.cpp client-data-manager.cpp)
 
 target_compile_features(oni-core-entities
-        INTERFACE
+        PUBLIC
             cxx_std_17
         )
 

@@ -20,6 +20,8 @@ namespace oni {
         struct Particle {
             common::real32 life{0.f};
             math::vec3 pos{0.f, 0.f, 0.f};
+            common::uint16 count{0};
+            common::real32 heading{0.f};
         };
 
         enum class TextureStatus : common::uint8 {

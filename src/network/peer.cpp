@@ -27,6 +27,8 @@ namespace oni {
                 mEnetHost = enet_host_create(nullptr, peerCount, channelLimit, incomingBandwidth, outgoingBandwidth);
             }
 
+            assert(mEnetHost);
+
         }
 
         Peer::~Peer() {

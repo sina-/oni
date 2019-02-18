@@ -79,6 +79,7 @@ namespace oni {
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
             auto lifeIndex = glGetAttribLocation(program, "life");
+            auto headingIndex = glGetAttribLocation(program, "heading");
 
             if (positionIndex == -1 || colorIndex == -1 || lifeIndex == -1) {
                 throw std::runtime_error("Invalid attribute name.");
@@ -114,10 +115,21 @@ namespace oni {
                     component::ParticleVertex,
                     life));
 
+            component::BufferStructure heading;
+            heading.index = static_cast<common::oniGLuint>(headingIndex);
+            heading.componentCount = 1;
+            heading.componentType = GL_FLOAT;
+            heading.normalized = GL_FALSE;
+            heading.stride = stride;
+            heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ParticleVertex,
+                    heading));
+
             std::vector<component::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
             bufferStructures.push_back(life);
+            bufferStructures.push_back(heading);
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
@@ -230,6 +242,88 @@ namespace oni {
             mTextureShader->disable();
         }
 
+        void SceneManager::tick(entities::EntityManager &manager, common::real64 tickTime) {
+            // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
+            // TODO: A better way is no not call tick before we know we have all the information to do actual
+            // work. Kinda like a level loading screen.
+            if (mZLevel.majorLevelDelta <= common::ep) {
+                return;
+            }
+
+            {
+                auto view = manager.createView<component::Particle, component::Tag_Particle>();
+                for (const auto &entity: view) {
+                    auto &particle = view.get<component::Particle>(entity);
+                    // TODO: Maybe you want a single place to store these variables?
+                    particle.life -= 0.5f * tickTime;
+                    if (particle.life < 0.f) {
+                        entities::removeParticle(manager, entity);
+                    }
+                }
+            }
+
+            std::vector<component::Placement> carTireRRPlacements{};
+            std::vector<component::Placement> carTireRLPlacements{};
+            std::vector<component::TransformParent> carTireRRTransformParent{};
+            std::vector<component::TransformParent> carTireRLTransformParent{};
+            std::vector<common::uint8> skidOpacity{};
+            {
+                auto carView = manager.createViewScopeLock<component::Car, component::Placement>();
+                for (auto &&carEntity: carView) {
+
+                    const auto car = carView.get<component::Car>(carEntity);
+                    // NOTE: Technically I should use slippingRear, but this gives better effect
+                    if (car.slippingFront || true) {
+                        // TODO: This is not in the view and it will be very slow as more entities are added to the
+                        // registry. Perhaps I can save the tires together with the car
+                        const auto &carTireRRPlacement = manager.get<component::Placement>(car.tireRR);
+                        carTireRRPlacements.push_back(carTireRRPlacement);
+                        const auto &carTireRLPlacement = manager.get<component::Placement>(car.tireRL);
+                        carTireRLPlacements.push_back(carTireRLPlacement);
+
+                        const auto &transformParentRR = manager.get<component::TransformParent>(car.tireRR);
+                        carTireRRTransformParent.push_back(transformParentRR);
+                        const auto &transformParentRL = manager.get<component::TransformParent>(car.tireRL);
+                        carTireRLTransformParent.push_back(transformParentRL);
+
+                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+                        skidOpacity.push_back(alpha);
+                    }
+                }
+            }
+
+            for (size_t i = 0; i < skidOpacity.size(); ++i) {
+                auto skidMarkRRPos = carTireRRTransformParent[i].transform * carTireRRPlacements[i].position;
+                auto skidMarkRLPos = carTireRLTransformParent[i].transform * carTireRLPlacements[i].position;
+
+                common::EntityID skidEntityRL{0};
+                common::EntityID skidEntityRR{0};
+
+                skidEntityRL = getOrCreateSkidTile(skidMarkRLPos.getXY());
+                skidEntityRR = getOrCreateSkidTile(skidMarkRRPos.getXY());
+
+                updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
+                updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
+            }
+            {
+                auto carLapView = manager.createViewScopeLock<component::Car, component::CarLapInfo>();
+                for (auto &&carEntity: carLapView) {
+                    // TODO: This will render all player laps on top of each other. I should render the data in rows
+                    // instead. Something like:
+                    /**
+                     * Player Name: lap, lap time, best time
+                     *
+                     * Player 1: 4, 1:12, :1:50
+                     * Player 2: 5, 0:02, :1:50
+                     */
+                    const auto &carLap = carLapView.get<component::CarLapInfo>(carEntity);
+                    const auto &carLapText = getOrCreateLapText(carEntity, carLap);
+                    updateRaceInfo(carLap, carLapText);
+                }
+            }
+        }
+
+
         void
         SceneManager::begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale, bool setMVP) {
             shader.enable();
@@ -320,9 +414,9 @@ namespace oni {
                 }
 
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
+                renderStaticText(manager, viewWidth, viewHeight);
                 renderStaticTextures(manager, viewWidth, viewHeight);
                 renderDynamicTextures(manager, viewWidth, viewHeight);
-                renderStaticText(manager, viewWidth, viewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
@@ -482,90 +576,8 @@ namespace oni {
         }
 
 
-        void SceneManager::tick(entities::EntityManager &manager, common::real64 tickTime) {
-            // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
-            // TODO: A better way is no not call tick before we know we have all the information to do actual
-            // work. Kinda like a level loading screen.
-            if (mZLevel.majorLevelDelta <= common::ep) {
-                return;
-            }
-
-            {
-                auto view = manager.createView<component::Particle, component::Tag_Particle>();
-                for (const auto &entity: view) {
-                    auto &particle = view.get<component::Particle>(entity);
-                    // TODO: Maybe you want a single place to store these variables?
-                    particle.life -= 0.5f * tickTime;
-                    if (particle.life < 0.f) {
-                        entities::removeParticle(manager, entity);
-                    }
-                }
-
-            }
-
-            std::vector<component::Placement> carTireRRPlacements{};
-            std::vector<component::Placement> carTireRLPlacements{};
-            std::vector<component::TransformParent> carTireRRTransformParent{};
-            std::vector<component::TransformParent> carTireRLTransformParent{};
-            std::vector<common::uint8> skidOpacity{};
-            {
-                auto carView = manager.createViewScopeLock<component::Car, component::Placement>();
-                for (auto &&carEntity: carView) {
-
-                    const auto car = carView.get<component::Car>(carEntity);
-                    // NOTE: Technically I should use slippingRear, but this gives better effect
-                    if (car.slippingFront || true) {
-                        // TODO: This is not in the view and it will be very slow as more entities are added to the
-                        // registry. Perhaps I can save the tires together with the car
-                        const auto &carTireRRPlacement = manager.get<component::Placement>(car.tireRR);
-                        carTireRRPlacements.push_back(carTireRRPlacement);
-                        const auto &carTireRLPlacement = manager.get<component::Placement>(car.tireRL);
-                        carTireRLPlacements.push_back(carTireRLPlacement);
-
-                        const auto &transformParentRR = manager.get<component::TransformParent>(car.tireRR);
-                        carTireRRTransformParent.push_back(transformParentRR);
-                        const auto &transformParentRL = manager.get<component::TransformParent>(car.tireRL);
-                        carTireRLTransformParent.push_back(transformParentRL);
-
-                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-                        skidOpacity.push_back(alpha);
-                    }
-                }
-            }
-
-            for (size_t i = 0; i < skidOpacity.size(); ++i) {
-                auto skidMarkRRPos = carTireRRTransformParent[i].transform * carTireRRPlacements[i].position;
-                auto skidMarkRLPos = carTireRLTransformParent[i].transform * carTireRLPlacements[i].position;
-
-                common::EntityID skidEntityRL{0};
-                common::EntityID skidEntityRR{0};
-
-                skidEntityRL = createOrGetSkidTile(skidMarkRLPos.getXY());
-                skidEntityRR = createOrGetSkidTile(skidMarkRRPos.getXY());
-
-                updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
-                updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
-            }
-            {
-                auto carLapView = manager.createViewScopeLock<component::Car, component::CarLapInfo>();
-                for (auto &&carEntity: carLapView) {
-                    // TODO: This will render all player laps on top of each other. I should render the data in rows
-                    // instead. Something like:
-                    /**
-                     * Player Name: lap, lap time, best time
-                     *
-                     * Player 1: 4, 1:12, :1:50
-                     * Player 2: 5, 0:02, :1:50
-                     */
-                    const auto &carLap = carLapView.get<component::CarLapInfo>(carEntity);
-                    const auto &carLapText = createLapTextIfMissing(carEntity, carLap);
-                    updateRaceInfo(carLap, carLapText);
-                }
-            }
-        }
-
-        const SceneManager::RaceInfoEntities &SceneManager::createLapTextIfMissing(common::EntityID carEntityID,
-                                                                                   const component::CarLapInfo &carLap) {
+        const SceneManager::RaceInfoEntities &SceneManager::getOrCreateLapText(common::EntityID carEntityID,
+                                                                               const component::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
                 RaceInfoEntities carLapText{0};
@@ -595,7 +607,7 @@ namespace oni {
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        common::EntityID SceneManager::createOrGetSkidTile(const math::vec2 &position) {
+        common::EntityID SceneManager::getOrCreateSkidTile(const math::vec2 &position) {
             auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             auto packedIndices = math::packIntegers(x, y);

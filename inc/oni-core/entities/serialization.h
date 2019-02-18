@@ -56,7 +56,7 @@ namespace oni {
     namespace component {
         template<class Archive>
         void serialize(Archive &archive, Particle &particle) {
-            archive(particle.pos, particle.life);
+            archive(particle.pos, particle.life, particle.count, particle.heading);
         }
     }
 

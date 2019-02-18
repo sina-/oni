@@ -6,13 +6,14 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/physic.h>
+#include <oni-core/component/visual.h>
 #include <oni-core/common/consts.h>
+#include <oni-core/math/rand.h>
 #include <oni-core/graphic/window.h>
 #include <oni-core/physics/car.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/physics/projectile.h>
 #include <oni-core/entities/create-entity.h>
-#include <oni-core/component/visual.h>
 
 namespace oni {
     namespace physics {
@@ -75,6 +76,7 @@ namespace oni {
             mCollisionHandler = std::make_unique<CollisionHandler>();
             mPhysicsWorld = std::make_unique<b2World>(gravity);
             mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
+            mRand = std::make_unique<math::Rand>(0);
 
             mCollisionHandlers[component::PhysicalCategory::BULLET] =
                     std::bind(&Dynamics::handleBulletCollision, this,
@@ -343,7 +345,9 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
-                entities::assignParticle(manager, particleEntity, pos, 1.f);
+
+                auto particleCount = mRand->nextUint8(3, 6);
+                entities::assignParticle(manager, particleEntity, pos, 1.f, particleCount, 0.f);
 
                 mProjectile->destroyBullet(manager, entity);
                 entities::destroyEntity(manager, entity);

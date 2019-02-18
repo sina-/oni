@@ -123,10 +123,10 @@ namespace oni {
 
             void prepareTexture(component::Texture &texture);
 
-            common::EntityID createOrGetSkidTile(const math::vec2 &position);
+            common::EntityID getOrCreateSkidTile(const math::vec2 &position);
 
-            const RaceInfoEntities &createLapTextIfMissing(common::EntityID carEntityID,
-                                                           const component::CarLapInfo &carLap);
+            const RaceInfoEntities &getOrCreateLapText(common::EntityID carEntityID,
+                                                       const component::CarLapInfo &carLap);
 
             common::EntityID createText(const math::vec3 &worldPos, const std::string &text);
 

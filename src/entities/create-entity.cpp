@@ -76,8 +76,7 @@ namespace oni {
         void assignPoint(EntityManager &manager,
                          common::EntityID entityID,
                          const math::vec3 &pos) {
-            component::Point point{pos.x, pos.y, pos.z};
-            manager.assign<component::Point>(entityID, point);
+            manager.assign<component::Point>(entityID, pos);
         }
 
         void assignPlacement(EntityManager &manager,
@@ -180,11 +179,8 @@ namespace oni {
         }
 
         void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                            common::real32 life) {
-            component::Particle particle{};
-            particle.pos = worldPos;
-            particle.life = life;
-            manager.assign<component::Particle>(entityID, particle);
+                            common::real32 life, common::uint16 count, common::real32 heading) {
+            manager.assign<component::Particle>(entityID, life, worldPos, count, heading);
             manager.assign<component::Tag_Particle>(entityID);
         }
 

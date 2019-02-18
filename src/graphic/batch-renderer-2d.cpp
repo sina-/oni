@@ -129,6 +129,7 @@ namespace oni {
             buffer->position = particle.pos;
             buffer->color = appearance.color;
             buffer->life = particle.life;
+            buffer->heading = particle.heading;
             buffer++;
 
             // Update the mBuffer to point to the head.

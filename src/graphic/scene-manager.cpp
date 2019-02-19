@@ -16,6 +16,7 @@
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/gameplay.h>
 #include <oni-core/math/intesects.h>
+#include <oni-core/math/rand.h>
 
 
 namespace oni {
@@ -64,6 +65,8 @@ namespace oni {
 
             mTextureManager = std::make_unique<TextureManager>();
 
+            mRand = std::make_unique<math::Rand>(0);
+
             mDebugDrawBox2D = std::make_unique<DebugDrawBox2D>(this);
             mDebugDrawBox2D->AppendFlags(b2Draw::e_shapeBit);
             //mDebugDrawBox2D->AppendFlags(b2Draw::e_aabbBit);
@@ -78,10 +81,10 @@ namespace oni {
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
-            auto lifeIndex = glGetAttribLocation(program, "life");
+            auto ageIndex = glGetAttribLocation(program, "age");
             auto headingIndex = glGetAttribLocation(program, "heading");
 
-            if (positionIndex == -1 || colorIndex == -1 || lifeIndex == -1) {
+            if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1) {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
@@ -105,15 +108,15 @@ namespace oni {
                     component::ParticleVertex,
                     color));
 
-            component::BufferStructure life;
-            life.index = static_cast<common::oniGLuint>(lifeIndex);
-            life.componentCount = 1;
-            life.componentType = GL_FLOAT;
-            life.normalized = GL_FALSE;
-            life.stride = stride;
-            life.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+            component::BufferStructure age;
+            age.index = static_cast<common::oniGLuint>(ageIndex);
+            age.componentCount = 1;
+            age.componentType = GL_FLOAT;
+            age.normalized = GL_FALSE;
+            age.stride = stride;
+            age.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
                     component::ParticleVertex,
-                    life));
+                    age));
 
             component::BufferStructure heading;
             heading.index = static_cast<common::oniGLuint>(headingIndex);
@@ -128,7 +131,7 @@ namespace oni {
             std::vector<component::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
-            bufferStructures.push_back(life);
+            bufferStructures.push_back(age);
             bufferStructures.push_back(heading);
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
@@ -251,12 +254,12 @@ namespace oni {
             }
 
             {
-                auto view = manager.createView<component::Particle, component::Tag_Particle>();
+                auto view = manager.createViewScopeLock<component::Particle, component::Tag_Particle>();
                 for (const auto &entity: view) {
                     auto &particle = view.get<component::Particle>(entity);
                     // TODO: Maybe you want a single place to store these variables?
-                    particle.life -= 0.5f * tickTime;
-                    if (particle.life < 0.f) {
+                    particle.age += tickTime;
+                    if (particle.age > particle.maxAge) {
                         entities::removeParticle(manager, entity);
                     }
                 }

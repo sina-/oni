@@ -30,7 +30,7 @@ namespace oni {
         struct ParticleVertex {
             math::vec3 position{0.f, 0.f, 0.f};
             math::vec4 color{0.f, 0.f, 0.f, 0.f};
-            common::real32 life{0.f};
+            common::real32 age{0.f};
             common::real32 heading{0.f};
         };
 

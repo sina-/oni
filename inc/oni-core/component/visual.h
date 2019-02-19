@@ -18,7 +18,8 @@ namespace oni {
         };
 
         struct Particle {
-            common::real32 life{0.f};
+            common::real32 age{0.f};
+            common::real32 maxAge{0};
             math::vec3 pos{0.f, 0.f, 0.f};
             common::uint16 count{0};
             common::real32 heading{0.f};

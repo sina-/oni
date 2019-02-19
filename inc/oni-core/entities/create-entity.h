@@ -55,7 +55,8 @@ namespace oni {
 
         void removePlacement(EntityManager &manager, common::EntityID entityID);
 
-        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos, common::real32 life, common::uint16 count, common::real32 heading);
+        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
+                            common::uint16 count, common::real32 heading, common::real32 age, common::real32 maxAge);
 
         void removeParticle(EntityManager &manager, common::EntityID entityID);
 

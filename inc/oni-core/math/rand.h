@@ -21,6 +21,8 @@ namespace oni {
 
             common::uint32 nextUint32(common::uint32 lowerBound, common::uint32 upperBound);
 
+            common::real32 nextReal32(common::real32 lowerBound, common::real32 upperBound);
+
         private:
             std::mt19937 mEngine{};
         };

@@ -56,7 +56,7 @@ namespace oni {
     namespace component {
         template<class Archive>
         void serialize(Archive &archive, Particle &particle) {
-            archive(particle.pos, particle.life, particle.count, particle.heading);
+            archive(particle.age, particle.maxAge, particle.pos, particle.count, particle.heading);
         }
     }
 
@@ -90,7 +90,8 @@ namespace oni {
 
         std::string serialize(entities::EntityManager &manager, component::SnapshotType snapshotType);
 
-        void deserialize(oni::entities::EntityManager &manager, const std::string &data, component::SnapshotType snapshotType);
+        void deserialize(oni::entities::EntityManager &manager, const std::string &data,
+                         component::SnapshotType snapshotType);
 
         template<class T>
         T deserialize(const std::string &data) {

@@ -128,7 +128,7 @@ namespace oni {
 
             buffer->position = particle.pos;
             buffer->color = appearance.color;
-            buffer->life = particle.life;
+            buffer->age = particle.age;
             buffer->heading = particle.heading;
             buffer++;
 

@@ -11,6 +11,8 @@ class b2World;
 namespace oni {
     namespace math {
         struct vec2;
+
+        class Rand;
     }
 
     namespace entities {
@@ -148,6 +150,8 @@ namespace oni {
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
             FontManager &mFontManager;
             b2World &mPhysicsWorld;
+
+            std::unique_ptr<math::Rand> mRand{};
 
             math::mat4 mModelMatrix{};
             math::mat4 mViewMatrix{};

@@ -41,5 +41,10 @@ namespace oni {
             std::uniform_int_distribution<common::uint32> distribution(lowerBound, upperBound);
             return distribution(mEngine);
         }
+
+        common::real32 Rand::nextReal32(common::real32 lowerBound, common::real32 upperBound) {
+            std::uniform_real_distribution<common::real32 > distribution(lowerBound, upperBound);
+            return distribution(mEngine);
+        }
     }
 }

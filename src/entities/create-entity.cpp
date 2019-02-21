@@ -179,8 +179,9 @@ namespace oni {
         }
 
         void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                            common::uint16 count, common::real32 heading, common::real32 age, common::real32 maxAge) {
-            manager.assign<component::Particle>(entityID, age, maxAge, worldPos, count, heading);
+                            common::real32 heading, common::real32 age, common::real32 maxAge,
+                            common::real32 velocity) {
+            manager.assign<component::Particle>(entityID, age, maxAge, worldPos, heading, velocity);
             manager.assign<component::Tag_Particle>(entityID);
         }
 

@@ -346,8 +346,7 @@ namespace oni {
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
 
-                auto particleCount = mRand->nextUint8(2, 4);
-                entities::assignParticle(manager, particleEntity, pos, particleCount, 0.f, 0.f, 0.f);
+                entities::assignParticle(manager, particleEntity, pos, 0.f, 0.f, 0.f, 0.f);
 
                 mProjectile->destroyBullet(manager, entity);
                 entities::destroyEntity(manager, entity);

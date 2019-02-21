@@ -32,6 +32,7 @@ namespace oni {
             math::vec4 color{0.f, 0.f, 0.f, 0.f};
             common::real32 age{0.f};
             common::real32 heading{0.f};
+            common::real32 velocity{0.f};
         };
 
         struct BufferStructure {

@@ -130,6 +130,7 @@ namespace oni {
             buffer->color = appearance.color;
             buffer->age = particle.age;
             buffer->heading = particle.heading;
+            buffer->velocity = particle.velocity;
             buffer++;
 
             // Update the mBuffer to point to the head.

@@ -82,10 +82,11 @@ namespace oni {
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
             auto ageIndex = glGetAttribLocation(program, "age");
+            auto velocityIndex = glGetAttribLocation(program, "velocity");
             auto headingIndex = glGetAttribLocation(program, "heading");
 
-            if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1) {
-                throw std::runtime_error("Invalid attribute name.");
+            if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1 || velocityIndex == -1) {
+                assert("Invalid attribute name." && false);
             }
 
             common::oniGLsizei stride = sizeof(component::ParticleVertex);
@@ -128,11 +129,22 @@ namespace oni {
                     component::ParticleVertex,
                     heading));
 
+            component::BufferStructure velocity;
+            velocity.index = static_cast<common::oniGLuint>(velocityIndex);
+            velocity.componentCount = 1;
+            velocity.componentType = GL_FLOAT;
+            velocity.normalized = GL_FALSE;
+            velocity.stride = stride;
+            velocity.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ParticleVertex,
+                    velocity));
+
             std::vector<component::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
             bufferStructures.push_back(age);
             bufferStructures.push_back(heading);
+            bufferStructures.push_back(velocity);
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,

@@ -2,6 +2,7 @@
 
 #include <thread>
 
+#include <oni-core/math/z-layer-manager.h>
 #include <oni-core/component/visual.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/gameplay/lap-tracker.h>
@@ -22,26 +23,7 @@ namespace oni {
             ServerGame::ServerGame(const oni::network::Address &address) : Game(), mServerAddress(address) {
                 srand(static_cast<unsigned int>(time(nullptr)));
 
-                {
-                    oni::common::real32 deltaMajor = 0.1f;
-                    oni::common::real32 deltaMinor = 0.001f;
-                    mZLevel.majorLevelDelta = deltaMajor;
-                    mZLevel.minorLevelDelta = deltaMinor;
-
-                    mZLevel.level_0 = 0.f;
-                    mZLevel.level_1 = mZLevel.level_0 + mZLevel.majorLevelDelta;
-                    mZLevel.level_2 = mZLevel.level_1 + mZLevel.majorLevelDelta;
-                    mZLevel.level_3 = mZLevel.level_2 + mZLevel.majorLevelDelta;
-                    mZLevel.level_4 = mZLevel.level_3 + mZLevel.majorLevelDelta;
-                    mZLevel.level_5 = mZLevel.level_4 + mZLevel.majorLevelDelta;
-                    mZLevel.level_6 = mZLevel.level_5 + mZLevel.majorLevelDelta;
-                    mZLevel.level_7 = mZLevel.level_6 + mZLevel.majorLevelDelta;
-                    mZLevel.level_8 = mZLevel.level_7 + mZLevel.majorLevelDelta;
-                    mZLevel.level_9 = mZLevel.level_8 + mZLevel.majorLevelDelta;
-
-                    mVehicleZ = mZLevel.level_2;
-                }
-
+                mZLayerManager = std::make_unique<oni::math::ZLayerManager>();
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
 
                 mDynamics = std::make_unique<oni::physics::Dynamics>(getTickFrequency());
@@ -49,9 +31,11 @@ namespace oni {
                 // Maybe I can expose subset of functionalities I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
                 mTileWorld = std::make_unique<oni::server::entities::TileWorld>(*mEntityManager,
-                                                                                *mDynamics->getPhysicsWorld(), mZLevel);
+                                                                                *mDynamics->getPhysicsWorld(),
+                                                                                *mZLayerManager);
+
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
-                mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager, mZLevel);
+                mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager, *mZLayerManager);
 
                 mServer = std::make_unique<oni::network::Server>(&address, 16, 2);
 
@@ -62,8 +46,8 @@ namespace oni {
                                                std::bind(&ServerGame::clientInputPacketHandler, this,
                                                          std::placeholders::_1,
                                                          std::placeholders::_2));
-                mServer->registerPacketHandler(oni::network::PacketType::Z_LEVEL_DELTA,
-                                               std::bind(&ServerGame::zLevelDeltaRequestPacketHandler, this,
+                mServer->registerPacketHandler(oni::network::PacketType::Z_LAYER,
+                                               std::bind(&ServerGame::zLayerPacketHandler, this,
                                                          std::placeholders::_1,
                                                          std::placeholders::_2));
 
@@ -117,12 +101,8 @@ namespace oni {
                 mClientDataManager->setClientInput(clientID, input);
             }
 
-            void
-            ServerGame::zLevelDeltaRequestPacketHandler(const oni::common::PeerID &clientID, const std::string &data) {
-                network::ZLevelDeltaPacket packet;
-                packet.major = mZLevel.majorLevelDelta;
-                packet.minor = mZLevel.minorLevelDelta;
-                mServer->sendZLevelDelta(clientID, packet);
+            void ServerGame::zLayerPacketHandler(const oni::common::PeerID &clientID, const std::string &data) {
+                mServer->sendZLayer(clientID, mZLayerManager->getZLayer());
             }
 
             void ServerGame::postDisconnectHook(const oni::common::PeerID &peerID) {
@@ -220,9 +200,11 @@ namespace oni {
                 carConfig.rollResist = 8.0f;
                 carConfig.wheelRadius = 0.25f;
 
+                auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::RACE_CAR);
+
                 // TODO: All cars spawn in the same location!
                 // NOTE: This is the center of car sprite.
-                auto carPosition = oni::math::vec3{-70.f, -30.f, mVehicleZ};
+                auto carPosition = oni::math::vec3{-70.f, -30.f, vehicleZ};
 
                 auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
                 auto carSizeY = carConfig.halfWidth * 2.0f;
@@ -248,7 +230,7 @@ namespace oni {
                                                         carSize,
                                                         heading,
                                                         properties);
-                oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize, mVehicleZ);
+                oni::entities::assignShapeLocal(*mEntityManager, carEntityID, carSize, vehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, carEntityID, carPosition, math::vec3{1.f, 1.f, 0.f},
                                                0.f);
                 oni::entities::assignCar(*mEntityManager, carEntityID, carPosition, carConfig);
@@ -262,7 +244,7 @@ namespace oni {
                 oni::math::vec3 gunPos{};
                 gunPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle * 0.7f);
                 gunPos.y = 0.f;
-                gunPos.z = carPosition.z + mZLevel.minorLevelDelta;
+                gunPos.z = mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN);
                 auto carGunEntity = createGun(carEntityID, gunPos, gunSize);
 
                 oni::math::vec2 tireSize;
@@ -385,8 +367,9 @@ namespace oni {
             }
 
             oni::common::EntityID ServerGame::createTruck() {
+                auto vehicleZ = mZLayerManager->getZForEntity(oni::component::EntityType::VEHICLE);
                 oni::math::vec2 size{1.0f, 3.0f};
-                oni::math::vec3 worldPos{-60.0f, -30.0f, mVehicleZ};
+                oni::math::vec3 worldPos{-60.0f, -30.0f, vehicleZ};
                 oni::common::real32 heading = 0.f;
                 std::string truckTexturePath = "resources/images/car/2/truck.png";
                 oni::component::PhysicalProperties properties;
@@ -400,7 +383,7 @@ namespace oni {
 
                 auto lock = mEntityManager->scopedLock();
                 auto entityID = oni::entities::createEntity(*mEntityManager);
-                oni::entities::assignShapeLocal(*mEntityManager, entityID, size, mVehicleZ);
+                oni::entities::assignShapeLocal(*mEntityManager, entityID, size, vehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, entityID, worldPos, {1.f, 1.f, 0.f}, 0.f);
                 oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), entityID,
                                                         worldPos,

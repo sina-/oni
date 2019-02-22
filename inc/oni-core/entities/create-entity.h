@@ -26,6 +26,20 @@ namespace oni {
 
     namespace entities {
 
+        class EntityFactory {
+
+        public:
+            explicit EntityFactory(EntityManager &);
+
+            common::EntityID createEntity(component::EntityType);
+
+        private:
+            common::EntityID createCar();
+
+        private:
+            EntityManager &mManager;
+        };
+
         common::EntityID createEntity(EntityManager &manager, bool tagAsNew = true);
 
         void destroyEntity(EntityManager &manager, common::EntityID entityID);

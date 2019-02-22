@@ -1,5 +1,6 @@
 #include <oni-core/gameplay/lap-tracker.h>
 
+#include <oni-core/math/z-layer-manager.h>
 #include <oni-core/component/gameplay.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/physics/transformation.h>
@@ -8,9 +9,9 @@
 namespace oni {
     namespace gameplay {
 
-        LapTracker::LapTracker(entities::EntityManager &entityManager, const component::ZLevel &zLevel)
-                : mEntityManager(entityManager) {
-            mZLevel = zLevel;
+        LapTracker::LapTracker(entities::EntityManager &entityManager, const math::ZLayerManager &zLayerManager)
+                : mEntityManager(entityManager), mZLayerManager(zLayerManager) {
+
             auto checkpoint1 = component::Shape::fromPositionAndSize(math::vec3{70, -40}, math::vec2{20, 20});
             auto checkpoint2 = component::Shape::fromPositionAndSize(math::vec3{70, 30}, math::vec2{20, 20});
             auto checkpoint3 = component::Shape::fromPositionAndSize(math::vec3{-80, 30}, math::vec2{20, 20});

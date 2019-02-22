@@ -49,9 +49,9 @@ namespace oni {
                     mPacketHandlers[PacketType::CLIENT_INPUT](peerID, dataString);
                     break;
                 }
-                case (PacketType::Z_LEVEL_DELTA): {
+                case (PacketType::Z_LAYER): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::Z_LEVEL_DELTA](peerID, dataString);
+                    mPacketHandlers[PacketType::Z_LAYER](peerID, dataString);
                     break;
                 }
                 default: {
@@ -115,9 +115,21 @@ namespace oni {
             send(type, data, mPeers[peerID]);
         }
 
-        void Server::sendZLevelDelta(const common::PeerID &peerID, const ZLevelDeltaPacket &packet) {
-            auto data = entities::serialize<ZLevelDeltaPacket>(packet);
-            auto type = PacketType::Z_LEVEL_DELTA;
+        void Server::sendZLayer(const common::PeerID &peerID, const component::ZLayer &zLayer) {
+            ZLayerPacket zLayerPacket{};
+            zLayerPacket.level_0 = zLayer.at(component::ZLayerDef::LAYER_0);
+            zLayerPacket.level_1 = zLayer.at(component::ZLayerDef::LAYER_1);
+            zLayerPacket.level_2 = zLayer.at(component::ZLayerDef::LAYER_2);
+            zLayerPacket.level_3 = zLayer.at(component::ZLayerDef::LAYER_3);
+            zLayerPacket.level_4 = zLayer.at(component::ZLayerDef::LAYER_4);
+            zLayerPacket.level_5 = zLayer.at(component::ZLayerDef::LAYER_5);
+            zLayerPacket.level_6 = zLayer.at(component::ZLayerDef::LAYER_6);
+            zLayerPacket.level_7 = zLayer.at(component::ZLayerDef::LAYER_7);
+            zLayerPacket.level_8 = zLayer.at(component::ZLayerDef::LAYER_8);
+            zLayerPacket.level_9 = zLayer.at(component::ZLayerDef::LAYER_9);
+
+            auto data = entities::serialize<ZLayerPacket>(zLayerPacket);
+            auto type = PacketType::Z_LAYER;
 
             send(type, data, mPeers[peerID]);
         }
@@ -125,13 +137,11 @@ namespace oni {
         void Server::broadcastSpawnParticle(entities::EntityManager &manager) {
             std::vector<component::Particle> particles;
             {
-                // TODO: Same silly requirement of two component is minimum for a view!
-                auto view = manager.createViewScopeLock<component::Particle, component::Tag_Particle>();
+                auto view = manager.createViewScopeLock<component::Particle>();
                 for (auto &&entity: view) {
                     particles.emplace_back(view.get<component::Particle>(entity));
                 }
                 manager.reset<component::Particle>();
-                manager.reset<component::Tag_Particle>();
             }
 
             // TODO: This is just way to many packets. I should batch them together.

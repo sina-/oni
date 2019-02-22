@@ -7,7 +7,7 @@
 #include <cereal/types/vector.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/snapshot-type.h>
+#include <oni-core/component/entity-definition.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/component/visual.h>
 
@@ -26,8 +26,19 @@ namespace oni {
         }
 
         template<class Archive>
-        void serialize(Archive &archive, ZLevelDeltaPacket &packet) {
-            archive(packet.major, packet.minor);
+        void serialize(Archive &archive, ZLayerPacket &zLayer) {
+            archive(
+                    zLayer.level_0,
+                    zLayer.level_1,
+                    zLayer.level_2,
+                    zLayer.level_3,
+                    zLayer.level_4,
+                    zLayer.level_5,
+                    zLayer.level_6,
+                    zLayer.level_7,
+                    zLayer.level_8,
+                    zLayer.level_9
+            );
         }
     }
 

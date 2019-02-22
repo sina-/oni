@@ -90,9 +90,9 @@ namespace oni {
                     mPacketHandlers[PacketType::DESTROYED_ENTITIES](peerID, dataString);
                     break;
                 }
-                case (PacketType::Z_LEVEL_DELTA): {
+                case (PacketType::Z_LAYER): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::Z_LEVEL_DELTA](peerID, dataString);
+                    mPacketHandlers[PacketType::Z_LAYER](peerID, dataString);
                     break;
                 }
                 case (PacketType::SPAWN_PARTICLE): {
@@ -136,7 +136,7 @@ namespace oni {
         }
 
         void Client::requestZLevelDelta() {
-            auto type = PacketType::Z_LEVEL_DELTA;
+            auto type = PacketType::Z_LAYER;
             auto data = std::string{};
             send(type, data, mEnetServer);
 

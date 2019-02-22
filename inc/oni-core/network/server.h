@@ -32,7 +32,7 @@ namespace oni {
 
             void sendCarEntityID(common::EntityID, const common::PeerID &);
 
-            void sendZLevelDelta(const common::PeerID &, const network::ZLevelDeltaPacket &);
+            void sendZLayer(const common::PeerID &peerID, const component::ZLayer &zLayer);
 
             void broadcastSpawnParticle(entities::EntityManager &manager);
 

@@ -13,6 +13,8 @@ namespace oni {
         struct vec2;
 
         class Rand;
+
+        class ZLayerManager;
     }
 
     namespace entities {
@@ -93,7 +95,7 @@ namespace oni {
 
             common::uint16 getTexturesPerFrame() const;
 
-            void setZLevel(const component::ZLevel &);
+            void initializeZLayerManager(const component::ZLayer &);
 
             void resetCounters();
 
@@ -176,8 +178,7 @@ namespace oni {
             common::uint16 mRenderedParticlesPerFrame{0};
 
             std::unique_ptr<entities::EntityManager> mInternalRegistry{};
-
-            component::ZLevel mZLevel{};
+            std::unique_ptr<math::ZLayerManager> mZLayerManager{};
         };
     }
 }

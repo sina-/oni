@@ -17,6 +17,7 @@
 #include <oni-core/component/gameplay.h>
 #include <oni-core/math/intesects.h>
 #include <oni-core/math/rand.h>
+#include <oni-core/math/z-layer-manager.h>
 
 
 namespace oni {
@@ -261,12 +262,12 @@ namespace oni {
             // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
             // TODO: A better way is no not call tick before we know we have all the information to do actual
             // work. Kinda like a level loading screen.
-            if (mZLevel.majorLevelDelta <= common::ep) {
+            if (!mZLayerManager) {
                 return;
             }
 
             {
-                auto view = manager.createViewScopeLock<component::Particle, component::Tag_Particle>();
+                auto view = manager.createViewScopeLock<component::Particle>();
                 for (const auto &entity: view) {
                     auto &particle = view.get<component::Particle>(entity);
                     // TODO: Maybe you want a single place to store these variables?
@@ -573,7 +574,7 @@ namespace oni {
 
         void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
                                            common::real32 viewHeight) {
-            auto view = manager.createView<component::Particle, component::Tag_Particle>();
+            auto view = manager.createView<component::Particle>();
             for (const auto &entity: view) {
                 const auto &particle = view.get<component::Particle>(entity);
                 if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
@@ -595,10 +596,11 @@ namespace oni {
                                                                                const component::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
+                auto zLevel = mZLayerManager->getZForEntity(component::EntityType::UI);
                 RaceInfoEntities carLapText{0};
-                math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, mZLevel.level_8};
-                math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, mZLevel.level_8};
-                math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, mZLevel.level_8};
+                math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, zLevel};
+                math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, zLevel};
+                math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, zLevel};
 
                 carLapText.lapEntity = createText(lapRenderPos, "Lap: " + std::to_string(carLap.lap));
                 carLapText.lapTimeEntity = createText(lapTimeRenderPos, "Lap time: " + std::to_string(carLap.lapTimeS));
@@ -631,7 +633,8 @@ namespace oni {
             if (!exists) {
                 auto tilePosX = math::indexToPosition(x, mSkidTileSizeX);
                 auto tilePosY = math::indexToPosition(y, mSkidTileSizeY);
-                auto worldPos = math::vec3{tilePosX, tilePosY, mZLevel.level_1};
+                auto worldPos = math::vec3{tilePosX, tilePosY,
+                                           mZLayerManager->getZForEntity(component::EntityType::SKID_LINE)};
                 auto tileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
                                            static_cast<common::real32>(mSkidTileSizeY)};
 
@@ -739,8 +742,8 @@ namespace oni {
             return entityID;
         }
 
-        void SceneManager::setZLevel(const component::ZLevel &zLevel) {
-            mZLevel = zLevel;
+        void SceneManager::initializeZLayerManager(const component::ZLayer &ZLayer) {
+            mZLayerManager = std::make_unique<math::ZLayerManager>(ZLayer);
         }
     }
 }

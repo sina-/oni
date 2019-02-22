@@ -14,10 +14,14 @@ namespace oni {
         class EntityManager;
     }
 
+    namespace math {
+        class ZLayerManager;
+    }
+
     namespace gameplay {
         class LapTracker {
         public:
-            explicit LapTracker(entities::EntityManager &entityManager, const component::ZLevel&);
+            explicit LapTracker(entities::EntityManager &entityManager, const math::ZLayerManager&);
 
             ~LapTracker();
 
@@ -35,7 +39,8 @@ namespace oni {
             std::map<common::EntityID, std::deque<component::Shape>> mRemainingCheckpoints{};
             std::map<common::EntityID, std::chrono::seconds> mBestLaps{};
             std::map<common::EntityID, utils::Timer> mTimers{};
-            component::ZLevel mZLevel{};
+
+            const math::ZLayerManager& mZLayerManager;
         };
     }
 }

@@ -19,6 +19,10 @@ namespace oni {
         class Server;
     }
 
+    namespace math {
+        class ZLayerManager;
+    }
+
     namespace entities {
         class EntityManager;
 
@@ -73,7 +77,7 @@ namespace oni {
 
                 void clientInputPacketHandler(const oni::common::PeerID &, const std::string &);
 
-                void zLevelDeltaRequestPacketHandler(const oni::common::PeerID &, const std::string &);
+                void zLayerPacketHandler(const oni::common::PeerID &, const std::string &);
 
                 void postDisconnectHook(const oni::common::PeerID &);
 
@@ -94,6 +98,7 @@ namespace oni {
             private:
                 std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
 
+                std::unique_ptr<oni::math::ZLayerManager> mZLayerManager{};
                 std::unique_ptr<oni::physics::Dynamics> mDynamics{};
                 std::unique_ptr<server::entities::TileWorld> mTileWorld{};
                 std::unique_ptr<oni::gameplay::LapTracker> mLapTracker{};
@@ -107,9 +112,6 @@ namespace oni {
                 std::unique_ptr<oni::entities::ClientDataManager> mClientDataManager{};
 
                 oni::component::CarConfig mCarConfigDefault{};
-
-                oni::component::ZLevel mZLevel{};
-                oni::common::real32 mVehicleZ{};
             };
         }
     }

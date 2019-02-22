@@ -6,11 +6,35 @@
 #include <oni-core/component/geometry.h>
 #include <oni-core/physics/transformation.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/component/snapshot-type.h>
+#include <oni-core/component/entity-definition.h>
 #include <oni-core/component/hierarchy.h>
 
 namespace oni {
     namespace entities {
+
+        EntityFactory::EntityFactory(EntityManager &manager) : mManager{manager} {
+
+        }
+
+        common::EntityID EntityFactory::createEntity(component::EntityType entityType) {
+            switch (entityType) {
+                case component::EntityType::UNKNOWN: {
+                    assert("Forgot to initialize EntityType?" && false);
+                    break;
+                }
+                case component::EntityType::RACE_CAR: {
+                    return createCar();
+                }
+                default: {
+                    assert("EntityType out-of-range" && false);
+                }
+            }
+            return 0;
+        }
+
+        common::EntityID EntityFactory::createCar() {
+            return 0;
+        }
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
             component::Texture texture;
@@ -182,11 +206,9 @@ namespace oni {
                             common::real32 heading, common::real32 age, common::real32 maxAge,
                             common::real32 velocity) {
             manager.assign<component::Particle>(entityID, age, maxAge, worldPos, heading, velocity);
-            manager.assign<component::Tag_Particle>(entityID);
         }
 
         void removeParticle(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<component::Tag_Particle>(entityID);
             manager.remove<component::Particle>(entityID);
         }
 

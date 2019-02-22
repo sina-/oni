@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <vector>
+#include <unordered_map>
 
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
@@ -26,12 +27,12 @@ namespace oni {
         };
 
         enum class TextureStatus : common::uint8 {
-            READY = 0,
-            NEEDS_LOADING_USING_PATH = 1,
-            NEEDS_LOADING_USING_DATA = 2,
-            NEEDS_RELOADING_USING_PATH = 3,
-            NEEDS_RELOADING_USING_DATA = 4,
-            INVALID = 5
+            INVALID = 0,
+            READY = 1,
+            NEEDS_LOADING_USING_PATH = 2,
+            NEEDS_LOADING_USING_DATA = 3,
+            NEEDS_RELOADING_USING_PATH = 4,
+            NEEDS_RELOADING_USING_DATA = 5,
         };
 
         struct Texture {
@@ -87,21 +88,19 @@ namespace oni {
             common::real32 z;
         };
 
-        struct ZLevel {
-            oni::common::real32 majorLevelDelta{0.f};
-            oni::common::real32 minorLevelDelta{0.f};
-
-            oni::common::real32 level_0{0.f};
-            oni::common::real32 level_1{0.f};
-            oni::common::real32 level_2{0.f};
-            oni::common::real32 level_3{0.f};
-            oni::common::real32 level_4{0.f};
-            oni::common::real32 level_5{0.f};
-            oni::common::real32 level_6{0.f};
-            oni::common::real32 level_7{0.f};
-            oni::common::real32 level_8{0.f};
-            oni::common::real32 level_9{0.f};
+        enum class ZLayerDef: common::uint8  {
+            LAYER_0 = 0,
+            LAYER_1 = 1,
+            LAYER_2 = 2,
+            LAYER_3 = 3,
+            LAYER_4 = 4,
+            LAYER_5 = 5,
+            LAYER_6 = 6,
+            LAYER_7 = 7,
+            LAYER_8 = 8,
+            LAYER_9 = 9,
         };
 
+        using ZLayer = std::unordered_map<component::ZLayerDef, common::real32>;
     }
 }

@@ -7,6 +7,7 @@
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/component/visual.h>
+#include <oni-core/math/z-layer-manager.h>
 
 class b2World;
 
@@ -15,13 +16,17 @@ namespace oni {
         class EntityManager;
     }
 
+    namespace math {
+        class ZLayerManager;
+    }
+
     namespace server {
         namespace entities {
 
             class TileWorld {
             public:
 
-                TileWorld(oni::entities::EntityManager &, b2World &, const oni::component::ZLevel &);
+                TileWorld(oni::entities::EntityManager &, b2World &, const oni::math::ZLayerManager &);
 
                 ~TileWorld();
 
@@ -126,7 +131,7 @@ namespace oni {
                 std::string mRaceTrack3{};
                 std::string mRaceTrack4{};
 
-                oni::component::ZLevel mZLevel{};
+                const oni::math::ZLayerManager& mZLayerManager;
                 oni::common::real32 mBackgroundZ{};
                 oni::common::real32 mRoadZ{};
                 oni::common::real32 mWallZ{};

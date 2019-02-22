@@ -14,10 +14,6 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
-        struct Tag_Particle {
-
-        };
-
         struct Tag_NewEntity {
         };
 

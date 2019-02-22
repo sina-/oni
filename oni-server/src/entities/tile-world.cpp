@@ -14,10 +14,10 @@ namespace oni {
     namespace server {
         namespace entities {
             TileWorld::TileWorld(oni::entities::EntityManager &manager, b2World &physicsWorld,
-                                 const oni::component::ZLevel &zLevel) :
+                                 const oni::math::ZLayerManager &zLevel) :
                     mEntityManager{manager},
                     mPhysicsWorld{physicsWorld},
-                    mZLevel{zLevel},
+                    mZLayerManager{zLevel},
                     mTileSizeX{10}, mTileSizeY{10},
                     //mHalfTileSizeX{mTileSizeX / 2.0f},
                     //mHalfTileSizeY{mTileSizeY / 2.0f},
@@ -56,9 +56,9 @@ namespace oni {
                 mRaceTrack3 = "resources/images/race-track/2/3.png";
                 mRaceTrack4 = "resources/images/race-track/2/4.png";
 
-                mBackgroundZ = mZLevel.level_0;
-                mRoadZ = mBackgroundZ + mZLevel.minorLevelDelta;
-                mWallZ = mRoadZ + mZLevel.minorLevelDelta;
+                mBackgroundZ = mZLayerManager.getZForEntity(component::EntityType::BACKGROUND);
+                mRoadZ = mZLayerManager.getZForEntity(component::EntityType::ROAD);
+                mWallZ = mZLayerManager.getZForEntity(component::EntityType::WALL);
             }
 
             TileWorld::~TileWorld() = default;

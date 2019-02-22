@@ -8,7 +8,7 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/snapshot-type.h>
+#include <oni-core/component/entity-definition.h>
 #include <oni-core/component/tag.h>
 
 
@@ -58,12 +58,20 @@ namespace oni {
 
                 template<class Component>
                 Component &get(EntityType entityID) noexcept {
-                    return mView.template get<Component>(entityID);
+                    if constexpr(sizeof...(Components) == 1) {
+                        return mView.get(entityID);
+                    } else {
+                        return mView.template get<Component>(entityID);
+                    }
                 }
 
                 template<class Component>
                 const Component &get(EntityType entityID) const noexcept {
-                    return mView.template get<Component>(entityID);
+                    if constexpr(sizeof...(Components) == 1) {
+                        return mView.get(entityID);
+                    } else {
+                        return mView.template get<Component>(entityID);
+                    }
                 }
 
             private:

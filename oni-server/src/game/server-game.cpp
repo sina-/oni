@@ -46,11 +46,6 @@ namespace oni {
                                                std::bind(&ServerGame::clientInputPacketHandler, this,
                                                          std::placeholders::_1,
                                                          std::placeholders::_2));
-                mServer->registerPacketHandler(oni::network::PacketType::Z_LAYER,
-                                               std::bind(&ServerGame::zLayerPacketHandler, this,
-                                                         std::placeholders::_1,
-                                                         std::placeholders::_2));
-
                 mServer->registerPostDisconnectHook(std::bind(&ServerGame::postDisconnectHook, this,
                                                               std::placeholders::_1));
 
@@ -99,10 +94,6 @@ namespace oni {
                 // TODO: Avoid copy by using a unique_ptr or something
                 auto lock = mClientDataManager->scopedLock();
                 mClientDataManager->setClientInput(clientID, input);
-            }
-
-            void ServerGame::zLayerPacketHandler(const oni::common::PeerID &clientID, const std::string &data) {
-                mServer->sendZLayer(clientID, mZLayerManager->getZLayer());
             }
 
             void ServerGame::postDisconnectHook(const oni::common::PeerID &peerID) {

@@ -24,22 +24,6 @@ namespace oni {
         void serialize(Archive &archive, EntityPacket &packet) {
             archive(packet.entity);
         }
-
-        template<class Archive>
-        void serialize(Archive &archive, ZLayerPacket &zLayer) {
-            archive(
-                    zLayer.level_0,
-                    zLayer.level_1,
-                    zLayer.level_2,
-                    zLayer.level_3,
-                    zLayer.level_4,
-                    zLayer.level_5,
-                    zLayer.level_6,
-                    zLayer.level_7,
-                    zLayer.level_8,
-                    zLayer.level_9
-            );
-        }
     }
 
     namespace math {
@@ -73,31 +57,6 @@ namespace oni {
 
     namespace entities {
         class EntityManager;
-
-/*        template<class... Components>
-        std::string serialize_(entities::EntityManager &manager) {
-            std::stringstream storage;
-            {
-                cereal::PortableBinaryOutputArchive output{storage};
-                manager.snapshot<cereal::PortableBinaryOutputArchive, Components...>(output);
-            }
-
-            return storage.str();
-        }
-
-        template<class... Component>
-        std::string deserialize_(entities::EntityManager &manager, const std::string &data) {
-            std::stringstream storage;
-            storage.str(data);
-
-            {
-                cereal::PortableBinaryInputArchive input{storage};
-                manager.restore<cereal::PortableBinaryInputArchive,
-                        Component...>
-                        (input);
-            }
-            return storage.str();
-        }*/
 
         std::string serialize(entities::EntityManager &manager, component::SnapshotType snapshotType);
 
@@ -141,7 +100,5 @@ namespace oni {
             }
             return storage.str();
         }
-
-
     }
 }

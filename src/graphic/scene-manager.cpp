@@ -35,6 +35,7 @@ namespace oni {
                 mPhysicsWorld(physicsWorld),
                 mGameUnitToPixels{gameUnitToPixels} {
 
+            mZLayerManager = std::make_unique<math::ZLayerManager>();
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
                                                          screenBounds.yMax, -1.0f, 1.0f);
             mViewMatrix = math::mat4::identity();
@@ -740,10 +741,6 @@ namespace oni {
         common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
             auto entityID = mFontManager.createTextFromString(*mInternalRegistry, text, worldPos);
             return entityID;
-        }
-
-        void SceneManager::initializeZLayerManager(const component::ZLayer &ZLayer) {
-            mZLayerManager = std::make_unique<math::ZLayerManager>(ZLayer);
         }
     }
 }

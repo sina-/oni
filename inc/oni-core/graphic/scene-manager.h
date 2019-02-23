@@ -95,8 +95,6 @@ namespace oni {
 
             common::uint16 getTexturesPerFrame() const;
 
-            void initializeZLayerManager(const component::ZLayer &);
-
             void resetCounters();
 
             // TODO: This is awful and inconsistent with the API of this class where I should only expose render().

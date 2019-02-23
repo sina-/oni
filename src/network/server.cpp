@@ -49,11 +49,6 @@ namespace oni {
                     mPacketHandlers[PacketType::CLIENT_INPUT](peerID, dataString);
                     break;
                 }
-                case (PacketType::Z_LAYER): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::Z_LAYER](peerID, dataString);
-                    break;
-                }
                 default: {
                     // TODO: Need to keep stats on clients with bad packets and block them when threshold reaches.
                     std::cout << "Unknown packet!" << std::endl;
@@ -111,25 +106,6 @@ namespace oni {
             auto packet = EntityPacket{entityID};
             auto data = entities::serialize<network::EntityPacket>(packet);
             auto type = PacketType::CAR_ENTITY_ID;
-
-            send(type, data, mPeers[peerID]);
-        }
-
-        void Server::sendZLayer(const common::PeerID &peerID, const component::ZLayer &zLayer) {
-            ZLayerPacket zLayerPacket{};
-            zLayerPacket.level_0 = zLayer.at(component::ZLayerDef::LAYER_0);
-            zLayerPacket.level_1 = zLayer.at(component::ZLayerDef::LAYER_1);
-            zLayerPacket.level_2 = zLayer.at(component::ZLayerDef::LAYER_2);
-            zLayerPacket.level_3 = zLayer.at(component::ZLayerDef::LAYER_3);
-            zLayerPacket.level_4 = zLayer.at(component::ZLayerDef::LAYER_4);
-            zLayerPacket.level_5 = zLayer.at(component::ZLayerDef::LAYER_5);
-            zLayerPacket.level_6 = zLayer.at(component::ZLayerDef::LAYER_6);
-            zLayerPacket.level_7 = zLayer.at(component::ZLayerDef::LAYER_7);
-            zLayerPacket.level_8 = zLayer.at(component::ZLayerDef::LAYER_8);
-            zLayerPacket.level_9 = zLayer.at(component::ZLayerDef::LAYER_9);
-
-            auto data = entities::serialize<ZLayerPacket>(zLayerPacket);
-            auto type = PacketType::Z_LAYER;
 
             send(type, data, mPeers[peerID]);
         }

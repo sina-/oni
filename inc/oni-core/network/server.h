@@ -32,8 +32,6 @@ namespace oni {
 
             void sendCarEntityID(common::EntityID, const common::PeerID &);
 
-            void sendZLayer(const common::PeerID &peerID, const component::ZLayer &zLayer);
-
             void broadcastSpawnParticle(entities::EntityManager &manager);
 
         private:

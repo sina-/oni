@@ -26,6 +26,8 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
+        class EntityFactory;
+
         class ClientDataManager;
     }
 
@@ -97,6 +99,7 @@ namespace oni {
 
             private:
                 std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
+                std::unique_ptr<oni::entities::EntityFactory> mEntityFactory{};
 
                 std::unique_ptr<oni::math::ZLayerManager> mZLayerManager{};
                 std::unique_ptr<oni::physics::Dynamics> mDynamics{};

@@ -21,15 +21,43 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            math::vec3 vertexA{0.f, 0.f, 0.f};
-            math::vec3 vertexB{0.f, 0.f, 0.f};
-            math::vec3 vertexC{0.f, 0.f, 0.f};
-            math::vec3 vertexD{0.f, 0.f, 0.f};
+            math::vec3 vertexA{0.f, 0.f, 1.f};
+            math::vec3 vertexB{0.f, 1.f, 1.f};
+            math::vec3 vertexC{1.f, 1.f, 1.f};
+            math::vec3 vertexD{1.f, 0.f, 1.f};
 
             math::vec3 getPosition() const { return vertexA; }
 
             math::vec2 getSize() const {
                 return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
+            }
+
+            void expandTopRight(const math::vec2 &size) {
+                vertexB.y += size.y;
+                vertexC.x += size.x;
+                vertexC.y += size.y;
+                vertexD.x += size.x;
+            }
+
+            void centerAlign() {
+                math::vec2 halfSize{};
+                halfSize.x /= (vertexD.x - vertexA.x) / 2;
+                halfSize.y /= (vertexB.y - vertexA.y) / 2;
+                vertexA.x -= halfSize.x;
+                vertexA.y -= halfSize.y;
+                vertexB.x -= halfSize.x;
+                vertexB.y -= halfSize.y;
+                vertexC.x -= halfSize.x;
+                vertexC.y -= halfSize.y;
+                vertexD.x -= halfSize.x;
+                vertexD.y -= halfSize.y;
+            }
+
+            void setZ(common::real32 z) {
+                vertexA.z = z;
+                vertexB.z = z;
+                vertexC.z = z;
+                vertexD.z = z;
             }
 
             static Shape fromPositionAndSize(const math::vec3 &position, const math::vec2 &size) {
@@ -111,24 +139,24 @@ namespace oni {
         struct CarConfig {
             common::CarSimDouble gravity{9.81f};
             common::CarSimDouble mass{1200};
-            common::CarSimDouble inertialScale{1.0f};
-            common::CarSimDouble halfWidth{0.9f};
-            common::CarSimDouble cgToFront{2.0f}; // Distance from center of gravity to the front in meters.
-            common::CarSimDouble cgToRear{2.0f};
-            common::CarSimDouble cgToFrontAxle{1.25f};
-            common::CarSimDouble cgToRearAxle{1.25f};
+            common::CarSimDouble inertialScale{0.5f};
+            common::CarSimDouble halfWidth{0.55f};
+            common::CarSimDouble cgToFront{1.25f}; // Distance from center of gravity to the front in meters.
+            common::CarSimDouble cgToRear{1.25f};
+            common::CarSimDouble cgToFrontAxle{1.15f};
+            common::CarSimDouble cgToRearAxle{1.f};
             common::CarSimDouble cgHeight{0.55f};
-            common::CarSimDouble wheelRadius{0.3f}; // For rendering only
+            common::CarSimDouble wheelRadius{0.25f}; // For rendering only
             common::CarSimDouble wheelWidth{0.2f}; // For rendering only
-            common::CarSimDouble tireGrip{2.0f};
-            common::CarSimDouble lockGrip{0.6f}; // % of grip when wheel is locked
-            common::CarSimDouble engineForce{4000.f};
-            common::CarSimDouble brakeForce{12000.f};
+            common::CarSimDouble tireGrip{3.0f};
+            common::CarSimDouble lockGrip{0.2f}; // % of grip when wheel is locked
+            common::CarSimDouble engineForce{10000.f};
+            common::CarSimDouble brakeForce{6000.f};
             common::CarSimDouble eBrakeForce{12000.f / 5.5f};
             common::CarSimDouble weightTransfer{0.2f};
-            common::CarSimDouble maxSteer{0.6f}; // in radians
+            common::CarSimDouble maxSteer{0.5f}; // in radians
             common::CarSimDouble cornerStiffnessFront{5.0f};
-            common::CarSimDouble cornerStiffnessRear{5.2f};
+            common::CarSimDouble cornerStiffnessRear{5.5f};
             common::CarSimDouble airResist{2.5f};
             common::CarSimDouble rollResist{8.0f};
 
@@ -138,84 +166,60 @@ namespace oni {
         };
 
         struct Car {
-            common::CarSimDouble heading{}; // In radians
-            common::CarSimDouble velocityAbsolute{};
-            common::CarSimDouble angularVelocity{}; // Angular velocity in radians (rad/s)
-            common::CarSimDouble steer{}; // (-1.0..1.0)
-            common::CarSimDouble steerAngle{}; // (-maxSteer..maxSteer)
+            common::CarSimDouble heading{0.f}; // In radians
+            common::CarSimDouble velocityAbsolute{0.f};
+            common::CarSimDouble angularVelocity{0.f}; // Angular velocity in radians (rad/s)
+            common::CarSimDouble steer{0.f}; // (-1.0..1.0)
+            common::CarSimDouble steerAngle{0.f}; // (-maxSteer..maxSteer)
+            common::CarSimDouble rpm{0.f};
+            common::CarSimDouble accumulatedEBrake{0.f};
+            common::CarSimDouble slipAngleFront{0.f};
+            common::CarSimDouble slipAngleRear{0.f};
+
             common::CarSimDouble inertia{};
             common::CarSimDouble wheelBase{};
             common::CarSimDouble axleWeightRatioFront{};
             common::CarSimDouble axleWeightRatioRear{};
-            common::CarSimDouble rpm{};
             common::CarSimDouble maxVelocityAbsolute{};
-            common::CarSimDouble accumulatedEBrake{};
-            common::CarSimDouble slipAngleFront{};
-            common::CarSimDouble slipAngleRear{};
 
 
-            math::vec2 position{};
-            math::vec2 velocity{}; // m/s
-            math::vec2 velocityLocal{}; // m/s
-            math::vec2 acceleration{};
-            math::vec2 accelerationLocal{};
+            math::vec2 position{0.f, 0.f};
+            math::vec2 velocity{0.f, 0.f}; // m/s
+            math::vec2 velocityLocal{0.f, 0.f}; // m/s
+            math::vec2 acceleration{0.f, 0.f};
+            math::vec2 accelerationLocal{0.f, 0.f};
 
-            bool accelerating{};
-            bool slippingFront{};
-            bool slippingRear{};
+            bool accelerating{false};
+            bool slippingFront{false};
+            bool slippingRear{false};
 
-            bool smoothSteer{};
-            bool safeSteer{};
+            bool smoothSteer{true};
+            bool safeSteer{true};
 
-            common::CarSimDouble distanceFromCamera{};
+            common::CarSimDouble distanceFromCamera{1.f};
 
-            common::EntityID tireFR{};
-            common::EntityID tireFL{};
-            common::EntityID tireRR{};
-            common::EntityID tireRL{};
+            common::EntityID tireFR{0};
+            common::EntityID tireFL{0};
+            common::EntityID tireRR{0};
+            common::EntityID tireRL{0};
 
-            common::EntityID gunEntity{};
+            common::EntityID gunEntity{0};
 
             bool isColliding{false};
 
-            Car() {}
+            Car() = default;
 
-            explicit Car(const component::CarConfig &c) {
-                heading = 0.f;
-                velocityAbsolute = 0.f;
-                angularVelocity = 0.f;
-                steer = 0.f;
-                steerAngle = 0.f;
+            void applyConfiguration(const component::CarConfig &c) {
                 inertia = c.mass * c.inertialScale;
                 wheelBase = c.cgToFrontAxle + c.cgToRearAxle;
                 axleWeightRatioFront = c.cgToRearAxle / wheelBase;
                 axleWeightRatioRear = c.cgToFrontAxle / wheelBase;
-                slipAngleFront = 0.f;
-                slipAngleRear = 0.f;
 
-                position = math::vec2{0.f, 0.f};
-                velocity = math::vec2{0.f, 0.f};
-                velocityLocal = math::vec2{0.f, 0.f};
-                acceleration = math::vec2{0.f, 0.f};
-                accelerationLocal = math::vec2{0.f, 0.f};
-
-                rpm = 0.f;
-                accelerating = false;
                 // Formula for solving quadratic equation: -c.airResistance*v^2 - c.rollResistance*v + c.engineForce = 0
                 // Notice we are only interested in the positive answer.
                 maxVelocityAbsolute = (c.rollResist -
                                        std::sqrt(c.rollResist * c.rollResist + 4 * c.airResist * c.engineForce)) /
                                       (-2 * c.airResist);
-                accumulatedEBrake = 0.f;
-
-                smoothSteer = true;
-                safeSteer = true;
-                slippingFront = false;
-                slippingRear = false;
-
-                distanceFromCamera = 1.0f;
-
-                isColliding = false;
             }
         };
     }

@@ -7,8 +7,11 @@
 #include <oni-core/component/physic.h>
 #include <oni-core/common/typedefs-graphics.h>
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/math/z-layer-manager.h>
 
 class b2World;
+
+class b2Body;
 
 namespace oni {
     namespace entities {
@@ -24,20 +27,53 @@ namespace oni {
         class SceneManager;
     }
 
+    namespace math {
+        class ZLayerManager;
+    }
+
     namespace entities {
 
         class EntityFactory {
-
         public:
-            explicit EntityFactory(EntityManager &);
+            EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
 
             common::EntityID createEntity(component::EntityType);
 
         private:
+            common::EntityID createEntity(bool tagNew);
+
+            template<class Component>
+            Component &createComponent(common::EntityID entityID) {
+                return mManager.assign<Component>(entityID, Component{});
+            }
+
             common::EntityID createCar();
+
+            common::EntityID createGun(
+                    const math::vec3 &pos,
+                    const math::vec2 &size,
+                    const common::real32 heading,
+                    const std::string &textureID
+            );
+
+            common::EntityID createTire(
+                    const math::vec3 &pos,
+                    const math::vec2 &size,
+                    const common::real32 heading,
+                    const std::string &textureID
+            );
+
+            b2Body *createPhysicalBody(
+                    const math::vec3 &worldPos,
+                    const math::vec2 &size,
+                    common::real32 heading,
+                    component::PhysicalProperties &properties
+            );
 
         private:
             EntityManager &mManager;
+            b2World &mPhysicsWorld;
+            const math::ZLayerManager &mZLayerManager;
         };
 
         common::EntityID createEntity(EntityManager &manager, bool tagAsNew = true);
@@ -115,7 +151,7 @@ namespace oni {
             manager.remove<T>(entityID);
         }
 
-        void assignTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child);
+        void attach(EntityManager &manager, common::EntityID parent, common::EntityID child);
 
         void removeTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child);
     }

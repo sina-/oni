@@ -33,6 +33,8 @@ namespace oni {
                 mTileWorld = std::make_unique<oni::server::entities::TileWorld>(*mEntityManager,
                                                                                 *mDynamics->getPhysicsWorld(),
                                                                                 *mZLayerManager);
+                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mEntityManager, *mZLayerManager,
+                                                                                *mDynamics->getPhysicsWorld());
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
                 mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager, *mZLayerManager);
@@ -162,7 +164,9 @@ namespace oni {
             void ServerGame::showSPS(oni::common::int16 tps) {}
 
             void ServerGame::showPPS(oni::common::int16 pps) {
-                std::cout << "PPS " << pps << "\n";
+                if (pps < 30) {
+                    std::cout << "PPS " << pps << "\n";
+                }
             }
 
             void ServerGame::showPET(oni::common::int16 pet) {}
@@ -173,6 +177,8 @@ namespace oni {
 
             oni::common::EntityID ServerGame::createCar() {
                 auto lock = mEntityManager->scopedLock();
+                // auto entity = mEntityFactory->createEntity(oni::component::EntityType::RACE_CAR);
+
 
                 auto carConfig = oni::component::CarConfig();
                 carConfig.cgToRear = 1.25f;
@@ -315,7 +321,7 @@ namespace oni {
                 oni::entities::assignShapeLocal(*mEntityManager, entityID, size, pos.z);
                 oni::entities::assignPlacement(*mEntityManager, entityID, pos, scale, heading);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, texture);
-                oni::entities::assignTransformationHierarchy(*mEntityManager, carEntityID, entityID);
+                oni::entities::attach(*mEntityManager, carEntityID, entityID);
                 oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);
 
                 return entityID;
@@ -341,7 +347,7 @@ namespace oni {
                 oni::entities::assignShapeLocal(*mEntityManager, entityID, size, pos.z);
                 oni::entities::assignPlacement(*mEntityManager, entityID, pos, scale, 0.f);
                 oni::entities::assignTextureToLoad(*mEntityManager, entityID, texture);
-                oni::entities::assignTransformationHierarchy(*mEntityManager, carEntityID, entityID);
+                oni::entities::attach(*mEntityManager, carEntityID, entityID);
                 oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);
 
                 return entityID;

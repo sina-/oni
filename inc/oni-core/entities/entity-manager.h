@@ -118,10 +118,10 @@ namespace oni {
             }
 
             template<class Component, class... Args>
-            void assign(EntityType entityID, Args &&... args) {
+            Component &assign(EntityType entityID, Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
-                    mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
+                    return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
                 }
             }
 

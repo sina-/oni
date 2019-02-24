@@ -12,9 +12,12 @@
 namespace oni {
     namespace entities {
 
-        EntityFactory::EntityFactory(EntityManager &manager) : mManager{manager} {
-
-        }
+        EntityFactory::EntityFactory(EntityManager &manager,
+                                     const math::ZLayerManager &zLayerManager,
+                                     b2World &physicsWorld) :
+                mManager(manager),
+                mZLayerManager(zLayerManager),
+                mPhysicsWorld{physicsWorld} {}
 
         common::EntityID EntityFactory::createEntity(component::EntityType entityType) {
             switch (entityType) {
@@ -33,7 +36,239 @@ namespace oni {
         }
 
         common::EntityID EntityFactory::createCar() {
-            return 0;
+            auto vehicleZ = mZLayerManager.getZForEntity(component::EntityType::RACE_CAR);
+            // TODO: All cars spawn in the same location!
+            // NOTE: This is the center of car sprite.
+            // TODO: Functions in this class should not assign values based on real game but only sane defaults.
+            // The user of the library is responsible to edit these values as needed after creation.
+            // #CANDIATE FOR ARG#
+            auto carPosition = oni::math::vec3{-70.f, -30.f, vehicleZ};
+
+            // #CANDIATE FOR ARG#
+            common::real32 heading = 0.f;
+
+            // TODO: Should locking happen here?
+            auto lock = mManager.scopedLock();
+            auto carEntityID = createEntity(true);
+
+            auto &carConfig = createComponent<component::CarConfig>(carEntityID);
+
+            auto &placement = createComponent<component::Placement>(carEntityID);
+            placement.position = carPosition;
+            placement.rotation = heading;
+
+            auto &properties = createComponent<component::PhysicalProperties>(carEntityID);
+            properties.physicalCategory = oni::component::PhysicalCategory::RACE_CAR;
+            properties.bodyType = component::BodyType::DYNAMIC;
+            properties.highPrecision = true;
+
+            auto &texture = createComponent<component::Texture>(carEntityID);
+            // #CANDIATE FOR ARG#
+            texture.filePath = "resources/images/car/1/car.png";
+
+            // #CANDIATE FOR ARG#
+            auto carSizeX = carConfig.cgToRear + carConfig.cgToFront;
+            auto carSizeY = carConfig.halfWidth * 2.0f;
+            auto carSize = oni::math::vec2{static_cast<oni::common::real32>(carSizeX),
+                                           static_cast<oni::common::real32>(carSizeY)};
+            assert(carSizeX - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
+
+            auto *body = createPhysicalBody(carPosition, carSize, heading, properties);
+
+            auto &car = createComponent<component::Car>(carEntityID);
+            car.position.x = carPosition.x;
+            car.position.y = carPosition.y;
+            car.applyConfiguration(carConfig);
+
+            auto &shape = createComponent<component::Shape>(carEntityID);
+            shape.setZ(vehicleZ);
+            shape.expandTopRight(carSize);
+            shape.centerAlign();
+            oni::entities::assignTag<component::Tag_Dynamic>(mManager, carEntityID);
+
+            oni::math::vec2 gunSize{};
+            gunSize.x = static_cast<common::real32>(carConfig.cgToFrontAxle + carConfig.cgToRearAxle);
+            gunSize.y = static_cast<common::real32>(carConfig.halfWidth * 0.8f);
+
+            oni::math::vec3 gunPos{};
+            gunPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle * 0.7f);
+            gunPos.y = 0.f;
+            gunPos.z = mZLayerManager.getZForEntity(component::EntityType::VEHICLE_GUN);
+            auto carGunEntity = createGun(gunPos, gunSize, 0.f, "resources/images/minigun/1.png");
+            attach(mManager, carEntityID, carGunEntity);
+
+            std::string tireTextureID = "resources/images/car/1/car-tire.png";
+            auto tireRotation = static_cast<oni::common::real32>(oni::math::toRadians(90.0f));
+            math::vec2 tireSize;
+            tireSize.x = static_cast<common::real32>(carConfig.wheelWidth);
+            tireSize.y = static_cast<common::real32>(carConfig.wheelRadius * 2);
+
+            math::vec3 tireFRPos;
+            tireFRPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
+            tireFRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
+            tireFRPos.z = carPosition.z;
+            auto carTireFREntity = createTire(tireFRPos, tireSize, tireRotation, tireTextureID);
+            attach(mManager, carEntityID, carTireFREntity);
+
+            oni::math::vec3 tireFLPos;
+            tireFLPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
+            tireFLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
+            tireFLPos.z = carPosition.z;
+            auto carTireFLEntity = createTire(tireFLPos, tireSize, tireRotation, tireTextureID);
+            attach(mManager, carEntityID, carTireFLEntity);
+
+            oni::math::vec3 tireRRPos;
+            tireRRPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
+            tireRRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
+            tireRRPos.z = carPosition.z;
+            auto carTireRREntity = createTire(tireRRPos, tireSize, tireRotation, tireTextureID);
+            attach(mManager, carEntityID, carTireRREntity);
+
+
+            oni::math::vec3 tireRLPos;
+            tireRLPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
+            tireRLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
+            tireRLPos.z = carPosition.z;
+            auto carTireRLEntity = createTire(tireRLPos, tireSize, tireRotation, tireTextureID);
+            attach(mManager, carEntityID, carTireRLEntity);
+
+            car.tireFR = carTireFREntity;
+            car.tireFL = carTireFLEntity;
+            car.tireRR = carTireRREntity;
+            car.tireRL = carTireRLEntity;
+
+            car.gunEntity = carGunEntity;
+
+            return carEntityID;
+        }
+
+        common::EntityID EntityFactory::createGun(
+                const oni::math::vec3 &pos,
+                const oni::math::vec2 &size,
+                const common::real32 heading,
+                const std::string &textureID) {
+            auto entityID = createEntity(true);
+
+            auto &placement = createComponent<component::Placement>(entityID);
+            placement.position = pos;
+            placement.rotation = heading;
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+
+            auto &shape = createComponent<component::Shape>(entityID);
+            shape.setZ(pos.z);
+            shape.expandTopRight(size);
+            shape.centerAlign();
+
+            oni::entities::assignTag<oni::component::Tag_Dynamic>(mManager, entityID);
+
+            return entityID;
+        }
+
+        common::EntityID EntityFactory::createTire(
+                const math::vec3 &pos,
+                const math::vec2 &size,
+                const common::real32 heading,
+                const std::string &textureID) {
+            auto entityID = createEntity(true);
+
+            auto &placement = createComponent<component::Placement>(entityID);
+            placement.position = pos;
+            placement.rotation = heading;
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+
+            auto &shape = createComponent<component::Shape>(entityID);
+            shape.setZ(pos.z);
+            shape.expandTopRight(size);
+            shape.centerAlign();
+
+            oni::entities::assignTag<oni::component::Tag_Dynamic>(mManager, entityID);
+
+            return entityID;
+        }
+
+        common::EntityID EntityFactory::createEntity(bool tagNew) {
+            auto entityID = mManager.create();
+            if (tagNew) {
+                mManager.assign<component::Tag_NewEntity>(entityID);
+            }
+            return entityID;
+        }
+
+        b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
+                                                  const math::vec2 &size, common::real32 heading,
+                                                  component::PhysicalProperties &properties) {
+            b2PolygonShape shape{};
+            shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
+
+            // NOTE: This is non-owning pointer. physicsWorld owns it.
+            b2Body *body{};
+
+            b2BodyDef bodyDef;
+            bodyDef.bullet = properties.highPrecision;
+            bodyDef.angle = heading;
+            bodyDef.linearDamping = properties.linearDamping;
+            bodyDef.angularDamping = properties.angularDamping;
+
+            b2FixtureDef fixtureDef;
+            // NOTE: Box2D will create a copy of the shape, so it is safe to pass a local ref.
+            fixtureDef.shape = &shape;
+            fixtureDef.density = properties.density;
+            fixtureDef.friction = properties.friction;
+
+            switch (properties.bodyType) {
+                case component::BodyType::DYNAMIC : {
+                    bodyDef.position.x = worldPos.x;
+                    bodyDef.position.y = worldPos.y;
+                    bodyDef.type = b2_dynamicBody;
+                    body = mPhysicsWorld.CreateBody(&bodyDef);
+
+                    b2FixtureDef collisionSensor;
+                    collisionSensor.isSensor = true;
+                    collisionSensor.shape = &shape;
+                    collisionSensor.density = properties.density;
+                    collisionSensor.friction = properties.friction;
+
+                    if (!properties.collisionWithinCategory) {
+                        collisionSensor.filter.groupIndex = -static_cast<common::int16>(properties.physicalCategory);
+                    }
+
+                    body->CreateFixture(&fixtureDef);
+                    body->CreateFixture(&collisionSensor);
+                    break;
+                }
+                case component::BodyType::STATIC: {
+                    // NOTE: for static entities position in world is the bottom left corner of the sprite. But
+                    // bodyDef.position is the center of gravity of the entity.
+                    bodyDef.position.x = worldPos.x + size.x / 2.0f;
+                    bodyDef.position.y = worldPos.y + size.y / 2.0f;
+                    bodyDef.type = b2_staticBody;
+                    body = mPhysicsWorld.CreateBody(&bodyDef);
+                    body->CreateFixture(&shape, 0.f);
+                    break;
+                }
+                case component::BodyType::KINEMATIC: {
+                    bodyDef.position.x = worldPos.x;
+                    bodyDef.position.y = worldPos.y;
+                    bodyDef.type = b2_kinematicBody;
+                    body = mPhysicsWorld.CreateBody(&bodyDef);
+                    body->CreateFixture(&fixtureDef);
+                    break;
+                }
+                case component::BodyType::UNKNOWN: {
+                    assert("Unknown BodyType" && false);
+                    break;
+                }
+                default: {
+                    assert("Invalid BodyType" && false);
+                    break;
+                }
+            }
+            properties.body = body;
+            return body;
         }
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
@@ -143,6 +378,10 @@ namespace oni {
             fixtureDef.friction = properties.friction;
 
             switch (properties.bodyType) {
+                case component::BodyType ::UNKNOWN: {
+                    assert("Unknown BodyType" && false);
+                    break;
+                }
                 case component::BodyType::DYNAMIC : {
                     bodyDef.position.x = worldPos.x;
                     bodyDef.position.y = worldPos.y;
@@ -195,7 +434,8 @@ namespace oni {
 
         void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
                        const component::CarConfig &carConfig) {
-            auto car = component::Car(carConfig);
+            auto car = component::Car{};
+            car.applyConfiguration(carConfig);
             car.position.x = worldPos.x;
             car.position.y = worldPos.y;
             manager.assign<component::Car>(entityID, car);
@@ -243,9 +483,9 @@ namespace oni {
             manager.remove<component::CarConfig>(entityID);
         }
 
-        void assignTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child) {
+        void attach(EntityManager &manager, common::EntityID parent, common::EntityID child) {
             if (manager.has<component::TransformChildren>(parent)) {
-                auto transformChildren = manager.get<component::TransformChildren>(parent);
+                auto &transformChildren = manager.get<component::TransformChildren>(parent);
                 transformChildren.children.emplace_back(child);
                 manager.replace<component::TransformChildren>(parent, transformChildren);
             } else {

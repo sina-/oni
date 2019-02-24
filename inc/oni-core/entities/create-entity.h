@@ -37,7 +37,12 @@ namespace oni {
         public:
             EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
 
-            common::EntityID createEntity(component::EntityType);
+            common::EntityID createEntity(component::EntityType,
+                                          const math::vec3 &pos,
+                                          const math::vec2 &size,
+                                          common::real32 heading,
+                                          const std::string& textureID
+                                          );
 
         private:
             common::EntityID createEntity(bool tagNew);
@@ -47,7 +52,11 @@ namespace oni {
                 return mManager.assign<Component>(entityID, Component{});
             }
 
-            common::EntityID createCar();
+            common::EntityID createCar(const math::vec3 &pos,
+                                       const math::vec2 &size,
+                                       common::real32 heading,
+                                       const std::string& textureID
+                                       );
 
             common::EntityID createGun(
                     const math::vec3 &pos,
@@ -69,6 +78,16 @@ namespace oni {
                     common::real32 heading,
                     component::PhysicalProperties &properties
             );
+
+            template<class T>
+            void assignTag(common::EntityID entityID) {
+                mManager.assign<T>(entityID);
+            }
+
+            template<class T>
+            void removeTag(common::EntityID entityID) {
+                mManager.remove<T>(entityID);
+            }
 
         private:
             EntityManager &mManager;

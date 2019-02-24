@@ -5,10 +5,14 @@
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
+#include <oni-core/component/entity-definition.h>
 
 namespace oni {
     namespace component {
         using Point = math::vec3;
+
+        //using EntityAttachment = std::map<EntityType, common::EntityID>;
+        using EntityAttachment = std::vector<std::tuple<EntityType, common::EntityID>>;
 
         // TODO: Rename this into Sprite
         struct Shape {
@@ -32,17 +36,17 @@ namespace oni {
                 return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
             }
 
-            void expandTopRight(const math::vec2 &size) {
-                vertexB.y += size.y;
-                vertexC.x += size.x;
-                vertexC.y += size.y;
-                vertexD.x += size.x;
+            void setSizeFromOrigin(const math::vec2 &size) {
+                vertexB.y = size.y;
+                vertexC.x = size.x;
+                vertexC.y = size.y;
+                vertexD.x = size.x;
             }
 
             void centerAlign() {
                 math::vec2 halfSize{};
-                halfSize.x /= (vertexD.x - vertexA.x) / 2;
-                halfSize.y /= (vertexB.y - vertexA.y) / 2;
+                halfSize.x = (vertexD.x - vertexA.x) / 2;
+                halfSize.y = (vertexB.y - vertexA.y) / 2;
                 vertexA.x -= halfSize.x;
                 vertexA.y -= halfSize.y;
                 vertexB.x -= halfSize.x;
@@ -162,7 +166,6 @@ namespace oni {
 
             common::CarSimDouble gearRatio{2.7f};
             common::CarSimDouble differentialRatio{3.4f};
-
         };
 
         struct Car {

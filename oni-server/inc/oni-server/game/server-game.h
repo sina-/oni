@@ -85,10 +85,6 @@ namespace oni {
 
                 EntityID createCar();
 
-                EntityID createTire(EntityID carEntityID, const oni::math::vec3 &pos, const oni::math::vec2 &size);
-
-                EntityID createGun(EntityID carEntityID, const oni::math::vec3 &pos, const oni::math::vec2 &size);
-
                 void removeTire(EntityID carEntityID, EntityID tireEntityID);
 
                 void removeCar(EntityID entityID);

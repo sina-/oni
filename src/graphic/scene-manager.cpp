@@ -293,18 +293,19 @@ namespace oni {
                     if (car.slippingFront || true) {
                         // TODO: This is not in the view and it will be very slow as more entities are added to the
                         // registry. Perhaps I can save the tires together with the car
-                        const auto &carTireRRPlacement = manager.get<component::Placement>(car.tireRR);
-                        carTireRRPlacements.push_back(carTireRRPlacement);
-                        const auto &carTireRLPlacement = manager.get<component::Placement>(car.tireRL);
-                        carTireRLPlacements.push_back(carTireRLPlacement);
+                        // TODO: Fix this with EntityAttachement
+//                        const auto &carTireRRPlacement = manager.get<component::Placement>(car.tireRR);
+//                        carTireRRPlacements.push_back(carTireRRPlacement);
+//                        const auto &carTireRLPlacement = manager.get<component::Placement>(car.tireRL);
+//                        carTireRLPlacements.push_back(carTireRLPlacement);
+//
+//                        const auto &transformParentRR = manager.get<component::TransformParent>(car.tireRR);
+//                        carTireRRTransformParent.push_back(transformParentRR);
+//                        const auto &transformParentRL = manager.get<component::TransformParent>(car.tireRL);
+//                        carTireRLTransformParent.push_back(transformParentRL);
 
-                        const auto &transformParentRR = manager.get<component::TransformParent>(car.tireRR);
-                        carTireRRTransformParent.push_back(transformParentRR);
-                        const auto &transformParentRL = manager.get<component::TransformParent>(car.tireRL);
-                        carTireRLTransformParent.push_back(transformParentRL);
-
-                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-                        skidOpacity.push_back(alpha);
+//                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+//                        skidOpacity.push_back(alpha);
                     }
                 }
             }

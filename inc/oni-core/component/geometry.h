@@ -11,8 +11,15 @@ namespace oni {
     namespace component {
         using Point = math::vec3;
 
-        //using EntityAttachment = std::map<EntityType, common::EntityID>;
-        using EntityAttachment = std::vector<std::tuple<EntityType, common::EntityID>>;
+        struct EntityAttachment {
+            std::vector<common::EntityID> entities;
+            std::vector<component::EntityType> entityTypes;
+        };
+
+        struct EntityAttachee {
+            common::EntityID entityID;
+            component::EntityType entityType;
+        };
 
         // TODO: Rename this into Sprite
         struct Shape {
@@ -200,13 +207,6 @@ namespace oni {
             bool safeSteer{true};
 
             common::CarSimDouble distanceFromCamera{1.f};
-
-            common::EntityID tireFR{0};
-            common::EntityID tireFL{0};
-            common::EntityID tireRR{0};
-            common::EntityID tireRL{0};
-
-            common::EntityID gunEntity{0};
 
             bool isColliding{false};
 

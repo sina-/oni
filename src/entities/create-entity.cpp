@@ -14,7 +14,24 @@ namespace oni {
                                      b2World &physicsWorld) :
                 mManager(manager),
                 mZLayerManager(zLayerManager),
-                mPhysicsWorld{physicsWorld} {}
+                mPhysicsWorld{physicsWorld} {
+
+        }
+
+        common::EntityID EntityFactory::createEntity(bool tagNew) {
+            auto entityID = mManager.create();
+            if (tagNew) {
+                mManager.assign<component::Tag_NewEntity>(entityID);
+            }
+            return entityID;
+        }
+
+        void EntityFactory::destroyEntity(common::EntityID entityID) {
+            if (!mManager.has<component::Tag_NewEntity>(entityID)) {
+                mManager.addDeletedEntity(entityID);
+            }
+            mManager.destroy(entityID);
+        }
 
         common::EntityID EntityFactory::createEntity(component::EntityType entityType,
                                                      const math::vec3 &pos,
@@ -22,32 +39,79 @@ namespace oni {
                                                      common::real32 heading,
                                                      const std::string &textureID
         ) {
+            common::EntityID entityID = createEntity(true);
+            auto &type = createComponent<component::EntityType>(entityID);
+            type = entityType;
+
             switch (entityType) {
+                case component::EntityType::RACE_CAR: {
+                    createCar(entityID, pos, size, heading, textureID);
+                    break;
+                }
+                case component::EntityType::VEHICLE_GUN: {
+                    createGun(entityID, pos, size, heading, textureID);
+                    break;
+                }
+                case component::EntityType::VEHICLE_TIRE: {
+                    createTire(entityID, pos, size, heading, textureID);
+                    break;
+                }
+                case component::EntityType::UNKNOWN: {
+                    mManager.remove<component::EntityType>(entityID);
+                    mManager.destroy(entityID);
+                    assert(false);
+                    break;
+                }
+                default: {
+                    mManager.remove<component::EntityType>(entityID);
+                    mManager.destroy(entityID);
+                    assert(false);
+                    break;
+                }
+            }
+
+            return entityID;
+        }
+
+        void EntityFactory::removeEntity(common::EntityID entityID, component::EntityType entityType) {
+            switch (entityType) {
+                case component::EntityType::RACE_CAR: {
+                    removeRaceCar(entityID);
+                    break;
+                }
+                case component::EntityType::VEHICLE_GUN: {
+                    removeGun(entityID);
+                    break;
+                }
+                case component::EntityType::VEHICLE_TIRE: {
+                    removeTire(entityID);
+                    break;
+                }
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
                 }
-                case component::EntityType::RACE_CAR: {
-                    return createCar(pos, size, heading, textureID);
-                }
                 default: {
                     assert(false);
+                    break;
                 }
             }
-            return 0;
+
+            removeComponent<component::EntityType>(entityID);
+            destroyEntity(entityID);
         }
 
-        common::EntityID EntityFactory::createCar(const math::vec3 &pos,
-                                                  const math::vec2 &size,
-                                                  common::real32 heading,
-                                                  const std::string &textureID) {
-            auto lock = mManager.scopedLock();
-            auto carEntityID = createEntity(true);
-
+        void EntityFactory::createCar(
+                const common::EntityID carEntityID,
+                const math::vec3 &pos,
+                const math::vec2 &size,
+                const common::real32 heading,
+                const std::string &textureID) {
             auto &carConfig = createComponent<component::CarConfig>(carEntityID);
             carConfig.cgToRear = size.x / 2;
             carConfig.cgToFront = size.x / 2;
             carConfig.halfWidth = size.y / 2;
+            assert(size.x - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
             auto &placement = createComponent<component::Placement>(carEntityID);
             placement.position = pos;
@@ -62,8 +126,7 @@ namespace oni {
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
-            assert(size.x - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
-
+            // TODO: Does this make sense? Or should it be same as createComponent?
             auto *body = createPhysicalBody(pos, size, heading, properties);
 
             auto &car = createComponent<component::Car>(carEntityID);
@@ -76,71 +139,40 @@ namespace oni {
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
-            oni::math::vec2 gunSize{};
-            gunSize.x = static_cast<common::real32>(carConfig.cgToFrontAxle + carConfig.cgToRearAxle);
-            gunSize.y = static_cast<common::real32>(carConfig.halfWidth * 0.8f);
-
-            oni::math::vec3 gunPos{};
-            gunPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle * 0.7f);
-            gunPos.y = 0.f;
-            gunPos.z = mZLayerManager.getZForEntity(component::EntityType::VEHICLE_GUN);
-            auto carGunEntity = createGun(gunPos, gunSize, 0.f, "resources/images/minigun/1.png");
-            attach(mManager, carEntityID, carGunEntity);
-
-            std::string tireTextureID = "resources/images/car/1/car-tire.png";
-            auto tireRotation = static_cast<oni::common::real32>(oni::math::toRadians(90.0f));
-            math::vec2 tireSize;
-            tireSize.x = static_cast<common::real32>(carConfig.wheelWidth);
-            tireSize.y = static_cast<common::real32>(carConfig.wheelRadius * 2);
-
-            math::vec3 tireFRPos;
-            tireFRPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
-            tireFRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
-            tireFRPos.z = pos.z;
-            auto carTireFREntity = createTire(tireFRPos, tireSize, tireRotation, tireTextureID);
-            attach(mManager, carEntityID, carTireFREntity);
-
-            oni::math::vec3 tireFLPos;
-            tireFLPos.x = static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius);
-            tireFLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
-            tireFLPos.z = pos.z;
-            auto carTireFLEntity = createTire(tireFLPos, tireSize, tireRotation, tireTextureID);
-            attach(mManager, carEntityID, carTireFLEntity);
-
-            oni::math::vec3 tireRRPos;
-            tireRRPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
-            tireRRPos.y = static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth);
-            tireRRPos.z = pos.z;
-            auto carTireRREntity = createTire(tireRRPos, tireSize, tireRotation, tireTextureID);
-            attach(mManager, carEntityID, carTireRREntity);
-
-            oni::math::vec3 tireRLPos;
-            tireRLPos.x = static_cast<common::real32>(-carConfig.cgToRearAxle);
-            tireRLPos.y = static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth);
-            tireRLPos.z = pos.z;
-            auto carTireRLEntity = createTire(tireRLPos, tireSize, tireRotation, tireTextureID);
-            attach(mManager, carEntityID, carTireRLEntity);
-
-            car.tireFR = carTireFREntity;
-            car.tireFL = carTireFLEntity;
-            car.tireRR = carTireRREntity;
-            car.tireRL = carTireRLEntity;
-
-            car.gunEntity = carGunEntity;
+            createComponent<component::TransformChildren>(carEntityID);
+            createComponent<component::EntityAttachment>(carEntityID);
 
             assignTag<component::Tag_TextureShaded>(carEntityID);
             assignTag<component::Tag_Dynamic>(carEntityID);
-
-            return carEntityID;
         }
 
-        common::EntityID EntityFactory::createGun(
+        void EntityFactory::removeRaceCar(common::EntityID entityID) {
+            auto &attachments = mManager.get<component::EntityAttachment>(entityID);
+            for (common::size i = 0; i < attachments.entities.size(); ++i) {
+                removeEntity(attachments.entities[i], attachments.entityTypes[i]);
+            }
+            removeComponent<component::EntityAttachment>(entityID);
+            removeComponent<component::Shape>(entityID);
+            removeComponent<component::Placement>(entityID);
+            // TODO: When notifying clients of this, the texture in memory should be evicted.
+            removeComponent<component::Texture>(entityID);
+            removeComponent<component::TransformChildren>(entityID);
+            removeComponent<component::Car>(entityID);
+            removeComponent<component::CarConfig>(entityID);
+
+            removePhysicalBody(entityID);
+            removeComponent<component::PhysicalProperties>(entityID);
+
+            removeTag<component::Tag_Dynamic>(entityID);
+            removeTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        void EntityFactory::createGun(
+                const common::EntityID entityID,
                 const oni::math::vec3 &pos,
                 const oni::math::vec2 &size,
                 const common::real32 heading,
                 const std::string &textureID) {
-            auto entityID = createEntity(true);
-
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -154,19 +186,30 @@ namespace oni {
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
+            createComponent<component::EntityAttachee>(entityID);
+            createComponent<component::TransformParent>(entityID);
+
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-
-            return entityID;
         }
 
-        common::EntityID EntityFactory::createTire(
+        void EntityFactory::removeGun(common::EntityID entityID) {
+            removeComponent<component::Placement>(entityID);
+            removeComponent<component::Texture>(entityID);
+            removeComponent<component::Shape>(entityID);
+            removeComponent<component::EntityAttachee>(entityID);
+            removeComponent<component::TransformParent>(entityID);
+
+            removeTag<component::Tag_Dynamic>(entityID);
+            removeTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        void EntityFactory::createTire(
+                const common::EntityID entityID,
                 const math::vec3 &pos,
                 const math::vec2 &size,
                 const common::real32 heading,
                 const std::string &textureID) {
-            auto entityID = createEntity(true);
-
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -180,18 +223,22 @@ namespace oni {
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
+            createComponent<component::EntityAttachee>(entityID);
+            createComponent<component::TransformParent>(entityID);
+
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-
-            return entityID;
         }
 
-        common::EntityID EntityFactory::createEntity(bool tagNew) {
-            auto entityID = mManager.create();
-            if (tagNew) {
-                mManager.assign<component::Tag_NewEntity>(entityID);
-            }
-            return entityID;
+        void EntityFactory::removeTire(common::EntityID entityID) {
+            removeComponent<component::Placement>(entityID);
+            removeComponent<component::Texture>(entityID);
+            removeComponent<component::Shape>(entityID);
+            removeComponent<component::EntityAttachee>(entityID);
+            removeComponent<component::TransformParent>(entityID);
+
+            removeTag<component::Tag_Dynamic>(entityID);
+            removeTag<component::Tag_TextureShaded>(entityID);
         }
 
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
@@ -265,6 +312,11 @@ namespace oni {
             }
             properties.body = body;
             return body;
+        }
+
+        void EntityFactory::removePhysicalBody(common::EntityID entityID) {
+            auto entityPhysicalProps = mManager.get<component::PhysicalProperties>(entityID);
+            mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
         }
 
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
@@ -428,16 +480,6 @@ namespace oni {
             body->SetUserData(static_cast<void *>(&props.colliding));
         }
 
-        void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                       const component::CarConfig &carConfig) {
-            auto car = component::Car{};
-            car.applyConfiguration(carConfig);
-            car.position.x = worldPos.x;
-            car.position.y = worldPos.y;
-            manager.assign<component::Car>(entityID, car);
-            manager.assign<component::CarConfig>(entityID, carConfig);
-        }
-
         void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
                             common::real32 heading, common::real32 age, common::real32 maxAge,
                             common::real32 velocity) {
@@ -456,10 +498,6 @@ namespace oni {
             manager.remove<component::Placement>(entityID);
         }
 
-        void removeAppearance(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<component::Appearance>(entityID);
-        }
-
         void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID) {
             auto entityPhysicalProps = manager.get<component::PhysicalProperties>(entityID);
             physicsWorld.DestroyBody(entityPhysicalProps.body);
@@ -474,33 +512,22 @@ namespace oni {
             manager.remove<component::Text>(entityID);
         }
 
-        void removeCar(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<component::Car>(entityID);
-            manager.remove<component::CarConfig>(entityID);
-        }
+        void attach(
+                EntityManager &manager,
+                common::EntityID parent,
+                common::EntityID child,
+                component::EntityType parentType,
+                component::EntityType childType) {
+            auto &transformChildren = manager.get<component::TransformChildren>(parent);
+            transformChildren.children.emplace_back(child);
 
-        void attach(EntityManager &manager, common::EntityID parent, common::EntityID child) {
-            if (manager.has<component::TransformChildren>(parent)) {
-                auto &transformChildren = manager.get<component::TransformChildren>(parent);
-                transformChildren.children.emplace_back(child);
-                manager.replace<component::TransformChildren>(parent, transformChildren);
-            } else {
-                auto transformChildren = component::TransformChildren{};
-                transformChildren.children.emplace_back(child);
-                manager.assign<component::TransformChildren>(parent, transformChildren);
-            }
+            auto &attachment = manager.get<component::EntityAttachment>(parent);
+            attachment.entities.emplace_back(child);
+            attachment.entityTypes.emplace_back(childType);
 
-            assert(!manager.has<component::TransformParent>(child));
-
-            auto transformParent = component::TransformParent{parent, math::mat4::identity()};
-            manager.assign<component::TransformParent>(child, transformParent);
-        }
-
-        void removeTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child) {
-            if (manager.has<component::TransformChildren>(parent)) {
-                manager.remove<component::TransformChildren>(parent);
-            }
-            manager.remove<component::TransformParent>(child);
+            auto &attachee = manager.get<component::EntityAttachee>(child);
+            attachee.entityID = parent;
+            attachee.entityType = parentType;
         }
     }
 }

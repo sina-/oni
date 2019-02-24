@@ -37,35 +37,36 @@ namespace oni {
         public:
             EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
 
-            common::EntityID createEntity(component::EntityType,
+            common::EntityID createEntity(const component::EntityType,
                                           const math::vec3 &pos,
                                           const math::vec2 &size,
-                                          common::real32 heading,
-                                          const std::string& textureID
-                                          );
+                                          const common::real32 heading,
+                                          const std::string &textureID
+            );
+
+            void removeEntity(common::EntityID, component::EntityType);
 
         private:
             common::EntityID createEntity(bool tagNew);
 
-            template<class Component>
-            Component &createComponent(common::EntityID entityID) {
-                return mManager.assign<Component>(entityID, Component{});
-            }
-
-            common::EntityID createCar(const math::vec3 &pos,
-                                       const math::vec2 &size,
-                                       common::real32 heading,
-                                       const std::string& textureID
-                                       );
-
-            common::EntityID createGun(
+            void createCar(
+                    const common::EntityID entityID,
                     const math::vec3 &pos,
                     const math::vec2 &size,
                     const common::real32 heading,
                     const std::string &textureID
             );
 
-            common::EntityID createTire(
+            void createGun(
+                    const common::EntityID entityID,
+                    const math::vec3 &pos,
+                    const math::vec2 &size,
+                    const common::real32 heading,
+                    const std::string &textureID
+            );
+
+            void createTire(
+                    const common::EntityID entityID,
                     const math::vec3 &pos,
                     const math::vec2 &size,
                     const common::real32 heading,
@@ -75,9 +76,20 @@ namespace oni {
             b2Body *createPhysicalBody(
                     const math::vec3 &worldPos,
                     const math::vec2 &size,
-                    common::real32 heading,
+                    const common::real32 heading,
                     component::PhysicalProperties &properties
             );
+
+        private:
+            void removeRaceCar(common::EntityID);
+
+            void removeTire(common::EntityID);
+
+            void removeGun(common::EntityID);
+
+            void removePhysicalBody(common::EntityID);
+
+        private:
 
             template<class T>
             void assignTag(common::EntityID entityID) {
@@ -88,6 +100,18 @@ namespace oni {
             void removeTag(common::EntityID entityID) {
                 mManager.remove<T>(entityID);
             }
+
+            template<class Component>
+            Component &createComponent(common::EntityID entityID) {
+                return mManager.assign<Component>(entityID, Component{});
+            }
+
+            template<class Component>
+            void removeComponent(common::EntityID entityID) {
+                mManager.remove<Component>(entityID);
+            }
+
+            void destroyEntity(common::EntityID entityID);
 
         private:
             EntityManager &mManager;
@@ -132,8 +156,6 @@ namespace oni {
 
         void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color);
 
-        void removeAppearance(EntityManager &manager, common::EntityID entityID);
-
         void assignPhysicalProperties(EntityManager &manager,
                                       b2World &physicsWorld,
                                       common::EntityID,
@@ -155,11 +177,6 @@ namespace oni {
 
         void removeText(EntityManager &manager, common::EntityID entityID);
 
-        void assignCar(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                       const component::CarConfig &carConfig);
-
-        void removeCar(EntityManager &manager, common::EntityID entityID);
-
         template<class T>
         void assignTag(EntityManager &manager, common::EntityID entityID) {
             manager.assign<T>(entityID);
@@ -170,8 +187,12 @@ namespace oni {
             manager.remove<T>(entityID);
         }
 
-        void attach(EntityManager &manager, common::EntityID parent, common::EntityID child);
+        void attach(
+                EntityManager &manager,
+                common::EntityID parent,
+                common::EntityID child,
+                component::EntityType parentType,
+                component::EntityType childType);
 
-        void removeTransformationHierarchy(EntityManager &manager, common::EntityID parent, common::EntityID child);
     }
 }

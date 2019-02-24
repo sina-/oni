@@ -4,6 +4,7 @@
 
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/map.hpp>
 #include <cereal/archives/portable_binary.hpp>
 
 #include <oni-core/entities/entity-manager.h>
@@ -28,6 +29,16 @@ namespace oni {
         template<class Archive>
         void serialize(Archive &archive, component::Point &point) {
             archive(point);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, component::EntityAttachment &attachment) {
+            archive(attachment.entities, attachment.entityTypes);
+        }
+
+        template<class Archive>
+        void serialize(Archive &archive, component::EntityAttachee &attachee) {
+            archive(attachee.entityID, attachee.entityType);
         }
 
         template<class Archive>
@@ -92,12 +103,6 @@ namespace oni {
                     car.smoothSteer,
                     car.safeSteer,
                     car.distanceFromCamera,
-
-                    car.tireFR,
-                    car.tireFL,
-                    car.tireRR,
-                    car.tireRL,
-
                     car.isColliding
             );
         }
@@ -147,6 +152,9 @@ namespace oni {
                         component::Point,
                         component::Appearance,
                         component::Texture,
+                        component::EntityType,
+                        component::EntityAttachment,
+                        component::EntityAttachee,
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
                         // to know what it points to at the moment because sever does the physics calculations and only
                         // send the results back to the client, so I can skip it. But for the future I have to
@@ -180,6 +188,9 @@ namespace oni {
                         component::Point,
                         component::Appearance,
                         component::Texture,
+                        component::EntityType,
+                        component::EntityAttachment,
+                        component::EntityAttachee,
                         //components::PhysicalProperties,
                         component::TransformParent,
                         component::Tag_Dynamic,
@@ -187,13 +198,11 @@ namespace oni {
                         component::Tag_ColorShaded,
                         component::Tag_Static
                 >(snapshotType, input,
-                        // NOTE: Car entity keeps a reference to tire entities but those ids might change during
+                        // NOTE: Entities might keep references to other entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct
-                        // mapping from client side tire ids to server side ids for each Car.
-                  &component::Car::tireFR,
-                  &component::Car::tireFL,
-                  &component::Car::tireRR,
-                  &component::Car::tireRL,
+                        // mapping from client side tire ids to server side ids for each entity.
+                  &component::EntityAttachment::entities,
+                  &component::EntityAttachee::entityID,
                   &component::CarLapInfo::entityID
                 );
             }

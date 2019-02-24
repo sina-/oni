@@ -83,13 +83,9 @@ namespace oni {
 
                 void postDisconnectHook(const oni::common::PeerID &);
 
-                EntityID createCar();
+                EntityID spawnRaceCar();
 
-                void removeTire(EntityID carEntityID, EntityID tireEntityID);
-
-                void removeCar(EntityID entityID);
-
-                void removeGun(EntityID carEntityID, EntityID entityID);
+                void removeRaceCar(EntityID carEntityID);
 
                 EntityID createTruck();
 

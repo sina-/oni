@@ -14,6 +14,7 @@ namespace oni {
         typedef std::uint32_t uint32;
         typedef std::uint16_t uint16;
         typedef std::uint8_t uint8;
+        typedef std::size_t size;
 
         typedef float real32;
         typedef double real64;

@@ -21,8 +21,6 @@ namespace oni {
     namespace server {
         namespace game {
             ServerGame::ServerGame(const oni::network::Address &address) : Game(), mServerAddress(address) {
-                srand(static_cast<unsigned int>(time(nullptr)));
-
                 mZLayerManager = std::make_unique<oni::math::ZLayerManager>();
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
 
@@ -82,7 +80,7 @@ namespace oni {
             }
 
             void ServerGame::setupSessionPacketHandler(const oni::common::PeerID &clientID, const std::string &data) {
-                auto carEntity = createCar();
+                auto carEntity = spawnRaceCar();
 
                 mServer->sendCarEntityID(carEntity, clientID);
                 mServer->sendEntitiesAll(*mEntityManager);
@@ -102,7 +100,7 @@ namespace oni {
                 auto clientDataLock = mClientDataManager->scopedLock();
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
-                removeCar(clientCarEntityID);
+                removeRaceCar(clientCarEntityID);
                 mClientDataManager->deleteClient(peerID);
             }
 
@@ -175,66 +173,69 @@ namespace oni {
 
             void ServerGame::showRET(oni::common::int16 ret) {}
 
-            oni::common::EntityID ServerGame::createCar() {
+            oni::common::EntityID ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
                 oni::math::vec3 pos{-70.f, -30.f, vehicleZ};
                 oni::math::vec2 size{2.5f, 1.1f};
                 common::real32 heading = 0.f;
-                std::string textureID = "resources/images/car/1/car.png";
-                auto entity = mEntityFactory->createEntity(oni::component::EntityType::RACE_CAR,
-                                                           pos,
-                                                           size,
-                                                           heading,
-                                                           textureID);
-                return entity;
-            }
+                std::string carTextureID = "resources/images/car/1/car.png";
 
-            void ServerGame::removeCar(oni::common::EntityID carEntityID) {
                 auto lock = mEntityManager->scopedLock();
+                auto carEntity = mEntityFactory->createEntity(oni::component::EntityType::RACE_CAR,
+                                                              pos,
+                                                              size,
+                                                              heading,
+                                                              carTextureID);
 
-                const auto &car = mEntityManager->get<oni::component::Car>(carEntityID);
-                auto tireFL = car.tireFL;
-                auto tireFR = car.tireFR;
-                auto tireRL = car.tireRL;
-                auto tireRR = car.tireRR;
-                auto gunEntity = car.gunEntity;
+                oni::math::vec2 gunSize{2.f, 0.5f};
+                oni::math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
+                std::string gunTextureID = "resources/images/minigun/1.png";
+                auto carGunEntity = mEntityFactory->createEntity(oni::component::EntityType::VEHICLE_GUN,
+                                                                 gunPos,
+                                                                 gunSize,
+                                                                 0.f,
+                                                                 gunTextureID);
 
-                removeTire(carEntityID, tireFL);
-                removeTire(carEntityID, tireFR);
-                removeTire(carEntityID, tireRL);
-                removeTire(carEntityID, tireRR);
+                oni::entities::attach(*mEntityManager, carEntity, carGunEntity, oni::component::EntityType::RACE_CAR,
+                                      oni::component::EntityType::VEHICLE_GUN);
 
-                removeGun(carEntityID, gunEntity);
+                auto &carConfig = mEntityManager->get<component::CarConfig>(carEntity);
+                std::string tireTextureID = "resources/images/car/1/car-tire.png";
+                auto tireRotation = static_cast<oni::common::real32>(oni::math::toRadians(90.0f));
+                math::vec2 tireSize{
+                        static_cast<common::real32>(carConfig.wheelWidth),
+                        static_cast<common::real32>(carConfig.wheelRadius * 2)
+                };
 
-                oni::entities::removeShape(*mEntityManager, carEntityID);
-                oni::entities::removePlacement(*mEntityManager, carEntityID);
-                oni::entities::removeTexture(*mEntityManager, carEntityID);
-                oni::entities::removePhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), carEntityID);
-                oni::entities::removeTag<oni::component::Tag_Dynamic>(*mEntityManager, carEntityID);
-                oni::entities::removeCar(*mEntityManager, carEntityID);
+                std::array<math::vec2, 4> carTires{
+                        math::vec2{static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
+                                   static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
+                        math::vec2{static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
+                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)},
+                        math::vec2{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                   static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
+                        math::vec2{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)},
+                };
 
-                oni::entities::destroyEntity(*mEntityManager, carEntityID);
+                for (auto &&carTire: carTires) {
+                    math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
+                    auto tireEntity = mEntityFactory->createEntity(oni::component::EntityType::VEHICLE_TIRE,
+                                                                   tirePos,
+                                                                   tireSize,
+                                                                   tireRotation,
+                                                                   tireTextureID);
+                    oni::entities::attach(*mEntityManager, carEntity, tireEntity, oni::component::EntityType::RACE_CAR,
+                                          oni::component::EntityType::VEHICLE_TIRE);
+                }
+
+                return carEntity;
             }
 
-            void ServerGame::removeTire(oni::common::EntityID carEntityID, oni::common::EntityID tireEntityID) {
-                oni::entities::removeShape(*mEntityManager, tireEntityID);
-                oni::entities::removePlacement(*mEntityManager, tireEntityID);
-                oni::entities::removeTexture(*mEntityManager, tireEntityID);
-                oni::entities::removeTransformationHierarchy(*mEntityManager, carEntityID, tireEntityID);
-                oni::entities::removeTag<component::Tag_Dynamic>(*mEntityManager, tireEntityID);
-
-                oni::entities::destroyEntity(*mEntityManager, tireEntityID);
-            }
-
-            void ServerGame::removeGun(EntityID carEntityID, EntityID entityID) {
-                oni::entities::removeShape(*mEntityManager, entityID);
-                oni::entities::removePlacement(*mEntityManager, entityID);
-                oni::entities::removeTexture(*mEntityManager, entityID);
-                oni::entities::removeTransformationHierarchy(*mEntityManager, carEntityID, entityID);
-                oni::entities::removeTag<component::Tag_Dynamic>(*mEntityManager, entityID);
-
-                oni::entities::destroyEntity(*mEntityManager, entityID);
+            void ServerGame::removeRaceCar(oni::common::EntityID carEntityID) {
+                auto lock = mEntityManager->scopedLock();
+                mEntityFactory->removeEntity(carEntityID, oni::component::EntityType::RACE_CAR);
             }
 
             oni::common::EntityID ServerGame::createTruck() {

@@ -292,24 +292,23 @@ namespace oni {
                 }
             }
 
-            {
-                // Update tires
-                auto view = manager.createViewScopeLock<component::Placement, component::Car,
-                        component::CarConfig>();
-                for (
-                    auto entity : view) {
-                    auto car = view.get<component::Car>(entity);
-                    auto &carTireFRPlacement = manager.get<component::Placement>(car.tireFR);
-                    // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
-                    // There seems to be something wrong with the way tires are created in the beginning
-                    carTireFRPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
-                                                                                   math::toRadians(90.0f));
-
-                    auto &carTireFLPlacement = manager.get<component::Placement>(car.tireFL);
-                    carTireFLPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
-                                                                                   math::toRadians(90.0f));
-                }
-            }
+            // TODO: Fix this using EntityAttachment
+//            {
+//                // Update tires
+//                auto view = manager.createViewScopeLock<component::Car>();
+//                for (auto &&entity : view) {
+//                    auto car = view.get<component::Car>(entity);
+//                    auto &carTireFRPlacement = manager.get<component::Placement>(car.tireFR);
+//                    // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
+//                    // There seems to be something wrong with the way tires are created in the beginning
+//                    carTireFRPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
+//                                                                                   math::toRadians(90.0f));
+//
+//                    auto &carTireFLPlacement = manager.get<component::Placement>(car.tireFL);
+//                    carTireFLPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
+//                                                                                   math::toRadians(90.0f));
+//                }
+//            }
 
             for (auto &&entity : entitiesToBeUpdated) {
                 auto lock = manager.scopedLock();
@@ -328,7 +327,7 @@ namespace oni {
                  ce && !colliding; ce = ce->next) {
                 b2Contact *c = ce->contact;
 //                if (c->GetFixtureA()->IsSensor() || c->GetFixtureB()->IsSensor()) {
-                    colliding = c->IsTouching();
+                colliding = c->IsTouching();
 //                }
             }
             return colliding;

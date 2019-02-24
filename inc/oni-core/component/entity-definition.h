@@ -12,10 +12,11 @@ namespace oni {
             RACE_CAR = 4,
             VEHICLE = 5,
             VEHICLE_GUN = 6,
+            VEHICLE_TIRE = 7,
 
-            SKID_LINE = 7,
+            SKID_LINE = 8,
 
-            UI = 8,
+            UI = 9,
 
         };
 

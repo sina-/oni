@@ -174,20 +174,21 @@ namespace oni {
 
             void ServerGame::showRET(oni::common::int16 ret) {}
 
-            oni::common::EntityID ServerGame::spawnRaceCar() {
+            common::EntityID ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
-                oni::math::vec3 pos{-70.f, -30.f, vehicleZ};
-                oni::math::vec2 size{2.5f, 1.1f};
+                math::vec3 pos{-70.f, -30.f, vehicleZ};
+                math::vec2 size{2.5f, 1.1f};
                 common::real32 heading = 0.f;
                 std::string carTextureID = "resources/images/car/1/car.png";
 
                 auto lock = mEntityFactory->scopedLock();
-                auto carEntity = mEntityFactory->createEntity(oni::component::EntityType::RACE_CAR,
-                                                              pos,
-                                                              size,
-                                                              heading,
-                                                              carTextureID);
+                auto carEntity = mEntityFactory->createEntity(
+                        component::EntityType::RACE_CAR,
+                        pos,
+                        size,
+                        heading,
+                        carTextureID);
 
                 oni::math::vec2 gunSize{2.f, 0.5f};
                 oni::math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
@@ -195,7 +196,7 @@ namespace oni {
                 auto carGunEntity = mEntityFactory->createEntity(oni::component::EntityType::VEHICLE_GUN,
                                                                  gunPos,
                                                                  gunSize,
-                                                                 0.f,
+                                                                 heading,
                                                                  gunTextureID);
 
                 oni::entities::attach(*mEntityManager, carEntity, carGunEntity, oni::component::EntityType::RACE_CAR,

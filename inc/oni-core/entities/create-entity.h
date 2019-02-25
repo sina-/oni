@@ -23,10 +23,6 @@ namespace oni {
         struct CarConfig;
     }
 
-    namespace graphic {
-        class SceneManager;
-    }
-
     namespace math {
         class ZLayerManager;
     }
@@ -37,14 +33,45 @@ namespace oni {
         public:
             EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
 
+            template<class... Args>
+            common::EntityID createEntity(component::EntityType entityType, Args &&... args) {
+                common::EntityID entityID = createEntity(true);
+                auto &type = createComponent<component::EntityType>(entityID);
+                type = entityType;
 
+                switch (entityType) {
+                    case component::EntityType::RACE_CAR: {
+                        createCar(entityID, std::forward<Args>(args)...);
+                        break;
+                    }
+                    case component::EntityType::VEHICLE_GUN: {
+                        createGun(entityID, std::forward<Args>(args)...);
+                        break;
+                    }
+                    case component::EntityType::VEHICLE_TIRE: {
+                        createTire(entityID, std::forward<Args>(args)...);
+                        break;
+                    }
+                    case component::EntityType::WALL: {
+                        createWall(entityID, std::forward<Args>(args)...);
+                        break;
+                    }
+                    case component::EntityType::UNKNOWN: {
+                        mManager.remove<component::EntityType>(entityID);
+                        mManager.destroy(entityID);
+                        assert(false);
+                        break;
+                    }
+                    default: {
+                        mManager.remove<component::EntityType>(entityID);
+                        mManager.destroy(entityID);
+                        assert(false);
+                        break;
+                    }
+                }
 
-            common::EntityID createEntity(const component::EntityType,
-                                          const math::vec3 &pos,
-                                          const math::vec2 &size,
-                                          const common::real32 heading,
-                                          const std::string &textureID
-            );
+                return entityID;
+            }
 
             void removeEntity(common::EntityID, component::EntityType);
 
@@ -53,37 +80,25 @@ namespace oni {
         private:
             common::EntityID createEntity(bool tagNew);
 
-            void createCar(
-                    const common::EntityID entityID,
-                    const math::vec3 &pos,
-                    const math::vec2 &size,
-                    const common::real32 heading,
-                    const std::string &textureID
-            );
+            template<class ...Args>
+            void createCar(common::EntityID, Args &&... args) {
+                assert(false);
+            }
 
-            void createGun(
-                    const common::EntityID entityID,
-                    const math::vec3 &pos,
-                    const math::vec2 &size,
-                    const common::real32 heading,
-                    const std::string &textureID
-            );
+            template<class ...Args>
+            void createGun(common::EntityID, Args &&... args) {
+                assert(false);
+            }
 
-            void createTire(
-                    const common::EntityID entityID,
-                    const math::vec3 &pos,
-                    const math::vec2 &size,
-                    const common::real32 heading,
-                    const std::string &textureID
-            );
+            template<class ...Args>
+            void createTire(common::EntityID, Args &&... args) {
+                assert(false);
+            }
 
-            void createWall(
-                    const common::EntityID entityID,
-                    const math::vec3 &pos,
-                    const math::vec2 &size,
-                    const common::real32 heading,
-                    const std::string &textureID
-            );
+            template<class ...Args>
+            void createWall(common::EntityID, Args &&... args) {
+                assert(false);
+            }
 
         private:
             void removeRaceCar(common::EntityID);

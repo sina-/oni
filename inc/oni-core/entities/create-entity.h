@@ -37,6 +37,8 @@ namespace oni {
         public:
             EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
 
+
+
             common::EntityID createEntity(const component::EntityType,
                                           const math::vec3 &pos,
                                           const math::vec2 &size,
@@ -45,6 +47,8 @@ namespace oni {
             );
 
             void removeEntity(common::EntityID, component::EntityType);
+
+            std::unique_lock<std::mutex> scopedLock();
 
         private:
             common::EntityID createEntity(bool tagNew);
@@ -73,11 +77,12 @@ namespace oni {
                     const std::string &textureID
             );
 
-            b2Body *createPhysicalBody(
-                    const math::vec3 &worldPos,
+            void createWall(
+                    const common::EntityID entityID,
+                    const math::vec3 &pos,
                     const math::vec2 &size,
                     const common::real32 heading,
-                    component::PhysicalProperties &properties
+                    const std::string &textureID
             );
 
         private:
@@ -86,6 +91,16 @@ namespace oni {
             void removeTire(common::EntityID);
 
             void removeGun(common::EntityID);
+
+            void removeWall(common::EntityID);
+
+        private:
+            b2Body *createPhysicalBody(
+                    const math::vec3 &worldPos,
+                    const math::vec2 &size,
+                    const common::real32 heading,
+                    component::PhysicalProperties &properties
+            );
 
             void removePhysicalBody(common::EntityID);
 

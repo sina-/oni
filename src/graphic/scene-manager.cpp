@@ -8,7 +8,7 @@
 #include <oni-core/graphic/texture-manager.h>
 #include <oni-core/graphic/font-manager.h>
 #include <oni-core/graphic/debug-draw-box2d.h>
-#include <oni-core/physics/transformation.h>
+#include <oni-core/math/transformation.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/create-entity.h>
 #include <oni-core/common/consts.h>
@@ -530,7 +530,7 @@ namespace oni {
                 const auto &shape = view.get<component::Shape>(entity);
                 const auto &placement = view.get<component::Placement>(entity);
 
-                auto transformation = physics::Transformation::createTransformation(placement.position,
+                auto transformation = math::Transformation::createTransformation(placement.position,
                                                                                     placement.rotation,
                                                                                     placement.scale);
 
@@ -545,7 +545,7 @@ namespace oni {
                     transformation = transformParent.transform * transformation;
                 }
 
-                auto shapeTransformed = physics::Transformation::shapeTransformation(transformation, shape);
+                auto shapeTransformed = math::Transformation::shapeTransformation(transformation, shape);
                 if (!math::intersects(shapeTransformed, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
@@ -671,7 +671,7 @@ namespace oni {
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;
-            physics::Transformation::worldToTextureCoordinate(skidMarksTexturePos, mGameUnitToPixels,
+            math::Transformation::worldToTextureCoordinate(skidMarksTexturePos, mGameUnitToPixels,
                                                               skidPos);
 
             // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to

@@ -14,6 +14,8 @@ class b2World;
 namespace oni {
     namespace entities {
         class EntityManager;
+
+        class EntityFactory;
     }
 
     namespace math {
@@ -26,63 +28,64 @@ namespace oni {
             class TileWorld {
             public:
 
-                TileWorld(oni::entities::EntityManager &, b2World &, const oni::math::ZLayerManager &);
+                TileWorld(oni::entities::EntityManager &,
+                          oni::entities::EntityFactory &,
+                          b2World &,
+                          const oni::math::ZLayerManager &);
 
                 ~TileWorld();
 
                 void tick(const oni::math::vec2 &position);
 
-                void generateDemoRaceCourse();
+                void genDemoRaceCourse();
 
             private:
 
                 void tickChunk(const oni::math::vec2 &position);
 
-                oni::component::ChunkIndex backgroundChunkPosToIndex(const oni::math::vec2 &position) const;
+                oni::component::ChunkIndex groundChunkPosToIndex(const oni::math::vec2 &position) const;
 
-                oni::math::vec3 backgroundChunkIndexToPos(const oni::component::ChunkIndex &chunkIndex) const;
+                oni::math::vec3 groundChunkIndexToPos(const oni::component::ChunkIndex &chunkIndex) const;
 
                 oni::math::vec3 roadTileIndexToPos(const oni::component::ChunkIndex &chunkIndex,
                                                    oni::component::RoadTileIndex roadTileIndices) const;
 
                 oni::math::vec2 unpackCoordinates(oni::common::uint64 coord) const;
 
-                void generateTilesForChunk(oni::common::int64 xChunkIndex,
-                                           oni::common::int64 yChunkIndex);
+                void genChunkTiles(oni::common::int64 xChunkIndex,
+                                   oni::common::int64 yChunkIndex);
 
                 oni::common::EntityID
-                generateSprite(oni::math::vec4 color, oni::math::vec2 tileSize, oni::math::vec3 worldPos);
+                genSprite(oni::math::vec4 color, oni::math::vec2 tileSize, oni::math::vec3 worldPos);
 
-                oni::common::EntityID generateTexture(const oni::math::vec2 &size,
-                                                      const oni::math::vec3 &worldPos,
-                                                      const std::string &path);
+                oni::common::EntityID genTexture(const oni::math::vec2 &size,
+                                                 const oni::math::vec3 &worldPos,
+                                                 const std::string &path);
 
-                void generateRoadsForChunk(oni::common::int64 chunkX, oni::common::int64 chunkY);
+                void genChunkRoads(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-                void generateChunkBackgroundTexture(oni::common::int64 chunkX, oni::common::int64 chunkY);
+                void genChunkGroundTexture(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-                void generateChunkBackgroundSprite(oni::common::int64 chunkX, oni::common::int64 chunkY);
+                void genChunkGroundSprite(oni::common::int64 chunkX, oni::common::int64 chunkY);
 
-                void generateRoadTile(const oni::component::ChunkIndex &chunkIndex,
-                                      const oni::component::RoadTileIndex &roadTileIndex);
+                void genTileRoad(const oni::component::ChunkIndex &chunkIndex,
+                                 const oni::component::RoadTileIndex &roadTileIndex);
 
-                void generateTexturedRoadTile(const oni::component::ChunkIndex &chunkIndex,
-                                              const oni::component::RoadTileIndex &roadTileIndex,
-                                              const std::string &texturePath);
+                void genTileRoad(const oni::component::ChunkIndex &chunkIndex,
+                                 const oni::component::RoadTileIndex &roadTileIndex,
+                                 const std::string &texturePath);
 
-                void generateRoadTileBetween(const oni::component::ChunkIndex &chunkIndex,
-                                             oni::component::RoadTileIndex startingRoadTileIndex,
-                                             oni::component::RoadTileIndex endingRoadTileIndex);
+                void genTileRoad(const oni::component::ChunkIndex &chunkIndex,
+                                 oni::component::RoadTileIndex startingRoadTileIndex,
+                                 oni::component::RoadTileIndex endingRoadTileIndex);
 
-                bool
-                existsInMap(oni::common::uint64 packedIndex,
-                            const std::map<oni::common::uint64, oni::common::EntityID> &map) const;
+                bool isInMap(oni::common::uint64 packedIndex,
+                             const std::map<oni::common::uint64, oni::common::EntityID> &map) const;
 
                 bool shouldGenerateRoad(const oni::component::ChunkIndex &chunkIndex) const;
 
-                void
-                createWall(oni::component::WallTilePosition position, oni::common::int64 xTileIndex,
-                           oni::common::int64 yTileIndex);
+                void createWall(oni::component::WallTilePosition position, oni::common::int64 xTileIndex,
+                                oni::common::int64 yTileIndex);
 
                 void createWall(const std::vector<oni::component::WallTilePosition> &position,
                                 const std::vector<oni::component::TileIndex> &indices);
@@ -93,6 +96,7 @@ namespace oni {
 
             private:
                 oni::entities::EntityManager &mEntityManager;
+                oni::entities::EntityFactory &mEntityFactory;
                 b2World &mPhysicsWorld;
                 /**
                  * A tile is determined by its lower left coordinate in the world. This coordinate is
@@ -131,8 +135,8 @@ namespace oni {
                 std::string mRaceTrack3{};
                 std::string mRaceTrack4{};
 
-                const oni::math::ZLayerManager& mZLayerManager;
-                oni::common::real32 mBackgroundZ{};
+                const oni::math::ZLayerManager &mZLayerManager;
+                oni::common::real32 mGroundZ{};
                 oni::common::real32 mRoadZ{};
                 oni::common::real32 mWallZ{};
             };

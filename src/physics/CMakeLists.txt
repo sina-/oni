@@ -1,4 +1,4 @@
-add_library(oni-core-physics dynamics.cpp car.cpp transformation.cpp projectile.cpp)
+add_library(oni-core-physics dynamics.cpp car.cpp ../math/transformation.cpp projectile.cpp)
 
 target_compile_features(oni-core-physics
         PUBLIC

@@ -12,7 +12,7 @@
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/serialization.h>
-#include <oni-core/physics/transformation.h>
+#include <oni-core/math/transformation.h>
 
 #include <oni-server/entities/tile-world.h>
 
@@ -23,16 +23,17 @@ namespace oni {
             ServerGame::ServerGame(const oni::network::Address &address) : Game(), mServerAddress(address) {
                 mZLayerManager = std::make_unique<oni::math::ZLayerManager>();
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
-
                 mDynamics = std::make_unique<oni::physics::Dynamics>(getTickFrequency());
+                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mEntityManager, *mZLayerManager,
+                                                                                *mDynamics->getPhysicsWorld());
+
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionalities I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
                 mTileWorld = std::make_unique<oni::server::entities::TileWorld>(*mEntityManager,
+                                                                                *mEntityFactory,
                                                                                 *mDynamics->getPhysicsWorld(),
                                                                                 *mZLayerManager);
-                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mEntityManager, *mZLayerManager,
-                                                                                *mDynamics->getPhysicsWorld());
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
                 mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager, *mZLayerManager);
@@ -57,7 +58,7 @@ namespace oni {
             void ServerGame::loadLevel() {
                 mTruckEntity = createTruck();
 
-                mTileWorld->generateDemoRaceCourse();
+                mTileWorld->genDemoRaceCourse();
 
 /*            {
                 auto lock = mEntityManager->scopedLock();
@@ -181,7 +182,7 @@ namespace oni {
                 common::real32 heading = 0.f;
                 std::string carTextureID = "resources/images/car/1/car.png";
 
-                auto lock = mEntityManager->scopedLock();
+                auto lock = mEntityFactory->scopedLock();
                 auto carEntity = mEntityFactory->createEntity(oni::component::EntityType::RACE_CAR,
                                                               pos,
                                                               size,
@@ -234,7 +235,7 @@ namespace oni {
             }
 
             void ServerGame::removeRaceCar(oni::common::EntityID carEntityID) {
-                auto lock = mEntityManager->scopedLock();
+                auto lock = mEntityFactory->scopedLock();
                 mEntityFactory->removeEntity(carEntityID, oni::component::EntityType::RACE_CAR);
             }
 
@@ -253,7 +254,7 @@ namespace oni {
                 properties.bodyType = oni::component::BodyType::DYNAMIC;
                 properties.physicalCategory = oni::component::PhysicalCategory::VEHICLE;
 
-                auto lock = mEntityManager->scopedLock();
+                auto lock = mEntityFactory->scopedLock();
                 auto entityID = oni::entities::createEntity(*mEntityManager);
                 oni::entities::assignShapeLocal(*mEntityManager, entityID, size, vehicleZ);
                 oni::entities::assignPlacement(*mEntityManager, entityID, worldPos, {1.f, 1.f, 0.f}, 0.f);

@@ -11,9 +11,10 @@
 #include <oni-core/math/rand.h>
 #include <oni-core/graphic/window.h>
 #include <oni-core/physics/car.h>
-#include <oni-core/physics/transformation.h>
+#include <oni-core/math/transformation.h>
 #include <oni-core/physics/projectile.h>
 #include <oni-core/entities/create-entity.h>
+#include <oni-core/component/hierarchy.h>
 
 namespace oni {
     namespace physics {
@@ -203,7 +204,7 @@ namespace oni {
                                        carPlacement.position.z},
                             static_cast<const common::real32>(car.heading),
                             math::vec3{1.0f, 1.0f, 0.0f}};
-                    Transformation::updatePlacement(manager, entity, placement);
+                    updatePlacement(manager, entity, placement);
 
                     auto velocity = car.velocityLocal.len();
                     car.distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
@@ -282,7 +283,7 @@ namespace oni {
                         std::abs(placement.rotation - props.body->GetAngle()) > common::ep) {
                         placement.position = math::vec3{position.x, position.y, placement.position.z};
                         placement.rotation = props.body->GetAngle();
-                        Transformation::updatePlacement(manager, entity, placement);
+                        updatePlacement(manager, entity, placement);
                     }
 
                     mCollisionHandlers[props.physicalCategory](manager,
@@ -379,6 +380,33 @@ namespace oni {
                                          component::PhysicalProperties &props,
                                          component::Placement &placement) {
         }
+
+        void Dynamics::updatePlacement(entities::EntityManager &manager,
+                                       common::EntityID entity,
+                                       const component::Placement &placement) {
+            manager.replace<component::Placement>(entity, placement);
+
+            if (manager.has<component::TransformChildren>(entity)) {
+                auto transformChildren = manager.get<component::TransformChildren>(entity);
+                for (auto child: transformChildren.children) {
+                    auto transformParent = manager.get<component::TransformParent>(child);
+                    transformParent.transform = math::Transformation::createTransformation(placement.position,
+                                                                                           placement.rotation,
+                                                                                           placement.scale);
+
+                    updateTransformParent(manager, child, transformParent);
+                }
+            }
+        }
+
+        void Dynamics::updateTransformParent(entities::EntityManager &manager,
+                                             common::EntityID entity,
+                                             const component::TransformParent &transformParent) {
+            // TODO: This function should recurse
+            manager.replace<component::TransformParent>(entity, transformParent);
+            manager.accommodate<component::Tag_OnlyComponentUpdate>(entity);
+        }
+
     }
 
 }

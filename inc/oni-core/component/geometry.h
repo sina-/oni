@@ -1,11 +1,12 @@
 #pragma once
 
+#include <oni-core/common/typedefs.h>
+#include <oni-core/component/entity-definition.h>
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
-#include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/math/transformation.h>
 
 namespace oni {
     namespace component {
@@ -48,6 +49,10 @@ namespace oni {
                 vertexC.x = size.x;
                 vertexC.y = size.y;
                 vertexD.x = size.x;
+            }
+
+            void moveToWorldCoordinates(const math::vec3 &worldPos) {
+                math::Transformation::localToWorldTranslation(worldPos, *this);
             }
 
             void centerAlign() {

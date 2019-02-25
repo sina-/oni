@@ -3,7 +3,6 @@
 #include <Box2D/Box2D.h>
 
 #include <oni-core/component/geometry.h>
-#include <oni-core/physics/transformation.h>
 #include <oni-core/component/hierarchy.h>
 
 namespace oni {
@@ -56,6 +55,10 @@ namespace oni {
                     createTire(entityID, pos, size, heading, textureID);
                     break;
                 }
+                case component::EntityType::WALL: {
+                    createWall(entityID, pos, size, heading, textureID);
+                    break;
+                }
                 case component::EntityType::UNKNOWN: {
                     mManager.remove<component::EntityType>(entityID);
                     mManager.destroy(entityID);
@@ -87,6 +90,10 @@ namespace oni {
                     removeTire(entityID);
                     break;
                 }
+                case component::EntityType::WALL: {
+                    removeWall(entityID);
+                    break;
+                }
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
@@ -102,48 +109,48 @@ namespace oni {
         }
 
         void EntityFactory::createCar(
-                const common::EntityID carEntityID,
+                const common::EntityID entityID,
                 const math::vec3 &pos,
                 const math::vec2 &size,
                 const common::real32 heading,
                 const std::string &textureID) {
-            auto &carConfig = createComponent<component::CarConfig>(carEntityID);
+            auto &carConfig = createComponent<component::CarConfig>(entityID);
             carConfig.cgToRear = size.x / 2;
             carConfig.cgToFront = size.x / 2;
             carConfig.halfWidth = size.y / 2;
             assert(size.x - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
-            auto &placement = createComponent<component::Placement>(carEntityID);
+            auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
 
-            auto &properties = createComponent<component::PhysicalProperties>(carEntityID);
+            auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.physicalCategory = oni::component::PhysicalCategory::RACE_CAR;
             properties.bodyType = component::BodyType::DYNAMIC;
             properties.highPrecision = true;
 
-            auto &texture = createComponent<component::Texture>(carEntityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
-
             // TODO: Does this make sense? Or should it be same as createComponent?
             auto *body = createPhysicalBody(pos, size, heading, properties);
 
-            auto &car = createComponent<component::Car>(carEntityID);
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+            auto &car = createComponent<component::Car>(entityID);
             car.position.x = pos.x;
             car.position.y = pos.y;
             car.applyConfiguration(carConfig);
 
-            auto &shape = createComponent<component::Shape>(carEntityID);
+            auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
-            createComponent<component::TransformChildren>(carEntityID);
-            createComponent<component::EntityAttachment>(carEntityID);
+            createComponent<component::TransformChildren>(entityID);
+            createComponent<component::EntityAttachment>(entityID);
 
-            assignTag<component::Tag_TextureShaded>(carEntityID);
-            assignTag<component::Tag_Dynamic>(carEntityID);
+            assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_Dynamic>(entityID);
         }
 
         void EntityFactory::removeRaceCar(common::EntityID entityID) {
@@ -241,6 +248,42 @@ namespace oni {
             removeTag<component::Tag_TextureShaded>(entityID);
         }
 
+        void EntityFactory::createWall(
+                const common::EntityID entityID,
+                const math::vec3 &worldPos,
+                const math::vec2 &size,
+                const common::real32 heading,
+                const std::string &textureID) {
+            auto &properties = createComponent<component::PhysicalProperties>(entityID);
+            properties.highPrecision = false;
+            properties.bodyType = oni::component::BodyType::STATIC;
+            properties.physicalCategory = oni::component::PhysicalCategory::WALL;
+            auto *body = createPhysicalBody(worldPos, size, heading, properties);
+
+            auto &shape = createComponent<component::Shape>(entityID);
+            shape.setZ(worldPos.z);
+            shape.setSizeFromOrigin(size);
+            shape.moveToWorldCoordinates(worldPos);
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+            assignTag<component::Tag_Static>(entityID);
+            assignTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        void EntityFactory::removeWall(common::EntityID entityID) {
+            removeComponent<component::Texture>(entityID);
+            removeComponent<component::Shape>(entityID);
+
+            removePhysicalBody(entityID);
+            removeComponent<component::PhysicalProperties>(entityID);
+
+            removeTag<component::Tag_Static>(entityID);
+            removeTag<component::Tag_TextureShaded>(entityID);
+        }
+
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
                                                   const math::vec2 &size, common::real32 heading,
                                                   component::PhysicalProperties &properties) {
@@ -319,6 +362,10 @@ namespace oni {
             mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
         }
 
+        std::unique_lock<std::mutex> EntityFactory::scopedLock() {
+            return mManager.scopedLock();
+        }
+
         void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path) {
             component::Texture texture;
             texture.filePath = path;
@@ -366,7 +413,7 @@ namespace oni {
             auto halfSizeX = size.x / 2;
             auto halfSizeY = size.y / 2;
             auto sprite = component::Shape::fromPositionAndSize(math::vec3{-halfSizeX, -halfSizeY, z}, size);
-            physics::Transformation::shapeTransformation(
+            math::Transformation::shapeTransformation(
                     math::mat4::rotation(math::toRadians(angle), math::vec3{0.f, 0.f, 1.f}), sprite);
             manager.assign<component::Shape>(entityID, sprite);
         }
@@ -376,7 +423,7 @@ namespace oni {
             auto sizeWithZ = math::vec3{size.x, size.y, worldPos.z};
             auto sprite = component::Shape::fromSizeAndRotation(sizeWithZ, 0);
 
-            physics::Transformation::localToWorldTranslation(worldPos, sprite);
+            math::Transformation::localToWorldTranslation(worldPos, sprite);
             manager.assign<component::Shape>(entityID, sprite);
         }
 

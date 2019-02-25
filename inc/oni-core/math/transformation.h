@@ -19,7 +19,7 @@ namespace oni {
         struct Placement;
         struct TransformParent;
     }
-    namespace physics {
+    namespace math {
         class Transformation {
             Transformation() = default;
 
@@ -54,14 +54,6 @@ namespace oni {
              */
             static void worldToTextureCoordinate(const math::vec3 &reference, common::real32 ratio,
                                                  math::vec3 &operand);
-
-            static void updatePlacement(entities::EntityManager &manager,
-                                        common::EntityID entity,
-                                        const component::Placement &placement);
-
-            static void updateTransformParent(entities::EntityManager &manager,
-                                              common::EntityID entity,
-                                              const component::TransformParent &transformParent);
         };
     }
 }

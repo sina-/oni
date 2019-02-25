@@ -3,7 +3,7 @@
 #include <oni-core/math/z-layer-manager.h>
 #include <oni-core/component/gameplay.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/physics/transformation.h>
+#include <oni-core/math/transformation.h>
 #include <oni-core/math/intesects.h>
 
 namespace oni {
@@ -43,7 +43,7 @@ namespace oni {
                     const auto &nextCheckpoint = mRemainingCheckpoints[entity].back();
                     auto carShapeWorld = carView.get<component::Shape>(entity);
                     auto entityPlacement = carView.get<component::Placement>(entity);
-                    physics::Transformation::localToWorldTranslation(entityPlacement.position, carShapeWorld);
+                    math::Transformation::localToWorldTranslation(entityPlacement.position, carShapeWorld);
 
                     if (math::intersects(nextCheckpoint, carShapeWorld)) {
                         mRemainingCheckpoints[entity].pop_back();

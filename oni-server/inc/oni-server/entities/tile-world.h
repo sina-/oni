@@ -84,9 +84,6 @@ namespace oni {
 
                 bool shouldGenerateRoad(const oni::component::ChunkIndex &chunkIndex) const;
 
-                void createWall(oni::component::WallTilePosition position, oni::common::int64 xTileIndex,
-                                oni::common::int64 yTileIndex);
-
                 void createWall(const std::vector<oni::component::WallTilePosition> &position,
                                 const std::vector<oni::component::TileIndex> &indices);
 

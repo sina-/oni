@@ -14,7 +14,6 @@ namespace oni {
                 mManager(manager),
                 mZLayerManager(zLayerManager),
                 mPhysicsWorld{physicsWorld} {
-
         }
 
         common::EntityID EntityFactory::createEntity(bool tagNew) {
@@ -30,50 +29,6 @@ namespace oni {
                 mManager.addDeletedEntity(entityID);
             }
             mManager.destroy(entityID);
-        }
-
-        common::EntityID EntityFactory::createEntity(component::EntityType entityType,
-                                                     const math::vec3 &pos,
-                                                     const math::vec2 &size,
-                                                     common::real32 heading,
-                                                     const std::string &textureID
-        ) {
-            common::EntityID entityID = createEntity(true);
-            auto &type = createComponent<component::EntityType>(entityID);
-            type = entityType;
-
-            switch (entityType) {
-                case component::EntityType::RACE_CAR: {
-                    createCar(entityID, pos, size, heading, textureID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_GUN: {
-                    createGun(entityID, pos, size, heading, textureID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_TIRE: {
-                    createTire(entityID, pos, size, heading, textureID);
-                    break;
-                }
-                case component::EntityType::WALL: {
-                    createWall(entityID, pos, size, heading, textureID);
-                    break;
-                }
-                case component::EntityType::UNKNOWN: {
-                    mManager.remove<component::EntityType>(entityID);
-                    mManager.destroy(entityID);
-                    assert(false);
-                    break;
-                }
-                default: {
-                    mManager.remove<component::EntityType>(entityID);
-                    mManager.destroy(entityID);
-                    assert(false);
-                    break;
-                }
-            }
-
-            return entityID;
         }
 
         void EntityFactory::removeEntity(common::EntityID entityID, component::EntityType entityType) {
@@ -108,12 +63,14 @@ namespace oni {
             destroyEntity(entityID);
         }
 
-        void EntityFactory::createCar(
-                const common::EntityID entityID,
-                const math::vec3 &pos,
-                const math::vec2 &size,
-                const common::real32 heading,
-                const std::string &textureID) {
+        template<>
+        void
+        EntityFactory::createCar(
+                common::EntityID entityID,
+                math::vec3 &pos,
+                math::vec2 &size,
+                common::real32 &heading,
+                std::string &textureID) {
             auto &carConfig = createComponent<component::CarConfig>(entityID);
             carConfig.cgToRear = size.x / 2;
             carConfig.cgToFront = size.x / 2;
@@ -174,12 +131,13 @@ namespace oni {
             removeTag<component::Tag_TextureShaded>(entityID);
         }
 
+        template<>
         void EntityFactory::createGun(
-                const common::EntityID entityID,
-                const oni::math::vec3 &pos,
-                const oni::math::vec2 &size,
-                const common::real32 heading,
-                const std::string &textureID) {
+                common::EntityID entityID,
+                oni::math::vec3 &pos,
+                oni::math::vec2 &size,
+                common::real32 &heading,
+                std::string &textureID) {
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -211,12 +169,13 @@ namespace oni {
             removeTag<component::Tag_TextureShaded>(entityID);
         }
 
+        template<>
         void EntityFactory::createTire(
-                const common::EntityID entityID,
-                const math::vec3 &pos,
-                const math::vec2 &size,
-                const common::real32 heading,
-                const std::string &textureID) {
+                common::EntityID entityID,
+                math::vec3 &pos,
+                math::vec2 &size,
+                common::real32 &heading,
+                std::string &textureID) {
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -248,12 +207,13 @@ namespace oni {
             removeTag<component::Tag_TextureShaded>(entityID);
         }
 
+        template<>
         void EntityFactory::createWall(
-                const common::EntityID entityID,
-                const math::vec3 &worldPos,
-                const math::vec2 &size,
-                const common::real32 heading,
-                const std::string &textureID) {
+                common::EntityID entityID,
+                math::vec3 &worldPos,
+                math::vec2 &size,
+                common::real32 &heading,
+                std::string &textureID) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.highPrecision = false;
             properties.bodyType = oni::component::BodyType::STATIC;

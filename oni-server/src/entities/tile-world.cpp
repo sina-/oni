@@ -520,11 +520,11 @@ namespace oni {
                         }
                     }
 
-                    mEntityFactory.createEntity(component::EntityType::WALL,
-                                                wallPositionInWorld,
-                                                wallSize,
-                                                heading,
-                                                wallTexturePath);
+                    mEntityFactory.createEntity<component::EntityType::WALL>(
+                            wallPositionInWorld,
+                            wallSize,
+                            heading,
+                            wallTexturePath);
                 }
             }
 
@@ -575,8 +575,8 @@ namespace oni {
             }
 
             oni::common::EntityID TileWorld::genTexture(const oni::math::vec2 &size,
-                                                             const oni::math::vec3 &worldPos,
-                                                             const std::string &path) {
+                                                        const oni::math::vec3 &worldPos,
+                                                        const std::string &path) {
                 auto lock = mEntityManager.scopedLock();
                 auto entityID = oni::entities::createEntity(mEntityManager);
                 oni::entities::assignShapeWorld(mEntityManager, entityID, size, worldPos);

@@ -183,21 +183,21 @@ namespace oni {
                 std::string carTextureID = "resources/images/car/1/car.png";
 
                 auto lock = mEntityFactory->scopedLock();
-                auto carEntity = mEntityFactory->createEntity(
-                        component::EntityType::RACE_CAR,
-                        pos,
-                        size,
-                        heading,
-                        carTextureID);
+
+                auto carEntity = mEntityFactory->createEntity
+                        <component::EntityType::RACE_CAR>(pos,
+                                                          size,
+                                                          heading,
+                                                          carTextureID);
 
                 oni::math::vec2 gunSize{2.f, 0.5f};
                 oni::math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
-                auto carGunEntity = mEntityFactory->createEntity(oni::component::EntityType::VEHICLE_GUN,
-                                                                 gunPos,
-                                                                 gunSize,
-                                                                 heading,
-                                                                 gunTextureID);
+                auto carGunEntity = mEntityFactory->createEntity
+                        <component::EntityType::VEHICLE_GUN>(gunPos,
+                                                             gunSize,
+                                                             heading,
+                                                             gunTextureID);
 
                 oni::entities::attach(*mEntityManager, carEntity, carGunEntity, oni::component::EntityType::RACE_CAR,
                                       oni::component::EntityType::VEHICLE_GUN);
@@ -223,11 +223,11 @@ namespace oni {
 
                 for (auto &&carTire: carTires) {
                     math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity(oni::component::EntityType::VEHICLE_TIRE,
-                                                                   tirePos,
-                                                                   tireSize,
-                                                                   tireRotation,
-                                                                   tireTextureID);
+                    auto tireEntity = mEntityFactory->createEntity<oni::component::EntityType::VEHICLE_TIRE>(
+                            tirePos,
+                            tireSize,
+                            tireRotation,
+                            tireTextureID);
                     oni::entities::attach(*mEntityManager, carEntity, tireEntity, oni::component::EntityType::RACE_CAR,
                                           oni::component::EntityType::VEHICLE_TIRE);
                 }
@@ -237,7 +237,7 @@ namespace oni {
 
             void ServerGame::removeRaceCar(oni::common::EntityID carEntityID) {
                 auto lock = mEntityFactory->scopedLock();
-                mEntityFactory->removeEntity(carEntityID, oni::component::EntityType::RACE_CAR);
+                mEntityFactory->removeEntity<oni::component::EntityType::RACE_CAR>(carEntityID);
             }
 
             oni::common::EntityID ServerGame::createTruck() {

@@ -31,41 +31,39 @@ namespace oni {
             mManager.destroy(entityID);
         }
 
+        // TODO: Why can't I just call removeEntity<entityType>(entityID)?
         void EntityFactory::removeEntity(common::EntityID entityID, component::EntityType entityType) {
             switch (entityType) {
                 case component::EntityType::RACE_CAR: {
-                    removeRaceCar(entityID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_GUN: {
-                    removeGun(entityID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_TIRE: {
-                    removeTire(entityID);
+                    removeEntity<component::EntityType::RACE_CAR>(entityID);
                     break;
                 }
                 case component::EntityType::WALL: {
-                    removeWall(entityID);
+                    removeEntity<component::EntityType::WALL>(entityID);
                     break;
                 }
+                case component::EntityType::VEHICLE_GUN: {
+                    removeEntity<component::EntityType::VEHICLE_GUN>(entityID);
+                    break;
+                }
+                case component::EntityType::VEHICLE_TIRE: {
+                    removeEntity<component::EntityType::VEHICLE_TIRE>(entityID);
+                    break;
+                }
+                case component::EntityType::ROAD:
+                case component::EntityType::VEHICLE:
+                case component::EntityType::BACKGROUND:
+                case component::EntityType::SKID_LINE:
+                case component::EntityType::UI:
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
                 }
-                default: {
-                    assert(false);
-                    break;
-                }
             }
-
-            removeComponent<component::EntityType>(entityID);
-            destroyEntity(entityID);
         }
 
         template<>
-        void
-        EntityFactory::createCar(
+        void EntityFactory::createEntity<component::EntityType::RACE_CAR>(
                 common::EntityID entityID,
                 math::vec3 &pos,
                 math::vec2 &size,
@@ -110,10 +108,13 @@ namespace oni {
             assignTag<component::Tag_Dynamic>(entityID);
         }
 
-        void EntityFactory::removeRaceCar(common::EntityID entityID) {
+
+        template<>
+        void EntityFactory::removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID) {
             auto &attachments = mManager.get<component::EntityAttachment>(entityID);
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
-                removeEntity(attachments.entities[i], attachments.entityTypes[i]);
+                component::EntityType attachmentType = attachments.entityTypes[i];
+                removeEntity(entityID, attachmentType);
             }
             removeComponent<component::EntityAttachment>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -132,7 +133,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::createGun(
+        void EntityFactory::createEntity<component::EntityType::VEHICLE_GUN>(
                 common::EntityID entityID,
                 oni::math::vec3 &pos,
                 oni::math::vec2 &size,
@@ -158,7 +159,8 @@ namespace oni {
             assignTag<component::Tag_TextureShaded>(entityID);
         }
 
-        void EntityFactory::removeGun(common::EntityID entityID) {
+        template<>
+        void EntityFactory::removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID entityID) {
             removeComponent<component::Placement>(entityID);
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -170,7 +172,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::createTire(
+        void EntityFactory::createEntity<component::EntityType::VEHICLE_TIRE>(
                 common::EntityID entityID,
                 math::vec3 &pos,
                 math::vec2 &size,
@@ -196,7 +198,8 @@ namespace oni {
             assignTag<component::Tag_TextureShaded>(entityID);
         }
 
-        void EntityFactory::removeTire(common::EntityID entityID) {
+        template<>
+        void EntityFactory::removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID entityID) {
             removeComponent<component::Placement>(entityID);
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -208,7 +211,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::createWall(
+        void EntityFactory::createEntity<component::EntityType::WALL>(
                 common::EntityID entityID,
                 math::vec3 &worldPos,
                 math::vec2 &size,
@@ -233,7 +236,8 @@ namespace oni {
             assignTag<component::Tag_TextureShaded>(entityID);
         }
 
-        void EntityFactory::removeWall(common::EntityID entityID) {
+        template<>
+        void EntityFactory::removeEntity<component::EntityType::WALL>(common::EntityID entityID) {
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
 

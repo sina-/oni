@@ -20,30 +20,30 @@
 namespace oni {
     namespace server {
         namespace game {
-            ServerGame::ServerGame(const oni::network::Address &address) : Game(), mServerAddress(address) {
-                mZLayerManager = std::make_unique<oni::math::ZLayerManager>();
+            ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
+                mZLayerManager = std::make_unique<math::ZLayerManager>();
                 mEntityManager = std::make_unique<oni::entities::EntityManager>();
-                mDynamics = std::make_unique<oni::physics::Dynamics>(getTickFrequency());
+                mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
                 mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mEntityManager, *mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
 
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
-                // Maybe I can expose subset of functionalities I need from Dynamics class, maybe even better to call it
+                // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
-                mTileWorld = std::make_unique<oni::server::entities::TileWorld>(*mEntityManager,
-                                                                                *mEntityFactory,
-                                                                                *mDynamics->getPhysicsWorld(),
-                                                                                *mZLayerManager);
+                mTileWorld = std::make_unique<server::entities::TileWorld>(*mEntityManager,
+                                                                           *mEntityFactory,
+                                                                           *mDynamics->getPhysicsWorld(),
+                                                                           *mZLayerManager);
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
-                mLapTracker = std::make_unique<oni::gameplay::LapTracker>(*mEntityManager, *mZLayerManager);
+                mLapTracker = std::make_unique<gameplay::LapTracker>(*mEntityManager, *mZLayerManager);
 
-                mServer = std::make_unique<oni::network::Server>(&address, 16, 2);
+                mServer = std::make_unique<network::Server>(&address, 16, 2);
 
-                mServer->registerPacketHandler(oni::network::PacketType::SETUP_SESSION,
+                mServer->registerPacketHandler(network::PacketType::SETUP_SESSION,
                                                std::bind(&ServerGame::setupSessionPacketHandler, this,
                                                          std::placeholders::_1, std::placeholders::_2));
-                mServer->registerPacketHandler(oni::network::PacketType::CLIENT_INPUT,
+                mServer->registerPacketHandler(network::PacketType::CLIENT_INPUT,
                                                std::bind(&ServerGame::clientInputPacketHandler, this,
                                                          std::placeholders::_1,
                                                          std::placeholders::_2));
@@ -56,7 +56,7 @@ namespace oni {
             ServerGame::~ServerGame() = default;
 
             void ServerGame::loadLevel() {
-                mTruckEntity = createTruck();
+                mTruckEntity = spawnTruck();
 
                 mTileWorld->genDemoRaceCourse();
 
@@ -80,7 +80,7 @@ namespace oni {
             }*/
             }
 
-            void ServerGame::setupSessionPacketHandler(const oni::common::PeerID &clientID, const std::string &data) {
+            void ServerGame::setupSessionPacketHandler(const common::PeerID &clientID, const std::string &data) {
                 auto carEntity = spawnRaceCar();
 
                 mServer->sendCarEntityID(carEntity, clientID);
@@ -90,14 +90,14 @@ namespace oni {
                 mClientDataManager->addNewClient(clientID, carEntity);
             }
 
-            void ServerGame::clientInputPacketHandler(const oni::common::PeerID &clientID, const std::string &data) {
-                auto input = oni::entities::deserialize<oni::io::Input>(data);
+            void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {
+                auto input = oni::entities::deserialize<io::Input>(data);
                 // TODO: Avoid copy by using a unique_ptr or something
                 auto lock = mClientDataManager->scopedLock();
                 mClientDataManager->setClientInput(clientID, input);
             }
 
-            void ServerGame::postDisconnectHook(const oni::common::PeerID &peerID) {
+            void ServerGame::postDisconnectHook(const common::PeerID &peerID) {
                 auto clientDataLock = mClientDataManager->scopedLock();
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
@@ -126,13 +126,13 @@ namespace oni {
                 }
             }
 
-            void ServerGame::_sim(const oni::common::real64 tickTime) {
+            void ServerGame::_sim(const common::real64 tickTime) {
                 // Fake lag
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
-                mDynamics->tick(*mEntityManager, *mClientDataManager, tickTime);
+                mDynamics->tick(*mEntityManager, *mEntityFactory, *mClientDataManager, tickTime);
 
-                std::vector<oni::math::vec2> tickPositions{};
+                std::vector<math::vec2> tickPositions{};
                 {
                     // TODO: This is just awful :( so many locks. Accessing entities from registry without a view, which
                     // is slow and by the time the positions are passed to other systems, such as TileWorld, the entities
@@ -142,7 +142,7 @@ namespace oni {
                     auto registryLock = mEntityManager->scopedLock();
                     auto clientDataLock = mClientDataManager->scopedLock();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
-                        const auto &carPlacement = mEntityManager->get<oni::component::Placement>(carEntity);
+                        const auto &carPlacement = mEntityManager->get<component::Placement>(carEntity);
                         tickPositions.push_back(carPlacement.position.getXY());
                     }
                 }
@@ -154,25 +154,25 @@ namespace oni {
                 mLapTracker->tick();
             }
 
-            void ServerGame::_render(oni::common::real64 simTime) {}
+            void ServerGame::_render(common::real64 simTime) {}
 
             void ServerGame::_display() {}
 
-            void ServerGame::showFPS(oni::common::int16 fps) {}
+            void ServerGame::showFPS(common::int16 fps) {}
 
-            void ServerGame::showSPS(oni::common::int16 tps) {}
+            void ServerGame::showSPS(common::int16 tps) {}
 
-            void ServerGame::showPPS(oni::common::int16 pps) {
+            void ServerGame::showPPS(common::int16 pps) {
                 if (pps < 30) {
                     std::cout << "PPS " << pps << "\n";
                 }
             }
 
-            void ServerGame::showPET(oni::common::int16 pet) {}
+            void ServerGame::showPET(common::int16 pet) {}
 
-            void ServerGame::showSET(oni::common::int16 set) {}
+            void ServerGame::showSET(common::int16 set) {}
 
-            void ServerGame::showRET(oni::common::int16 ret) {}
+            void ServerGame::showRET(common::int16 ret) {}
 
             common::EntityID ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::RACE_CAR);
@@ -190,8 +190,8 @@ namespace oni {
                                                           heading,
                                                           carTextureID);
 
-                oni::math::vec2 gunSize{2.f, 0.5f};
-                oni::math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
+                math::vec2 gunSize{2.f, 0.5f};
+                math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
                 auto carGunEntity = mEntityFactory->createEntity
                         <component::EntityType::VEHICLE_GUN>(gunPos,
@@ -199,12 +199,12 @@ namespace oni {
                                                              heading,
                                                              gunTextureID);
 
-                oni::entities::attach(*mEntityManager, carEntity, carGunEntity, oni::component::EntityType::RACE_CAR,
-                                      oni::component::EntityType::VEHICLE_GUN);
+                oni::entities::attach(*mEntityManager, carEntity, carGunEntity, component::EntityType::RACE_CAR,
+                                      component::EntityType::VEHICLE_GUN);
 
                 auto &carConfig = mEntityManager->get<component::CarConfig>(carEntity);
                 std::string tireTextureID = "resources/images/car/1/car-tire.png";
-                auto tireRotation = static_cast<oni::common::real32>(oni::math::toRadians(90.0f));
+                auto tireRotation = static_cast< common::real32>( math::toRadians(90.0f));
                 math::vec2 tireSize{
                         static_cast<common::real32>(carConfig.wheelWidth),
                         static_cast<common::real32>(carConfig.wheelRadius * 2)
@@ -223,51 +223,32 @@ namespace oni {
 
                 for (auto &&carTire: carTires) {
                     math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity<oni::component::EntityType::VEHICLE_TIRE>(
+                    auto tireEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_TIRE>(
                             tirePos,
                             tireSize,
                             tireRotation,
                             tireTextureID);
-                    oni::entities::attach(*mEntityManager, carEntity, tireEntity, oni::component::EntityType::RACE_CAR,
-                                          oni::component::EntityType::VEHICLE_TIRE);
+                    oni::entities::attach(*mEntityManager, carEntity, tireEntity, component::EntityType::RACE_CAR,
+                                          component::EntityType::VEHICLE_TIRE);
                 }
 
                 return carEntity;
             }
 
-            void ServerGame::removeRaceCar(oni::common::EntityID carEntityID) {
+            void ServerGame::removeRaceCar(common::EntityID carEntityID) {
                 auto lock = mEntityFactory->scopedLock();
-                mEntityFactory->removeEntity<oni::component::EntityType::RACE_CAR>(carEntityID);
+                mEntityFactory->removeEntity<component::EntityType::RACE_CAR>(carEntityID);
             }
 
-            oni::common::EntityID ServerGame::createTruck() {
-                auto vehicleZ = mZLayerManager->getZForEntity(oni::component::EntityType::VEHICLE);
-                oni::math::vec2 size{1.0f, 3.0f};
-                oni::math::vec3 worldPos{-60.0f, -30.0f, vehicleZ};
-                oni::common::real32 heading = 0.f;
-                std::string truckTexturePath = "resources/images/car/2/truck.png";
-                oni::component::PhysicalProperties properties;
-                properties.friction = 1.f;
-                properties.density = 0.1f;
-                properties.angularDamping = 2.f;
-                properties.linearDamping = 2.f;
-                properties.highPrecision = false;
-                properties.bodyType = oni::component::BodyType::DYNAMIC;
-                properties.physicalCategory = oni::component::PhysicalCategory::VEHICLE;
+            common::EntityID ServerGame::spawnTruck() {
+                auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::VEHICLE);
+                math::vec2 size{1.0f, 3.0f};
+                math::vec3 worldPos{-60.0f, -30.0f, vehicleZ};
+                common::real32 heading = 0.f;
+                std::string textureID = "resources/images/car/2/truck.png";
 
                 auto lock = mEntityFactory->scopedLock();
-                auto entityID = oni::entities::createEntity(*mEntityManager);
-                oni::entities::assignShapeLocal(*mEntityManager, entityID, size, vehicleZ);
-                oni::entities::assignPlacement(*mEntityManager, entityID, worldPos, {1.f, 1.f, 0.f}, 0.f);
-                oni::entities::assignPhysicalProperties(*mEntityManager, *mDynamics->getPhysicsWorld(), entityID,
-                                                        worldPos,
-                                                        size,
-                                                        heading,
-                                                        properties);
-                oni::entities::assignTextureToLoad(*mEntityManager, entityID, truckTexturePath);
-                oni::entities::assignTag<oni::component::Tag_Dynamic>(*mEntityManager, entityID);
-
-                return entityID;
+                return mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading, textureID);
             }
         }
     }

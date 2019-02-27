@@ -56,7 +56,7 @@ namespace oni {
                                    oni::common::int64 yChunkIndex);
 
                 oni::common::EntityID
-                genSprite(oni::math::vec4 color, oni::math::vec2 tileSize, oni::math::vec3 worldPos);
+                genSprite(oni::math::vec4 &color, oni::math::vec2 &tileSize, oni::math::vec3 &worldPos);
 
                 oni::common::EntityID genTexture(const oni::math::vec2 &size,
                                                  const oni::math::vec3 &worldPos,

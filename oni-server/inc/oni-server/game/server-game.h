@@ -87,7 +87,7 @@ namespace oni {
 
                 void removeRaceCar(EntityID carEntityID);
 
-                EntityID createTruck();
+                EntityID spawnTruck();
 
             private:
                 std::unique_ptr<oni::entities::EntityManager> mEntityManager{};

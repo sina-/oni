@@ -85,7 +85,8 @@ namespace oni {
                               std::placeholders::_2,
                               std::placeholders::_3,
                               std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_5,
+                              std::placeholders::_6
                     );
 
             mCollisionHandlers[component::PhysicalCategory::VEHICLE] =
@@ -94,7 +95,8 @@ namespace oni {
                               std::placeholders::_2,
                               std::placeholders::_3,
                               std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_5,
+                              std::placeholders::_6
                     );
 
             mCollisionHandlers[component::PhysicalCategory::RACE_CAR] =
@@ -103,7 +105,8 @@ namespace oni {
                               std::placeholders::_2,
                               std::placeholders::_3,
                               std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_5,
+                              std::placeholders::_6
                     );
 
             mCollisionHandlers[component::PhysicalCategory::WALL] =
@@ -112,7 +115,8 @@ namespace oni {
                               std::placeholders::_2,
                               std::placeholders::_3,
                               std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_5,
+                              std::placeholders::_6
                     );
 
             mCollisionHandlers[component::PhysicalCategory::GENERIC] =
@@ -121,7 +125,8 @@ namespace oni {
                               std::placeholders::_2,
                               std::placeholders::_3,
                               std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_5,
+                              std::placeholders::_6
                     );
             // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
             // skipping some of them!
@@ -131,6 +136,7 @@ namespace oni {
         Dynamics::~Dynamics() = default;
 
         void Dynamics::tick(entities::EntityManager &manager,
+                            entities::EntityFactory &entityFactory,
                             entities::ClientDataManager &clientData,
                             common::real64 tickTime) {
             std::map<common::EntityID, component::CarInput> carInput{};
@@ -287,6 +293,7 @@ namespace oni {
                     }
 
                     mCollisionHandlers[props.physicalCategory](manager,
+                                                               entityFactory,
                                                                entitiesToBeUpdated,
                                                                entity,
                                                                props, placement);
@@ -335,18 +342,17 @@ namespace oni {
         }
 
         void Dynamics::handleBulletCollision(entities::EntityManager &manager,
+                                             entities::EntityFactory &entityFactory,
                                              std::vector<common::EntityID> &entitiesToBeUpdated,
                                              common::EntityID entity,
                                              component::PhysicalProperties &props,
                                              component::Placement &placement) {
 
             if (isColliding(props.body)) {
-                auto particleEntity = entities::createEntity(manager, false);
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
-
-                entities::assignParticle(manager, particleEntity, pos, 0.f, 0.f, 0.f, 0.f);
+                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos);
 
                 mProjectile->destroyBullet(manager, entity);
                 entities::destroyEntity(manager, entity);
@@ -358,6 +364,7 @@ namespace oni {
 
         void
         Dynamics::handleVehicleCollision(entities::EntityManager &manager,
+                                         entities::EntityFactory &entityFactory,
                                          std::vector<common::EntityID> &entitiesToBeUpdated,
                                          common::EntityID entity,
                                          component::PhysicalProperties &props,
@@ -366,6 +373,7 @@ namespace oni {
         }
 
         void Dynamics::handleCollision(entities::EntityManager &manager,
+                                       entities::EntityFactory &entityFactory,
                                        std::vector<common::EntityID> &entitiesToBeUpdated,
                                        common::EntityID entity,
                                        component::PhysicalProperties &props,
@@ -375,6 +383,7 @@ namespace oni {
 
         void
         Dynamics::handleRaceCarCollision(entities::EntityManager &manager,
+                                         entities::EntityFactory &entityFactory,
                                          std::vector<common::EntityID> &entitiesToBeUpdated,
                                          common::EntityID entity,
                                          component::PhysicalProperties &props,

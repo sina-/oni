@@ -13,6 +13,8 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
+        class EntityFactory;
+
         class ClientDataManager;
     }
     namespace component {
@@ -50,29 +52,34 @@ namespace oni {
             b2World *getPhysicsWorld();
 
             void tick(entities::EntityManager &manager,
+                      entities::EntityFactory &entityFactory,
                       entities::ClientDataManager &clientData,
                       common::real64 tickTime);
 
         private:
             void handleBulletCollision(entities::EntityManager &,
+                                       entities::EntityFactory &,
                                        std::vector<common::EntityID> &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
                                        component::Placement &);
 
             void handleVehicleCollision(entities::EntityManager &,
+                                        entities::EntityFactory &,
                                         std::vector<common::EntityID> &,
                                         common::EntityID,
                                         component::PhysicalProperties &,
                                         component::Placement &);
 
             void handleRaceCarCollision(entities::EntityManager &,
+                                        entities::EntityFactory &,
                                         std::vector<common::EntityID> &,
                                         common::EntityID,
                                         component::PhysicalProperties &,
                                         component::Placement &);
 
             void handleCollision(entities::EntityManager &,
+                                 entities::EntityFactory &,
                                  std::vector<common::EntityID> &,
                                  common::EntityID,
                                  component::PhysicalProperties &,
@@ -97,6 +104,7 @@ namespace oni {
 
             std::map<component::PhysicalCategory,
                     std::function<void(entities::EntityManager &,
+                                       entities::EntityFactory &,
                                        std::vector<common::EntityID> &,
                                        common::EntityID,
                                        component::PhysicalProperties &,

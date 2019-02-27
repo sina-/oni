@@ -63,6 +63,13 @@ namespace oni {
                                                                const std::string &textureID);
 
             template<>
+            void createEntity<component::EntityType::VEHICLE>(common::EntityID entityID,
+                                                              const math::vec3 &pos,
+                                                              const math::vec2 &size,
+                                                              const common::real32 &heading,
+                                                              const std::string &textureID);
+
+            template<>
             void createEntity<component::EntityType::VEHICLE_GUN>(common::EntityID,
                                                                   const math::vec3 &pos,
                                                                   const math::vec2 &size,
@@ -96,6 +103,10 @@ namespace oni {
                                                                     const math::vec2 &size,
                                                                     const common::real32 &heading,
                                                                     const std::string &textureID);
+
+            template<>
+            void createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
+                                                                      const math::vec3 &worldPos);
 
             common::EntityID createEntity(bool tagNew);
 

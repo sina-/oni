@@ -58,6 +58,7 @@ namespace oni {
                 case component::EntityType::UI:
                 case component::EntityType::SIMPLE_SPRITE:
                 case component::EntityType::SIMPLE_PARTICLE:
+                case component::EntityType::TEXT:
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
@@ -305,6 +306,16 @@ namespace oni {
             assignTag<component::Tag_TextureShaded>(entityID);
         }
 
+        template<>
+        void EntityFactory::_createEntity<component::EntityType::TEXT>(common::EntityID entityID, const math::vec3 &pos,
+                                                                       const std::string &text) {
+
+            auto &textComponent = createComponent<component::Text>(entityID);
+            textComponent.position = pos;
+            textComponent.textContent = text;
+
+            assignTag<component::Tag_Static>(entityID);
+        }
 
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
                                                   const math::vec2 &size, common::real32 heading,
@@ -450,6 +461,12 @@ namespace oni {
 
             removeTag<component::Tag_Dynamic>(entityID);
             removeTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_removeEntity<component::EntityType::TEXT>(common::EntityID entityID) {
+            removeComponent<component::Text>(entityID);
+            removeTag<component::Tag_Static>(entityID);
         }
 
         void EntityFactory::removePhysicalBody(common::EntityID entityID) {

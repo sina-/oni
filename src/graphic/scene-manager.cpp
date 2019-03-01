@@ -23,19 +23,20 @@
 namespace oni {
     namespace graphic {
         SceneManager::SceneManager(const component::ScreenBounds &screenBounds, FontManager &fontManager,
+                                   math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
                                    common::real32 gameUnitToPixels
         ) :
-                mSkidTileSizeX{64}, mSkidTileSizeY{64},
-                mHalfSkidTileSizeX{mSkidTileSizeX / 2.0f},
-                mHalfSkidTileSizeY{mSkidTileSizeY / 2.0f},
+                mSkidTileSizeX(64), mSkidTileSizeY(64),
+                mHalfSkidTileSizeX(mSkidTileSizeX / 2.0f),
+                mHalfSkidTileSizeY(mSkidTileSizeY / 2.0f),
                 // 64k vertices
                 mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds),
                 mFontManager(fontManager),
                 mPhysicsWorld(physicsWorld),
-                mGameUnitToPixels{gameUnitToPixels} {
+                mGameUnitToPixels(gameUnitToPixels),
+                mZLayerManager(zLayerManager) {
 
-            mZLayerManager = std::make_unique<math::ZLayerManager>();
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
                                                          screenBounds.yMax, -1.0f, 1.0f);
             mViewMatrix = math::mat4::identity();
@@ -43,6 +44,10 @@ namespace oni {
             mModelMatrix = math::mat4::identity();
 
             mInternalRegistry = std::make_unique<entities::EntityManager>();
+            // TODO: Note that this mixes entities in InternalRegistry with physicsWorld, does that make sense? As of
+            // now physicsWorld on client side is empty, but my plan is to use it for debug drawing physics layer.
+            mInternalEntityFactory = std::make_unique<entities::EntityFactory>(*mInternalRegistry, mZLayerManager,
+                                                                               physicsWorld);
 
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
@@ -260,13 +265,6 @@ namespace oni {
         }
 
         void SceneManager::tick(entities::EntityManager &manager, common::real64 tickTime) {
-            // NOTE: Server needs to send zLevel data prior to creating any visual object on clients.
-            // TODO: A better way is no not call tick before we know we have all the information to do actual
-            // work. Kinda like a level loading screen.
-            if (!mZLayerManager) {
-                return;
-            }
-
             {
                 auto view = manager.createViewScopeLock<component::Particle>();
                 for (const auto &entity: view) {
@@ -531,8 +529,8 @@ namespace oni {
                 const auto &placement = view.get<component::Placement>(entity);
 
                 auto transformation = math::Transformation::createTransformation(placement.position,
-                                                                                    placement.rotation,
-                                                                                    placement.scale);
+                                                                                 placement.rotation,
+                                                                                 placement.scale);
 
                 // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
                 // separately for each entity and each time a physics system updates an entity it will automatically
@@ -601,7 +599,7 @@ namespace oni {
                                                                                const component::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
-                auto zLevel = mZLayerManager->getZForEntity(component::EntityType::UI);
+                auto zLevel = mZLayerManager.getZForEntity(component::EntityType::UI);
                 RaceInfoEntities carLapText{0};
                 math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, zLevel};
                 math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, zLevel};
@@ -639,7 +637,7 @@ namespace oni {
                 auto tilePosX = math::indexToPosition(x, mSkidTileSizeX);
                 auto tilePosY = math::indexToPosition(y, mSkidTileSizeY);
                 auto worldPos = math::vec3{tilePosX, tilePosY,
-                                           mZLayerManager->getZForEntity(component::EntityType::SKID_LINE)};
+                                           mZLayerManager.getZForEntity(component::EntityType::SKID_LINE)};
                 auto tileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
                                            static_cast<common::real32>(mSkidTileSizeY)};
 
@@ -672,7 +670,7 @@ namespace oni {
 
             auto skidPos = position;
             math::Transformation::worldToTextureCoordinate(skidMarksTexturePos, mGameUnitToPixels,
-                                                              skidPos);
+                                                           skidPos);
 
             // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
             // squares.
@@ -743,7 +741,8 @@ namespace oni {
         }
 
         common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
-            auto entityID = mFontManager.createTextFromString(*mInternalRegistry, text, worldPos);
+            auto entityID = mFontManager.createTextFromString(*mInternalRegistry, *mInternalEntityFactory, text,
+                                                              worldPos);
             return entityID;
         }
     }

@@ -26,11 +26,14 @@ namespace oni {
 
         class EntityFactory {
         public:
+            // TODO: Does it make sense to require every user of this class to provide all these systems? Not every user
+            // might be interested in creating entities that requires those systems. I should think about if it makes
+            // sense to break up this factory into factories for special purposes, maybe one per system or combination
+            // of them?
             EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
 
             template<component::EntityType entityType, class ...Args>
             common::EntityID createEntity(const Args &... args) {
-                // TODO: Isn't there a better way to create entities without tagging them?
                 common::EntityID entityID = createEntity();
                 auto &type = createComponent<component::EntityType>(entityID);
                 type = entityType;
@@ -121,6 +124,13 @@ namespace oni {
                                                                      const std::string &textureID);
 
             template<>
+            void _createEntity<component::EntityType::TEXT>(common::EntityID,
+                                                            const math::vec3 &pos,
+                                                            const std::string &text);
+
+
+        private:
+            template<>
             void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID);
 
             template<>
@@ -134,6 +144,9 @@ namespace oni {
 
             template<>
             void _removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID);
+
+            template<>
+            void _removeEntity<component::EntityType::TEXT>(common::EntityID);
 
         private:
             b2Body *createPhysicalBody(

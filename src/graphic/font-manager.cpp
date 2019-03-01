@@ -62,40 +62,45 @@ namespace oni {
 
         GLuint FontManager::getTextureID() const { return m_FTAtlas->id; }
 
-        common::EntityID FontManager::createTextFromString(entities::EntityManager &manager, const std::string &text,
+        common::EntityID FontManager::createTextFromString(entities::EntityManager &manager,
+                                                           entities::EntityFactory &entityFactory,
+                                                           const std::string &text,
                                                            const math::vec3 &position) {
-            auto textComponent = createTextComponent(text, position);
             auto lock = manager.scopedLock();
-            auto entity = entities::createEntity(manager);
-            manager.assign<component::Text>(entity, textComponent);
-            entities::assignTag<component::Tag_Static>(manager, entity);
+            auto entityID = entityFactory.createEntity<component::EntityType::TEXT>(position, text);
+            auto &textComponent = manager.get<component::Text>(entityID);
+            assignGlyphs(textComponent);
 
-            return entity;
+            return entityID;
         }
 
         void FontManager::updateText(const std::string &textContent, component::Text &text) {
-            text = createTextComponent(textContent, text.position);
+            // TODO: This could be optimized to only update part of text that is actually different.
+            text.textContent = textContent;
+            text.height.clear();
+            text.width.clear();
+            text.offsetX.clear();
+            text.offsetY.clear();
+            text.advanceX.clear();
+            text.advanceY.clear();
+            text.uv.clear();
+            assignGlyphs(text);
         }
 
-        component::Text FontManager::createTextComponent(const std::string &text, const math::vec3 &position) {
-            component::Text textComponent{};
-            for (auto &&character: text) {
+        void FontManager::assignGlyphs(component::Text &text) {
+            for (auto &&character: text.textContent) {
                 auto glyph = findGlyph(character);
-                textComponent.height.emplace_back(glyph->height);
-                textComponent.width.emplace_back(glyph->width);
-                textComponent.offsetX.emplace_back(glyph->offset_x);
-                textComponent.offsetY.emplace_back(glyph->offset_y);
-                textComponent.advanceX.emplace_back(glyph->advance_x);
-                textComponent.advanceY.emplace_back(glyph->advance_y);
-                textComponent.uv.emplace_back(math::vec4{glyph->s0, glyph->t0, glyph->s1, glyph->t1});
-                textComponent.xScaling = mGameWidth;
-                textComponent.yScaling = mGameHeight;
+                text.height.emplace_back(glyph->height);
+                text.width.emplace_back(glyph->width);
+                text.offsetX.emplace_back(glyph->offset_x);
+                text.offsetY.emplace_back(glyph->offset_y);
+                text.advanceX.emplace_back(glyph->advance_x);
+                text.advanceY.emplace_back(glyph->advance_y);
+                text.uv.emplace_back(math::vec4{glyph->s0, glyph->t0, glyph->s1, glyph->t1});
+                text.xScaling = mGameWidth;
+                text.yScaling = mGameHeight;
             }
-            textComponent.textureID = m_FTAtlas->id;
-            textComponent.textContent = text;
-            textComponent.position = position;
-
-            return textComponent;
+            text.textureID = m_FTAtlas->id;
         }
     }
 }

@@ -19,6 +19,8 @@ namespace oni {
 
     namespace entities {
         class EntityManager;
+
+        class EntityFactory;
     }
 
     namespace component {
@@ -42,6 +44,7 @@ namespace oni {
         class SceneManager {
         public:
             SceneManager(const component::ScreenBounds &, FontManager &,
+                         math::ZLayerManager&,
                          b2World &,
                          common::real32
             );
@@ -176,7 +179,8 @@ namespace oni {
             common::uint16 mRenderedParticlesPerFrame{0};
 
             std::unique_ptr<entities::EntityManager> mInternalRegistry{};
-            std::unique_ptr<math::ZLayerManager> mZLayerManager{};
+            std::unique_ptr<entities::EntityFactory> mInternalEntityFactory{};
+            math::ZLayerManager& mZLayerManager;
         };
     }
 }

@@ -219,7 +219,7 @@ namespace oni {
                 }
             }
 
-            mProjectile->tick(manager, clientData, tickTime);
+            mProjectile->tick(manager, entityFactory, clientData, tickTime);
 
             {
                 // NOTE: Step() function will modify collision status of entities, so we have to lock the registry.
@@ -352,10 +352,9 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
-                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos);
+                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos);
 
-                mProjectile->destroyBullet(manager, entity);
-                entities::destroyEntity(manager, entity);
+                entityFactory.removeEntity<component::EntityType::SIMPLE_BULLET>(entity);
 
             } else {
                 entitiesToBeUpdated.push_back(entity);

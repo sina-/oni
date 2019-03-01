@@ -13,6 +13,8 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
+        class EntityFactory;
+
         class ClientDataManager;
     }
 
@@ -23,12 +25,8 @@ namespace oni {
 
             ~Projectile();
 
-            void tick(entities::EntityManager &, entities::ClientDataManager &, common::real64 tickTime);
-
-            void destroyBullet(entities::EntityManager&, common::EntityID);
-
-        private:
-            common::EntityID createBullet(entities::EntityManager &, const component::Placement &, common::real32);
+            void tick(entities::EntityManager &, entities::EntityFactory &, entities::ClientDataManager &,
+                      common::real64 tickTime);
 
         private:
             b2World *mPhysicsWorld{};

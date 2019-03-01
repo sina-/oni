@@ -7,7 +7,6 @@
 
 namespace oni {
     namespace entities {
-
         EntityFactory::EntityFactory(EntityManager &manager,
                                      const math::ZLayerManager &zLayerManager,
                                      b2World &physicsWorld) :
@@ -16,38 +15,40 @@ namespace oni {
                 mPhysicsWorld{physicsWorld} {
         }
 
-        common::EntityID EntityFactory::createEntity(bool tagNew) {
+        common::EntityID EntityFactory::createEntity() {
             auto entityID = mManager.create();
-            if (tagNew) {
-                mManager.assign<component::Tag_NewEntity>(entityID);
-            }
+            mManager.assign<component::Tag_NewEntity>(entityID);
             return entityID;
         }
 
         void EntityFactory::destroyEntity(common::EntityID entityID) {
+            // TODO: Can we remove this check?
             if (!mManager.has<component::Tag_NewEntity>(entityID)) {
                 mManager.addDeletedEntity(entityID);
             }
             mManager.destroy(entityID);
         }
 
-        // TODO: Why can't I just call removeEntity<entityType>(entityID)?
-        void EntityFactory::removeEntity(common::EntityID entityID, component::EntityType entityType) {
+        void EntityFactory::_removeEntity(common::EntityID entityID, component::EntityType entityType) {
             switch (entityType) {
                 case component::EntityType::RACE_CAR: {
-                    removeEntity<component::EntityType::RACE_CAR>(entityID);
+                    _removeEntity<component::EntityType::RACE_CAR>(entityID);
                     break;
                 }
                 case component::EntityType::WALL: {
-                    removeEntity<component::EntityType::WALL>(entityID);
+                    _removeEntity<component::EntityType::WALL>(entityID);
                     break;
                 }
                 case component::EntityType::VEHICLE_GUN: {
-                    removeEntity<component::EntityType::VEHICLE_GUN>(entityID);
+                    _removeEntity<component::EntityType::VEHICLE_GUN>(entityID);
                     break;
                 }
                 case component::EntityType::VEHICLE_TIRE: {
-                    removeEntity<component::EntityType::VEHICLE_TIRE>(entityID);
+                    _removeEntity<component::EntityType::VEHICLE_TIRE>(entityID);
+                    break;
+                }
+                case component::EntityType::SIMPLE_BULLET: {
+                    _removeEntity<component::EntityType::SIMPLE_BULLET>(entityID);
                     break;
                 }
                 case component::EntityType::ROAD:
@@ -62,6 +63,8 @@ namespace oni {
                     break;
                 }
             }
+            removeComponent<component::EntityType>(entityID);
+            destroyEntity(entityID);
         }
 
         template<>
@@ -263,9 +266,45 @@ namespace oni {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
 
-            // TODO: For now particles are sync'd with a game packet, don't need to serialize them through registry
+            // NOTE: For now particles are sync'd with a game packet, don't need to serialize them through registry
             removeTag<component::Tag_NewEntity>(entityID);
         }
+
+        template<>
+        void EntityFactory::createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID,
+                                                                               const math::vec3 &pos,
+                                                                               const math::vec2 &size,
+                                                                               const common::real32 &heading,
+                                                                               const std::string &textureID) {
+            auto &properties = createComponent<component::PhysicalProperties>(entityID);
+            properties.friction = 1.f;
+            properties.density = 0.1f;
+            properties.angularDamping = 2.f;
+            properties.linearDamping = 0.1f;
+            properties.highPrecision = true;
+            properties.bodyType = oni::component::BodyType::DYNAMIC;
+            properties.physicalCategory = oni::component::PhysicalCategory::BULLET;
+            properties.collisionWithinCategory = false;
+
+            auto *body = createPhysicalBody(pos, size, heading, properties);
+
+            auto &shape = createComponent<component::Shape>(entityID);
+            shape.setZ(pos.z);
+            shape.setSizeFromOrigin(size);
+            shape.centerAlign();
+
+            auto &placement = createComponent<component::Placement>(entityID);
+            placement.position = pos;
+            placement.rotation = heading;
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+            assignTag<component::Tag_Dynamic>(entityID);
+            assignTag<component::Tag_TextureShaded>(entityID);
+        }
+
 
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
                                                   const math::vec2 &size, common::real32 heading,
@@ -341,11 +380,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID) {
+        void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID) {
             auto &attachments = mManager.get<component::EntityAttachment>(entityID);
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
-                component::EntityType attachmentType = attachments.entityTypes[i];
-                removeEntity(entityID, attachmentType);
+                auto attachmentType = attachments.entityTypes[i];
+                auto attachmentEntityID = attachments.entities[i];
+                _removeEntity(attachmentEntityID, attachmentType);
             }
             removeComponent<component::EntityAttachment>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -364,7 +404,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID entityID) {
+        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID entityID) {
             removeComponent<component::Placement>(entityID);
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -376,7 +416,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID entityID) {
+        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID entityID) {
             removeComponent<component::Placement>(entityID);
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -388,7 +428,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::removeEntity<component::EntityType::WALL>(common::EntityID entityID) {
+        void EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID) {
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
 
@@ -396,6 +436,19 @@ namespace oni {
             removeComponent<component::PhysicalProperties>(entityID);
 
             removeTag<component::Tag_Static>(entityID);
+            removeTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID) {
+            removeComponent<component::Shape>(entityID);
+            removeComponent<component::Placement>(entityID);
+            removeComponent<component::Texture>(entityID);
+
+            removePhysicalBody(entityID);
+            removeComponent<component::PhysicalProperties>(entityID);
+
+            removeTag<component::Tag_Dynamic>(entityID);
             removeTag<component::Tag_TextureShaded>(entityID);
         }
 

@@ -20,6 +20,7 @@ namespace oni {
 
             SIMPLE_SPRITE = 10,
             SIMPLE_PARTICLE = 11,
+            SIMPLE_BULLET = 12,
         };
 
         enum class SnapshotType {

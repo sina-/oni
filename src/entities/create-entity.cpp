@@ -4,6 +4,8 @@
 
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/hierarchy.h>
+#include <oni-core/component/visual.h>
+#include <oni-core/math/rand.h>
 
 namespace oni {
     namespace entities {
@@ -13,6 +15,7 @@ namespace oni {
                 mManager(manager),
                 mZLayerManager(zLayerManager),
                 mPhysicsWorld{physicsWorld} {
+            mRand = std::make_unique<math::Rand>(0);
         }
 
         common::EntityID EntityFactory::createEntity() {
@@ -263,10 +266,17 @@ namespace oni {
 
         template<>
         void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                                  const math::vec3 &worldPos) {
+                                                                                  const math::vec3 &worldPos,
+                                                                                  const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
+            particle.age = 0.f;
 
+            if (randomize) {
+                particle.heading = mRand->nextReal32(0, 6.28f); // NOTE: 6.28f is 2 * pi in radians (360 degrees)
+                particle.velocity = mRand->nextReal32(1.f, 7.f);
+                particle.maxAge = mRand->nextReal32(0.2f, 1.f);
+            }
             // NOTE: For now particles are sync'd with a game packet, don't need to serialize them through registry
             removeTag<component::Tag_NewEntity>(entityID);
         }

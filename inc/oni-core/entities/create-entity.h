@@ -1,19 +1,22 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/math/vec2.h>
-#include <oni-core/math/vec3.h>
-#include <oni-core/math/vec4.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/common/typedefs-graphics.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/math/z-layer-manager.h>
 
 class b2World;
 
 class b2Body;
 
 namespace oni {
+    namespace math {
+        class Rand;
+
+        struct vec2;
+        struct vec3;
+        struct vec4;
+    }
     namespace entities {
         class EntityManager;
     }
@@ -22,8 +25,11 @@ namespace oni {
         class ZLayerManager;
     }
 
-    namespace entities {
+    namespace component {
+        class Texture;
+    }
 
+    namespace entities {
         class EntityFactory {
         public:
             // TODO: Does it make sense to require every user of this class to provide all these systems? Not every user
@@ -114,7 +120,9 @@ namespace oni {
 
             template<>
             void _createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                       const math::vec3 &worldPos);
+                                                                       const math::vec3 &worldPos,
+                    // TODO: Is there a way to avoid need for const &?
+                                                                       const bool &randomize);
 
             template<>
             void _createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID,
@@ -185,6 +193,7 @@ namespace oni {
             EntityManager &mManager;
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
+            std::unique_ptr<math::Rand> mRand{};
         };
 
         common::EntityID createEntity(EntityManager &manager, bool tagAsNew = true);

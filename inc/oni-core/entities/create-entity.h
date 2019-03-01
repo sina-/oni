@@ -34,7 +34,7 @@ namespace oni {
                 common::EntityID entityID = createEntity();
                 auto &type = createComponent<component::EntityType>(entityID);
                 type = entityType;
-                createEntity<entityType>(entityID, args...);
+                _createEntity<entityType>(entityID, args...);
                 return entityID;
 
             }
@@ -53,7 +53,7 @@ namespace oni {
             common::EntityID createEntity();
 
             template<component::EntityType, class ...Args>
-            void createEntity(common::EntityID, const Args &...) = delete;
+            void _createEntity(common::EntityID, const Args &...) = delete;
 
             void _removeEntity(common::EntityID, component::EntityType entityType);
 
@@ -61,64 +61,64 @@ namespace oni {
             void _removeEntity(common::EntityID) = delete;
 
             template<>
-            void createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
+            void _createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
+                                                                const math::vec3 &pos,
+                                                                const math::vec2 &size,
+                                                                const common::real32 &heading,
+                                                                const std::string &textureID);
+
+            template<>
+            void _createEntity<component::EntityType::VEHICLE>(common::EntityID entityID,
                                                                const math::vec3 &pos,
                                                                const math::vec2 &size,
                                                                const common::real32 &heading,
                                                                const std::string &textureID);
 
             template<>
-            void createEntity<component::EntityType::VEHICLE>(common::EntityID entityID,
-                                                              const math::vec3 &pos,
-                                                              const math::vec2 &size,
-                                                              const common::real32 &heading,
-                                                              const std::string &textureID);
-
-            template<>
-            void createEntity<component::EntityType::VEHICLE_GUN>(common::EntityID,
-                                                                  const math::vec3 &pos,
-                                                                  const math::vec2 &size,
-                                                                  const common::real32 &heading,
-                                                                  const std::string &textureID);
-
-            template<>
-            void createEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID,
+            void _createEntity<component::EntityType::VEHICLE_GUN>(common::EntityID,
                                                                    const math::vec3 &pos,
                                                                    const math::vec2 &size,
                                                                    const common::real32 &heading,
                                                                    const std::string &textureID);
 
             template<>
-            void createEntity<component::EntityType::WALL>(common::EntityID,
-                                                           const math::vec3 &pos,
-                                                           const math::vec2 &size,
-                                                           const common::real32 &heading,
-                                                           const std::string &textureID);
-
-            template<>
-            void createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                                    const math::vec3 &worldPos,
-                                                                    const math::vec2 &size,
-                                                                    const common::real32 &heading,
-                                                                    const math::vec4 &color);
-
-            template<>
-            void createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                                    const math::vec3 &worldPos,
-                                                                    const math::vec2 &size,
-                                                                    const common::real32 &heading,
-                                                                    const std::string &textureID);
-
-            template<>
-            void createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                      const math::vec3 &worldPos);
-
-            template<>
-            void createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID,
+            void _createEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID,
                                                                     const math::vec3 &pos,
                                                                     const math::vec2 &size,
                                                                     const common::real32 &heading,
                                                                     const std::string &textureID);
+
+            template<>
+            void _createEntity<component::EntityType::WALL>(common::EntityID,
+                                                            const math::vec3 &pos,
+                                                            const math::vec2 &size,
+                                                            const common::real32 &heading,
+                                                            const std::string &textureID);
+
+            template<>
+            void _createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID,
+                                                                     const math::vec3 &worldPos,
+                                                                     const math::vec2 &size,
+                                                                     const common::real32 &heading,
+                                                                     const math::vec4 &color);
+
+            template<>
+            void _createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID,
+                                                                     const math::vec3 &worldPos,
+                                                                     const math::vec2 &size,
+                                                                     const common::real32 &heading,
+                                                                     const std::string &textureID);
+
+            template<>
+            void _createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
+                                                                       const math::vec3 &worldPos);
+
+            template<>
+            void _createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID,
+                                                                     const math::vec3 &pos,
+                                                                     const math::vec2 &size,
+                                                                     const common::real32 &heading,
+                                                                     const std::string &textureID);
 
             template<>
             void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID);

@@ -31,7 +31,7 @@ namespace oni {
             template<component::EntityType entityType, class ...Args>
             common::EntityID createEntity(const Args &... args) {
                 // TODO: Isn't there a better way to create entities without tagging them?
-                common::EntityID entityID = createEntity(true);
+                common::EntityID entityID = createEntity();
                 auto &type = createComponent<component::EntityType>(entityID);
                 type = entityType;
                 createEntity<entityType>(entityID, args...);
@@ -41,7 +41,7 @@ namespace oni {
 
             template<component::EntityType entityType>
             void removeEntity(common::EntityID entityID) {
-                removeEntity<entityType>(entityID);
+                _removeEntity<entityType>(entityID);
                 removeComponent<component::EntityType>(entityID);
                 destroyEntity(entityID);
             }
@@ -50,10 +50,15 @@ namespace oni {
             std::unique_lock<std::mutex> scopedLock();
 
         private:
+            common::EntityID createEntity();
+
             template<component::EntityType, class ...Args>
             void createEntity(common::EntityID, const Args &...) = delete;
 
-            void removeEntity(common::EntityID, component::EntityType entityType);
+            void _removeEntity(common::EntityID, component::EntityType entityType);
+
+            template<component::EntityType entityType>
+            void _removeEntity(common::EntityID) = delete;
 
             template<>
             void createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
@@ -108,19 +113,27 @@ namespace oni {
             void createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
                                                                       const math::vec3 &worldPos);
 
-            common::EntityID createEntity(bool tagNew);
+            template<>
+            void createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID,
+                                                                    const math::vec3 &pos,
+                                                                    const math::vec2 &size,
+                                                                    const common::real32 &heading,
+                                                                    const std::string &textureID);
 
             template<>
-            void removeEntity<component::EntityType::RACE_CAR>(common::EntityID);
+            void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID);
 
             template<>
-            void removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID);
+            void _removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID);
 
             template<>
-            void removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID);
+            void _removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID);
 
             template<>
-            void removeEntity<component::EntityType::WALL>(common::EntityID);
+            void _removeEntity<component::EntityType::WALL>(common::EntityID);
+
+            template<>
+            void _removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID);
 
         private:
             b2Body *createPhysicalBody(

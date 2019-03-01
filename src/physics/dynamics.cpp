@@ -352,7 +352,7 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{placement.position.x, placement.position.y, particleZ};
-                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos);
+                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, false);
 
                 entityFactory.removeEntity<component::EntityType::SIMPLE_BULLET>(entity);
 

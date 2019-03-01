@@ -2,7 +2,6 @@
 
 #include <oni-core/common/typedefs.h>
 
-
 namespace oni {
     namespace math {
         class Rand {

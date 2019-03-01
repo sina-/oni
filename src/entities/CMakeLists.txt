@@ -17,6 +17,8 @@ target_include_directories(oni-core-entities
 find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug NO_DEFAULT_PATH)
 
 target_link_libraries(oni-core-entities
+        PUBLIC
+            oni-core-math
         PRIVATE
             ${BOX2D_LIBRARY}
             oni-core-physics

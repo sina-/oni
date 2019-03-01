@@ -2,7 +2,6 @@
 
 #include <thread>
 
-#include <oni-core/math/z-layer-manager.h>
 #include <oni-core/component/visual.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/gameplay/lap-tracker.h>
@@ -13,6 +12,8 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/math/transformation.h>
+#include <oni-core/math/rand.h>
+#include <oni-core/math/z-layer-manager.h>
 
 #include <oni-server/entities/tile-world.h>
 

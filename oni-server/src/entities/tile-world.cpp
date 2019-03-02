@@ -172,7 +172,8 @@ namespace oni {
 
                     if (isInMap(southChunkID, mChunkLookup)) {
                         auto southChunkEntityID = mChunkLookup.at(southChunkID);
-                        const auto &southChunk = mEntityFactory.getEntityManager().get<component::Chunk>(southChunkEntityID);
+                        const auto &southChunk = mEntityFactory.getEntityManager().get<component::Chunk>(
+                                southChunkEntityID);
 
                         edgeRoads.southBoarder.x = southChunk.edgeRoad.northBoarder.x;
                         edgeRoads.southBoarder.y = 0;
@@ -181,7 +182,8 @@ namespace oni {
                     }
                     if (isInMap(northChunkID, mChunkLookup)) {
                         auto northChunkEntityID = mChunkLookup.at(northChunkID);
-                        const auto &northChunk = mEntityFactory.getEntityManager().get<component::Chunk>(northChunkEntityID);
+                        const auto &northChunk = mEntityFactory.getEntityManager().get<component::Chunk>(
+                                northChunkEntityID);
 
                         edgeRoads.northBoarder = northChunk.edgeRoad.southBoarder;
 
@@ -206,7 +208,8 @@ namespace oni {
 
                     if (isInMap(eastChunkID, mChunkLookup)) {
                         auto eastChunkEntityID = mChunkLookup.at(eastChunkID);
-                        const auto &eastChunk = mEntityFactory.getEntityManager().get<component::Chunk>(eastChunkEntityID);
+                        const auto &eastChunk = mEntityFactory.getEntityManager().get<component::Chunk>(
+                                eastChunkEntityID);
 
                         edgeRoads.eastBoarder.x = mTilesPerChunkX - 1;
                         edgeRoads.eastBoarder.y = eastChunk.edgeRoad.westBoarder.y;
@@ -217,7 +220,8 @@ namespace oni {
 
                     if (isInMap(westChunkID, mChunkLookup)) {
                         auto westChunkEntityID = mChunkLookup.at(westChunkID);
-                        const auto &westChunk = mEntityFactory.getEntityManager().get<component::Chunk>(westChunkEntityID);
+                        const auto &westChunk = mEntityFactory.getEntityManager().get<component::Chunk>(
+                                westChunkEntityID);
 
                         edgeRoads.westBoarder.x = 0;
                         edgeRoads.westBoarder.y = westChunk.edgeRoad.eastBoarder.y;
@@ -325,8 +329,10 @@ namespace oni {
                 auto chunkID = math::packIntegers(chunkIndex.x, chunkIndex.y);
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
                 auto chunkEntityID = mChunkLookup[chunkID];
-                auto chunk = component::Chunk{worldPos, chunkID, edgeRoads};
-                mEntityFactory.getEntityManager().assign<component::Chunk>(chunkEntityID, chunk);
+                auto &chunk = mEntityFactory.getEntityManager().get<component::Chunk>(chunkEntityID);
+                chunk.position = worldPos;
+                chunk.index = chunkID;
+                chunk.edgeRoad = edgeRoads;
             }
 
             void TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
@@ -563,8 +569,8 @@ namespace oni {
             TileWorld::genSprite(math::vec4 &color, math::vec2 &tileSize, math::vec3 &worldPos) {
                 auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
-                return mEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos, tileSize, heading,
-                                                                                         color);
+                return mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, tileSize, heading,
+                                                                                       color);
             }
 
             common::EntityID TileWorld::genTexture(const math::vec2 &size,
@@ -572,7 +578,7 @@ namespace oni {
                                                    const std::string &path) {
                 auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
-                return mEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos, size, heading, path);
+                return mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, size, heading, path);
             }
 
             void TileWorld::genDemoRaceCourse() {

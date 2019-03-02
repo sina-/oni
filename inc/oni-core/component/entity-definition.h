@@ -23,6 +23,7 @@ namespace oni {
             SIMPLE_BULLET = 12,
 
             TEXT = 13,
+            WORLD_CHUNK = 14,
         };
 
         enum class SnapshotType {

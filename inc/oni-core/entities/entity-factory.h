@@ -1,4 +1,5 @@
 #pragma once
+
 #include <mutex>
 
 #include <oni-core/common/typedefs.h>
@@ -140,6 +141,19 @@ namespace oni {
             void _createEntity<component::EntityType::TEXT>(common::EntityID,
                                                             const math::vec3 &pos,
                                                             const std::string &text);
+
+            template<>
+            void _createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID,
+                                                                   const math::vec3 &worldPos,
+                                                                   const math::vec2 &size,
+                                                                   const common::real32 &heading,
+                                                                   const std::string &textureID);
+            template<>
+            void _createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID,
+                                                                   const math::vec3 &worldPos,
+                                                                   const math::vec2 &size,
+                                                                   const common::real32 &heading,
+                                                                   const math::vec4 &color);
 
         private:
             template<>

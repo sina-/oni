@@ -45,7 +45,6 @@ namespace oni {
                 type = entityType;
                 _createEntity<entityType>(entityID, args...);
                 return entityID;
-
             }
 
             template<component::EntityType entityType>
@@ -58,16 +57,16 @@ namespace oni {
             // TODO: Remove this once this locking non-sense is over
             std::unique_lock<std::mutex> scopedLock();
 
-        private:
-            common::EntityID createEntity();
-
             template<component::EntityType, class ...Args>
             void _createEntity(common::EntityID, const Args &...) = delete;
 
-            void _removeEntity(common::EntityID, component::EntityType entityType);
-
             template<component::EntityType entityType>
             void _removeEntity(common::EntityID) = delete;
+
+        private:
+            common::EntityID createEntity();
+
+            void _removeEntity(common::EntityID, component::EntityType entityType);
 
             template<>
             void _createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
@@ -154,6 +153,9 @@ namespace oni {
             void _removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID);
 
             template<>
+            void _removeEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID);
+
+            template<>
             void _removeEntity<component::EntityType::TEXT>(common::EntityID);
 
         private:
@@ -195,74 +197,6 @@ namespace oni {
             const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};
         };
-
-        common::EntityID createEntity(EntityManager &manager, bool tagAsNew = true);
-
-        void destroyEntity(EntityManager &manager, common::EntityID entityID);
-
-        void
-        assignShapeLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size, common::real32);
-
-        void assignShapeRotatedLocal(EntityManager &manager, common::EntityID entityID, const math::vec2 &size,
-                                     common::real32, common::real32);
-
-        void removeShape(EntityManager &manager, common::EntityID entityID);
-
-        void assignShapeWorld(EntityManager &manager,
-                              common::EntityID entityID,
-                              const math::vec2 &size,
-                              const math::vec3 &worldPos);
-
-        void assignPoint(EntityManager &manager,
-                         common::EntityID entityID,
-                         const math::vec3 &pos);
-
-        void assignPlacement(EntityManager &manager,
-                             common::EntityID entityID,
-                             const math::vec3 &worldPos,
-                             const math::vec3 &scale,
-                             common::real32 heading);
-
-        void removePlacement(EntityManager &manager, common::EntityID entityID);
-
-        void assignParticle(EntityManager &manager, common::EntityID entityID, const math::vec3 &worldPos,
-                            common::real32 heading, common::real32 age, common::real32 maxAge,
-                            common::real32 velocity);
-
-        void removeParticle(EntityManager &manager, common::EntityID entityID);
-
-        void assignAppearance(EntityManager &manager, common::EntityID entityID, const math::vec4 &color);
-
-        void assignPhysicalProperties(EntityManager &manager,
-                                      b2World &physicsWorld,
-                                      common::EntityID,
-                                      const math::vec3 &worldPos,
-                                      const math::vec2 &size,
-                                      common::real32 heading,
-                                      component::PhysicalProperties &
-        );
-
-        void removePhysicalProperties(EntityManager &manager, b2World &physicsWorld, common::EntityID entityID);
-
-        void assignTextureToLoad(EntityManager &manager, common::EntityID entity, const std::string &path);
-
-        void assignTextureLoaded(EntityManager &manager,
-                                 common::EntityID entity,
-                                 const component::Texture &texture);
-
-        void removeTexture(EntityManager &manager, common::EntityID entityID);
-
-        void removeText(EntityManager &manager, common::EntityID entityID);
-
-        template<class T>
-        void assignTag(EntityManager &manager, common::EntityID entityID) {
-            manager.assign<T>(entityID);
-        }
-
-        template<class T>
-        void removeTag(EntityManager &manager, common::EntityID entityID) {
-            manager.remove<T>(entityID);
-        }
 
         void attach(
                 EntityManager &manager,

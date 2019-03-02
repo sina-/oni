@@ -12,6 +12,7 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/math/transformation.h>
+// TODO: Compile fails if this is not here even though this file doesn't need it :( I had this issue in the past hmm...
 #include <oni-core/math/rand.h>
 #include <oni-core/math/z-layer-manager.h>
 

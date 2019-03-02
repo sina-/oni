@@ -44,7 +44,7 @@ namespace oni {
                     break;
                 }
                 default:
-                    assert(false && "Invalid PrimitiveType");
+                    assert(false);
             }
 
             auto maxUIntSize = std::numeric_limits<common::int32>::max();
@@ -246,7 +246,7 @@ namespace oni {
                     break;
                 }
                 default: {
-                    assert(false && "Invalid primitive type");
+                    assert(false);
                 }
             };
 

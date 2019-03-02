@@ -90,7 +90,6 @@ namespace oni {
                 EntityID spawnTruck();
 
             private:
-                std::unique_ptr<oni::entities::EntityManager> mEntityManager{};
                 std::unique_ptr<oni::entities::EntityFactory> mEntityFactory{};
 
                 std::unique_ptr<oni::math::ZLayerManager> mZLayerManager{};

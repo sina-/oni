@@ -10,7 +10,7 @@
 #include <oni-core/graphic/debug-draw-box2d.h>
 #include <oni-core/math/transformation.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/entity-factory.h>
 #include <oni-core/common/consts.h>
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/hierarchy.h>
@@ -43,10 +43,9 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            mInternalRegistry = std::make_unique<entities::EntityManager>();
             // TODO: Note that this mixes entities in InternalRegistry with physicsWorld, does that make sense? As of
             // now physicsWorld on client side is empty, but my plan is to use it for debug drawing physics layer.
-            mInternalEntityFactory = std::make_unique<entities::EntityFactory>(*mInternalRegistry, mZLayerManager,
+            mInternalEntityFactory = std::make_unique<entities::EntityFactory>(mZLayerManager,
                                                                                physicsWorld);
 
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
@@ -264,10 +263,10 @@ namespace oni {
             mTextureShader->disable();
         }
 
-        void SceneManager::tick(entities::EntityManager &manager, entities::EntityFactory &entityFactory,
+        void SceneManager::tick(entities::EntityFactory &entityFactory,
                                 common::real64 tickTime) {
             {
-                auto view = manager.createViewScopeLock<component::Particle>();
+                auto view = entityFactory.getEntityManager().createViewScopeLock<component::Particle>();
                 for (const auto &entity: view) {
                     auto &particle = view.get<component::Particle>(entity);
                     // TODO: Maybe you want a single place to store these variables?
@@ -284,7 +283,7 @@ namespace oni {
             std::vector<component::TransformParent> carTireRLTransformParent{};
             std::vector<common::uint8> skidOpacity{};
             {
-                auto carView = manager.createViewScopeLock<component::Car, component::Placement>();
+                auto carView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::Placement>();
                 for (auto &&carEntity: carView) {
 
                     const auto car = carView.get<component::Car>(carEntity);
@@ -323,7 +322,7 @@ namespace oni {
                 updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
             }
             {
-                auto carLapView = manager.createViewScopeLock<component::Car, component::CarLapInfo>();
+                auto carLapView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -447,18 +446,19 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
+            auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
             {
-                auto lock = mInternalRegistry->scopedLock();
+                auto lock = internalEntityRegistry.scopedLock();
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
-                renderStaticTextures(*mInternalRegistry, viewWidth, viewHeight);
+                renderStaticTextures(internalEntityRegistry, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
             {
-                auto lock = mInternalRegistry->scopedLock();
+                auto lock = internalEntityRegistry.scopedLock();
                 // Render UI text with fixed camera
                 begin(*mTextureShader, *mTextureRenderer, false, false, true);
-                renderStaticText(*mInternalRegistry, viewWidth, viewHeight);
+                renderStaticText(internalEntityRegistry, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
@@ -617,14 +617,15 @@ namespace oni {
 
         void SceneManager::updateRaceInfo(const component::CarLapInfo &carLap,
                                           const SceneManager::RaceInfoEntities &carLapTextEntities) {
+            auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
             // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
-            auto &lapText = mInternalRegistry->get<component::Text>(carLapTextEntities.lapEntity);
+            auto &lapText = internalEntityRegistry.get<component::Text>(carLapTextEntities.lapEntity);
             mFontManager.updateText("Lap: " + std::to_string(carLap.lap), lapText);
 
-            auto &lapTimeText = mInternalRegistry->get<component::Text>(carLapTextEntities.lapTimeEntity);
+            auto &lapTimeText = internalEntityRegistry.get<component::Text>(carLapTextEntities.lapTimeEntity);
             mFontManager.updateText("Lap time: " + std::to_string(carLap.lapTimeS) + "s", lapTimeText);
 
-            auto &bestTimeText = mInternalRegistry->get<component::Text>(carLapTextEntities.lapBestTimeEntity);
+            auto &bestTimeText = internalEntityRegistry.get<component::Text>(carLapTextEntities.lapBestTimeEntity);
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
@@ -653,13 +654,14 @@ namespace oni {
 
                 common::real32 heading = 0.f;
                 std::string emptyTextureID;
-                auto lock = mInternalRegistry->scopedLock();
+                auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
+                auto lock = internalEntityRegistry.scopedLock();
                 auto entityID = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
                                                                                                            tileSize,
                                                                                                            heading,
                                                                                                            emptyTextureID);
                 auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
-                auto &texture = mInternalRegistry->get<component::Texture>(entityID);
+                auto &texture = internalEntityRegistry.get<component::Texture>(entityID);
                 texture = loadedTexture;
                 mSkidlineLookup.emplace(packedIndices, entityID);
             }
@@ -669,8 +671,9 @@ namespace oni {
 
         void SceneManager::updateSkidlines(const math::vec3 &position, common::EntityID skidTextureEntity,
                                            common::uint8 alpha) {
-            auto skidMarksTexture = mInternalRegistry->get<component::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = mInternalRegistry->get<component::Shape>(
+            auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
+            auto skidMarksTexture = internalEntityRegistry.get<component::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = internalEntityRegistry.get<component::Shape>(
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;
@@ -746,7 +749,7 @@ namespace oni {
         }
 
         common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
-            auto entityID = mFontManager.createTextFromString(*mInternalRegistry, *mInternalEntityFactory, text,
+            auto entityID = mFontManager.createTextFromString(*mInternalEntityFactory, text,
                                                               worldPos);
             return entityID;
         }

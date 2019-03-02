@@ -1,8 +1,10 @@
 #pragma once
+#include <mutex>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/common/typedefs-graphics.h>
+#include <oni-core/component/entity-definition.h>
 #include <oni-core/entities/entity-manager.h>
 
 class b2World;
@@ -16,9 +18,6 @@ namespace oni {
         struct vec2;
         struct vec3;
         struct vec4;
-    }
-    namespace entities {
-        class EntityManager;
     }
 
     namespace math {
@@ -36,7 +35,12 @@ namespace oni {
             // might be interested in creating entities that requires those systems. I should think about if it makes
             // sense to break up this factory into factories for special purposes, maybe one per system or combination
             // of them?
-            EntityFactory(EntityManager &, const math::ZLayerManager &, b2World &);
+            EntityFactory(const math::ZLayerManager &, b2World &);
+
+            // TODO: Ideally I would have one interface into Entity world where I can request entities to be created,
+            // destroyed, or take a look at its components. EntityFactory uses EntityManager to store the data. Maybe
+            // makes sense to merge functionalities provided by EntityManager into EntityFactory?
+            EntityManager &getEntityManager();
 
             template<component::EntityType entityType, class ...Args>
             common::EntityID createEntity(const Args &... args) {
@@ -54,14 +58,16 @@ namespace oni {
                 destroyEntity(entityID);
             }
 
-            // TODO: Remove this once this locking non-sense is over
-            std::unique_lock<std::mutex> scopedLock();
-
             template<component::EntityType, class ...Args>
             void _createEntity(common::EntityID, const Args &...) = delete;
 
             template<component::EntityType entityType>
             void _removeEntity(common::EntityID) = delete;
+
+            void attach(common::EntityID parent,
+                        common::EntityID child,
+                        component::EntityType parentType,
+                        component::EntityType childType);
 
         private:
             common::EntityID createEntity();
@@ -135,7 +141,6 @@ namespace oni {
                                                             const math::vec3 &pos,
                                                             const std::string &text);
 
-
         private:
             template<>
             void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID);
@@ -171,39 +176,31 @@ namespace oni {
         private:
             template<class T>
             void assignTag(common::EntityID entityID) {
-                mManager.assign<T>(entityID);
+                mManager->assign<T>(entityID);
             }
 
             template<class T>
             void removeTag(common::EntityID entityID) {
-                mManager.remove<T>(entityID);
+                mManager->remove<T>(entityID);
             }
 
             template<class Component>
             Component &createComponent(common::EntityID entityID) {
-                return mManager.assign<Component>(entityID, Component{});
+                return mManager->assign<Component>(entityID, Component{});
             }
 
             template<class Component>
             void removeComponent(common::EntityID entityID) {
-                mManager.remove<Component>(entityID);
+                mManager->remove<Component>(entityID);
             }
 
             void destroyEntity(common::EntityID entityID);
 
         private:
-            EntityManager &mManager;
+            std::unique_ptr<EntityManager> mManager;
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};
         };
-
-        void attach(
-                EntityManager &manager,
-                common::EntityID parent,
-                common::EntityID child,
-                component::EntityType parentType,
-                component::EntityType childType);
-
     }
 }

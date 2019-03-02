@@ -27,9 +27,7 @@ namespace oni {
 
             class TileWorld {
             public:
-
-                TileWorld(oni::entities::EntityManager &,
-                          oni::entities::EntityFactory &,
+                TileWorld(oni::entities::EntityFactory &,
                           b2World &,
                           const oni::math::ZLayerManager &);
 
@@ -92,7 +90,6 @@ namespace oni {
                 oni::math::vec2 getChunkSize() const;
 
             private:
-                oni::entities::EntityManager &mEntityManager;
                 oni::entities::EntityFactory &mEntityFactory;
                 b2World &mPhysicsWorld;
                 /**

@@ -34,7 +34,6 @@ namespace oni {
                         mRegistryLock(std::move(registryLock)) {
                 }
 
-
             public:
                 EntityView(const EntityView &) = delete;
 

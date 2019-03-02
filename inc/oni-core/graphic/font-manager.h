@@ -33,8 +33,7 @@ namespace oni {
 
             FontManager &operator=(FontManager &) = delete;
 
-            common::EntityID createTextFromString(entities::EntityManager &,
-                                                  entities::EntityFactory &,
+            common::EntityID createTextFromString(entities::EntityFactory &,
                                                   const std::string &text,
                                                   const math::vec3 &position);
 

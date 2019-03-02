@@ -25,8 +25,7 @@ namespace oni {
 
             ~Projectile();
 
-            void tick(entities::EntityManager &, entities::EntityFactory &, entities::ClientDataManager &,
-                      common::real64 tickTime);
+            void tick(entities::EntityFactory &, entities::ClientDataManager &, common::real64 tickTime);
 
         private:
             b2World *mPhysicsWorld{};

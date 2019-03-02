@@ -1,4 +1,4 @@
-#include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/entity-factory.h>
 
 #include <Box2D/Box2D.h>
 
@@ -9,27 +9,30 @@
 
 namespace oni {
     namespace entities {
-        EntityFactory::EntityFactory(EntityManager &manager,
-                                     const math::ZLayerManager &zLayerManager,
+        EntityFactory::EntityFactory(const math::ZLayerManager &zLayerManager,
                                      b2World &physicsWorld) :
-                mManager(manager),
                 mZLayerManager(zLayerManager),
                 mPhysicsWorld{physicsWorld} {
             mRand = std::make_unique<math::Rand>(0);
+            mManager = std::make_unique<oni::entities::EntityManager>();
+        }
+
+        EntityManager &EntityFactory::getEntityManager() {
+            return *mManager;
         }
 
         common::EntityID EntityFactory::createEntity() {
-            auto entityID = mManager.create();
-            mManager.assign<component::Tag_NewEntity>(entityID);
+            auto entityID = mManager->create();
+            mManager->assign<component::Tag_NewEntity>(entityID);
             return entityID;
         }
 
         void EntityFactory::destroyEntity(common::EntityID entityID) {
             // TODO: Can we remove this check?
-            if (!mManager.has<component::Tag_NewEntity>(entityID)) {
-                mManager.addDeletedEntity(entityID);
+            if (!mManager->has<component::Tag_NewEntity>(entityID)) {
+                mManager->addDeletedEntity(entityID);
             }
-            mManager.destroy(entityID);
+            mManager->destroy(entityID);
         }
 
         void EntityFactory::_removeEntity(common::EntityID entityID, component::EntityType entityType) {
@@ -402,7 +405,7 @@ namespace oni {
 
         template<>
         void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID) {
-            auto &attachments = mManager.get<component::EntityAttachment>(entityID);
+            auto &attachments = mManager->get<component::EntityAttachment>(entityID);
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 auto attachmentType = attachments.entityTypes[i];
                 auto attachmentEntityID = attachments.entities[i];
@@ -485,28 +488,22 @@ namespace oni {
         }
 
         void EntityFactory::removePhysicalBody(common::EntityID entityID) {
-            auto entityPhysicalProps = mManager.get<component::PhysicalProperties>(entityID);
+            auto entityPhysicalProps = mManager->get<component::PhysicalProperties>(entityID);
             mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
         }
 
-        std::unique_lock<std::mutex> EntityFactory::scopedLock() {
-            return mManager.scopedLock();
-        }
-
-        void attach(
-                EntityManager &manager,
-                common::EntityID parent,
-                common::EntityID child,
-                component::EntityType parentType,
-                component::EntityType childType) {
-            auto &transformChildren = manager.get<component::TransformChildren>(parent);
+        void EntityFactory::attach(common::EntityID parent,
+                                   common::EntityID child,
+                                   component::EntityType parentType,
+                                   component::EntityType childType) {
+            auto &transformChildren = mManager->get<component::TransformChildren>(parent);
             transformChildren.children.emplace_back(child);
 
-            auto &attachment = manager.get<component::EntityAttachment>(parent);
+            auto &attachment = mManager->get<component::EntityAttachment>(parent);
             attachment.entities.emplace_back(child);
             attachment.entityTypes.emplace_back(childType);
 
-            auto &attachee = manager.get<component::EntityAttachee>(child);
+            auto &attachee = mManager->get<component::EntityAttachee>(child);
             attachee.entityID = parent;
             attachee.entityType = parentType;
         }

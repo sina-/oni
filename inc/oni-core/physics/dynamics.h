@@ -51,35 +51,30 @@ namespace oni {
             // the cost really.
             b2World *getPhysicsWorld();
 
-            void tick(entities::EntityManager &manager,
-                      entities::EntityFactory &entityFactory,
+            void tick(entities::EntityFactory &entityFactory,
                       entities::ClientDataManager &clientData,
                       common::real64 tickTime);
 
         private:
-            void handleBulletCollision(entities::EntityManager &,
-                                       entities::EntityFactory &,
+            void handleBulletCollision(entities::EntityFactory &,
                                        std::vector<common::EntityID> &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
                                        component::Placement &);
 
-            void handleVehicleCollision(entities::EntityManager &,
-                                        entities::EntityFactory &,
+            void handleVehicleCollision(entities::EntityFactory &,
                                         std::vector<common::EntityID> &,
                                         common::EntityID,
                                         component::PhysicalProperties &,
                                         component::Placement &);
 
-            void handleRaceCarCollision(entities::EntityManager &,
-                                        entities::EntityFactory &,
+            void handleRaceCarCollision(entities::EntityFactory &,
                                         std::vector<common::EntityID> &,
                                         common::EntityID,
                                         component::PhysicalProperties &,
                                         component::Placement &);
 
-            void handleCollision(entities::EntityManager &,
-                                 entities::EntityFactory &,
+            void handleCollision(entities::EntityFactory &,
                                  std::vector<common::EntityID> &,
                                  common::EntityID,
                                  component::PhysicalProperties &,
@@ -103,8 +98,7 @@ namespace oni {
             std::unique_ptr<CollisionHandler> mCollisionHandler{};
 
             std::map<component::PhysicalCategory,
-                    std::function<void(entities::EntityManager &,
-                                       entities::EntityFactory &,
+                    std::function<void(entities::EntityFactory &,
                                        std::vector<common::EntityID> &,
                                        common::EntityID,
                                        component::PhysicalProperties &,

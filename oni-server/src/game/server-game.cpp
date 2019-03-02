@@ -7,7 +7,7 @@
 #include <oni-core/gameplay/lap-tracker.h>
 #include <oni-core/physics/dynamics.h>
 #include <oni-core/network/server.h>
-#include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/entity-factory.h>
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/serialization.h>
@@ -24,21 +24,20 @@ namespace oni {
         namespace game {
             ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
                 mZLayerManager = std::make_unique<math::ZLayerManager>();
-                mEntityManager = std::make_unique<oni::entities::EntityManager>();
                 mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
-                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mEntityManager, *mZLayerManager,
+                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
 
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
-                mTileWorld = std::make_unique<server::entities::TileWorld>(*mEntityManager,
-                                                                           *mEntityFactory,
+                mTileWorld = std::make_unique<server::entities::TileWorld>(*mEntityFactory,
                                                                            *mDynamics->getPhysicsWorld(),
                                                                            *mZLayerManager);
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
-                mLapTracker = std::make_unique<gameplay::LapTracker>(*mEntityManager, *mZLayerManager);
+                mLapTracker = std::make_unique<gameplay::LapTracker>(mEntityFactory->getEntityManager(),
+                                                                     *mZLayerManager);
 
                 mServer = std::make_unique<network::Server>(&address, 16, 2);
 
@@ -86,7 +85,7 @@ namespace oni {
                 auto carEntity = spawnRaceCar();
 
                 mServer->sendCarEntityID(carEntity, clientID);
-                mServer->sendEntitiesAll(*mEntityManager);
+                mServer->sendEntitiesAll(mEntityFactory->getEntityManager());
 
                 auto lock = mClientDataManager->scopedLock();
                 mClientDataManager->addNewClient(clientID, carEntity);
@@ -114,16 +113,17 @@ namespace oni {
             void ServerGame::_poll() {
                 mServer->poll();
 
-                mServer->sendComponentsUpdate(*mEntityManager);
-                mServer->sendNewEntities(*mEntityManager);
-                mServer->broadcastSpawnParticle(*mEntityManager);
+                mServer->sendComponentsUpdate(mEntityFactory->getEntityManager());
+                mServer->sendNewEntities(mEntityFactory->getEntityManager());
+                mServer->broadcastSpawnParticle(mEntityFactory->getEntityManager());
 
                 {
-                    auto lock = mEntityManager->scopedLock();
-                    if (mEntityManager->containsDeletedEntities()) {
-                        mServer->broadcastDeletedEntities(*mEntityManager);
+                    auto& entityManager = mEntityFactory->getEntityManager();
+                    auto lock = entityManager.scopedLock();
+                    if (entityManager.containsDeletedEntities()) {
+                        mServer->broadcastDeletedEntities(entityManager);
                         // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                        mEntityManager->clearDeletedEntitiesList();
+                        entityManager.clearDeletedEntitiesList();
                     }
                 }
             }
@@ -132,7 +132,7 @@ namespace oni {
                 // Fake lag
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
-                mDynamics->tick(*mEntityManager, *mEntityFactory, *mClientDataManager, tickTime);
+                mDynamics->tick(*mEntityFactory, *mClientDataManager, tickTime);
 
                 std::vector<math::vec2> tickPositions{};
                 {
@@ -141,10 +141,11 @@ namespace oni {
                     // might not even be there anymore. It won't crash because registry will be locked, but then what is the
                     // point of multi threading? Maybe I should drop this whole multi-thread everything shenanigans and just do
                     // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
-                    auto registryLock = mEntityManager->scopedLock();
+                    auto &manager = mEntityFactory->getEntityManager();
+                    auto registryLock = manager.scopedLock();
                     auto clientDataLock = mClientDataManager->scopedLock();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
-                        const auto &carPlacement = mEntityManager->get<component::Placement>(carEntity);
+                        const auto &carPlacement = manager.get<component::Placement>(carEntity);
                         tickPositions.push_back(carPlacement.position.getXY());
                     }
                 }
@@ -184,7 +185,8 @@ namespace oni {
                 common::real32 heading = 0.f;
                 std::string carTextureID = "resources/images/car/1/car.png";
 
-                auto lock = mEntityFactory->scopedLock();
+                auto& manager = mEntityFactory->getEntityManager();
+                auto lock = manager.scopedLock();
 
                 auto carEntity = mEntityFactory->createEntity
                         <component::EntityType::RACE_CAR>(pos,
@@ -201,10 +203,10 @@ namespace oni {
                                                              heading,
                                                              gunTextureID);
 
-                oni::entities::attach(*mEntityManager, carEntity, carGunEntity, component::EntityType::RACE_CAR,
-                                      component::EntityType::VEHICLE_GUN);
+                mEntityFactory->attach(carEntity, carGunEntity, component::EntityType::RACE_CAR,
+                                       component::EntityType::VEHICLE_GUN);
 
-                auto &carConfig = mEntityManager->get<component::CarConfig>(carEntity);
+                auto &carConfig = manager.get<component::CarConfig>(carEntity);
                 std::string tireTextureID = "resources/images/car/1/car-tire.png";
                 auto tireRotation = static_cast< common::real32>( math::toRadians(90.0f));
                 math::vec2 tireSize{
@@ -230,15 +232,16 @@ namespace oni {
                             tireSize,
                             tireRotation,
                             tireTextureID);
-                    oni::entities::attach(*mEntityManager, carEntity, tireEntity, component::EntityType::RACE_CAR,
-                                          component::EntityType::VEHICLE_TIRE);
+
+                    mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
+                                           component::EntityType::VEHICLE_TIRE);
                 }
 
                 return carEntity;
             }
 
             void ServerGame::removeRaceCar(common::EntityID carEntityID) {
-                auto lock = mEntityFactory->scopedLock();
+                auto lock = mEntityFactory->getEntityManager().scopedLock();
                 mEntityFactory->removeEntity<component::EntityType::RACE_CAR>(carEntityID);
             }
 
@@ -249,7 +252,7 @@ namespace oni {
                 common::real32 heading = 0.f;
                 std::string textureID = "resources/images/car/2/truck.png";
 
-                auto lock = mEntityFactory->scopedLock();
+                auto lock = mEntityFactory->getEntityManager().scopedLock();
                 return mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading, textureID);
             }
         }

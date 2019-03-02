@@ -57,22 +57,7 @@ namespace oni {
 
             void renderPhysicsDebugData();
 
-            void renderStaticTextures(entities::EntityManager &, common::real32 viewWidth,
-                                      common::real32 viewHeight);
-
-            void renderStaticText(entities::EntityManager &, common::real32 viewWidth,
-                                  common::real32 viewHeight);
-
-            void renderDynamicTextures(entities::EntityManager &, common::real32 viewWidth,
-                                       common::real32 viewHeight);
-
-            void renderColorSprites(entities::EntityManager &, common::real32 viewWidth,
-                                    common::real32 viewHeight);
-
-            void renderParticles(entities::EntityManager &, common::real32 viewWidth,
-                                 common::real32 viewHeight);
-
-            void tick(entities::EntityManager &, entities::EntityFactory &, common::real64 tickTime);
+            void tick(entities::EntityFactory &, common::real64 tickTime);
 
             void renderRaw(const component::Shape &, const component::Appearance &);
 
@@ -107,6 +92,23 @@ namespace oni {
             void beginColorRendering();
 
             void endColorRendering();
+
+        private:
+            void renderStaticTextures(entities::EntityManager &, common::real32 viewWidth,
+                                      common::real32 viewHeight);
+
+            void renderStaticText(entities::EntityManager &, common::real32 viewWidth,
+                                  common::real32 viewHeight);
+
+            void renderDynamicTextures(entities::EntityManager &, common::real32 viewWidth,
+                                       common::real32 viewHeight);
+
+            void renderColorSprites(entities::EntityManager &, common::real32 viewWidth,
+                                    common::real32 viewHeight);
+
+            void renderParticles(entities::EntityManager &, common::real32 viewWidth,
+                                 common::real32 viewHeight);
+
 
         private:
             struct RaceInfoEntities {
@@ -178,7 +180,6 @@ namespace oni {
             common::uint16 mRenderedTexturesPerFrame{0};
             common::uint16 mRenderedParticlesPerFrame{0};
 
-            std::unique_ptr<entities::EntityManager> mInternalRegistry{};
             std::unique_ptr<entities::EntityFactory> mInternalEntityFactory{};
             math::ZLayerManager &mZLayerManager;
         };

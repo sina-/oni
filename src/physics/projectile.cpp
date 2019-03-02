@@ -6,7 +6,7 @@
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/component/geometry.h>
-#include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/entity-factory.h>
 
 namespace oni {
     namespace physics {
@@ -16,12 +16,11 @@ namespace oni {
 
         Projectile::~Projectile() = default;
 
-        void Projectile::tick(entities::EntityManager &manager,
-                              entities::EntityFactory &entityFactory,
+        void Projectile::tick(entities::EntityFactory &entityFactory,
                               entities::ClientDataManager &clientData,
                               common::real64 tickTime) {
             {
-                auto carView = manager.createViewScopeLock<
+                auto carView = entityFactory.getEntityManager().createViewScopeLock<
                         component::Placement, component::Car, component::CarConfig>();
 
                 common::real32 bulletSpeed{200.f};
@@ -65,7 +64,7 @@ namespace oni {
                                                                                                          carPlacement.rotation,
                                                                                                          textureID);
 
-                        auto *body = manager.get<component::PhysicalProperties>(bulletID).body;
+                        auto *body = entityFactory.getEntityManager().get<component::PhysicalProperties>(bulletID).body;
                         body->ApplyForceToCenter(
                                 b2Vec2(static_cast<common::real32>(std::cos(heading) * bulletSpeed),
                                        static_cast<common::real32>(std::sin(heading) * bulletSpeed)),

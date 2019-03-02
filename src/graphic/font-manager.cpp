@@ -7,7 +7,7 @@
 
 #include <oni-core/graphic/texture-manager.h>
 #include <oni-core/component/tag.h>
-#include <oni-core/entities/create-entity.h>
+#include <oni-core/entities/entity-factory.h>
 
 namespace oni {
     namespace graphic {
@@ -62,13 +62,13 @@ namespace oni {
 
         GLuint FontManager::getTextureID() const { return m_FTAtlas->id; }
 
-        common::EntityID FontManager::createTextFromString(entities::EntityManager &manager,
-                                                           entities::EntityFactory &entityFactory,
+        common::EntityID FontManager::createTextFromString(entities::EntityFactory &entityFactory,
                                                            const std::string &text,
                                                            const math::vec3 &position) {
-            auto lock = manager.scopedLock();
+            auto &entityRegistry = entityFactory.getEntityManager();
+            auto lock = entityRegistry.scopedLock();
             auto entityID = entityFactory.createEntity<component::EntityType::TEXT>(position, text);
-            auto &textComponent = manager.get<component::Text>(entityID);
+            auto &textComponent = entityRegistry.get<component::Text>(entityID);
             assignGlyphs(textComponent);
 
             return entityID;

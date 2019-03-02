@@ -6,6 +6,7 @@
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/visual.h>
 #include <oni-core/math/rand.h>
+#include <oni-core/component/gameplay.h>
 
 namespace oni {
     namespace entities {
@@ -65,6 +66,7 @@ namespace oni {
                 case component::EntityType::SIMPLE_SPRITE:
                 case component::EntityType::SIMPLE_PARTICLE:
                 case component::EntityType::TEXT:
+                case component::EntityType::WORLD_CHUNK:
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
@@ -111,6 +113,12 @@ namespace oni {
             shape.setZ(pos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
+
+            auto carLap = createComponent<component::CarLapInfo>(entityID);
+            carLap.entityID = entityID;
+            carLap.lap = 0;
+            carLap.bestLapTimeS = 0;
+            carLap.lapTimeS = 0;
 
             createComponent<component::TransformChildren>(entityID);
             createComponent<component::EntityAttachment>(entityID);
@@ -330,6 +338,48 @@ namespace oni {
             assignTag<component::Tag_Static>(entityID);
         }
 
+        template<>
+        void EntityFactory::_createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID entityID,
+                                                                              const math::vec3 &worldPos,
+                                                                              const math::vec2 &size,
+                                                                              const common::real32 &heading,
+                                                                              const std::string &textureID) {
+            auto &shape = createComponent<component::Shape>(entityID);
+            shape.setZ(worldPos.z);
+            shape.setSizeFromOrigin(size);
+            shape.moveToWorldCoordinates(worldPos);
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+            createComponent<component::Chunk>(entityID);
+
+            assignTag<component::Tag_Static>(entityID);
+            assignTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID entityID,
+                                                                              const math::vec3 &worldPos,
+                                                                              const math::vec2 &size,
+                                                                              const common::real32 &heading,
+                                                                              const math::vec4& color) {
+            auto &shape = createComponent<component::Shape>(entityID);
+            shape.setZ(worldPos.z);
+            shape.setSizeFromOrigin(size);
+            shape.moveToWorldCoordinates(worldPos);
+
+            auto &appearance = createComponent<component::Appearance>(entityID);
+            appearance.color = color;
+
+            createComponent<component::Chunk>(entityID);
+
+            assignTag<component::Tag_Static>(entityID);
+            assignTag<component::Tag_ColorShaded>(entityID);
+        }
+
+
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
                                                   const math::vec2 &size, common::real32 heading,
                                                   component::PhysicalProperties &properties) {
@@ -419,6 +469,9 @@ namespace oni {
             removeComponent<component::TransformChildren>(entityID);
             removeComponent<component::Car>(entityID);
             removeComponent<component::CarConfig>(entityID);
+            // TODO: Does it make sense to remove this? A player might leave but lap info should still be visible
+            // Maybe I should not keep it as part of RACE_CAR entity?
+            removeComponent<component::CarLapInfo>(entityID);
 
             removePhysicalBody(entityID);
             removeComponent<component::PhysicalProperties>(entityID);

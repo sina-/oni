@@ -314,7 +314,7 @@ namespace oni {
 
             for (auto &&entity : entitiesToBeUpdated) {
                 auto lock = manager.scopedLock();
-                manager.accommodate<component::Tag_OnlyComponentUpdate>(entity);
+                manager.tagForComponentSync(entity);
             }
 
         }
@@ -402,7 +402,7 @@ namespace oni {
                                              const component::TransformParent &transformParent) {
             // TODO: This function should recurse
             manager.replace<component::TransformParent>(entity, transformParent);
-            manager.accommodate<component::Tag_OnlyComponentUpdate>(entity);
+            manager.tagForComponentSync(entity);
         }
 
     }

@@ -146,9 +146,7 @@ namespace oni {
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
-            if (!textureID) {
-                throw std::runtime_error("Could not generate texture.");
-            }
+            assert(textureID);
 
             common::oniGLint internalFormat = GL_RED;
             common::oniGLenum format = GL_RED;
@@ -186,9 +184,7 @@ namespace oni {
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
-            if (!textureID) {
-                throw std::runtime_error("Could not generate texture.");
-            }
+            assert(textureID);
 
             common::oniGLenum format = GL_BGRA;
             common::oniGLenum type = GL_UNSIGNED_BYTE;

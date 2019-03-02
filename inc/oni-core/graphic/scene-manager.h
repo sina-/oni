@@ -44,37 +44,37 @@ namespace oni {
         class SceneManager {
         public:
             SceneManager(const component::ScreenBounds &, FontManager &,
-                         math::ZLayerManager&,
+                         math::ZLayerManager &,
                          b2World &,
                          common::real32
             );
 
             ~SceneManager();
 
-            void render(entities::EntityManager &manager, common::EntityID lookAtEntity);
+            void render(entities::EntityManager &, common::EntityID lookAtEntity);
 
             void renderInternal();
 
             void renderPhysicsDebugData();
 
-            void renderStaticTextures(entities::EntityManager &manager, common::real32 viewWidth,
+            void renderStaticTextures(entities::EntityManager &, common::real32 viewWidth,
                                       common::real32 viewHeight);
 
-            void renderStaticText(entities::EntityManager &manager, common::real32 viewWidth,
+            void renderStaticText(entities::EntityManager &, common::real32 viewWidth,
                                   common::real32 viewHeight);
 
-            void renderDynamicTextures(entities::EntityManager &manager, common::real32 viewWidth,
+            void renderDynamicTextures(entities::EntityManager &, common::real32 viewWidth,
                                        common::real32 viewHeight);
 
-            void renderColorSprites(entities::EntityManager &manager, common::real32 viewWidth,
+            void renderColorSprites(entities::EntityManager &, common::real32 viewWidth,
                                     common::real32 viewHeight);
 
-            void renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
+            void renderParticles(entities::EntityManager &, common::real32 viewWidth,
                                  common::real32 viewHeight);
 
-            void tick(entities::EntityManager &manager, common::real64 tickTime);
+            void tick(entities::EntityManager &, entities::EntityFactory &, common::real64 tickTime);
 
-            void renderRaw(const component::Shape &shape, const component::Appearance &appearance);
+            void renderRaw(const component::Shape &, const component::Appearance &);
 
             void lookAt(common::real32 x, common::real32 y);
 
@@ -180,7 +180,7 @@ namespace oni {
 
             std::unique_ptr<entities::EntityManager> mInternalRegistry{};
             std::unique_ptr<entities::EntityFactory> mInternalEntityFactory{};
-            math::ZLayerManager& mZLayerManager;
+            math::ZLayerManager &mZLayerManager;
         };
     }
 }

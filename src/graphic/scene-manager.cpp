@@ -264,7 +264,8 @@ namespace oni {
             mTextureShader->disable();
         }
 
-        void SceneManager::tick(entities::EntityManager &manager, common::real64 tickTime) {
+        void SceneManager::tick(entities::EntityManager &manager, entities::EntityFactory &entityFactory,
+                                common::real64 tickTime) {
             {
                 auto view = manager.createViewScopeLock<component::Particle>();
                 for (const auto &entity: view) {
@@ -272,7 +273,7 @@ namespace oni {
                     // TODO: Maybe you want a single place to store these variables?
                     particle.age += tickTime;
                     if (particle.age > particle.maxAge) {
-                        entities::removeParticle(manager, entity);
+                        entityFactory.removeEntity<component::EntityType::SIMPLE_PARTICLE>(entity);
                     }
                 }
             }
@@ -650,12 +651,16 @@ namespace oni {
                 auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels,
                                                                   defaultColor);
 
-                auto texture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
+                common::real32 heading = 0.f;
+                std::string emptyTextureID;
                 auto lock = mInternalRegistry->scopedLock();
-                auto entityID = entities::createEntity(*mInternalRegistry);
-                entities::assignShapeWorld(*mInternalRegistry, entityID, tileSize, worldPos);
-                entities::assignTextureLoaded(*mInternalRegistry, entityID, texture);
-                entities::assignTag<component::Tag_Static>(*mInternalRegistry, entityID);
+                auto entityID = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
+                                                                                                           tileSize,
+                                                                                                           heading,
+                                                                                                           emptyTextureID);
+                auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
+                auto &texture = mInternalRegistry->get<component::Texture>(entityID);
+                texture = loadedTexture;
                 mSkidlineLookup.emplace(packedIndices, entityID);
             }
 

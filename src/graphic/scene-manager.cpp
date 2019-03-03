@@ -277,40 +277,47 @@ namespace oni {
                 }
             }
 
-            std::vector<component::Placement> carTireRRPlacements{};
-            std::vector<component::Placement> carTireRLPlacements{};
-            std::vector<component::TransformParent> carTireRRTransformParent{};
-            std::vector<component::TransformParent> carTireRLTransformParent{};
+            std::vector<math::vec3> skidPosRRList{};
+            std::vector<math::vec3> skidPosRLList{};
+            std::vector<math::mat4> carTireTransform{};
             std::vector<common::uint8> skidOpacity{};
             {
-                auto carView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::Placement>();
+                auto carView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::Placement, component::CarConfig>();
                 for (auto &&carEntity: carView) {
 
                     const auto car = carView.get<component::Car>(carEntity);
                     // NOTE: Technically I should use slippingRear, but this gives better effect
                     if (car.slippingFront || true) {
-                        // TODO: This is not in the view and it will be very slow as more entities are added to the
-                        // registry. Perhaps I can save the tires together with the car
-                        // TODO: Fix this with EntityAttachement
-//                        const auto &carTireRRPlacement = manager.get<component::Placement>(car.tireRR);
-//                        carTireRRPlacements.push_back(carTireRRPlacement);
-//                        const auto &carTireRLPlacement = manager.get<component::Placement>(car.tireRL);
-//                        carTireRLPlacements.push_back(carTireRLPlacement);
-//
-//                        const auto &transformParentRR = manager.get<component::TransformParent>(car.tireRR);
-//                        carTireRRTransformParent.push_back(transformParentRR);
-//                        const auto &transformParentRL = manager.get<component::TransformParent>(car.tireRL);
-//                        carTireRLTransformParent.push_back(transformParentRL);
+                        const auto &carConfig = carView.get<component::CarConfig>(carEntity);
+                        const auto &placement = carView.get<component::Placement>(carEntity);
 
-//                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-//                        skidOpacity.push_back(alpha);
+                        // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
+                        // same logic is hard-coded when spawningCar server side.
+                        math::vec3 skidPosRL{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                             static_cast<common::real32>(carConfig.wheelWidth +
+                                                                         carConfig.halfWidth / 2),
+                                // NOTE: This z-value is unused.
+                                             0.f};
+                        math::vec3 skidPosRR{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                             static_cast<common::real32>(-carConfig.wheelWidth -
+                                                                         carConfig.halfWidth / 2),
+                                             0.f};
+                        skidPosRRList.push_back(skidPosRR);
+                        skidPosRLList.push_back(skidPosRL);
+
+                        carTireTransform.push_back(math::Transformation::createTransformation(placement.position,
+                                                                                              placement.rotation,
+                                                                                              placement.scale));
+
+                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
+                        skidOpacity.push_back(alpha);
                     }
                 }
             }
 
             for (size_t i = 0; i < skidOpacity.size(); ++i) {
-                auto skidMarkRRPos = carTireRRTransformParent[i].transform * carTireRRPlacements[i].position;
-                auto skidMarkRLPos = carTireRLTransformParent[i].transform * carTireRLPlacements[i].position;
+                auto skidMarkRRPos = carTireTransform[i] * skidPosRRList[i];
+                auto skidMarkRLPos = carTireTransform[i] * skidPosRLList[i];
 
                 common::EntityID skidEntityRL{0};
                 common::EntityID skidEntityRR{0};
@@ -634,8 +641,8 @@ namespace oni {
             auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             auto packedIndices = math::packIntegers(x, y);
 
-            auto exists = mSkidlineLookup.find(packedIndices) != mSkidlineLookup.end();
-            if (!exists) {
+            auto missing = mSkidlineLookup.find(packedIndices) == mSkidlineLookup.end();
+            if (missing) {
                 auto tilePosX = math::indexToPosition(x, mSkidTileSizeX);
                 auto tilePosY = math::indexToPosition(y, mSkidTileSizeY);
                 auto worldPos = math::vec3{tilePosX, tilePosY,
@@ -684,8 +691,8 @@ namespace oni {
             // squares.
             //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
             //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
-            common::uint16 height = 5;
-            common::uint16 width = 5;
+            common::uint16 height = 3;
+            common::uint16 width = 3;
 
             auto bits = graphic::TextureManager::generateBits(width, height, component::PixelRGBA{0, 0, 0, alpha});
             // TODO: Need to create skid texture data as it should be and set it.

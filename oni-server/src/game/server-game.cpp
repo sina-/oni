@@ -118,7 +118,7 @@ namespace oni {
                 mServer->broadcastSpawnParticle(mEntityFactory->getEntityManager());
 
                 {
-                    auto& entityManager = mEntityFactory->getEntityManager();
+                    auto &entityManager = mEntityFactory->getEntityManager();
                     auto lock = entityManager.scopedLock();
                     if (entityManager.containsDeletedEntities()) {
                         mServer->broadcastDeletedEntities(entityManager);
@@ -185,7 +185,7 @@ namespace oni {
                 common::real32 heading = 0.f;
                 std::string carTextureID = "resources/images/car/1/car.png";
 
-                auto& manager = mEntityFactory->getEntityManager();
+                auto &manager = mEntityFactory->getEntityManager();
                 auto lock = manager.scopedLock();
 
                 auto carEntity = mEntityFactory->createEntity
@@ -214,27 +214,41 @@ namespace oni {
                         static_cast<common::real32>(carConfig.wheelRadius * 2)
                 };
 
-                std::array<math::vec2, 4> carTires{
+                std::array<math::vec2, 2> carTiresFront{
                         math::vec2{static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
                                    static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
                         math::vec2{static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
-                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)},
+                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)}
+                };
+                std::array<math::vec2, 2> carTiresRear{
                         math::vec2{static_cast<common::real32>(-carConfig.cgToRearAxle),
                                    static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
                         math::vec2{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)},
+                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)}
                 };
 
-                for (auto &&carTire: carTires) {
+                for (auto &&carTire: carTiresFront) {
                     math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_TIRE>(
+                    auto tireEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(
                             tirePos,
                             tireSize,
                             tireRotation,
                             tireTextureID);
 
                     mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
-                                           component::EntityType::VEHICLE_TIRE);
+                                           component::EntityType::VEHICLE_TIRE_FRONT);
+                }
+
+                for (auto &&carTire: carTiresRear) {
+                    math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
+                    auto tireEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_TIRE_REAR>(
+                            tirePos,
+                            tireSize,
+                            tireRotation,
+                            tireTextureID);
+
+                    mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
+                                           component::EntityType::VEHICLE_TIRE_REAR);
                 }
 
                 return carEntity;

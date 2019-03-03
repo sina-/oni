@@ -96,8 +96,8 @@ namespace oni {
                         auto chunkID = math::packIntegers(i, j);
                         if (!isInMap(chunkID, mChunkLookup)) {
                             // genChunkTexture(i, j);
-                            //genChunkTiles(i, j);
-                            genChunkRoads(i, j);
+                            // genChunkTiles(i, j);
+                            // genChunkRoads(i, j);
                         }
                     }
                 }
@@ -584,7 +584,7 @@ namespace oni {
             void TileWorld::genDemoRaceCourse() {
                 for (int i = -2; i <= 2; ++i) {
                     for (int j = -2; j <= 2; ++j) {
-                        //genChunkGroundTexture(i, j);
+                        genChunkGroundTexture(i, j);
                     }
                 }
 

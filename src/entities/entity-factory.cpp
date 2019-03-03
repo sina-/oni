@@ -50,8 +50,12 @@ namespace oni {
                     _removeEntity<component::EntityType::VEHICLE_GUN>(entityID);
                     break;
                 }
-                case component::EntityType::VEHICLE_TIRE: {
-                    _removeEntity<component::EntityType::VEHICLE_TIRE>(entityID);
+                case component::EntityType::VEHICLE_TIRE_FRONT: {
+                    _removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(entityID);
+                    break;
+                }
+                case component::EntityType::VEHICLE_TIRE_REAR: {
+                    _removeEntity<component::EntityType::VEHICLE_TIRE_REAR>(entityID);
                     break;
                 }
                 case component::EntityType::SIMPLE_BULLET: {
@@ -182,17 +186,18 @@ namespace oni {
 
             createComponent<component::EntityAttachee>(entityID);
             createComponent<component::TransformParent>(entityID);
+            createComponent<component::GunCoolDown>(entityID);
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID entityID,
-                                                                               const math::vec3 &pos,
-                                                                               const math::vec2 &size,
-                                                                               const common::real32 &heading,
-                                                                               const std::string &textureID) {
+        void EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID,
+                                                                                     const math::vec3 &pos,
+                                                                                     const math::vec2 &size,
+                                                                                     const common::real32 &heading,
+                                                                                     const std::string &textureID) {
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -211,6 +216,15 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID,
+                                                                                    const math::vec3 &pos,
+                                                                                    const math::vec2 &size,
+                                                                                    const common::real32 &heading,
+                                                                                    const std::string &textureID) {
+            _createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(entityID, pos, size, heading, textureID);
         }
 
         template<>
@@ -364,7 +378,7 @@ namespace oni {
                                                                               const math::vec3 &worldPos,
                                                                               const math::vec2 &size,
                                                                               const common::real32 &heading,
-                                                                              const math::vec4& color) {
+                                                                              const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
@@ -487,13 +501,14 @@ namespace oni {
             removeComponent<component::Shape>(entityID);
             removeComponent<component::EntityAttachee>(entityID);
             removeComponent<component::TransformParent>(entityID);
+            removeComponent<component::GunCoolDown>(entityID);
 
             removeTag<component::Tag_Dynamic>(entityID);
             removeTag<component::Tag_TextureShaded>(entityID);
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID entityID) {
+        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID) {
             removeComponent<component::Placement>(entityID);
             removeComponent<component::Texture>(entityID);
             removeComponent<component::Shape>(entityID);
@@ -502,6 +517,11 @@ namespace oni {
 
             removeTag<component::Tag_Dynamic>(entityID);
             removeTag<component::Tag_TextureShaded>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID) {
+            _removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(entityID);
         }
 
         template<>

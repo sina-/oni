@@ -11,5 +11,9 @@ namespace oni {
             common::uint32 lapTimeS{0};
             common::uint32 bestLapTimeS{0};
         };
+
+        struct GunCoolDown {
+            common::real32 value{0.f};
+        };
     }
 }

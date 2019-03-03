@@ -3,27 +3,28 @@
 namespace oni {
     namespace component {
         enum class EntityType : common::uint8 {
-            UNKNOWN = 0,
+            UNKNOWN,
 
-            BACKGROUND = 1,
-            ROAD = 2,
-            WALL = 3,
+            BACKGROUND,
+            ROAD,
+            WALL,
 
-            RACE_CAR = 4,
-            VEHICLE = 5,
-            VEHICLE_GUN = 6,
-            VEHICLE_TIRE = 7,
+            RACE_CAR,
+            VEHICLE,
+            VEHICLE_GUN,
+            VEHICLE_TIRE_REAR,
+            VEHICLE_TIRE_FRONT,
 
-            SKID_LINE = 8,
+            SKID_LINE,
 
-            UI = 9,
+            UI,
 
-            SIMPLE_SPRITE = 10,
-            SIMPLE_PARTICLE = 11,
-            SIMPLE_BULLET = 12,
+            SIMPLE_SPRITE,
+            SIMPLE_PARTICLE,
+            SIMPLE_BULLET,
 
-            TEXT = 13,
-            WORLD_CHUNK = 14,
+            TEXT,
+            WORLD_CHUNK,
         };
 
         enum class SnapshotType {

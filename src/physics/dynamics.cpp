@@ -287,6 +287,7 @@ namespace oni {
                         updatePlacement(manager, entity, placement);
                     }
 
+                    // TODO: Does it make sense to do collision handling after updatePlacement?
                     mCollisionHandlers[props.physicalCategory](entityFactory,
                                                                entitiesToBeUpdated,
                                                                entity,
@@ -294,29 +295,31 @@ namespace oni {
                 }
             }
 
-            // TODO: Fix this using EntityAttachment
-//            {
-//                // Update tires
-//                auto view = manager.createViewScopeLock<component::Car>();
-//                for (auto &&entity : view) {
-//                    auto car = view.get<component::Car>(entity);
-//                    auto &carTireFRPlacement = manager.get<component::Placement>(car.tireFR);
-//                    // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
-//                    // There seems to be something wrong with the way tires are created in the beginning
-//                    carTireFRPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
-//                                                                                   math::toRadians(90.0f));
-//
-//                    auto &carTireFLPlacement = manager.get<component::Placement>(car.tireFL);
-//                    carTireFLPlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
-//                                                                                   math::toRadians(90.0f));
-//                }
-//            }
+            {
+                // Update tires
+                auto view = manager.createViewScopeLock<component::EntityAttachment, component::Car>();
+                for (auto &&entity : view) {
+                    const auto &attachments = view.get<component::EntityAttachment>(entity);
+                    const auto &car = view.get<component::Car>(entity);
+                    for (common::size i = 0; i < attachments.entities.size(); ++i) {
+                        if (attachments.entityTypes[i] == component::EntityType::VEHICLE_TIRE_FRONT) {
+                            auto &tirePlacement = manager.get<component::Placement>(attachments.entities[i]);
 
-            for (auto &&entity : entitiesToBeUpdated) {
-                auto lock = manager.scopedLock();
-                manager.tagForComponentSync(entity);
+                            // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
+                            // There seems to be something wrong with the way tires are created in the beginning
+                            tirePlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
+                                                                                      math::toRadians(90.0f));
+                        }
+                    }
+                }
             }
 
+            {
+                auto lock = manager.scopedLock();
+                for (auto &&entity : entitiesToBeUpdated) {
+                    manager.tagForComponentSync(entity);
+                }
+            }
         }
 
         b2World *Dynamics::getPhysicsWorld() {

@@ -97,11 +97,18 @@ namespace oni {
                                                                    const std::string &textureID);
 
             template<>
-            void _createEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID,
-                                                                    const math::vec3 &pos,
-                                                                    const math::vec2 &size,
-                                                                    const common::real32 &heading,
-                                                                    const std::string &textureID);
+            void _createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID,
+                                                                          const math::vec3 &pos,
+                                                                          const math::vec2 &size,
+                                                                          const common::real32 &heading,
+                                                                          const std::string &textureID);
+
+            template<>
+            void _createEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID,
+                                                                         const math::vec3 &pos,
+                                                                         const math::vec2 &size,
+                                                                         const common::real32 &heading,
+                                                                         const std::string &textureID);
 
             template<>
             void _createEntity<component::EntityType::WALL>(common::EntityID,
@@ -148,6 +155,7 @@ namespace oni {
                                                                    const math::vec2 &size,
                                                                    const common::real32 &heading,
                                                                    const std::string &textureID);
+
             template<>
             void _createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID,
                                                                    const math::vec3 &worldPos,
@@ -163,7 +171,10 @@ namespace oni {
             void _removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID);
 
             template<>
-            void _removeEntity<component::EntityType::VEHICLE_TIRE>(common::EntityID);
+            void _removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID);
+
+            template<>
+            void _removeEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID);
 
             template<>
             void _removeEntity<component::EntityType::WALL>(common::EntityID);

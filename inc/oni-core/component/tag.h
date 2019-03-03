@@ -14,9 +14,6 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
-        struct Tag_LeavesTrail {
-        };
-
         struct Tag_NewEntity {
         };
 

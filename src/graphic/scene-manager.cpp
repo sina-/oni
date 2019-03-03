@@ -269,13 +269,43 @@ namespace oni {
 
             // Bullet trails
             {
-                auto view = entityFactory.getEntityManager().createViewScopeLock<component::Tag_LeavesTrail, component::Placement>();
+                auto view = entityFactory.getEntityManager().createViewScopeLock<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
-                    auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                            placement.position, false);
-                    auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(trailEntity);
-                    particle.maxAge = 1.f;
+                    const auto &trail = view.get<component::Trail>(entity);
+                    if (!trail.previousLocation.z) {
+                        continue;
+                    }
+
+                    common::real32 dX = placement.position.x - trail.previousLocation.x;
+                    common::real32 dY = placement.position.y - trail.previousLocation.y;
+
+                    auto distance = static_cast<common::real32>(std::sqrt(std::pow(dX, 2) + std::pow(dY, 2)));
+
+                    // TODO: This should match what geometry shader uses.
+                    common::real32 particleSize = 0.2f;
+
+                    common::real32 fillX = dX / particleSize;
+                    common::real32 fillY = dY / particleSize;
+
+                    for (auto n = trail.previousLocation.x;
+                         n <= placement.position.x;) {
+                        for (auto m = trail.previousLocation.y;
+                             m <= placement.position.y;) {
+                            math::vec3 pos{n, m, trail.previousLocation.z};
+                            auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                    pos, false);
+                            auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
+                                    trailEntity);
+                            particle.maxAge = 1.f;
+
+                            m += fillY;
+                            if(fillY == 0.f){
+                                break;
+                            }
+                        }
+                        n += fillX;
+                    }
                 }
             }
 

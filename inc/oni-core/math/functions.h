@@ -12,6 +12,11 @@ namespace oni {
             return degrees * (M_PI / 180.0f);
         }
 
+        template<typename T>
+        int sign(T val) {
+            return (T(0) < val) - (val < T(0));
+        }
+
         inline common::int64 positionToIndex(const common::real64 position, const common::uint16 tileSize) {
             /**
              * Tiles in the world map fall under these indices:

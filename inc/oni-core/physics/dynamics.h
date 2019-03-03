@@ -57,25 +57,21 @@ namespace oni {
 
         private:
             void handleBulletCollision(entities::EntityFactory &,
-                                       std::vector<common::EntityID> &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
                                        component::Placement &);
 
             void handleVehicleCollision(entities::EntityFactory &,
-                                        std::vector<common::EntityID> &,
                                         common::EntityID,
                                         component::PhysicalProperties &,
                                         component::Placement &);
 
             void handleRaceCarCollision(entities::EntityFactory &,
-                                        std::vector<common::EntityID> &,
                                         common::EntityID,
                                         component::PhysicalProperties &,
                                         component::Placement &);
 
             void handleCollision(entities::EntityFactory &,
-                                 std::vector<common::EntityID> &,
                                  common::EntityID,
                                  component::PhysicalProperties &,
                                  component::Placement &);
@@ -99,7 +95,6 @@ namespace oni {
 
             std::map<component::PhysicalCategory,
                     std::function<void(entities::EntityFactory &,
-                                       std::vector<common::EntityID> &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
                                        component::Placement &

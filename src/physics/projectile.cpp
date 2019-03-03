@@ -12,7 +12,7 @@ namespace oni {
     namespace physics {
         Projectile::Projectile(b2World *physicsWorld) :
                 mPhysicsWorld{physicsWorld},
-                mGunCoolDownS{0.1f} {}
+                mGunCoolDownS{0.2f} {}
 
         Projectile::~Projectile() = default;
 
@@ -38,7 +38,7 @@ namespace oni {
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 bulletSpeed{200.f};
+                common::real32 bulletSpeed{10.f};
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();

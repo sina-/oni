@@ -333,13 +333,14 @@ namespace oni {
             placement.position = pos;
             placement.rotation = heading;
 
+            auto &trail = createComponent<component::Trail>(entityID);
+
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_LeavesTrail>(entityID);
         }
 
         template<>
@@ -545,10 +546,10 @@ namespace oni {
 
             removePhysicalBody(entityID);
             removeComponent<component::PhysicalProperties>(entityID);
+            removeComponent<component::Trail>(entityID);
 
             removeTag<component::Tag_Dynamic>(entityID);
             removeTag<component::Tag_TextureShaded>(entityID);
-            removeTag<component::Tag_LeavesTrail>(entityID);
         }
 
         template<>

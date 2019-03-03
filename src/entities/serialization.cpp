@@ -32,6 +32,11 @@ namespace oni {
         }
 
         template<class Archive>
+        void serialize(Archive &archive, component::Trail &trail) {
+            archive(trail.previousLocation);
+        }
+
+        template<class Archive>
         void serialize(Archive &archive, component::EntityAttachment &attachment) {
             archive(attachment.entities, attachment.entityTypes);
         }
@@ -152,6 +157,7 @@ namespace oni {
                         component::Point,
                         component::Appearance,
                         component::Texture,
+                        component::Trail,
                         component::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
@@ -164,7 +170,6 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_LeavesTrail,
                         component::Tag_Static
                 >(output, snapshotType);
             }
@@ -189,6 +194,7 @@ namespace oni {
                         component::Point,
                         component::Appearance,
                         component::Texture,
+                        component::Trail,
                         component::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
@@ -197,7 +203,6 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_LeavesTrail,
                         component::Tag_Static
                 >(snapshotType, input,
                         // NOTE: Entities might keep references to other entities but those ids might change during

@@ -84,8 +84,7 @@ namespace oni {
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_4
                     );
 
             mCollisionHandlers[component::PhysicalCategory::VEHICLE] =
@@ -93,8 +92,7 @@ namespace oni {
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_4
                     );
 
             mCollisionHandlers[component::PhysicalCategory::RACE_CAR] =
@@ -102,8 +100,7 @@ namespace oni {
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_4
                     );
 
             mCollisionHandlers[component::PhysicalCategory::WALL] =
@@ -111,8 +108,7 @@ namespace oni {
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_4
                     );
 
             mCollisionHandlers[component::PhysicalCategory::GENERIC] =
@@ -120,8 +116,7 @@ namespace oni {
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4,
-                              std::placeholders::_5
+                              std::placeholders::_4
                     );
             // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
             // skipping some of them!
@@ -271,7 +266,20 @@ namespace oni {
             }
 
             {
-                // Handle collision for other dynamic entities
+                // Handle collision
+                auto view = manager.createViewScopeLock<component::Placement, component::Tag_Dynamic,
+                        component::PhysicalProperties>();
+                for (auto entity: view) {
+                    auto &props = view.get<component::PhysicalProperties>(entity);
+                    auto &placement = view.get<component::Placement>(entity);
+
+                    mCollisionHandlers[props.physicalCategory](entityFactory,
+                                                               entity,
+                                                               props, placement);
+                }
+            }
+            {
+                // Update placement
                 auto view = manager.createViewScopeLock<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
 
@@ -282,16 +290,16 @@ namespace oni {
 
                     if (std::abs(placement.position.x - position.x) > common::ep ||
                         std::abs(placement.rotation - props.body->GetAngle()) > common::ep) {
+                        if (manager.has<component::Trail>(entity)) {
+                            auto &trail = manager.get<component::Trail>(entity);
+                            trail.previousLocation = placement.position;
+                        }
+
                         placement.position = math::vec3{position.x, position.y, placement.position.z};
                         placement.rotation = props.body->GetAngle();
                         updatePlacement(manager, entity, placement);
+                        entitiesToBeUpdated.push_back(entity);
                     }
-
-                    // TODO: Does it make sense to do collision handling after updatePlacement?
-                    mCollisionHandlers[props.physicalCategory](entityFactory,
-                                                               entitiesToBeUpdated,
-                                                               entity,
-                                                               props, placement);
                 }
             }
 
@@ -339,7 +347,6 @@ namespace oni {
         }
 
         void Dynamics::handleBulletCollision(entities::EntityFactory &entityFactory,
-                                             std::vector<common::EntityID> &entitiesToBeUpdated,
                                              common::EntityID entity,
                                              component::PhysicalProperties &props,
                                              component::Placement &placement) {
@@ -347,36 +354,29 @@ namespace oni {
             if (isColliding(props.body)) {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
-                math::vec3 pos{placement.position.x, placement.position.y, particleZ};
+                math::vec3 pos{props.body->GetPosition().x, props.body->GetPosition().y, particleZ};
                 entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, false);
 
                 entityFactory.removeEntity<component::EntityType::SIMPLE_BULLET>(entity);
 
-            } else {
-                entitiesToBeUpdated.push_back(entity);
             }
         }
 
         void
         Dynamics::handleVehicleCollision(entities::EntityFactory &entityFactory,
-                                         std::vector<common::EntityID> &entitiesToBeUpdated,
                                          common::EntityID entity,
                                          component::PhysicalProperties &props,
                                          component::Placement &placement) {
-            entitiesToBeUpdated.push_back(entity);
         }
 
         void Dynamics::handleCollision(entities::EntityFactory &entityFactory,
-                                       std::vector<common::EntityID> &entitiesToBeUpdated,
                                        common::EntityID entity,
                                        component::PhysicalProperties &props,
                                        component::Placement &placement) {
-            entitiesToBeUpdated.push_back(entity);
         }
 
         void
         Dynamics::handleRaceCarCollision(entities::EntityFactory &entityFactory,
-                                         std::vector<common::EntityID> &entitiesToBeUpdated,
                                          common::EntityID entity,
                                          component::PhysicalProperties &props,
                                          component::Placement &placement) {

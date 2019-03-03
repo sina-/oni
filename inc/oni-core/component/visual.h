@@ -26,6 +26,10 @@ namespace oni {
             common::real32 velocity{0.f};
         };
 
+        struct Trail {
+            math::vec3 previousLocation{0.f, 0.f, 0.f};
+        };
+
         enum class TextureStatus : common::uint8 {
             INVALID = 0,
             READY = 1,

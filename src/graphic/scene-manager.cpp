@@ -265,69 +265,77 @@ namespace oni {
 
         void SceneManager::tick(entities::EntityFactory &entityFactory,
                                 common::real64 tickTime) {
+            updateParticles(entityFactory, tickTime);
+
+            // Bullet trails
             {
-                auto view = entityFactory.getEntityManager().createViewScopeLock<component::Particle>();
-                for (const auto &entity: view) {
-                    auto &particle = view.get<component::Particle>(entity);
-                    // TODO: Maybe you want a single place to store these variables?
-                    particle.age += tickTime;
-                    if (particle.age > particle.maxAge) {
-                        entityFactory.removeEntity<component::EntityType::SIMPLE_PARTICLE>(entity);
-                    }
+                auto view = entityFactory.getEntityManager().createViewScopeLock<component::Tag_LeavesTrail, component::Placement>();
+                for (auto &&entity: view) {
+                    const auto &placement = view.get<component::Placement>(entity);
+                    auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                            placement.position, false);
+                    auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(trailEntity);
+                    particle.maxAge = 1.f;
                 }
             }
 
-            std::vector<math::vec3> skidPosRRList{};
-            std::vector<math::vec3> skidPosRLList{};
-            std::vector<math::mat4> carTireTransform{};
-            std::vector<common::uint8> skidOpacity{};
+            // Update Skid lines.
             {
-                auto carView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::Placement, component::CarConfig>();
-                for (auto &&carEntity: carView) {
+                std::vector<math::vec3> skidPosRRList{};
+                std::vector<math::vec3> skidPosRLList{};
+                std::vector<math::mat4> carTireTransform{};
+                std::vector<common::uint8> skidOpacity{};
+                {
+                    auto carView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::Placement, component::CarConfig>();
+                    for (auto &&carEntity: carView) {
 
-                    const auto car = carView.get<component::Car>(carEntity);
-                    // NOTE: Technically I should use slippingRear, but this gives better effect
-                    if (car.slippingFront || true) {
-                        const auto &carConfig = carView.get<component::CarConfig>(carEntity);
-                        const auto &placement = carView.get<component::Placement>(carEntity);
+                        const auto car = carView.get<component::Car>(carEntity);
+                        // NOTE: Technically I should use slippingRear, but this gives better effect
+                        if (car.slippingFront || true) {
+                            const auto &carConfig = carView.get<component::CarConfig>(carEntity);
+                            const auto &placement = carView.get<component::Placement>(carEntity);
 
-                        // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
-                        // same logic is hard-coded when spawningCar server side.
-                        math::vec3 skidPosRL{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                             static_cast<common::real32>(carConfig.wheelWidth +
-                                                                         carConfig.halfWidth / 2),
-                                // NOTE: This z-value is unused.
-                                             0.f};
-                        math::vec3 skidPosRR{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                             static_cast<common::real32>(-carConfig.wheelWidth -
-                                                                         carConfig.halfWidth / 2),
-                                             0.f};
-                        skidPosRRList.push_back(skidPosRR);
-                        skidPosRLList.push_back(skidPosRL);
+                            // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
+                            // same logic is hard-coded when spawningCar server side.
+                            math::vec3 skidPosRL{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                                 static_cast<common::real32>(carConfig.wheelWidth +
+                                                                             carConfig.halfWidth / 2),
+                                    // NOTE: This z-value is unused.
+                                                 0.f};
+                            math::vec3 skidPosRR{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                                 static_cast<common::real32>(-carConfig.wheelWidth -
+                                                                             carConfig.halfWidth / 2),
+                                                 0.f};
+                            skidPosRRList.push_back(skidPosRR);
+                            skidPosRLList.push_back(skidPosRL);
 
-                        carTireTransform.push_back(math::Transformation::createTransformation(placement.position,
-                                                                                              placement.rotation,
-                                                                                              placement.scale));
+                            carTireTransform.push_back(math::Transformation::createTransformation(placement.position,
+                                                                                                  placement.rotation,
+                                                                                                  placement.scale));
 
-                        auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) * 255);
-                        skidOpacity.push_back(alpha);
+                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
+                                                                    255);
+                            skidOpacity.push_back(alpha);
+                        }
                     }
+                }
+
+                for (size_t i = 0; i < skidOpacity.size(); ++i) {
+                    auto skidMarkRRPos = carTireTransform[i] * skidPosRRList[i];
+                    auto skidMarkRLPos = carTireTransform[i] * skidPosRLList[i];
+
+                    common::EntityID skidEntityRL{0};
+                    common::EntityID skidEntityRR{0};
+
+                    skidEntityRL = getOrCreateSkidTile(skidMarkRLPos.getXY());
+                    skidEntityRR = getOrCreateSkidTile(skidMarkRRPos.getXY());
+
+                    updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
+                    updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
                 }
             }
 
-            for (size_t i = 0; i < skidOpacity.size(); ++i) {
-                auto skidMarkRRPos = carTireTransform[i] * skidPosRRList[i];
-                auto skidMarkRLPos = carTireTransform[i] * skidPosRLList[i];
-
-                common::EntityID skidEntityRL{0};
-                common::EntityID skidEntityRR{0};
-
-                skidEntityRL = getOrCreateSkidTile(skidMarkRLPos.getXY());
-                skidEntityRR = getOrCreateSkidTile(skidMarkRRPos.getXY());
-
-                updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
-                updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
-            }
+            // Update Laps
             {
                 auto carLapView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
@@ -342,6 +350,22 @@ namespace oni {
                     const auto &carLap = carLapView.get<component::CarLapInfo>(carEntity);
                     const auto &carLapText = getOrCreateLapText(carEntity, carLap);
                     updateRaceInfo(carLap, carLapText);
+                }
+            }
+        }
+
+        void SceneManager::tickInternal(common::real64 tickTime) {
+            updateParticles(*mInternalEntityFactory, tickTime);
+        }
+
+        void SceneManager::updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime) {
+            auto view = entityFactory.getEntityManager().createViewScopeLock<component::Particle>();
+            for (const auto &entity: view) {
+                auto &particle = view.get<component::Particle>(entity);
+                // TODO: Maybe you want a single place to store these variables?
+                particle.age += tickTime;
+                if (particle.age > particle.maxAge) {
+                    entityFactory.removeEntity<component::EntityType::SIMPLE_PARTICLE>(entity);
                 }
             }
         }
@@ -468,6 +492,14 @@ namespace oni {
                 renderStaticText(internalEntityRegistry, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
+
+            {
+                auto lock = internalEntityRegistry.scopedLock();
+                begin(*mParticleShader, *mParticleRenderer, true, true, true);
+                renderParticles(internalEntityRegistry, viewWidth, viewHeight);
+            }
+
+            end(*mParticleShader, *mParticleRenderer);
 
         }
 

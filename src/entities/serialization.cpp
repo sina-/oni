@@ -164,6 +164,7 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
+                        component::Tag_LeavesTrail,
                         component::Tag_Static
                 >(output, snapshotType);
             }
@@ -196,6 +197,7 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
+                        component::Tag_LeavesTrail,
                         component::Tag_Static
                 >(snapshotType, input,
                         // NOTE: Entities might keep references to other entities but those ids might change during

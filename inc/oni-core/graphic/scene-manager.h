@@ -59,6 +59,8 @@ namespace oni {
 
             void tick(entities::EntityFactory &, common::real64 tickTime);
 
+            void tickInternal(common::real64 tickTime);
+
             void renderRaw(const component::Shape &, const component::Appearance &);
 
             void lookAt(common::real32 x, common::real32 y);
@@ -141,6 +143,8 @@ namespace oni {
                                  common::EntityID skidTextureEntity,
                                  common::uint8 alpha);
 
+            void updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime);
+
             void updateRaceInfo(const component::CarLapInfo &carLap,
                                 const RaceInfoEntities &carLapTextEntities);
 
@@ -182,6 +186,7 @@ namespace oni {
 
             std::unique_ptr<entities::EntityFactory> mInternalEntityFactory{};
             math::ZLayerManager &mZLayerManager;
+
         };
     }
 }

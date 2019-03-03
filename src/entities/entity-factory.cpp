@@ -339,6 +339,7 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_LeavesTrail>(entityID);
         }
 
         template<>
@@ -547,6 +548,7 @@ namespace oni {
 
             removeTag<component::Tag_Dynamic>(entityID);
             removeTag<component::Tag_TextureShaded>(entityID);
+            removeTag<component::Tag_LeavesTrail>(entityID);
         }
 
         template<>

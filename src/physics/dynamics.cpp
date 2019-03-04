@@ -194,13 +194,10 @@ namespace oni {
                     tickCar(car, carConfig, carInput[entity], tickTime);
 
                     auto &carPlacement = carView.get<component::Placement>(entity);
-                    auto placement = component::Placement{
-                            math::vec3{car.position.x, car.position.y,
-                                    // TODO: Perhaps better to have car.position to be the canonical z value?
-                                       carPlacement.position.z},
-                            static_cast<const common::real32>(car.heading),
-                            math::vec3{1.0f, 1.0f, 0.0f}};
-                    updatePlacement(manager, entity, placement);
+                    carPlacement.position.x = car.position.x;
+                    carPlacement.position.y = car.position.y;
+                    carPlacement.rotation = static_cast<common::real32>(car.heading);
+                    updateTransforms(manager, entity, carPlacement);
 
                     auto velocity = car.velocityLocal.len();
                     car.distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
@@ -292,12 +289,13 @@ namespace oni {
                         std::abs(placement.rotation - props.body->GetAngle()) > common::ep) {
                         if (manager.has<component::Trail>(entity)) {
                             auto &trail = manager.get<component::Trail>(entity);
-                            trail.previousLocation = placement.position;
+                            trail.previousLocation.push_back(placement.position);
+                            trail.velocity.push_back(props.body->GetLinearVelocity().Length());
                         }
 
                         placement.position = math::vec3{position.x, position.y, placement.position.z};
                         placement.rotation = props.body->GetAngle();
-                        updatePlacement(manager, entity, placement);
+                        updateTransforms(manager, entity, placement);
                         entitiesToBeUpdated.push_back(entity);
                     }
                 }
@@ -355,10 +353,14 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{props.body->GetPosition().x, props.body->GetPosition().y, particleZ};
-                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, false);
+                math::vec4 color{0.f, 0.f, 0.f, 0.f};
+                // NOTE: This will be read by the server and send SPAWN_PARTICLE packet at the give location to clients
+                // and clients will decide what to render. I'm using the registry just as a way to communicate between
+                // this function and server packet sender. These entities are not synced with usual registry sync
+                // mechanic
+                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, color, false);
 
                 entityFactory.removeEntity<component::EntityType::SIMPLE_BULLET>(entity);
-
             }
         }
 
@@ -382,11 +384,9 @@ namespace oni {
                                          component::Placement &placement) {
         }
 
-        void Dynamics::updatePlacement(entities::EntityManager &manager,
-                                       common::EntityID entity,
-                                       const component::Placement &placement) {
-            manager.replace<component::Placement>(entity, placement);
-
+        void Dynamics::updateTransforms(entities::EntityManager &manager,
+                                        common::EntityID entity,
+                                        const component::Placement &placement) {
             if (manager.has<component::TransformChildren>(entity)) {
                 auto transformChildren = manager.get<component::TransformChildren>(entity);
                 for (auto child: transformChildren.children) {

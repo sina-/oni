@@ -38,7 +38,7 @@ namespace oni {
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 bulletSpeed{10.f};
+                common::real32 bulletSpeed{100.f};
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
@@ -101,13 +101,9 @@ namespace oni {
                     auto bulletID = entityFactory.createEntity<component::EntityType::SIMPLE_BULLET>(pos,
                                                                                                      bulletSize,
                                                                                                      carPlacement.rotation,
-                                                                                                     textureID);
-
-                    auto *body = entityFactory.getEntityManager().get<component::PhysicalProperties>(bulletID).body;
-                    body->ApplyForceToCenter(
-                            b2Vec2(static_cast<common::real32>(cos(heading) * bulletSpeed),
-                                   static_cast<common::real32>(sin(heading) * bulletSpeed)),
-                            true);
+                                                                                                     textureID,
+                                                                                                     bulletSpeed
+                                                                                                     );
                 }
             }
         }

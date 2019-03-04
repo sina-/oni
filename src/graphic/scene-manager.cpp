@@ -273,39 +273,62 @@ namespace oni {
                 for (auto &&entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     const auto &trail = view.get<component::Trail>(entity);
-                    if (!trail.previousLocation.z) {
-                        continue;
-                    }
+//                    if (!trail.previousLocation.z) {
+//                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+//                                placement.position, false);
+//                        continue;
+//                    }
 
-                    common::real32 dX = placement.position.x - trail.previousLocation.x;
-                    common::real32 dY = placement.position.y - trail.previousLocation.y;
+//                    common::real32 dX = placement.position.x - trail.previousLocation.x;
+//                    common::real32 dY = placement.position.y - trail.previousLocation.y;
 
-                    auto distance = static_cast<common::real32>(std::sqrt(std::pow(dX, 2) + std::pow(dY, 2)));
+                    //auto distance = static_cast<common::real32>(std::sqrt(std::pow(dX, 2) + std::pow(dY, 2)));
 
                     // TODO: This should match what geometry shader uses.
                     common::real32 particleSize = 0.2f;
 
-                    common::real32 fillX = dX / particleSize;
-                    common::real32 fillY = dY / particleSize;
+//                    common::real32 fillX = dX / particleSize;
+//                    common::real32 fillY = dY / particleSize;
+                    math::vec4 color{1.f, 1.f, 1.f, 1.f};
+                    assert(trail.previousLocation.size() == trail.velocity.size());
 
-                    for (auto n = trail.previousLocation.x;
-                         n <= placement.position.x;) {
-                        for (auto m = trail.previousLocation.y;
-                             m <= placement.position.y;) {
-                            math::vec3 pos{n, m, trail.previousLocation.z};
-                            auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                    pos, false);
-                            auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
-                                    trailEntity);
-                            particle.maxAge = 1.f;
-
-                            m += fillY;
-                            if(fillY == 0.f){
-                                break;
-                            }
-                        }
-                        n += fillX;
+                    if (!trail.previousLocation.size()) {
+                        mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                placement.position, color, false);
+                        continue;
                     }
+                    common::real32 dX = placement.position.x - trail.previousLocation[0].x;
+                    common::real32 dY = placement.position.y - trail.previousLocation[0].y;
+                    for (common::real32 x = trail.previousLocation[0].x;
+                         x < placement.position.x; x += particleSize) {
+                        math::vec3 pos{x, placement.position.y, placement.position.z};
+                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                pos, color, false);
+                        auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
+                                trailEntity);
+                        particle.maxAge = 1.f - dX / trail.velocity[0];
+                    }
+
+                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
+                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
+
+/*                    for (common::size i = 0; i < trail.previousLocation.size(); ++i) {
+                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                math::vec3{trail.previousLocation[i].x, trail.previousLocation[i].y,
+                                           trail.previousLocation[i].z},
+                                colorBlue,
+                                false);
+                        auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
+                                trailEntity);
+                        particle.maxAge = 100.f;
+
+                    }
+                    auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                            math::vec3{placement.position.x, placement.position.y, placement.position.z},
+                            colorRed,
+                            false);
+
+                    mInternalEntityFactory->getEntityManager().get<component::Particle>(trailEntity).maxAge = 100.f;*/
                 }
             }
 
@@ -655,7 +678,7 @@ namespace oni {
                 }
 
                 component::Appearance appearance;
-                appearance.color = math::vec4{1.f, 1.f, 1.f, 0.8f};
+                appearance.color = particle.color;
 
                 ++mRenderedParticlesPerFrame;
 

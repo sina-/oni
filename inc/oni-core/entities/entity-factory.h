@@ -134,6 +134,7 @@ namespace oni {
             template<>
             void _createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
                                                                        const math::vec3 &worldPos,
+                                                                       const math::vec4 &color,
                     // TODO: Is there a way to avoid need for const &?
                                                                        const bool &randomize);
 
@@ -142,7 +143,9 @@ namespace oni {
                                                                      const math::vec3 &pos,
                                                                      const math::vec2 &size,
                                                                      const common::real32 &heading,
-                                                                     const std::string &textureID);
+                                                                     const std::string &textureID,
+                                                                     const common::real32 &velocity
+            );
 
             template<>
             void _createEntity<component::EntityType::TEXT>(common::EntityID,

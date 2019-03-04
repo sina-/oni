@@ -24,10 +24,12 @@ namespace oni {
             math::vec3 pos{0.f, 0.f, 0.f};
             common::real32 heading{0.f};
             common::real32 velocity{0.f};
+            math::vec4 color{0.f, 0.f, 0.f, 1.f};
         };
 
         struct Trail {
-            math::vec3 previousLocation{0.f, 0.f, 0.f};
+            std::vector<math::vec3> previousLocation{};
+            std::vector<common::real32> velocity{0.f};
         };
 
         enum class TextureStatus : common::uint8 {
@@ -92,7 +94,7 @@ namespace oni {
             common::real32 z;
         };
 
-        enum class ZLayerDef: common::uint8  {
+        enum class ZLayerDef : common::uint8 {
             LAYER_0 = 0,
             LAYER_1 = 1,
             LAYER_2 = 2,

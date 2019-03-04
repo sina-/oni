@@ -77,6 +77,12 @@ namespace oni {
                 auto lock = manager.scopedLock();
                 // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
                 manager.reset<component::Tag_OnlyComponentUpdate>();
+
+                auto view = manager.createView<component::Trail>();
+                for(auto && entity: view){
+                    view.get<component::Trail>(entity).velocity.clear();
+                    view.get<component::Trail>(entity).previousLocation.clear();
+                }
             }
         }
 

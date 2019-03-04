@@ -292,10 +292,12 @@ namespace oni {
         template<>
         void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
                                                                                   const math::vec3 &worldPos,
+                                                                                  const math::vec4 &color,
                                                                                   const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
             particle.age = 0.f;
+            particle.color = color;
 
             if (randomize) {
                 particle.heading = mRand->nextReal32(0, 6.28f); // NOTE: 6.28f is 2 * pi in radians (360 degrees)
@@ -311,7 +313,9 @@ namespace oni {
                                                                                 const math::vec3 &pos,
                                                                                 const math::vec2 &size,
                                                                                 const common::real32 &heading,
-                                                                                const std::string &textureID) {
+                                                                                const std::string &textureID,
+                                                                                const common::real32 &velocity
+        ) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.friction = 1.f;
             properties.density = 0.1f;
@@ -324,6 +328,11 @@ namespace oni {
 
             auto *body = createPhysicalBody(pos, size, heading, properties);
 
+            body->ApplyLinearImpulseToCenter(
+                    b2Vec2(static_cast<common::real32>(cos(heading) * velocity),
+                           static_cast<common::real32>(sin(heading) * velocity)),
+                    true);
+
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
             shape.setSizeFromOrigin(size);
@@ -334,6 +343,7 @@ namespace oni {
             placement.rotation = heading;
 
             auto &trail = createComponent<component::Trail>(entityID);
+            trail.velocity.push_back(velocity);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;

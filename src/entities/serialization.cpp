@@ -33,7 +33,7 @@ namespace oni {
 
         template<class Archive>
         void serialize(Archive &archive, component::Trail &trail) {
-            archive(trail.previousLocation);
+            archive(trail.previousLocation, trail.velocity);
         }
 
         template<class Archive>

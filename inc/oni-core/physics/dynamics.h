@@ -79,9 +79,9 @@ namespace oni {
             bool isColliding(b2Body *);
 
         private:
-            void updatePlacement(entities::EntityManager &manager,
-                                 common::EntityID entity,
-                                 const component::Placement &placement);
+            void updateTransforms(entities::EntityManager &manager,
+                                  common::EntityID entity,
+                                  const component::Placement &placement);
 
             void updateTransformParent(entities::EntityManager &manager,
                                        common::EntityID entity,

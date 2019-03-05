@@ -31,7 +31,7 @@ namespace oni {
                 mHalfSkidTileSizeX(mSkidTileSizeX / 2.0f),
                 mHalfSkidTileSizeY(mSkidTileSizeY / 2.0f),
                 // 64k vertices
-                mMaxSpriteCount(16 * 1000), mScreenBounds(screenBounds),
+                mMaxSpriteCount(64 * 1000), mScreenBounds(screenBounds),
                 mFontManager(fontManager),
                 mPhysicsWorld(physicsWorld),
                 mGameUnitToPixels(gameUnitToPixels),
@@ -307,16 +307,30 @@ namespace oni {
 
                     auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
 
-                    for (common::real32 i = 0.f; i < distance; i += particleSize) {
-                        math::vec3 pos{x, y, currentPos.z};
-                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                    math::vec3 pos{x, y, currentPos.z};
+                    common::EntityID trailEntity;
+                    for (common::real32 i = 0.f; i <= distance + particleSize; i += particleSize) {
+/*                        if(i == 0){
+                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                    pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
+                        }
+                        else if (i >= distance ){
+                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                    pos, math::vec4{1.f, 0.f, 0.f, 1.f}, false);
+                        }
+                        else{
+                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                    pos, color, false);
+                        }
+                        */
+                        trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
                                 pos, color, false);
                         auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
                                 trailEntity);
                         particle.maxAge = 1.f - (distance - i) / trail.velocity[0];
 
-                        x += particleSize * std::sin(alpha);
-                        y += particleSize * std::cos(alpha);
+                        pos.x += particleSize * std::sin(alpha);
+                        pos.y += particleSize * std::cos(alpha);
                     }
 
 //                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};

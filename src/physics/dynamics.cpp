@@ -286,6 +286,7 @@ namespace oni {
                     auto &placement = view.get<component::Placement>(entity);
 
                     if (std::abs(placement.position.x - position.x) > common::ep ||
+                        std::abs(placement.position.y - position.y) > common::ep ||
                         std::abs(placement.rotation - props.body->GetAngle()) > common::ep) {
                         if (manager.has<component::Trail>(entity)) {
                             auto &trail = manager.get<component::Trail>(entity);

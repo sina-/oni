@@ -81,7 +81,7 @@ namespace oni {
                 auto view = manager.createView<component::Trail>();
                 for(auto && entity: view){
                     view.get<component::Trail>(entity).velocity.clear();
-                    view.get<component::Trail>(entity).previousLocation.clear();
+                    view.get<component::Trail>(entity).previousPos.clear();
                 }
             }
         }

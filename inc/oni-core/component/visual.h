@@ -28,7 +28,7 @@ namespace oni {
         };
 
         struct Trail {
-            std::vector<math::vec3> previousLocation{};
+            std::vector<math::vec3> previousPos{};
             std::vector<common::real32> velocity{};
         };
 

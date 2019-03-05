@@ -267,68 +267,60 @@ namespace oni {
                                 common::real64 tickTime) {
             updateParticles(entityFactory, tickTime);
 
+            auto viewWidth = getViewWidth();
+            auto viewHeight = getViewHeight();
+
             // Bullet trails
             {
                 auto view = entityFactory.getEntityManager().createViewScopeLock<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
-                    const auto &placement = view.get<component::Placement>(entity);
+                    const auto &currentPos = view.get<component::Placement>(entity).position;
                     const auto &trail = view.get<component::Trail>(entity);
-//                    if (!trail.previousLocation.z) {
-//                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-//                                placement.position, false);
-//                        continue;
-//                    }
 
-//                    common::real32 dX = placement.position.x - trail.previousLocation.x;
-//                    common::real32 dY = placement.position.y - trail.previousLocation.y;
+                    assert(trail.previousPos.size() == trail.velocity.size());
 
-                    //auto distance = static_cast<common::real32>(std::sqrt(std::pow(dX, 2) + std::pow(dY, 2)));
+                    math::vec4 color{1.f, 1.f, 1.f, 1.f};
+
+                    if (trail.previousPos.empty()) {
+                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                currentPos, color, false);
+                        continue;
+                    }
+
+                    const auto &previousPos = trail.previousPos[0];
+
+                    if (!math::intersects(currentPos, mCamera.x, mCamera.y, viewWidth, viewHeight) &&
+                        !math::intersects(previousPos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        continue;
+                    }
 
                     // TODO: This should match what geometry shader uses.
                     common::real32 particleSize = 0.2f;
 
-//                    common::real32 fillX = dX / particleSize;
-//                    common::real32 fillY = dY / particleSize;
-                    math::vec4 color{1.f, 1.f, 1.f, 1.f};
-                    assert(trail.previousLocation.size() == trail.velocity.size());
+                    common::real32 dX = currentPos.x - previousPos.x;
+                    common::real32 dY = currentPos.y - previousPos.y;
 
-                    if (!trail.previousLocation.size()) {
-                        mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                placement.position, color, false);
-                        continue;
-                    }
-                    common::real32 dX = placement.position.x - trail.previousLocation[0].x;
-                    common::real32 dY = placement.position.y - trail.previousLocation[0].y;
-                    for (common::real32 x = trail.previousLocation[0].x;
-                         x < placement.position.x; x += particleSize) {
-                        math::vec3 pos{x, placement.position.y, placement.position.z};
+                    common::real32 distance = std::sqrt(dX * dX + dY * dY);
+
+                    auto x = trail.previousPos[0].x;
+                    auto y = trail.previousPos[0].y;
+
+                    auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
+
+                    for (common::real32 i = 0.f; i < distance; i += particleSize) {
+                        math::vec3 pos{x, y, currentPos.z};
                         auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
                                 pos, color, false);
                         auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
                                 trailEntity);
-                        particle.maxAge = 1.f - dX / trail.velocity[0];
+                        particle.maxAge = 1.f - (distance - i) / trail.velocity[0];
+
+                        x += particleSize * std::sin(alpha);
+                        y += particleSize * std::cos(alpha);
                     }
 
-                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
-                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
-
-/*                    for (common::size i = 0; i < trail.previousLocation.size(); ++i) {
-                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                math::vec3{trail.previousLocation[i].x, trail.previousLocation[i].y,
-                                           trail.previousLocation[i].z},
-                                colorBlue,
-                                false);
-                        auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
-                                trailEntity);
-                        particle.maxAge = 100.f;
-
-                    }
-                    auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                            math::vec3{placement.position.x, placement.position.y, placement.position.z},
-                            colorRed,
-                            false);
-
-                    mInternalEntityFactory->getEntityManager().get<component::Particle>(trailEntity).maxAge = 100.f;*/
+//                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
+//                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
                 }
             }
 

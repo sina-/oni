@@ -637,7 +637,7 @@ namespace oni {
                     wallTiles.emplace_back(component::TileIndex{-innerTrackWidth, i});
                 }
 
-                createWall(wallPosInTile, wallTiles);
+                // createWall(wallPosInTile, wallTiles);
             }
         }
     }

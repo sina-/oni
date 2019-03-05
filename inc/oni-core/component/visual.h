@@ -29,7 +29,7 @@ namespace oni {
 
         struct Trail {
             std::vector<math::vec3> previousLocation{};
-            std::vector<common::real32> velocity{0.f};
+            std::vector<common::real32> velocity{};
         };
 
         enum class TextureStatus : common::uint8 {

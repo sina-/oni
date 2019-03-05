@@ -291,6 +291,7 @@ namespace oni {
                             auto &trail = manager.get<component::Trail>(entity);
                             trail.previousLocation.push_back(placement.position);
                             trail.velocity.push_back(props.body->GetLinearVelocity().Length());
+                            assert(trail.previousLocation.size() == trail.velocity.size());
                         }
 
                         placement.position = math::vec3{position.x, position.y, placement.position.z};

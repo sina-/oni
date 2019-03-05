@@ -38,7 +38,7 @@ namespace oni {
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 bulletSpeed{100.f};
+                common::real32 bulletSpeed{50.f};
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();

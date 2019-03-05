@@ -302,8 +302,8 @@ namespace oni {
 
                     common::real32 distance = std::sqrt(dX * dX + dY * dY);
 
-                    auto x = trail.previousPos[0].x;
-                    auto y = trail.previousPos[0].y;
+                    auto x = previousPos.x;
+                    auto y = previousPos.y;
 
                     auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
 

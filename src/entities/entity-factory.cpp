@@ -328,7 +328,7 @@ namespace oni {
 
             auto *body = createPhysicalBody(pos, size, heading, properties);
 
-            body->ApplyLinearImpulseToCenter(
+            body->ApplyForceToCenter(
                     b2Vec2(static_cast<common::real32>(cos(heading) * velocity),
                            static_cast<common::real32>(sin(heading) * velocity)),
                     true);

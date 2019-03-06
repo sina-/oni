@@ -327,6 +327,8 @@ namespace oni {
                                 pos, color, false);
                         auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
                                 trailEntity);
+                        // TODO: I don't use any other velocity than the first one, should I just not store the rest?
+                        // or should I update this code to use all by iterating over trail.previousPos?
                         particle.maxAge = 1.f - (distance - i) / trail.velocity[0];
 
                         pos.x += particleSize * std::sin(alpha);

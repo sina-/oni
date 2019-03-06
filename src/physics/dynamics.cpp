@@ -295,7 +295,8 @@ namespace oni {
                             assert(trail.previousPos.size() == trail.velocity.size());
                         }
 
-                        placement.position = math::vec3{position.x, position.y, placement.position.z};
+                        placement.position.x = position.x;
+                        placement.position.y = position.y;
                         placement.rotation = props.body->GetAngle();
                         updateTransforms(manager, entity, placement);
                         entitiesToBeUpdated.push_back(entity);

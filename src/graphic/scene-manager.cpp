@@ -295,7 +295,7 @@ namespace oni {
                     }
 
                     // TODO: This should match what geometry shader uses.
-                    common::real32 particleSize = 0.2f;
+                    common::real32 particleSize = 0.4f;
 
                     common::real32 dX = currentPos.x - previousPos.x;
                     common::real32 dY = currentPos.y - previousPos.y;
@@ -309,7 +309,7 @@ namespace oni {
 
                     math::vec3 pos{x, y, currentPos.z};
                     common::EntityID trailEntity;
-                    for (common::real32 i = 0.f; i <= distance + particleSize; i += particleSize) {
+                    for (common::real32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
                             trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);

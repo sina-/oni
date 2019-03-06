@@ -206,8 +206,6 @@ namespace oni {
                 }
             }
 
-            mProjectile->tick(entityFactory, clientData, tickTime);
-
             {
                 // NOTE: Step() function will modify collision status of entities, so we have to lock the registry.
                 auto lock = manager.scopedLock();
@@ -217,6 +215,8 @@ namespace oni {
                 // implementation to outside.
                 mPhysicsWorld->Step(mTickFrequency, 6, 2);
             }
+
+            mProjectile->tick(entityFactory, clientData, tickTime);
 
             {
                 auto carPhysicsView = manager.createViewScopeLock<component::Car, component::PhysicalProperties>();

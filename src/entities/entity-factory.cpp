@@ -343,6 +343,8 @@ namespace oni {
             placement.rotation = heading;
 
             auto &trail = createComponent<component::Trail>(entityID);
+            trail.previousPos.push_back(pos);
+            trail.velocity.push_back(velocity);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;

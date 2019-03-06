@@ -18,15 +18,6 @@ namespace oni {
             math::vec4 color{0.f, 0.f, 0.f, 0.f};
         };
 
-        struct Particle {
-            common::real32 age{0.f};
-            common::real32 maxAge{0};
-            math::vec3 pos{0.f, 0.f, 0.f};
-            common::real32 heading{0.f};
-            common::real32 velocity{0.f};
-            math::vec4 color{0.f, 0.f, 0.f, 1.f};
-        };
-
         struct Trail {
             std::vector<math::vec3> previousPos{};
             std::vector<common::real32> velocity{};
@@ -51,10 +42,18 @@ namespace oni {
             // GL_UNSIGNED_BYTE
             common::oniGLenum type{0x1401};
             std::string filePath{};
-            std::vector<math::vec2> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},
-                                       math::vec2{1.f, 1.f}, math::vec2{0.f, 1.f}};
+            std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},
+                                         math::vec2{1.f, 1.f}, math::vec2{0.f, 1.f}};
             std::vector<common::uint8> data{};
             TextureStatus status{TextureStatus::INVALID};
+        };
+
+        struct Particle {
+            common::real32 age{0.f};
+            common::real32 maxAge{0};
+            math::vec3 pos{0.f, 0.f, 0.f};
+            common::real32 heading{0.f};
+            common::real32 velocity{0.f};
         };
 
         struct Text {

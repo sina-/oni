@@ -297,7 +297,31 @@ namespace oni {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
             particle.age = 0.f;
-            particle.color = color;
+
+            auto &appearance = createComponent<component::Appearance>(entityID);
+            appearance.color = color;
+
+            if (randomize) {
+                particle.heading = mRand->nextReal32(0, 6.28f); // NOTE: 6.28f is 2 * pi in radians (360 degrees)
+                particle.velocity = mRand->nextReal32(1.f, 7.f);
+                particle.maxAge = mRand->nextReal32(0.2f, 1.f);
+            }
+            // NOTE: For now particles are sync'd with a game packet, don't need to serialize them through registry
+            removeTag<component::Tag_NewEntity>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
+                                                                                  const math::vec3 &worldPos,
+                                                                                  const std::string &textureID,
+                                                                                  const bool &randomize) {
+            auto &particle = createComponent<component::Particle>(entityID);
+            particle.pos = worldPos;
+            particle.age = 0.f;
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             if (randomize) {
                 particle.heading = mRand->nextReal32(0, 6.28f); // NOTE: 6.28f is 2 * pi in radians (360 degrees)
@@ -566,6 +590,8 @@ namespace oni {
         template<>
         void EntityFactory::_removeEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID) {
             removeComponent<component::Particle>(entityID);
+            removeComponentSafe<component::Appearance>(entityID);
+            removeComponentSafe<component::Texture>(entityID);
         }
 
         template<>

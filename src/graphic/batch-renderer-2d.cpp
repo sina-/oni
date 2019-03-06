@@ -131,6 +131,28 @@ namespace oni {
             buffer->age = particle.age;
             buffer->heading = particle.heading;
             buffer->velocity = particle.velocity;
+            buffer->samplerID = -1;
+            buffer++;
+
+            // Update the mBuffer to point to the head.
+            mBuffer = static_cast<void *>(buffer);
+
+            mIndexCount += 1;
+        }
+
+        void BatchRenderer2D::_submit(const component::Particle &particle, const component::Texture &texture) {
+            assert(mIndexCount + 1 < mMaxIndicesCount);
+
+            auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
+
+            auto samplerID = getSamplerID(texture.textureID);
+
+            buffer->position = particle.pos;
+            buffer->color = {};
+            buffer->age = particle.age;
+            buffer->heading = particle.heading;
+            buffer->velocity = particle.velocity;
+            buffer->samplerID = samplerID;
             buffer++;
 
             // Update the mBuffer to point to the head.

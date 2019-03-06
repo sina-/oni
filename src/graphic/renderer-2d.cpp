@@ -22,6 +22,10 @@ namespace oni {
             _submit(particle, color);
         }
 
+        void Renderer2D::submit(const component::Particle &particle, const component::Texture &texture) {
+            _submit(particle, texture);
+        }
+
         void Renderer2D::submit(const component::Shape &position, const component::Texture &texture) {
             _submit(position, texture);
         }

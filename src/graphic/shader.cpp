@@ -1,6 +1,7 @@
 #include <oni-core/graphic/shader.h>
 
 #include <GL/glew.h>
+#include <assert.h>
 
 namespace oni {
     namespace graphic {
@@ -33,7 +34,8 @@ namespace oni {
                     std::vector<char> error(static_cast<common::uint32>(length));
                     glGetShaderInfoLog(shaderID, length, &length, &error[0]);
                     glDeleteShader(shaderID);
-                    throw std::runtime_error(&error[0]);
+                    std::cout << std::string(error.data()) << "\n";
+                    assert(false);
                 }
             };
 

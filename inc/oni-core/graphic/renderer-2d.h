@@ -36,13 +36,15 @@ namespace oni {
              */
             void begin();
 
-            void submit(const component::Shape &position, const component::Appearance &color);
+            void submit(const component::Shape &, const component::Appearance &);
 
-            void submit(const component::Particle &, const component::Appearance &color);
+            void submit(const component::Particle &, const component::Appearance &);
 
-            void submit(const component::Shape &position, const component::Texture &texture);
+            void submit(const component::Particle &, const component::Texture &);
 
-            void submit(const component::Text &text);
+            void submit(const component::Shape &, const component::Texture &);
+
+            void submit(const component::Text &);
 
             /**
              * Draw the element(s).
@@ -57,13 +59,15 @@ namespace oni {
         private:
             virtual void _begin() = 0;
 
-            virtual void _submit(const component::Shape &position, const component::Appearance &color) = 0;
+            virtual void _submit(const component::Shape &, const component::Appearance &) = 0;
 
-            virtual void _submit(const component::Particle &, const component::Appearance &color) = 0;
+            virtual void _submit(const component::Particle &, const component::Appearance &) = 0;
 
-            virtual void _submit(const component::Shape &position, const component::Texture &texture) = 0;
+            virtual void _submit(const component::Particle &, const component::Texture &) = 0;
 
-            virtual void _submit(const component::Text &text) = 0;
+            virtual void _submit(const component::Shape &, const component::Texture &) = 0;
+
+            virtual void _submit(const component::Text &) = 0;
 
             /**
              * Draw the element(s).

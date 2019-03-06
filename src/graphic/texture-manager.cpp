@@ -17,7 +17,7 @@ namespace oni {
         TextureManager::~TextureManager() = default;
 
         void TextureManager::bindRange(common::oniGLuint first, const std::vector<common::oniGLuint> &textures) {
-            if(!textures.empty()){
+            if (!textures.empty()) {
                 glBindTextures(first, static_cast<common::oniGLsizei>(textures.size()), textures.data());
             }
         }
@@ -82,10 +82,10 @@ namespace oni {
 
             FreeImage_Unload(dib);
 
-            std::vector<math::vec2> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
+            std::array<math::vec2, 4> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
 
             auto texture = component::Texture{width, height, textureID, format, type, path, uv, {},
-                                               component::TextureStatus::READY};
+                                              component::TextureStatus::READY};
             mTextureMap[path] = texture;
 
             return &mTextureMap[path];
@@ -180,7 +180,7 @@ namespace oni {
         }
 
         component::Texture TextureManager::loadFromData(common::uint16 width, common::uint16 height,
-                                                         const common::TextureData &data) {
+                                                        const common::TextureData &data) {
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
@@ -198,12 +198,12 @@ namespace oni {
 
             unbind();
 
-            std::vector<math::vec2> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
+            std::array<math::vec2, 4> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
 
             // TODO: The path is empty, might be useful to generate a unique path for procgen textures. Maybe with the
             // seed.
             return component::Texture{width, height, textureID, format, type, "", uv, data,
-                                       component::TextureStatus::READY};
+                                      component::TextureStatus::READY};
 
         }
 

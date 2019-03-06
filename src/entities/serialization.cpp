@@ -4,6 +4,7 @@
 
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
 #include <cereal/types/map.hpp>
 #include <cereal/archives/portable_binary.hpp>
 

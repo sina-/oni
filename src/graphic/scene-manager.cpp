@@ -90,9 +90,11 @@ namespace oni {
             auto ageIndex = glGetAttribLocation(program, "age");
             auto velocityIndex = glGetAttribLocation(program, "velocity");
             auto headingIndex = glGetAttribLocation(program, "heading");
+            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
 
-            if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1 || velocityIndex == -1) {
-                assert("Invalid attribute name." && false);
+            if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1 || velocityIndex == -1 ||
+                headingIndex == -1 || samplerIDIndex == -1) {
+                assert(false);
             }
 
             common::oniGLsizei stride = sizeof(component::ParticleVertex);
@@ -145,12 +147,23 @@ namespace oni {
                     component::ParticleVertex,
                     velocity));
 
+            component::BufferStructure sampler;
+            sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
+            sampler.componentCount = 1;
+            sampler.componentType = GL_FLOAT;
+            sampler.normalized = GL_FALSE;
+            sampler.stride = stride;
+            sampler.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ParticleVertex,
+                    samplerID));
+
             std::vector<component::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
             bufferStructures.push_back(age);
             bufferStructures.push_back(heading);
             bufferStructures.push_back(velocity);
+            bufferStructures.push_back(sampler);
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
@@ -269,6 +282,7 @@ namespace oni {
 
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
+            std::string textureID = "resources/images/smoke/1.png";
 
             // Bullet trails
             {
@@ -279,11 +293,11 @@ namespace oni {
 
                     assert(trail.previousPos.size() == trail.velocity.size());
 
-                    math::vec4 color{1.f, 1.f, 1.f, 1.f};
+                    //math::vec4 color{1.f, 1.f, 1.f, 1.f};
 
                     if (trail.previousPos.empty()) {
                         auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                currentPos, color, false);
+                                currentPos, textureID, false);
                         continue;
                     }
 
@@ -324,7 +338,7 @@ namespace oni {
                         }
                         */
                         trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                pos, color, false);
+                                pos, textureID, false);
                         auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
                                 trailEntity);
                         // TODO: I don't use any other velocity than the first one, should I just not store the rest?
@@ -678,19 +692,36 @@ namespace oni {
 
         void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
                                            common::real32 viewHeight) {
-            auto view = manager.createView<component::Particle>();
-            for (const auto &entity: view) {
-                const auto &particle = view.get<component::Particle>(entity);
-                if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                    continue;
+            {
+                auto view = manager.createView<component::Particle, component::Appearance>();
+                for (const auto &entity: view) {
+                    const auto &particle = view.get<component::Particle>(entity);
+                    if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        continue;
+                    }
+                    const auto &appearance = view.get<component::Appearance>(entity);
+
+                    ++mRenderedParticlesPerFrame;
+
+                    mParticleRenderer->submit(particle, appearance);
                 }
+            }
 
-                component::Appearance appearance;
-                appearance.color = particle.color;
+            {
+                auto view = manager.createView<component::Particle, component::Texture>();
+                for (const auto &entity: view) {
+                    const auto &particle = view.get<component::Particle>(entity);
+                    if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        continue;
+                    }
 
-                ++mRenderedParticlesPerFrame;
+                    auto &texture = view.get<component::Texture>(entity);
+                    prepareTexture(texture);
 
-                mParticleRenderer->submit(particle, appearance);
+                    ++mRenderedParticlesPerFrame;
+
+                    mParticleRenderer->submit(particle, texture);
+                }
             }
 
         }

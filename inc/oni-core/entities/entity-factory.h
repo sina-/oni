@@ -139,6 +139,12 @@ namespace oni {
                                                                        const bool &randomize);
 
             template<>
+            void _createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
+                                                                       const math::vec3 &worldPos,
+                                                                       const std::string &textureID,
+                                                                       const bool &randomize);
+
+            template<>
             void _createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID,
                                                                      const math::vec3 &pos,
                                                                      const math::vec2 &size,
@@ -220,6 +226,13 @@ namespace oni {
             template<class Component>
             void removeComponent(common::EntityID entityID) {
                 mManager->remove<Component>(entityID);
+            }
+
+            template<class Component>
+            void removeComponentSafe(common::EntityID entityID) {
+                if(mManager->has<Component>(entityID)){
+                    mManager->remove<Component>(entityID);
+                }
             }
 
             void destroyEntity(common::EntityID entityID);

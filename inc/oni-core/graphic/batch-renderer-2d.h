@@ -45,13 +45,15 @@ namespace oni {
         private:
             void _begin() override;
 
-            void _submit(const component::Shape &position, const component::Appearance &color) override;
+            void _submit(const component::Shape &, const component::Appearance &) override;
 
-            void _submit(const component::Particle &, const component::Appearance &color) override;
+            void _submit(const component::Particle &, const component::Appearance &) override;
 
-            void _submit(const component::Shape &position, const component::Texture &texture) override;
+            void _submit(const component::Particle &, const component::Texture &) override;
 
-            void _submit(const component::Text &text) override;
+            void _submit(const component::Shape &, const component::Texture &) override;
+
+            void _submit(const component::Text &) override;
 
             void _flush() override;
 

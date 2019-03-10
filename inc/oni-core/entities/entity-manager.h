@@ -10,6 +10,7 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/entity-definition.h>
 #include <oni-core/component/tag.h>
+#include <oni-core/component/visual.h>
 
 
 namespace oni {
@@ -123,12 +124,6 @@ namespace oni {
                 return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
 
-            template<class Component>
-            void reset() {
-                mRegistry->reset<Component>();
-            }
-
-            // TODO: This shouldn't be exposes like this! Only removeEntity from EntityFactory should handle destruction.
             void destroy(EntityID entityID) {
                 mRegistry->destroy(entityID);
             }
@@ -195,20 +190,47 @@ namespace oni {
                 switch (snapshotType) {
                     case component::SnapshotType::ONLY_COMPONENTS: {
                         // TODO: Rather not have this class know about specific components!
-                        auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
-                        if (!view.empty()) {
-                            mRegistry->snapshot().template component<ArchiveComponents...>(archive,
-                                                                                           view.begin(),
-                                                                                           view.end());
+                        {
+                            auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
+                            if (!view.empty()) {
+                                mRegistry->snapshot().template component<ArchiveComponents...>(archive,
+                                                                                               view.begin(),
+                                                                                               view.end());
+                                mRegistry->reset<component::Tag_OnlyComponentUpdate>();
+                            }
+                        }
+                        {
+                            // TODO: This component tracks all the changes server side so that if there are changes
+                            // between network updates those changes won't be lost. This could happen to any other
+                            // component that is updated faster than network poll rate. I need a generic solution
+                            // to this problem. Maybe I should have a global tick id and every tick id has a set
+                            // of components that has been updated, so that each client can be sync'd with all
+                            // those changes
+                            auto view = createView<component::Trail>();
+                            for (auto &&entity: view) {
+                                view.get<component::Trail>(entity).velocity.clear();
+                                view.get<component::Trail>(entity).previousPos.clear();
+                            }
                         }
                         break;
                     }
                     case component::SnapshotType::ONLY_NEW_ENTITIES: {
-                        auto view = mRegistry->view<component::Tag_SyncUsingRegistry>();
-                        if (!view.empty()) {
-                            mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
-                                                                                                             view.begin(),
-                                                                                                             view.end());
+                        {
+                            auto view = mRegistry->view<component::Tag_SyncUsingRegistry>();
+                            if (!view.empty()) {
+                                mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
+                                        archive,
+                                        view.begin(),
+                                        view.end());
+                                mRegistry->reset<component::Tag_SyncUsingRegistry>();
+                            }
+                        }
+                        {
+                            auto view = createView<component::Trail>();
+                            for (auto &&entity: view) {
+                                view.get<component::Trail>(entity).velocity.clear();
+                                view.get<component::Trail>(entity).previousPos.clear();
+                            }
                         }
                         break;
                     }

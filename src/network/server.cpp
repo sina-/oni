@@ -70,40 +70,22 @@ namespace oni {
         }
 
         void Server::sendComponentsUpdate(entities::EntityManager &manager) {
+            // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
             std::string data = entities::serialize(manager, component::SnapshotType::ONLY_COMPONENTS);
             auto type = PacketType::ONLY_COMPONENT_UPDATE;
 
             if (data.size() > 1) {
                 broadcast(type, data);
-
-                auto lock = manager.scopedLock();
-                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<component::Tag_OnlyComponentUpdate>();
-
-                auto view = manager.createView<component::Trail>();
-                for (auto &&entity: view) {
-                    view.get<component::Trail>(entity).velocity.clear();
-                    view.get<component::Trail>(entity).previousPos.clear();
-                }
             }
         }
 
         void Server::sendNewEntities(entities::EntityManager &manager) {
+            // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
             std::string data = entities::serialize(manager, component::SnapshotType::ONLY_NEW_ENTITIES);
             auto type = PacketType::ADD_NEW_ENTITIES;
 
             if (data.size() > 1) {
                 broadcast(type, data);
-
-                auto lock = manager.scopedLock();
-                // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                manager.reset<component::Tag_SyncUsingRegistry>();
-
-                auto view = manager.createView<component::Trail>();
-                for (auto &&entity: view) {
-                    view.get<component::Trail>(entity).velocity.clear();
-                    view.get<component::Trail>(entity).previousPos.clear();
-                }
             }
         }
 

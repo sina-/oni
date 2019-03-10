@@ -91,9 +91,10 @@ namespace oni {
             auto velocityIndex = glGetAttribLocation(program, "velocity");
             auto headingIndex = glGetAttribLocation(program, "heading");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
+            auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
 
             if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1 || velocityIndex == -1 ||
-                headingIndex == -1 || samplerIDIndex == -1) {
+                headingIndex == -1 || samplerIDIndex == -1 || halfSizeIndex == -1) {
                 assert(false);
             }
 
@@ -157,6 +158,16 @@ namespace oni {
                     component::ParticleVertex,
                     samplerID));
 
+            component::BufferStructure halfSize;
+            halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
+            halfSize.componentCount = 1;
+            halfSize.componentType = GL_FLOAT;
+            halfSize.normalized = GL_FALSE;
+            halfSize.stride = stride;
+            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
+                    component::ParticleVertex,
+                    halfSize));
+
             std::vector<component::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
@@ -164,6 +175,7 @@ namespace oni {
             bufferStructures.push_back(heading);
             bufferStructures.push_back(velocity);
             bufferStructures.push_back(sampler);
+            bufferStructures.push_back(halfSize);
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
@@ -283,6 +295,7 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
             std::string textureID = "resources/images/smoke/1.png";
+            common::real32 halfSize = 0.5f;
 
             // Bullet trails
             {
@@ -297,7 +310,7 @@ namespace oni {
 
                     if (trail.previousPos.empty()) {
                         auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                currentPos, textureID, false);
+                                currentPos, textureID, halfSize, false);
                         continue;
                     }
 
@@ -338,7 +351,7 @@ namespace oni {
                         }
                         */
                         trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                pos, textureID, false);
+                                pos, textureID, halfSize, false);
                         auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
                                 trailEntity);
                         // TODO: I don't use any other velocity than the first one, should I just not store the rest?
@@ -694,6 +707,7 @@ namespace oni {
                                            common::real32 viewHeight) {
             {
                 auto view = manager.createView<component::Particle, component::Appearance>();
+
                 for (const auto &entity: view) {
                     const auto &particle = view.get<component::Particle>(entity);
                     if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {

@@ -293,10 +293,12 @@ namespace oni {
         void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
                                                                                   const math::vec3 &worldPos,
                                                                                   const math::vec4 &color,
+                                                                                  const common::real32 &halfSize,
                                                                                   const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
             particle.age = 0.f;
+            particle.halfSize = halfSize;
 
             auto &appearance = createComponent<component::Appearance>(entityID);
             appearance.color = color;
@@ -314,10 +316,12 @@ namespace oni {
         void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
                                                                                   const math::vec3 &worldPos,
                                                                                   const std::string &textureID,
+                                                                                  const common::real32 &halfSize,
                                                                                   const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
             particle.age = 0.f;
+            particle.halfSize = halfSize;
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;

@@ -361,7 +361,7 @@ namespace oni {
                 // and clients will decide what to render. I'm using the registry just as a way to communicate between
                 // this function and server packet sender. These entities are not synced with usual registry sync
                 // mechanic
-                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, color, false);
+                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, color, 0.5f, false);
 
                 entityFactory.removeEntity<component::EntityType::SIMPLE_BULLET>(entity);
             }

@@ -76,9 +76,7 @@ namespace oni {
         common::oniGLint Shader::getUniformLocation(const common::oniGLchar *name) const {
             // TODO: Slow operation, need caching
             auto location = glGetUniformLocation(mProgram, name);
-            if (location == -1) {
-                throw std::runtime_error("Invalid uniform name.");
-            }
+            assert(location != -1);
             return location;
         }
 

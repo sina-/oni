@@ -132,6 +132,7 @@ namespace oni {
             buffer->heading = particle.heading;
             buffer->velocity = particle.velocity;
             buffer->samplerID = -1;
+            buffer->halfSize = particle.halfSize;
             buffer++;
 
             // Update the mBuffer to point to the head.
@@ -153,6 +154,7 @@ namespace oni {
             buffer->heading = particle.heading;
             buffer->velocity = particle.velocity;
             buffer->samplerID = samplerID;
+            buffer->halfSize = particle.halfSize;
             buffer++;
 
             // Update the mBuffer to point to the head.

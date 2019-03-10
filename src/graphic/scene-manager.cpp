@@ -296,13 +296,18 @@ namespace oni {
             auto viewHeight = getViewHeight();
             std::string textureID = "resources/images/smoke/1.png";
             common::real32 halfSize = 0.5f;
+            common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
             // Bullet trails
             {
                 auto view = entityFactory.getEntityManager().createViewScopeLock<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
-                    const auto &currentPos = view.get<component::Placement>(entity).position;
+                    const auto &placement = view.get<component::Placement>(entity);
+                    const auto &currentPos = placement.position;
                     const auto &trail = view.get<component::Trail>(entity);
+                    common::real32 projectileHeading = placement.rotation;
+                    common::real32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
+                    common::real32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
 
                     assert(trail.previousPos.size() == trail.velocity.size());
 
@@ -334,9 +339,10 @@ namespace oni {
 
                     auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
 
-                    math::vec3 pos{x, y, currentPos.z};
                     common::EntityID trailEntity;
-                    for (common::real32 i = 0.f; i <= distance; i += particleSize) {
+                    for (auto numParticles = 0; numParticles < mRand->nextUint8(1, 2); ++numParticles) {
+                        math::vec3 pos{x, y, currentPos.z};
+                        for (common::real32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
                             trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
@@ -350,16 +356,19 @@ namespace oni {
                                     pos, color, false);
                         }
                         */
-                        trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
-                                pos, textureID, halfSize, false);
-                        auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
-                                trailEntity);
-                        // TODO: I don't use any other velocity than the first one, should I just not store the rest?
-                        // or should I update this code to use all by iterating over trail.previousPos?
-                        particle.maxAge = 1.f - (distance - i) / trail.velocity[0];
+                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                                    pos, textureID, halfSize, false);
+                            auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
+                                    trailEntity);
+                            // TODO: I don't use any other velocity than the first one, should I just not store the rest?
+                            // or should I update this code to use all by iterating over trail.previousPos?
+                            particle.maxAge = 1.f - (distance - i) / trail.velocity[0];
+                            particle.heading = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
+                            particle.velocity = mRand->nextReal32(2.f, 10.f);
 
-                        pos.x += particleSize * std::sin(alpha);
-                        pos.y += particleSize * std::cos(alpha);
+                            pos.x += particleSize * std::sin(alpha);
+                            pos.y += particleSize * std::cos(alpha);
+                        }
                     }
 
 //                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
@@ -789,9 +798,9 @@ namespace oni {
                                            static_cast<common::real32>(mSkidTileSizeY)};
 
                 auto widthInPixels = static_cast<common::uint16>(mSkidTileSizeX * mGameUnitToPixels +
-                                                                 common::ep);
+                                                                 common::EP);
                 auto heightInPixels = static_cast<common::uint16>(mSkidTileSizeY * mGameUnitToPixels +
-                                                                  common::ep);
+                                                                  common::EP);
                 auto defaultColor = component::PixelRGBA{};
                 // TODO: I can blend skid textures using this data
                 auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels,

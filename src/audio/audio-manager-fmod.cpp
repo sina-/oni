@@ -72,7 +72,7 @@ namespace oni {
             ERRCHECK(result);
 
             // TODO: This is just a work around to keep the interface consistent with double.
-            return (static_cast<double>(pos) + common::ep);
+            return (static_cast<double>(pos) + common::EP);
         }
 
         void AudioManagerFMOD::stopSound(OniSoundID id) {
@@ -103,7 +103,7 @@ namespace oni {
         }
 
         void AudioManagerFMOD::seek(OniSoundID id, double position) {
-            auto result = mChannels[id]->setPosition(static_cast<common::uint32>(position + common::ep),
+            auto result = mChannels[id]->setPosition(static_cast<common::uint32>(position + common::EP),
                                                      FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
         }

@@ -285,9 +285,9 @@ namespace oni {
                     auto &position = props.body->GetPosition();
                     auto &placement = view.get<component::Placement>(entity);
 
-                    if (std::abs(placement.position.x - position.x) > common::ep ||
-                        std::abs(placement.position.y - position.y) > common::ep ||
-                        std::abs(placement.rotation - props.body->GetAngle()) > common::ep) {
+                    if (std::abs(placement.position.x - position.x) > common::EP ||
+                        std::abs(placement.position.y - position.y) > common::EP ||
+                        std::abs(placement.rotation - props.body->GetAngle()) > common::EP) {
                         if (manager.has<component::Trail>(entity)) {
                             auto &trail = manager.get<component::Trail>(entity);
                             trail.previousPos.push_back(placement.position);

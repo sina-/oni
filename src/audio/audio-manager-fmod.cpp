@@ -82,7 +82,6 @@ namespace oni {
         void AudioManagerFMOD::setLoop(OniSoundID id, bool loop) {
             UNUSED(id);
             UNUSED(loop);
-
         }
 
         void AudioManagerFMOD::setVolume(OniSoundID id, common::real32 volume) {

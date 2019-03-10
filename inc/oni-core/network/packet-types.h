@@ -18,6 +18,7 @@ namespace oni {
             DESTROYED_ENTITIES = 9,
 
             SPAWN_PARTICLE = 11,
+            ONE_SHOT_SOUND_EFFECT = 12,
         };
     }
 }

@@ -14,7 +14,13 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
-        struct Tag_NewEntity {
+        struct Tag_SyncUsingRegistry {
+        };
+
+        struct Tag_SyncUsingPacket {
+        };
+
+        struct Tag_OneShot {
         };
 
         struct Tag_OnlyComponentUpdate {

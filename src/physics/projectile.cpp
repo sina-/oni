@@ -38,7 +38,7 @@ namespace oni {
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 bulletSpeed{50.f};
+                common::real32 bulletSpeed{20.f};
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
@@ -98,12 +98,16 @@ namespace oni {
                             carPos.z};
 
                     std::string textureID = "resources/images/bullet/1.png";
-                    auto bulletID = entityFactory.createEntity<component::EntityType::SIMPLE_BULLET>(pos,
-                                                                                                     bulletSize,
-                                                                                                     carPlacement.rotation,
-                                                                                                     textureID,
-                                                                                                     bulletSpeed
-                                                                                                     );
+
+                    entityFactory.createEntity<component::EntityType::SIMPLE_BULLET>(pos,
+                                                                                     bulletSize,
+                                                                                     carPlacement.rotation,
+                                                                                     textureID,
+                                                                                     bulletSpeed
+                    );
+                    std::string soundID = "resources/audio/gun/1.wav";
+                    entityFactory.createEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(pos.getXY(), soundID);
+
                 }
             }
         }

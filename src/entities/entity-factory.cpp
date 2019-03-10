@@ -7,6 +7,7 @@
 #include <oni-core/component/visual.h>
 #include <oni-core/math/rand.h>
 #include <oni-core/component/gameplay.h>
+#include <oni-core/component/audio.h>
 
 namespace oni {
     namespace entities {
@@ -24,14 +25,15 @@ namespace oni {
 
         common::EntityID EntityFactory::createEntity() {
             auto entityID = mManager->create();
-            mManager->assign<component::Tag_NewEntity>(entityID);
             return entityID;
         }
 
         void EntityFactory::destroyEntity(common::EntityID entityID) {
-            // TODO: Can we remove this check?
-            if (!mManager->has<component::Tag_NewEntity>(entityID)) {
-                mManager->addDeletedEntity(entityID);
+            // NOTE: The check is so that if an entity is created server side but not yet send to clients.
+            // TODO: Maybe I shouldn't care if clients know about this entity or not and make them do safe delete
+            // when they receive entity deletion packet.
+            if (!mManager->has<component::Tag_SyncUsingRegistry>(entityID)) {
+                mManager->trackDeletion(entityID);
             }
             mManager->destroy(entityID);
         }
@@ -71,6 +73,7 @@ namespace oni {
                 case component::EntityType::SIMPLE_PARTICLE:
                 case component::EntityType::TEXT:
                 case component::EntityType::WORLD_CHUNK:
+                case component::EntityType::ONESHOT_SOUND_EFFECT:
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
@@ -129,6 +132,7 @@ namespace oni {
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -163,6 +167,7 @@ namespace oni {
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -190,6 +195,7 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -216,6 +222,7 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -250,6 +257,7 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -268,6 +276,7 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_ColorShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -287,6 +296,7 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -308,8 +318,7 @@ namespace oni {
                 particle.velocity = mRand->nextReal32(1.f, 7.f);
                 particle.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
-            // NOTE: For now particles are sync'd with a game packet, don't need to serialize them through registry
-            removeTag<component::Tag_NewEntity>(entityID);
+            assignTag<component::Tag_SyncUsingPacket>(entityID);
         }
 
         template<>
@@ -332,8 +341,7 @@ namespace oni {
                 particle.velocity = mRand->nextReal32(1.f, 7.f);
                 particle.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
-            // NOTE: For now particles are sync'd with a game packet, don't need to serialize them through registry
-            removeTag<component::Tag_NewEntity>(entityID);
+            assignTag<component::Tag_SyncUsingPacket>(entityID);
         }
 
         template<>
@@ -380,6 +388,7 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -391,6 +400,7 @@ namespace oni {
             textComponent.textContent = text;
 
             assignTag<component::Tag_Static>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -412,6 +422,7 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -432,8 +443,17 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_ColorShaded>(entityID);
+            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
+        template<>
+        void EntityFactory::_createEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(common::EntityID entityID,
+                                                                                       const math::vec2 &worldPos,
+                                                                                       const std::string &soundID) {
+            auto &soundEffect = createComponent<component::SoundEffect>(entityID);
+            assignTag<component::Tag_OneShot>(entityID);
+            assignTag<component::Tag_SyncUsingPacket>(entityID);
+        }
 
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
                                                   const math::vec2 &size, common::real32 heading,
@@ -602,6 +622,12 @@ namespace oni {
         void EntityFactory::_removeEntity<component::EntityType::TEXT>(common::EntityID entityID) {
             removeComponent<component::Text>(entityID);
             removeTag<component::Tag_Static>(entityID);
+        }
+
+        template<>
+        void EntityFactory::_removeEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(oni::common::EntityID entityID) {
+            removeComponent<component::SoundEffect>(entityID);
+            removeTag<component::Tag_OneShot>(entityID);
         }
 
         void EntityFactory::removePhysicalBody(common::EntityID entityID) {

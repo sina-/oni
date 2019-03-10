@@ -131,6 +131,9 @@ namespace oni {
         void serialize(Archive &archive, component::Tag_ColorShaded &) {}
 
         template<class Archive>
+        void serialize(Archive &archive, component::Tag_OneShot &) {}
+
+        template<class Archive>
         void serialize(Archive &archive, component::Appearance &appearance) {
             archive(appearance.color);
         }

@@ -116,6 +116,7 @@ namespace oni {
                 mServer->sendComponentsUpdate(mEntityFactory->getEntityManager());
                 mServer->sendNewEntities(mEntityFactory->getEntityManager());
                 mServer->broadcastSpawnParticle(mEntityFactory->getEntityManager());
+                mServer->broadcastOneShotSoundEffects(mEntityFactory->getEntityManager());
 
                 {
                     auto &entityManager = mEntityFactory->getEntityManager();

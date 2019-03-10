@@ -30,6 +30,8 @@ namespace oni {
 
             void broadcastDeletedEntities(entities::EntityManager &);
 
+            void broadcastOneShotSoundEffects(entities::EntityManager &);
+
             void sendCarEntityID(common::EntityID, const common::PeerID &);
 
             void broadcastSpawnParticle(entities::EntityManager &manager);

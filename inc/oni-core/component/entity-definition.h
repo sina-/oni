@@ -25,6 +25,8 @@ namespace oni {
 
             TEXT,
             WORLD_CHUNK,
+
+            ONESHOT_SOUND_EFFECT,
         };
 
         enum class SnapshotType {

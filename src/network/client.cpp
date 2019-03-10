@@ -53,6 +53,7 @@ namespace oni {
 
         void Client::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
             auto peerID = getPeerID(*peer);
+            assert(mPacketHandlers.find(header) != mPacketHandlers.end());
             switch (header) {
                 case (PacketType::PING): {
                     auto latency = mTimer->elapsed_in_seconds();
@@ -95,8 +96,13 @@ namespace oni {
                     mPacketHandlers[PacketType::SPAWN_PARTICLE](peerID, dataString);
                     break;
                 }
+                case (PacketType::ONE_SHOT_SOUND_EFFECT): {
+                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
+                    mPacketHandlers[PacketType::ONE_SHOT_SOUND_EFFECT](peerID, dataString);
+                    break;
+                }
                 default: {
-                    std::cout << "Unknown packet!" << std::endl;
+                    assert(false);
                     break;
                 }
             }

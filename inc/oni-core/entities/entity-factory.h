@@ -59,19 +59,23 @@ namespace oni {
                 destroyEntity(entityID);
             }
 
-            template<component::EntityType, class ...Args>
-            void _createEntity(common::EntityID, const Args &...) = delete;
-
-            template<component::EntityType entityType>
-            void _removeEntity(common::EntityID) = delete;
-
             void attach(common::EntityID parent,
                         common::EntityID child,
                         component::EntityType parentType,
                         component::EntityType childType);
 
+            void clearDeletedEntitiesList() {
+                mManager->clearDeletedEntitiesList();
+            }
+
         private:
             common::EntityID createEntity();
+
+            template<component::EntityType, class ...Args>
+            void _createEntity(common::EntityID, const Args &...) = delete;
+
+            template<component::EntityType entityType>
+            void _removeEntity(common::EntityID) = delete;
 
             void _removeEntity(common::EntityID, component::EntityType entityType);
 
@@ -174,6 +178,11 @@ namespace oni {
                                                                    const common::real32 &heading,
                                                                    const math::vec4 &color);
 
+            template<>
+            void _createEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(common::EntityID,
+                                                                            const math::vec2 &worldPos,
+                                                                            const std::string &soundID);
+
         private:
             template<>
             void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID);
@@ -198,6 +207,9 @@ namespace oni {
 
             template<>
             void _removeEntity<component::EntityType::TEXT>(common::EntityID);
+
+            template<>
+            void _removeEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(common::EntityID);
 
         private:
             b2Body *createPhysicalBody(
@@ -232,7 +244,7 @@ namespace oni {
 
             template<class Component>
             void removeComponentSafe(common::EntityID entityID) {
-                if(mManager->has<Component>(entityID)){
+                if (mManager->has<Component>(entityID)) {
                     mManager->remove<Component>(entityID);
                 }
             }

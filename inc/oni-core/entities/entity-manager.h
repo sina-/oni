@@ -204,7 +204,7 @@ namespace oni {
                         break;
                     }
                     case component::SnapshotType::ONLY_NEW_ENTITIES: {
-                        auto view = mRegistry->view<component::Tag_NewEntity>();
+                        auto view = mRegistry->view<component::Tag_SyncUsingRegistry>();
                         if (!view.empty()) {
                             mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive,
                                                                                                              view.begin(),
@@ -230,7 +230,7 @@ namespace oni {
                 return std::unique_lock<std::mutex>(mMutex);
             }
 
-            void addDeletedEntity(EntityID entity) {
+            void trackDeletion(EntityID entity) {
                 mDeletedEntities.push_back(entity);
             }
 

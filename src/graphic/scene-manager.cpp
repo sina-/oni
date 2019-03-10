@@ -290,8 +290,6 @@ namespace oni {
 
         void SceneManager::tick(entities::EntityFactory &entityFactory,
                                 common::real64 tickTime) {
-            entityFactory.clearDeletedEntitiesList();
-
             updateParticles(entityFactory, tickTime);
 
             auto viewWidth = getViewWidth();
@@ -454,8 +452,6 @@ namespace oni {
         }
 
         void SceneManager::tickInternal(common::real64 tickTime) {
-            mInternalEntityFactory->clearDeletedEntitiesList();
-
             updateParticles(*mInternalEntityFactory, tickTime);
         }
 
@@ -466,7 +462,7 @@ namespace oni {
                 // TODO: Maybe you want a single place to store these variables?
                 particle.age += tickTime;
                 if (particle.age > particle.maxAge) {
-                    entityFactory.removeEntity<component::EntityType::SIMPLE_PARTICLE>(entity);
+                    entityFactory.removeEntity(entity, false, false);
                 }
             }
         }

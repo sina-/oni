@@ -16,54 +16,38 @@ namespace oni {
                 mZLayerManager(zLayerManager),
                 mPhysicsWorld{physicsWorld} {
             mRand = std::make_unique<math::Rand>(0);
-            mManager = std::make_unique<oni::entities::EntityManager>();
+            mRegistryManager = std::make_unique<oni::entities::EntityManager>();
         }
 
         EntityManager &EntityFactory::getEntityManager() {
-            return *mManager;
+            return *mRegistryManager;
         }
 
         common::EntityID EntityFactory::createEntity() {
-            auto entityID = mManager->create();
+            auto entityID = mRegistryManager->create();
             return entityID;
         }
 
-        void EntityFactory::destroyEntity(common::EntityID entityID) {
-            // NOTE: The check is so that if an entity is created server side but not yet send to clients.
-            // TODO: Maybe I shouldn't care if clients know about this entity or not and make them do safe delete
-            // when they receive entity deletion packet.
-            if (!mManager->has<component::Tag_SyncUsingRegistry>(entityID)) {
-                mManager->trackDeletion(entityID);
-            }
-            mManager->destroy(entityID);
-        }
-
-        void EntityFactory::_removeEntity(common::EntityID entityID, component::EntityType entityType) {
+        void EntityFactory::removeEntity(common::EntityID entityID,
+                                         component::EntityType entityType,
+                                         bool track,
+                                         bool safe) {
             switch (entityType) {
                 case component::EntityType::RACE_CAR: {
-                    _removeEntity<component::EntityType::RACE_CAR>(entityID);
+                    _removeEntity<component::EntityType::RACE_CAR>(entityID, track, safe);
                     break;
                 }
                 case component::EntityType::WALL: {
-                    _removeEntity<component::EntityType::WALL>(entityID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_GUN: {
-                    _removeEntity<component::EntityType::VEHICLE_GUN>(entityID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_TIRE_FRONT: {
-                    _removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(entityID);
-                    break;
-                }
-                case component::EntityType::VEHICLE_TIRE_REAR: {
-                    _removeEntity<component::EntityType::VEHICLE_TIRE_REAR>(entityID);
+                    _removeEntity<component::EntityType::WALL>(entityID, track, safe);
                     break;
                 }
                 case component::EntityType::SIMPLE_BULLET: {
-                    _removeEntity<component::EntityType::SIMPLE_BULLET>(entityID);
+                    _removeEntity<component::EntityType::SIMPLE_BULLET>(entityID, track, safe);
                     break;
                 }
+                case component::EntityType::VEHICLE_GUN:
+                case component::EntityType::VEHICLE_TIRE_FRONT:
+                case component::EntityType::VEHICLE_TIRE_REAR:
                 case component::EntityType::ROAD:
                 case component::EntityType::VEHICLE:
                 case component::EntityType::BACKGROUND:
@@ -79,8 +63,18 @@ namespace oni {
                     break;
                 }
             }
-            removeComponent<component::EntityType>(entityID);
-            destroyEntity(entityID);
+            removeEntity(entityID, track, safe);
+        }
+
+        void EntityFactory::removeEntity(common::EntityID entityID, bool track, bool safe) {
+            if (safe && !mRegistryManager->valid(entityID)) {
+                return;
+            }
+            if (track) {
+                mRegistryManager->destroyAndTrack(entityID);
+            } else {
+                mRegistryManager->destroy(entityID);
+            }
         }
 
         template<>
@@ -529,109 +523,32 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID) {
-            auto &attachments = mManager->get<component::EntityAttachment>(entityID);
+        void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID, bool track, bool safe) {
+            // TODO: When notifying clients of this, the texture in memory should be evicted.
+
+
+            auto &attachments = mRegistryManager->get<component::EntityAttachment>(entityID);
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 auto attachmentType = attachments.entityTypes[i];
                 auto attachmentEntityID = attachments.entities[i];
-                _removeEntity(attachmentEntityID, attachmentType);
+                removeEntity(attachmentEntityID, track, safe);
             }
-            removeComponent<component::EntityAttachment>(entityID);
-            removeComponent<component::Shape>(entityID);
-            removeComponent<component::Placement>(entityID);
-            // TODO: When notifying clients of this, the texture in memory should be evicted.
-            removeComponent<component::Texture>(entityID);
-            removeComponent<component::TransformChildren>(entityID);
-            removeComponent<component::Car>(entityID);
-            removeComponent<component::CarConfig>(entityID);
-            // TODO: Does it make sense to remove this? A player might leave but lap info should still be visible
-            // Maybe I should not keep it as part of RACE_CAR entity?
-            removeComponent<component::CarLapInfo>(entityID);
 
             removePhysicalBody(entityID);
-            removeComponent<component::PhysicalProperties>(entityID);
-
-            removeTag<component::Tag_Dynamic>(entityID);
-            removeTag<component::Tag_TextureShaded>(entityID);
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID entityID) {
-            removeComponent<component::Placement>(entityID);
-            removeComponent<component::Texture>(entityID);
-            removeComponent<component::Shape>(entityID);
-            removeComponent<component::EntityAttachee>(entityID);
-            removeComponent<component::TransformParent>(entityID);
-            removeComponent<component::GunCoolDown>(entityID);
-
-            removeTag<component::Tag_Dynamic>(entityID);
-            removeTag<component::Tag_TextureShaded>(entityID);
-        }
-
-        template<>
-        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID) {
-            removeComponent<component::Placement>(entityID);
-            removeComponent<component::Texture>(entityID);
-            removeComponent<component::Shape>(entityID);
-            removeComponent<component::EntityAttachee>(entityID);
-            removeComponent<component::TransformParent>(entityID);
-
-            removeTag<component::Tag_Dynamic>(entityID);
-            removeTag<component::Tag_TextureShaded>(entityID);
-        }
-
-        template<>
-        void EntityFactory::_removeEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID) {
-            _removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(entityID);
-        }
-
-        template<>
-        void EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID) {
-            removeComponent<component::Texture>(entityID);
-            removeComponent<component::Shape>(entityID);
-
+        void EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID, bool track, bool safe) {
             removePhysicalBody(entityID);
-            removeComponent<component::PhysicalProperties>(entityID);
-
-            removeTag<component::Tag_Static>(entityID);
-            removeTag<component::Tag_TextureShaded>(entityID);
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID) {
-            removeComponent<component::Shape>(entityID);
-            removeComponent<component::Placement>(entityID);
-            removeComponent<component::Texture>(entityID);
-
+        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID, bool track, bool safe) {
             removePhysicalBody(entityID);
-            removeComponent<component::PhysicalProperties>(entityID);
-            removeComponent<component::Trail>(entityID);
-
-            removeTag<component::Tag_Dynamic>(entityID);
-            removeTag<component::Tag_TextureShaded>(entityID);
-        }
-
-        template<>
-        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID) {
-            removeComponent<component::Particle>(entityID);
-            removeComponentSafe<component::Appearance>(entityID);
-            removeComponentSafe<component::Texture>(entityID);
-        }
-
-        template<>
-        void EntityFactory::_removeEntity<component::EntityType::TEXT>(common::EntityID entityID) {
-            removeComponent<component::Text>(entityID);
-            removeTag<component::Tag_Static>(entityID);
-        }
-
-        template<>
-        void EntityFactory::_removeEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(oni::common::EntityID entityID) {
-            removeComponent<component::SoundEffect>(entityID);
-            removeTag<component::Tag_OneShot>(entityID);
         }
 
         void EntityFactory::removePhysicalBody(common::EntityID entityID) {
-            auto entityPhysicalProps = mManager->get<component::PhysicalProperties>(entityID);
+            auto entityPhysicalProps = mRegistryManager->get<component::PhysicalProperties>(entityID);
             mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
         }
 
@@ -639,14 +556,14 @@ namespace oni {
                                    common::EntityID child,
                                    component::EntityType parentType,
                                    component::EntityType childType) {
-            auto &transformChildren = mManager->get<component::TransformChildren>(parent);
+            auto &transformChildren = mRegistryManager->get<component::TransformChildren>(parent);
             transformChildren.children.emplace_back(child);
 
-            auto &attachment = mManager->get<component::EntityAttachment>(parent);
+            auto &attachment = mRegistryManager->get<component::EntityAttachment>(parent);
             attachment.entities.emplace_back(child);
             attachment.entityTypes.emplace_back(childType);
 
-            auto &attachee = mManager->get<component::EntityAttachee>(child);
+            auto &attachee = mRegistryManager->get<component::EntityAttachee>(child);
             attachee.entityID = parent;
             attachee.entityType = parentType;
         }

@@ -52,12 +52,9 @@ namespace oni {
                 return entityID;
             }
 
-            template<component::EntityType entityType>
-            void removeEntity(common::EntityID entityID) {
-                _removeEntity<entityType>(entityID);
-                removeComponent<component::EntityType>(entityID);
-                destroyEntity(entityID);
-            }
+            void removeEntity(common::EntityID, component::EntityType entityType, bool track, bool safe);
+
+            void removeEntity(common::EntityID, bool track, bool safe);
 
             void attach(common::EntityID parent,
                         common::EntityID child,
@@ -65,7 +62,7 @@ namespace oni {
                         component::EntityType childType);
 
             void clearDeletedEntitiesList() {
-                mManager->clearDeletedEntitiesList();
+                mRegistryManager->clearDeletedEntitiesList();
             }
 
         private:
@@ -75,9 +72,7 @@ namespace oni {
             void _createEntity(common::EntityID, const Args &...) = delete;
 
             template<component::EntityType entityType>
-            void _removeEntity(common::EntityID) = delete;
-
-            void _removeEntity(common::EntityID, component::EntityType entityType);
+            void _removeEntity(common::EntityID, bool track, bool safe) = delete;
 
             template<>
             void _createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
@@ -185,31 +180,13 @@ namespace oni {
 
         private:
             template<>
-            void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID);
+            void _removeEntity<component::EntityType::RACE_CAR>(common::EntityID, bool track, bool safe);
 
             template<>
-            void _removeEntity<component::EntityType::VEHICLE_GUN>(common::EntityID);
+            void _removeEntity<component::EntityType::WALL>(common::EntityID, bool track, bool safe);
 
             template<>
-            void _removeEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID);
-
-            template<>
-            void _removeEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID);
-
-            template<>
-            void _removeEntity<component::EntityType::WALL>(common::EntityID);
-
-            template<>
-            void _removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID);
-
-            template<>
-            void _removeEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID);
-
-            template<>
-            void _removeEntity<component::EntityType::TEXT>(common::EntityID);
-
-            template<>
-            void _removeEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(common::EntityID);
+            void _removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID, bool track, bool safe);
 
         private:
             b2Body *createPhysicalBody(
@@ -224,35 +201,35 @@ namespace oni {
         private:
             template<class T>
             void assignTag(common::EntityID entityID) {
-                mManager->assign<T>(entityID);
+                mRegistryManager->assign<T>(entityID);
             }
 
             template<class T>
             void removeTag(common::EntityID entityID) {
-                mManager->remove<T>(entityID);
+                mRegistryManager->remove<T>(entityID);
             }
 
             template<class Component>
             Component &createComponent(common::EntityID entityID) {
-                return mManager->assign<Component>(entityID, Component{});
+                return mRegistryManager->assign<Component>(entityID, Component{});
             }
 
             template<class Component>
             void removeComponent(common::EntityID entityID) {
-                mManager->remove<Component>(entityID);
+                mRegistryManager->remove<Component>(entityID);
             }
 
             template<class Component>
             void removeComponentSafe(common::EntityID entityID) {
-                if (mManager->has<Component>(entityID)) {
-                    mManager->remove<Component>(entityID);
+                if (mRegistryManager->has<Component>(entityID)) {
+                    mRegistryManager->remove<Component>(entityID);
                 }
             }
 
             void destroyEntity(common::EntityID entityID);
 
         private:
-            std::unique_ptr<EntityManager> mManager;
+            std::unique_ptr<EntityManager> mRegistryManager;
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};

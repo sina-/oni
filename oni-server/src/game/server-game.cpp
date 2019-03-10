@@ -115,17 +115,13 @@ namespace oni {
 
                 mServer->sendComponentsUpdate(mEntityFactory->getEntityManager());
                 mServer->sendNewEntities(mEntityFactory->getEntityManager());
-                mServer->broadcastSpawnParticle(mEntityFactory->getEntityManager());
-                mServer->broadcastOneShotSoundEffects(mEntityFactory->getEntityManager());
+                mServer->broadcastSpawnParticle(*mEntityFactory);
+                mServer->broadcastOneShotSoundEffects(*mEntityFactory);
 
                 {
                     auto &entityManager = mEntityFactory->getEntityManager();
                     auto lock = entityManager.scopedLock();
-                    if (entityManager.containsDeletedEntities()) {
-                        mServer->broadcastDeletedEntities(entityManager);
-                        // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-                        entityManager.clearDeletedEntitiesList();
-                    }
+                    mServer->broadcastDeletedEntities(entityManager);
                 }
             }
 
@@ -257,7 +253,9 @@ namespace oni {
 
             void ServerGame::removeRaceCar(common::EntityID carEntityID) {
                 auto lock = mEntityFactory->getEntityManager().scopedLock();
-                mEntityFactory->removeEntity<component::EntityType::RACE_CAR>(carEntityID);
+                mEntityFactory->removeEntity(carEntityID,
+                                             component::EntityType::RACE_CAR,
+                                             true, false);
             }
 
             common::EntityID ServerGame::spawnTruck() {

@@ -3,6 +3,7 @@
 #include <enet/enet.h>
 
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/entities/entity-factory.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/component/audio.h>
 
@@ -92,6 +93,7 @@ namespace oni {
         void Server::broadcastDeletedEntities(entities::EntityManager &manager) {
             auto type = PacketType::DESTROYED_ENTITIES;
             auto data = entities::serialize(manager.getDeletedEntities());
+            manager.clearDeletedEntitiesList();
 
             if (data.size() > 1) {
                 broadcast(type, data);
@@ -106,17 +108,19 @@ namespace oni {
             send(type, data, mPeers[peerID]);
         }
 
-        void Server::broadcastSpawnParticle(entities::EntityManager &manager) {
+        void Server::broadcastSpawnParticle(entities::EntityFactory &entityFactory) {
             std::vector<component::Particle> particles;
             {
                 // TODO: This is stupid, the whole particle and related components are created server side just so
                 // to send a dummy packet to clients. Why not just create a minimum data type that is only for
                 // network event triggering? And let the clients handle the full entity creation as it is only
                 // client side data anyway.
-                auto view = manager.createViewScopeLock<component::Particle, component::Tag_SyncUsingPacket>();
+                auto view = entityFactory.getEntityManager().createViewScopeLock<
+                        component::Particle,
+                        component::Tag_SyncUsingPacket>();
                 for (auto &&entity: view) {
                     particles.emplace_back(view.get<component::Particle>(entity));
-                    manager.destroy(entity);
+                    entityFactory.removeEntity(entity, false, false);
                 }
             }
 
@@ -129,13 +133,16 @@ namespace oni {
             }
         }
 
-        void Server::broadcastOneShotSoundEffects(entities::EntityManager &manager) {
+        void Server::broadcastOneShotSoundEffects(entities::EntityFactory &entityFactory) {
             std::vector<component::SoundEffect> soundEffects;
             {
-                auto view = manager.createViewScopeLock<component::SoundEffect, component::Tag_OneShot, component::Tag_SyncUsingPacket>();
+                auto view = entityFactory.getEntityManager().createViewScopeLock<
+                        component::SoundEffect,
+                        component::Tag_OneShot,
+                        component::Tag_SyncUsingPacket>();
                 for (auto &&entity: view) {
                     soundEffects.emplace_back(view.get<component::SoundEffect>(entity));
-                    manager.destroy(entity);
+                    entityFactory.removeEntity(entity, false, false);
                 }
             }
 

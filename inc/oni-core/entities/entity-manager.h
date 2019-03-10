@@ -124,10 +124,6 @@ namespace oni {
                 return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
 
-            void destroy(EntityID entityID) {
-                mRegistry->destroy(entityID);
-            }
-
             template<class Component>
             Component &get(EntityID entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
@@ -252,14 +248,6 @@ namespace oni {
                 return std::unique_lock<std::mutex>(mMutex);
             }
 
-            void trackDeletion(EntityID entity) {
-                mDeletedEntities.push_back(entity);
-            }
-
-            bool containsDeletedEntities() {
-                return !mDeletedEntities.empty();
-            }
-
             void clearDeletedEntitiesList() {
                 mDeletedEntities.clear();
             }
@@ -272,15 +260,6 @@ namespace oni {
                 accommodate<component::Tag_OnlyComponentUpdate>(entity);
             }
 
-/*
-            void lock() {
-                mLock.lock();
-            }
-
-            void unlock() {
-                mLock.unlock();
-            }
-*/
             template<class Component, class Comparator>
             void sort(Comparator comparator) {
                 mRegistry->sort<Component, Comparator>(std::move(comparator));
@@ -309,6 +288,19 @@ namespace oni {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
                 }
+            }
+
+            void destroy(EntityID entityID) {
+                mRegistry->destroy(entityID);
+            }
+
+            void destroyAndTrack(EntityID entityID){
+                mRegistry->destroy(entityID);
+                mDeletedEntities.push_back(entityID);
+            }
+
+            bool valid(EntityID entityID){
+                return mRegistry->valid(entityID);
             }
 
         private:

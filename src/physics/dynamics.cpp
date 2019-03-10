@@ -362,8 +362,7 @@ namespace oni {
                 // this function and server packet sender. These entities are not synced with usual registry sync
                 // mechanic
                 entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, color, 0.5f, false);
-
-                entityFactory.removeEntity<component::EntityType::SIMPLE_BULLET>(entity);
+                entityFactory.removeEntity(entity, true, false);
             }
         }
 

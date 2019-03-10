@@ -13,6 +13,8 @@ namespace oni {
     }
     namespace entities {
         class EntityManager;
+
+        class EntityFactory;
     }
     namespace network {
 
@@ -30,11 +32,11 @@ namespace oni {
 
             void broadcastDeletedEntities(entities::EntityManager &);
 
-            void broadcastOneShotSoundEffects(entities::EntityManager &);
+            void broadcastOneShotSoundEffects(entities::EntityFactory &);
 
             void sendCarEntityID(common::EntityID, const common::PeerID &);
 
-            void broadcastSpawnParticle(entities::EntityManager &manager);
+            void broadcastSpawnParticle(entities::EntityFactory &);
 
         private:
             Server();

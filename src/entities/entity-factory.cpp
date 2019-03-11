@@ -4,7 +4,6 @@
 
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/hierarchy.h>
-#include <oni-core/component/visual.h>
 #include <oni-core/math/rand.h>
 #include <oni-core/component/gameplay.h>
 #include <oni-core/component/audio.h>
@@ -26,6 +25,16 @@ namespace oni {
         common::EntityID EntityFactory::createEntity() {
             auto entityID = mRegistryManager->create();
             return entityID;
+        }
+
+        template<>
+        void EntityFactory::_apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
+                                                                                       component::CollisionPos &)> &func) {
+            auto view = mRegistryManager->createView<component::CollidingEntity, component::CollisionPos>();
+            for (auto &&entity: view) {
+                func(view.get<component::CollidingEntity>(entity),
+                     view.get<component::CollisionPos>(entity));
+            }
         }
 
         void EntityFactory::removeEntity(common::EntityID entityID,
@@ -57,7 +66,6 @@ namespace oni {
                 case component::EntityType::SIMPLE_PARTICLE:
                 case component::EntityType::TEXT:
                 case component::EntityType::WORLD_CHUNK:
-                case component::EntityType::ONESHOT_SOUND_EFFECT:
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;
@@ -75,6 +83,10 @@ namespace oni {
             } else {
                 mRegistryManager->destroy(entityID);
             }
+        }
+
+        void EntityFactory::resetEvents() {
+            mRegistryManager->destroy<component::EventType>();
         }
 
         template<>
@@ -126,7 +138,6 @@ namespace oni {
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -161,7 +172,6 @@ namespace oni {
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -189,7 +199,6 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -216,7 +225,6 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -251,7 +259,6 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -270,7 +277,6 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_ColorShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -290,7 +296,6 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -312,7 +317,6 @@ namespace oni {
                 particle.velocity = mRand->nextReal32(1.f, 7.f);
                 particle.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
-            assignTag<component::Tag_SyncUsingPacket>(entityID);
         }
 
         template<>
@@ -335,7 +339,6 @@ namespace oni {
                 particle.velocity = mRand->nextReal32(1.f, 7.f);
                 particle.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
-            assignTag<component::Tag_SyncUsingPacket>(entityID);
         }
 
         template<>
@@ -382,7 +385,6 @@ namespace oni {
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -394,7 +396,6 @@ namespace oni {
             textComponent.textContent = text;
 
             assignTag<component::Tag_Static>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -416,7 +417,6 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
@@ -437,16 +437,33 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_ColorShaded>(entityID);
-            assignTag<component::Tag_SyncUsingRegistry>(entityID);
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(common::EntityID entityID,
-                                                                                       const math::vec2 &worldPos,
-                                                                                       const std::string &soundID) {
-            auto &soundEffect = createComponent<component::SoundEffect>(entityID);
-            assignTag<component::Tag_OneShot>(entityID);
-            assignTag<component::Tag_SyncUsingPacket>(entityID);
+        void EntityFactory::_createEvent<component::EventType::COLLISION>(common::EntityID entityID,
+                                                                          const component::EntityType &a,
+                                                                          const component::EntityType &b,
+                                                                          const math::vec3 &worldPos) {
+            auto &collidingEntity = createComponent<component::CollidingEntity>(entityID);
+            collidingEntity.entityA = a;
+            collidingEntity.entityB = b;
+
+            auto &pos = createComponent<component::CollisionPos>(entityID);
+            pos.x = worldPos.x;
+            pos.y = worldPos.y;
+            pos.z = worldPos.z;
+        }
+
+        template<>
+        void EntityFactory::_createEvent<component::EventType::SOUND_EFFECT>(common::EntityID entityID,
+                                                                             const component::SoundEffectID &effectID,
+                                                                             const math::vec2 &worldPos) {
+            auto &effectIDComponent = createComponent<component::SoundEffectID>(entityID);
+            effectIDComponent = effectID;
+
+            auto &pos = createComponent<component::SoundPos>(entityID);
+            pos.x = worldPos.x;
+            pos.y = worldPos.y;
         }
 
         b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
@@ -523,7 +540,8 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID, bool track, bool safe) {
+        void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID, bool track,
+                                                                           bool safe) {
             // TODO: When notifying clients of this, the texture in memory should be evicted.
 
 
@@ -538,12 +556,14 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID, bool track, bool safe) {
+        void
+        EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID, bool track, bool safe) {
             removePhysicalBody(entityID);
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID, bool track, bool safe) {
+        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID, bool track,
+                                                                                bool safe) {
             removePhysicalBody(entityID);
         }
 
@@ -566,6 +586,10 @@ namespace oni {
             auto &attachee = mRegistryManager->get<component::EntityAttachee>(child);
             attachee.entityID = parent;
             attachee.entityType = parentType;
+        }
+
+        void EntityFactory::tagForNetworkSync(common::EntityID entityID) {
+            assignTag<component::Tag_NetworkSync>(entityID);
         }
     }
 }

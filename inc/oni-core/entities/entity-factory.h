@@ -7,6 +7,8 @@
 #include <oni-core/common/typedefs-graphics.h>
 #include <oni-core/component/entity-definition.h>
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/component/entity-event.h>
+#include <oni-core/component/audio.h>
 
 class b2World;
 
@@ -52,15 +54,34 @@ namespace oni {
                 return entityID;
             }
 
+            template<component::EventType eventType, class ...Args>
+            common::EntityID createEvent(const Args &... args) {
+                common::EntityID entityID = createEntity();
+                auto &type = createComponent<component::EventType>(entityID);
+                type = eventType;
+                _createEvent<eventType>(entityID, args...);
+                return entityID;
+            }
+
+            template<component::EventType eventType, class Func>
+            void apply(Func &func) {
+                _apply<eventType>(func);
+            }
+
             void removeEntity(common::EntityID, component::EntityType entityType, bool track, bool safe);
 
             void removeEntity(common::EntityID, bool track, bool safe);
+
+            void resetEvents();
 
             void attach(common::EntityID parent,
                         common::EntityID child,
                         component::EntityType parentType,
                         component::EntityType childType);
 
+            void tagForNetworkSync(common::EntityID);
+
+            // TODO: Does it make sense to create a deleted entity event instead of keeping track of these entities?
             void clearDeletedEntitiesList() {
                 mRegistryManager->clearDeletedEntitiesList();
             }
@@ -70,6 +91,16 @@ namespace oni {
 
             template<component::EntityType, class ...Args>
             void _createEntity(common::EntityID, const Args &...) = delete;
+
+            template<component::EventType, class ...Args>
+            void _createEvent(common::EntityID, const Args &...) = delete;
+
+            template<component::EventType eventType, class Func>
+            void _apply(Func &func) = delete;
+
+            template<>
+            void _apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
+                                                                            component::CollisionPos &)> &);
 
             template<component::EntityType entityType>
             void _removeEntity(common::EntityID, bool track, bool safe) = delete;
@@ -173,10 +204,18 @@ namespace oni {
                                                                    const common::real32 &heading,
                                                                    const math::vec4 &color);
 
+        private:
             template<>
-            void _createEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(common::EntityID,
-                                                                            const math::vec2 &worldPos,
-                                                                            const std::string &soundID);
+            void _createEvent<component::EventType::COLLISION>(common::EntityID,
+                                                               const component::EntityType &,
+                                                               const component::EntityType &,
+                                                               const math::vec3 &worldPos);
+
+            template<>
+            void _createEvent<component::EventType::SOUND_EFFECT>(common::EntityID,
+                                                                  const component::SoundEffectID &,
+                                                                  const math::vec2 &worldPos);
+
 
         private:
             template<>

@@ -212,13 +212,13 @@ namespace oni {
                     }
                     case component::SnapshotType::ONLY_NEW_ENTITIES: {
                         {
-                            auto view = mRegistry->view<component::Tag_SyncUsingRegistry>();
+                            auto view = mRegistry->view<component::Tag_NetworkSync>();
                             if (!view.empty()) {
                                 mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
                                         archive,
                                         view.begin(),
                                         view.end());
-                                mRegistry->reset<component::Tag_SyncUsingRegistry>();
+                                mRegistry->reset<component::Tag_NetworkSync>();
                             }
                         }
                         {
@@ -294,12 +294,17 @@ namespace oni {
                 mRegistry->destroy(entityID);
             }
 
-            void destroyAndTrack(EntityID entityID){
+            template<class... Component>
+            void destroy() {
+                mRegistry->destroy<Component...>();
+            }
+
+            void destroyAndTrack(EntityID entityID) {
                 mRegistry->destroy(entityID);
                 mDeletedEntities.push_back(entityID);
             }
 
-            bool valid(EntityID entityID){
+            bool valid(EntityID entityID) {
                 return mRegistry->valid(entityID);
             }
 

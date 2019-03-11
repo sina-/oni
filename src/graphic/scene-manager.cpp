@@ -294,12 +294,13 @@ namespace oni {
 
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
-            std::string textureID = "resources/images/smoke/1.png";
-            common::real32 halfSize = 0.5f;
-            common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
             // Bullet trails
             {
+                std::string textureID = "resources/images/smoke/1.png";
+                common::real32 halfSize = 0.5f;
+                common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
+
                 auto view = entityFactory.getEntityManager().createViewScopeLock<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
@@ -314,7 +315,7 @@ namespace oni {
                     //math::vec4 color{1.f, 1.f, 1.f, 1.f};
 
                     if (trail.previousPos.empty()) {
-                        auto trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                        auto trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                 currentPos, textureID, halfSize, false);
                         continue;
                     }
@@ -344,19 +345,19 @@ namespace oni {
                         math::vec3 pos{x, y, currentPos.z};
                         for (common::real32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
-                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
                         }
                         else if (i >= distance ){
-                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{1.f, 0.f, 0.f, 1.f}, false);
                         }
                         else{
-                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                     pos, color, false);
                         }
                         */
-                            trailEntity = mInternalEntityFactory->createEntity<oni::component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                     pos, textureID, halfSize, false);
                             auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
                                     trailEntity);

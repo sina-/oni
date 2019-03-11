@@ -108,23 +108,25 @@ namespace oni {
             send(type, data, mPeers[peerID]);
         }
 
+        // TODO: Replace this method with broadcastCollisionEvent which is part of broadcastEvents function which
+        // at the end clears all events from the registry.
         void Server::broadcastSpawnParticle(entities::EntityFactory &entityFactory) {
             std::vector<component::Particle> particles;
             {
-                // TODO: This is stupid, the whole particle and related components are created server side just so
-                // to send a dummy packet to clients. Why not just create a minimum data type that is only for
-                // network event triggering? And let the clients handle the full entity creation as it is only
-                // client side data anyway.
-                auto view = entityFactory.getEntityManager().createViewScopeLock<
-                        component::Particle,
-                        component::Tag_SyncUsingPacket>();
-                for (auto &&entity: view) {
-                    particles.emplace_back(view.get<component::Particle>(entity));
-                    entityFactory.removeEntity(entity, false, false);
-                }
+                auto lock = entityFactory.getEntityManager().scopedLock();
+                std::function<void(component::CollidingEntity &,
+                                   component::CollisionPos &)> func = [&particles](
+                        component::CollidingEntity &collidingEntity,
+                        component::CollisionPos &collisionPos) {
+                    auto particle = component::Particle{};
+                    particle.pos = collisionPos;
+                    particles.emplace_back(particle);
+                };
+                entityFactory.apply<component::EventType::COLLISION>(func);
             }
 
             // TODO: This is just way too many packets. I should batch them together.
+            // TODO: Create a new event packet type which uses CollidingEntity and CollisionPos
             for (auto &&particle: particles) {
                 auto data = entities::serialize(particle);
                 auto type = PacketType::SPAWN_PARTICLE;
@@ -134,25 +136,25 @@ namespace oni {
         }
 
         void Server::broadcastOneShotSoundEffects(entities::EntityFactory &entityFactory) {
-            std::vector<component::SoundEffect> soundEffects;
-            {
-                auto view = entityFactory.getEntityManager().createViewScopeLock<
-                        component::SoundEffect,
-                        component::Tag_OneShot,
-                        component::Tag_SyncUsingPacket>();
-                for (auto &&entity: view) {
-                    soundEffects.emplace_back(view.get<component::SoundEffect>(entity));
-                    entityFactory.removeEntity(entity, false, false);
-                }
-            }
-
-            // TODO: Why not send one packet with all the effects?
-            for (auto &&soundEffect: soundEffects) {
-                auto data = entities::serialize(soundEffect);
-                auto type = PacketType::ONE_SHOT_SOUND_EFFECT;
-
-                broadcast(type, data);
-            }
+//            std::vector<component::SoundEffect> soundEffects;
+//            {
+//                auto view = entityFactory.getEntityManager().createViewScopeLock<
+//                        component::SoundEffect,
+//                        component::Tag_OneShot,
+//                        component::Tag_SyncUsingPacket>();
+//                for (auto &&entity: view) {
+//                    soundEffects.emplace_back(view.get<component::SoundEffect>(entity));
+//                    entityFactory.removeEntity(entity, false, false);
+//                }
+//            }
+//
+//            // TODO: Why not send one packet with all the effects?
+//            for (auto &&soundEffect: soundEffects) {
+//                auto data = entities::serialize(soundEffect);
+//                auto type = PacketType::ONE_SHOT_SOUND_EFFECT;
+//
+//                broadcast(type, data);
+//            }
         }
     }
 }

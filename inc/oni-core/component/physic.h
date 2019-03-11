@@ -1,7 +1,8 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/math/vec2.h>
+#include <oni-core/component/entity-definition.h>
+#include <oni-core/math/vec3.h>
 
 class b2Body;
 
@@ -45,5 +46,12 @@ namespace oni {
             // I don't think there is a better way.
             b2Body *body{nullptr};
         };
+
+        struct CollidingEntity {
+            EntityType entityA{EntityType::UNKNOWN};
+            EntityType entityB{EntityType::UNKNOWN};
+        };
+
+        using CollisionPos = math::vec3;
     }
 }

@@ -47,7 +47,6 @@ namespace oni {
                         continue;
                     }
 
-                    // TODO: This will spawn bullets very fast, infact so fast that they will overlap each other.
                     if (input->isPressed(GLFW_KEY_F)) {
                         const auto &carPlacement = carView.get<component::Placement>(entity);
                         const auto &carConfig = carView.get<component::CarConfig>(entity);
@@ -99,14 +98,15 @@ namespace oni {
 
                     std::string textureID = "resources/images/bullet/1.png";
 
-                    entityFactory.createEntity<component::EntityType::SIMPLE_BULLET>(pos,
-                                                                                     bulletSize,
-                                                                                     carPlacement.rotation,
-                                                                                     textureID,
-                                                                                     bulletSpeed
-                    );
+                    auto bulletEntity = entityFactory.createEntity<component::EntityType::SIMPLE_BULLET>(pos,
+                                                                                                         bulletSize,
+                                                                                                         carPlacement.rotation,
+                                                                                                         textureID,
+                                                                                                         bulletSpeed);
+                    entityFactory.tagForNetworkSync(bulletEntity);
+
                     std::string soundID = "resources/audio/gun/1.wav";
-                    entityFactory.createEntity<component::EntityType::ONESHOT_SOUND_EFFECT>(pos.getXY(), soundID);
+                    entityFactory.createEvent<component::EventType::SOUND_EFFECT>(soundID, pos.getXY());
 
                 }
             }

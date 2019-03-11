@@ -522,11 +522,12 @@ namespace oni {
                         }
                     }
 
-                    mEntityFactory.createEntity<component::EntityType::WALL>(
+                    auto entityID = mEntityFactory.createEntity<component::EntityType::WALL>(
                             wallPositionInWorld,
                             wallSize,
                             heading,
                             wallTexturePath);
+                    mEntityFactory.tagForNetworkSync(entityID);
                 }
             }
 
@@ -569,8 +570,11 @@ namespace oni {
             TileWorld::genSprite(math::vec4 &color, math::vec2 &tileSize, math::vec3 &worldPos) {
                 auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
-                return mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, tileSize, heading,
-                                                                                       color);
+                auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, tileSize,
+                                                                                                heading,
+                                                                                                color);
+                mEntityFactory.tagForNetworkSync(entityID);
+                return entityID;
             }
 
             common::EntityID TileWorld::genTexture(const math::vec2 &size,
@@ -578,7 +582,9 @@ namespace oni {
                                                    const std::string &path) {
                 auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
-                return mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, size, heading, path);
+                auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, size, heading, path);
+                mEntityFactory.tagForNetworkSync(entityID);
+                return entityID;
             }
 
             void TileWorld::genDemoRaceCourse() {

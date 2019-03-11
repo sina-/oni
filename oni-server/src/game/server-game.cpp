@@ -42,7 +42,7 @@ namespace oni {
                 mServer = std::make_unique<network::Server>(&address, 16, 2);
 
                 mServer->registerPacketHandler(network::PacketType::SETUP_SESSION,
-                                               std::bind(&ServerGame::setupSessionPacketHandler, this,
+                                              std::bind(&ServerGame::setupSessionPacketHandler, this,
                                                          std::placeholders::_1, std::placeholders::_2));
                 mServer->registerPacketHandler(network::PacketType::CLIENT_INPUT,
                                                std::bind(&ServerGame::clientInputPacketHandler, this,
@@ -185,20 +185,21 @@ namespace oni {
                 auto &manager = mEntityFactory->getEntityManager();
                 auto lock = manager.scopedLock();
 
-                auto carEntity = mEntityFactory->createEntity
-                        <component::EntityType::RACE_CAR>(pos,
-                                                          size,
-                                                          heading,
-                                                          carTextureID);
+                auto carEntity = mEntityFactory->createEntity<component::EntityType::RACE_CAR>(pos,
+                                                                                               size,
+                                                                                               heading,
+                                                                                               carTextureID);
+
+                mEntityFactory->tagForNetworkSync(carEntity);
 
                 math::vec2 gunSize{2.f, 0.5f};
                 math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
-                auto carGunEntity = mEntityFactory->createEntity
-                        <component::EntityType::VEHICLE_GUN>(gunPos,
-                                                             gunSize,
-                                                             heading,
-                                                             gunTextureID);
+                auto carGunEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_GUN>(gunPos,
+                                                                                                     gunSize,
+                                                                                                     heading,
+                                                                                                     gunTextureID);
+                mEntityFactory->tagForNetworkSync(carGunEntity);
 
                 mEntityFactory->attach(carEntity, carGunEntity, component::EntityType::RACE_CAR,
                                        component::EntityType::VEHICLE_GUN);
@@ -231,6 +232,7 @@ namespace oni {
                             tireSize,
                             tireRotation,
                             tireTextureID);
+                    mEntityFactory->tagForNetworkSync(tireEntity);
 
                     mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
                                            component::EntityType::VEHICLE_TIRE_FRONT);
@@ -243,6 +245,7 @@ namespace oni {
                             tireSize,
                             tireRotation,
                             tireTextureID);
+                    mEntityFactory->tagForNetworkSync(tireEntity);
 
                     mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
                                            component::EntityType::VEHICLE_TIRE_REAR);
@@ -266,7 +269,9 @@ namespace oni {
                 std::string textureID = "resources/images/car/2/truck.png";
 
                 auto lock = mEntityFactory->getEntityManager().scopedLock();
-                return mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading, textureID);
+                auto entityID =  mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading, textureID);
+                mEntityFactory->tagForNetworkSync(entityID);
+                return entityID;
             }
         }
     }

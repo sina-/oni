@@ -356,12 +356,11 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{props.body->GetPosition().x, props.body->GetPosition().y, particleZ};
-                math::vec4 color{0.f, 0.f, 0.f, 0.f};
-                // NOTE: This will be read by the server and send SPAWN_PARTICLE packet at the give location to clients
-                // and clients will decide what to render. I'm using the registry just as a way to communicate between
-                // this function and server packet sender. These entities are not synced with usual registry sync
-                // mechanic
-                entityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(pos, color, 0.5f, false);
+
+                entityFactory.createEvent<component::EventType::COLLISION>(component::EntityType::SIMPLE_BULLET,
+                        // TODO: use the proper type for the other entity instead of UNKNOWN
+                                                                           component::EntityType::UNKNOWN,
+                                                                           pos);
                 entityFactory.removeEntity(entity, true, false);
             }
         }

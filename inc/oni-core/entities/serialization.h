@@ -55,10 +55,6 @@ namespace oni {
             archive(particle.age, particle.maxAge, particle.pos, particle.heading, particle.velocity, particle.halfSize);
         }
 
-        template<class Archive>
-        void serialize(Archive &archive, SoundEffect &soundEffect) {
-            archive(soundEffect.pos, soundEffect.soundID);
-        }
     }
 
     namespace entities {

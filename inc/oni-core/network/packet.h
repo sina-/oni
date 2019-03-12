@@ -4,6 +4,7 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet-types.h>
+#include <oni-core/component/physic.h>
 
 
 namespace oni {
@@ -16,5 +17,9 @@ namespace oni {
             std::string data{};
         };
 
+        struct CollisionEventPacket {
+            component::CollidingEntity collidingEntity{};
+            component::CollisionPos  collisionPos{};
+        };
     }
 }

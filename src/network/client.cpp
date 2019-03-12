@@ -66,39 +66,16 @@ namespace oni {
                     std::cout << packet.data << std::endl;
                     break;
                 }
-                case (PacketType::CAR_ENTITY_ID): {
+                case (PacketType::CAR_ENTITY_ID):
+                case (PacketType::REPLACE_ALL_ENTITIES):
+                case (PacketType::ONLY_COMPONENT_UPDATE):
+                case (PacketType::ADD_NEW_ENTITIES):
+                case (PacketType::DESTROYED_ENTITIES):
+                case (PacketType::SPAWN_PARTICLE):
+                case (PacketType::ONE_SHOT_SOUND_EFFECT):
+                case (PacketType::COLLISION_EVENT): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::CAR_ENTITY_ID](peerID, dataString);
-                    break;
-                }
-                case (PacketType::REPLACE_ALL_ENTITIES): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::REPLACE_ALL_ENTITIES](peerID, dataString);
-                    break;
-                }
-                case (PacketType::ONLY_COMPONENT_UPDATE): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::ONLY_COMPONENT_UPDATE](peerID, dataString);
-                    break;
-                }
-                case (PacketType::ADD_NEW_ENTITIES): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::ADD_NEW_ENTITIES](peerID, dataString);
-                    break;
-                }
-                case (PacketType::DESTROYED_ENTITIES): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::DESTROYED_ENTITIES](peerID, dataString);
-                    break;
-                }
-                case (PacketType::SPAWN_PARTICLE): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::SPAWN_PARTICLE](peerID, dataString);
-                    break;
-                }
-                case (PacketType::ONE_SHOT_SOUND_EFFECT): {
-                    auto dataString = std::string(reinterpret_cast<char *>(data), size);
-                    mPacketHandlers[PacketType::ONE_SHOT_SOUND_EFFECT](peerID, dataString);
+                    mPacketHandlers[header](peerID, dataString);
                     break;
                 }
                 default: {

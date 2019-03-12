@@ -25,6 +25,11 @@ namespace oni {
         void serialize(Archive &archive, EntityPacket &packet) {
             archive(packet.entity);
         }
+
+        template<class Archive>
+        void serialize(Archive &archive, CollisionEventPacket &packet) {
+            archive(packet.collidingEntity, packet.collisionPos);
+        }
     }
 
     namespace math {
@@ -55,6 +60,10 @@ namespace oni {
             archive(particle.age, particle.maxAge, particle.pos, particle.heading, particle.velocity, particle.halfSize);
         }
 
+        template<class Archive>
+        void serialize(Archive &archive, CollidingEntity &collidingEntity) {
+            archive(collidingEntity.entityA, collidingEntity.entityB);
+        }
     }
 
     namespace entities {

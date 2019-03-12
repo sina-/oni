@@ -108,12 +108,11 @@ namespace oni {
             send(type, data, mPeers[peerID]);
         }
 
-        // TODO: Replace this method with broadcastCollisionEvent which is part of broadcastEvents function which
-        // at the end clears all events from the registry.
         void Server::broadcastEvents(entities::EntityFactory &entityFactory) {
+            auto lock = entityFactory.getEntityManager().scopedLock();
+
             std::vector<CollisionEventPacket> packets;
             {
-                auto lock = entityFactory.getEntityManager().scopedLock();
                 std::function<void(component::CollidingEntity &,
                                    component::CollisionPos &)> func = [&packets](
                         component::CollidingEntity &collidingEntity,
@@ -126,15 +125,12 @@ namespace oni {
                 entityFactory.apply<component::EventType::COLLISION>(func);
             }
 
-            // TODO: This is just way too many packets. I should batch them together.
-            for (auto &&packet: packets) {
-                auto data = entities::serialize(packet);
-                auto type = PacketType::COLLISION_EVENT;
-
-                broadcast(type, data);
-            }
-
             entityFactory.resetEvents();
+
+            auto data = entities::serialize(packets);
+            auto type = PacketType::COLLISION_EVENT;
+
+            broadcast(type, data);
         }
     }
 }

@@ -177,8 +177,6 @@ namespace oni {
 
             template<class... ViewComponents>
             EntityView<EntityID, ViewComponents...> createView() {
-                //std::unique_lock<std::mutex> registryLock(mMutex);
-                //return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
                 return EntityView<EntityID, ViewComponents...>(*mRegistry);
             }
 
@@ -190,8 +188,6 @@ namespace oni {
 
             template<class... GroupComponents>
             EntityGroup<EntityID, GroupComponents...> createGroup() {
-                //std::unique_lock<std::mutex> registryLock(mMutex);
-                //return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
                 return EntityGroup<EntityID, GroupComponents...>(*mRegistry);
             }
 
@@ -289,13 +285,13 @@ namespace oni {
                     }
                     case component::SnapshotType::ONLY_NEW_ENTITIES: {
                         {
-                            auto view = mRegistry->view<component::Tag_NetworkSync>();
+                            auto view = mRegistry->view<component::Tag_RequiresNetworkSync>();
                             if (!view.empty()) {
                                 mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
                                         archive,
                                         view.begin(),
                                         view.end());
-                                mRegistry->reset<component::Tag_NetworkSync>();
+                                mRegistry->reset<component::Tag_RequiresNetworkSync>();
                             }
                         }
                         {

@@ -586,7 +586,7 @@ namespace oni {
         }
 
         void EntityFactory::tagForNetworkSync(common::EntityID entityID) {
-            assignTag<component::Tag_NetworkSync>(entityID);
+            assignTag<component::Tag_RequiresNetworkSync>(entityID);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
-        struct Tag_NetworkSync {
+        struct Tag_RequiresNetworkSync {
         };
 
         struct Tag_OneShot {

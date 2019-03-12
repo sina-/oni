@@ -19,6 +19,7 @@ namespace oni {
 
             SPAWN_PARTICLE = 11,
             ONE_SHOT_SOUND_EFFECT = 12,
+            COLLISION_EVENT = 13,
         };
     }
 }

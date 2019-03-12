@@ -30,11 +30,8 @@ namespace oni {
         template<>
         void EntityFactory::_apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
                                                                                        component::CollisionPos &)> &func) {
-            auto view = mRegistryManager->createView<component::CollidingEntity, component::CollisionPos>();
-            for (auto &&entity: view) {
-                func(view.get<component::CollidingEntity>(entity),
-                     view.get<component::CollisionPos>(entity));
-            }
+            auto group = mRegistryManager->createGroup<component::CollidingEntity, component::CollisionPos>();
+            group.apply(func);
         }
 
         void EntityFactory::removeEntity(common::EntityID entityID,

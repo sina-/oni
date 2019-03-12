@@ -82,6 +82,70 @@ namespace oni {
                 std::unique_lock<std::mutex> mRegistryLock{};
             };
 
+            template<class Entity, class... Components>
+            class EntityGroup {
+            private:
+                friend EntityManager;
+
+                explicit EntityGroup(entt::registry<EntityID> &registry) :
+                        mGroup(registry.group<Components...>()) {
+                }
+
+                EntityGroup(entt::registry<EntityID> &registry,
+                            std::unique_lock<std::mutex> registryLock) :
+                        mGroup(registry.group<Components...>()),
+                        mRegistryLock(std::move(registryLock)) {
+                }
+
+            public:
+                EntityGroup(const EntityGroup &) = delete;
+
+                EntityGroup(const EntityGroup &&) = delete;
+
+                EntityGroup &operator=(const Entity &) = delete;
+
+                ~EntityGroup() = default;
+
+                size_t size() noexcept {
+                    return mGroup.size();
+                }
+
+                auto begin() {
+                    return mGroup.begin();
+                }
+
+                auto end() {
+                    return mGroup.end();
+                }
+
+                template<class Component>
+                Component &get(EntityID entityID) noexcept {
+                    if constexpr(sizeof...(Components) == 1) {
+                        return mGroup.get(entityID);
+                    } else {
+                        return mGroup.template get<Component>(entityID);
+                    }
+                }
+
+                template<class Component>
+                const Component &get(EntityID entityID) const noexcept {
+                    if constexpr(sizeof...(Components) == 1) {
+                        return mGroup.get(entityID);
+                    } else {
+                        return mGroup.template get<Component>(entityID);
+                    }
+                }
+
+                template<class Func>
+                void apply(Func &func) {
+                   mGroup.each(func);
+                }
+
+            private:
+                entt::group<Entity, entt::get_t<>, Components...> mGroup;
+                std::unique_lock<std::mutex> mRegistryLock{};
+            };
+
             EntityManager() {
                 mRegistry = std::make_unique<entt::registry<common::uint32 >>();
                 mLoader = std::make_unique<entt::continuous_loader<EntityID>>(*mRegistry);
@@ -122,6 +186,19 @@ namespace oni {
             EntityView<EntityID, ViewComponents...> createViewScopeLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
                 return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
+            }
+
+            template<class... GroupComponents>
+            EntityGroup<EntityID, GroupComponents...> createGroup() {
+                //std::unique_lock<std::mutex> registryLock(mMutex);
+                //return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
+                return EntityGroup<EntityID, GroupComponents...>(*mRegistry);
+            }
+
+            template<class... GroupComponents>
+            EntityGroup<EntityID, GroupComponents...> createGroupScopeLock() {
+                std::unique_lock<std::mutex> registryLock(mMutex);
+                return EntityView<EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class Component>

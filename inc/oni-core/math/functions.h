@@ -1,6 +1,7 @@
 #pragma once
 
 #define _USE_MATH_DEFINES
+
 #include <cmath>
 
 #include <oni-core/common/typedefs.h>
@@ -48,7 +49,7 @@ namespace oni {
          * @param x
          * @return pack uint64 value
          */
-        inline common::PackedInt32 packIntegers(const common::int64 x, const common::int64 y) {
+        inline common::Int64Pack packInt64(const common::int64 x, const common::int64 y) {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -63,6 +64,10 @@ namespace oni {
             auto result = _x | _y;
 
             return result;
+        }
+
+        inline common::UInt16Pack packUInt16(common::uint16 x, common::uint16 y) {
+            return x << 16 | y;
         }
     }
 }

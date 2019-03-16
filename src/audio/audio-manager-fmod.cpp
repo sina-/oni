@@ -11,9 +11,7 @@
 
 namespace oni {
     namespace audio {
-
-        AudioManagerFMOD::AudioManagerFMOD() : mSystem{}, mSounds{}, mChannels{} {
-
+        AudioManagerFMOD::AudioManagerFMOD() : AudioManager(), mSystem{}, mSounds{}, mChannels{} {
             FMOD::System *system{nullptr};
 
             auto result = FMOD::System_Create(&system);

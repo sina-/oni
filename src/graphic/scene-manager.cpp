@@ -787,7 +787,7 @@ namespace oni {
         common::EntityID SceneManager::getOrCreateSkidTile(const math::vec2 &position) {
             auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             auto y = math::positionToIndex(position.y, mSkidTileSizeY);
-            auto packedIndices = math::packIntegers(x, y);
+            auto packedIndices = math::packInt64(x, y);
 
             auto missing = mSkidlineLookup.find(packedIndices) == mSkidlineLookup.end();
             if (missing) {

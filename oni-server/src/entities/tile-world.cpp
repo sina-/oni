@@ -69,7 +69,7 @@ namespace oni {
             }
 
             math::vec2 TileWorld::unpackCoordinates(common::uint64 coord) const {
-                // TODO: This function is incorrect. Need to match it to packIntegers function if I ever use it
+                // TODO: This function is incorrect. Need to match it to packInt64 function if I ever use it
                 assert(false);
                 //auto x = static_cast<int>(coord >> 32) * mTileSizeX;
                 //auto y = static_cast<int>(coord & (0xFFFFFFFF)) * mTileSizeX;
@@ -93,7 +93,7 @@ namespace oni {
                 // 6--7--8
                 for (auto i = chunkIndex.x - 1; i <= chunkIndex.x + 1; ++i) {
                     for (auto j = chunkIndex.y - 1; j <= chunkIndex.y + 1; ++j) {
-                        auto chunkID = math::packIntegers(i, j);
+                        auto chunkID = math::packInt64(i, j);
                         if (!isInMap(chunkID, mChunkLookup)) {
                             // genChunkTexture(i, j);
                             // genChunkTiles(i, j);
@@ -124,16 +124,16 @@ namespace oni {
                 }
 
                 auto northChunkIndex = component::ChunkIndex{chunkIndex.x, chunkIndex.y + 1};
-                auto northChunkID = math::packIntegers(chunkIndex.x, chunkIndex.y);
+                auto northChunkID = math::packInt64(chunkIndex.x, chunkIndex.y);
 
                 auto southChunkIndex = component::ChunkIndex{chunkIndex.x, chunkIndex.y - 1};
-                auto southChunkID = math::packIntegers(southChunkIndex.x, southChunkIndex.y);
+                auto southChunkID = math::packInt64(southChunkIndex.x, southChunkIndex.y);
 
                 auto westChunkIndex = component::ChunkIndex{chunkIndex.x - 1, chunkIndex.y};
-                auto westChunkID = math::packIntegers(westChunkIndex.x, westChunkIndex.y);
+                auto westChunkID = math::packInt64(westChunkIndex.x, westChunkIndex.y);
 
                 auto eastChunkIndex = component::ChunkIndex{chunkIndex.x + 1, chunkIndex.y};
-                auto eastChunkID = math::packIntegers(eastChunkIndex.x, eastChunkIndex.y);
+                auto eastChunkID = math::packInt64(eastChunkIndex.x, eastChunkIndex.y);
 
                 auto northChunkHasRoads = shouldGenerateRoad(northChunkIndex);
                 auto southChunkHasRoads = shouldGenerateRoad(southChunkIndex);
@@ -326,7 +326,7 @@ namespace oni {
                                     entities);*/
 
 
-                auto chunkID = math::packIntegers(chunkIndex.x, chunkIndex.y);
+                auto chunkID = math::packInt64(chunkIndex.x, chunkIndex.y);
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
                 auto chunkEntityID = mChunkLookup[chunkID];
                 auto &chunk = mEntityFactory.getEntityManager().get<component::Chunk>(chunkEntityID);
@@ -340,7 +340,7 @@ namespace oni {
                                         const std::string &texturePath) {
                 auto worldPos = roadTileIndexToPos(chunkIndex, roadTileIndex);
                 auto roadEntityID = genTexture(getTileSize(), worldPos, texturePath);
-                auto roadID = math::packIntegers(roadTileIndex.x, roadTileIndex.y);
+                auto roadID = math::packInt64(roadTileIndex.x, roadTileIndex.y);
                 mRoadLookup.emplace(roadID, roadEntityID);
             }
 
@@ -352,7 +352,7 @@ namespace oni {
                 auto worldPos = roadTileIndexToPos(chunkIndex, roadTileIndex);
                 auto roadID = genSprite(color, roadTileSize, worldPos);
 
-                auto packedIndex = math::packIntegers(roadTileIndex.x, roadTileIndex.y);
+                auto packedIndex = math::packInt64(roadTileIndex.x, roadTileIndex.y);
                 mRoadLookup.emplace(packedIndex, roadID);
             }
 
@@ -403,7 +403,7 @@ namespace oni {
 
                 for (auto i = firstTileX; i < lastTileX; i += mTileSizeX) {
                     for (auto j = firstTileY; j < lastTileY; j += mTileSizeY) {
-                        auto packedIndex = math::packIntegers(i, j);
+                        auto packedIndex = math::packInt64(i, j);
                         // Chunks are created in batch, if single tile is created so are others.
                         if (isInMap(packedIndex, mTileLookup)) {
                             return;
@@ -536,12 +536,12 @@ namespace oni {
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
 
                 auto chunkEntityID = genTexture(getChunkSize(), worldPos, mRaceTrack1);
-                auto packed = math::packIntegers(chunkX, chunkY);
+                auto packed = math::packInt64(chunkX, chunkY);
                 mChunkLookup.emplace(packed, chunkEntityID);
             }
 
             void TileWorld::genChunkGroundSprite(common::int64 chunkX, common::int64 chunkY) {
-                auto chunkID = math::packIntegers(chunkX, chunkY);
+                auto chunkID = math::packInt64(chunkX, chunkY);
                 auto R = (std::rand() % 255) / 255.0f;
                 auto G = (std::rand() % 255) / 255.0f;
                 auto B = (std::rand() % 255) / 255.0f;

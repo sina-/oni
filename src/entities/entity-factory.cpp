@@ -63,6 +63,7 @@ namespace oni {
                 case component::EntityType::SIMPLE_PARTICLE:
                 case component::EntityType::TEXT:
                 case component::EntityType::WORLD_CHUNK:
+                case component::EntityType::LAST:
                 case component::EntityType::UNKNOWN: {
                     assert(false);
                     break;

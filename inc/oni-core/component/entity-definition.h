@@ -2,7 +2,7 @@
 
 namespace oni {
     namespace component {
-        enum class EntityType : common::uint8 {
+        enum class EntityType : common::uint16 {
             UNKNOWN,
 
             BACKGROUND,
@@ -25,6 +25,10 @@ namespace oni {
 
             TEXT,
             WORLD_CHUNK,
+
+
+
+            LAST
         };
 
         enum class SnapshotType {

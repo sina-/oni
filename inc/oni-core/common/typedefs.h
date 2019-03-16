@@ -22,7 +22,9 @@ namespace oni {
         typedef double CarSimDouble;
         typedef uint32 OniSoundID;
 
-        typedef uint64 PackedInt32;
+        typedef uint64 Int64Pack;
+
+        typedef uint32 UInt16Pack;
 
         typedef uint32 EntityID;
 

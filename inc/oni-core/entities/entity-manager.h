@@ -138,7 +138,7 @@ namespace oni {
 
                 template<class Func>
                 void apply(Func &func) {
-                   mGroup.each(func);
+                    mGroup.each(func);
                 }
 
             private:

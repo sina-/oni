@@ -11,7 +11,7 @@
 
 namespace oni {
     namespace audio {
-        AudioManagerFMOD::AudioManagerFMOD() : AudioManager(), mSystem{}, mSounds{}, mChannels{} {
+        AudioManagerFMOD::AudioManagerFMOD() : AudioManager(), mSystem{}, mSounds{}, mLoopingSoundChannel{} {
             FMOD::System *system{nullptr};
 
             auto result = FMOD::System_Create(&system);
@@ -35,81 +35,100 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        OniSoundID AudioManagerFMOD::loadSound(const std::string &name) {
-            // TODO: This will break for one-off sound effects, currently all the functions in this
-            // class work if the audio is to be looped over.
-
+        SoundID AudioManagerFMOD::loadSound(const std::string &name) {
             FMOD::Sound *sound{nullptr};
             auto result = mSystem->createSound(name.c_str(), FMOD_DEFAULT, nullptr, &sound);
             mSounds.emplace_back(std::unique_ptr<FMOD::Sound, FMODDeleter>(sound, FMODDeleter()));
             ERRCHECK(result);
 
-            result = mSounds.back()->setMode(FMOD_LOOP_NORMAL);
-            ERRCHECK(result);
+            // TODO: This is mixing the semantics and overlaping SoundID with loadLoopingSound(). Design is a bit messy
+            // I have to refactor it so that for users there is just SoundID, and they could play it once, or loop it.
+            // I can create a channel for one shot sounds as well, but that just sounds stupid to create channel
+            // and destroy it at the end. I might need it for sounds that are played once but while playing I need
+            // to adjust them, e.g., change pitch.
+            return mSounds.size() - 1;
+        }
+
+        SoundID AudioManagerFMOD::loadLoopingSound(const std::string &name) {
+            auto soundID = loadSound(name);
 
             FMOD::Channel *channel{nullptr};
-            result = mSystem->playSound(sound, nullptr, true, &channel);
+            auto result = mSystem->playSound(mSounds[soundID].get(), nullptr, true, &channel);
             ERRCHECK(result);
 
-            mChannels.emplace_back(std::unique_ptr<FMOD::Channel, FMODDeleter>(channel, FMODDeleter()));
+            mLoopingSoundChannel.emplace_back(std::unique_ptr<FMOD::Channel, FMODDeleter>(channel, FMODDeleter()));
 
-            return mChannels.size() - 1;
+            return mLoopingSoundChannel.size() - 1;
         }
 
-        void AudioManagerFMOD::playSound(OniSoundID id) {
-            auto result = mChannels[id]->setPaused(false);
+        void AudioManagerFMOD::playLoopingSound(SoundID id) {
+            assert(id >= 0 && id < mLoopingSoundChannel.size());
+
+            auto result = mLoopingSoundChannel[id]->setMode(FMOD_LOOP_NORMAL);
+            ERRCHECK(result);
+
+            result = mLoopingSoundChannel[id]->setPaused(false);
             ERRCHECK(result);
         }
 
-        double AudioManagerFMOD::pauseSound(OniSoundID id) {
-            auto result = mChannels[id]->setPaused(true);
+        void AudioManagerFMOD::playSoundOnce(SoundID id) {
+            assert(id >= 0 && id < mSounds.size());
+
+            auto result = mSystem->playSound(mSounds[id].get(), nullptr, false, nullptr);
+            ERRCHECK(result);
+        }
+
+        double AudioManagerFMOD::pauseSound(SoundID id) {
+            assert(id >= 0 && id < mLoopingSoundChannel.size());
+
+            auto result = mLoopingSoundChannel[id]->setPaused(true);
             ERRCHECK(result);
 
             common::uint32 pos;
-            result = mChannels[id]->getPosition(&pos, FMOD_TIMEUNIT_MS);
+            result = mLoopingSoundChannel[id]->getPosition(&pos, FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
 
             // TODO: This is just a work around to keep the interface consistent with double.
             return (static_cast<double>(pos) + common::EP);
         }
 
-        void AudioManagerFMOD::stopSound(OniSoundID id) {
+        void AudioManagerFMOD::stopSound(SoundID id) {
             UNUSED(id);
         }
 
-        void AudioManagerFMOD::setLoop(OniSoundID id, bool loop) {
+        void AudioManagerFMOD::setLoop(SoundID id, bool loop) {
             UNUSED(id);
             UNUSED(loop);
         }
 
-        void AudioManagerFMOD::setVolume(OniSoundID id, common::real32 volume) {
-            auto result = mChannels[id]->setVolume(volume);
+        void AudioManagerFMOD::setVolume(SoundID id, common::real32 volume) {
+            auto result = mLoopingSoundChannel[id]->setVolume(volume);
             ERRCHECK(result);
         }
 
-        common::real32 AudioManagerFMOD::getVolume(OniSoundID id) {
+        common::real32 AudioManagerFMOD::getVolume(SoundID id) {
             UNUSED(id);
             return 0;
         }
 
-        bool AudioManagerFMOD::isPlaying(OniSoundID id) {
+        bool AudioManagerFMOD::isPlaying(SoundID id) {
             bool isPaused{false};
-            auto result = mChannels[id]->getPaused(&isPaused);
+            auto result = mLoopingSoundChannel[id]->getPaused(&isPaused);
             ERRCHECK(result);
             return !isPaused;
         }
 
-        void AudioManagerFMOD::seek(OniSoundID id, double position) {
-            auto result = mChannels[id]->setPosition(static_cast<common::uint32>(position + common::EP),
+        void AudioManagerFMOD::seek(SoundID id, double position) {
+            auto result = mLoopingSoundChannel[id]->setPosition(static_cast<common::uint32>(position + common::EP),
                                                      FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
         }
 
-        void AudioManagerFMOD::setPitch(OniSoundID id, common::real32 pitch) {
+        void AudioManagerFMOD::setPitch(SoundID id, common::real32 pitch) {
             if (pitch > 256) {
                 pitch = 256;
             }
-            auto result = mChannels[id]->setPitch(pitch);
+            auto result = mLoopingSoundChannel[id]->setPitch(pitch);
             ERRCHECK(result);
         }
 

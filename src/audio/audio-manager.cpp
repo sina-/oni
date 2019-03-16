@@ -8,12 +8,12 @@ namespace oni {
         AudioManager::AudioManager() = default;
 
         void AudioManager::collisionSoundEffect(component::EntityType A, component::EntityType B) {
-            auto soundID = findID(A, B);
+            auto soundID = createID(A, B);
             assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
-            playSound(mCollisionEffects[soundID]);
+            playSoundOnce(mCollisionEffects[soundID]);
         }
 
-        common::UInt16Pack AudioManager::findID(component::EntityType A, component::EntityType B) {
+        common::UInt16Pack AudioManager::createID(component::EntityType A, component::EntityType B) {
             static_assert(sizeof(A) == sizeof(common::uint16), "Hashing will fail due to size mismatch");
             auto x = static_cast<common::uint16 >(A);
             auto y = static_cast<common::uint16 >(B);
@@ -27,12 +27,13 @@ namespace oni {
         }
 
         void AudioManager::preLoadSound() {
-            auto id = loadSound("resources/audio/collision/bullet-with-unknown.wav");
+            auto soundID = loadSound("resources/audio/collision/bullet-with-unknown.wav");
             for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
                  i < static_cast<common::uint16>(component::EntityType::LAST);
                  ++i) {
-                mCollisionEffects[id] = findID(component::EntityType::SIMPLE_BULLET,
-                                               static_cast<component::EntityType>(i));
+                auto id = createID(component::EntityType::SIMPLE_BULLET,
+                                   static_cast<component::EntityType>(i));
+                mCollisionEffects[id] = soundID;
             }
         }
     }

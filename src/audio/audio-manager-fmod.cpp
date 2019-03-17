@@ -58,7 +58,8 @@ namespace oni {
         void AudioManagerFMOD::play(const component::SoundID &id) {
             if (mChannels.find(id) != mChannels.end()) {
                 // NOTE: For non-looping sounds, after one play through the channel is not valid anymore.
-                mChannels[id]->setPaused(false);
+                auto result = mChannels[id]->setPaused(false);
+                ERRCHECK(result);
             } else {
                 VALID(mSounds, id);
                 auto result = mSystem->playSound(mSounds[id].get(), nullptr, false, nullptr);

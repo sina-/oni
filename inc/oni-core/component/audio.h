@@ -5,7 +5,7 @@
 
 namespace oni {
     namespace component {
-        using SoundEffectID = std::string;
+        using SoundID = std::string;
         using SoundPos = math::vec2;
     }
 }

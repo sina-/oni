@@ -127,9 +127,9 @@ namespace oni {
 
             std::vector<SoundEffectEventPacket> soundEffectPackets;
             {
-                std::function<void(component::SoundEffectID &,
+                std::function<void(component::SoundID &,
                                    component::SoundPos &)> func = [&soundEffectPackets](
-                        component::SoundEffectID &soundEffectID,
+                        component::SoundID &soundEffectID,
                         component::SoundPos &soundPos) {
                     SoundEffectEventPacket packet;
                     packet.soundID = soundEffectID;

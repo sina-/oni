@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 
 #include <oni-core/audio/audio-manager.h>
 #include <oni-core/common/typedefs.h>
@@ -16,35 +17,29 @@ namespace FMOD {
 
 namespace oni {
     namespace audio {
-        using common::SoundID;
-
         class AudioManagerFMOD : public AudioManager {
         public:
             AudioManagerFMOD();
 
             void tick() override;
 
-            SoundID loadSound(const std::string &name) override;
+            void loadSound(const component::SoundID &) override;
 
-            SoundID loadLoopingSound(const std::string &name) override;
+            void attachControls(const component::SoundID &id) override;
 
-            void playLoopingSound(SoundID id) override;
+            void play(const component::SoundID &id) override;
 
-            void playSoundOnce(SoundID id) override;
+            void setPitch(const component::SoundID &, common::real32 pitch) override;
 
-            oni::common::real64 pauseSound(SoundID id) override;
+            void setLoop(const component::SoundID &, bool loop) override;
 
-            void stopSound(SoundID id) override;
+            common::real64 pauseSound(const component::SoundID &) override;
 
-            void setLoop(SoundID id, bool loop) override;
+            void setVolume(const component::SoundID &, common::real32 volume) override;
 
-            void setVolume(SoundID id, common::real32 volume) override;
+            bool isPlaying(const component::SoundID&) override;
 
-            bool isPlaying(SoundID id) override;
-
-            void seek(SoundID id, oni::common::real64 position) override;
-
-            void setPitch(SoundID id, common::real32 pitch) override;
+            void seek(const component::SoundID &, common::real64 position) override;
 
         private:
             class FMODDeleter {
@@ -57,9 +52,9 @@ namespace oni {
             };
 
         private:
-            std::unique_ptr <FMOD::System, FMODDeleter> mSystem;
-            std::vector <std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
-            std::vector <std::unique_ptr<FMOD::Channel, FMODDeleter>> mLoopingSoundChannel;
+            std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
+            std::unordered_map<component::SoundID, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
+            std::map<component::SoundID, std::unique_ptr<FMOD::Channel, FMODDeleter>> mChannels;
         };
     }
 }

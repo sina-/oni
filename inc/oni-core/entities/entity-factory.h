@@ -103,7 +103,7 @@ namespace oni {
                                                                             component::CollisionPos &)> &);
 
             template<>
-            void _apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundEffectID &,
+            void _apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundID &,
                                                                                component::SoundPos &)> &);
 
             template<component::EntityType entityType>
@@ -217,7 +217,7 @@ namespace oni {
 
             template<>
             void _createEvent<component::EventType::SOUND_EFFECT>(common::EntityID,
-                                                                  const component::SoundEffectID &,
+                                                                  const component::SoundID &,
                                                                   const math::vec2 &worldPos);
 
 

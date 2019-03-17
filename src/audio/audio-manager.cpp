@@ -7,13 +7,13 @@ namespace oni {
     namespace audio {
         AudioManager::AudioManager() = default;
 
-        void AudioManager::collisionSoundEffect(component::EntityType A, component::EntityType B) {
-            auto soundID = createID(A, B);
+        void AudioManager::playCollisionSoundEffect(component::EntityType A, component::EntityType B) {
+            auto soundID = createCollisionEffectID(A, B);
             assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
-            playSoundOnce(mCollisionEffects[soundID]);
+            play(mCollisionEffects[soundID]);
         }
 
-        common::UInt16Pack AudioManager::createID(component::EntityType A, component::EntityType B) {
+        common::UInt16Pack AudioManager::createCollisionEffectID(component::EntityType A, component::EntityType B) {
             static_assert(sizeof(A) == sizeof(common::uint16), "Hashing will fail due to size mismatch");
             auto x = static_cast<common::uint16 >(A);
             auto y = static_cast<common::uint16 >(B);
@@ -27,13 +27,14 @@ namespace oni {
         }
 
         void AudioManager::preLoadCollisionSoundEffects() {
-            auto soundID = loadSound("resources/audio/collision/bullet-with-unknown.wav");
+            component::SoundID bulletWithUnknown = "resources/audio/collision/bullet-with-unknown.wav";
+            loadSound(bulletWithUnknown);
             for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
                  i < static_cast<common::uint16>(component::EntityType::LAST);
                  ++i) {
-                auto id = createID(component::EntityType::SIMPLE_BULLET,
-                                   static_cast<component::EntityType>(i));
-                mCollisionEffects[id] = soundID;
+                auto id = createCollisionEffectID(component::EntityType::SIMPLE_BULLET,
+                                                  static_cast<component::EntityType>(i));
+                mCollisionEffects[id] = bulletWithUnknown;
             }
         }
     }

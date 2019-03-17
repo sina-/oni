@@ -20,7 +20,6 @@ namespace oni {
         typedef double real64;
 
         typedef double CarSimDouble;
-        typedef uint32 SoundID;
 
         typedef uint64 Int64Pack;
 

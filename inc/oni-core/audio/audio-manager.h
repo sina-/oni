@@ -17,39 +17,34 @@ namespace oni {
 
             virtual void tick() = 0;
 
-            virtual common::SoundID loadSound(const std::string &name) = 0;
+            virtual void loadSound(const component::SoundID &) = 0;
 
-            virtual common::SoundID loadLoopingSound(const std::string &name) = 0;
+            virtual void attachControls(const component::SoundID &) = 0;
 
-            virtual void playLoopingSound(common::SoundID) = 0;
+            virtual void play(const component::SoundID &) = 0;
 
-            virtual void playSoundOnce(common::SoundID) = 0;
+            virtual void setLoop(const component::SoundID &, bool loop) = 0;
 
-            virtual oni::common::real64 pauseSound(common::SoundID) = 0;
+            virtual void setPitch(const component::SoundID &, common::real32 pitch) = 0;
 
-            virtual void stopSound(common::SoundID) = 0;
+            virtual common::real64 pauseSound(const component::SoundID &) = 0;
 
-            virtual void setLoop(common::SoundID, bool loop) = 0;
+            virtual void setVolume(const component::SoundID &, common::real32 volume) = 0;
 
-            virtual void setVolume(common::SoundID, common::real32 volume) = 0;
+            virtual bool isPlaying(const component::SoundID &) = 0;
 
-            virtual bool isPlaying(common::SoundID) = 0;
-
-            virtual void seek(common::SoundID, oni::common::real64 position) = 0;
-
-            virtual void setPitch(common::SoundID, common::real32 pitch) = 0;
+            virtual void seek(const component::SoundID &, common::real64 position) = 0;
 
         public:
-            void collisionSoundEffect(component::EntityType, component::EntityType);
+            void playCollisionSoundEffect(component::EntityType, component::EntityType);
 
             void preLoadCollisionSoundEffects();
 
         protected:
-            std::unordered_map<common::UInt16Pack, common::SoundID> mCollisionEffects;
-            std::unordered_map<component::SoundEffectID, common::SoundID> mSoundEffects;
+            std::unordered_map<common::UInt16Pack, component::SoundID> mCollisionEffects;
 
         private:
-            common::UInt16Pack createID(component::EntityType, component::EntityType);
+            common::UInt16Pack createCollisionEffectID(component::EntityType, component::EntityType);
         };
     }
 }

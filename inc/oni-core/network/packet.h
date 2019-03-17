@@ -24,7 +24,7 @@ namespace oni {
         };
 
         struct SoundEffectEventPacket {
-            component::SoundEffectID soundID{};
+            component::SoundID soundID{};
             component::SoundPos pos{};
         };
     }

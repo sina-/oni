@@ -35,9 +35,9 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundEffectID &,
+        void EntityFactory::_apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundID &,
                                                                                           component::SoundPos &)> &func) {
-            auto group = mRegistryManager->createGroup<component::SoundEffectID, component::SoundPos>();
+            auto group = mRegistryManager->createGroup<component::SoundID, component::SoundPos>();
             group.apply(func);
         }
 
@@ -461,9 +461,9 @@ namespace oni {
 
         template<>
         void EntityFactory::_createEvent<component::EventType::SOUND_EFFECT>(common::EntityID entityID,
-                                                                             const component::SoundEffectID &effectID,
+                                                                             const component::SoundID &effectID,
                                                                              const math::vec2 &worldPos) {
-            auto &effectIDComponent = createComponent<component::SoundEffectID>(entityID);
+            auto &effectIDComponent = createComponent<component::SoundID>(entityID);
             effectIDComponent = effectID;
 
             auto &pos = createComponent<component::SoundPos>(entityID);

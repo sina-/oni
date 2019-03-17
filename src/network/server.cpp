@@ -111,24 +111,43 @@ namespace oni {
         void Server::broadcastEvents(entities::EntityFactory &entityFactory) {
             auto lock = entityFactory.getEntityManager().scopedLock();
 
-            std::vector<CollisionEventPacket> packets;
+            std::vector<CollisionEventPacket> collisionPackets;
             {
                 std::function<void(component::CollidingEntity &,
-                                   component::CollisionPos &)> func = [&packets](
+                                   component::CollisionPos &)> func = [&collisionPackets](
                         component::CollidingEntity &collidingEntity,
                         component::CollisionPos &collisionPos) {
                     CollisionEventPacket packet;
                     packet.collidingEntity = collidingEntity;
                     packet.collisionPos = collisionPos;
-                    packets.emplace_back(packet);
+                    collisionPackets.emplace_back(packet);
                 };
                 entityFactory.apply<component::EventType::COLLISION>(func);
             }
 
+            std::vector<SoundEffectEventPacket> soundEffectPackets;
+            {
+                std::function<void(component::SoundEffectID &,
+                                   component::SoundPos &)> func = [&soundEffectPackets](
+                        component::SoundEffectID &soundEffectID,
+                        component::SoundPos &soundPos) {
+                    SoundEffectEventPacket packet;
+                    packet.soundID = soundEffectID;
+                    packet.pos = soundPos;
+                    soundEffectPackets.emplace_back(packet);
+                };
+                entityFactory.apply<component::EventType::SOUND_EFFECT>(func);
+            }
+
             entityFactory.resetEvents();
 
-            auto data = entities::serialize(packets);
+            auto data = entities::serialize(collisionPackets);
             auto type = PacketType::COLLISION_EVENT;
+
+            broadcast(type, data);
+
+            data = entities::serialize(soundEffectPackets);
+            type = PacketType::ONE_SHOT_SOUND_EFFECT;
 
             broadcast(type, data);
         }

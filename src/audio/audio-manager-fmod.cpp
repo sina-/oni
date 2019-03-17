@@ -106,11 +106,6 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        common::real32 AudioManagerFMOD::getVolume(SoundID id) {
-            UNUSED(id);
-            return 0;
-        }
-
         bool AudioManagerFMOD::isPlaying(SoundID id) {
             bool isPaused{false};
             auto result = mLoopingSoundChannel[id]->getPaused(&isPaused);

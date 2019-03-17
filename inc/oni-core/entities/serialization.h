@@ -30,6 +30,11 @@ namespace oni {
         void serialize(Archive &archive, CollisionEventPacket &packet) {
             archive(packet.collidingEntity, packet.collisionPos);
         }
+
+        template<class Archive>
+        void serialize(Archive &archive, SoundEffectEventPacket &packet) {
+            archive(packet.soundID, packet.pos);
+        }
     }
 
     namespace math {

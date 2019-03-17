@@ -102,6 +102,10 @@ namespace oni {
             void _apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
                                                                             component::CollisionPos &)> &);
 
+            template<>
+            void _apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundEffectID &,
+                                                                               component::SoundPos &)> &);
+
             template<component::EntityType entityType>
             void _removeEntity(common::EntityID, bool track, bool safe) = delete;
 

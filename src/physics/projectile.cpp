@@ -105,7 +105,7 @@ namespace oni {
                                                                                                          bulletSpeed);
                     entityFactory.tagForNetworkSync(bulletEntity);
 
-                    std::string soundID = "resources/audio/gun/1.wav";
+                    std::string soundID = "resources/audio/rocket/1.wav";
                     entityFactory.createEvent<component::EventType::SOUND_EFFECT>(soundID, pos.getXY());
 
                 }

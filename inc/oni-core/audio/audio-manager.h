@@ -5,6 +5,7 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/entity-definition.h>
+#include <oni-core/component/audio.h>
 
 namespace oni {
     namespace audio {
@@ -32,8 +33,6 @@ namespace oni {
 
             virtual void setVolume(common::SoundID, common::real32 volume) = 0;
 
-            virtual common::real32 getVolume(common::SoundID) = 0;
-
             virtual bool isPlaying(common::SoundID) = 0;
 
             virtual void seek(common::SoundID, oni::common::real64 position) = 0;
@@ -43,10 +42,11 @@ namespace oni {
         public:
             void collisionSoundEffect(component::EntityType, component::EntityType);
 
-            void preLoadSound();
+            void preLoadCollisionSoundEffects();
 
         protected:
             std::unordered_map<common::UInt16Pack, common::SoundID> mCollisionEffects;
+            std::unordered_map<component::SoundEffectID, common::SoundID> mSoundEffects;
 
         private:
             common::UInt16Pack createID(component::EntityType, component::EntityType);

@@ -5,6 +5,7 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/network/packet-types.h>
 #include <oni-core/component/physic.h>
+#include <oni-core/component/audio.h>
 
 
 namespace oni {
@@ -19,7 +20,12 @@ namespace oni {
 
         struct CollisionEventPacket {
             component::CollidingEntity collidingEntity{};
-            component::CollisionPos  collisionPos{};
+            component::CollisionPos collisionPos{};
+        };
+
+        struct SoundEffectEventPacket {
+            component::SoundEffectID soundID{};
+            component::SoundPos pos{};
         };
     }
 }

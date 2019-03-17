@@ -34,6 +34,13 @@ namespace oni {
             group.apply(func);
         }
 
+        template<>
+        void EntityFactory::_apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundEffectID &,
+                                                                                          component::SoundPos &)> &func) {
+            auto group = mRegistryManager->createGroup<component::SoundEffectID, component::SoundPos>();
+            group.apply(func);
+        }
+
         void EntityFactory::removeEntity(common::EntityID entityID,
                                          component::EntityType entityType,
                                          bool track,

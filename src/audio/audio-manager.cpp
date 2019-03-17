@@ -26,7 +26,7 @@ namespace oni {
             return soundID;
         }
 
-        void AudioManager::preLoadSound() {
+        void AudioManager::preLoadCollisionSoundEffects() {
             auto soundID = loadSound("resources/audio/collision/bullet-with-unknown.wav");
             for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
                  i < static_cast<common::uint16>(component::EntityType::LAST);

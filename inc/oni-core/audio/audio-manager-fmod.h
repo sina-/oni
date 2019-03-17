@@ -40,8 +40,6 @@ namespace oni {
 
             void setVolume(SoundID id, common::real32 volume) override;
 
-            common::real32 getVolume(SoundID id) override;
-
             bool isPlaying(SoundID id) override;
 
             void seek(SoundID id, oni::common::real64 position) override;

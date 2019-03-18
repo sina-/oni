@@ -6,13 +6,15 @@
 
 #include <oni-core/common/consts.h>
 #include <oni-core/common/defines.h>
+#include <oni-core/entities/entity-factory.h>
+#include <oni-core/component/geometry.h>
 
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
 #define VALID(MAP, ID) assert(MAP.find(id) != MAP.end())
 
 namespace oni {
     namespace audio {
-        AudioManagerFMOD::AudioManagerFMOD() : AudioManager(), mSystem{}, mSounds{}, mChannels{} {
+        AudioManagerFMOD::AudioManagerFMOD() : AudioManager() {
             FMOD::System *system{nullptr};
 
             auto result = FMOD::System_Create(&system);
@@ -31,7 +33,26 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        void AudioManagerFMOD::tick() {
+        void AudioManagerFMOD::tick(entities::EntityFactory &entityFactory) {
+            {
+                auto view = entityFactory.getEntityManager().createViewWithLock<component::SoundID,
+                        component::SoundPlaybackState,
+                        component::Placement>();
+                for (auto &&entity : view) {
+                    auto &playbackState = view.get<component::SoundPlaybackState>(entity);
+                    auto &soundID = view.get<component::SoundID>(entity);
+                    if (playbackState == component::SoundPlaybackState::REQUIRES_PLAYBACK) {
+                        // TODO: This doesn't work as of now, because every network component update packet resets
+                        // the status. I might need to keep an internal state of each entity and soundID and only
+                        // play a new if it is not already, but what if I want to play the same track several times in
+                        // parallel for an entity?
+                        //play(soundID);
+                        playbackState = component::SoundPlaybackState::PLAYING;
+                    } else if (playbackState == component::SoundPlaybackState::STOPPED) {
+                        pauseSound(soundID);
+                    }
+                }
+            }
             auto result = mSystem->update();
             ERRCHECK(result);
         }
@@ -87,7 +108,10 @@ namespace oni {
         }
 
         common::real64 AudioManagerFMOD::pauseSound(const component::SoundID &id) {
-            VALID(mChannels, id);
+            // NOTE: It might be that the play-back has already finished.
+            if (mChannels.find(id) == mChannels.end()) {
+                return -1.f;
+            }
 
             auto result = mChannels[id]->setPaused(true);
             ERRCHECK(result);
@@ -118,6 +142,10 @@ namespace oni {
             auto result = mChannels[id]->setPosition(static_cast<common::uint32>(position + common::EP),
                                                      FMOD_TIMEUNIT_MS);
             ERRCHECK(result);
+        }
+
+        void AudioManagerFMOD::fadeOut(const component::SoundID &id) {
+            //VALID(mChannels, id);
         }
 
         void AudioManagerFMOD::FMODDeleter::operator()(FMOD::Sound *s) const {

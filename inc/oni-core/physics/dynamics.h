@@ -56,7 +56,7 @@ namespace oni {
                       common::real64 tickTime);
 
         private:
-            void handleBulletCollision(entities::EntityFactory &,
+            void handleRocketCollision(entities::EntityFactory &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
                                        component::Placement &);

@@ -165,11 +165,15 @@ namespace oni {
                         component::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
+                        component::SoundID,
+                        component::SoundPlaybackState,
+
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
                         // to know what it points to at the moment because sever does the physics calculations and only
                         // send the results back to the client, so I can skip it. But for the future I have to
                         // find a solution to this shit.
                         //components::PhysicalProperties,
+
                         component::TransformParent,
                         component::Tag_Dynamic,
                         component::Tag_TextureShaded,
@@ -202,6 +206,8 @@ namespace oni {
                         component::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
+                        component::SoundID,
+                        component::SoundPlaybackState,
                         //components::PhysicalProperties,
                         component::TransformParent,
                         component::Tag_Dynamic,

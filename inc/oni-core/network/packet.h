@@ -23,7 +23,7 @@ namespace oni {
             component::CollisionPos collisionPos{};
         };
 
-        struct SoundEffectEventPacket {
+        struct SoundPlayEventPacket {
             component::SoundID soundID{};
             component::SoundPos pos{};
         };

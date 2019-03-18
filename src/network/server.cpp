@@ -125,18 +125,18 @@ namespace oni {
                 entityFactory.apply<component::EventType::COLLISION>(func);
             }
 
-            std::vector<SoundEffectEventPacket> soundEffectPackets;
+            std::vector<SoundPlayEventPacket> soundPlayPackets;
             {
                 std::function<void(component::SoundID &,
-                                   component::SoundPos &)> func = [&soundEffectPackets](
+                                   component::SoundPos &)> func = [&soundPlayPackets](
                         component::SoundID &soundEffectID,
                         component::SoundPos &soundPos) {
-                    SoundEffectEventPacket packet;
+                    SoundPlayEventPacket packet;
                     packet.soundID = soundEffectID;
                     packet.pos = soundPos;
-                    soundEffectPackets.emplace_back(packet);
+                    soundPlayPackets.emplace_back(packet);
                 };
-                entityFactory.apply<component::EventType::SOUND_EFFECT>(func);
+                entityFactory.apply<component::EventType::SOUND_PLAY>(func);
             }
 
             entityFactory.resetEvents();
@@ -146,7 +146,7 @@ namespace oni {
 
             broadcast(type, data);
 
-            data = entities::serialize(soundEffectPackets);
+            data = entities::serialize(soundPlayPackets);
             type = PacketType::ONE_SHOT_SOUND_EFFECT;
 
             broadcast(type, data);

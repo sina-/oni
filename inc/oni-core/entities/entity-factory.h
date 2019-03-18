@@ -103,8 +103,8 @@ namespace oni {
                                                                             component::CollisionPos &)> &);
 
             template<>
-            void _apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                               component::SoundPos &)> &);
+            void _apply<component::EventType::SOUND_PLAY>(std::function<void(component::SoundID &,
+                                                                             component::SoundPos &)> &);
 
             template<component::EntityType entityType>
             void _removeEntity(common::EntityID, bool track, bool safe) = delete;
@@ -181,7 +181,7 @@ namespace oni {
                                                                        const bool &randomize);
 
             template<>
-            void _createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID,
+            void _createEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID,
                                                                      const math::vec3 &pos,
                                                                      const math::vec2 &size,
                                                                      const common::real32 &heading,
@@ -216,9 +216,9 @@ namespace oni {
                                                                const math::vec3 &worldPos);
 
             template<>
-            void _createEvent<component::EventType::SOUND_EFFECT>(common::EntityID,
-                                                                  const component::SoundID &,
-                                                                  const math::vec2 &worldPos);
+            void _createEvent<component::EventType::SOUND_PLAY>(common::EntityID,
+                                                                const component::SoundID &,
+                                                                const math::vec2 &worldPos);
 
 
         private:
@@ -229,7 +229,7 @@ namespace oni {
             void _removeEntity<component::EntityType::WALL>(common::EntityID, bool track, bool safe);
 
             template<>
-            void _removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID, bool track, bool safe);
+            void _removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID, bool track, bool safe);
 
         private:
             b2Body *createPhysicalBody(

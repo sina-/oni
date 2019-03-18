@@ -32,7 +32,7 @@ namespace oni {
             for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
                  i < static_cast<common::uint16>(component::EntityType::LAST);
                  ++i) {
-                auto id = createCollisionEffectID(component::EntityType::SIMPLE_BULLET,
+                auto id = createCollisionEffectID(component::EntityType::SIMPLE_ROCKET,
                                                   static_cast<component::EntityType>(i));
                 mCollisionEffects[id] = bulletWithUnknown;
             }

@@ -8,6 +8,10 @@
 #include <oni-core/component/audio.h>
 
 namespace oni {
+    namespace entities {
+        class EntityFactory;
+    }
+
     namespace audio {
         class AudioManager {
         public:
@@ -15,7 +19,7 @@ namespace oni {
 
             virtual ~AudioManager() = default;
 
-            virtual void tick() = 0;
+            virtual void tick(entities::EntityFactory &) = 0;
 
             virtual void loadSound(const component::SoundID &) = 0;
 
@@ -28,6 +32,8 @@ namespace oni {
             virtual void setPitch(const component::SoundID &, common::real32 pitch) = 0;
 
             virtual common::real64 pauseSound(const component::SoundID &) = 0;
+
+            virtual void fadeOut(const component::SoundID &) = 0;
 
             virtual void setVolume(const component::SoundID &, common::real32 volume) = 0;
 

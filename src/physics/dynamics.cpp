@@ -79,8 +79,8 @@ namespace oni {
             mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
             mRand = std::make_unique<math::Rand>(0);
 
-            mCollisionHandlers[component::PhysicalCategory::BULLET] =
-                    std::bind(&Dynamics::handleBulletCollision, this,
+            mCollisionHandlers[component::PhysicalCategory::ROCKET] =
+                    std::bind(&Dynamics::handleRocketCollision, this,
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
@@ -137,7 +137,7 @@ namespace oni {
                 // One solutions could be, if this loop is very heavy, is to create a copy of all the data I need to
                 // operate on and do all the calculation and then lock the registry and update all the corresponding
                 // entities.
-                auto carView = manager.createViewScopeLock<component::Placement, component::Car, component::CarConfig>();
+                auto carView = manager.createViewWithLock<component::Placement, component::Car, component::CarConfig>();
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
@@ -194,15 +194,22 @@ namespace oni {
                     tickCar(car, carConfig, carInput[entity], tickTime);
 
                     auto &carPlacement = carView.get<component::Placement>(entity);
-                    carPlacement.position.x = car.position.x;
-                    carPlacement.position.y = car.position.y;
-                    carPlacement.rotation = static_cast<common::real32>(car.heading);
-                    updateTransforms(manager, entity, carPlacement);
 
                     auto velocity = car.velocityLocal.len();
-                    car.distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
+                    auto distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
+                    if (std::abs(carPlacement.position.x - car.position.x) > common::EP ||
+                        std::abs(carPlacement.position.y - car.position.y) > common::EP ||
+                        std::abs(carPlacement.rotation - car.heading) > common::EP ||
+                        std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP
+                            ) {
+                        carPlacement.position.x = car.position.x;
+                        carPlacement.position.y = car.position.y;
+                        carPlacement.rotation = static_cast<common::real32>(car.heading);
+                        car.distanceFromCamera = distanceFromCamera;
 
-                    entitiesToBeUpdated.push_back(entity);
+                        updateTransforms(manager, entity, carPlacement);
+                        entitiesToBeUpdated.push_back(entity);
+                    }
                 }
             }
 
@@ -219,7 +226,7 @@ namespace oni {
             mProjectile->tick(entityFactory, clientData, tickTime);
 
             {
-                auto carPhysicsView = manager.createViewScopeLock<component::Car, component::PhysicalProperties>();
+                auto carPhysicsView = manager.createViewWithLock<component::Car, component::PhysicalProperties>();
 
                 // Handle collision
                 for (auto entity: carPhysicsView) {
@@ -264,7 +271,7 @@ namespace oni {
 
             {
                 // Handle collision
-                auto view = manager.createViewScopeLock<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createViewWithLock<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
                 for (auto entity: view) {
                     auto &props = view.get<component::PhysicalProperties>(entity);
@@ -272,12 +279,13 @@ namespace oni {
 
                     mCollisionHandlers[props.physicalCategory](entityFactory,
                                                                entity,
-                                                               props, placement);
+                                                               props,
+                                                               placement);
                 }
             }
             {
                 // Update placement
-                auto view = manager.createViewScopeLock<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createViewWithLock<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
 
                 for (auto entity: view) {
@@ -306,7 +314,7 @@ namespace oni {
 
             {
                 // Update tires
-                auto view = manager.createViewScopeLock<component::EntityAttachment, component::Car>();
+                auto view = manager.createViewWithLock<component::EntityAttachment, component::Car>();
                 for (auto &&entity : view) {
                     const auto &attachments = view.get<component::EntityAttachment>(entity);
                     const auto &car = view.get<component::Car>(entity);
@@ -347,21 +355,24 @@ namespace oni {
             return colliding;
         }
 
-        void Dynamics::handleBulletCollision(entities::EntityFactory &entityFactory,
-                                             common::EntityID entity,
+        void Dynamics::handleRocketCollision(entities::EntityFactory &entityFactory,
+                                             common::EntityID entityID,
                                              component::PhysicalProperties &props,
-                                             component::Placement &placement) {
+                                             component::Placement &) {
 
             if (isColliding(props.body)) {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 math::vec3 pos{props.body->GetPosition().x, props.body->GetPosition().y, particleZ};
 
-                entityFactory.createEvent<component::EventType::COLLISION>(component::EntityType::SIMPLE_BULLET,
+                // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
+                // sound effects, etc.
+                entityFactory.createEvent<component::EventType::COLLISION>(component::EntityType::SIMPLE_ROCKET,
                         // TODO: use the proper type for the other entity instead of UNKNOWN
                                                                            component::EntityType::UNKNOWN,
                                                                            pos);
-                entityFactory.removeEntity(entity, true, false);
+
+                entityFactory.removeEntity(entityID, true, false);
             }
         }
 

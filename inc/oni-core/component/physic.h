@@ -28,7 +28,7 @@ namespace oni {
             GENERIC = 1,
             VEHICLE = 2,
             RACE_CAR = 3,
-            BULLET = 4,
+            ROCKET = 4,
             WALL = 5,
         };
 

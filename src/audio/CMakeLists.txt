@@ -18,4 +18,9 @@ find_library(FMOD fmodL PATHS ${oni_SOURCE_DIR}/lib/fmod/lib/x86_64 NO_DEFAULT_P
 target_link_libraries(oni-core-audio
         PRIVATE
             ${FMOD}
+            oni-core-entities
+        )
+
+add_dependencies(oni-core-audio
+        oni-core-entities
         )

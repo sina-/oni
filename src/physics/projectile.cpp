@@ -21,7 +21,7 @@ namespace oni {
                               common::real64 tickTime) {
             // Update cool-downs
             {
-                auto view = entityFactory.getEntityManager().createViewScopeLock<component::GunCoolDown>();
+                auto view = entityFactory.getEntityManager().createViewWithLock<component::GunCoolDown>();
                 for (auto &&entity: view) {
                     auto &coolDown = view.get<component::GunCoolDown>(entity);
                     if (coolDown.value > 0) {
@@ -30,15 +30,15 @@ namespace oni {
                 }
             }
 
-            // Spawn bullets
+            // Spawn projectile
             {
-                auto carView = entityFactory.getEntityManager().createViewScopeLock<
+                auto carView = entityFactory.getEntityManager().createViewWithLock<
                         component::Placement,
                         component::Car,
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 bulletSpeed{20.f};
+                common::real32 velocity{20.f};
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
@@ -53,14 +53,14 @@ namespace oni {
                         const auto &car = carView.get<component::Car>(entity);
                         const auto &heading = carView.get<component::Car>(entity).heading;
                         const auto &attachments = carView.get<component::EntityAttachment>(entity);
-                        fireBullet(entityFactory, bulletSpeed, carPlacement, carConfig, heading, attachments);
+                        fireRocket(entityFactory, velocity, carPlacement, carConfig, heading, attachments);
                     }
                 }
             }
         }
 
-        void Projectile::fireBullet(entities::EntityFactory &entityFactory,
-                                    common::real32 bulletSpeed,
+        void Projectile::fireRocket(entities::EntityFactory &entityFactory,
+                                    const common::real32 velocity,
                                     const component::Placement &carPlacement,
                                     const component::CarConfig &carConfig,
                                     const common::CarSimDouble &heading,
@@ -85,29 +85,25 @@ namespace oni {
                     auto carHalfY = static_cast<common::real32>(carConfig.halfWidth);
                     auto offset = sqrt(carHalfX * carHalfX + carHalfY * carHalfY);
 
-                    math::vec2 bulletSize{0.3f, 0.1f};
+                    math::vec2 size{0.3f, 0.1f};
                     auto &carPos = carPlacement.position;
-                    auto bulletOffset = sqrt(
-                            bulletSize.x * bulletSize.x / 4.f + bulletSize.y * bulletSize.y / 4.f);
+                    auto projectileOffset = sqrt(
+                            size.x * size.x / 4.f + size.y * size.y / 4.f);
                     common::real32 fudge = 0.2f;
 
                     math::vec3 pos{
-                            carPos.x + (offset + bulletOffset + fudge) * cos(carPlacement.rotation),
-                            carPos.y + (offset + bulletOffset + fudge) * sin(carPlacement.rotation),
+                            carPos.x + (offset + projectileOffset + fudge) * cos(carPlacement.rotation),
+                            carPos.y + (offset + projectileOffset + fudge) * sin(carPlacement.rotation),
                             carPos.z};
 
                     std::string textureID = "resources/images/bullet/1.png";
 
-                    auto bulletEntity = entityFactory.createEntity<component::EntityType::SIMPLE_BULLET>(pos,
-                                                                                                         bulletSize,
+                    auto rocketEntity = entityFactory.createEntity<component::EntityType::SIMPLE_ROCKET>(pos,
+                                                                                                         size,
                                                                                                          carPlacement.rotation,
                                                                                                          textureID,
-                                                                                                         bulletSpeed);
-                    entityFactory.tagForNetworkSync(bulletEntity);
-
-                    std::string soundID = "resources/audio/rocket/1.wav";
-                    entityFactory.createEvent<component::EventType::SOUND_EFFECT>(soundID, pos.getXY());
-
+                                                                                                         velocity);
+                    entityFactory.tagForNetworkSync(rocketEntity);
                 }
             }
         }

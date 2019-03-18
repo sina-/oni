@@ -35,8 +35,8 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_apply<component::EventType::SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                          component::SoundPos &)> &func) {
+        void EntityFactory::_apply<component::EventType::SOUND_PLAY>(std::function<void(component::SoundID &,
+                                                                                        component::SoundPos &)> &func) {
             auto group = mRegistryManager->createGroup<component::SoundID, component::SoundPos>();
             group.apply(func);
         }
@@ -54,8 +54,8 @@ namespace oni {
                     _removeEntity<component::EntityType::WALL>(entityID, track, safe);
                     break;
                 }
-                case component::EntityType::SIMPLE_BULLET: {
-                    _removeEntity<component::EntityType::SIMPLE_BULLET>(entityID, track, safe);
+                case component::EntityType::SIMPLE_ROCKET: {
+                    _removeEntity<component::EntityType::SIMPLE_ROCKET>(entityID, track, safe);
                     break;
                 }
                 case component::EntityType::VEHICLE_GUN:
@@ -347,7 +347,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID,
+        void EntityFactory::_createEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
                                                                                 const math::vec3 &pos,
                                                                                 const math::vec2 &size,
                                                                                 const common::real32 &heading,
@@ -361,7 +361,7 @@ namespace oni {
             properties.linearDamping = 0.1f;
             properties.highPrecision = true;
             properties.bodyType = oni::component::BodyType::DYNAMIC;
-            properties.physicalCategory = oni::component::PhysicalCategory::BULLET;
+            properties.physicalCategory = oni::component::PhysicalCategory::ROCKET;
             properties.collisionWithinCategory = false;
 
             auto *body = createPhysicalBody(pos, size, heading, properties);
@@ -387,6 +387,12 @@ namespace oni {
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+            auto &soundID = createComponent<component::SoundID>(entityID);
+            soundID.assign("resources/audio/rocket/1.wav");
+
+            auto &state = createComponent<component::SoundPlaybackState>(entityID);
+            state = component::SoundPlaybackState::REQUIRES_PLAYBACK;
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
@@ -460,11 +466,11 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEvent<component::EventType::SOUND_EFFECT>(common::EntityID entityID,
-                                                                             const component::SoundID &effectID,
-                                                                             const math::vec2 &worldPos) {
-            auto &effectIDComponent = createComponent<component::SoundID>(entityID);
-            effectIDComponent = effectID;
+        void EntityFactory::_createEvent<component::EventType::SOUND_PLAY>(common::EntityID entityID,
+                                                                           const component::SoundID &id,
+                                                                           const math::vec2 &worldPos) {
+            auto &soundID = createComponent<component::SoundID>(entityID);
+            soundID = id;
 
             auto &pos = createComponent<component::SoundPos>(entityID);
             pos.x = worldPos.x;
@@ -567,7 +573,7 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_BULLET>(common::EntityID entityID, bool track,
+        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID, bool track,
                                                                                 bool safe) {
             removePhysicalBody(entityID);
         }

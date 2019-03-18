@@ -29,13 +29,13 @@ namespace oni {
             void tick(entities::EntityFactory &, entities::ClientDataManager &, common::real64 tickTime);
 
         private:
-            void fireBullet(entities::EntityFactory &entityFactory,
-                            const common::real32 bulletSpeed,
+            void fireRocket(entities::EntityFactory &entityFactory,
+                            const common::real32 speed,
                             const component::Placement &,
                             const component::CarConfig &,
                             const common::CarSimDouble &heading,
-                            const component::EntityAttachment&
-                            );
+                            const component::EntityAttachment &
+            );
 
         private:
             b2World *mPhysicsWorld{};

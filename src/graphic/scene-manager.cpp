@@ -295,13 +295,13 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
-            // Bullet trails
+            // trails
             {
                 std::string textureID = "resources/images/smoke/1.png";
                 common::real32 halfSize = 0.5f;
                 common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
-                auto view = entityFactory.getEntityManager().createViewScopeLock<component::Trail, component::Placement>();
+                auto view = entityFactory.getEntityManager().createViewWithLock<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     const auto &currentPos = placement.position;
@@ -384,7 +384,7 @@ namespace oni {
                 std::vector<math::mat4> carTireTransform{};
                 std::vector<common::uint8> skidOpacity{};
                 {
-                    auto carView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::Placement, component::CarConfig>();
+                    auto carView = entityFactory.getEntityManager().createViewWithLock<component::Car, component::Placement, component::CarConfig>();
                     for (auto &&carEntity: carView) {
 
                         const auto car = carView.get<component::Car>(carEntity);
@@ -435,7 +435,7 @@ namespace oni {
 
             // Update Laps
             {
-                auto carLapView = entityFactory.getEntityManager().createViewScopeLock<component::Car, component::CarLapInfo>();
+                auto carLapView = entityFactory.getEntityManager().createViewWithLock<component::Car, component::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -457,7 +457,7 @@ namespace oni {
         }
 
         void SceneManager::updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime) {
-            auto view = entityFactory.getEntityManager().createViewScopeLock<component::Particle>();
+            auto view = entityFactory.getEntityManager().createViewWithLock<component::Particle>();
             for (const auto &entity: view) {
                 auto &particle = view.get<component::Particle>(entity);
                 // TODO: Maybe you want a single place to store these variables?
@@ -489,6 +489,9 @@ namespace oni {
         }
 
         void SceneManager::prepareTexture(component::Texture &texture) {
+            // TODO: With current network registry sync code every time an entity gets component sync this texture
+            // status is reverted back to what it was on server, which might be okay, but something to keep in mind
+            // if it becomes a perf bottle-neck.
             switch (texture.status) {
                 case component::TextureStatus::INVALID : {
                     assert(false);

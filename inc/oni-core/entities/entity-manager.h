@@ -181,7 +181,7 @@ namespace oni {
             }
 
             template<class... ViewComponents>
-            EntityView<EntityID, ViewComponents...> createViewScopeLock() {
+            EntityView<EntityID, ViewComponents...> createViewWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
                 return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
@@ -192,7 +192,7 @@ namespace oni {
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityID, GroupComponents...> createGroupScopeLock() {
+            EntityGroup<EntityID, GroupComponents...> createGroupWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
                 return EntityView<EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
             }
@@ -262,6 +262,12 @@ namespace oni {
                         {
                             auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
                             if (!view.empty()) {
+/*                                for (auto &&entity: view) {
+                                    std::cout << "Updating: "
+                                              << static_cast<int>(mRegistry->get<component::EntityType>(entity))
+                                              << " id: " << entity
+                                              << "\n";
+                                }*/
                                 mRegistry->snapshot().template component<ArchiveComponents...>(archive,
                                                                                                view.begin(),
                                                                                                view.end());

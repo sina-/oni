@@ -21,7 +21,7 @@ namespace oni {
         public:
             AudioManagerFMOD();
 
-            void tick() override;
+            void tick(entities::EntityFactory&) override;
 
             void loadSound(const component::SoundID &) override;
 
@@ -34,6 +34,8 @@ namespace oni {
             void setLoop(const component::SoundID &, bool loop) override;
 
             common::real64 pauseSound(const component::SoundID &) override;
+
+            void fadeOut(const component::SoundID &id) override;
 
             void setVolume(const component::SoundID &, common::real32 volume) override;
 

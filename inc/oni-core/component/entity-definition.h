@@ -21,7 +21,7 @@ namespace oni {
 
             SIMPLE_SPRITE,
             SIMPLE_PARTICLE,
-            SIMPLE_BULLET,
+            SIMPLE_ROCKET,
 
             TEXT,
             WORLD_CHUNK,

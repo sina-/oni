@@ -10,7 +10,6 @@
 #include <oni-core/component/entity-definition.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/component/visual.h>
-#include <oni-core/component/audio.h>
 
 namespace oni {
     // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
@@ -32,7 +31,7 @@ namespace oni {
         }
 
         template<class Archive>
-        void serialize(Archive &archive, SoundEffectEventPacket &packet) {
+        void serialize(Archive &archive, SoundPlayEventPacket &packet) {
             archive(packet.soundID, packet.pos);
         }
     }

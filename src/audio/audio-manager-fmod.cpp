@@ -34,27 +34,35 @@ namespace oni {
         }
 
         void AudioManagerFMOD::tick(entities::EntityFactory &entityFactory) {
-            {
-                auto view = entityFactory.getEntityManager().createViewWithLock<component::SoundID,
-                        component::SoundPlaybackState,
-                        component::Placement>();
-                for (auto &&entity : view) {
-                    auto &playbackState = view.get<component::SoundPlaybackState>(entity);
-                    auto &soundID = view.get<component::SoundID>(entity);
-                    if (playbackState == component::SoundPlaybackState::REQUIRES_PLAYBACK) {
-                        // TODO: This doesn't work as of now, because every network component update packet resets
-                        // the status. I might need to keep an internal state of each entity and soundID and only
-                        // play a new if it is not already, but what if I want to play the same track several times in
-                        // parallel for an entity?
-                        //play(soundID);
-                        playbackState = component::SoundPlaybackState::PLAYING;
-                    } else if (playbackState == component::SoundPlaybackState::STOPPED) {
-                        pauseSound(soundID);
-                    }
-                }
-            }
             auto result = mSystem->update();
             ERRCHECK(result);
+
+            auto view = entityFactory.getEntityManager().createViewWithLock<component::SoundID,
+                    component::SoundPlaybackState,
+                    component::Placement>();
+            for (auto &&entity : view) {
+                auto &playbackState = view.get<component::SoundPlaybackState>(entity);
+                auto &soundID = view.get<component::SoundID>(entity);
+                if (playbackState == component::SoundPlaybackState::PLAY) {
+                    tryPlay(soundID, entity);
+                } else if (playbackState == component::SoundPlaybackState::STOP) {
+                    kill(soundID, entity);
+                } else if (playbackState == component::SoundPlaybackState::FADE_OUT) {
+                    fadeOut(soundID, entity);
+                }
+            }
+
+            // TODO: This is not thread safe. Other threads could write to this data.
+            for (auto sound = mChannels.begin(); sound != mChannels.end(); ++sound) {
+                bool playing{false};
+                result = sound->second->isPlaying(&playing);
+                if (result == FMOD_ERR_INVALID_HANDLE) {
+                    // TODO: Not super happy with this. I should be able to just have one-shot play type of audio
+                    // that does not require manual clean-up. Why am I even storing this information for non-looping
+                    // sounds?
+                    mChannels.erase(sound);
+                }
+            }
         }
 
         void AudioManagerFMOD::loadSound(const component::SoundID &id) {
@@ -67,13 +75,18 @@ namespace oni {
         }
 
         void AudioManagerFMOD::attachControls(const component::SoundID &id) {
+            mChannels[id] = createChannel(id);
+        }
+
+        std::unique_ptr<FMOD::Channel, AudioManagerFMOD::FMODDeleter>
+        AudioManagerFMOD::createChannel(const component::SoundID &id) {
             VALID(mSounds, id);
 
             FMOD::Channel *channel{nullptr};
             auto result = mSystem->playSound(mSounds[id].get(), nullptr, true, &channel);
             ERRCHECK(result);
 
-            mChannels[id] = std::unique_ptr<FMOD::Channel, FMODDeleter>(channel, FMODDeleter());
+            return std::unique_ptr<FMOD::Channel, FMODDeleter>(channel, FMODDeleter());
         }
 
         void AudioManagerFMOD::play(const component::SoundID &id) {
@@ -85,6 +98,52 @@ namespace oni {
                 VALID(mSounds, id);
                 auto result = mSystem->playSound(mSounds[id].get(), nullptr, false, nullptr);
                 ERRCHECK(result);
+            }
+        }
+
+        static FMOD_RESULT
+        endOfPlayCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE type,
+                          FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *, void *) {
+            if (type == FMOD_CHANNELCONTROL_TYPE::FMOD_CHANNELCONTROL_CHANNELGROUP) {
+                return FMOD_OK;
+            }
+
+            auto *channel = (FMOD::Channel *) (channelControl);
+            if (callbackType == FMOD_CHANNELCONTROL_CALLBACK_TYPE::FMOD_CHANNELCONTROL_CALLBACK_END) {
+                void *finished;
+                auto result = channel->getUserData(&finished);
+                ERRCHECK(result);
+                *(bool *) finished = true;
+            }
+
+            return FMOD_OK;
+        };
+
+        void AudioManagerFMOD::tryPlay(const component::SoundID &soundID, common::EntityID entityID) {
+            auto soundEntityID = getID(soundID, entityID);
+            if (mEntityChannel.find(soundEntityID) == mEntityChannel.end()) {
+                EntityChannel entityChannel;
+                entityChannel.entityID = entityID;
+                entityChannel.channel = createChannel(soundID);
+                // TODO: This is
+                auto result = entityChannel.channel->setVolume(0.5f);
+                ERRCHECK(result);
+
+                mEntityChannel[soundEntityID] = std::move(entityChannel);
+            }
+
+            auto &entityChannel = mEntityChannel.at(soundEntityID);
+            bool paused;
+            auto result = entityChannel.channel->getPaused(&paused);
+            // NOTE: This will happen if the play-back has ended.
+            if (result == FMOD_ERR_INVALID_HANDLE) {
+                mEntityChannel.erase(soundEntityID);
+                tryPlay(soundID, entityID);
+            } else if (paused) {
+                result = entityChannel.channel->setPaused(false);
+                ERRCHECK(result);
+            } else {
+                // NOTE: The sound is already playing.
             }
         }
 
@@ -123,6 +182,20 @@ namespace oni {
             return (static_cast<common::real64>(pos) + common::EP);
         }
 
+        void AudioManagerFMOD::kill(const component::SoundID &soundID, common::EntityID entityID) {
+            auto soundEntityID = getID(soundID, entityID);
+            if (mEntityChannel.find(soundEntityID) == mEntityChannel.end()) {
+                assert(false);
+                return;
+            }
+
+            auto &entityChannel = mEntityChannel.at(soundEntityID);
+            auto result = entityChannel.channel->stop();
+            ERRCHECK(result);
+
+            mEntityChannel.erase(soundEntityID);
+        }
+
         void AudioManagerFMOD::setVolume(const component::SoundID &id, common::real32 volume) {
             VALID(mChannels, id);
             auto result = mChannels[id]->setVolume(volume);
@@ -146,6 +219,16 @@ namespace oni {
 
         void AudioManagerFMOD::fadeOut(const component::SoundID &id) {
             //VALID(mChannels, id);
+        }
+
+        AudioManagerFMOD::SoundEntityID AudioManagerFMOD::getID(const component::SoundID &soundID,
+                                                                common::EntityID entityID) {
+            return soundID + std::to_string(entityID);
+        }
+
+        void AudioManagerFMOD::fadeOut(const component::SoundID &soundID, common::EntityID entityID) {
+            // TODO: Proper fade-out
+            kill(soundID, entityID);
         }
 
         void AudioManagerFMOD::FMODDeleter::operator()(FMOD::Sound *s) const {

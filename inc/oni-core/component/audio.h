@@ -6,9 +6,9 @@
 namespace oni {
     namespace component {
         enum class SoundPlaybackState : common::uint8 {
-            REQUIRES_PLAYBACK,
-            PLAYING,
-            STOPPED,
+            PLAY,
+            STOP,
+            FADE_OUT,
         };
 
         using SoundID = std::string;

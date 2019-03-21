@@ -27,13 +27,19 @@ namespace oni {
 
             virtual void play(const component::SoundID &) = 0;
 
+            virtual void tryPlay(const component::SoundID &, common::EntityID) = 0;
+
             virtual void setLoop(const component::SoundID &, bool loop) = 0;
 
             virtual void setPitch(const component::SoundID &, common::real32 pitch) = 0;
 
             virtual common::real64 pauseSound(const component::SoundID &) = 0;
 
+            virtual void kill(const component::SoundID &, common::EntityID) = 0;
+
             virtual void fadeOut(const component::SoundID &) = 0;
+
+            virtual void fadeOut(const component::SoundID &, common::EntityID) = 0;
 
             virtual void setVolume(const component::SoundID &, common::real32 volume) = 0;
 

@@ -392,7 +392,7 @@ namespace oni {
             soundID.assign("resources/audio/rocket/1.wav");
 
             auto &state = createComponent<component::SoundPlaybackState>(entityID);
-            state = component::SoundPlaybackState::REQUIRES_PLAYBACK;
+            state = component::SoundPlaybackState::PLAY;
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);

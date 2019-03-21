@@ -203,7 +203,11 @@ namespace oni {
             }
 
             EntityID map(EntityID entityID) {
-                return mLoader->map(entityID);
+                auto result = mLoader->map(entityID);
+                if (result == entt::null) {
+                    return 0;
+                }
+                return result;
             }
 
 /*            template<class Component>
@@ -213,11 +217,10 @@ namespace oni {
 
             template<class Component>
             bool has(EntityID entityID) noexcept {
+                assert(mRegistry->valid(entityID));
+
                 bool result{false};
-                {
-                    //std::lock_guard<std::mutex> registryLock(mMutex);
-                    result = mRegistry->has<Component>(entityID);
-                }
+                result = mRegistry->has<Component>(entityID);
                 return result;
             }
 

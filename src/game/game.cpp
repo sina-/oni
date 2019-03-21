@@ -67,7 +67,7 @@ namespace oni {
                     auto sleepFor = static_cast<common::int64>(excess);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep during sim(). Deficit: " << excess << "ms\n";
+                    std::cout << "WARN: Couldn't sleep during sim(). Deficit: " << excess << "ms\n";
                 }
 
                 excessPerSecond += excess;
@@ -106,7 +106,7 @@ namespace oni {
                     auto sleepFor = static_cast<common::int64>(excess);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep during poll(). Deficit: " << excess << "ms\n";
+                    std::cout << "WARN: Couldn't sleep during poll(). Deficit: " << excess << "ms\n";
                 }
 
                 excessPerSecond += excess;
@@ -147,7 +147,7 @@ namespace oni {
                     auto sleepFor = static_cast<common::int64>(excess);
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
                 } else {
-                    std::cout << "Couldn't sleep during render(). Deficit: " << excess << "ms\n";
+                    std::cout << "WARN: Couldn't sleep during render(). Deficit: " << excess << "ms\n";
                 }
 
                 // NOTE: Only display the result at the end after mSimMS amount of time has passed.

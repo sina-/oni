@@ -389,7 +389,7 @@ namespace oni {
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &soundID = createComponent<component::SoundID>(entityID);
-            soundID.assign("resources/audio/rocket/1.wav");
+            soundID.assign("resources/audio/rocket/1-fast.wav");
 
             auto &state = createComponent<component::SoundPlaybackState>(entityID);
             state = component::SoundPlaybackState::PLAY;

@@ -11,6 +11,11 @@ namespace oni {
             FADE_OUT,
         };
 
+        enum class SoundTag : common::uint32 {
+            ROCKET,
+            ENGINE_IDLE,
+        };
+
         using SoundID = std::string;
         using SoundPos = math::vec2;
     }

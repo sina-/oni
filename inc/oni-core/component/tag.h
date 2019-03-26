@@ -14,10 +14,10 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
-        struct Tag_RequiresNetworkSync {
+        struct Tag_Audible {
         };
 
-        struct Tag_OneShot {
+        struct Tag_RequiresNetworkSync {
         };
 
         struct Tag_OnlyComponentUpdate {

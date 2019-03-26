@@ -131,7 +131,7 @@ namespace oni {
         void serialize(Archive &archive, component::Tag_ColorShaded &) {}
 
         template<class Archive>
-        void serialize(Archive &archive, component::Tag_OneShot &) {}
+        void serialize(Archive &archive, component::Tag_Audible &) {}
 
         template<class Archive>
         void serialize(Archive &archive, component::Appearance &appearance) {
@@ -165,8 +165,7 @@ namespace oni {
                         component::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
-                        component::SoundID,
-                        component::SoundPlaybackState,
+                        component::SoundTag,
 
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
                         // to know what it points to at the moment because sever does the physics calculations and only
@@ -176,9 +175,10 @@ namespace oni {
 
                         component::TransformParent,
                         component::Tag_Dynamic,
+                        component::Tag_Static,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_Static
+                        component::Tag_Audible
                 >(output, snapshotType);
             }
 
@@ -206,14 +206,16 @@ namespace oni {
                         component::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
-                        component::SoundID,
-                        component::SoundPlaybackState,
+                        component::SoundTag,
+
                         //components::PhysicalProperties,
+
                         component::TransformParent,
                         component::Tag_Dynamic,
+                        component::Tag_Static,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
-                        component::Tag_Static
+                        component::Tag_Audible
                 >(snapshotType, input,
                         // NOTE: Entities might keep references to other entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct

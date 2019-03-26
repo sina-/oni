@@ -88,9 +88,8 @@ namespace oni {
 			return stream;
 		}
 
-        float vec2::len() const {
+        common::real32 vec2::len() const {
             return std::sqrt(x * x + y * y);
         }
-
     }
 }

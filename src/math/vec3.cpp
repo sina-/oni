@@ -1,5 +1,7 @@
 #include <oni-core/math/vec3.h>
 
+#include <cmath>
+
 namespace oni {
     namespace math {
         vec3 &vec3::add(const vec3 &other) {
@@ -77,6 +79,10 @@ namespace oni {
 
         vec2 vec3::getXY() const {
             return vec2{x, y};
+        }
+
+        common::real32 vec3::len() {
+            return std::sqrt(x * x + y * y + z * z);
         }
     }
 }

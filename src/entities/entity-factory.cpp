@@ -6,7 +6,6 @@
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/math/rand.h>
 #include <oni-core/component/gameplay.h>
-#include <oni-core/component/audio.h>
 
 namespace oni {
     namespace entities {
@@ -132,17 +131,21 @@ namespace oni {
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
-            auto carLap = createComponent<component::CarLapInfo>(entityID);
+            auto &carLap = createComponent<component::CarLapInfo>(entityID);
             carLap.entityID = entityID;
             carLap.lap = 0;
             carLap.bestLapTimeS = 0;
             carLap.lapTimeS = 0;
+
+            auto &soundTag = createComponent<component::SoundTag>(entityID);
+            soundTag = component::SoundTag::ENGINE_IDLE;
 
             createComponent<component::TransformChildren>(entityID);
             createComponent<component::EntityAttachment>(entityID);
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
+            assignTag<component::Tag_Audible>(entityID);
         }
 
         template<>
@@ -388,14 +391,12 @@ namespace oni {
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
-            auto &soundID = createComponent<component::SoundID>(entityID);
-            soundID.assign("resources/audio/rocket/1-fast.wav");
-
-            auto &state = createComponent<component::SoundPlaybackState>(entityID);
-            state = component::SoundPlaybackState::PLAY;
+            auto &soundTag = createComponent<component::SoundTag>(entityID);
+            soundTag = component::SoundTag::ROCKET;
 
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_Audible>(entityID);
         }
 
         template<>

@@ -38,7 +38,7 @@ namespace oni {
 
             bool operator!=(const vec2 &other);
 
-            oni::common::real32 len() const;
+            common::real32 len() const;
 
             friend std::ostream &operator<<(std::ostream &stream, const vec2 &vector);
 

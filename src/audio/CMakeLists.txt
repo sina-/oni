@@ -1,4 +1,4 @@
-add_library(oni-core-audio audio-manager-fmod.cpp audio-manager.cpp)
+add_library(oni-core-audio audio-manager.cpp)
 
 target_compile_features(oni-core-audio
         PUBLIC

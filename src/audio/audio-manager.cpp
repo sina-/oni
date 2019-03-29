@@ -10,7 +10,7 @@
 namespace oni {
     namespace audio {
         AudioManager::AudioManager() {
-            mMaxAuidbleDistance = 150.f;
+            mMaxAudibleDistance = 150.f;
 
             FMOD::System *system{nullptr};
 
@@ -21,9 +21,12 @@ namespace oni {
             common::uint32 version;
             result = system->getVersion(&version);
             ERRCHECK(result);
+
             assert(version >= FMOD_VERSION);
 
-            result = system->init(32, FMOD_INIT_NORMAL, nullptr);
+            mMaxNumberOfChannels = 1024;
+
+            result = system->init(mMaxNumberOfChannels, FMOD_INIT_NORMAL, nullptr);
             ERRCHECK(result);
 
             result = system->update();
@@ -47,9 +50,14 @@ namespace oni {
 
             ROCKET = "resources/audio/rocket/1-idle.wav";
             loadSound(ROCKET);
+
+            loadSound("resources/audio/rocket/1-shot.wav");
+
+            preLoadCollisionSoundEffects();
         }
 
         void AudioManager::tick(entities::EntityFactory &entityFactory, const math::vec3 &playerPos) {
+            mPlayerPos = playerPos;
             auto result = mSystem->update();
             ERRCHECK(result);
 
@@ -66,18 +74,17 @@ namespace oni {
                     // TODO: Using soundTag find the correct sound to play.
                     component::SoundID soundID = ENGINE_IDLE;
 
+                    auto &entityChannel = getOrCreateLooping3DChannel(soundID, entity);
                     auto &entityPos = placement.position;
-                    auto distance = (entityPos - playerPos).len();
-                    if (distance < mMaxAuidbleDistance) {
+                    auto distance = (entityPos - mPlayerPos).len();
+                    if (distance < mMaxAudibleDistance) {
                         auto pitch = static_cast< common::real32>(car.rpm) / 2000;
-                        auto &entityChannel = getOrCreateChannelIfMissing(soundID, entity);
-                        setPitch(entityChannel, pitch);
-                        set3DPos(entityChannel, entityPos - playerPos, velocity);
+                        setPitch(*entityChannel.channel, pitch);
+                        set3DPos(*entityChannel.channel, entityPos - mPlayerPos, velocity);
 
-                        unPause(entityChannel);
+                        unPause(*entityChannel.channel);
                     } else {
-                        auto &entityChannel = getOrCreateChannelIfMissing(soundID, entity);
-                        pause(entityChannel);
+                        pause(*entityChannel.channel);
                     }
                 }
             }
@@ -95,28 +102,65 @@ namespace oni {
                     }
                     component::SoundID soundID = ROCKET;
 
-                    auto distance = (pos - playerPos).len();
-                    if (distance < mMaxAuidbleDistance) {
-                        auto &entityChannel = getOrCreateChannelIfMissing(soundID, entity);
+                    auto &entityChannel = getOrCreateLooping3DChannel(soundID, entity);
+                    auto distance = (pos - mPlayerPos).len();
+                    if (distance < mMaxAudibleDistance) {
 
                         // TODO: Does it matter if this is accurate?
                         math::vec3 vel{1.f, 0.f, 0.f};
-                        set3DPos(entityChannel, pos - playerPos, vel);
-                        unPause(entityChannel);
+                        set3DPos(*entityChannel.channel, pos - mPlayerPos, vel);
+                        unPause(*entityChannel.channel);
                     } else {
-                        auto &entityChannel = getOrCreateChannelIfMissing(soundID, entity);
-                        pause(entityChannel);
+                        pause(*entityChannel.channel);
                     }
                 }
             }
         }
 
+        void AudioManager::playCollisionSoundEffect(component::EntityType A, component::EntityType B,
+                                                    const component::CollisionPos &pos) {
+            auto soundID = createCollisionEffectID(A, B);
+            assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
+            auto distance = mPlayerPos - pos;
+            // TODO: use ChannelGroup and use the volume from it
+            common::real32 volume = 0.1f;
+            common::real32 pitch = 1.f;
+            playOneShot(mCollisionEffects[soundID], distance, volume, pitch);
+            playOneShot(mCollisionEffects[soundID], distance, volume, pitch);
+        }
+
+        common::UInt16Pack AudioManager::createCollisionEffectID(component::EntityType A, component::EntityType B) {
+            static_assert(sizeof(A) == sizeof(common::uint16), "Hashing will fail due to size mismatch");
+            auto x = static_cast<common::uint16 >(A);
+            auto y = static_cast<common::uint16 >(B);
+
+            if (x > y) {
+                std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
+            }
+
+            auto soundID = math::packUInt16(x, y);
+            return soundID;
+        }
+
+        void AudioManager::preLoadCollisionSoundEffects() {
+            component::SoundID rocketWithUnknown = "resources/audio/collision/rocket-with-unknown.wav";
+            loadSound(rocketWithUnknown);
+            for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
+                 i < static_cast<common::uint16>(component::EntityType::LAST);
+                 ++i) {
+                auto id = createCollisionEffectID(component::EntityType::SIMPLE_ROCKET,
+                                                  static_cast<component::EntityType>(i));
+                mCollisionEffects[id] = rocketWithUnknown;
+            }
+        }
+
+
         void AudioManager::kill(common::EntityID entityID) {
-            for (auto it = mEntityAudioChannel.begin(); it != mEntityAudioChannel.end();) {
+            for (auto it = mLooping3DChannels.begin(); it != mLooping3DChannels.end();) {
                 if (it->second.entityID == entityID) {
                     auto result = it->second.channel->stop();
                     ERRCHECK(result);
-                    it = mEntityAudioChannel.erase(it);
+                    it = mLooping3DChannels.erase(it);
                 } else {
                     ++it;
                 }
@@ -142,20 +186,23 @@ namespace oni {
             return channel;
         }
 
-        void AudioManager::play(const component::SoundID &id, const math::vec2 &distance, common::real32 volume,
-                                common::real32 pitch) {
+        void AudioManager::playOneShot(const component::SoundID &id, const math::vec3 &distance, common::real32 volume,
+                                       common::real32 pitch) {
             VALID(mSounds, id);
             auto channel = createChannel(id);
-            auto result = channel->setVolume(volume);
-            ERRCHECK(result);
-            result = channel->setPitch(pitch);
-            ERRCHECK(result);
 
-            // TODO: Set position
-
-            result = channel->setPaused(false);
+            auto result = channel->setMode(FMOD_3D);
             ERRCHECK(result);
 
+            setVolume(*channel, volume);
+
+            setPitch(*channel, pitch);
+
+            // TODO: Does this matter?
+            math::vec3 velocity {1.f, 1.f, 0.f};
+            set3DPos(*channel, distance, velocity);
+
+            unPause(*channel);
         }
 
         static FMOD_RESULT
@@ -174,51 +221,6 @@ namespace oni {
             }
 
             return FMOD_OK;
-        };
-
-        void AudioManager::tryPlay(const component::SoundID &soundID, common::EntityID entityID) {
-            auto soundEntityID = getID(soundID, entityID);
-            if (mEntityAudioChannel.find(soundEntityID) == mEntityAudioChannel.end()) {
-                EntityChannel entityChannel;
-                entityChannel.entityID = entityID;
-                entityChannel.channel = createChannel(soundID);
-                auto result = entityChannel.channel->setVolume(0.5f);
-                ERRCHECK(result);
-
-                mEntityAudioChannel[soundEntityID] = std::move(entityChannel);
-            }
-
-            auto &entityChannel = mEntityAudioChannel.at(soundEntityID);
-            bool paused;
-            auto result = entityChannel.channel->getPaused(&paused);
-            // NOTE: This will happen if the play-back has ended.
-            if (result == FMOD_ERR_INVALID_HANDLE) {
-                mEntityAudioChannel.erase(soundEntityID);
-                tryPlay(soundID, entityID);
-            } else if (paused) {
-                result = entityChannel.channel->setPaused(false);
-                ERRCHECK(result);
-            } else {
-                // NOTE: The sound is already playing.
-            }
-        }
-
-        void AudioManager::kill(const component::SoundID &soundID, common::EntityID entityID) {
-            auto soundEntityID = getID(soundID, entityID);
-            if (mEntityAudioChannel.find(soundEntityID) == mEntityAudioChannel.end()) {
-                assert(false);
-                return;
-            }
-
-            auto &entityChannel = mEntityAudioChannel.at(soundEntityID);
-            auto result = entityChannel.channel->stop();
-            ERRCHECK(result);
-
-            mEntityAudioChannel.erase(soundEntityID);
-        }
-
-        void AudioManager::fadeOut(const component::SoundID &id) {
-            //VALID(mChannels, id);
         }
 
         AudioManager::SoundEntityID AudioManager::getID(const component::SoundID &soundID,
@@ -226,50 +228,44 @@ namespace oni {
             return soundID + std::to_string(entityID);
         }
 
-        void AudioManager::fadeOut(const component::SoundID &soundID, common::EntityID entityID) {
-            // TODO: Proper fade-out
-            kill(soundID, entityID);
-        }
-
         AudioManager::EntityChannel &
-        AudioManager::getOrCreateChannelIfMissing(const component::SoundID &soundID, common::EntityID entityID) {
+        AudioManager::getOrCreateLooping3DChannel(const component::SoundID &soundID, common::EntityID entityID) {
             auto id = getID(soundID, entityID);
-            if (mEntityAudioChannel.find(id) == mEntityAudioChannel.end()) {
+            if (mLooping3DChannels.find(id) == mLooping3DChannels.end()) {
                 EntityChannel entityChannel;
                 entityChannel.entityID = entityID;
                 entityChannel.channel = createChannel(soundID);
                 // TODO: This should not be happening, assign channel group and set volume on the group
                 entityChannel.channel->setVolume(0.1f);
-                // TODO: How will you handle non-looping?
                 entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
 
-                mEntityAudioChannel[id] = entityChannel;
+                mLooping3DChannels[id] = entityChannel;
             }
-            return mEntityAudioChannel[id];
+            return mLooping3DChannels[id];
         }
 
-        void AudioManager::setPitch(AudioManager::EntityChannel &entityChannel, common::real32 pitch) {
+        void AudioManager::setPitch(FMOD::Channel &channel, common::real32 pitch) {
             if (pitch > 256) {
                 pitch = 256;
             }
-            auto result = entityChannel.channel->setPitch(pitch);
+            auto result = channel.setPitch(pitch);
             ERRCHECK(result);
         }
 
-        bool AudioManager::isPaused(AudioManager::EntityChannel &entityChannel) {
+        bool AudioManager::isPaused(FMOD::Channel &channel) {
             bool paused{false};
-            auto result = entityChannel.channel->getPaused(&paused);
+            auto result = channel.getPaused(&paused);
             ERRCHECK(result);
             return paused;
         }
 
-        void AudioManager::unPause(AudioManager::EntityChannel &entityChannel) {
-            auto result = entityChannel.channel->setPaused(false);
+        void AudioManager::unPause(FMOD::Channel &channel) {
+            auto result = channel.setPaused(false);
             ERRCHECK(result);
         }
 
-        void AudioManager::pause(AudioManager::EntityChannel &entityChannel) {
-            auto result = entityChannel.channel->setPaused(true);
+        void AudioManager::pause(FMOD::Channel &channel) {
+            auto result = channel.setPaused(true);
             ERRCHECK(result);
         }
 
@@ -281,39 +277,7 @@ namespace oni {
             sys->close();
             sys->release();
         }
-
-        void AudioManager::playCollisionSoundEffect(component::EntityType A, component::EntityType B) {
-            auto soundID = createCollisionEffectID(A, B);
-            assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
-            //play(mCollisionEffects[soundID]);
-        }
-
-        common::UInt16Pack AudioManager::createCollisionEffectID(component::EntityType A, component::EntityType B) {
-            static_assert(sizeof(A) == sizeof(common::uint16), "Hashing will fail due to size mismatch");
-            auto x = static_cast<common::uint16 >(A);
-            auto y = static_cast<common::uint16 >(B);
-
-            if (x > y) {
-                std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
-            }
-
-            auto soundID = math::packUInt16(x, y);
-            return soundID;
-        }
-
-        void AudioManager::preLoadCollisionSoundEffects() {
-            component::SoundID bulletWithUnknown = "resources/audio/collision/bullet-with-unknown.wav";
-            loadSound(bulletWithUnknown);
-            for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
-                 i < static_cast<common::uint16>(component::EntityType::LAST);
-                 ++i) {
-                auto id = createCollisionEffectID(component::EntityType::SIMPLE_ROCKET,
-                                                  static_cast<component::EntityType>(i));
-                mCollisionEffects[id] = bulletWithUnknown;
-            }
-        }
-
-        void AudioManager::set3DPos(AudioManager::EntityChannel &entityChannel, const math::vec3 &pos,
+        void AudioManager::set3DPos(FMOD::Channel &channel, const math::vec3 &pos,
                                     const math::vec3 &velocity) {
             FMOD_VECTOR fPos;
             fPos.x = pos.x;
@@ -324,10 +288,15 @@ namespace oni {
             fVelocity.y = velocity.y;
             fVelocity.z = velocity.z;
 
-            auto result = entityChannel.channel->set3DAttributes(&fPos, &fVelocity);
+            auto result = channel.set3DAttributes(&fPos, &fVelocity);
             ERRCHECK(result);
 
-            result = entityChannel.channel->set3DMinMaxDistance(20.f, mMaxAuidbleDistance); // In meters
+            result = channel.set3DMinMaxDistance(20.f, mMaxAudibleDistance); // In meters
+            ERRCHECK(result);
+        }
+
+        void AudioManager::setVolume(FMOD::Channel &channel, common::real32 volume) {
+            auto result = channel.setVolume(volume);
             ERRCHECK(result);
         }
     }

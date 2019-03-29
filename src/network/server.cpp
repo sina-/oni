@@ -136,7 +136,22 @@ namespace oni {
                     packet.pos = soundPos;
                     soundPlayPackets.emplace_back(packet);
                 };
-                entityFactory.apply<component::EventType::SOUND_PLAY>(func);
+                entityFactory.apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(func);
+            }
+
+            // TODO: Create packets for rocket launch event, think if you can unify events so I don't have
+            // to create the same boiler plate for each type. Maybe I can write a function called collect()
+            // that will iterate through a group with given components and append each
+            // member to a vector of given Packet type with emplace_back, might need constructor for packets
+
+            std::vector<RocketLaunchEventPacket> rocketLaunchPackets;
+            {
+                std::function<void(math::vec2 &pos)> func = [&rocketLaunchPackets](math::vec2 &pos) {
+                    RocketLaunchEventPacket packet;
+                    packet.pos = pos;
+                    rocketLaunchPackets.emplace_back(packet);
+                };
+                entityFactory.apply<component::EventType::ROCKET_LAUNCH>(func);
             }
 
             entityFactory.resetEvents();
@@ -147,7 +162,12 @@ namespace oni {
             broadcast(type, data);
 
             data = entities::serialize(soundPlayPackets);
-            type = PacketType::ONE_SHOT_SOUND_EFFECT;
+            type = PacketType::ONE_SHOT_SOUND_EFFECT_EVENT;
+
+            broadcast(type, data);
+
+            data = entities::serialize(rocketLaunchPackets);
+            type = PacketType::ROCKET_LAUNCH_EVENT;
 
             broadcast(type, data);
         }

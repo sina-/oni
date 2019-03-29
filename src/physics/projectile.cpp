@@ -104,6 +104,8 @@ namespace oni {
                                                                                                          textureID,
                                                                                                          velocity);
                     entityFactory.tagForNetworkSync(rocketEntity);
+
+                    entityFactory.createEvent<component::EventType::ROCKET_LAUNCH>(pos.getXY());
                 }
             }
         }

@@ -15,7 +15,7 @@
 
 namespace oni {
     namespace entities {
-        typedef common::EntityID EntityID;
+        typedef common::EntityID EntityType;
 
         class EntityFactory;
 
@@ -28,11 +28,11 @@ namespace oni {
             private:
                 friend EntityManager;
 
-                explicit EntityView(entt::registry<EntityID> &registry) :
+                explicit EntityView(entt::basic_registry<EntityType> &registry) :
                         mView(registry.view<Components...>()) {
                 }
 
-                EntityView(entt::registry<EntityID> &registry,
+                EntityView(entt::basic_registry<EntityType> &registry,
                            std::unique_lock<std::mutex> registryLock) :
                         mView(registry.view<Components...>()),
                         mRegistryLock(std::move(registryLock)) {
@@ -60,7 +60,7 @@ namespace oni {
                 }
 
                 template<class Component>
-                Component &get(EntityID entityID) noexcept {
+                Component &get(EntityType entityID) noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mView.get(entityID);
                     } else {
@@ -69,7 +69,7 @@ namespace oni {
                 }
 
                 template<class Component>
-                const Component &get(EntityID entityID) const noexcept {
+                const Component &get(EntityType entityID) const noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mView.get(entityID);
                     } else {
@@ -78,20 +78,24 @@ namespace oni {
                 }
 
             private:
-                entt::view<Entity, Components...> mView{};
+                entt::basic_view<Entity, Components...> mView{};
                 std::unique_lock<std::mutex> mRegistryLock{};
             };
 
+            // TODO: Group like this is use-less. Each component that is used is kinda "owned" by the group and
+            // you can't have two groups that share components as it will assert :( I probably need just the
+            // partially-owning group where the shared component between groups is passed as template param and
+            // other components as function argument.
             template<class Entity, class... Components>
             class EntityGroup {
             private:
                 friend EntityManager;
 
-                explicit EntityGroup(entt::registry<EntityID> &registry) :
+                explicit EntityGroup(entt::basic_registry<EntityType> &registry) :
                         mGroup(registry.group<Components...>()) {
                 }
 
-                EntityGroup(entt::registry<EntityID> &registry,
+                EntityGroup(entt::basic_registry<EntityType> &registry,
                             std::unique_lock<std::mutex> registryLock) :
                         mGroup(registry.group<Components...>()),
                         mRegistryLock(std::move(registryLock)) {
@@ -119,7 +123,7 @@ namespace oni {
                 }
 
                 template<class Component>
-                Component &get(EntityID entityID) noexcept {
+                Component &get(EntityType entityID) noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mGroup.get(entityID);
                     } else {
@@ -128,7 +132,7 @@ namespace oni {
                 }
 
                 template<class Component>
-                const Component &get(EntityID entityID) const noexcept {
+                const Component &get(EntityType entityID) const noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mGroup.get(entityID);
                     } else {
@@ -142,13 +146,13 @@ namespace oni {
                 }
 
             private:
-                entt::group<Entity, entt::get_t<>, Components...> mGroup;
+                entt::basic_group<Entity, entt::get_t<>, Components...> mGroup;
                 std::unique_lock<std::mutex> mRegistryLock{};
             };
 
             EntityManager() {
-                mRegistry = std::make_unique<entt::registry<common::uint32 >>();
-                mLoader = std::make_unique<entt::continuous_loader<EntityID>>(*mRegistry);
+                mRegistry = std::make_unique<entt::basic_registry<common::uint32 >>();
+                mLoader = std::make_unique<entt::basic_continuous_loader<EntityType>>(*mRegistry);
                 //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
             }
 
@@ -176,33 +180,33 @@ namespace oni {
             }
 
             template<class... ViewComponents>
-            EntityView<EntityID, ViewComponents...> createView() {
-                return EntityView<EntityID, ViewComponents...>(*mRegistry);
+            EntityView<EntityType, ViewComponents...> createView() {
+                return EntityView<EntityType, ViewComponents...>(*mRegistry);
             }
 
             template<class... ViewComponents>
-            EntityView<EntityID, ViewComponents...> createViewWithLock() {
+            EntityView<EntityType, ViewComponents...> createViewWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
+                return EntityView<EntityType, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityID, GroupComponents...> createGroup() {
-                return EntityGroup<EntityID, GroupComponents...>(*mRegistry);
+            EntityGroup<EntityType, GroupComponents...> createGroup() {
+                return EntityGroup<EntityType, GroupComponents...>(*mRegistry);
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityID, GroupComponents...> createGroupWithLock() {
+            EntityGroup<EntityType, GroupComponents...> createGroupWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
+                return EntityView<EntityType, GroupComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class Component>
-            Component &get(EntityID entityID) noexcept {
+            Component &get(EntityType entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
             }
 
-            EntityID map(EntityID entityID) {
+            EntityType map(EntityType entityID) {
                 auto result = mLoader->map(entityID);
                 if (result == entt::null) {
                     return 0;
@@ -216,7 +220,7 @@ namespace oni {
             }*/
 
             template<class Component>
-            bool has(EntityID entityID) noexcept {
+            bool has(EntityType entityID) noexcept {
                 assert(mRegistry->valid(entityID));
 
                 bool result{false};
@@ -225,7 +229,7 @@ namespace oni {
             }
 
             template<class Component, class... Args>
-            void replace(EntityID entityID, Args &&... args) {
+            void replace(EntityType entityID, Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
@@ -334,11 +338,11 @@ namespace oni {
                 mDeletedEntities.clear();
             }
 
-            const std::vector<EntityID> &getDeletedEntities() const {
+            const std::vector<EntityType> &getDeletedEntities() const {
                 return mDeletedEntities;
             }
 
-            void tagForComponentSync(EntityID entity) {
+            void tagForComponentSync(EntityType entity) {
                 accommodate<component::Tag_OnlyComponentUpdate>(entity);
             }
 
@@ -348,55 +352,55 @@ namespace oni {
             }
 
         private:
-            EntityID create() {
-                EntityID result{};
+            EntityType create() {
+                EntityType result{};
                 result = mRegistry->create();
                 return result;
             }
 
             template<class Component>
-            void remove(EntityID entityID) {
+            void remove(EntityType entityID) {
                 mRegistry->remove<Component>(entityID);
             }
 
             template<class Component, class... Args>
-            Component &assign(EntityID entityID, Args &&... args) {
+            Component &assign(EntityType entityID, Args &&... args) {
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
             template<class Component, class... Args>
-            void accommodate(EntityID entityID, Args &&... args) {
+            void accommodate(EntityType entityID, Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
                     mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
                 }
             }
 
-            void destroy(EntityID entityID) {
+            void destroy(EntityType entityID) {
                 mRegistry->destroy(entityID);
             }
 
             template<class... Component>
             void destroy() {
-                mRegistry->destroy<Component...>();
+                mRegistry->reset<Component...>();
             }
 
-            void destroyAndTrack(EntityID entityID) {
+            void destroyAndTrack(EntityType entityID) {
                 mRegistry->destroy(entityID);
                 mDeletedEntities.push_back(entityID);
             }
 
-            bool valid(EntityID entityID) {
+            bool valid(EntityType entityID) {
                 return mRegistry->valid(entityID);
             }
 
         private:
-            std::unique_ptr<entt::registry<EntityID>> mRegistry{};
-            std::unique_ptr<entt::continuous_loader<EntityID>> mLoader{};
+            std::unique_ptr<entt::basic_registry<EntityType>> mRegistry{};
+            std::unique_ptr<entt::basic_continuous_loader<EntityType>> mLoader{};
             std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
 
-            std::vector<EntityID> mDeletedEntities{};
+            std::vector<EntityType> mDeletedEntities{};
         };
 
     }

@@ -29,15 +29,36 @@ namespace oni {
         template<>
         void EntityFactory::_apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
                                                                                        component::CollisionPos &)> &func) {
-            auto group = mRegistryManager->createGroup<component::CollidingEntity, component::CollisionPos>();
-            group.apply(func);
+            auto group = mRegistryManager->createView<component::CollidingEntity, component::CollisionPos, component::EventType>();
+            for (auto &&entity: group) {
+                if (auto event = group.get<component::EventType>(entity);
+                        event == component::EventType::COLLISION) {
+                    func(group.get<component::CollidingEntity>(entity), group.get<component::CollisionPos>(entity));
+                }
+            }
         }
 
         template<>
-        void EntityFactory::_apply<component::EventType::SOUND_PLAY>(std::function<void(component::SoundID &,
-                                                                                        component::SoundPos &)> &func) {
-            auto group = mRegistryManager->createGroup<component::SoundID, component::SoundPos>();
-            group.apply(func);
+        void EntityFactory::_apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
+                                                                                                   component::SoundPos &)> &func) {
+            auto group = mRegistryManager->createView<component::SoundID, component::SoundPos, component::EventType>();
+            for (auto &&entity: group) {
+                if (auto event = group.get<component::EventType>(entity);
+                        event == component::EventType::ONE_SHOT_SOUND_EFFECT) {
+                    func(group.get<component::SoundID>(entity), group.get<component::SoundPos>(entity));
+                }
+            }
+        }
+
+        template<>
+        void EntityFactory::_apply<component::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &func) {
+            auto group = mRegistryManager->createView<math::vec2, component::EventType>();
+            for (auto &&entity: group) {
+                if (auto event = group.get<component::EventType>(entity);
+                        event == component::EventType::ROCKET_LAUNCH) {
+                    func(group.get<math::vec2>(entity));
+                }
+            }
         }
 
         void EntityFactory::removeEntity(common::EntityID entityID,
@@ -467,13 +488,22 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEvent<component::EventType::SOUND_PLAY>(common::EntityID entityID,
-                                                                           const component::SoundID &id,
-                                                                           const math::vec2 &worldPos) {
+        void EntityFactory::_createEvent<component::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID entityID,
+                                                                                      const component::SoundID &id,
+                                                                                      const math::vec2 &worldPos) {
             auto &soundID = createComponent<component::SoundID>(entityID);
             soundID = id;
 
             auto &pos = createComponent<component::SoundPos>(entityID);
+            pos.x = worldPos.x;
+            pos.y = worldPos.y;
+        }
+
+        template<>
+        void
+        EntityFactory::_createEvent<component::EventType::ROCKET_LAUNCH>(common::EntityID entityID,
+                                                                         const math::vec2 &worldPos) {
+            auto &pos = createComponent<math::vec2>(entityID);
             pos.x = worldPos.x;
             pos.y = worldPos.y;
         }

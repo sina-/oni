@@ -27,5 +27,9 @@ namespace oni {
             component::SoundID soundID{};
             component::SoundPos pos{};
         };
+
+        struct RocketLaunchEventPacket {
+            math::vec2 pos{};
+        };
     }
 }

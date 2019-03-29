@@ -7,7 +7,8 @@ namespace oni {
         enum class EventType : common::uint8 {
             COLLISION,
             SPAWN_PARTICLE,
-            SOUND_PLAY,
+            ONE_SHOT_SOUND_EFFECT,
+            ROCKET_LAUNCH,
         };
     }
 }

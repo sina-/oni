@@ -28,6 +28,9 @@ namespace oni {
                 mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
 
+                auto a = mEntityFactory->getEntityManager().createGroup<component::SoundID, component::SoundPos, component::EventType>();
+                auto b = mEntityFactory->getEntityManager().createGroup<component::SoundID, component::SoundPos, component::EventType>();
+
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
@@ -42,7 +45,7 @@ namespace oni {
                 mServer = std::make_unique<network::Server>(&address, 16, 2);
 
                 mServer->registerPacketHandler(network::PacketType::SETUP_SESSION,
-                                              std::bind(&ServerGame::setupSessionPacketHandler, this,
+                                               std::bind(&ServerGame::setupSessionPacketHandler, this,
                                                          std::placeholders::_1, std::placeholders::_2));
                 mServer->registerPacketHandler(network::PacketType::CLIENT_INPUT,
                                                std::bind(&ServerGame::clientInputPacketHandler, this,
@@ -268,7 +271,8 @@ namespace oni {
                 std::string textureID = "resources/images/car/2/truck.png";
 
                 auto lock = mEntityFactory->getEntityManager().scopedLock();
-                auto entityID =  mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading, textureID);
+                auto entityID = mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading,
+                                                                                             textureID);
                 mEntityFactory->tagForNetworkSync(entityID);
                 return entityID;
             }

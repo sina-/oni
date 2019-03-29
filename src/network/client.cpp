@@ -72,7 +72,8 @@ namespace oni {
                 case (PacketType::ADD_NEW_ENTITIES):
                 case (PacketType::DESTROYED_ENTITIES):
                 case (PacketType::SPAWN_PARTICLE):
-                case (PacketType::ONE_SHOT_SOUND_EFFECT):
+                case (PacketType::ONE_SHOT_SOUND_EFFECT_EVENT):
+                case (PacketType::ROCKET_LAUNCH_EVENT):
                 case (PacketType::COLLISION_EVENT): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
                     mPacketHandlers[header](peerID, dataString);

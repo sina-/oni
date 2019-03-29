@@ -103,8 +103,11 @@ namespace oni {
                                                                             component::CollisionPos &)> &);
 
             template<>
-            void _apply<component::EventType::SOUND_PLAY>(std::function<void(component::SoundID &,
+            void _apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
                                                                              component::SoundPos &)> &);
+
+            template<>
+            void _apply<component::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &);
 
             template<component::EntityType entityType>
             void _removeEntity(common::EntityID, bool track, bool safe) = delete;
@@ -216,10 +219,13 @@ namespace oni {
                                                                const math::vec3 &worldPos);
 
             template<>
-            void _createEvent<component::EventType::SOUND_PLAY>(common::EntityID,
+            void _createEvent<component::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID,
                                                                 const component::SoundID &,
                                                                 const math::vec2 &worldPos);
 
+            template<>
+            void _createEvent<component::EventType::ROCKET_LAUNCH>(common::EntityID,
+                                                                   const math::vec2 &worldPos);
 
         private:
             template<>

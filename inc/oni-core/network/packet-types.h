@@ -18,8 +18,9 @@ namespace oni {
             DESTROYED_ENTITIES = 9,
 
             SPAWN_PARTICLE = 11,
-            ONE_SHOT_SOUND_EFFECT = 12,
+            ONE_SHOT_SOUND_EFFECT_EVENT = 12,
             COLLISION_EVENT = 13,
+            ROCKET_LAUNCH_EVENT = 14,
         };
     }
 }

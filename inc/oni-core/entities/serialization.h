@@ -34,6 +34,11 @@ namespace oni {
         void serialize(Archive &archive, SoundPlayEventPacket &packet) {
             archive(packet.soundID, packet.pos);
         }
+
+        template<class Archive>
+        void serialize(Archive &archive, RocketLaunchEventPacket &packet) {
+            archive(packet.pos);
+        }
     }
 
     namespace math {

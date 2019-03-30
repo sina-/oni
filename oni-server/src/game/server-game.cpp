@@ -28,9 +28,6 @@ namespace oni {
                 mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
 
-                auto a = mEntityFactory->getEntityManager().createGroup<component::SoundID, component::SoundPos, component::EventType>();
-                auto b = mEntityFactory->getEntityManager().createGroup<component::SoundID, component::SoundPos, component::EventType>();
-
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.

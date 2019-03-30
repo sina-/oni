@@ -51,15 +51,13 @@ namespace oni {
 
             ~SceneManager();
 
-            void render(entities::EntityManager &, common::EntityID lookAtEntity);
-
-            void renderInternal();
+            void render(entities::EntityManager &server,
+                        entities::EntityManager &client,
+                        common::EntityID lookAtEntity);
 
             void renderPhysicsDebugData();
 
-            void tick(entities::EntityFactory &, common::real64 tickTime);
-
-            void tickInternal(common::real64 tickTime);
+            void tick(entities::EntityFactory &server, entities::EntityFactory &client, common::real64 tickTime);
 
             void renderRaw(const component::Shape &, const component::Appearance &);
 
@@ -111,6 +109,7 @@ namespace oni {
             void renderParticles(entities::EntityManager &, common::real32 viewWidth,
                                  common::real32 viewHeight);
 
+            void renderClientSideEntities(entities::EntityManager &);
 
         private:
             struct RaceInfoEntities {
@@ -132,20 +131,22 @@ namespace oni {
 
             void prepareTexture(component::Texture &texture);
 
-            common::EntityID getOrCreateSkidTile(const math::vec2 &position);
+            common::EntityID getOrCreateSkidTile(entities::EntityFactory &, const math::vec2 &position);
 
-            const RaceInfoEntities &getOrCreateLapText(common::EntityID carEntityID,
+            const RaceInfoEntities &getOrCreateLapText(entities::EntityFactory &, common::EntityID carEntityID,
                                                        const component::CarLapInfo &carLap);
 
-            common::EntityID createText(const math::vec3 &worldPos, const std::string &text);
+            common::EntityID createText(entities::EntityFactory &, const math::vec3 &worldPos, const std::string &text);
 
-            void updateSkidlines(const math::vec3 &position,
+            void updateSkidlines(entities::EntityFactory &,
+                                 const math::vec3 &position,
                                  common::EntityID skidTextureEntity,
                                  common::uint8 alpha);
 
             void updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime);
 
-            void updateRaceInfo(const component::CarLapInfo &carLap,
+            void updateRaceInfo(entities::EntityManager &,
+                                const component::CarLapInfo &carLap,
                                 const RaceInfoEntities &carLapTextEntities);
 
         private:
@@ -184,7 +185,6 @@ namespace oni {
             common::uint16 mRenderedTexturesPerFrame{0};
             common::uint16 mRenderedParticlesPerFrame{0};
 
-            std::unique_ptr<entities::EntityFactory> mInternalEntityFactory{};
             math::ZLayerManager &mZLayerManager;
 
         };

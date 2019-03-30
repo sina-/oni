@@ -373,6 +373,10 @@ namespace oni {
                                                                            pos);
 
                 entityFactory.removeEntity(entityID, true, false);
+                // TODO: I'm leaking memory here, data in b2world is left behind :(
+                // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
+                // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
+                // and audio system.
             }
         }
 

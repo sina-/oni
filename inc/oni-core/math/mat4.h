@@ -10,7 +10,6 @@
 
 namespace oni {
     namespace math {
-        // TODO: Take a look at GLM
         struct mat4 {
             // https://stackoverflow.com/a/18177444
             union {

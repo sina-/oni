@@ -25,8 +25,7 @@ namespace oni {
         SceneManager::SceneManager(const component::ScreenBounds &screenBounds, FontManager &fontManager,
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
-                                   common::real32 gameUnitToPixels
-        ) :
+                                   common::real32 gameUnitToPixels) :
                 mSkidTileSizeX(64), mSkidTileSizeY(64),
                 mHalfSkidTileSizeX(mSkidTileSizeX / 2.0f),
                 mHalfSkidTileSizeY(mSkidTileSizeY / 2.0f),
@@ -43,15 +42,10 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            // TODO: Note that this mixes entities in InternalRegistry with physicsWorld, does that make sense? As of
-            // now physicsWorld on client side is empty, but my plan is to use it for debug drawing physics layer.
-            mInternalEntityFactory = std::make_unique<entities::EntityFactory>(mZLayerManager,
-                                                                               physicsWorld);
-
             // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
             // to provide flexibility in type of shaders users can define and expect to just work by having buffer
-            // structure and what not set up automatically.
+            // structure and what not set up automatically. Asset system should take care of this.
             mTextureShader = std::make_unique<graphic::Shader>("resources/shaders/texture.vert",
                                                                "",
                                                                "resources/shaders/texture.frag");
@@ -288,9 +282,10 @@ namespace oni {
             mTextureShader->disable();
         }
 
-        void SceneManager::tick(entities::EntityFactory &entityFactory,
+        void SceneManager::tick(entities::EntityFactory &serverEntityFactory,
+                                entities::EntityFactory &clientEntityFactory,
                                 common::real64 tickTime) {
-            updateParticles(entityFactory, tickTime);
+            updateParticles(clientEntityFactory, tickTime);
 
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
@@ -301,7 +296,8 @@ namespace oni {
                 common::real32 halfSize = 0.5f;
                 common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
-                auto view = entityFactory.getEntityManager().createViewWithLock<component::Trail, component::Placement>();
+                auto lock = clientEntityFactory.getEntityManager().scopedLock();
+                auto view = serverEntityFactory.getEntityManager().createViewWithLock<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     const auto &currentPos = placement.position;
@@ -315,7 +311,7 @@ namespace oni {
                     //math::vec4 color{1.f, 1.f, 1.f, 1.f};
 
                     if (trail.previousPos.empty()) {
-                        auto trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                        auto trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                 currentPos, textureID, halfSize, false);
                         continue;
                     }
@@ -328,7 +324,7 @@ namespace oni {
                     }
 
                     // TODO: This should match what geometry shader uses.
-                    common::real32 particleSize = 0.2f;
+                    common::real32 particleSize = 0.4f;
 
                     common::real32 dX = currentPos.x - previousPos.x;
                     common::real32 dY = currentPos.y - previousPos.y;
@@ -357,9 +353,9 @@ namespace oni {
                                     pos, color, false);
                         }
                         */
-                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                     pos, textureID, halfSize, false);
-                            auto &particle = mInternalEntityFactory->getEntityManager().get<component::Particle>(
+                            auto &particle = clientEntityFactory.getEntityManager().get<component::Particle>(
                                     trailEntity);
                             // TODO: I don't use any other velocity than the first one, should I just not store the rest?
                             // or should I update this code to use all by iterating over trail.previousPos?
@@ -384,7 +380,7 @@ namespace oni {
                 std::vector<math::mat4> carTireTransform{};
                 std::vector<common::uint8> skidOpacity{};
                 {
-                    auto carView = entityFactory.getEntityManager().createViewWithLock<component::Car, component::Placement, component::CarConfig>();
+                    auto carView = serverEntityFactory.getEntityManager().createViewWithLock<component::Car, component::Placement, component::CarConfig>();
                     for (auto &&carEntity: carView) {
 
                         const auto car = carView.get<component::Car>(carEntity);
@@ -425,17 +421,17 @@ namespace oni {
                     common::EntityID skidEntityRL{0};
                     common::EntityID skidEntityRR{0};
 
-                    skidEntityRL = getOrCreateSkidTile(skidMarkRLPos.getXY());
-                    skidEntityRR = getOrCreateSkidTile(skidMarkRRPos.getXY());
+                    skidEntityRL = getOrCreateSkidTile(clientEntityFactory, skidMarkRLPos.getXY());
+                    skidEntityRR = getOrCreateSkidTile(clientEntityFactory, skidMarkRRPos.getXY());
 
-                    updateSkidlines(skidMarkRLPos, skidEntityRL, skidOpacity[i]);
-                    updateSkidlines(skidMarkRRPos, skidEntityRR, skidOpacity[i]);
+                    updateSkidlines(clientEntityFactory, skidMarkRLPos, skidEntityRL, skidOpacity[i]);
+                    updateSkidlines(clientEntityFactory, skidMarkRRPos, skidEntityRR, skidOpacity[i]);
                 }
             }
 
             // Update Laps
             {
-                auto carLapView = entityFactory.getEntityManager().createViewWithLock<component::Car, component::CarLapInfo>();
+                auto carLapView = serverEntityFactory.getEntityManager().createViewWithLock<component::Car, component::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -446,14 +442,11 @@ namespace oni {
                      * Player 2: 5, 0:02, :1:50
                      */
                     const auto &carLap = carLapView.get<component::CarLapInfo>(carEntity);
-                    const auto &carLapText = getOrCreateLapText(carEntity, carLap);
-                    updateRaceInfo(carLap, carLapText);
+
+                    const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
+                    updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
                 }
             }
-        }
-
-        void SceneManager::tickInternal(common::real64 tickTime) {
-            updateParticles(*mInternalEntityFactory, tickTime);
         }
 
         void SceneManager::updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime) {
@@ -537,67 +530,70 @@ namespace oni {
             mDebugDrawBox2D->End();
         }
 
-        void SceneManager::render(entities::EntityManager &manager, common::EntityID lookAtEntity) {
+        void SceneManager::render(entities::EntityManager &serverEntityManager,
+                                  entities::EntityManager &clientEntityManager,
+                                  common::EntityID lookAtEntity) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
             {
-                auto lock = manager.scopedLock();
+                auto lock = serverEntityManager.scopedLock();
                 begin(*mColorShader, *mColorRenderer, true, true, true);
-                renderColorSprites(manager, viewWidth, viewHeight);
+                renderColorSprites(serverEntityManager, viewWidth, viewHeight);
             }
 
             end(*mColorShader, *mColorRenderer);
 
             {
-                auto lock = manager.scopedLock();
+                auto lock = serverEntityManager.scopedLock();
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
-                renderParticles(manager, viewWidth, viewHeight);
+                renderParticles(serverEntityManager, viewWidth, viewHeight);
             }
 
             end(*mParticleShader, *mParticleRenderer);
 
             {
-                auto lock = manager.scopedLock();
-                if (lookAtEntity && manager.has<component::Placement>(lookAtEntity)) {
-                    const auto &pos = manager.get<component::Placement>(lookAtEntity).position;
+                auto lock = serverEntityManager.scopedLock();
+                if (lookAtEntity && serverEntityManager.has<component::Placement>(lookAtEntity)) {
+                    const auto &pos = serverEntityManager.get<component::Placement>(lookAtEntity).position;
                     lookAt(pos.x, pos.y);
                 }
 
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
-                renderStaticText(manager, viewWidth, viewHeight);
-                renderStaticTextures(manager, viewWidth, viewHeight);
-                renderDynamicTextures(manager, viewWidth, viewHeight);
+                renderStaticText(serverEntityManager, viewWidth, viewHeight);
+                renderStaticTextures(serverEntityManager, viewWidth, viewHeight);
+                renderDynamicTextures(serverEntityManager, viewWidth, viewHeight);
                 // Release the lock as soon as we are done with the registry.
             }
 
             end(*mTextureShader, *mTextureRenderer);
+
+            renderClientSideEntities(clientEntityManager);
         }
 
-        void SceneManager::renderInternal() {
+        void SceneManager::renderClientSideEntities(entities::EntityManager &entityManager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
-            auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
             {
-                auto lock = internalEntityRegistry.scopedLock();
+                auto lock = entityManager.scopedLock();
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
-                renderStaticTextures(internalEntityRegistry, viewWidth, viewHeight);
+                renderStaticTextures(entityManager, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
             {
-                auto lock = internalEntityRegistry.scopedLock();
+                auto lock = entityManager.scopedLock();
                 // Render UI text with fixed camera
                 begin(*mTextureShader, *mTextureRenderer, false, false, true);
-                renderStaticText(internalEntityRegistry, viewWidth, viewHeight);
+                renderStaticText(entityManager, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
             {
-                auto lock = internalEntityRegistry.scopedLock();
+                auto lock = entityManager.scopedLock();
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
-                renderParticles(internalEntityRegistry, viewWidth, viewHeight);
+                renderParticles(entityManager, viewWidth, viewHeight);
             }
 
             end(*mParticleShader, *mParticleRenderer);
@@ -754,7 +750,8 @@ namespace oni {
         }
 
 
-        const SceneManager::RaceInfoEntities &SceneManager::getOrCreateLapText(common::EntityID carEntityID,
+        const SceneManager::RaceInfoEntities &SceneManager::getOrCreateLapText(entities::EntityFactory &entityFactory,
+                                                                               common::EntityID carEntityID,
                                                                                const component::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
@@ -764,30 +761,32 @@ namespace oni {
                 math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, zLevel};
                 math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, zLevel};
 
-                carLapText.lapEntity = createText(lapRenderPos, "Lap: " + std::to_string(carLap.lap));
-                carLapText.lapTimeEntity = createText(lapTimeRenderPos, "Lap time: " + std::to_string(carLap.lapTimeS));
-                carLapText.lapBestTimeEntity = createText(bestTimeRenderPos,
+                carLapText.lapEntity = createText(entityFactory, lapRenderPos, "Lap: " + std::to_string(carLap.lap));
+                carLapText.lapTimeEntity = createText(entityFactory, lapTimeRenderPos,
+                                                      "Lap time: " + std::to_string(carLap.lapTimeS));
+                carLapText.lapBestTimeEntity = createText(entityFactory, bestTimeRenderPos,
                                                           "Best time: " + std::to_string(carLap.bestLapTimeS));
                 mLapInfoLookup[carEntityID] = carLapText;
             }
             return mLapInfoLookup.at(carEntityID);
         }
 
-        void SceneManager::updateRaceInfo(const component::CarLapInfo &carLap,
+        void SceneManager::updateRaceInfo(entities::EntityManager &entityManager,
+                                          const component::CarLapInfo &carLap,
                                           const SceneManager::RaceInfoEntities &carLapTextEntities) {
-            auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
             // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
-            auto &lapText = internalEntityRegistry.get<component::Text>(carLapTextEntities.lapEntity);
+            auto &lapText = entityManager.get<component::Text>(carLapTextEntities.lapEntity);
             mFontManager.updateText("Lap: " + std::to_string(carLap.lap), lapText);
 
-            auto &lapTimeText = internalEntityRegistry.get<component::Text>(carLapTextEntities.lapTimeEntity);
+            auto &lapTimeText = entityManager.get<component::Text>(carLapTextEntities.lapTimeEntity);
             mFontManager.updateText("Lap time: " + std::to_string(carLap.lapTimeS) + "s", lapTimeText);
 
-            auto &bestTimeText = internalEntityRegistry.get<component::Text>(carLapTextEntities.lapBestTimeEntity);
+            auto &bestTimeText = entityManager.get<component::Text>(carLapTextEntities.lapBestTimeEntity);
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        common::EntityID SceneManager::getOrCreateSkidTile(const math::vec2 &position) {
+        common::EntityID SceneManager::getOrCreateSkidTile(entities::EntityFactory &entityFactory,
+                                                           const math::vec2 &position) {
             auto x = math::positionToIndex(position.x, mSkidTileSizeX);
             auto y = math::positionToIndex(position.y, mSkidTileSizeY);
             auto packedIndices = math::packInt64(x, y);
@@ -812,14 +811,14 @@ namespace oni {
 
                 common::real32 heading = 0.f;
                 std::string emptyTextureID;
-                auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
-                auto lock = internalEntityRegistry.scopedLock();
-                auto entityID = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
-                                                                                                           tileSize,
-                                                                                                           heading,
-                                                                                                           emptyTextureID);
+                auto &entityRegistry = entityFactory.getEntityManager();
+                auto lock = entityRegistry.scopedLock();
+                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
+                                                                                                 tileSize,
+                                                                                                 heading,
+                                                                                                 emptyTextureID);
                 auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
-                auto &texture = internalEntityRegistry.get<component::Texture>(entityID);
+                auto &texture = entityRegistry.get<component::Texture>(entityID);
                 texture = loadedTexture;
                 mSkidlineLookup.emplace(packedIndices, entityID);
             }
@@ -827,11 +826,14 @@ namespace oni {
             return mSkidlineLookup.at(packedIndices);
         }
 
-        void SceneManager::updateSkidlines(const math::vec3 &position, common::EntityID skidTextureEntity,
+        void SceneManager::updateSkidlines(entities::EntityFactory &entityFactory,
+                                           const math::vec3 &position,
+                                           common::EntityID skidTextureEntity,
                                            common::uint8 alpha) {
-            auto &internalEntityRegistry = mInternalEntityFactory->getEntityManager();
-            auto skidMarksTexture = internalEntityRegistry.get<component::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = internalEntityRegistry.get<component::Shape>(
+            auto &entityRegistry = entityFactory.getEntityManager();
+            auto lock = entityRegistry.scopedLock();
+            auto skidMarksTexture = entityRegistry.get<component::Texture>(skidTextureEntity);
+            const auto skidMarksTexturePos = entityRegistry.get<component::Shape>(
                     skidTextureEntity).getPosition();
 
             auto skidPos = position;
@@ -906,9 +908,9 @@ namespace oni {
             mRenderedTexturesPerFrame = 0;
         }
 
-        common::EntityID SceneManager::createText(const math::vec3 &worldPos, const std::string &text) {
-            auto entityID = mFontManager.createTextFromString(*mInternalEntityFactory, text,
-                                                              worldPos);
+        common::EntityID SceneManager::createText(entities::EntityFactory &entityFactory, const math::vec3 &worldPos,
+                                                  const std::string &text) {
+            auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
             return entityID;
         }
     }

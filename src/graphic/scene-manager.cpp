@@ -328,7 +328,7 @@ namespace oni {
                     }
 
                     // TODO: This should match what geometry shader uses.
-                    common::real32 particleSize = 0.4f;
+                    common::real32 particleSize = 0.2f;
 
                     common::real32 dX = currentPos.x - previousPos.x;
                     common::real32 dY = currentPos.y - previousPos.y;

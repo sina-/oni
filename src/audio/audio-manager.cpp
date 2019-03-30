@@ -48,7 +48,7 @@ namespace oni {
             component::SoundID rocketSlowSoundID = "resources/audio/rocket/1-slow.wav";
             loadSound(rocketSlowSoundID);*/
 
-            ROCKET = "resources/audio/rocket/1-idle.wav";
+            ROCKET = "resources/audio/rocket/2-idle-fast.wav";
             loadSound(ROCKET);
 
             loadSound("resources/audio/rocket/1-shot.wav");

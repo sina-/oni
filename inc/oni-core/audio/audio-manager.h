@@ -50,7 +50,6 @@ namespace oni {
             };
 
         private:
-
             common::UInt16Pack createCollisionEffectID(component::EntityType, component::EntityType);
 
             FMOD::Channel *createChannel(const component::SoundID &);

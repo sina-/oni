@@ -9,18 +9,18 @@ namespace oni {
             PING = 1,
             MESSAGE = 2,
             SETUP_SESSION = 3,
+            // TODO: Is this needed?
             CAR_ENTITY_ID = 4,
             CLIENT_INPUT = 5,
 
-            REPLACE_ALL_ENTITIES = 6,
-            ONLY_COMPONENT_UPDATE = 7,
-            ADD_NEW_ENTITIES = 8,
-            DESTROYED_ENTITIES = 9,
+            REGISTRY_REPLACE_ALL_ENTITIES = 6,
+            REGISTRY_ONLY_COMPONENT_UPDATE = 7,
+            REGISTRY_ADD_NEW_ENTITIES = 8,
+            REGISTRY_DESTROYED_ENTITIES = 9,
 
-            SPAWN_PARTICLE = 11,
-            ONE_SHOT_SOUND_EFFECT_EVENT = 12,
-            COLLISION_EVENT = 13,
-            ROCKET_LAUNCH_EVENT = 14,
+            EVENT_ONE_SHOT_SOUND_EFFECT = 10,
+            EVENT_COLLISION = 11,
+            EVENT_ROCKET_LAUNCH = 12,
         };
     }
 }

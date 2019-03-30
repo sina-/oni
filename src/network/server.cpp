@@ -63,7 +63,7 @@ namespace oni {
 
         void Server::sendEntitiesAll(entities::EntityManager &manager) {
             std::string data = entities::serialize(manager, component::SnapshotType::ENTIRE_REGISTRY);
-            auto type = PacketType::REPLACE_ALL_ENTITIES;
+            auto type = PacketType::REGISTRY_REPLACE_ALL_ENTITIES;
 
             if (data.size() > 1) {
                 broadcast(type, data);
@@ -73,7 +73,7 @@ namespace oni {
         void Server::sendComponentsUpdate(entities::EntityManager &manager) {
             // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
             std::string data = entities::serialize(manager, component::SnapshotType::ONLY_COMPONENTS);
-            auto type = PacketType::ONLY_COMPONENT_UPDATE;
+            auto type = PacketType::REGISTRY_ONLY_COMPONENT_UPDATE;
 
             if (data.size() > 1) {
                 broadcast(type, data);
@@ -83,7 +83,7 @@ namespace oni {
         void Server::sendNewEntities(entities::EntityManager &manager) {
             // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
             std::string data = entities::serialize(manager, component::SnapshotType::ONLY_NEW_ENTITIES);
-            auto type = PacketType::ADD_NEW_ENTITIES;
+            auto type = PacketType::REGISTRY_ADD_NEW_ENTITIES;
 
             if (data.size() > 1) {
                 broadcast(type, data);
@@ -91,7 +91,7 @@ namespace oni {
         }
 
         void Server::broadcastDeletedEntities(entities::EntityManager &manager) {
-            auto type = PacketType::DESTROYED_ENTITIES;
+            auto type = PacketType::REGISTRY_DESTROYED_ENTITIES;
             auto data = entities::serialize(manager.getDeletedEntities());
             manager.clearDeletedEntitiesList();
 
@@ -139,11 +139,6 @@ namespace oni {
                 entityFactory.apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(func);
             }
 
-            // TODO: Create packets for rocket launch event, think if you can unify events so I don't have
-            // to create the same boiler plate for each type. Maybe I can write a function called collect()
-            // that will iterate through a group with given components and append each
-            // member to a vector of given Packet type with emplace_back, might need constructor for packets
-
             std::vector<RocketLaunchEventPacket> rocketLaunchPackets;
             {
                 std::function<void(math::vec2 &pos)> func = [&rocketLaunchPackets](math::vec2 &pos) {
@@ -157,17 +152,17 @@ namespace oni {
             entityFactory.resetEvents();
 
             auto data = entities::serialize(collisionPackets);
-            auto type = PacketType::COLLISION_EVENT;
+            auto type = PacketType::EVENT_COLLISION;
 
             broadcast(type, data);
 
             data = entities::serialize(soundPlayPackets);
-            type = PacketType::ONE_SHOT_SOUND_EFFECT_EVENT;
+            type = PacketType::EVENT_ONE_SHOT_SOUND_EFFECT;
 
             broadcast(type, data);
 
             data = entities::serialize(rocketLaunchPackets);
-            type = PacketType::ROCKET_LAUNCH_EVENT;
+            type = PacketType::EVENT_ROCKET_LAUNCH;
 
             broadcast(type, data);
         }

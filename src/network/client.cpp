@@ -67,14 +67,13 @@ namespace oni {
                     break;
                 }
                 case (PacketType::CAR_ENTITY_ID):
-                case (PacketType::REPLACE_ALL_ENTITIES):
-                case (PacketType::ONLY_COMPONENT_UPDATE):
-                case (PacketType::ADD_NEW_ENTITIES):
-                case (PacketType::DESTROYED_ENTITIES):
-                case (PacketType::SPAWN_PARTICLE):
-                case (PacketType::ONE_SHOT_SOUND_EFFECT_EVENT):
-                case (PacketType::ROCKET_LAUNCH_EVENT):
-                case (PacketType::COLLISION_EVENT): {
+                case (PacketType::REGISTRY_REPLACE_ALL_ENTITIES):
+                case (PacketType::REGISTRY_ONLY_COMPONENT_UPDATE):
+                case (PacketType::REGISTRY_ADD_NEW_ENTITIES):
+                case (PacketType::REGISTRY_DESTROYED_ENTITIES):
+                case (PacketType::EVENT_ONE_SHOT_SOUND_EFFECT):
+                case (PacketType::EVENT_ROCKET_LAUNCH):
+                case (PacketType::EVENT_COLLISION): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
                     mPacketHandlers[header](peerID, dataString);
                     break;

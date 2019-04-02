@@ -43,7 +43,8 @@ namespace oni {
 
         class SceneManager {
         public:
-            SceneManager(const component::ScreenBounds &, FontManager &,
+            SceneManager(const component::ScreenBounds &,
+                         FontManager &,
                          math::ZLayerManager &,
                          b2World &,
                          common::real32
@@ -51,65 +52,100 @@ namespace oni {
 
             ~SceneManager();
 
-            void render(entities::EntityManager &server,
-                        entities::EntityManager &client,
-                        common::EntityID lookAtEntity);
+            void
+            render(entities::EntityManager &server,
+                   entities::EntityManager &client,
+                   common::EntityID lookAtEntity);
 
-            void renderPhysicsDebugData();
+            void
+            renderPhysicsDebugData();
 
-            void tick(entities::EntityFactory &server, entities::EntityFactory &client, common::real64 tickTime);
+            void
+            tick(entities::EntityFactory &server,
+                 entities::EntityFactory &client,
+                 common::real64 tickTime);
 
-            void renderRaw(const component::Shape &, const component::Appearance &);
+            void
+            renderRaw(const component::Shape &,
+                      const component::Appearance &);
 
-            void lookAt(common::real32 x, common::real32 y);
+            void
+            lookAt(common::real32 x,
+                   common::real32 y);
 
-            void lookAt(common::real32 x, common::real32 y, common::real32 distance);
+            void
+            lookAt(common::real32 x,
+                   common::real32 y,
+                   common::real32 distance);
 
-            void zoom(common::real32 distance);
+            void
+            zoom(common::real32 distance);
 
-            const component::Camera &getCamera() const;
+            const component::Camera &
+            getCamera() const;
 
-            const math::mat4 &getProjectionMatrix() const;
+            const math::mat4 &
+            getProjectionMatrix() const;
 
-            const math::mat4 &getViewMatrix() const;
+            const math::mat4 &
+            getViewMatrix() const;
 
-            common::real32 getViewWidth() const;
+            common::real32
+            getViewWidth() const;
 
-            common::real32 getViewHeight() const;
+            common::real32
+            getViewHeight() const;
 
-            common::uint16 getSpritesPerFrame() const;
+            common::uint16
+            getSpritesPerFrame() const;
 
-            common::uint16 getParticlesPerFrame() const;
+            common::uint16
+            getParticlesPerFrame() const;
 
-            common::uint16 getTexturesPerFrame() const;
+            common::uint16
+            getTexturesPerFrame() const;
 
-            void resetCounters();
+            void
+            resetCounters();
 
             // TODO: This is awful and inconsistent with the API of this class where I should only expose render().
             // Instead of exposing the internals, I can batch the render objects in DebugDrawBox2D and then
             // pass them to a new render() function that receives a vector of sprites
             // .
-            void beginColorRendering();
+            void
+            beginColorRendering();
 
-            void endColorRendering();
+            void
+            endColorRendering();
 
         private:
-            void renderStaticTextures(entities::EntityManager &, common::real32 viewWidth,
-                                      common::real32 viewHeight);
-
-            void renderStaticText(entities::EntityManager &, common::real32 viewWidth,
-                                  common::real32 viewHeight);
-
-            void renderDynamicTextures(entities::EntityManager &, common::real32 viewWidth,
-                                       common::real32 viewHeight);
-
-            void renderColorSprites(entities::EntityManager &, common::real32 viewWidth,
-                                    common::real32 viewHeight);
-
-            void renderParticles(entities::EntityManager &, common::real32 viewWidth,
+            void
+            renderStaticTextures(entities::EntityManager &,
+                                 common::real32 viewWidth,
                                  common::real32 viewHeight);
 
-            void renderClientSideEntities(entities::EntityManager &);
+            void
+            renderStaticText(entities::EntityManager &,
+                             common::real32 viewWidth,
+                             common::real32 viewHeight);
+
+            void
+            renderDynamicTextures(entities::EntityManager &,
+                                  common::real32 viewWidth,
+                                  common::real32 viewHeight);
+
+            void
+            renderColorSprites(entities::EntityManager &,
+                               common::real32 viewWidth,
+                               common::real32 viewHeight);
+
+            void
+            renderParticles(entities::EntityManager &,
+                            common::real32 viewWidth,
+                            common::real32 viewHeight);
+
+            void
+            renderClientSideEntities(entities::EntityManager &);
 
         private:
             struct RaceInfoEntities {
@@ -117,37 +153,71 @@ namespace oni {
                 common::EntityID lapTimeEntity{0};
                 common::EntityID lapBestTimeEntity{0};
             };
+            enum class BrushType : common::uint8 {
+                PLAIN_RECTANGLE,
+            };
 
         private:
-            void begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale, bool setMVP);
+            void
+            begin(const Shader &shader,
+                  Renderer2D &renderer2D,
+                  bool translate,
+                  bool scale,
+                  bool setMVP);
 
-            void end(const Shader &shader, Renderer2D &renderer2D);
+            void
+            end(const Shader &shader,
+                Renderer2D &renderer2D);
 
-            void initializeTextureRenderer();
+            void
+            initializeTextureRenderer();
 
-            void initializeColorRenderer();
+            void
+            initializeColorRenderer();
 
-            void initializeParticleRenderer();
+            void
+            initializeParticleRenderer();
 
-            void prepareTexture(component::Texture &texture);
+            void
+            prepareTexture(component::Texture &texture);
 
-            common::EntityID getOrCreateSkidTile(entities::EntityFactory &, const math::vec2 &position);
+            const RaceInfoEntities &
+            getOrCreateLapText(entities::EntityFactory &,
+                               common::EntityID carEntityID,
+                               const component::CarLapInfo &carLap);
 
-            const RaceInfoEntities &getOrCreateLapText(entities::EntityFactory &, common::EntityID carEntityID,
-                                                       const component::CarLapInfo &carLap);
+            common::EntityID
+            createText(entities::EntityFactory &,
+                       const math::vec3 &worldPos,
+                       const std::string &text);
 
-            common::EntityID createText(entities::EntityFactory &, const math::vec3 &worldPos, const std::string &text);
+            void
+            updateParticles(entities::EntityFactory &entityFactory,
+                            common::real64 tickTime);
 
-            void updateSkidlines(entities::EntityFactory &,
-                                 const math::vec3 &position,
-                                 common::EntityID skidTextureEntity,
-                                 common::uint8 alpha);
+            void
+            updateRaceInfo(entities::EntityManager &,
+                           const component::CarLapInfo &carLap,
+                           const RaceInfoEntities &carLapTextEntities);
 
-            void updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime);
+            void
+            paint(entities::EntityFactory &,
+                  BrushType,
+                  const math::vec2 &brushSize,
+                  const component::PixelRGBA &,
+                  const math::vec2 &worldPos);
 
-            void updateRaceInfo(entities::EntityManager &,
-                                const component::CarLapInfo &carLap,
-                                const RaceInfoEntities &carLapTextEntities);
+            common::EntityID
+            getOrCreateCanvasTile(entities::EntityFactory &,
+                                  const math::vec2 &pos);
+
+            void
+            updateCanvas(entities::EntityManager &,
+                         common::EntityID,
+                         BrushType,
+                         const math::vec2& brushSize,
+                         const component::PixelRGBA &,
+                         const math::vec2 &pos);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -167,13 +237,13 @@ namespace oni {
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            std::map<common::uint64, common::EntityID> mSkidlineLookup{};
+            std::map<common::uint64, common::EntityID> mCanvasTileLookup{};
             std::map<common::EntityID, RaceInfoEntities> mLapInfoLookup{};
 
-            const common::uint16 mSkidTileSizeX{0};
-            const common::uint16 mSkidTileSizeY{0};
-            const common::real32 mHalfSkidTileSizeX{0.0f};
-            const common::real32 mHalfSkidTileSizeY{0.0f};
+            const common::uint16 mCanvasTileSizeX{0};
+            const common::uint16 mCanvasTileSizeY{0};
+            const common::real32 mHalfCanvasTileSizeX{0.0f};
+            const common::real32 mHalfCanvasTileSizeY{0.0f};
 
             component::ScreenBounds mScreenBounds{};
             component::Camera mCamera{0.0f, 0.0f, 1.0f};
@@ -186,7 +256,6 @@ namespace oni {
             common::uint16 mRenderedParticlesPerFrame{0};
 
             math::ZLayerManager &mZLayerManager;
-
         };
     }
 }

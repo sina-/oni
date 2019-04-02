@@ -18,37 +18,16 @@ namespace oni {
             return (T(0) < val) - (val < T(0));
         }
 
-        inline common::int64 positionToIndex(const common::real64 position, const common::uint16 tileSize) {
-            /**
-             * Tiles in the world map fall under these indices:
-             *
-             * [-halfTileSize * 5, -halfTileSize * 3) -> -2
-             * [-halfTileSize * 3, -halfTileSize * 1) -> -1
-             * [-halfTileSize * 1, +halfTileSize * 1) -> +0
-             * [+halfTileSize * 1, +halfTileSize * 3) -> +1
-             * [+halfTileSize * 3, +halfTileSize * 5) -> +2
-             *
-             * For example for tile size 16:
-             * [-40, -24) -> -2
-             * [-24,  -8) -> -1
-             * [ -8,  +8) -> +0
-             * [ +8, +24) -> +1
-             * [+24, +40) -> +2
-             */
-            auto result = floor(position / tileSize);
+        inline common::int64 findBin(const common::real64 position, const common::uint16 binSize) {
+            auto result = floor(position / binSize);
             auto truncated = static_cast<common::int64>(result);
             return truncated;
         }
 
-        inline common::real32 indexToPosition(const common::int64 index, const common::uint16 tileSize) {
-            return tileSize * index;
+        inline common::real32 binPos(const common::int64 index, const common::uint16 binSize) {
+            return binSize * index;
         }
 
-        /**
-         * Pack two unique int32 values into unique uint64.
-         * @param x
-         * @return pack uint64 value
-         */
         inline common::Int64Pack packInt64(const common::int64 x, const common::int64 y) {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)

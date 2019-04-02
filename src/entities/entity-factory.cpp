@@ -84,7 +84,7 @@ namespace oni {
                 case component::EntityType::ROAD:
                 case component::EntityType::VEHICLE:
                 case component::EntityType::BACKGROUND:
-                case component::EntityType::SKID_LINE:
+                case component::EntityType::CANVAS:
                 case component::EntityType::UI:
                 case component::EntityType::SIMPLE_SPRITE:
                 case component::EntityType::SIMPLE_PARTICLE:

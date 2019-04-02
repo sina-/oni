@@ -33,7 +33,7 @@ namespace oni {
             mEntityZLayers[EntityType::ROAD] = getNextZAtLayer(ZLayerDef::LAYER_0);
             mEntityZLayers[EntityType::WALL] = getNextZAtLayer(ZLayerDef::LAYER_0);
 
-            mEntityZLayers[EntityType::SKID_LINE] = getNextZAtLayer(ZLayerDef::LAYER_1);
+            mEntityZLayers[EntityType::CANVAS] = getNextZAtLayer(ZLayerDef::LAYER_1);
 
             mEntityZLayers[EntityType::RACE_CAR] = getNextZAtLayer(ZLayerDef::LAYER_2);
             mEntityZLayers[EntityType::VEHICLE] = mEntityZLayers[EntityType::RACE_CAR];

@@ -22,13 +22,15 @@
 
 namespace oni {
     namespace graphic {
-        SceneManager::SceneManager(const component::ScreenBounds &screenBounds, FontManager &fontManager,
+        SceneManager::SceneManager(const component::ScreenBounds &screenBounds,
+                                   FontManager &fontManager,
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
                                    common::real32 gameUnitToPixels) :
-                mSkidTileSizeX(64), mSkidTileSizeY(64),
-                mHalfSkidTileSizeX(mSkidTileSizeX / 2.0f),
-                mHalfSkidTileSizeY(mSkidTileSizeY / 2.0f),
+                mCanvasTileSizeX{64},
+                mCanvasTileSizeY{64},
+                mHalfCanvasTileSizeX{mCanvasTileSizeX / 2.f},
+                mHalfCanvasTileSizeY{mCanvasTileSizeY / 2.f},
                 // 64k vertices
                 mMaxSpriteCount(64 * 1000), mScreenBounds(screenBounds),
                 mFontManager(fontManager),
@@ -76,7 +78,8 @@ namespace oni {
 
         SceneManager::~SceneManager() = default;
 
-        void SceneManager::initializeParticleRenderer() {
+        void
+        SceneManager::initializeParticleRenderer() {
             auto program = mParticleShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
@@ -180,7 +183,8 @@ namespace oni {
             );
         }
 
-        void SceneManager::initializeColorRenderer() {
+        void
+        SceneManager::initializeColorRenderer() {
             auto program = mColorShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
@@ -223,7 +227,8 @@ namespace oni {
             );
         }
 
-        void SceneManager::initializeTextureRenderer() {
+        void
+        SceneManager::initializeTextureRenderer() {
             auto program = mTextureShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
@@ -282,9 +287,10 @@ namespace oni {
             mTextureShader->disable();
         }
 
-        void SceneManager::tick(entities::EntityFactory &serverEntityFactory,
-                                entities::EntityFactory &clientEntityFactory,
-                                common::real64 tickTime) {
+        void
+        SceneManager::tick(entities::EntityFactory &serverEntityFactory,
+                           entities::EntityFactory &clientEntityFactory,
+                           common::real64 tickTime) {
             updateParticles(clientEntityFactory, tickTime);
 
             auto viewWidth = getViewWidth();
@@ -375,9 +381,7 @@ namespace oni {
 
             // Update Skid lines.
             {
-                std::vector<math::vec3> skidPosRRList{};
-                std::vector<math::vec3> skidPosRLList{};
-                std::vector<math::mat4> carTireTransform{};
+                std::vector<math::vec2> skidPosList{};
                 std::vector<common::uint8> skidOpacity{};
                 {
                     auto carView = serverEntityFactory.getEntityManager().createViewWithLock<component::Car, component::Placement, component::CarConfig>();
@@ -400,12 +404,11 @@ namespace oni {
                                                  static_cast<common::real32>(-carConfig.wheelWidth -
                                                                              carConfig.halfWidth / 2),
                                                  0.f};
-                            skidPosRRList.push_back(skidPosRR);
-                            skidPosRLList.push_back(skidPosRL);
-
-                            carTireTransform.push_back(math::Transformation::createTransformation(placement.position,
-                                                                                                  placement.rotation,
-                                                                                                  placement.scale));
+                            auto transform = math::Transformation::createTransformation(placement.position,
+                                                                                        placement.rotation,
+                                                                                        placement.scale);
+                            skidPosList.emplace_back((transform * skidPosRL).getXY());
+                            skidPosList.emplace_back((transform * skidPosRR).getXY());
 
                             auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
                                                                     255);
@@ -414,18 +417,13 @@ namespace oni {
                     }
                 }
 
-                for (size_t i = 0; i < skidOpacity.size(); ++i) {
-                    auto skidMarkRRPos = carTireTransform[i] * skidPosRRList[i];
-                    auto skidMarkRLPos = carTireTransform[i] * skidPosRLList[i];
+                BrushType brushType = BrushType::PLAIN_RECTANGLE;
+                math::vec2 brushSize{8.f, 8.f};
 
-                    common::EntityID skidEntityRL{0};
-                    common::EntityID skidEntityRR{0};
-
-                    skidEntityRL = getOrCreateSkidTile(clientEntityFactory, skidMarkRLPos.getXY());
-                    skidEntityRR = getOrCreateSkidTile(clientEntityFactory, skidMarkRRPos.getXY());
-
-                    updateSkidlines(clientEntityFactory, skidMarkRLPos, skidEntityRL, skidOpacity[i]);
-                    updateSkidlines(clientEntityFactory, skidMarkRRPos, skidEntityRR, skidOpacity[i]);
+                auto lock = clientEntityFactory.getEntityManager().scopedLock();
+                for (size_t i = 0; i < skidPosList.size(); ++i) {
+                    component::PixelRGBA color{0, 0, 0, 255};//skidOpacity[i / 2]};
+                    paint(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
                 }
             }
 
@@ -449,7 +447,9 @@ namespace oni {
             }
         }
 
-        void SceneManager::updateParticles(entities::EntityFactory &entityFactory, common::real64 tickTime) {
+        void
+        SceneManager::updateParticles(entities::EntityFactory &entityFactory,
+                                      common::real64 tickTime) {
             auto view = entityFactory.getEntityManager().createViewWithLock<component::Particle>();
             for (const auto &entity: view) {
                 auto &particle = view.get<component::Particle>(entity);
@@ -463,7 +463,11 @@ namespace oni {
 
 
         void
-        SceneManager::begin(const Shader &shader, Renderer2D &renderer2D, bool translate, bool scale, bool setMVP) {
+        SceneManager::begin(const Shader &shader,
+                            Renderer2D &renderer2D,
+                            bool translate,
+                            bool scale,
+                            bool setMVP) {
             shader.enable();
 
             auto view = math::mat4::identity();
@@ -481,7 +485,8 @@ namespace oni {
             renderer2D.begin();
         }
 
-        void SceneManager::prepareTexture(component::Texture &texture) {
+        void
+        SceneManager::prepareTexture(component::Texture &texture) {
             // TODO: With current network registry sync code every time an entity gets component sync this texture
             // status is reverted back to what it was on server, which might be okay, but something to keep in mind
             // if it becomes a perf bottle-neck.
@@ -518,21 +523,25 @@ namespace oni {
             }
         }
 
-        void SceneManager::end(const Shader &shader, Renderer2D &renderer2D) {
+        void
+        SceneManager::end(const Shader &shader,
+                          Renderer2D &renderer2D) {
             renderer2D.end();
             renderer2D.flush();
             shader.disable();
         }
 
-        void SceneManager::renderPhysicsDebugData() {
+        void
+        SceneManager::renderPhysicsDebugData() {
             mDebugDrawBox2D->Begin();
             mPhysicsWorld.DrawDebugData();
             mDebugDrawBox2D->End();
         }
 
-        void SceneManager::render(entities::EntityManager &serverEntityManager,
-                                  entities::EntityManager &clientEntityManager,
-                                  common::EntityID lookAtEntity) {
+        void
+        SceneManager::render(entities::EntityManager &serverEntityManager,
+                             entities::EntityManager &clientEntityManager,
+                             common::EntityID lookAtEntity) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
@@ -571,7 +580,8 @@ namespace oni {
             renderClientSideEntities(clientEntityManager);
         }
 
-        void SceneManager::renderClientSideEntities(entities::EntityManager &entityManager) {
+        void
+        SceneManager::renderClientSideEntities(entities::EntityManager &entityManager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
@@ -600,21 +610,27 @@ namespace oni {
 
         }
 
-        void SceneManager::renderRaw(const component::Shape &shape, const component::Appearance &appearance) {
+        void
+        SceneManager::renderRaw(const component::Shape &shape,
+                                const component::Appearance &appearance) {
             mColorRenderer->submit(shape, appearance);
             ++mRenderedSpritesPerFrame;
         }
 
-        void SceneManager::beginColorRendering() {
+        void
+        SceneManager::beginColorRendering() {
             begin(*mColorShader, *mColorRenderer, true, false, true);
         }
 
-        void SceneManager::endColorRendering() {
+        void
+        SceneManager::endColorRendering() {
             end(*mColorShader, *mColorRenderer);
         }
 
-        void SceneManager::renderStaticText(entities::EntityManager &manager, common::real32 viewWidth,
-                                            common::real32 viewHeight) {
+        void
+        SceneManager::renderStaticText(entities::EntityManager &manager,
+                                       common::real32 viewWidth,
+                                       common::real32 viewHeight) {
             auto staticTextView = manager.createView<component::Text, component::Tag_Static>();
             for (const auto &entity: staticTextView) {
                 auto &text = staticTextView.get<component::Text>(entity);
@@ -626,8 +642,10 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderStaticTextures(entities::EntityManager &manager, common::real32 viewWidth,
-                                                common::real32 viewHeight) {
+        void
+        SceneManager::renderStaticTextures(entities::EntityManager &manager,
+                                           common::real32 viewWidth,
+                                           common::real32 viewHeight) {
             auto staticTextureView = manager.createView<component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::Tag_Static>();
             for (const auto &entity: staticTextureView) {
@@ -654,8 +672,10 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderDynamicTextures(entities::EntityManager &manager, common::real32 viewWidth,
-                                                 common::real32 viewHeight) {
+        void
+        SceneManager::renderDynamicTextures(entities::EntityManager &manager,
+                                            common::real32 viewWidth,
+                                            common::real32 viewHeight) {
             // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
             // other systems don't share any entity component, or the shared section is minimum and I can create
             // copy of that data before starting rendering and only lock the registry at that point
@@ -695,8 +715,10 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderColorSprites(entities::EntityManager &manager, common::real32 viewWidth,
-                                              common::real32 viewHeight) {
+        void
+        SceneManager::renderColorSprites(entities::EntityManager &manager,
+                                         common::real32 viewWidth,
+                                         common::real32 viewHeight) {
             auto view = manager.createView<component::Tag_ColorShaded, component::Shape,
                     component::Appearance, component::Tag_Static>();
             for (const auto &entity: view) {
@@ -712,8 +734,10 @@ namespace oni {
             }
         }
 
-        void SceneManager::renderParticles(entities::EntityManager &manager, common::real32 viewWidth,
-                                           common::real32 viewHeight) {
+        void
+        SceneManager::renderParticles(entities::EntityManager &manager,
+                                      common::real32 viewWidth,
+                                      common::real32 viewHeight) {
             {
                 auto view = manager.createView<component::Particle, component::Appearance>();
 
@@ -750,9 +774,10 @@ namespace oni {
         }
 
 
-        const SceneManager::RaceInfoEntities &SceneManager::getOrCreateLapText(entities::EntityFactory &entityFactory,
-                                                                               common::EntityID carEntityID,
-                                                                               const component::CarLapInfo &carLap) {
+        const SceneManager::RaceInfoEntities &
+        SceneManager::getOrCreateLapText(entities::EntityFactory &entityFactory,
+                                         common::EntityID carEntityID,
+                                         const component::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
                 auto zLevel = mZLayerManager.getZForEntity(component::EntityType::UI);
@@ -771,9 +796,10 @@ namespace oni {
             return mLapInfoLookup.at(carEntityID);
         }
 
-        void SceneManager::updateRaceInfo(entities::EntityManager &entityManager,
-                                          const component::CarLapInfo &carLap,
-                                          const SceneManager::RaceInfoEntities &carLapTextEntities) {
+        void
+        SceneManager::updateRaceInfo(entities::EntityManager &entityManager,
+                                     const component::CarLapInfo &carLap,
+                                     const SceneManager::RaceInfoEntities &carLapTextEntities) {
             // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
             auto &lapText = entityManager.get<component::Text>(carLapTextEntities.lapEntity);
             mFontManager.updateText("Lap: " + std::to_string(carLap.lap), lapText);
@@ -785,133 +811,172 @@ namespace oni {
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        common::EntityID SceneManager::getOrCreateSkidTile(entities::EntityFactory &entityFactory,
-                                                           const math::vec2 &position) {
-            auto x = math::positionToIndex(position.x, mSkidTileSizeX);
-            auto y = math::positionToIndex(position.y, mSkidTileSizeY);
-            auto packedIndices = math::packInt64(x, y);
-
-            auto missing = mSkidlineLookup.find(packedIndices) == mSkidlineLookup.end();
-            if (missing) {
-                auto tilePosX = math::indexToPosition(x, mSkidTileSizeX);
-                auto tilePosY = math::indexToPosition(y, mSkidTileSizeY);
-                auto worldPos = math::vec3{tilePosX, tilePosY,
-                                           mZLayerManager.getZForEntity(component::EntityType::SKID_LINE)};
-                auto tileSize = math::vec2{static_cast<common::real32>(mSkidTileSizeX),
-                                           static_cast<common::real32>(mSkidTileSizeY)};
-
-                auto widthInPixels = static_cast<common::uint16>(mSkidTileSizeX * mGameUnitToPixels +
-                                                                 common::EP);
-                auto heightInPixels = static_cast<common::uint16>(mSkidTileSizeY * mGameUnitToPixels +
-                                                                  common::EP);
-                auto defaultColor = component::PixelRGBA{};
-                // TODO: I can blend skid textures using this data
-                auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels,
-                                                                  defaultColor);
-
-                common::real32 heading = 0.f;
-                std::string emptyTextureID;
-                auto &entityRegistry = entityFactory.getEntityManager();
-                auto lock = entityRegistry.scopedLock();
-                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
-                                                                                                 tileSize,
-                                                                                                 heading,
-                                                                                                 emptyTextureID);
-                auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
-                auto &texture = entityRegistry.get<component::Texture>(entityID);
-                texture = loadedTexture;
-                mSkidlineLookup.emplace(packedIndices, entityID);
-            }
-
-            return mSkidlineLookup.at(packedIndices);
-        }
-
-        void SceneManager::updateSkidlines(entities::EntityFactory &entityFactory,
-                                           const math::vec3 &position,
-                                           common::EntityID skidTextureEntity,
-                                           common::uint8 alpha) {
-            auto &entityRegistry = entityFactory.getEntityManager();
-            auto lock = entityRegistry.scopedLock();
-            auto skidMarksTexture = entityRegistry.get<component::Texture>(skidTextureEntity);
-            const auto skidMarksTexturePos = entityRegistry.get<component::Shape>(
-                    skidTextureEntity).getPosition();
-
-            auto skidPos = position;
-            math::Transformation::worldToTextureCoordinate(skidMarksTexturePos, mGameUnitToPixels,
-                                                           skidPos);
-
-            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
-            // squares.
-            //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
-            //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
-            common::uint16 height = 3;
-            common::uint16 width = 3;
-
-            auto bits = graphic::TextureManager::generateBits(width, height, component::PixelRGBA{0, 0, 0, alpha});
-            // TODO: Need to create skid texture data as it should be and set it.
-            mTextureManager->updateSubTexture(skidMarksTexture,
-                                              static_cast<common::oniGLint>(skidPos.x - width / 2.0f),
-                                              static_cast<common::oniGLint>(skidPos.y - height / 2.0f),
-                                              width, height, bits);
-        }
-
-        const component::Camera &SceneManager::getCamera() const {
+        const component::Camera &
+        SceneManager::getCamera() const {
             return mCamera;
         }
 
-        void SceneManager::zoom(common::real32 distance) {
+        void
+        SceneManager::zoom(common::real32 distance) {
             mCamera.z = 1 / distance;
         }
 
-        void SceneManager::lookAt(common::real32 x, common::real32 y) {
+        void
+        SceneManager::lookAt(common::real32 x,
+                             common::real32 y) {
             mCamera.x = x;
             mCamera.y = y;
         }
 
-        void SceneManager::lookAt(common::real32 x, common::real32 y, common::real32 distance) {
+        void
+        SceneManager::lookAt(common::real32 x,
+                             common::real32 y,
+                             common::real32 distance) {
             mCamera.x = x;
             mCamera.y = y;
             mCamera.z = 1 / distance;
         }
 
-        const math::mat4 &SceneManager::getProjectionMatrix() const {
+        const math::mat4 &
+        SceneManager::getProjectionMatrix() const {
             return mProjectionMatrix;
         }
 
-        const math::mat4 &SceneManager::getViewMatrix() const {
+        const math::mat4 &
+        SceneManager::getViewMatrix() const {
             return mViewMatrix;
         }
 
-        common::uint16 SceneManager::getSpritesPerFrame() const {
+        common::uint16
+        SceneManager::getSpritesPerFrame() const {
             return mRenderedSpritesPerFrame;
         }
 
-        common::uint16 SceneManager::getParticlesPerFrame() const {
+        common::uint16
+        SceneManager::getParticlesPerFrame() const {
             return mRenderedParticlesPerFrame;
         }
 
-        common::uint16 SceneManager::getTexturesPerFrame() const {
+        common::uint16
+        SceneManager::getTexturesPerFrame() const {
             return mRenderedTexturesPerFrame;
         }
 
-        common::real32 SceneManager::getViewWidth() const {
+        common::real32
+        SceneManager::getViewWidth() const {
             return (mScreenBounds.xMax - mScreenBounds.xMin) * (1.0f / mCamera.z);
         }
 
-        common::real32 SceneManager::getViewHeight() const {
+        common::real32
+        SceneManager::getViewHeight() const {
             return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
         }
 
-        void SceneManager::resetCounters() {
+        void
+        SceneManager::resetCounters() {
             mRenderedSpritesPerFrame = 0;
             mRenderedParticlesPerFrame = 0;
             mRenderedTexturesPerFrame = 0;
         }
 
-        common::EntityID SceneManager::createText(entities::EntityFactory &entityFactory, const math::vec3 &worldPos,
-                                                  const std::string &text) {
+        common::EntityID
+        SceneManager::createText(entities::EntityFactory &entityFactory,
+                                 const math::vec3 &worldPos,
+                                 const std::string &text) {
             auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
             return entityID;
         }
+
+        void
+        SceneManager::paint(entities::EntityFactory &entityFactory,
+                            SceneManager::BrushType brushType,
+                            const math::vec2 &brushSize,
+                            const component::PixelRGBA &color,
+                            const math::vec2 &worldPos) {
+            auto &entityManager = entityFactory.getEntityManager();
+            auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
+            updateCanvas(entityManager, entityID, brushType, brushSize, color, worldPos);
+        }
+
+        common::EntityID
+        SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
+                                            const math::vec2 &pos) {
+            auto x = math::findBin(pos.x, mCanvasTileSizeX);
+            auto y = math::findBin(pos.y, mCanvasTileSizeY);
+            auto xy = math::packInt64(x, y);
+            auto &entityRegistry = entityFactory.getEntityManager();
+
+            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
+            if (missing) {
+                auto tilePosX = math::binPos(x, mCanvasTileSizeX);
+                auto tilePosY = math::binPos(y, mCanvasTileSizeY);
+
+                auto worldPos = math::vec3{tilePosX, tilePosY,
+                                           mZLayerManager.getZForEntity(component::EntityType::CANVAS)};
+                auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
+                                           static_cast<common::real32>(mCanvasTileSizeY)};
+
+                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
+                                                                 common::EP);
+                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
+                                                                  common::EP);
+                auto defaultColor = component::PixelRGBA{};
+                auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels, defaultColor);
+
+                common::real32 heading = 0.f;
+                std::string emptyTextureID;
+
+                // TODO: Should this be a canvas type?
+                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
+                                                                                                 tileSize,
+                                                                                                 heading,
+                                                                                                 emptyTextureID);
+
+                auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
+                auto &texture = entityRegistry.get<component::Texture>(entityID);
+                texture = loadedTexture;
+
+                mCanvasTileLookup.emplace(xy, entityID);
+            }
+
+            return mCanvasTileLookup.at(xy);
+        }
+
+        void
+        SceneManager::updateCanvas(entities::EntityManager &entityManager,
+                                   common::EntityID entityID,
+                                   SceneManager::BrushType brushType,
+                                   const math::vec2 &brushSize,
+                                   const component::PixelRGBA &color,
+                                   const math::vec2 &pos) {
+            auto &canvasTexture = entityManager.get<component::Texture>(entityID);
+            auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
+
+            auto brushTexturePos = math::vec3{pos.x, pos.y, 0.f};
+            math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
+                                                           brushTexturePos);
+
+            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
+            // squares.
+            //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
+            //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
+            common::uint16 width;
+            common::uint16 height;
+            switch (brushType) {
+                case BrushType::PLAIN_RECTANGLE: {
+                    width = brushSize.x;
+                    height = brushSize.y;
+                    break;
+                }
+            }
+
+            auto bits = graphic::TextureManager::generateBits(width, height, color);
+            // TODO: Need to create skid texture data as it should be and set it.
+            mTextureManager->updateSubTexture(canvasTexture,
+                                              static_cast<common::oniGLint>(brushTexturePos.x - width / 2.0f),
+                                              static_cast<common::oniGLint>(brushTexturePos.y - height / 2.0f),
+                                              width, height, bits);
+        }
+
     }
 }

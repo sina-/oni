@@ -15,9 +15,8 @@ namespace oni {
             VEHICLE_TIRE_REAR,
             VEHICLE_TIRE_FRONT,
 
-            SKID_LINE,
-
             UI,
+            CANVAS,
 
             SIMPLE_SPRITE,
             SIMPLE_PARTICLE,

@@ -118,8 +118,8 @@ namespace oni {
 
         void
         TextureManager::updateSubTexture(const component::Texture &texture,
-                                         const common::oniGLint xOffset,
-                                         const common::oniGLint yOffset,
+                                         common::oniGLint xOffset,
+                                         common::oniGLint yOffset,
                                          common::oniGLint width,
                                          common::oniGLint height,
                                          const std::vector<common::uint8> &bits) {
@@ -135,9 +135,10 @@ namespace oni {
             }
             assert(texture.width > xOffset + width);
             assert(texture.height > yOffset + height);
-            if (xOffset < 0 || yOffset < 0) {
-                return;
-            }
+
+            xOffset = math::zeroClip(xOffset);
+            yOffset = math::zeroClip(yOffset);
+
             assert(xOffset >= 0);
             assert(yOffset >= 0);
             assert(texture.width >= width);
@@ -153,8 +154,6 @@ namespace oni {
                               common::oniGLint width,
                               common::oniGLint height,
                               std::vector<common::uint8> &bits) {
-            // TODO: There is an off by one errors somewhere here, on the bottom most edge of tile there is nothing drawn
-
             assert(texture.width > xOffset);
             assert(texture.height > yOffset);
 
@@ -166,9 +165,8 @@ namespace oni {
                 height = texture.height - yOffset - 1;
             }
 
-            if (xOffset < 0 || yOffset < 0) {
-                return;
-            }
+            xOffset = math::zeroClip(xOffset);
+            yOffset = math::zeroClip(yOffset);
 
             assert(width > 0);
             assert(height > 0);

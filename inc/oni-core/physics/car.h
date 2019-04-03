@@ -19,16 +19,6 @@ namespace oni {
     }
     namespace physics {
 
-        template<class T>
-        common::int32 sign(T n) {
-            return (T(0) < n) - (T(0) > n);
-        }
-
-        template<class T>
-        T clip(const T &n, const T &lower, const T &upper) {
-            return std::max(lower, std::min(n, upper));
-        }
-
         void tickCar(component::Car &car, const component::CarConfig &config,
                      const component::CarInput &inputs, common::real64 dt);
 

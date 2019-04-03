@@ -212,12 +212,12 @@ namespace oni {
                                   const math::vec2 &pos);
 
             void
-            updateCanvas(entities::EntityManager &,
-                         common::EntityID,
-                         BrushType,
-                         const math::vec2& brushSize,
-                         const component::PixelRGBA &,
-                         const math::vec2 &pos);
+            updateCanvasTile(entities::EntityManager &,
+                             common::EntityID,
+                             BrushType,
+                             const math::vec2 &brushSize,
+                             const component::PixelRGBA &,
+                             const math::vec2 &worldPos);
 
         private:
             std::unique_ptr<Shader> mColorShader{};

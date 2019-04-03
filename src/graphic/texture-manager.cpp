@@ -16,13 +16,16 @@ namespace oni {
 
         TextureManager::~TextureManager() = default;
 
-        void TextureManager::bindRange(common::oniGLuint first, const std::vector<common::oniGLuint> &textures) {
+        void
+        TextureManager::bindRange(common::oniGLuint first,
+                                  const std::vector<common::oniGLuint> &textures) {
             if (!textures.empty()) {
                 glBindTextures(first, static_cast<common::oniGLsizei>(textures.size()), textures.data());
             }
         }
 
-        const component::Texture *TextureManager::findOrLoad(const std::string &path) {
+        const component::Texture *
+        TextureManager::findOrLoad(const std::string &path) {
             if (isLoaded(path)) {
                 return &mTextureMap[path];
             }
@@ -30,7 +33,8 @@ namespace oni {
             return texture;
         }
 
-        const component::Texture *TextureManager::load(const std::string &path) {
+        const component::Texture *
+        TextureManager::load(const std::string &path) {
             assert(!path.empty());
 
             if (isLoaded(path)) {
@@ -91,8 +95,10 @@ namespace oni {
             return &mTextureMap[path];
         }
 
-        common::TextureData TextureManager::generateBits(const common::uint16 width, const common::uint16 height,
-                                                         const component::PixelRGBA &pixel) {
+        common::TextureData
+        TextureManager::generateBits(const common::uint16 width,
+                                     const common::uint16 height,
+                                     const component::PixelRGBA &pixel) {
             // Elements in pixel
             common::uint8 eip = 4;
             common::TextureData bits(static_cast<common::uint32>(eip * width * height), 0);
@@ -110,14 +116,17 @@ namespace oni {
             return bits;
         }
 
-        void TextureManager::updateSubTexture(const component::Texture &texture,
-                                              const common::oniGLint xOffset, const common::oniGLint yOffset,
-                                              common::oniGLint width, common::oniGLint height,
-                                              const std::vector<common::uint8> &bits) {
+        void
+        TextureManager::updateSubTexture(const component::Texture &texture,
+                                         const common::oniGLint xOffset,
+                                         const common::oniGLint yOffset,
+                                         common::oniGLint width,
+                                         common::oniGLint height,
+                                         const std::vector<common::uint8> &bits) {
             assert(texture.width > xOffset);
             assert(texture.height > yOffset);
 
-            // Truncate
+            // Clip
             if (xOffset + width >= texture.width) {
                 width = texture.width - xOffset - 1;
             }
@@ -137,7 +146,76 @@ namespace oni {
                                 bits.data());
         }
 
-        common::oniGLuint TextureManager::load(const graphic::FontManager &fontManager) {
+        void
+        TextureManager::blend(component::Texture &texture,
+                              common::oniGLint xOffset,
+                              common::oniGLint yOffset,
+                              common::oniGLint width,
+                              common::oniGLint height,
+                              std::vector<common::uint8> &bits) {
+            // TODO: There is an off by one errors somewhere here, on the bottom most edge of tile there is nothing drawn
+
+            assert(texture.width > xOffset);
+            assert(texture.height > yOffset);
+
+            // Clip
+            if (xOffset + width >= texture.width) {
+                width = texture.width - xOffset - 1;
+            }
+            if (yOffset + height >= texture.height) {
+                height = texture.height - yOffset - 1;
+            }
+
+            if (xOffset < 0 || yOffset < 0) {
+                return;
+            }
+
+            assert(width > 0);
+            assert(height > 0);
+
+            assert(texture.width > xOffset + width);
+            assert(texture.height > yOffset + height);
+
+            common::uint8 eip = 4; // Elements in pixel
+            common::uint16 brushStride = width * eip;
+            common::uint16 textureStride = texture.width * eip;
+
+            auto r = FI_RGBA_RED;
+            auto g = FI_RGBA_GREEN;
+            auto b = FI_RGBA_BLUE;
+            auto a = FI_RGBA_ALPHA;
+
+            auto textureOffset = (yOffset * textureStride) + (xOffset * eip);
+
+            for (common::uint32 y = 0; y < height; ++y) {
+                for (common::uint32 x = 0; x < width; ++x) {
+                    auto n = (y * brushStride) + (x * eip);
+                    auto m = textureOffset + (y * textureStride) + (x * eip);
+
+                    assert(m + a < texture.data.size());
+
+                    auto oldR = static_cast<common::uint16>(texture.data[m + r]);
+                    auto oldG = static_cast<common::uint16>(texture.data[m + g]);
+                    auto oldB = static_cast<common::uint16>(texture.data[m + b]);
+                    auto oldA = static_cast<common::uint16>(texture.data[m + a]);
+
+                    bits[n + r] = math::clipUpper(oldR + bits[n + r], 255);
+                    bits[n + g] = math::clipUpper(oldG + bits[n + g], 255);
+                    bits[n + b] = math::clipUpper(oldB + bits[n + b], 255);
+                    bits[n + a] = math::clipUpper(oldA + bits[n + a], 255);
+
+                    texture.data[m + r] = bits[n + r];
+                    texture.data[m + g] = bits[n + g];
+                    texture.data[m + b] = bits[n + b];
+                    texture.data[m + a] = bits[n + a];
+                }
+            }
+
+            updateSubTexture(texture, xOffset, yOffset, width, height, bits);
+        }
+
+        common::oniGLuint
+        TextureManager::load(const graphic::FontManager &fontManager) {
             // TODO: There is no caching in this function!
 
             auto width = static_cast<common::oniGLsizei>(fontManager.getAtlasWidth());
@@ -167,20 +245,25 @@ namespace oni {
         }
 
 
-        bool TextureManager::isLoaded(const std::string &path) const {
+        bool
+        TextureManager::isLoaded(const std::string &path) const {
             return mTextureMap.find(path) != mTextureMap.end();
         }
 
-        void TextureManager::bind(common::oniGLuint textureID) {
+        void
+        TextureManager::bind(common::oniGLuint textureID) {
             glBindTexture(GL_TEXTURE_2D, textureID);
         }
 
-        void TextureManager::unbind() {
+        void
+        TextureManager::unbind() {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        component::Texture TextureManager::loadFromData(common::uint16 width, common::uint16 height,
-                                                        const common::TextureData &data) {
+        component::Texture
+        TextureManager::loadFromData(common::uint16 width,
+                                     common::uint16 height,
+                                     const common::TextureData &data) {
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
@@ -207,7 +290,8 @@ namespace oni {
 
         }
 
-        size_t TextureManager::numLoadedTexture() const {
+        size_t
+        TextureManager::numLoadedTexture() const {
             return mTextureMap.size();
         }
     }

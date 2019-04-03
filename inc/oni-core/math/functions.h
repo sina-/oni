@@ -9,26 +9,71 @@
 
 namespace oni {
     namespace math {
-        inline common::real64 toRadians(common::real64 degrees) {
+        inline common::real64
+        toRadians(common::real64 degrees) {
             return degrees * (common::PI / 180.0f);
         }
 
-        template<typename T>
-        int sign(T val) {
-            return (T(0) < val) - (val < T(0));
+        template<class T>
+        T
+        clip(const T &n,
+             const T &lower,
+             const T &upper) {
+            return std::max(lower, std::min(n, upper));
         }
 
-        inline common::int64 findBin(const common::real64 position, const common::uint16 binSize) {
+        template<class T>
+        inline T
+        clipUpper(const T &val,
+                  const T &upper) {
+            if (val > upper) {
+                return upper;
+            }
+            return val;
+        }
+
+        template<class T>
+        inline T
+        clipLower(const T &val,
+                  const T &lower) {
+            if (val < lower) {
+                return lower;
+            }
+            return val;
+        }
+
+        template<class T>
+        inline T
+        zeroClip(const T &val) {
+            if (val < 0) {
+                return 0;
+            }
+            return val;
+        }
+
+        template<class T>
+        common::int32
+        sign(T n) {
+            return (T(0) < n) - (T(0) > n);
+        }
+
+        inline common::int64
+        findBin(const common::real64 position,
+                const common::uint16 binSize) {
             auto result = floor(position / binSize);
             auto truncated = static_cast<common::int64>(result);
             return truncated;
         }
 
-        inline common::real32 binPos(const common::int64 index, const common::uint16 binSize) {
+        inline common::real32
+        binPos(const common::int64 index,
+               const common::uint16 binSize) {
             return binSize * index;
         }
 
-        inline common::Int64Pack packInt64(const common::int64 x, const common::int64 y) {
+        inline common::Int64Pack
+        packInt64(const common::int64 x,
+                  const common::int64 y) {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -45,7 +90,9 @@ namespace oni {
             return result;
         }
 
-        inline common::UInt16Pack packUInt16(common::uint16 x, common::uint16 y) {
+        inline common::UInt16Pack
+        packUInt16(common::uint16 x,
+                   common::uint16 y) {
             return x << 16 | y;
         }
     }

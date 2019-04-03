@@ -6,8 +6,11 @@
 namespace oni {
     namespace physics {
 
-        void tickCar(component::Car &car, const component::CarConfig &config,
-                     const component::CarInput &inputs, common::real64 dt) {
+        void
+        tickCar(component::Car &car,
+                const component::CarConfig &config,
+                const component::CarInput &inputs,
+                common::real64 dt) {
             using common::CarSimDouble;
             CarSimDouble sn = std::sin(car.heading);
             CarSimDouble cs = std::cos(car.heading);
@@ -32,7 +35,7 @@ namespace oni {
             // Calculate slip angles for front and rear wheels (a.k.a. alpha)
             CarSimDouble slipAngleFront =
                     std::atan2(car.velocityLocal.y + yawSpeedFront, std::abs(car.velocityLocal.x)) -
-                    sign(car.velocityLocal.x) * car.steerAngle;
+                    math::sign(car.velocityLocal.x) * car.steerAngle;
             CarSimDouble slipAngleRear = std::atan2(car.velocityLocal.y + yawSpeedRear,
                                                     std::abs(car.velocityLocal.x));
 
@@ -48,10 +51,10 @@ namespace oni {
                                                                   config.lockGrip)); // reduce rear grip when eBrake is on
 
             CarSimDouble frictionForceFrontLocalY =
-                    clip(-config.cornerStiffnessFront * slipAngleFront, -tireGripFront, tireGripFront) *
+                    math::clip(-config.cornerStiffnessFront * slipAngleFront, -tireGripFront, tireGripFront) *
                     axleWeightFront;
             CarSimDouble frictionForceRearLocalY =
-                    clip(-config.cornerStiffnessRear * slipAngleRear, -tireGripRear, tireGripRear) * axleWeightRear;
+                    math::clip(-config.cornerStiffnessRear * slipAngleRear, -tireGripRear, tireGripRear) * axleWeightRear;
 
             //  Get amount of brake/throttle from our inputs
             CarSimDouble brake = std::min(inputs.brake * config.brakeForce + inputs.eBrake * config.eBrakeForce,
@@ -62,7 +65,7 @@ namespace oni {
 
             //  Resulting force in local car coordinates.
             //  This is implemented as a Rear-Wheel-Drive car only.
-            CarSimDouble tractionForceLocalX = throttle - brake * sign(car.velocityLocal.x);
+            CarSimDouble tractionForceLocalX = throttle - brake * math::sign(car.velocityLocal.x);
             CarSimDouble tractionForceLocalY = 0;
 
             CarSimDouble rollingResistanceForceLocalX = -config.rollResist * car.velocityLocal.x;
@@ -119,13 +122,15 @@ namespace oni {
             car.position.y += car.velocity.y * dt;
         }
 
-        common::CarSimDouble applySmoothSteer(const component::Car &car,
-                                              common::CarSimDouble steerInput, common::real64 dt) {
+        common::CarSimDouble
+        applySmoothSteer(const component::Car &car,
+                         common::CarSimDouble steerInput,
+                         common::real64 dt) {
             common::CarSimDouble steer = 0;
 
             if (std::abs(steerInput) > 0.001) {
                 //  Move toward steering input
-                steer = clip(car.steer + steerInput * dt * 2.0, -1.0, 1.0); // -inp.right, inp.left);
+                steer = math::clip(car.steer + steerInput * dt * 2.0, -1.0, 1.0); // -inp.right, inp.left);
             } else {
                 //  No steer input - move toward centre (0)
                 if (car.steer > 0) {
@@ -138,8 +143,9 @@ namespace oni {
             return steer;
         }
 
-        common::CarSimDouble applySafeSteer(const component::Car &car,
-                                            common::CarSimDouble steerInput) {
+        common::CarSimDouble
+        applySafeSteer(const component::Car &car,
+                       common::CarSimDouble steerInput) {
             auto avel = std::min(car.velocityAbsolute, 250.0);
             auto steer = steerInput * (1.0f - (avel / 280.0));
             return steer;

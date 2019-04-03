@@ -410,9 +410,10 @@ namespace oni {
                             skidPosList.emplace_back((transform * skidPosRL).getXY());
                             skidPosList.emplace_back((transform * skidPosRR).getXY());
 
-                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
-                                                                    255);
-                            skidOpacity.push_back(alpha);
+//                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
+//                                                                    255);
+                            // TODO: arbitrary number based on number of frames, think about better way of determining this
+                            skidOpacity.push_back(10);
                         }
                     }
                 }
@@ -422,7 +423,7 @@ namespace oni {
 
                 auto lock = clientEntityFactory.getEntityManager().scopedLock();
                 for (size_t i = 0; i < skidPosList.size(); ++i) {
-                    component::PixelRGBA color{0, 0, 0, 255};//skidOpacity[i / 2]};
+                    component::PixelRGBA color{0, 0, 0, skidOpacity[i / 2]};
                     paint(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
                 }
             }
@@ -895,7 +896,7 @@ namespace oni {
                             const math::vec2 &worldPos) {
             auto &entityManager = entityFactory.getEntityManager();
             auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
-            updateCanvas(entityManager, entityID, brushType, brushSize, color, worldPos);
+            updateCanvasTile(entityManager, entityID, brushType, brushSize, color, worldPos);
         }
 
         common::EntityID
@@ -943,39 +944,41 @@ namespace oni {
         }
 
         void
-        SceneManager::updateCanvas(entities::EntityManager &entityManager,
-                                   common::EntityID entityID,
-                                   SceneManager::BrushType brushType,
-                                   const math::vec2 &brushSize,
-                                   const component::PixelRGBA &color,
-                                   const math::vec2 &pos) {
+        SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
+                                       common::EntityID entityID,
+                                       SceneManager::BrushType brushType,
+                                       const math::vec2 &brushSize,
+                                       const component::PixelRGBA &color,
+                                       const math::vec2 &worldPos) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
+            // TODO: why the hell from Shape and not Placement?
             auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
 
-            auto brushTexturePos = math::vec3{pos.x, pos.y, 0.f};
+            auto brushTexturePos = math::vec3{worldPos.x, worldPos.y, 0.f};
             math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
                                                            brushTexturePos);
-
             // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
             // squares.
             //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
             //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
-            common::uint16 width;
-            common::uint16 height;
+            common::uint16 brushWidth;
+            common::uint16 brushHeight;
             switch (brushType) {
                 case BrushType::PLAIN_RECTANGLE: {
-                    width = brushSize.x;
-                    height = brushSize.y;
+                    brushWidth = brushSize.x;
+                    brushHeight = brushSize.y;
                     break;
                 }
             }
 
-            auto bits = graphic::TextureManager::generateBits(width, height, color);
-            // TODO: Need to create skid texture data as it should be and set it.
-            mTextureManager->updateSubTexture(canvasTexture,
-                                              static_cast<common::oniGLint>(brushTexturePos.x - width / 2.0f),
-                                              static_cast<common::oniGLint>(brushTexturePos.y - height / 2.0f),
-                                              width, height, bits);
+            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (brushWidth / 2.f));
+            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (brushHeight / 2.f));
+
+            auto bits = graphic::TextureManager::generateBits(brushWidth, brushHeight, color);
+            mTextureManager->blend(canvasTexture,
+                                   textureOffsetX,
+                                   textureOffsetY,
+                                   brushWidth, brushHeight, bits);
         }
 
     }

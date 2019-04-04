@@ -15,7 +15,15 @@ namespace oni {
         }
 
         template<class T>
-        T
+        inline void
+        clip(T &n,
+             const T &lower,
+             const T &upper) {
+            n = std::max(lower, std::min(n, upper));
+        }
+
+        template<class T>
+        inline T
         clip(const T &n,
              const T &lower,
              const T &upper) {
@@ -23,36 +31,33 @@ namespace oni {
         }
 
         template<class T>
-        inline T
-        clipUpper(const T &val,
+        inline void
+        clipUpper(T &val,
                   const T &upper) {
             if (val > upper) {
-                return upper;
+                val = upper;
             }
-            return val;
         }
 
         template<class T>
-        inline T
-        clipLower(const T &val,
+        inline void
+        clipLower(T &val,
                   const T &lower) {
             if (val < lower) {
-                return lower;
+                val = lower;
             }
-            return val;
         }
 
         template<class T>
-        inline T
-        zeroClip(const T &val) {
+        inline void
+        zeroClip(T &val) {
             if (val < 0) {
-                return 0;
+                val = 0;
             }
-            return val;
         }
 
         template<class T>
-        common::int32
+        inline common::int32
         sign(T n) {
             return (T(0) < n) - (T(0) > n);
         }
@@ -60,7 +65,7 @@ namespace oni {
         inline common::int64
         findBin(const common::real64 position,
                 const common::uint16 binSize) {
-            auto result = floor(position / binSize);
+            auto result = std::floor(position / binSize);
             auto truncated = static_cast<common::int64>(result);
             return truncated;
         }

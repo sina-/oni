@@ -18,6 +18,8 @@ namespace oni {
 
             vec2 &divide(const vec2 &other);
 
+            vec2 &divide(common::real32);
+
             friend vec2 operator+(const vec2 &left, const vec2 &right);
 
             friend vec2 operator-(const vec2 &left, const vec2 &right);
@@ -25,6 +27,8 @@ namespace oni {
             friend vec2 operator*(const vec2 &left, const vec2 &right);
 
             friend vec2 operator/(const vec2 &left, const vec2 &right);
+
+            friend vec2 operator/(const vec2 &left, common::real32 right);
 
             vec2 &operator+=(const vec2 &other);
 

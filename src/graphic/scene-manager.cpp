@@ -1,5 +1,6 @@
-#include <oni-core/physics/dynamics.h>
 #include <oni-core/graphic/scene-manager.h>
+
+#include <set>
 
 #include <GL/glew.h>
 
@@ -8,6 +9,7 @@
 #include <oni-core/graphic/texture-manager.h>
 #include <oni-core/graphic/font-manager.h>
 #include <oni-core/graphic/debug-draw-box2d.h>
+#include <oni-core/physics/dynamics.h>
 #include <oni-core/math/transformation.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/entity-factory.h>
@@ -27,8 +29,8 @@ namespace oni {
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
                                    common::real32 gameUnitToPixels) :
-                mCanvasTileSizeX{64},
-                mCanvasTileSizeY{64},
+                mCanvasTileSizeX{110},
+                mCanvasTileSizeY{110},
                 mHalfCanvasTileSizeX{mCanvasTileSizeX / 2.f},
                 mHalfCanvasTileSizeY{mCanvasTileSizeY / 2.f},
                 // 64k vertices
@@ -419,7 +421,7 @@ namespace oni {
                 }
 
                 BrushType brushType = BrushType::PLAIN_RECTANGLE;
-                math::vec2 brushSize{8.f, 8.f};
+                math::vec2 brushSize{0.5f, 0.5f};
 
                 auto lock = clientEntityFactory.getEntityManager().scopedLock();
                 for (size_t i = 0; i < skidPosList.size(); ++i) {
@@ -446,6 +448,124 @@ namespace oni {
                     updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
                 }
             }
+        }
+
+        void
+        SceneManager::paint(entities::EntityFactory &entityFactory,
+                            SceneManager::BrushType brushType,
+                            const math::vec2 &brushSize,
+                            const component::PixelRGBA &color,
+                            const math::vec2 &worldPos) {
+            auto &entityManager = entityFactory.getEntityManager();
+
+            std::set<common::EntityID> tileEntities;
+
+            auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
+            tileEntities.insert(entityID);
+
+            auto lowerLeft = worldPos - brushSize / 2.f;
+            auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
+            tileEntities.insert(lowerLeftEntityID);
+
+            auto topRight = worldPos + brushSize / 2.f;
+            auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
+            tileEntities.insert(topRightEntityID);
+
+            math::vec2 topLeft{worldPos.x - brushSize.x / 2.f, worldPos.y + brushSize.y / 2.f};
+            auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
+            tileEntities.insert(topLeftEntityID);
+
+            math::vec2 lowerRight{worldPos.x + brushSize.x / 2.f, worldPos.y - brushSize.y / 2.f};
+            auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
+            tileEntities.insert(lowerRightEntityID);
+
+            for (auto &&tileEntity: tileEntities) {
+                updateCanvasTile(entityManager, tileEntity, brushType, brushSize, color, worldPos);
+            }
+        }
+
+        common::EntityID
+        SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
+                                            const math::vec2 &pos) {
+            auto x = math::findBin(pos.x, mCanvasTileSizeX);
+            auto y = math::findBin(pos.y, mCanvasTileSizeY);
+            auto xy = math::packInt64(x, y);
+            auto &entityRegistry = entityFactory.getEntityManager();
+
+            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
+            if (missing) {
+                auto tilePosX = math::binPos(x, mCanvasTileSizeX);
+                auto tilePosY = math::binPos(y, mCanvasTileSizeY);
+
+                auto worldPos = math::vec3{tilePosX, tilePosY,
+                                           mZLayerManager.getZForEntity(component::EntityType::CANVAS)};
+                auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
+                                           static_cast<common::real32>(mCanvasTileSizeY)};
+
+                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
+                                                                 common::EP);
+                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
+                                                                  common::EP);
+                auto defaultColor = component::PixelRGBA{};
+                auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels, defaultColor);
+
+                common::real32 heading = 0.f;
+                std::string emptyTextureID;
+
+                // TODO: Should this be a canvas type?
+                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
+                                                                                                 tileSize,
+                                                                                                 heading,
+                                                                                                 emptyTextureID);
+
+                auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
+                auto &texture = entityRegistry.get<component::Texture>(entityID);
+                texture = loadedTexture;
+
+                mCanvasTileLookup.emplace(xy, entityID);
+            }
+
+            return mCanvasTileLookup.at(xy);
+        }
+
+        void
+        SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
+                                       common::EntityID entityID,
+                                       SceneManager::BrushType brushType,
+                                       const math::vec2 &brushSize,
+                                       const component::PixelRGBA &color,
+                                       const math::vec2 &worldPos) {
+            auto &canvasTexture = entityManager.get<component::Texture>(entityID);
+            // TODO: why the hell from Shape and not Placement?
+            auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
+
+            auto brushTexturePos = math::vec3{worldPos.x, worldPos.y, 0.f};
+            math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
+                                                           brushTexturePos);
+            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
+            // squares.
+            //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
+            //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
+            common::uint16 brushWidth;
+            common::uint16 brushHeight;
+            switch (brushType) {
+                case BrushType::PLAIN_RECTANGLE: {
+                    brushWidth = brushSize.x * mGameUnitToPixels;
+                    brushHeight = brushSize.y * mGameUnitToPixels;
+                    break;
+                }
+            }
+
+            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (brushWidth / 2.f));
+            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (brushHeight / 2.f));
+
+            auto bits = graphic::TextureManager::generateBits(brushWidth, brushHeight, color);
+            mTextureManager->blend(canvasTexture,
+                                   textureOffsetX,
+                                   textureOffsetY,
+                                   brushWidth,
+                                   brushHeight,
+                                   bits);
         }
 
         void
@@ -886,99 +1006,6 @@ namespace oni {
                                  const std::string &text) {
             auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
             return entityID;
-        }
-
-        void
-        SceneManager::paint(entities::EntityFactory &entityFactory,
-                            SceneManager::BrushType brushType,
-                            const math::vec2 &brushSize,
-                            const component::PixelRGBA &color,
-                            const math::vec2 &worldPos) {
-            auto &entityManager = entityFactory.getEntityManager();
-            auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
-            updateCanvasTile(entityManager, entityID, brushType, brushSize, color, worldPos);
-        }
-
-        common::EntityID
-        SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
-                                            const math::vec2 &pos) {
-            auto x = math::findBin(pos.x, mCanvasTileSizeX);
-            auto y = math::findBin(pos.y, mCanvasTileSizeY);
-            auto xy = math::packInt64(x, y);
-            auto &entityRegistry = entityFactory.getEntityManager();
-
-            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
-            if (missing) {
-                auto tilePosX = math::binPos(x, mCanvasTileSizeX);
-                auto tilePosY = math::binPos(y, mCanvasTileSizeY);
-
-                auto worldPos = math::vec3{tilePosX, tilePosY,
-                                           mZLayerManager.getZForEntity(component::EntityType::CANVAS)};
-                auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
-                                           static_cast<common::real32>(mCanvasTileSizeY)};
-
-                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                                 common::EP);
-                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                                  common::EP);
-                auto defaultColor = component::PixelRGBA{};
-                auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels, defaultColor);
-
-                common::real32 heading = 0.f;
-                std::string emptyTextureID;
-
-                // TODO: Should this be a canvas type?
-                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
-                                                                                                 tileSize,
-                                                                                                 heading,
-                                                                                                 emptyTextureID);
-
-                auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
-                auto &texture = entityRegistry.get<component::Texture>(entityID);
-                texture = loadedTexture;
-
-                mCanvasTileLookup.emplace(xy, entityID);
-            }
-
-            return mCanvasTileLookup.at(xy);
-        }
-
-        void
-        SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
-                                       common::EntityID entityID,
-                                       SceneManager::BrushType brushType,
-                                       const math::vec2 &brushSize,
-                                       const component::PixelRGBA &color,
-                                       const math::vec2 &worldPos) {
-            auto &canvasTexture = entityManager.get<component::Texture>(entityID);
-            // TODO: why the hell from Shape and not Placement?
-            auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
-
-            auto brushTexturePos = math::vec3{worldPos.x, worldPos.y, 0.f};
-            math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
-                                                           brushTexturePos);
-            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
-            // squares.
-            //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
-            //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
-            common::uint16 brushWidth;
-            common::uint16 brushHeight;
-            switch (brushType) {
-                case BrushType::PLAIN_RECTANGLE: {
-                    brushWidth = brushSize.x;
-                    brushHeight = brushSize.y;
-                    break;
-                }
-            }
-
-            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (brushWidth / 2.f));
-            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (brushHeight / 2.f));
-
-            auto bits = graphic::TextureManager::generateBits(brushWidth, brushHeight, color);
-            mTextureManager->blend(canvasTexture,
-                                   textureOffsetX,
-                                   textureOffsetY,
-                                   brushWidth, brushHeight, bits);
         }
 
     }

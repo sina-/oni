@@ -128,16 +128,16 @@ namespace oni {
 
             // Clip
             if (xOffset + width >= texture.width) {
-                width = texture.width - xOffset - 1;
+                width = texture.width - xOffset;
             }
             if (yOffset + height >= texture.height) {
-                height = texture.height - yOffset - 1;
+                height = texture.height - yOffset;
             }
-            assert(texture.width > xOffset + width);
-            assert(texture.height > yOffset + height);
+            assert(texture.width >= xOffset + width);
+            assert(texture.height >= yOffset + height);
 
-            xOffset = math::zeroClip(xOffset);
-            yOffset = math::zeroClip(yOffset);
+            math::zeroClip(xOffset);
+            math::zeroClip(yOffset);
 
             assert(xOffset >= 0);
             assert(yOffset >= 0);
@@ -154,25 +154,31 @@ namespace oni {
                               common::oniGLint width,
                               common::oniGLint height,
                               std::vector<common::uint8> &bits) {
-            assert(texture.width > xOffset);
-            assert(texture.height > yOffset);
+            if (xOffset < 0) {
+                width += xOffset;
+                xOffset = 0;
+            }
+            if (yOffset < 0) {
+                height += yOffset;
+                yOffset = 0;
+            }
+
+            math::clipUpper(xOffset, texture.width - 1);
+            math::clipUpper(yOffset, texture.height - 1);
 
             // Clip
             if (xOffset + width >= texture.width) {
-                width = texture.width - xOffset - 1;
+                width = texture.width - xOffset;
             }
             if (yOffset + height >= texture.height) {
-                height = texture.height - yOffset - 1;
+                height = texture.height - yOffset;
             }
 
-            xOffset = math::zeroClip(xOffset);
-            yOffset = math::zeroClip(yOffset);
+            assert(width >= 0);
+            assert(height >= 0);
 
-            assert(width > 0);
-            assert(height > 0);
-
-            assert(texture.width > xOffset + width);
-            assert(texture.height > yOffset + height);
+            assert(texture.width >= xOffset + width);
+            assert(texture.height >= yOffset + height);
 
             common::uint8 eip = 4; // Elements in pixel
             common::uint16 brushStride = width * eip;
@@ -192,15 +198,20 @@ namespace oni {
 
                     assert(m + a < texture.data.size());
 
-                    auto oldR = static_cast<common::uint16>(texture.data[m + r]);
-                    auto oldG = static_cast<common::uint16>(texture.data[m + g]);
-                    auto oldB = static_cast<common::uint16>(texture.data[m + b]);
-                    auto oldA = static_cast<common::uint16>(texture.data[m + a]);
+                    auto oldR = static_cast<common::uint16>(texture.data[m + r]) + bits[n + r];
+                    auto oldG = static_cast<common::uint16>(texture.data[m + g]) + bits[n + g];
+                    auto oldB = static_cast<common::uint16>(texture.data[m + b]) + bits[n + b];
+                    auto oldA = static_cast<common::uint16>(texture.data[m + a]) + bits[n + a];
 
-                    bits[n + r] = math::clipUpper(oldR + bits[n + r], 255);
-                    bits[n + g] = math::clipUpper(oldG + bits[n + g], 255);
-                    bits[n + b] = math::clipUpper(oldB + bits[n + b], 255);
-                    bits[n + a] = math::clipUpper(oldA + bits[n + a], 255);
+                    math::clipUpper(oldR, 255);
+                    math::clipUpper(oldG, 255);
+                    math::clipUpper(oldB, 255);
+                    math::clipUpper(oldA, 255);
+
+                    bits[n + r] = oldR;
+                    bits[n + g] = oldG;
+                    bits[n + b] = oldB;
+                    bits[n + a] = oldA;
 
                     texture.data[m + r] = bits[n + r];
                     texture.data[m + g] = bits[n + g];

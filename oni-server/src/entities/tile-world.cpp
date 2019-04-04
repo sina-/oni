@@ -63,12 +63,14 @@ namespace oni {
             TileWorld::~TileWorld() = default;
 
 
-            bool TileWorld::isInMap(common::uint64 packedIndex,
-                                    const std::map<common::uint64, common::EntityID> &map) const {
+            bool
+            TileWorld::isInMap(common::uint64 packedIndex,
+                               const std::map<common::uint64, common::EntityID> &map) const {
                 return map.find(packedIndex) != map.end();
             }
 
-            math::vec2 TileWorld::unpackCoordinates(common::uint64 coord) const {
+            math::vec2
+            TileWorld::unpackCoordinates(common::uint64 coord) const {
                 // TODO: This function is incorrect. Need to match it to packInt64 function if I ever use it
                 assert(false);
                 //auto x = static_cast<int>(coord >> 32) * mTileSizeX;
@@ -78,11 +80,13 @@ namespace oni {
                 return math::vec2{};
             }
 
-            void TileWorld::tick(const math::vec2 &position) {
+            void
+            TileWorld::tick(const math::vec2 &position) {
                 tickChunk(position);
             }
 
-            void TileWorld::tickChunk(const math::vec2 &position) {
+            void
+            TileWorld::tickChunk(const math::vec2 &position) {
                 auto chunkIndex = groundChunkPosToIndex(position);
 
                 // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
@@ -98,12 +102,15 @@ namespace oni {
                             // genChunkTexture(i, j);
                             // genChunkTiles(i, j);
                             // genChunkRoads(i, j);
+                             genChunkGroundSprite(i, j);
                         }
                     }
                 }
             }
 
-            void TileWorld::genChunkRoads(common::int64 chunkX, common::int64 chunkY) {
+            void
+            TileWorld::genChunkRoads(common::int64 chunkX,
+                                     common::int64 chunkY) {
                 /**
                  * 1. Check if there should be a road in this chunk
                  * 2. Find the neighbours connected by road to current chunk
@@ -113,8 +120,6 @@ namespace oni {
                  *    tile.
                  * 4. Connect starting tile to the ending tile.
                  */
-
-                genChunkGroundSprite(chunkX, chunkY);
 
                 component::ChunkIndex chunkIndex{chunkX, chunkY};
                 component::EdgeRoadTile edgeRoads{};
@@ -335,17 +340,19 @@ namespace oni {
                 chunk.edgeRoad = edgeRoads;
             }
 
-            void TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
-                                        const component::RoadTileIndex &roadTileIndex,
-                                        const std::string &texturePath) {
+            void
+            TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
+                                   const component::RoadTileIndex &roadTileIndex,
+                                   const std::string &texturePath) {
                 auto worldPos = roadTileIndexToPos(chunkIndex, roadTileIndex);
                 auto roadEntityID = genTexture(getTileSize(), worldPos, texturePath);
                 auto roadID = math::packInt64(roadTileIndex.x, roadTileIndex.y);
                 mRoadLookup.emplace(roadID, roadEntityID);
             }
 
-            void TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
-                                        const component::RoadTileIndex &roadTileIndex) {
+            void
+            TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
+                                   const component::RoadTileIndex &roadTileIndex) {
                 math::vec4 color{0.1f, 0.1f, 0.1f, 0.5f};
                 auto roadTileSize = getTileSize();
 
@@ -356,9 +363,10 @@ namespace oni {
                 mRoadLookup.emplace(packedIndex, roadID);
             }
 
-            void TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
-                                        component::RoadTileIndex startingRoadTileIndex,
-                                        component::RoadTileIndex endingRoadTileIndex) {
+            void
+            TileWorld::genTileRoad(const component::ChunkIndex &chunkIndex,
+                                   component::RoadTileIndex startingRoadTileIndex,
+                                   component::RoadTileIndex endingRoadTileIndex) {
                 // Fill between tiles as if we are sweeping the Manhattan distance between them.
                 while (startingRoadTileIndex.x < endingRoadTileIndex.x) {
                     genTileRoad(chunkIndex, startingRoadTileIndex);
@@ -391,8 +399,9 @@ namespace oni {
                 }
             }
 
-            void TileWorld::genChunkTiles(common::int64 xChunkIndex,
-                                          common::int64 yChunkIndex) {
+            void
+            TileWorld::genChunkTiles(common::int64 xChunkIndex,
+                                     common::int64 yChunkIndex) {
 
                 auto firstTileX = xChunkIndex * mChunkSizeX;
                 auto lastTileX = xChunkIndex * mChunkSizeX + mChunkSizeX;
@@ -424,18 +433,21 @@ namespace oni {
                 }
             }
 
-            bool TileWorld::shouldGenerateRoad(const component::ChunkIndex &chunkIndex) const {
+            bool
+            TileWorld::shouldGenerateRoad(const component::ChunkIndex &chunkIndex) const {
                 return chunkIndex.y == 0;
             }
 
-            math::vec3 TileWorld::groundChunkIndexToPos(const component::ChunkIndex &chunkIndex) const {
+            math::vec3
+            TileWorld::groundChunkIndexToPos(const component::ChunkIndex &chunkIndex) const {
                 return math::vec3{static_cast<common::real32>(chunkIndex.x * mChunkSizeX),
                                   static_cast<common::real32>(chunkIndex.y * mChunkSizeY),
                         // TODO: Should I keep Z as part of ChunkIndex maybe?
                                   mGroundZ};
             }
 
-            component::ChunkIndex TileWorld::groundChunkPosToIndex(const math::vec2 &position) const {
+            component::ChunkIndex
+            TileWorld::groundChunkPosToIndex(const math::vec2 &position) const {
                 auto x = floor(position.x / mChunkSizeX);
                 auto xIndex = static_cast<common::int64>(x);
                 auto y = floor(position.y / mChunkSizeY);
@@ -443,8 +455,9 @@ namespace oni {
                 return component::ChunkIndex{xIndex, yIndex};
             }
 
-            math::vec3 TileWorld::roadTileIndexToPos(const component::ChunkIndex &chunkIndex,
-                                                     component::RoadTileIndex roadTileIndex) const {
+            math::vec3
+            TileWorld::roadTileIndexToPos(const component::ChunkIndex &chunkIndex,
+                                          component::RoadTileIndex roadTileIndex) const {
 
                 auto chunkPos = groundChunkIndexToPos(chunkIndex);
                 auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndex.x * mTileSizeX),
@@ -453,8 +466,9 @@ namespace oni {
                 return pos;
             }
 
-            void TileWorld::createWall(const std::vector<component::WallTilePosition> &position,
-                                       const std::vector<component::TileIndex> &indices) {
+            void
+            TileWorld::createWall(const std::vector<component::WallTilePosition> &position,
+                                  const std::vector<component::TileIndex> &indices) {
                 assert(position.size() == indices.size());
 
                 size_t wallCount = indices.size();
@@ -531,7 +545,9 @@ namespace oni {
                 }
             }
 
-            void TileWorld::genChunkGroundTexture(common::int64 chunkX, common::int64 chunkY) {
+            void
+            TileWorld::genChunkGroundTexture(common::int64 chunkX,
+                                             common::int64 chunkY) {
                 auto chunkIndex = component::ChunkIndex{chunkX, chunkY};
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
 
@@ -540,7 +556,9 @@ namespace oni {
                 mChunkLookup.emplace(packed, chunkEntityID);
             }
 
-            void TileWorld::genChunkGroundSprite(common::int64 chunkX, common::int64 chunkY) {
+            void
+            TileWorld::genChunkGroundSprite(common::int64 chunkX,
+                                            common::int64 chunkY) {
                 auto chunkID = math::packInt64(chunkX, chunkY);
                 auto R = (std::rand() % 255) / 255.0f;
                 auto G = (std::rand() % 255) / 255.0f;
@@ -556,18 +574,22 @@ namespace oni {
 
             }
 
-            math::vec2 TileWorld::getTileSize() const {
+            math::vec2
+            TileWorld::getTileSize() const {
                 return math::vec2{static_cast<common::real32>(mTileSizeX),
                                   static_cast<common::real32 >(mTileSizeY)};
             }
 
-            math::vec2 TileWorld::getChunkSize() const {
+            math::vec2
+            TileWorld::getChunkSize() const {
                 return math::vec2{static_cast<common::real32>(mChunkSizeX),
                                   static_cast<common::real32 >(mChunkSizeY)};
             }
 
             common::EntityID
-            TileWorld::genSprite(math::vec4 &color, math::vec2 &tileSize, math::vec3 &worldPos) {
+            TileWorld::genSprite(math::vec4 &color,
+                                 math::vec2 &tileSize,
+                                 math::vec3 &worldPos) {
                 auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
                 auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, tileSize,
@@ -577,17 +599,21 @@ namespace oni {
                 return entityID;
             }
 
-            common::EntityID TileWorld::genTexture(const math::vec2 &size,
-                                                   const math::vec3 &worldPos,
-                                                   const std::string &path) {
+            common::EntityID
+            TileWorld::genTexture(const math::vec2 &size,
+                                  const math::vec3 &worldPos,
+                                  const std::string &path) {
                 auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
-                auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, size, heading, path);
+                auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, size, heading,
+                                                                                                path);
                 mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }
 
-            void TileWorld::genDemoRaceCourse() {
+            void
+            TileWorld::genDemoRaceCourse() {
+                return;
                 for (int i = -2; i <= 2; ++i) {
                     for (int j = -2; j <= 2; ++j) {
                         genChunkGroundTexture(i, j);

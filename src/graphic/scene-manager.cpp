@@ -301,7 +301,8 @@ namespace oni {
             // trails
             {
                 std::string textureID = "resources/images/smoke/1.png";
-                common::real32 halfSize = 0.5f;
+                common::real32 particleHalfSize = 0.35f;
+                common::real32 particleSize = particleHalfSize * 2;
                 common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
                 auto lock = clientEntityFactory.getEntityManager().scopedLock();
@@ -320,7 +321,7 @@ namespace oni {
 
                     if (trail.previousPos.empty()) {
                         auto trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
-                                currentPos, textureID, halfSize, false);
+                                currentPos, textureID, particleHalfSize, false);
                         continue;
                     }
 
@@ -330,9 +331,6 @@ namespace oni {
                         !math::intersects(previousPos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-
-                    // TODO: This should match what geometry shader uses.
-                    common::real32 particleSize = 0.4f;
 
                     common::real32 dX = currentPos.x - previousPos.x;
                     common::real32 dY = currentPos.y - previousPos.y;
@@ -362,7 +360,7 @@ namespace oni {
                         }
                         */
                             trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
-                                    pos, textureID, halfSize, false);
+                                    pos, textureID, particleHalfSize, false);
                             auto &particle = clientEntityFactory.getEntityManager().get<component::Particle>(
                                     trailEntity);
                             // TODO: I don't use any other velocity than the first one, should I just not store the rest?
@@ -420,13 +418,15 @@ namespace oni {
                     }
                 }
 
-                BrushType brushType = BrushType::PLAIN_RECTANGLE;
-                math::vec2 brushSize{0.5f, 0.5f};
+                {
+                    BrushType brushType = BrushType::PLAIN_RECTANGLE;
+                    math::vec2 brushSize{0.5f, 0.5f};
 
-                auto lock = clientEntityFactory.getEntityManager().scopedLock();
-                for (size_t i = 0; i < skidPosList.size(); ++i) {
-                    component::PixelRGBA color{0, 0, 0, skidOpacity[i / 2]};
-                    paint(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
+                    auto lock = clientEntityFactory.getEntityManager().scopedLock();
+                    for (size_t i = 0; i < skidPosList.size(); ++i) {
+                        component::PixelRGBA color{0, 0, 0, skidOpacity[i / 2]};
+                        paint(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
+                    }
                 }
             }
 
@@ -542,10 +542,7 @@ namespace oni {
             auto brushTexturePos = math::vec3{worldPos.x, worldPos.y, 0.f};
             math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
                                                            brushTexturePos);
-            // TODO: I can not generate geometrical shapes that are rotated. Until I have that I will stick to
-            // squares.
-            //auto width = static_cast<int>(carConfig.wheelRadius * mGameUnitToPixels * 2);
-            //auto height = static_cast<int>(carConfig.wheelWidth * mGameUnitToPixels / 2);
+
             common::uint16 brushWidth;
             common::uint16 brushHeight;
             switch (brushType) {
@@ -554,12 +551,15 @@ namespace oni {
                     brushHeight = brushSize.y * mGameUnitToPixels;
                     break;
                 }
+                default: {
+                    assert(false);
+                }
             }
+            auto bits = graphic::TextureManager::generateBits(brushWidth, brushHeight, color);
 
             auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (brushWidth / 2.f));
             auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (brushHeight / 2.f));
 
-            auto bits = graphic::TextureManager::generateBits(brushWidth, brushHeight, color);
             mTextureManager->blend(canvasTexture,
                                    textureOffsetX,
                                    textureOffsetY,

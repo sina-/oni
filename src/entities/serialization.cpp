@@ -139,9 +139,14 @@ namespace oni {
         }
 
         template<class Archive>
+        void serialize(Archive &archive, component::Image &image) {
+            archive(image.data, image.width, image.height);
+        }
+
+        template<class Archive>
         void serialize(Archive &archive, component::Texture &texture) {
-            archive(texture.width, texture.height, texture.textureID, texture.format, texture.type, texture.filePath,
-                    texture.uv, texture.data, texture.status);
+            archive(texture.image, texture.textureID, texture.format, texture.type, texture.filePath,
+                    texture.uv, texture.status);
         }
     }
 

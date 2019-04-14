@@ -52,17 +52,18 @@ namespace oni {
                   common::oniGLint height,
                   std::vector<common::uint8> &bits);
 
-            const component::Texture *
-            findOrLoad(const std::string &path);
+            const component::Image &
+            loadOrGetImage(const char *path);
 
-            static component::Texture
-            loadFromData(common::uint16 width,
-                         common::uint16 height,
-                         const common::TextureData &data);
+            const component::Texture &
+            loadOrGetTexture(const char *path);
+
+            component::Texture
+            loadFromImage(const component::Image &);
 
             // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random
             // data generations of all types
-            static common::TextureData
+            component::Image
             generateBits(common::uint16 width,
                          common::uint16 height,
                          const component::PixelRGBA &pixel);
@@ -76,17 +77,20 @@ namespace oni {
 
         private:
             bool
-            isLoaded(const std::string &path) const;
+            isTextureLoaded(const char *path) const;
 
-            const component::Texture *
-            load(const std::string &path);
+            bool
+            isImageLoaded(const char *path) const;
 
             static void
             bind(common::oniGLuint textureID);
 
+        private:
 
         private:
             std::unordered_map<std::string, component::Texture> mTextureMap{};
+            std::unordered_map<std::string, component::Image> mImageMap{};
+            const common::uint8 mElementsInRGBA{4};
         };
     }
 }

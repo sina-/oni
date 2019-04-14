@@ -38,7 +38,7 @@ namespace oni {
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 velocity{20.f};
+                common::real32 velocity{200.f};
 
                 for (auto &&entity: carView) {
                     auto clientLock = clientData.scopedLock();
@@ -85,7 +85,7 @@ namespace oni {
                     auto carHalfY = static_cast<common::real32>(carConfig.halfWidth);
                     auto offset = sqrt(carHalfX * carHalfX + carHalfY * carHalfY);
 
-                    math::vec2 size{0.3f, 0.1f};
+                    math::vec2 size{1.0f, 0.3f};
                     auto &carPos = carPlacement.position;
                     auto projectileOffset = sqrt(
                             size.x * size.x / 4.f + size.y * size.y / 4.f);
@@ -96,7 +96,7 @@ namespace oni {
                             carPos.y + (offset + projectileOffset + fudge) * sin(carPlacement.rotation),
                             carPos.z};
 
-                    std::string textureID = "resources/images/bullet/1.png";
+                    std::string textureID = "resources/images/bullet/2.png";
 
                     auto rocketEntity = entityFactory.createEntity<component::EntityType::SIMPLE_ROCKET>(pos,
                                                                                                          size,

@@ -23,7 +23,5 @@ namespace oni {
         typedef void oniGLvoid;
         typedef std::ptrdiff_t oniGLintptr;
         typedef std::ptrdiff_t oniGLsizeiptr;
-
-        using TextureData = std::vector<common::uint8>;
     }
 }

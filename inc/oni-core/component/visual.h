@@ -32,10 +32,14 @@ namespace oni {
             NEEDS_RELOADING_USING_DATA = 5,
         };
 
+        struct Image {
+            std::vector<common::uint8> data;
+            common::uint16 width{};
+            common::uint16 height{};
+        };
+
         struct Texture {
-            // TODO: This might need re ordering for better caching.
-            common::oniGLsizei width{0};
-            common::oniGLsizei height{0};
+            Image image;
             common::oniGLuint textureID{0};
             // GL_BGRA
             common::oniGLenum format{0x80E1};
@@ -44,7 +48,6 @@ namespace oni {
             std::string filePath{};
             std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},
                                          math::vec2{1.f, 1.f}, math::vec2{0.f, 1.f}};
-            std::vector<common::uint8> data{};
             TextureStatus status{TextureStatus::INVALID};
         };
 
@@ -112,5 +115,11 @@ namespace oni {
         };
 
         using ZLayer = std::unordered_map<component::ZLayerDef, common::real32>;
+
+        enum class BrushType : common::uint8 {
+            PLAIN_RECTANGLE,
+            EXPLOSION,
+        };
+
     }
 }

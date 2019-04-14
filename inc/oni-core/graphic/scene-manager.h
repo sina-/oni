@@ -70,6 +70,20 @@ namespace oni {
                       const component::Appearance &);
 
             void
+            splat(entities::EntityFactory &entityFactory,
+                  component::BrushType brushType,
+                  const math::vec2 &brushSize,
+                  const component::PixelRGBA &color,
+                  const math::vec2 &worldPos);
+
+            void
+            splat(entities::EntityFactory &entityFactory,
+                  const char *textureID,
+                  const math::vec2 &brushSize,
+                  const component::PixelRGBA &color,
+                  const math::vec2 &worldPos);
+
+            void
             lookAt(common::real32 x,
                    common::real32 y);
 
@@ -153,9 +167,6 @@ namespace oni {
                 common::EntityID lapTimeEntity{0};
                 common::EntityID lapBestTimeEntity{0};
             };
-            enum class BrushType : common::uint8 {
-                PLAIN_RECTANGLE,
-            };
 
         private:
             void
@@ -200,13 +211,6 @@ namespace oni {
                            const component::CarLapInfo &carLap,
                            const RaceInfoEntities &carLapTextEntities);
 
-            void
-            paint(entities::EntityFactory &,
-                  BrushType,
-                  const math::vec2 &brushSize,
-                  const component::PixelRGBA &,
-                  const math::vec2 &worldPos);
-
             common::EntityID
             getOrCreateCanvasTile(entities::EntityFactory &,
                                   const math::vec2 &pos);
@@ -214,7 +218,7 @@ namespace oni {
             void
             updateCanvasTile(entities::EntityManager &,
                              common::EntityID,
-                             BrushType,
+                             component::BrushType,
                              const math::vec2 &brushSize,
                              const component::PixelRGBA &,
                              const math::vec2 &worldPos);

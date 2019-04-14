@@ -19,39 +19,46 @@ namespace oni {
 
         Client::~Client() = default;
 
-        void Client::connect(const Address &address) {
+        void
+        Client::connect(const Address &address) {
             auto enetAddress = ENetAddress{};
             enet_address_set_host(&enetAddress, address.host.c_str());
             enetAddress.port = address.port;
 
             mEnetServer = enet_host_connect(mEnetHost, &enetAddress, 2, 0);
             if (!mEnetServer) {
-                throw std::runtime_error(
-                        "Failed to initiate connection to: " + address.host + ":" + std::to_string(address.port));
+                io::printl("Failed to initiate connection to: " + address.host + ":" + std::to_string(address.port));
+                assert(false);
             }
             ENetEvent event;
             if (enet_host_service(mEnetHost, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
                 io::printl("Connected to: " + address.host + ":" + std::to_string(address.port));
             } else {
-                throw std::runtime_error(
-                        "Failed connecting to: " + address.host + ":" + std::to_string(address.port));
+                io::printl("Failed connecting to: " + address.host + ":" + std::to_string(address.port));
+                assert(false);
             }
 
             requestSessionSetup();
         }
 
-        void Client::disconnect() {
+        void
+        Client::disconnect() {
             enet_peer_disconnect_now(mEnetServer, 0);
         }
 
-        void Client::pingServer() {
+        void
+        Client::pingServer() {
             auto type = PacketType::PING;
             auto data = std::string{};
 
             send(type, data, mEnetServer);
         }
 
-        void Client::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
+        void
+        Client::handle(ENetPeer *peer,
+                       enet_uint8 *data,
+                       size_t size,
+                       PacketType header) {
             auto peerID = getPeerID(*peer);
             assert(mPacketHandlers.find(header) != mPacketHandlers.end());
             switch (header) {
@@ -85,7 +92,8 @@ namespace oni {
             }
         }
 
-        void Client::sendMessage(std::string &&message) {
+        void
+        Client::sendMessage(std::string &&message) {
             auto type = PacketType::MESSAGE;
             auto messagePacket = DataPacket{std::move(message)};
             auto data = entities::serialize<DataPacket>(messagePacket);
@@ -93,21 +101,25 @@ namespace oni {
             send(type, data, mEnetServer);
         }
 
-        void Client::postConnectHook(const ENetEvent *event) {
+        void
+        Client::postConnectHook(const ENetEvent *event) {
         }
 
-        void Client::postDisconnectHook(const ENetEvent *event) {
+        void
+        Client::postDisconnectHook(const ENetEvent *event) {
 
         }
 
-        void Client::sendInput(const io::Input *input) {
+        void
+        Client::sendInput(const io::Input *input) {
             auto type = PacketType::CLIENT_INPUT;
             auto data = entities::serialize<io::Input>(*input);
 
             send(type, data, mEnetServer);
         }
 
-        void Client::requestSessionSetup() {
+        void
+        Client::requestSessionSetup() {
             auto type = PacketType::SETUP_SESSION;
             auto data = std::string{};
             send(type, data, mEnetServer);

@@ -21,25 +21,36 @@ namespace oni {
         public:
             AudioManager();
 
-            void tick(entities::EntityFactory &, const math::vec3 &playerPos);
+            void
+            tick(entities::EntityFactory &,
+                 const math::vec3 &playerPos);
 
             void
-            playCollisionSoundEffect(component::EntityType, component::EntityType, const component::CollisionPos &);
+            playCollisionSoundEffect(component::EntityType,
+                                     component::EntityType,
+                                     const component::CollisionPos &);
 
-            void kill(common::EntityID);
+            void
+            kill(common::EntityID);
 
-            void playOneShot(const component::SoundID &id, const math::vec3 &distance, common::real32 volume,
-                             common::real32 pitch);
+            void
+            playOneShot(const component::SoundID &id,
+                        const math::vec3 &distance,
+                        common::real32 volume,
+                        common::real32 pitch);
 
         private:
-            void loadSound(const component::SoundID &);
+            void
+            loadSound(const component::SoundID &);
 
         private:
             class FMODDeleter {
             public:
-                void operator()(FMOD::Sound *s) const;
+                void
+                operator()(FMOD::Sound *s) const;
 
-                void operator()(FMOD::System *sys) const;
+                void
+                operator()(FMOD::System *sys) const;
             };
 
             using SoundEntityID = std::string;
@@ -50,27 +61,45 @@ namespace oni {
             };
 
         private:
-            common::UInt16Pack createCollisionEffectID(component::EntityType, component::EntityType);
+            common::UInt16Pack
+            createCollisionEffectID(component::EntityType,
+                                    component::EntityType);
 
-            FMOD::Channel *createChannel(const component::SoundID &);
+            FMOD::Channel *
+            createChannel(const component::SoundID &);
 
-            SoundEntityID getID(const component::SoundID &, common::EntityID);
+            SoundEntityID
+            getID(const component::SoundID &,
+                  common::EntityID);
 
-            EntityChannel &getOrCreateLooping3DChannel(const component::SoundID &soundID, common::EntityID entityID);
+            EntityChannel &
+            getOrCreateLooping3DChannel(const component::SoundID &soundID,
+                                        common::EntityID entityID);
 
-            void preLoadCollisionSoundEffects();
+            void
+            preLoadCollisionSoundEffects();
 
-            void setPitch(FMOD::Channel &, common::real32 pitch);
+            void
+            setPitch(FMOD::Channel &,
+                     common::real32 pitch);
 
-            void set3DPos(FMOD::Channel &, const math::vec3 &pos, const math::vec3 &velocity);
+            void
+            set3DPos(FMOD::Channel &,
+                     const math::vec3 &pos,
+                     const math::vec3 &velocity);
 
-            bool isPaused(FMOD::Channel &);
+            bool
+            isPaused(FMOD::Channel &);
 
-            void unPause(FMOD::Channel &);
+            void
+            unPause(FMOD::Channel &);
 
-            void pause(FMOD::Channel &);
+            void
+            pause(FMOD::Channel &);
 
-            void setVolume(FMOD::Channel &, common::real32 volume);
+            void
+            setVolume(FMOD::Channel &,
+                      common::real32 volume);
 
         private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;

@@ -178,7 +178,8 @@ namespace oni {
 
             mParticleRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
-                    0,
+                    // TODO: If there are more than this number of textures to render in a draw call, it will fail
+                    common::maxNumTextureSamplers,
                     sizeof(component::ParticleVertex),
                     bufferStructures,
                     PrimitiveType::POINT
@@ -297,6 +298,28 @@ namespace oni {
 
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
+
+/*
+            math::vec4 red{1, 0, 0, 0.25};
+            math::vec4 green{0, 1, 0, 0.25};
+            math::vec4 blue{0, 0, 1, 1};
+
+            math::vec3 redPos{0, 0, 1};
+            math::vec3 greenPos{5, 5, 0.1f};
+            math::vec3 bluePos{0, 5, 0.0f};
+
+            static bool add = true;
+            if (add) {
+                math::vec2 size{10, 10};
+                common::real32 heading = 0;
+                clientEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
+
+                clientEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
+
+                clientEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
+                add = false;
+            }
+*/
 
             // trails
             {
@@ -419,13 +442,13 @@ namespace oni {
                 }
 
                 {
-                    BrushType brushType = BrushType::PLAIN_RECTANGLE;
-                    math::vec2 brushSize{0.5f, 0.5f};
+                    auto brushType = component::BrushType::PLAIN_RECTANGLE;
+                    auto brushSize = math::vec2{0.5f, 0.5f};
 
                     auto lock = clientEntityFactory.getEntityManager().scopedLock();
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
                         component::PixelRGBA color{0, 0, 0, skidOpacity[i / 2]};
-                        paint(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
+                        splat(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
                     }
                 }
             }
@@ -451,8 +474,8 @@ namespace oni {
         }
 
         void
-        SceneManager::paint(entities::EntityFactory &entityFactory,
-                            SceneManager::BrushType brushType,
+        SceneManager::splat(entities::EntityFactory &entityFactory,
+                            component::BrushType brushType,
                             const math::vec2 &brushSize,
                             const component::PixelRGBA &color,
                             const math::vec2 &worldPos) {
@@ -484,6 +507,15 @@ namespace oni {
             }
         }
 
+        void
+        SceneManager::splat(entities::EntityFactory &entityFactory,
+                            const char *textureID,
+                            const math::vec2 &brushSize,
+                            const component::PixelRGBA &color,
+                            const math::vec2 &worldPos) {
+
+        }
+
         common::EntityID
         SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
                                             const math::vec2 &pos) {
@@ -507,7 +539,7 @@ namespace oni {
                 auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
                                                                   common::EP);
                 auto defaultColor = component::PixelRGBA{};
-                auto data = graphic::TextureManager::generateBits(widthInPixels, heightInPixels, defaultColor);
+                auto image = mTextureManager->generateBits(widthInPixels, heightInPixels, defaultColor);
 
                 common::real32 heading = 0.f;
                 std::string emptyTextureID;
@@ -518,7 +550,7 @@ namespace oni {
                                                                                                  heading,
                                                                                                  emptyTextureID);
 
-                auto loadedTexture = mTextureManager->loadFromData(widthInPixels, heightInPixels, data);
+                auto loadedTexture = mTextureManager->loadFromImage(image);
                 auto &texture = entityRegistry.get<component::Texture>(entityID);
                 texture = loadedTexture;
 
@@ -531,7 +563,7 @@ namespace oni {
         void
         SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
                                        common::EntityID entityID,
-                                       SceneManager::BrushType brushType,
+                                       component::BrushType brushType,
                                        const math::vec2 &brushSize,
                                        const component::PixelRGBA &color,
                                        const math::vec2 &worldPos) {
@@ -546,7 +578,7 @@ namespace oni {
             common::uint16 brushWidth;
             common::uint16 brushHeight;
             switch (brushType) {
-                case BrushType::PLAIN_RECTANGLE: {
+                case component::BrushType::PLAIN_RECTANGLE: {
                     brushWidth = brushSize.x * mGameUnitToPixels;
                     brushHeight = brushSize.y * mGameUnitToPixels;
                     break;
@@ -555,7 +587,7 @@ namespace oni {
                     assert(false);
                 }
             }
-            auto bits = graphic::TextureManager::generateBits(brushWidth, brushHeight, color);
+            auto bits = mTextureManager->generateBits(brushWidth, brushHeight, color);
 
             auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (brushWidth / 2.f));
             auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (brushHeight / 2.f));
@@ -565,7 +597,7 @@ namespace oni {
                                    textureOffsetY,
                                    brushWidth,
                                    brushHeight,
-                                   bits);
+                                   bits.data);
         }
 
         void
@@ -619,15 +651,15 @@ namespace oni {
                     break;
                 }
                 case component::TextureStatus::NEEDS_LOADING_USING_PATH: {
-                    auto loadedTexture = mTextureManager->findOrLoad(texture.filePath);
-                    texture = *loadedTexture;
+                    const auto &loadedTexture = mTextureManager->loadOrGetTexture(texture.filePath.c_str());
+                    texture = loadedTexture;
                     break;
                 }
                 case component::TextureStatus::NEEDS_LOADING_USING_DATA: {
-                    assert(texture.width);
-                    assert(texture.height);
+                    assert(texture.image.width);
+                    assert(texture.image.height);
 
-                    auto loadedTexture = mTextureManager->loadFromData(texture.width, texture.height, texture.data);
+                    auto loadedTexture = mTextureManager->loadFromImage(texture.image);
                     texture = loadedTexture;
                     break;
                 }
@@ -705,6 +737,14 @@ namespace oni {
         SceneManager::renderClientSideEntities(entities::EntityManager &entityManager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
+
+            {
+                auto lock = entityManager.scopedLock();
+                begin(*mColorShader, *mColorRenderer, true, true, true);
+                renderColorSprites(entityManager, viewWidth, viewHeight);
+            }
+
+            end(*mColorShader, *mColorRenderer);
 
             {
                 auto lock = entityManager.scopedLock();

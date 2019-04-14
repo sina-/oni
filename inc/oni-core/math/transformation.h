@@ -27,19 +27,30 @@ namespace oni {
 
         public:
 
-            static component::Shape shapeTransformation(const math::mat4 &transformation,
-                                                         const component::Shape &shape);
+            static component::Shape
+            shapeTransformation(const math::mat4 &transformation,
+                                const component::Shape &shape);
 
-            static math::mat4 createTransformation(const math::vec3 &position, common::real32 rotation,
-                                                   const math::vec3 &scale);
+            static math::mat4
+            createTransformation(const math::vec3 &position,
+                                 common::real32 rotation,
+                                 const math::vec3 &scale);
 
-            static void worldToLocalTranslation(const math::vec3 &reference, math::vec3 &operand);
+            static void
+            worldToLocalTranslation(const math::vec3 &reference,
+                                    math::vec3 &operand);
 
-            static void localToWorldTranslation(const math::vec3 &reference, math::vec3 &operand);
+            static void
+            localToWorldTranslation(const math::vec3 &reference,
+                                    math::vec3 &operand);
 
-            static void localToWorldTranslation(const math::vec3 &reference, component::Shape &shape);
+            static void
+            localToWorldTranslation(const math::vec3 &reference,
+                                    component::Shape &shape);
 
-            static void localToTextureTranslation(common::real32 ratio, math::vec3 &operand);
+            static void
+            localToTextureTranslation(common::real32 ratio,
+                                      math::vec3 &operand);
 
             /**
              * Translates operand in the world coordinates to local coordinates of reference in texture coordinates.
@@ -52,8 +63,10 @@ namespace oni {
              * @param ratio each game unit is worth this many texture pixels
              * @param operand input as world coordinate and outputs as local texture coordinates
              */
-            static void worldToTextureCoordinate(const math::vec3 &reference, common::real32 ratio,
-                                                 math::vec3 &operand);
+            static void
+            worldToTextureCoordinate(const math::vec3 &reference,
+                                     common::real32 ratio,
+                                     math::vec3 &operand);
         };
     }
 }

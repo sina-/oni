@@ -16,61 +16,84 @@ namespace oni {
     // other compilation units such as server.cpp
     namespace network {
         template<class Archive>
-        void serialize(Archive &archive, DataPacket &packet) {
+        void
+        serialize(Archive &archive,
+                  DataPacket &packet) {
             archive(packet.data);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, EntityPacket &packet) {
+        void
+        serialize(Archive &archive,
+                  EntityPacket &packet) {
             archive(packet.entity);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, CollisionEventPacket &packet) {
+        void
+        serialize(Archive &archive,
+                  CollisionEventPacket &packet) {
             archive(packet.collidingEntity, packet.collisionPos);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, SoundPlayEventPacket &packet) {
+        void
+        serialize(Archive &archive,
+                  SoundPlayEventPacket &packet) {
             archive(packet.soundID, packet.pos);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, RocketLaunchEventPacket &packet) {
+        void
+        serialize(Archive &archive,
+                  RocketLaunchEventPacket &packet) {
             archive(packet.pos);
         }
     }
 
     namespace math {
         template<class Archive>
-        void serialize(Archive &archive, mat4 &mat4) {
+        void
+        serialize(Archive &archive,
+                  mat4 &mat4) {
             archive(mat4.columns);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, vec2 &vec2) {
+        void
+        serialize(Archive &archive,
+                  vec2 &vec2) {
             archive(vec2.x, vec2.y);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, vec3 &vec3) {
+        void
+        serialize(Archive &archive,
+                  vec3 &vec3) {
             archive(vec3.x, vec3.y, vec3.z);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, vec4 &vec4) {
+        void
+        serialize(Archive &archive,
+                  vec4 &vec4) {
             archive(vec4.x, vec4.y, vec4.z, vec4.w);
         }
     }
 
     namespace component {
         template<class Archive>
-        void serialize(Archive &archive, Particle &particle) {
-            archive(particle.age, particle.maxAge, particle.pos, particle.heading, particle.velocity, particle.halfSize);
+        void
+        serialize(Archive &archive,
+                  Particle &particle) {
+            archive(particle.age, particle.maxAge, particle.pos, particle.heading, particle.velocity,
+                    particle.halfSize);
         }
 
         template<class Archive>
-        void serialize(Archive &archive, CollidingEntity &collidingEntity) {
+        void
+        serialize(Archive &archive,
+                  CollidingEntity &collidingEntity) {
             archive(collidingEntity.entityA, collidingEntity.entityB);
         }
     }
@@ -78,13 +101,18 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
-        std::string serialize(entities::EntityManager &manager, component::SnapshotType snapshotType);
+        std::string
+        serialize(entities::EntityManager &manager,
+                  component::SnapshotType snapshotType);
 
-        void deserialize(oni::entities::EntityManager &manager, const std::string &data,
-                         component::SnapshotType snapshotType);
+        void
+        deserialize(oni::entities::EntityManager &manager,
+                    const std::string &data,
+                    component::SnapshotType snapshotType);
 
         template<class T>
-        T deserialize(const std::string &data) {
+        T
+        deserialize(const std::string &data) {
             std::istringstream storage;
             storage.str(data);
 
@@ -97,7 +125,9 @@ namespace oni {
         }
 
         template<class T>
-        T deserialize(const common::uint8 *data, size_t size) {
+        T
+        deserialize(const common::uint8 *data,
+                    size_t size) {
             std::istringstream storage;
             storage.str(std::string(reinterpret_cast<const char *>(data), size));
 
@@ -111,7 +141,8 @@ namespace oni {
 
 
         template<class T>
-        std::string serialize(const T &data) {
+        std::string
+        serialize(const T &data) {
             std::ostringstream storage;
             {
                 cereal::PortableBinaryOutputArchive output{storage};

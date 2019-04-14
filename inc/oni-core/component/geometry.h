@@ -38,24 +38,29 @@ namespace oni {
             math::vec3 vertexC{1.f, 1.f, 1.f};
             math::vec3 vertexD{1.f, 0.f, 1.f};
 
-            math::vec3 getPosition() const { return vertexA; }
+            math::vec3
+            getPosition() const { return vertexA; }
 
-            math::vec2 getSize() const {
+            math::vec2
+            getSize() const {
                 return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
             }
 
-            void setSizeFromOrigin(const math::vec2 &size) {
+            void
+            setSizeFromOrigin(const math::vec2 &size) {
                 vertexB.y = size.y;
                 vertexC.x = size.x;
                 vertexC.y = size.y;
                 vertexD.x = size.x;
             }
 
-            void moveToWorldCoordinates(const math::vec3 &worldPos) {
+            void
+            moveToWorldCoordinates(const math::vec3 &worldPos) {
                 math::Transformation::localToWorldTranslation(worldPos, *this);
             }
 
-            void centerAlign() {
+            void
+            centerAlign() {
                 math::vec2 halfSize{};
                 halfSize.x = (vertexD.x - vertexA.x) / 2;
                 halfSize.y = (vertexB.y - vertexA.y) / 2;
@@ -69,14 +74,17 @@ namespace oni {
                 vertexD.y -= halfSize.y;
             }
 
-            void setZ(common::real32 z) {
+            void
+            setZ(common::real32 z) {
                 vertexA.z = z;
                 vertexB.z = z;
                 vertexC.z = z;
                 vertexD.z = z;
             }
 
-            static Shape fromPositionAndSize(const math::vec3 &position, const math::vec2 &size) {
+            static Shape
+            fromPositionAndSize(const math::vec3 &position,
+                                const math::vec2 &size) {
                 return Shape{
                         math::vec3{position.x, position.y, position.z},
                         math::vec3{position.x, position.y + size.y, position.z},
@@ -84,7 +92,9 @@ namespace oni {
                         math::vec3{position.x + size.x, position.y, position.z}};
             }
 
-            static Shape fromSizeAndRotation(const math::vec3 &size, const common::real32 rotation) {
+            static Shape
+            fromSizeAndRotation(const math::vec3 &size,
+                                const common::real32 rotation) {
                 auto shape = Shape{
                         math::vec3{0, 0, size.z},
                         math::vec3{0, size.y, size.z},
@@ -217,7 +227,8 @@ namespace oni {
 
             Car() = default;
 
-            void applyConfiguration(const component::CarConfig &c) {
+            void
+            applyConfiguration(const component::CarConfig &c) {
                 inertia = c.mass * c.inertialScale;
                 wheelBase = c.cgToFrontAxle + c.cgToRearAxle;
                 axleWeightRatioFront = c.cgToRearAxle / wheelBase;

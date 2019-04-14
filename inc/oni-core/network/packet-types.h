@@ -10,7 +10,7 @@ namespace oni {
             MESSAGE = 2,
             SETUP_SESSION = 3,
             // TODO: Is this needed?
-            CAR_ENTITY_ID = 4,
+                    CAR_ENTITY_ID = 4,
             CLIENT_INPUT = 5,
 
             REGISTRY_REPLACE_ALL_ENTITIES = 6,

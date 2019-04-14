@@ -17,13 +17,17 @@ namespace oni {
 
             ~VertexArray();
 
-            void bindVAO() const;
+            void
+            bindVAO() const;
 
-            void unbindVAO() const;
+            void
+            unbindVAO() const;
 
-            void bindVBO() const;
+            void
+            bindVBO() const;
 
-            void unbindVBO() const;
+            void
+            unbindVBO() const;
 
         private:
             common::oniGLuint mArrayID{0};

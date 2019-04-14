@@ -5,7 +5,9 @@
 
 namespace oni {
     namespace graphic {
-        Shader::Shader(const std::string &vertPath, const std::string &geomPath, const std::string &fragPath) :
+        Shader::Shader(const std::string &vertPath,
+                       const std::string &geomPath,
+                       const std::string &fragPath) :
                 mVertPath(vertPath), mGeomPath(geomPath), mFragPath(fragPath) {
             auto program = glCreateProgram();
 
@@ -41,7 +43,7 @@ namespace oni {
 
             common::oniGLuint geometry = 0;
             bool doGeometryShading = !geomPath.empty();
-            if(doGeometryShading){
+            if (doGeometryShading) {
                 geometry = glCreateShader(GL_GEOMETRY_SHADER);
                 auto geomSource = read_file(mGeomPath);
                 auto geomSourceChar = geomSource.c_str();
@@ -55,7 +57,7 @@ namespace oni {
 
             glAttachShader(program, vertex);
             glAttachShader(program, fragment);
-            if(doGeometryShading){
+            if (doGeometryShading) {
                 glAttachShader(program, geometry);
             }
 
@@ -73,61 +75,82 @@ namespace oni {
             glDeleteProgram(mProgram);
         }
 
-        common::oniGLint Shader::getUniformLocation(const common::oniGLchar *name) const {
+        common::oniGLint
+        Shader::getUniformLocation(const common::oniGLchar *name) const {
             // TODO: Slow operation, need caching
             auto location = glGetUniformLocation(mProgram, name);
             assert(location != -1);
             return location;
         }
 
-        void Shader::enable() const {
+        void
+        Shader::enable() const {
             glUseProgram(mProgram);
         }
 
-        void Shader::disable() const {
+        void
+        Shader::disable() const {
             glUseProgram(0);
         }
 
-        common::oniGLuint Shader::getProgram() const {
+        common::oniGLuint
+        Shader::getProgram() const {
             return mProgram;
         }
 
-        void Shader::setUniform1f(const common::oniGLchar *name, oni::common::real32 value) const {
+        void
+        Shader::setUniform1f(const common::oniGLchar *name,
+                             oni::common::real32 value) const {
             glUniform1f(getUniformLocation(name), value);
         }
 
-        void Shader::setUniform2f(const common::oniGLchar *name, const math::vec2 &vector) const {
+        void
+        Shader::setUniform2f(const common::oniGLchar *name,
+                             const math::vec2 &vector) const {
             glUniform2f(getUniformLocation(name), vector.x, vector.y);
         }
 
-        void Shader::setUniform3f(const common::oniGLchar *name, const math::vec3 &vector) const {
+        void
+        Shader::setUniform3f(const common::oniGLchar *name,
+                             const math::vec3 &vector) const {
             glUniform3f(getUniformLocation(name), vector.x, vector.y, vector.z);
         }
 
-        void Shader::setUniform4f(const common::oniGLchar *name, const math::vec4 &vector) const {
+        void
+        Shader::setUniform4f(const common::oniGLchar *name,
+                             const math::vec4 &vector) const {
             glUniform4f(getUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
         }
 
-        void Shader::setUniform1i(const common::oniGLchar *name, common::int32 value) const {
+        void
+        Shader::setUniform1i(const common::oniGLchar *name,
+                             common::int32 value) const {
             glUniform1i(getUniformLocation(name), value);
         }
 
-        void Shader::setUniformMat4(const common::oniGLchar *name, const math::mat4 &matrix) const {
+        void
+        Shader::setUniformMat4(const common::oniGLchar *name,
+                               const math::mat4 &matrix) const {
             glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, matrix.getArray());
         }
 
-        void Shader::setUniformiv(const common::oniGLchar *name, const std::vector<GLint> &textureIDs) const {
+        void
+        Shader::setUniformiv(const common::oniGLchar *name,
+                             const std::vector<GLint> &textureIDs) const {
             glUniform1iv(getUniformLocation(name), static_cast<common::oniGLsizei>(textureIDs.size()),
                          textureIDs.data());
         }
 
         void
-        Shader::setUniformuiv(const common::oniGLchar *name, const std::vector<common::oniGLuint> &textureIDs) const {
+        Shader::setUniformuiv(const common::oniGLchar *name,
+                              const std::vector<common::oniGLuint> &textureIDs) const {
             glUniform1uiv(getUniformLocation(name), static_cast<common::oniGLsizei>(textureIDs.size()),
                           textureIDs.data());
         }
 
-        void Shader::setUniformui(const common::oniGLchar *name, common::oniGLuint textureID) const {
+        void
+        Shader::setUniformui(const common::oniGLchar *name,
+                             common::oniGLuint textureID) const {
             glUniform1ui(getUniformLocation(name), textureID);
         }
 

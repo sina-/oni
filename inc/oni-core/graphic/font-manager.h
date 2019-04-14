@@ -25,32 +25,45 @@ namespace oni {
     namespace graphic {
         class FontManager {
         public:
-            FontManager(std::string font, common::uint8 size, common::real32 gameWidth, common::real32 gameHeight);
+            FontManager(std::string font,
+                        common::uint8 size,
+                        common::real32 gameWidth,
+                        common::real32 gameHeight);
 
             ~FontManager();
 
             FontManager(const FontManager &) = delete;
 
-            FontManager &operator=(FontManager &) = delete;
+            FontManager &
+            operator=(FontManager &) = delete;
 
-            common::EntityID createTextFromString(entities::EntityFactory &,
-                                                  const std::string &text,
-                                                  const math::vec3 &position);
+            common::EntityID
+            createTextFromString(entities::EntityFactory &,
+                                 const std::string &text,
+                                 const math::vec3 &position);
 
-            void updateText(const std::string &textContent, component::Text &text);
+            void
+            updateText(const std::string &textContent,
+                       component::Text &text);
 
-            size_t getAtlasWidth() const;
+            size_t
+            getAtlasWidth() const;
 
-            size_t getAtlasHeight() const;
+            size_t
+            getAtlasHeight() const;
 
-            unsigned char *getAtlasData() const;
+            unsigned char *
+            getAtlasData() const;
 
-            common::oniGLuint getTextureID() const;
+            common::oniGLuint
+            getTextureID() const;
 
         private:
-            const ftgl::texture_glyph_t *findGlyph(const char &character) const;
+            const ftgl::texture_glyph_t *
+            findGlyph(const char &character) const;
 
-            void assignGlyphs(component::Text &);
+            void
+            assignGlyphs(component::Text &);
 
         private:
             // Wrap atlas and font with unique_ptr and pass the custom deleter

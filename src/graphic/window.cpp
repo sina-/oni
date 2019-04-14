@@ -13,7 +13,9 @@
 namespace oni {
     namespace graphic {
 
-        Window::Window(std::string &&title, common::int32 gameWidth, common::int32 gameHeight) :
+        Window::Window(std::string &&title,
+                       common::int32 gameWidth,
+                       common::int32 gameHeight) :
                 mTitle{std::move(title)},
                 mGameWidth{gameWidth},
                 mGameHeight{gameHeight},
@@ -97,13 +99,14 @@ namespace oni {
             mWindow = nullptr;
         }
 
-        void Window::messageCallback(GLenum source,
-                                     GLenum type,
-                                     GLuint id,
-                                     GLenum severity,
-                                     GLsizei length,
-                                     const GLchar *message,
-                                     const void *userParam) {
+        void
+        Window::messageCallback(GLenum source,
+                                GLenum type,
+                                GLuint id,
+                                GLenum severity,
+                                GLsizei length,
+                                const GLchar *message,
+                                const void *userParam) {
             UNUSED(id);
             UNUSED(length);
             UNUSED(userParam);
@@ -118,7 +121,8 @@ namespace oni {
         }
 
 
-        void Window::tick(io::Input &input) {
+        void
+        Window::tick(io::Input &input) {
             glfwPollEvents();
 
             for (auto key: mKeysPressed) {
@@ -131,17 +135,22 @@ namespace oni {
             mKeysReleased.clear();
         }
 
-        bool Window::closed() const {
+        bool
+        Window::closed() const {
             return glfwWindowShouldClose(mWindow) == 1;
         }
 
-        void Window::clear() const {
+        void
+        Window::clear() const {
             glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
             glClearDepth(1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        void Window::windowResizeCallback(GLFWwindow *window, common::int32 width, common::int32 height) {
+        void
+        Window::windowResizeCallback(GLFWwindow *window,
+                                     common::int32 width,
+                                     common::int32 height) {
             auto thiz = getThisFromGLFWWindow(window);
             TwWindowSize(width, height);
 
@@ -150,8 +159,12 @@ namespace oni {
             thiz->setWidth(width);
         }
 
-        void Window::keyCallback(GLFWwindow *window, common::int32 key, common::int32 scancode, common::int32 action,
-                                 common::int32 mods) {
+        void
+        Window::keyCallback(GLFWwindow *window,
+                            common::int32 key,
+                            common::int32 scancode,
+                            common::int32 action,
+                            common::int32 mods) {
             UNUSED(scancode);
             UNUSED(mods);
             auto thiz = getThisFromGLFWWindow(window);
@@ -162,7 +175,10 @@ namespace oni {
         }
 
         void
-        Window::mouseCallback(GLFWwindow *window, common::int32 button, common::int32 action, common::int32 mods) {
+        Window::mouseCallback(GLFWwindow *window,
+                              common::int32 button,
+                              common::int32 action,
+                              common::int32 mods) {
             UNUSED(mods);
             TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);
@@ -172,18 +188,23 @@ namespace oni {
                 thiz->setMouseButton(GLFW_KEY_UNKNOWN);
         }
 
-        void Window::cursorPosCallback(GLFWwindow *window, double x, double y) {
+        void
+        Window::cursorPosCallback(GLFWwindow *window,
+                                  double x,
+                                  double y) {
             TwEventMousePosGLFW(x, y);
             auto thiz = getThisFromGLFWWindow(window);
             thiz->setCursorX(x);
             thiz->setCursorY(y);
         }
 
-        void Window::display() {
+        void
+        Window::display() {
             glfwSwapBuffers(mWindow);
         }
 
-        Window *Window::getThisFromGLFWWindow(GLFWwindow *window) {
+        Window *
+        Window::getThisFromGLFWWindow(GLFWwindow *window) {
             return reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
         }
 

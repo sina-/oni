@@ -34,50 +34,74 @@ namespace oni {
             /**
              * Preparation work, if needed.
              */
-            void begin();
+            void
+            begin();
 
-            void submit(const component::Shape &, const component::Appearance &);
+            void
+            submit(const component::Shape &,
+                   const component::Appearance &);
 
-            void submit(const component::Particle &, const component::Appearance &);
+            void
+            submit(const component::Particle &,
+                   const component::Appearance &);
 
-            void submit(const component::Particle &, const component::Texture &);
+            void
+            submit(const component::Particle &,
+                   const component::Texture &);
 
-            void submit(const component::Shape &, const component::Texture &);
+            void
+            submit(const component::Shape &,
+                   const component::Texture &);
 
-            void submit(const component::Text &);
+            void
+            submit(const component::Text &);
 
             /**
              * Draw the element(s).
              */
-            void flush();
+            void
+            flush();
 
             /**
              * Clean up, if needed.
              */
-            void end();
+            void
+            end();
 
         private:
-            virtual void _begin() = 0;
+            virtual void
+            _begin() = 0;
 
-            virtual void _submit(const component::Shape &, const component::Appearance &) = 0;
+            virtual void
+            _submit(const component::Shape &,
+                    const component::Appearance &) = 0;
 
-            virtual void _submit(const component::Particle &, const component::Appearance &) = 0;
+            virtual void
+            _submit(const component::Particle &,
+                    const component::Appearance &) = 0;
 
-            virtual void _submit(const component::Particle &, const component::Texture &) = 0;
+            virtual void
+            _submit(const component::Particle &,
+                    const component::Texture &) = 0;
 
-            virtual void _submit(const component::Shape &, const component::Texture &) = 0;
+            virtual void
+            _submit(const component::Shape &,
+                    const component::Texture &) = 0;
 
-            virtual void _submit(const component::Text &) = 0;
+            virtual void
+            _submit(const component::Text &) = 0;
 
             /**
              * Draw the element(s).
              */
-            virtual void _flush() = 0;
+            virtual void
+            _flush() = 0;
 
             /**
              * Clean up, if needed.
              */
-            virtual void _end() = 0;
+            virtual void
+            _end() = 0;
         };
     }
 }

@@ -11,21 +11,29 @@ namespace oni {
             Input();
 
             template<class Archive>
-            void serialize(Archive &archive) {
+            void
+            serialize(Archive &archive) {
                 archive(mKeysPressed, mKeysReleased);
             }
 
-            void update(component::oniKeyPress keyPressed, component::oniKeyPress keyReleased);
+            void
+            update(component::oniKeyPress keyPressed,
+                   component::oniKeyPress keyReleased);
 
-            bool isPressed(component::oniKeyPress key) const;
+            bool
+            isPressed(component::oniKeyPress key) const;
 
-            bool isReleased(component::oniKeyPress key) const;
+            bool
+            isReleased(component::oniKeyPress key) const;
 
-            void setPressed(component::oniKeyPress key);
+            void
+            setPressed(component::oniKeyPress key);
 
-            void setReleased(component::oniKeyPress key);
+            void
+            setReleased(component::oniKeyPress key);
 
-            void reset();
+            void
+            reset();
 
         private:
             std::vector<component::oniKeyPress> mKeysPressed;

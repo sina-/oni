@@ -13,21 +13,27 @@ namespace oni {
          */
         class Buffer {
         public:
-            Buffer(const std::vector<common::oniGLfloat> &data, common::oniGLsizeiptr dataSize, common::oniGLenum usage);
+            Buffer(const std::vector<common::oniGLfloat> &data,
+                   common::oniGLsizeiptr dataSize,
+                   common::oniGLenum usage);
 
             ~Buffer();
 
-            Buffer &operator=(const Buffer &) = delete;
+            Buffer &
+            operator=(const Buffer &) = delete;
 
-            Buffer &operator=(Buffer &) = delete;
+            Buffer &
+            operator=(Buffer &) = delete;
 
             Buffer(const Buffer &) = delete;
 
             Buffer(Buffer &) = delete;
 
-            void bind();
+            void
+            bind();
 
-            void unbind();
+            void
+            unbind();
 
         private:
             common::oniGLuint mBufferID;

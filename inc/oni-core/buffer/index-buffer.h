@@ -8,15 +8,18 @@ namespace oni {
     namespace buffer {
         class IndexBuffer {
         public:
-            explicit IndexBuffer(common::oniGLuint count, common::oniGLsizei size = 1);
+            explicit IndexBuffer(common::oniGLuint count,
+                                 common::oniGLsizei size = 1);
 
             IndexBuffer() = default;
 
             ~IndexBuffer();
 
-            void bind() const;
+            void
+            bind() const;
 
-            void unbind() const;
+            void
+            unbind() const;
 
         private:
             common::oniGLuint mBufferID;

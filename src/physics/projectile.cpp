@@ -16,9 +16,10 @@ namespace oni {
 
         Projectile::~Projectile() = default;
 
-        void Projectile::tick(entities::EntityFactory &entityFactory,
-                              entities::ClientDataManager &clientData,
-                              common::real64 tickTime) {
+        void
+        Projectile::tick(entities::EntityFactory &entityFactory,
+                         entities::ClientDataManager &clientData,
+                         common::real64 tickTime) {
             // Update cool-downs
             {
                 auto view = entityFactory.getEntityManager().createViewWithLock<component::GunCoolDown>();
@@ -59,12 +60,13 @@ namespace oni {
             }
         }
 
-        void Projectile::fireRocket(entities::EntityFactory &entityFactory,
-                                    const common::real32 velocity,
-                                    const component::Placement &carPlacement,
-                                    const component::CarConfig &carConfig,
-                                    const common::CarSimDouble &heading,
-                                    const component::EntityAttachment &attachments) {
+        void
+        Projectile::fireRocket(entities::EntityFactory &entityFactory,
+                               const common::real32 velocity,
+                               const component::Placement &carPlacement,
+                               const component::CarConfig &carConfig,
+                               const common::CarSimDouble &heading,
+                               const component::EntityAttachment &attachments) {
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 if (attachments.entityTypes[i] == component::EntityType::VEHICLE_GUN) {
                     auto &gunCoolDown = entityFactory.getEntityManager().get<component::GunCoolDown>(

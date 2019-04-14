@@ -21,17 +21,21 @@ namespace oni {
     namespace gameplay {
         class LapTracker {
         public:
-            explicit LapTracker(entities::EntityManager &entityManager, const math::ZLayerManager&);
+            explicit LapTracker(entities::EntityManager &entityManager,
+                                const math::ZLayerManager &);
 
             ~LapTracker();
 
-            void tick();
+            void
+            tick();
 
         private:
-            void resetPlayerCheckpoints(common::EntityID carEntity);
+            void
+            resetPlayerCheckpoints(common::EntityID carEntity);
 
             // TODO: Decide what to track players with, PeerID? Car? EntityID?
-            void addNewPlayer(common::EntityID carEntity);
+            void
+            addNewPlayer(common::EntityID carEntity);
 
         private:
             entities::EntityManager &mEntityManager;
@@ -40,7 +44,7 @@ namespace oni {
             std::map<common::EntityID, std::chrono::seconds> mBestLaps{};
             std::map<common::EntityID, utils::Timer> mTimers{};
 
-            const math::ZLayerManager& mZLayerManager;
+            const math::ZLayerManager &mZLayerManager;
         };
     }
 }

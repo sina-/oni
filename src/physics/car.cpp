@@ -54,7 +54,8 @@ namespace oni {
                     math::clip(-config.cornerStiffnessFront * slipAngleFront, -tireGripFront, tireGripFront) *
                     axleWeightFront;
             CarSimDouble frictionForceRearLocalY =
-                    math::clip(-config.cornerStiffnessRear * slipAngleRear, -tireGripRear, tireGripRear) * axleWeightRear;
+                    math::clip(-config.cornerStiffnessRear * slipAngleRear, -tireGripRear, tireGripRear) *
+                    axleWeightRear;
 
             //  Get amount of brake/throttle from our inputs
             CarSimDouble brake = std::min(inputs.brake * config.brakeForce + inputs.eBrake * config.eBrakeForce,

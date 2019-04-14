@@ -12,7 +12,9 @@
 namespace oni {
     namespace graphic {
 
-        FontManager::FontManager(std::string font, unsigned char size, common::real32 gameWidth,
+        FontManager::FontManager(std::string font,
+                                 unsigned char size,
+                                 common::real32 gameWidth,
                                  common::real32 gameHeight)
 //                m_FTAtlas(, ftgl::texture_atlas_delete),
 //                m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/Vera.ttf"),
@@ -40,7 +42,8 @@ namespace oni {
             ftgl::texture_font_delete(m_FTFont);
         }
 
-        const ftgl::texture_glyph_t *FontManager::findGlyph(const char &character) const {
+        const ftgl::texture_glyph_t *
+        FontManager::findGlyph(const char &character) const {
             auto glyph = ftgl::texture_font_find_glyph(m_FTFont, &character);
 
             // Make sure the character is pre-loaded and valid.
@@ -48,23 +51,28 @@ namespace oni {
             return glyph;
         }
 
-        size_t FontManager::getAtlasWidth() const {
+        size_t
+        FontManager::getAtlasWidth() const {
             return m_FTAtlas->width;
         }
 
-        size_t FontManager::getAtlasHeight() const {
+        size_t
+        FontManager::getAtlasHeight() const {
             return m_FTAtlas->height;
         }
 
-        unsigned char *FontManager::getAtlasData() const {
+        unsigned char *
+        FontManager::getAtlasData() const {
             return m_FTAtlas->data;
         }
 
-        GLuint FontManager::getTextureID() const { return m_FTAtlas->id; }
+        GLuint
+        FontManager::getTextureID() const { return m_FTAtlas->id; }
 
-        common::EntityID FontManager::createTextFromString(entities::EntityFactory &entityFactory,
-                                                           const std::string &text,
-                                                           const math::vec3 &position) {
+        common::EntityID
+        FontManager::createTextFromString(entities::EntityFactory &entityFactory,
+                                          const std::string &text,
+                                          const math::vec3 &position) {
             auto &entityRegistry = entityFactory.getEntityManager();
             auto lock = entityRegistry.scopedLock();
             auto entityID = entityFactory.createEntity<component::EntityType::TEXT>(position, text);
@@ -74,7 +82,9 @@ namespace oni {
             return entityID;
         }
 
-        void FontManager::updateText(const std::string &textContent, component::Text &text) {
+        void
+        FontManager::updateText(const std::string &textContent,
+                                component::Text &text) {
             // TODO: This could be optimized to only update part of text that is actually different.
             text.textContent = textContent;
             text.height.clear();
@@ -87,7 +97,8 @@ namespace oni {
             assignGlyphs(text);
         }
 
-        void FontManager::assignGlyphs(component::Text &text) {
+        void
+        FontManager::assignGlyphs(component::Text &text) {
             for (auto &&character: text.textContent) {
                 auto glyph = findGlyph(character);
                 text.height.emplace_back(glyph->height);

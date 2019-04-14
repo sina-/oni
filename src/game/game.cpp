@@ -11,7 +11,9 @@ namespace oni {
 
         Game::Game() = default;
 
-        Game::Game(common::uint8 simRate, common::uint8 pollRate, common::uint8 renderRate) :
+        Game::Game(common::uint8 simRate,
+                   common::uint8 pollRate,
+                   common::uint8 renderRate) :
                 mSimMS(1.0f / simRate),
                 mPollMS(1.0f / pollRate),
                 mRenderMS(1.0f / renderRate) {
@@ -19,7 +21,8 @@ namespace oni {
 
         Game::~Game() = default;
 
-        void Game::run() {
+        void
+        Game::run() {
             std::thread pollThread(&Game::poll, this);
             std::thread simThread(&Game::sim, this);
             std::thread renderThread(&Game::render, this);
@@ -36,7 +39,8 @@ namespace oni {
             renderThread.join();
         }
 
-        void Game::sim() {
+        void
+        Game::sim() {
             utils::Timer simTimer{};
             utils::Timer loopTimer{};
             common::uint16 updateCounter{0};
@@ -75,7 +79,8 @@ namespace oni {
             }
         }
 
-        void Game::poll() {
+        void
+        Game::poll() {
             utils::Timer pollTimer{};
             utils::Timer loopTimer{};
             common::uint16 updateCounter{0};
@@ -114,7 +119,8 @@ namespace oni {
             }
         }
 
-        void Game::render() {
+        void
+        Game::render() {
             utils::Timer renderTimer{};
             utils::Timer loopTimer{};
             common::uint16 updateCounter{0};
@@ -158,15 +164,18 @@ namespace oni {
             }
         }
 
-        void Game::display() {
+        void
+        Game::display() {
             _display();
         }
 
-        common::real32 Game::getTickFrequency() {
+        common::real32
+        Game::getTickFrequency() {
             return mSimMS;
         }
 
-        void Game::initRenderer() {
+        void
+        Game::initRenderer() {
         }
 
     }

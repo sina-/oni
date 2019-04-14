@@ -26,7 +26,6 @@ namespace oni {
             WORLD_CHUNK,
 
 
-
             LAST
         };
 

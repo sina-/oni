@@ -49,43 +49,52 @@ namespace oni {
             // I could also just make sure the one function that deletes stuff also gets a reference to b2World and
             // make sure things are deleted. So the bigger decision is to make sure all that refactoring is worth
             // the cost really.
-            b2World *getPhysicsWorld();
+            b2World *
+            getPhysicsWorld();
 
-            void tick(entities::EntityFactory &entityFactory,
-                      entities::ClientDataManager &clientData,
-                      common::real64 tickTime);
-
-        private:
-            void handleRocketCollision(entities::EntityFactory &,
-                                       common::EntityID,
-                                       component::PhysicalProperties &,
-                                       component::Placement &);
-
-            void handleVehicleCollision(entities::EntityFactory &,
-                                        common::EntityID,
-                                        component::PhysicalProperties &,
-                                        component::Placement &);
-
-            void handleRaceCarCollision(entities::EntityFactory &,
-                                        common::EntityID,
-                                        component::PhysicalProperties &,
-                                        component::Placement &);
-
-            void handleCollision(entities::EntityFactory &,
-                                 common::EntityID,
-                                 component::PhysicalProperties &,
-                                 component::Placement &);
-
-            bool isColliding(b2Body *);
+            void
+            tick(entities::EntityFactory &entityFactory,
+                 entities::ClientDataManager &clientData,
+                 common::real64 tickTime);
 
         private:
-            void updateTransforms(entities::EntityManager &manager,
+            void
+            handleRocketCollision(entities::EntityFactory &,
+                                  common::EntityID,
+                                  component::PhysicalProperties &,
+                                  component::Placement &);
+
+            void
+            handleVehicleCollision(entities::EntityFactory &,
+                                   common::EntityID,
+                                   component::PhysicalProperties &,
+                                   component::Placement &);
+
+            void
+            handleRaceCarCollision(entities::EntityFactory &,
+                                   common::EntityID,
+                                   component::PhysicalProperties &,
+                                   component::Placement &);
+
+            void
+            handleCollision(entities::EntityFactory &,
+                            common::EntityID,
+                            component::PhysicalProperties &,
+                            component::Placement &);
+
+            bool
+            isColliding(b2Body *);
+
+        private:
+            void
+            updateTransforms(entities::EntityManager &manager,
+                             common::EntityID entity,
+                             const component::Placement &placement);
+
+            void
+            updateTransformParent(entities::EntityManager &manager,
                                   common::EntityID entity,
-                                  const component::Placement &placement);
-
-            void updateTransformParent(entities::EntityManager &manager,
-                                       common::EntityID entity,
-                                       const component::TransformParent &transformParent);
+                                  const component::TransformParent &transformParent);
 
 
         private:

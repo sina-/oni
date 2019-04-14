@@ -47,47 +47,70 @@ namespace oni {
 
                 ServerGame(const ServerGame &) = delete;
 
-                ServerGame &operator=(ServerGame &) = delete;
+                ServerGame &
+                operator=(ServerGame &) = delete;
 
-                bool shouldTerminate() override;
+                bool
+                shouldTerminate() override;
 
-                void loadLevel();
+                void
+                loadLevel();
 
             protected:
-                void _sim(oni::common::real64 simTime) override;
+                void
+                _sim(oni::common::real64 simTime) override;
 
-                void _render(oni::common::real64 simTime) override;
+                void
+                _render(oni::common::real64 simTime) override;
 
-                void _display() override;
+                void
+                _display() override;
 
-                void _poll() override;
+                void
+                _poll() override;
 
-                void showFPS(oni::common::int16 fps) override;
+                void
+                showFPS(oni::common::int16 fps) override;
 
-                void showSPS(oni::common::int16 tps) override;
+                void
+                showSPS(oni::common::int16 tps) override;
 
-                void showPPS(oni::common::int16 pps) override;
+                void
+                showPPS(oni::common::int16 pps) override;
 
-                void showRET(oni::common::int16 ret) override;
+                void
+                showRET(oni::common::int16 ret) override;
 
-                void showPET(oni::common::int16 pet) override;
+                void
+                showPET(oni::common::int16 pet) override;
 
-                void showSET(oni::common::int16 set) override;
+                void
+                showSET(oni::common::int16 set) override;
 
             private:
-                void setupSessionPacketHandler(const oni::common::PeerID &, const std::string &);
+                void
+                setupSessionPacketHandler(const oni::common::PeerID &,
+                                          const std::string &);
 
-                void clientInputPacketHandler(const oni::common::PeerID &, const std::string &);
+                void
+                clientInputPacketHandler(const oni::common::PeerID &,
+                                         const std::string &);
 
-                void zLayerPacketHandler(const oni::common::PeerID &, const std::string &);
+                void
+                zLayerPacketHandler(const oni::common::PeerID &,
+                                    const std::string &);
 
-                void postDisconnectHook(const oni::common::PeerID &);
+                void
+                postDisconnectHook(const oni::common::PeerID &);
 
-                EntityID spawnRaceCar();
+                EntityID
+                spawnRaceCar();
 
-                void removeRaceCar(EntityID carEntityID);
+                void
+                removeRaceCar(EntityID carEntityID);
 
-                EntityID spawnTruck();
+                EntityID
+                spawnTruck();
 
             private:
                 std::unique_ptr<oni::entities::EntityFactory> mEntityFactory{};

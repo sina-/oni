@@ -56,7 +56,8 @@ namespace oni {
 
             ServerGame::~ServerGame() = default;
 
-            void ServerGame::loadLevel() {
+            void
+            ServerGame::loadLevel() {
                 mTruckEntity = spawnTruck();
 
                 mTileWorld->genDemoRaceCourse();
@@ -81,7 +82,9 @@ namespace oni {
             }*/
             }
 
-            void ServerGame::setupSessionPacketHandler(const common::PeerID &clientID, const std::string &data) {
+            void
+            ServerGame::setupSessionPacketHandler(const common::PeerID &clientID,
+                                                  const std::string &data) {
                 auto carEntity = spawnRaceCar();
 
                 mServer->sendCarEntityID(carEntity, clientID);
@@ -91,14 +94,17 @@ namespace oni {
                 mClientDataManager->addNewClient(clientID, carEntity);
             }
 
-            void ServerGame::clientInputPacketHandler(const common::PeerID &clientID, const std::string &data) {
+            void
+            ServerGame::clientInputPacketHandler(const common::PeerID &clientID,
+                                                 const std::string &data) {
                 auto input = oni::entities::deserialize<io::Input>(data);
                 // TODO: Avoid copy by using a unique_ptr or something
                 auto lock = mClientDataManager->scopedLock();
                 mClientDataManager->setClientInput(clientID, input);
             }
 
-            void ServerGame::postDisconnectHook(const common::PeerID &peerID) {
+            void
+            ServerGame::postDisconnectHook(const common::PeerID &peerID) {
                 auto clientDataLock = mClientDataManager->scopedLock();
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
@@ -106,11 +112,13 @@ namespace oni {
                 mClientDataManager->deleteClient(peerID);
             }
 
-            bool ServerGame::shouldTerminate() {
+            bool
+            ServerGame::shouldTerminate() {
                 return false;
             }
 
-            void ServerGame::_poll() {
+            void
+            ServerGame::_poll() {
                 mServer->poll();
 
                 mServer->sendComponentsUpdate(mEntityFactory->getEntityManager());
@@ -124,7 +132,8 @@ namespace oni {
                 }
             }
 
-            void ServerGame::_sim(const common::real64 tickTime) {
+            void
+            ServerGame::_sim(const common::real64 tickTime) {
                 // Fake lag
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
@@ -153,27 +162,36 @@ namespace oni {
                 mLapTracker->tick();
             }
 
-            void ServerGame::_render(common::real64 simTime) {}
+            void
+            ServerGame::_render(common::real64 simTime) {}
 
-            void ServerGame::_display() {}
+            void
+            ServerGame::_display() {}
 
-            void ServerGame::showFPS(common::int16 fps) {}
+            void
+            ServerGame::showFPS(common::int16 fps) {}
 
-            void ServerGame::showSPS(common::int16 tps) {}
+            void
+            ServerGame::showSPS(common::int16 tps) {}
 
-            void ServerGame::showPPS(common::int16 pps) {
+            void
+            ServerGame::showPPS(common::int16 pps) {
                 if (pps < 30) {
                     std::cout << "PPS " << pps << "\n";
                 }
             }
 
-            void ServerGame::showPET(common::int16 pet) {}
+            void
+            ServerGame::showPET(common::int16 pet) {}
 
-            void ServerGame::showSET(common::int16 set) {}
+            void
+            ServerGame::showSET(common::int16 set) {}
 
-            void ServerGame::showRET(common::int16 ret) {}
+            void
+            ServerGame::showRET(common::int16 ret) {}
 
-            common::EntityID ServerGame::spawnRaceCar() {
+            common::EntityID
+            ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
                 math::vec3 pos{-70.f, -30.f, vehicleZ};
@@ -253,14 +271,16 @@ namespace oni {
                 return carEntity;
             }
 
-            void ServerGame::removeRaceCar(common::EntityID carEntityID) {
+            void
+            ServerGame::removeRaceCar(common::EntityID carEntityID) {
                 auto lock = mEntityFactory->getEntityManager().scopedLock();
                 mEntityFactory->removeEntity(carEntityID,
                                              component::EntityType::RACE_CAR,
                                              true, false);
             }
 
-            common::EntityID ServerGame::spawnTruck() {
+            common::EntityID
+            ServerGame::spawnTruck() {
                 auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::VEHICLE);
                 math::vec2 size{1.0f, 3.0f};
                 math::vec3 worldPos{-60.0f, -30.0f, vehicleZ};

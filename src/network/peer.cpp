@@ -8,7 +8,8 @@ namespace oni {
     namespace network {
         Peer::Peer() = default;
 
-        Peer::Peer(const Address *address, common::uint8 peerCount,
+        Peer::Peer(const Address *address,
+                   common::uint8 peerCount,
                    common::uint8 channelLimit,
                    common::uint32 incomingBandwidth,
                    common::uint32 outgoingBandwidth) {
@@ -36,7 +37,8 @@ namespace oni {
             enet_deinitialize();
         }
 
-        void Peer::poll() {
+        void
+        Peer::poll() {
             ENetEvent event;
 
             while (enet_host_service(mEnetHost, &event, 0) > 0) {
@@ -91,7 +93,10 @@ namespace oni {
             }
         }
 
-        void Peer::send(const common::uint8 *data, size_t size, ENetPeer *peer) {
+        void
+        Peer::send(const common::uint8 *data,
+                   size_t size,
+                   ENetPeer *peer) {
             ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE |
                                                                         ENET_PACKET_FLAG_NO_ALLOCATE);
             assert(packetToServer);
@@ -101,7 +106,10 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        void Peer::send(PacketType type, std::string &data, ENetPeer *peer) {
+        void
+        Peer::send(PacketType type,
+                   std::string &data,
+                   ENetPeer *peer) {
             data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
 
             ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
@@ -112,7 +120,8 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        PacketType Peer::getHeader(const common::uint8 *data) const {
+        PacketType
+        Peer::getHeader(const common::uint8 *data) const {
             if (!data) {
                 return PacketType::UNKNOWN;
             }
@@ -121,7 +130,9 @@ namespace oni {
             return header;
         }
 
-        void Peer::broadcast(PacketType type, std::string &data) {
+        void
+        Peer::broadcast(PacketType type,
+                        std::string &data) {
             data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
             ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
             assert(packetToPeers);
@@ -130,17 +141,21 @@ namespace oni {
             enet_host_flush(mEnetHost);
         }
 
-        void Peer::registerPacketHandler(PacketType type,
-                                         std::function<void(const common::PeerID &, const std::string &)> &&handler) {
+        void
+        Peer::registerPacketHandler(PacketType type,
+                                    std::function<void(const common::PeerID &,
+                                                       const std::string &)> &&handler) {
             assert(mPacketHandlers.find(type) == mPacketHandlers.end());
             mPacketHandlers[type] = std::move(handler);
         }
 
-        void Peer::registerPostDisconnectHook(std::function<void(const common::PeerID &)> &&handler) {
+        void
+        Peer::registerPostDisconnectHook(std::function<void(const common::PeerID &)> &&handler) {
             mPostDisconnectHook = std::move(handler);
         }
 
-        common::PeerID Peer::getPeerID(const ENetPeer &peer) const {
+        common::PeerID
+        Peer::getPeerID(const ENetPeer &peer) const {
             return std::to_string(peer.connectID);
         }
     }

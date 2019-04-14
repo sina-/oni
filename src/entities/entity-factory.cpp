@@ -17,18 +17,21 @@ namespace oni {
             mRegistryManager = std::make_unique<oni::entities::EntityManager>();
         }
 
-        EntityManager &EntityFactory::getEntityManager() {
+        EntityManager &
+        EntityFactory::getEntityManager() {
             return *mRegistryManager;
         }
 
-        common::EntityID EntityFactory::createEntity() {
+        common::EntityID
+        EntityFactory::createEntity() {
             auto entityID = mRegistryManager->create();
             return entityID;
         }
 
         template<>
-        void EntityFactory::_apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
-                                                                                       component::CollisionPos &)> &func) {
+        void
+        EntityFactory::_apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
+                                                                                  component::CollisionPos &)> &func) {
             auto group = mRegistryManager->createView<component::CollidingEntity, component::CollisionPos, component::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<component::EventType>(entity);
@@ -39,8 +42,9 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                                   component::SoundPos &)> &func) {
+        void
+        EntityFactory::_apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
+                                                                                              component::SoundPos &)> &func) {
             auto group = mRegistryManager->createView<component::SoundID, component::SoundPos, component::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<component::EventType>(entity);
@@ -51,7 +55,8 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_apply<component::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &func) {
+        void
+        EntityFactory::_apply<component::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &func) {
             auto group = mRegistryManager->createView<math::vec2, component::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<component::EventType>(entity);
@@ -61,10 +66,11 @@ namespace oni {
             }
         }
 
-        void EntityFactory::removeEntity(common::EntityID entityID,
-                                         component::EntityType entityType,
-                                         bool track,
-                                         bool safe) {
+        void
+        EntityFactory::removeEntity(common::EntityID entityID,
+                                    component::EntityType entityType,
+                                    bool track,
+                                    bool safe) {
             switch (entityType) {
                 case component::EntityType::RACE_CAR: {
                     _removeEntity<component::EntityType::RACE_CAR>(entityID, track, safe);
@@ -99,7 +105,10 @@ namespace oni {
             removeEntity(entityID, track, safe);
         }
 
-        void EntityFactory::removeEntity(common::EntityID entityID, bool track, bool safe) {
+        void
+        EntityFactory::removeEntity(common::EntityID entityID,
+                                    bool track,
+                                    bool safe) {
             if (safe && !mRegistryManager->valid(entityID)) {
                 return;
             }
@@ -110,16 +119,18 @@ namespace oni {
             }
         }
 
-        void EntityFactory::resetEvents() {
+        void
+        EntityFactory::resetEvents() {
             mRegistryManager->destroy<component::EventType>();
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                                           const math::vec3 &pos,
-                                                                           const math::vec2 &size,
-                                                                           const common::real32 &heading,
-                                                                           const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
+                                                                      const math::vec3 &pos,
+                                                                      const math::vec2 &size,
+                                                                      const common::real32 &heading,
+                                                                      const std::string &textureID) {
             auto &carConfig = createComponent<component::CarConfig>(entityID);
             carConfig.cgToRear = size.x / 2;
             carConfig.cgToFront = size.x / 2;
@@ -170,11 +181,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::VEHICLE>(common::EntityID entityID,
-                                                                          const math::vec3 &pos,
-                                                                          const math::vec2 &size,
-                                                                          const common::real32 &heading,
-                                                                          const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::VEHICLE>(common::EntityID entityID,
+                                                                     const math::vec3 &pos,
+                                                                     const math::vec2 &size,
+                                                                     const common::real32 &heading,
+                                                                     const std::string &textureID) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.friction = 1.f;
             properties.density = 0.1f;
@@ -204,11 +216,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::VEHICLE_GUN>(common::EntityID entityID,
-                                                                              const oni::math::vec3 &pos,
-                                                                              const oni::math::vec2 &size,
-                                                                              const common::real32 &heading,
-                                                                              const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::VEHICLE_GUN>(common::EntityID entityID,
+                                                                         const oni::math::vec3 &pos,
+                                                                         const oni::math::vec2 &size,
+                                                                         const common::real32 &heading,
+                                                                         const std::string &textureID) {
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -231,11 +244,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID,
-                                                                                     const math::vec3 &pos,
-                                                                                     const math::vec2 &size,
-                                                                                     const common::real32 &heading,
-                                                                                     const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID,
+                                                                                const math::vec3 &pos,
+                                                                                const math::vec2 &size,
+                                                                                const common::real32 &heading,
+                                                                                const std::string &textureID) {
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = pos;
             placement.rotation = heading;
@@ -257,20 +271,22 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID,
-                                                                                    const math::vec3 &pos,
-                                                                                    const math::vec2 &size,
-                                                                                    const common::real32 &heading,
-                                                                                    const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID,
+                                                                               const math::vec3 &pos,
+                                                                               const math::vec2 &size,
+                                                                               const common::real32 &heading,
+                                                                               const std::string &textureID) {
             _createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(entityID, pos, size, heading, textureID);
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::WALL>(common::EntityID entityID,
-                                                                       const math::vec3 &worldPos,
-                                                                       const math::vec2 &size,
-                                                                       const common::real32 &heading,
-                                                                       const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::WALL>(common::EntityID entityID,
+                                                                  const math::vec3 &worldPos,
+                                                                  const math::vec2 &size,
+                                                                  const common::real32 &heading,
+                                                                  const std::string &textureID) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.highPrecision = false;
             properties.bodyType = oni::component::BodyType::STATIC;
@@ -291,11 +307,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
-                                                                                const math::vec3 &worldPos,
-                                                                                const math::vec2 &size,
-                                                                                const common::real32 &heading,
-                                                                                const math::vec4 &color) {
+        void
+        EntityFactory::_createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
+                                                                           const math::vec3 &worldPos,
+                                                                           const math::vec2 &size,
+                                                                           const common::real32 &heading,
+                                                                           const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
@@ -309,11 +326,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
-                                                                                const math::vec3 &worldPos,
-                                                                                const math::vec2 &size,
-                                                                                const common::real32 &heading,
-                                                                                const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
+                                                                           const math::vec3 &worldPos,
+                                                                           const math::vec2 &size,
+                                                                           const common::real32 &heading,
+                                                                           const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
@@ -328,11 +346,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                                  const math::vec3 &worldPos,
-                                                                                  const math::vec4 &color,
-                                                                                  const common::real32 &halfSize,
-                                                                                  const bool &randomize) {
+        void
+        EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
+                                                                             const math::vec3 &worldPos,
+                                                                             const math::vec4 &color,
+                                                                             const common::real32 &halfSize,
+                                                                             const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
             particle.age = 0.f;
@@ -349,11 +368,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                                  const math::vec3 &worldPos,
-                                                                                  const std::string &textureID,
-                                                                                  const common::real32 &halfSize,
-                                                                                  const bool &randomize) {
+        void
+        EntityFactory::_createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
+                                                                             const math::vec3 &worldPos,
+                                                                             const std::string &textureID,
+                                                                             const common::real32 &halfSize,
+                                                                             const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
             particle.pos = worldPos;
             particle.age = 0.f;
@@ -371,12 +391,13 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
-                                                                                const math::vec3 &pos,
-                                                                                const math::vec2 &size,
-                                                                                const common::real32 &heading,
-                                                                                const std::string &textureID,
-                                                                                const common::real32 &velocity
+        void
+        EntityFactory::_createEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
+                                                                           const math::vec3 &pos,
+                                                                           const math::vec2 &size,
+                                                                           const common::real32 &heading,
+                                                                           const std::string &textureID,
+                                                                           const common::real32 &velocity
         ) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.friction = 1.f;
@@ -421,8 +442,10 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::TEXT>(common::EntityID entityID, const math::vec3 &pos,
-                                                                       const std::string &text) {
+        void
+        EntityFactory::_createEntity<component::EntityType::TEXT>(common::EntityID entityID,
+                                                                  const math::vec3 &pos,
+                                                                  const std::string &text) {
 
             auto &textComponent = createComponent<component::Text>(entityID);
             textComponent.position = pos;
@@ -432,11 +455,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID entityID,
-                                                                              const math::vec3 &worldPos,
-                                                                              const math::vec2 &size,
-                                                                              const common::real32 &heading,
-                                                                              const std::string &textureID) {
+        void
+        EntityFactory::_createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID entityID,
+                                                                         const math::vec3 &worldPos,
+                                                                         const math::vec2 &size,
+                                                                         const common::real32 &heading,
+                                                                         const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
@@ -453,11 +477,12 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID entityID,
-                                                                              const math::vec3 &worldPos,
-                                                                              const math::vec2 &size,
-                                                                              const common::real32 &heading,
-                                                                              const math::vec4 &color) {
+        void
+        EntityFactory::_createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID entityID,
+                                                                         const math::vec3 &worldPos,
+                                                                         const math::vec2 &size,
+                                                                         const common::real32 &heading,
+                                                                         const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
@@ -473,10 +498,11 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEvent<component::EventType::COLLISION>(common::EntityID entityID,
-                                                                          const component::EntityType &a,
-                                                                          const component::EntityType &b,
-                                                                          const math::vec3 &worldPos) {
+        void
+        EntityFactory::_createEvent<component::EventType::COLLISION>(common::EntityID entityID,
+                                                                     const component::EntityType &a,
+                                                                     const component::EntityType &b,
+                                                                     const math::vec3 &worldPos) {
             auto &collidingEntity = createComponent<component::CollidingEntity>(entityID);
             collidingEntity.entityA = a;
             collidingEntity.entityB = b;
@@ -488,9 +514,10 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_createEvent<component::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID entityID,
-                                                                                      const component::SoundID &id,
-                                                                                      const math::vec2 &worldPos) {
+        void
+        EntityFactory::_createEvent<component::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID entityID,
+                                                                                 const component::SoundID &id,
+                                                                                 const math::vec2 &worldPos) {
             auto &soundID = createComponent<component::SoundID>(entityID);
             soundID = id;
 
@@ -508,9 +535,11 @@ namespace oni {
             pos.y = worldPos.y;
         }
 
-        b2Body *EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
-                                                  const math::vec2 &size, common::real32 heading,
-                                                  component::PhysicalProperties &properties) {
+        b2Body *
+        EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
+                                          const math::vec2 &size,
+                                          common::real32 heading,
+                                          component::PhysicalProperties &properties) {
             b2PolygonShape shape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
@@ -582,8 +611,10 @@ namespace oni {
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID, bool track,
-                                                                           bool safe) {
+        void
+        EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
+                                                                      bool track,
+                                                                      bool safe) {
             // TODO: When notifying clients of this, the texture in memory should be evicted.
 
 
@@ -599,25 +630,31 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID, bool track, bool safe) {
+        EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID,
+                                                                  bool track,
+                                                                  bool safe) {
             removePhysicalBody(entityID);
         }
 
         template<>
-        void EntityFactory::_removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID, bool track,
-                                                                                bool safe) {
+        void
+        EntityFactory::_removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
+                                                                           bool track,
+                                                                           bool safe) {
             removePhysicalBody(entityID);
         }
 
-        void EntityFactory::removePhysicalBody(common::EntityID entityID) {
+        void
+        EntityFactory::removePhysicalBody(common::EntityID entityID) {
             auto entityPhysicalProps = mRegistryManager->get<component::PhysicalProperties>(entityID);
             mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
         }
 
-        void EntityFactory::attach(common::EntityID parent,
-                                   common::EntityID child,
-                                   component::EntityType parentType,
-                                   component::EntityType childType) {
+        void
+        EntityFactory::attach(common::EntityID parent,
+                              common::EntityID child,
+                              component::EntityType parentType,
+                              component::EntityType childType) {
             auto &transformChildren = mRegistryManager->get<component::TransformChildren>(parent);
             transformChildren.children.emplace_back(child);
 
@@ -630,7 +667,8 @@ namespace oni {
             attachee.entityType = parentType;
         }
 
-        void EntityFactory::tagForNetworkSync(common::EntityID entityID) {
+        void
+        EntityFactory::tagForNetworkSync(common::EntityID entityID) {
             assignTag<component::Tag_RequiresNetworkSync>(entityID);
         }
     }

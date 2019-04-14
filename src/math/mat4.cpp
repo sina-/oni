@@ -15,11 +15,18 @@ namespace oni {
             elements[3 + 3 * 4] = diag;
         }
 
-        mat4 mat4::identity() {
+        mat4
+        mat4::identity() {
             return mat4(1.0f);
         }
 
-        mat4 mat4::orthographic(float left, float right, float bottom, float top, float near, float far) {
+        mat4
+        mat4::orthographic(float left,
+                           float right,
+                           float bottom,
+                           float top,
+                           float near,
+                           float far) {
             mat4 result(0.0f);
             result.elements[0 + 0 * 4] = 2.0f / (right - left);
             result.elements[1 + 1 * 4] = 2.0f / (top - bottom);
@@ -34,7 +41,11 @@ namespace oni {
             return result;
         }
 
-        mat4 mat4::perspective(float fov, float aspectRatio, float near, float far) {
+        mat4
+        mat4::perspective(float fov,
+                          float aspectRatio,
+                          float near,
+                          float far) {
             mat4 result(0.0f);
             float q = 1.0f / tan(toRadians(0.5f * fov));
             float a = 1 / (q * aspectRatio);
@@ -51,7 +62,8 @@ namespace oni {
             return result;
         }
 
-        mat4 mat4::translation(const vec3 &translation) {
+        mat4
+        mat4::translation(const vec3 &translation) {
             mat4 result(1.0f);
             result.elements[0 + 3 * 4] = translation.x;
             result.elements[1 + 3 * 4] = translation.y;
@@ -60,7 +72,10 @@ namespace oni {
             return result;
         }
 
-        mat4 mat4::translation(float x, float y, float z) {
+        mat4
+        mat4::translation(float x,
+                          float y,
+                          float z) {
             mat4 result(1.0f);
             result.elements[0 + 3 * 4] = x;
             result.elements[1 + 3 * 4] = y;
@@ -69,7 +84,9 @@ namespace oni {
             return result;
         }
 
-        mat4 mat4::rotation(float angle, const vec3 &axis) {
+        mat4
+        mat4::rotation(float angle,
+                       const vec3 &axis) {
             mat4 result(1.0f);
             float c = std::cos(angle);
             float s = std::sin(angle);
@@ -94,7 +111,8 @@ namespace oni {
             return result;
         }
 
-        mat4 mat4::scale(const vec3 &scale) {
+        mat4
+        mat4::scale(const vec3 &scale) {
             mat4 result(1.0f);
             result.elements[0 + 0 * 4] = scale.x;
             result.elements[1 + 1 * 4] = scale.y;
@@ -103,7 +121,8 @@ namespace oni {
             return result;
         }
 
-        mat4 &mat4::multiply(const mat4 &other) {
+        mat4 &
+        mat4::multiply(const mat4 &other) {
             std::array<float, 4 * 4> result{};
             for (common::uint8 i = 0; i < 4; i++) {
                 for (common::uint8 j = 0; j < 4; j++) {
@@ -117,24 +136,32 @@ namespace oni {
             return *this;
         }
 
-        mat4 &mat4::operator*=(const mat4 &other) {
+        mat4 &
+        mat4::operator*=(const mat4 &other) {
             return multiply(other);
         }
 
-        mat4 operator*(const mat4 &left, const mat4 &right) {
+        mat4
+        operator*(const mat4 &left,
+                  const mat4 &right) {
             mat4 result = left;
             return result.multiply(right);
         }
 
-        vec4 operator*(const mat4 &left, const vec4 &right) {
+        vec4
+        operator*(const mat4 &left,
+                  const vec4 &right) {
             return left.multiply(right);
         }
 
-        vec3 operator*(const mat4 &left, const vec3 &right) {
+        vec3
+        operator*(const mat4 &left,
+                  const vec3 &right) {
             return left.multiply(right);
         }
 
-        vec4 mat4::multiply(const vec4 &other) const {
+        vec4
+        mat4::multiply(const vec4 &other) const {
             return math::vec4{
                     elements[0] * other.x + elements[4] * other.y + elements[8] * other.z + elements[12] * other.w,
                     elements[1] * other.x + elements[5] * other.y + elements[9] * other.z + elements[13] * other.w,
@@ -143,7 +170,8 @@ namespace oni {
             };
         }
 
-        vec3 mat4::multiply(const vec3 &other) const {
+        vec3
+        mat4::multiply(const vec3 &other) const {
             return math::vec3{
                     elements[0] * other.x + elements[4] * other.y + elements[8] * other.z + elements[12],
                     elements[1] * other.x + elements[5] * other.y + elements[9] * other.z + elements[13],
@@ -151,7 +179,8 @@ namespace oni {
             };
         }
 
-        vec3 mat4::getPosition() {
+        vec3
+        mat4::getPosition() {
             return vec3{columns[3].x, columns[3].y, columns[3].z};
         }
     }

@@ -33,7 +33,8 @@ namespace oni {
         protected:
             Peer();
 
-            Peer(const Address *address, common::uint8 peerCount,
+            Peer(const Address *address,
+                 common::uint8 peerCount,
                  common::uint8 channelLimit,
                  common::uint32 incomingBandwidth,
                  common::uint32 outgoingBandwidth);
@@ -41,36 +42,57 @@ namespace oni {
         public:
             virtual ~Peer();
 
-            void poll();
+            void
+            poll();
 
             void
-            registerPacketHandler(PacketType type, std::function<void(const common::PeerID&, const std::string &)> &&handler);
+            registerPacketHandler(PacketType type,
+                                  std::function<void(const common::PeerID &,
+                                                     const std::string &)> &&handler);
 
-            void registerPostDisconnectHook(std::function<void(const common::PeerID&)> &&handler);
+            void
+            registerPostDisconnectHook(std::function<void(const common::PeerID &)> &&handler);
 
         protected:
-            virtual void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) = 0;
+            virtual void
+            handle(ENetPeer *peer,
+                   common::uint8 *data,
+                   size_t size,
+                   PacketType header) = 0;
 
-            common::PeerID getPeerID(const ENetPeer &peer) const;
+            common::PeerID
+            getPeerID(const ENetPeer &peer) const;
 
-            PacketType getHeader(const common::uint8 *data) const;
+            PacketType
+            getHeader(const common::uint8 *data) const;
 
             // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
-            void send(PacketType type, std::string &data, ENetPeer *peer);
+            void
+            send(PacketType type,
+                 std::string &data,
+                 ENetPeer *peer);
 
-            void send(const common::uint8 *data, size_t size, ENetPeer *peer);
+            void
+            send(const common::uint8 *data,
+                 size_t size,
+                 ENetPeer *peer);
 
-            void broadcast(PacketType type, std::string &data);
+            void
+            broadcast(PacketType type,
+                      std::string &data);
 
-            virtual void postConnectHook(const ENetEvent *event) = 0;
+            virtual void
+            postConnectHook(const ENetEvent *event) = 0;
 
-            virtual void postDisconnectHook(const ENetEvent *event) = 0;
+            virtual void
+            postDisconnectHook(const ENetEvent *event) = 0;
 
         protected:
             ENetHost *mEnetHost{};
             std::map<common::PeerID, ENetPeer *> mPeers{};
-            std::map<PacketType, std::function<void(common::PeerID, const std::string &)>> mPacketHandlers{};
-            std::function<void(const common::PeerID&)> mPostDisconnectHook{};
+            std::map<PacketType, std::function<void(common::PeerID,
+                                                    const std::string &)>> mPacketHandlers{};
+            std::function<void(const common::PeerID &)> mPostDisconnectHook{};
         };
     }
 }

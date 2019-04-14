@@ -19,15 +19,21 @@ namespace oni {
     }
     namespace physics {
 
-        void tickCar(component::Car &car, const component::CarConfig &config,
-                     const component::CarInput &inputs, common::real64 dt);
+        void
+        tickCar(component::Car &car,
+                const component::CarConfig &config,
+                const component::CarInput &inputs,
+                common::real64 dt);
 
 
-        common::CarSimDouble applySmoothSteer(const component::Car &car,
-                                              common::CarSimDouble steerInput, common::real64 dt);
+        common::CarSimDouble
+        applySmoothSteer(const component::Car &car,
+                         common::CarSimDouble steerInput,
+                         common::real64 dt);
 
-        common::CarSimDouble applySafeSteer(const component::Car &car,
-                                                common::CarSimDouble steerInput);
+        common::CarSimDouble
+        applySafeSteer(const component::Car &car,
+                       common::CarSimDouble steerInput);
 
     }
 }

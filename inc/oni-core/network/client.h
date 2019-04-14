@@ -18,26 +18,39 @@ namespace oni {
 
             ~Client() override;
 
-            void connect(const Address &address);
+            void
+            connect(const Address &address);
 
-            void disconnect();
+            void
+            disconnect();
 
-            void pingServer();
+            void
+            pingServer();
 
-            void sendMessage(std::string &&message);
+            void
+            sendMessage(std::string &&message);
 
-            void sendInput(const io::Input *input);
+            void
+            sendInput(const io::Input *input);
 
-            void requestZLevelDelta();
+            void
+            requestZLevelDelta();
 
         private:
-            void handle(ENetPeer *peer, common::uint8 *data, size_t size, PacketType header) override;
+            void
+            handle(ENetPeer *peer,
+                   common::uint8 *data,
+                   size_t size,
+                   PacketType header) override;
 
-            void postConnectHook(const ENetEvent *event) override;
+            void
+            postConnectHook(const ENetEvent *event) override;
 
-            void postDisconnectHook(const ENetEvent *event) override;
+            void
+            postDisconnectHook(const ENetEvent *event) override;
 
-            void requestSessionSetup();
+            void
+            requestSessionSetup();
 
         private:
             ENetPeer *mEnetServer;

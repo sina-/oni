@@ -20,30 +20,45 @@ namespace oni {
 
         class Server : public Peer {
         public:
-            Server(const Address *, common::uint8, common::uint8);
+            Server(const Address *,
+                   common::uint8,
+                   common::uint8);
 
             ~Server() override;
 
-            void sendEntitiesAll(entities::EntityManager &);
+            void
+            sendEntitiesAll(entities::EntityManager &);
 
-            void sendComponentsUpdate(entities::EntityManager &);
+            void
+            sendComponentsUpdate(entities::EntityManager &);
 
-            void sendNewEntities(entities::EntityManager &);
+            void
+            sendNewEntities(entities::EntityManager &);
 
-            void broadcastDeletedEntities(entities::EntityManager &);
+            void
+            broadcastDeletedEntities(entities::EntityManager &);
 
-            void sendCarEntityID(common::EntityID, const common::PeerID &);
+            void
+            sendCarEntityID(common::EntityID,
+                            const common::PeerID &);
 
-            void broadcastEvents(entities::EntityFactory &entityFactory);
+            void
+            broadcastEvents(entities::EntityFactory &entityFactory);
 
         private:
             Server();
 
-            void handle(ENetPeer *, common::uint8 *, size_t, PacketType) override;
+            void
+            handle(ENetPeer *,
+                   common::uint8 *,
+                   size_t,
+                   PacketType) override;
 
-            void postConnectHook(const ENetEvent *) override;
+            void
+            postConnectHook(const ENetEvent *) override;
 
-            void postDisconnectHook(const ENetEvent *) override;
+            void
+            postDisconnectHook(const ENetEvent *) override;
         };
     }
 }

@@ -20,7 +20,8 @@ namespace oni {
     namespace physics {
         class CollisionHandler : public b2ContactListener {
         public:
-            void BeginContact(b2Contact *contact) override {
+            void
+            BeginContact(b2Contact *contact) override {
                 auto *fixtureA = contact->GetFixtureA();
                 auto *fixtureB = contact->GetFixtureB();
 
@@ -41,7 +42,8 @@ namespace oni {
                 //}
             }
 
-            void EndContact(b2Contact *contact) override {
+            void
+            EndContact(b2Contact *contact) override {
                 auto *fixtureA = contact->GetFixtureA();
                 auto *fixtureB = contact->GetFixtureB();
 
@@ -125,9 +127,10 @@ namespace oni {
 
         Dynamics::~Dynamics() = default;
 
-        void Dynamics::tick(entities::EntityFactory &entityFactory,
-                            entities::ClientDataManager &clientData,
-                            common::real64 tickTime) {
+        void
+        Dynamics::tick(entities::EntityFactory &entityFactory,
+                       entities::ClientDataManager &clientData,
+                       common::real64 tickTime) {
             auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, component::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
@@ -339,11 +342,13 @@ namespace oni {
             }
         }
 
-        b2World *Dynamics::getPhysicsWorld() {
+        b2World *
+        Dynamics::getPhysicsWorld() {
             return mPhysicsWorld.get();
         }
 
-        bool Dynamics::isColliding(b2Body *body) {
+        bool
+        Dynamics::isColliding(b2Body *body) {
             bool colliding{false};
             for (b2ContactEdge *ce = body->GetContactList();
                  ce && !colliding; ce = ce->next) {
@@ -355,10 +360,11 @@ namespace oni {
             return colliding;
         }
 
-        void Dynamics::handleRocketCollision(entities::EntityFactory &entityFactory,
-                                             common::EntityID entityID,
-                                             component::PhysicalProperties &props,
-                                             component::Placement &) {
+        void
+        Dynamics::handleRocketCollision(entities::EntityFactory &entityFactory,
+                                        common::EntityID entityID,
+                                        component::PhysicalProperties &props,
+                                        component::Placement &) {
 
             if (isColliding(props.body)) {
                 // TODO: Proper Z level!
@@ -387,10 +393,11 @@ namespace oni {
                                          component::Placement &placement) {
         }
 
-        void Dynamics::handleCollision(entities::EntityFactory &entityFactory,
-                                       common::EntityID entity,
-                                       component::PhysicalProperties &props,
-                                       component::Placement &placement) {
+        void
+        Dynamics::handleCollision(entities::EntityFactory &entityFactory,
+                                  common::EntityID entity,
+                                  component::PhysicalProperties &props,
+                                  component::Placement &placement) {
         }
 
         void
@@ -400,9 +407,10 @@ namespace oni {
                                          component::Placement &placement) {
         }
 
-        void Dynamics::updateTransforms(entities::EntityManager &manager,
-                                        common::EntityID entity,
-                                        const component::Placement &placement) {
+        void
+        Dynamics::updateTransforms(entities::EntityManager &manager,
+                                   common::EntityID entity,
+                                   const component::Placement &placement) {
             if (manager.has<component::TransformChildren>(entity)) {
                 auto transformChildren = manager.get<component::TransformChildren>(entity);
                 for (auto child: transformChildren.children) {
@@ -416,9 +424,10 @@ namespace oni {
             }
         }
 
-        void Dynamics::updateTransformParent(entities::EntityManager &manager,
-                                             common::EntityID entity,
-                                             const component::TransformParent &transformParent) {
+        void
+        Dynamics::updateTransformParent(entities::EntityManager &manager,
+                                        common::EntityID entity,
+                                        const component::TransformParent &transformParent) {
             // TODO: This function should recurse
             manager.replace<component::TransformParent>(entity, transformParent);
             manager.tagForComponentSync(entity);

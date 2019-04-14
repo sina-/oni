@@ -9,7 +9,9 @@ namespace oni {
     namespace io {
         Input::Input() = default;
 
-        void Input::update(component::oniKeyPress keyPressed, component::oniKeyPress keyReleased) {
+        void
+        Input::update(component::oniKeyPress keyPressed,
+                      component::oniKeyPress keyReleased) {
             assert(keyPressed != keyReleased);
 
             if (keyPressed > 0) {
@@ -23,15 +25,18 @@ namespace oni {
             assert(mKeysReleased.size() < 50);
         }
 
-        bool Input::isPressed(component::oniKeyPress key) const {
+        bool
+        Input::isPressed(component::oniKeyPress key) const {
             return std::find(mKeysPressed.begin(), mKeysPressed.end(), key) != mKeysPressed.end();
         }
 
-        bool Input::isReleased(component::oniKeyPress key) const {
+        bool
+        Input::isReleased(component::oniKeyPress key) const {
             return std::find(mKeysReleased.begin(), mKeysReleased.end(), key) != mKeysReleased.end();
         }
 
-        void Input::setPressed(component::oniKeyPress key) {
+        void
+        Input::setPressed(component::oniKeyPress key) {
             if (!isPressed(key)) {
                 mKeysPressed.push_back(key);
             }
@@ -40,7 +45,8 @@ namespace oni {
             }
         }
 
-        void Input::setReleased(component::oniKeyPress key) {
+        void
+        Input::setReleased(component::oniKeyPress key) {
             if (!isReleased(key)) {
                 mKeysReleased.push_back(key);
             }
@@ -49,7 +55,8 @@ namespace oni {
             }
         }
 
-        void Input::reset() {
+        void
+        Input::reset() {
             mKeysPressed.clear();
             mKeysReleased.clear();
         }

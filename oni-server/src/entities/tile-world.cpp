@@ -102,7 +102,7 @@ namespace oni {
                             // genChunkTexture(i, j);
                             // genChunkTiles(i, j);
                             // genChunkRoads(i, j);
-                             genChunkGroundSprite(i, j);
+                            genChunkGroundSprite(i, j);
                         }
                     }
                 }

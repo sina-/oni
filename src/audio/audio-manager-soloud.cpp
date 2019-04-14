@@ -16,7 +16,8 @@ namespace oni {
             mSoloudManager.deinit();
         }
 
-        oniSoundID AudioManagerSoloud::loadSound(const std::string &name) {
+        oniSoundID
+        AudioManagerSoloud::loadSound(const std::string &name) {
             // Avoid double loading
             auto it = std::find(mAudioNames.begin(), mAudioNames.end(), name);
 
@@ -42,7 +43,8 @@ namespace oni {
             }
         }
 
-        void AudioManagerSoloud::playSound(oniSoundID id) {
+        void
+        AudioManagerSoloud::playSound(oniSoundID id) {
             if (mSoloudManager.getPause(mHandles[id])) {
                 mSoloudManager.setPause(mHandles[id], false);
             } else {
@@ -51,35 +53,45 @@ namespace oni {
             }
         }
 
-        double AudioManagerSoloud::pauseSound(oniSoundID id) {
+        double
+        AudioManagerSoloud::pauseSound(oniSoundID id) {
             mSoloudManager.setPause(mHandles[id], true);
             return mSoloudManager.getStreamTime(mHandles[id]);
             return 0;
         }
 
-        void AudioManagerSoloud::setLoop(oniSoundID id, bool loop) {
+        void
+        AudioManagerSoloud::setLoop(oniSoundID id,
+                                    bool loop) {
             mSoloudManager.setLooping(mHandles[id], loop);
         }
 
-        void AudioManagerSoloud::stopSound(oniSoundID id) {
+        void
+        AudioManagerSoloud::stopSound(oniSoundID id) {
             mSoloudManager.stop(mHandles[id]);
         }
 
-        void AudioManagerSoloud::setVolume(oniSoundID id, common::real32 volume) {
+        void
+        AudioManagerSoloud::setVolume(oniSoundID id,
+                                      common::real32 volume) {
             mSoloudManager.setVolume(mHandles[id], volume);
         }
 
-        common::real32 AudioManagerSoloud::getVolume(oniSoundID id) {
+        common::real32
+        AudioManagerSoloud::getVolume(oniSoundID id) {
             mSoloudManager.getVolume(mHandles[id]);
             return 0;
         }
 
-        bool AudioManagerSoloud::isPlaying(oniSoundID id) {
+        bool
+        AudioManagerSoloud::isPlaying(oniSoundID id) {
             return !mSoloudManager.getPause(mHandles[id]);
             return false;
         }
 
-        void AudioManagerSoloud::seek(oniSoundID id, double offset) {
+        void
+        AudioManagerSoloud::seek(oniSoundID id,
+                                 double offset) {
             mSoloudManager.seek(mHandles[id], offset);
         }
 

@@ -11,16 +11,20 @@ namespace oni {
         public:
             ZLayerManager();
 
-            explicit ZLayerManager(const component::ZLayer&);
+            explicit ZLayerManager(const component::ZLayer &);
 
-            common::real32 getZForEntity(component::EntityType) const;
+            common::real32
+            getZForEntity(component::EntityType) const;
 
-            common::real32 getNextZAtLayer(component::ZLayerDef);
+            common::real32
+            getNextZAtLayer(component::ZLayerDef);
 
-            component::ZLayer getZLayer() const;
+            component::ZLayer
+            getZLayer() const;
 
         private:
-            void constructEntityLayers();
+            void
+            constructEntityLayers();
 
         private:
             const common::real32 mMajorLayerDelta{0.1f};

@@ -27,7 +27,8 @@ namespace oni {
             constructEntityLayers();
         }
 
-        void ZLayerManager::constructEntityLayers() {
+        void
+        ZLayerManager::constructEntityLayers() {
             using namespace component;
             mEntityZLayers[EntityType::BACKGROUND] = getNextZAtLayer(ZLayerDef::LAYER_0);
             mEntityZLayers[EntityType::ROAD] = getNextZAtLayer(ZLayerDef::LAYER_0);
@@ -43,12 +44,14 @@ namespace oni {
             mEntityZLayers[EntityType::UI] = getNextZAtLayer(ZLayerDef::LAYER_8);
         }
 
-        common::real32 ZLayerManager::getZForEntity(component::EntityType type) const {
+        common::real32
+        ZLayerManager::getZForEntity(component::EntityType type) const {
             assert(mEntityZLayers.find(type) != mEntityZLayers.end());
             return mEntityZLayers.at(type);
         }
 
-        common::real32 ZLayerManager::getNextZAtLayer(component::ZLayerDef layer) {
+        common::real32
+        ZLayerManager::getNextZAtLayer(component::ZLayerDef layer) {
             assert(layer >= component::ZLayerDef::LAYER_0 &&
                    layer <= component::ZLayerDef::LAYER_9);
 
@@ -60,7 +63,8 @@ namespace oni {
             return currentTop;
         }
 
-        component::ZLayer ZLayerManager::getZLayer() const {
+        component::ZLayer
+        ZLayerManager::getZLayer() const {
             return mZLayer;
         }
     }

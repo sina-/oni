@@ -19,25 +19,37 @@ namespace oni {
 
             ~ClientDataManager();
 
-            void addNewClient(const common::PeerID &clientID, common::EntityID entityID);
+            void
+            addNewClient(const common::PeerID &clientID,
+                         common::EntityID entityID);
 
-            void deleteClient(const common::PeerID &clientID);
+            void
+            deleteClient(const common::PeerID &clientID);
 
-            void setClientInput(const common::PeerID &clientID, const io::Input &input);
+            void
+            setClientInput(const common::PeerID &clientID,
+                           const io::Input &input);
 
-            const io::Input *getClientInput(const common::EntityID &entityID) const;
+            const io::Input *
+            getClientInput(const common::EntityID &entityID) const;
 
-            void resetClientsInput();
+            void
+            resetClientsInput();
 
-            CarEntities getCarEntities() const;
+            CarEntities
+            getCarEntities() const;
 
-            size_t getNumClients() const;
+            size_t
+            getNumClients() const;
 
-            common::EntityID getEntityID(const common::PeerID &clientID) const;
+            common::EntityID
+            getEntityID(const common::PeerID &clientID) const;
 
-            common::PeerID getPeerID(const common::EntityID &entityID) const;
+            common::PeerID
+            getPeerID(const common::EntityID &entityID) const;
 
-            std::unique_lock<std::mutex> scopedLock();
+            std::unique_lock<std::mutex>
+            scopedLock();
 
 /*            void lock();
 

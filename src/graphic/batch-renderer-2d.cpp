@@ -62,7 +62,8 @@ namespace oni {
 
         BatchRenderer2D::~BatchRenderer2D() = default;
 
-        void BatchRenderer2D::_begin() {
+        void
+        BatchRenderer2D::_begin() {
             mNextSamplerID = 0;
             mSamplers.clear();
             mTextures.clear();
@@ -72,7 +73,9 @@ namespace oni {
             mBuffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         }
 
-        void BatchRenderer2D::_submit(const component::Shape &position, const component::Appearance &appearance) {
+        void
+        BatchRenderer2D::_submit(const component::Shape &position,
+                                 const component::Appearance &appearance) {
             // Check if Buffer can handle the number of vertices.
             // TODO: This seems to trigger even in none-debug mode
             assert(mIndexCount + 6 < mMaxIndicesCount);
@@ -121,7 +124,9 @@ namespace oni {
             mIndexCount += 6;
         }
 
-        void BatchRenderer2D::_submit(const component::Particle &particle, const component::Appearance &appearance) {
+        void
+        BatchRenderer2D::_submit(const component::Particle &particle,
+                                 const component::Appearance &appearance) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
             auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
@@ -141,7 +146,9 @@ namespace oni {
             mIndexCount += 1;
         }
 
-        void BatchRenderer2D::_submit(const component::Particle &particle, const component::Texture &texture) {
+        void
+        BatchRenderer2D::_submit(const component::Particle &particle,
+                                 const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
             auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
@@ -163,7 +170,9 @@ namespace oni {
             mIndexCount += 1;
         }
 
-        void BatchRenderer2D::_submit(const component::Shape &position, const component::Texture &texture) {
+        void
+        BatchRenderer2D::_submit(const component::Shape &position,
+                                 const component::Texture &texture) {
             // Check if Buffer can handle the number of vertices.
             assert(mIndexCount + 6 < mMaxIndicesCount);
 
@@ -196,7 +205,8 @@ namespace oni {
             mIndexCount += 6;
         }
 
-        void BatchRenderer2D::_submit(const component::Text &text) {
+        void
+        BatchRenderer2D::_submit(const component::Text &text) {
             auto buffer = static_cast<component::TexturedVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
@@ -248,7 +258,8 @@ namespace oni {
             mBuffer = static_cast<void *>(buffer);
         }
 
-        void BatchRenderer2D::_flush() {
+        void
+        BatchRenderer2D::_flush() {
             TextureManager::bindRange(0, mTextures);
 
             mVertexArray->bindVAO();
@@ -284,18 +295,21 @@ namespace oni {
             mIndexCount = 0;
         }
 
-        void BatchRenderer2D::_end() {
+        void
+        BatchRenderer2D::_end() {
             glUnmapBuffer(GL_ARRAY_BUFFER);
             mVertexArray->unbindVBO();
         }
 
-        void BatchRenderer2D::reset() {
+        void
+        BatchRenderer2D::reset() {
             end();
             flush();
             begin();
         }
 
-        common::oniGLint BatchRenderer2D::getSamplerID(common::oniGLuint textureID) {
+        common::oniGLint
+        BatchRenderer2D::getSamplerID(common::oniGLuint textureID) {
             auto it = std::find(mTextures.begin(), mTextures.end(), textureID);
             if (it == mTextures.end()) {
                 /*
@@ -314,7 +328,8 @@ namespace oni {
             }
         }
 
-        std::vector<common::oniGLint> BatchRenderer2D::generateSamplerIDs() {
+        std::vector<common::oniGLint>
+        BatchRenderer2D::generateSamplerIDs() {
             std::vector<common::oniGLint> samplers(mMaxNumTextureSamplers, 0);
             // Fill the vector with 0, 1, 2, 3, ...
             std::iota(samplers.begin(), samplers.end(), 0);

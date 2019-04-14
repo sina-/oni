@@ -45,11 +45,13 @@ namespace oni {
             glDeleteBuffers(mSize, &mBufferID);
         }
 
-        void IndexBuffer::bind() const {
+        void
+        IndexBuffer::bind() const {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
         }
 
-        void IndexBuffer::unbind() const {
+        void
+        IndexBuffer::unbind() const {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
     }

@@ -5,19 +5,23 @@
 
 namespace oni {
     namespace io {
-        void printl(const std::string &text) {
+        void
+        printl(const std::string &text) {
             std::cout << text << std::endl;
         }
 
-        void printl(const common::int32 text) {
+        void
+        printl(const common::int32 text) {
             std::cout << text << std::endl;
         }
 
-        void printl(double text) {
+        void
+        printl(double text) {
             std::cout << text << std::endl;
         }
 
-        void printl(common::real32 text) {
+        void
+        printl(common::real32 text) {
             std::cout << text << std::endl;
         }
     }

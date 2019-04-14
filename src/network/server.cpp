@@ -10,7 +10,9 @@
 
 namespace oni {
     namespace network {
-        Server::Server(const Address *address, common::uint8 numClients, common::uint8 numChannels) :
+        Server::Server(const Address *address,
+                       common::uint8 numClients,
+                       common::uint8 numChannels) :
                 Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
 
@@ -18,16 +20,22 @@ namespace oni {
 
         Server::~Server() = default;
 
-        void Server::postConnectHook(const ENetEvent *event) {
+        void
+        Server::postConnectHook(const ENetEvent *event) {
         }
 
-        void Server::postDisconnectHook(const ENetEvent *event) {
+        void
+        Server::postDisconnectHook(const ENetEvent *event) {
             auto clientID = getPeerID(*event->peer);
 
             mPostDisconnectHook(clientID);
         }
 
-        void Server::handle(ENetPeer *peer, enet_uint8 *data, size_t size, PacketType header) {
+        void
+        Server::handle(ENetPeer *peer,
+                       enet_uint8 *data,
+                       size_t size,
+                       PacketType header) {
             auto peerID = getPeerID(*peer);
             assert(mPacketHandlers.find(header) != mPacketHandlers.end() || header == PacketType::PING ||
                    header == PacketType::MESSAGE);
@@ -61,7 +69,8 @@ namespace oni {
             }
         }
 
-        void Server::sendEntitiesAll(entities::EntityManager &manager) {
+        void
+        Server::sendEntitiesAll(entities::EntityManager &manager) {
             std::string data = entities::serialize(manager, component::SnapshotType::ENTIRE_REGISTRY);
             auto type = PacketType::REGISTRY_REPLACE_ALL_ENTITIES;
 
@@ -70,7 +79,8 @@ namespace oni {
             }
         }
 
-        void Server::sendComponentsUpdate(entities::EntityManager &manager) {
+        void
+        Server::sendComponentsUpdate(entities::EntityManager &manager) {
             // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
             std::string data = entities::serialize(manager, component::SnapshotType::ONLY_COMPONENTS);
             auto type = PacketType::REGISTRY_ONLY_COMPONENT_UPDATE;
@@ -80,7 +90,8 @@ namespace oni {
             }
         }
 
-        void Server::sendNewEntities(entities::EntityManager &manager) {
+        void
+        Server::sendNewEntities(entities::EntityManager &manager) {
             // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
             std::string data = entities::serialize(manager, component::SnapshotType::ONLY_NEW_ENTITIES);
             auto type = PacketType::REGISTRY_ADD_NEW_ENTITIES;
@@ -90,7 +101,8 @@ namespace oni {
             }
         }
 
-        void Server::broadcastDeletedEntities(entities::EntityManager &manager) {
+        void
+        Server::broadcastDeletedEntities(entities::EntityManager &manager) {
             auto type = PacketType::REGISTRY_DESTROYED_ENTITIES;
             auto data = entities::serialize(manager.getDeletedEntities());
             manager.clearDeletedEntitiesList();
@@ -100,7 +112,9 @@ namespace oni {
             }
         }
 
-        void Server::sendCarEntityID(common::EntityID entityID, const common::PeerID &peerID) {
+        void
+        Server::sendCarEntityID(common::EntityID entityID,
+                                const common::PeerID &peerID) {
             auto packet = EntityPacket{entityID};
             auto data = entities::serialize(packet);
             auto type = PacketType::CAR_ENTITY_ID;
@@ -108,7 +122,8 @@ namespace oni {
             send(type, data, mPeers[peerID]);
         }
 
-        void Server::broadcastEvents(entities::EntityFactory &entityFactory) {
+        void
+        Server::broadcastEvents(entities::EntityFactory &entityFactory) {
             auto lock = entityFactory.getEntityManager().scopedLock();
 
             std::vector<CollisionEventPacket> collisionPackets;

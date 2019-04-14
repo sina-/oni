@@ -26,15 +26,19 @@ namespace oni {
 
             ~Projectile();
 
-            void tick(entities::EntityFactory &, entities::ClientDataManager &, common::real64 tickTime);
+            void
+            tick(entities::EntityFactory &,
+                 entities::ClientDataManager &,
+                 common::real64 tickTime);
 
         private:
-            void fireRocket(entities::EntityFactory &entityFactory,
-                            const common::real32 speed,
-                            const component::Placement &,
-                            const component::CarConfig &,
-                            const common::CarSimDouble &heading,
-                            const component::EntityAttachment &
+            void
+            fireRocket(entities::EntityFactory &entityFactory,
+                       const common::real32 speed,
+                       const component::Placement &,
+                       const component::CarConfig &,
+                       const common::CarSimDouble &heading,
+                       const component::EntityAttachment &
             );
 
         private:

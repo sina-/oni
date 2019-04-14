@@ -9,7 +9,8 @@
 namespace oni {
     namespace gameplay {
 
-        LapTracker::LapTracker(entities::EntityManager &entityManager, const math::ZLayerManager &zLayerManager)
+        LapTracker::LapTracker(entities::EntityManager &entityManager,
+                               const math::ZLayerManager &zLayerManager)
                 : mEntityManager(entityManager), mZLayerManager(zLayerManager) {
 
             auto checkpoint1 = component::Shape::fromPositionAndSize(math::vec3{70, -40}, math::vec2{20, 20});
@@ -25,7 +26,8 @@ namespace oni {
 
         LapTracker::~LapTracker() = default;;
 
-        void LapTracker::tick() {
+        void
+        LapTracker::tick() {
             std::vector<common::EntityID> entitiesToUpdate;
             {
                 auto carView = mEntityManager.createViewWithLock<component::Shape, component::Placement, component::Car>();
@@ -82,13 +84,15 @@ namespace oni {
             }
         }
 
-        void LapTracker::addNewPlayer(common::EntityID carEntity) {
+        void
+        LapTracker::addNewPlayer(common::EntityID carEntity) {
             mBestLaps[carEntity] = std::chrono::hours(666);
             mTimers[carEntity] = utils::Timer();
             resetPlayerCheckpoints(carEntity);
         }
 
-        void LapTracker::resetPlayerCheckpoints(common::EntityID carEntity) {
+        void
+        LapTracker::resetPlayerCheckpoints(common::EntityID carEntity) {
             mRemainingCheckpoints[carEntity] = mInitialCheckpoints;
             mTimers[carEntity].restart();
         }

@@ -10,35 +10,47 @@ namespace oni {
 
         Renderer2D::~Renderer2D() = default;
 
-        void Renderer2D::begin() {
+        void
+        Renderer2D::begin() {
             _begin();
         }
 
-        void Renderer2D::submit(const component::Shape &position, const component::Appearance &color) {
+        void
+        Renderer2D::submit(const component::Shape &position,
+                           const component::Appearance &color) {
             _submit(position, color);
         }
 
-        void Renderer2D::submit(const component::Particle &particle, const component::Appearance &color) {
+        void
+        Renderer2D::submit(const component::Particle &particle,
+                           const component::Appearance &color) {
             _submit(particle, color);
         }
 
-        void Renderer2D::submit(const component::Particle &particle, const component::Texture &texture) {
+        void
+        Renderer2D::submit(const component::Particle &particle,
+                           const component::Texture &texture) {
             _submit(particle, texture);
         }
 
-        void Renderer2D::submit(const component::Shape &position, const component::Texture &texture) {
+        void
+        Renderer2D::submit(const component::Shape &position,
+                           const component::Texture &texture) {
             _submit(position, texture);
         }
 
-        void Renderer2D::submit(const component::Text &text) {
+        void
+        Renderer2D::submit(const component::Text &text) {
             _submit(text);
         }
 
-        void Renderer2D::flush() {
+        void
+        Renderer2D::flush() {
             _flush();
         }
 
-        void Renderer2D::end() {
+        void
+        Renderer2D::end() {
             // TODO: probably you want to flush here
             _end();
         }

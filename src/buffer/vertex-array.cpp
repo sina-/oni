@@ -32,19 +32,23 @@ namespace oni {
             glDeleteVertexArrays(1, &mArrayID);
         }
 
-        void VertexArray::bindVAO() const {
+        void
+        VertexArray::bindVAO() const {
             glBindVertexArray(mArrayID);
         }
 
-        void VertexArray::unbindVAO() const {
+        void
+        VertexArray::unbindVAO() const {
             glBindVertexArray(0);
         }
 
-        void VertexArray::bindVBO() const {
+        void
+        VertexArray::bindVBO() const {
             mVertexBuffers->bind();
         }
 
-        void VertexArray::unbindVBO() const {
+        void
+        VertexArray::unbindVBO() const {
             mVertexBuffers->unbind();
         }
 

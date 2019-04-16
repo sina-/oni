@@ -445,7 +445,6 @@ namespace oni {
                     auto brushType = component::BrushType::PLAIN_RECTANGLE;
                     auto brushSize = math::vec2{0.5f, 0.5f};
 
-                    auto lock = clientEntityFactory.getEntityManager().scopedLock();
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
                         component::PixelRGBA color{0, 0, 0, skidOpacity[i / 2]};
                         splat(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
@@ -480,6 +479,7 @@ namespace oni {
                             const component::PixelRGBA &color,
                             const math::vec2 &worldPos) {
             auto &entityManager = entityFactory.getEntityManager();
+            auto lock = entityManager.scopedLock();
 
             std::set<common::EntityID> tileEntities;
 
@@ -507,15 +507,6 @@ namespace oni {
             }
         }
 
-        void
-        SceneManager::splat(entities::EntityFactory &entityFactory,
-                            const char *textureID,
-                            const math::vec2 &brushSize,
-                            const component::PixelRGBA &color,
-                            const math::vec2 &worldPos) {
-
-        }
-
         common::EntityID
         SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
                                             const math::vec2 &pos) {
@@ -534,13 +525,6 @@ namespace oni {
                 auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
                                            static_cast<common::real32>(mCanvasTileSizeY)};
 
-                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                                 common::EP);
-                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                                  common::EP);
-                auto defaultColor = component::PixelRGBA{};
-                auto image = mTextureManager->generateBits(widthInPixels, heightInPixels, defaultColor);
-
                 common::real32 heading = 0.f;
                 std::string emptyTextureID;
 
@@ -550,9 +534,19 @@ namespace oni {
                                                                                                  heading,
                                                                                                  emptyTextureID);
 
-                auto loadedTexture = mTextureManager->loadFromImage(image);
                 auto &texture = entityRegistry.get<component::Texture>(entityID);
-                texture = loadedTexture;
+
+                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
+                                                                 common::EP);
+                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
+                                                                  common::EP);
+
+                texture.image.width = widthInPixels;
+                texture.image.height = heightInPixels;
+
+                auto defaultColor = component::PixelRGBA{};
+                mTextureManager->fill(texture.image, defaultColor);
+                mTextureManager->loadFromImage(texture);
 
                 mCanvasTileLookup.emplace(xy, entityID);
             }
@@ -575,29 +569,38 @@ namespace oni {
             math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
                                                            brushTexturePos);
 
-            common::uint16 brushWidth;
-            common::uint16 brushHeight;
+            component::Image image{};
             switch (brushType) {
                 case component::BrushType::PLAIN_RECTANGLE: {
-                    brushWidth = brushSize.x * mGameUnitToPixels;
-                    brushHeight = brushSize.y * mGameUnitToPixels;
+                    image.width = static_cast<uint16>(brushSize.x * mGameUnitToPixels);
+                    image.height = static_cast<uint16>(brushSize.y * mGameUnitToPixels);
+                    mTextureManager->fill(image, color);
+                    break;
+                }
+                case component::BrushType::EXPLOSION: {
+                    // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
+                    // as long as down the line I can call sub texture update with the texture data only,
+                    // something along the lines of take the updated texture data and point to where the offsets point
+                    // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
+                    // at all what I intended
+                    image = mTextureManager->loadOrGetImage("resources/images/smoke/1.png");
                     break;
                 }
                 default: {
                     assert(false);
                 }
             }
-            auto bits = mTextureManager->generateBits(brushWidth, brushHeight, color);
 
-            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (brushWidth / 2.f));
-            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (brushHeight / 2.f));
+            assert(image.width);
+            assert(image.height);
 
-            mTextureManager->blend(canvasTexture,
-                                   textureOffsetX,
-                                   textureOffsetY,
-                                   brushWidth,
-                                   brushHeight,
-                                   bits.data);
+            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (image.width / 2.f));
+            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (image.height / 2.f));
+
+            mTextureManager->blendAndUpdateTexture(canvasTexture,
+                                                   textureOffsetX,
+                                                   textureOffsetY,
+                                                   image);
         }
 
         void
@@ -659,8 +662,7 @@ namespace oni {
                     assert(texture.image.width);
                     assert(texture.image.height);
 
-                    auto loadedTexture = mTextureManager->loadFromImage(texture.image);
-                    texture = loadedTexture;
+                    mTextureManager->loadFromImage(texture);
                     break;
                 }
                 case component::TextureStatus::NEEDS_RELOADING_USING_PATH: {

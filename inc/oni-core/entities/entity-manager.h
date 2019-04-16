@@ -443,7 +443,7 @@ namespace oni {
         private:
             std::unique_ptr<entt::basic_registry<EntityType>> mRegistry{};
             std::unique_ptr<entt::basic_continuous_loader<EntityType>> mLoader{};
-            std::mutex mMutex{};
+            mutable std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
 
             std::vector<EntityType> mDeletedEntities{};

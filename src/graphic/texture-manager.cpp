@@ -107,27 +107,25 @@ namespace oni {
             return mImageMap[path];
         }
 
-        component::Image
-        TextureManager::generateBits(const common::uint16 width,
-                                     const common::uint16 height,
-                                     const component::PixelRGBA &pixel) {
+        void
+        TextureManager::fill(component::Image &image,
+                             const component::PixelRGBA &pixel) {
+            assert(image.width);
+            assert(image.height);
 
-            auto image = component::Image{};
-            image.width = width;
-            image.height = height;
-            image.data.insert(image.data.begin(), static_cast<common::uint32>(mElementsInRGBA * width * height), 0);
-            common::uint16 stride = width * mElementsInRGBA;
+            image.width = image.width;
+            image.height = image.height;
+            image.data.resize(static_cast<common::uint32>(mElementsInRGBA * image.width * image.height), 0);
+            common::uint16 stride = image.width * mElementsInRGBA;
 
-            for (common::uint32 y = 0; y < height; ++y) {
-                for (common::uint32 x = 0; x < width; ++x) {
+            for (common::uint32 y = 0; y < image.height; ++y) {
+                for (common::uint32 x = 0; x < image.width; ++x) {
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = pixel.blue;
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = pixel.green;
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = pixel.red;
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_ALPHA] = pixel.alpha;
                 }
             }
-
-            return image;
         }
 
         void
@@ -137,11 +135,6 @@ namespace oni {
                                          common::oniGLint width,
                                          common::oniGLint height,
                                          const std::vector<common::uint8> &bits) {
-            assert(texture.image.width > xOffset);
-            assert(texture.image.height > yOffset);
-            assert(texture.image.width > 0);
-            assert(texture.image.height > 0);
-
             // Clip
             if (xOffset + width >= texture.image.width) {
                 width = texture.image.width - xOffset;
@@ -149,11 +142,17 @@ namespace oni {
             if (yOffset + height >= texture.image.height) {
                 height = texture.image.height - yOffset;
             }
-            assert(texture.image.width >= xOffset + width);
-            assert(texture.image.height >= yOffset + height);
 
             math::zeroClip(xOffset);
             math::zeroClip(yOffset);
+
+            assert(texture.image.width > xOffset);
+            assert(texture.image.height > yOffset);
+            assert(texture.image.width > 0);
+            assert(texture.image.height > 0);
+
+            assert(texture.image.width >= xOffset + width);
+            assert(texture.image.height >= yOffset + height);
 
             assert(xOffset >= 0);
             assert(yOffset >= 0);
@@ -164,12 +163,13 @@ namespace oni {
         }
 
         void
-        TextureManager::blend(component::Texture &texture,
-                              common::oniGLint xOffset,
-                              common::oniGLint yOffset,
-                              common::oniGLint width,
-                              common::oniGLint height,
-                              std::vector<common::uint8> &bits) {
+        TextureManager::blendAndUpdateTexture(component::Texture &texture,
+                                              common::oniGLint xOffset,
+                                              common::oniGLint yOffset,
+                                              component::Image &image) {
+            auto width = image.width;
+            auto height = image.height;
+
             if (xOffset < 0) {
                 width += xOffset;
                 xOffset = 0;
@@ -214,29 +214,48 @@ namespace oni {
                     assert(m >= 0);
                     assert(m + a < texture.image.data.size());
 
-                    auto oldR = static_cast<common::uint16>(texture.image.data[m + r]) + bits[n + r];
-                    auto oldG = static_cast<common::uint16>(texture.image.data[m + g]) + bits[n + g];
-                    auto oldB = static_cast<common::uint16>(texture.image.data[m + b]) + bits[n + b];
-                    auto oldA = static_cast<common::uint16>(texture.image.data[m + a]) + bits[n + a];
+                    // NOTE: Implicit cast from uint8 to uint16 to avoid over-flow during blending
+                    common::uint16 oldR = texture.image.data[m + r];
+                    common::uint16 oldG = texture.image.data[m + g];
+                    common::uint16 oldB = texture.image.data[m + b];
+                    common::uint16 oldA = texture.image.data[m + a];
 
-                    math::clipUpper(oldR, 255);
-                    math::clipUpper(oldG, 255);
-                    math::clipUpper(oldB, 255);
-                    math::clipUpper(oldA, 255);
+                    common::uint16 newR = image.data[n + r];
+                    common::uint16 newG = image.data[n + g];
+                    common::uint16 newB = image.data[n + b];
+                    common::uint16 newA = image.data[n + a];
 
-                    bits[n + r] = oldR;
-                    bits[n + g] = oldG;
-                    bits[n + b] = oldB;
-                    bits[n + a] = oldA;
+                    float blendR = 0;
+                    float blendG = 0;
+                    float blendB = 0;
 
-                    texture.image.data[m + r] = bits[n + r];
-                    texture.image.data[m + g] = bits[n + g];
-                    texture.image.data[m + b] = bits[n + b];
-                    texture.image.data[m + a] = bits[n + a];
+                    float blendA = 1 - (1 - newA / 255.f) * (1 - oldA / 255.f);
+                    if (blendA > 0) {
+                        blendR = newR * newA / blendA + oldR * oldA * (1 - newA) / blendA;
+                        blendG = newG * newA / blendA + oldG * oldA * (1 - newA) / blendA;
+                        blendB = newB * newA / blendA + oldB * oldA * (1 - newA) / blendA;
+                    }
+
+                    math::clip(blendR, 0.f, 1.f);
+                    math::clip(blendG, 0.f, 1.f);
+                    math::clip(blendB, 0.f, 1.f);
+                    math::clip(blendA, 0.f, 1.f);
+
+                    // Reuse the array to avoid memory allocation
+                    image.data[n + r] = (common::uint8)(blendR * 255);
+                    image.data[n + g] = (common::uint8)(blendG * 255);
+                    image.data[n + b] = (common::uint8)(blendB * 255);
+                    image.data[n + a] = (common::uint8)(blendA * 255);
+
+                    // NOTE: Store the blend for future blending
+                    texture.image.data[m + r] = (common::uint8)(blendR * 255);
+                    texture.image.data[m + g] = (common::uint8)(blendG * 255);
+                    texture.image.data[m + b] = (common::uint8)(blendB * 255);
+                    texture.image.data[m + a] = (common::uint8)(blendA * 255);
                 }
             }
 
-            updateSubTexture(texture, xOffset, yOffset, width, height, bits);
+            updateSubTexture(texture, xOffset, yOffset, width, height, image.data);
         }
 
         common::oniGLuint
@@ -290,8 +309,8 @@ namespace oni {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        component::Texture
-        TextureManager::loadFromImage(const component::Image &image) {
+        void
+        TextureManager::loadFromImage(component::Texture &texture) {
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
 
@@ -305,16 +324,21 @@ namespace oni {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, format, type, image.data.data());
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.image.width, texture.image.height, 0, format, type,
+                         texture.image.data.data());
 
             unbind();
 
             std::array<math::vec2, 4> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
 
+            texture.textureID = textureID;
+            texture.format = format;
+            texture.type = type;
             // TODO: The path is empty, might be useful to generate a unique path for procgen textures. Maybe with the
             // seed.
-            return component::Texture{image, textureID, format, type, "", uv, component::TextureStatus::READY};
-
+            texture.filePath = "";
+            texture.uv = uv;
+            texture.status = component::TextureStatus::READY;
         }
 
         size_t

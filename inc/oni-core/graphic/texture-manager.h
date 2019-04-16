@@ -45,12 +45,10 @@ namespace oni {
                              const std::vector<common::uint8> &bits);
 
             void
-            blend(component::Texture &texture,
-                  common::oniGLint xOffset,
-                  common::oniGLint yOffset,
-                  common::oniGLint width,
-                  common::oniGLint height,
-                  std::vector<common::uint8> &bits);
+            blendAndUpdateTexture(component::Texture &texture,
+                                  common::oniGLint xOffset,
+                                  common::oniGLint yOffset,
+                                  component::Image &image);
 
             const component::Image &
             loadOrGetImage(const char *path);
@@ -58,15 +56,14 @@ namespace oni {
             const component::Texture &
             loadOrGetTexture(const char *path);
 
-            component::Texture
-            loadFromImage(const component::Image &);
+            void
+            loadFromImage(component::Texture &);
 
             // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random
             // data generations of all types
-            component::Image
-            generateBits(common::uint16 width,
-                         common::uint16 height,
-                         const component::PixelRGBA &pixel);
+            void
+            fill(component::Image &,
+                 const component::PixelRGBA &pixel);
 
             // TODO: This function doesnt fit in the current design
             static common::oniGLuint

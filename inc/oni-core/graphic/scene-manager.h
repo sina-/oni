@@ -77,13 +77,6 @@ namespace oni {
                   const math::vec2 &worldPos);
 
             void
-            splat(entities::EntityFactory &entityFactory,
-                  const char *textureID,
-                  const math::vec2 &brushSize,
-                  const component::PixelRGBA &color,
-                  const math::vec2 &worldPos);
-
-            void
             lookAt(common::real32 x,
                    common::real32 y);
 

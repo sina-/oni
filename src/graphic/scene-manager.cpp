@@ -585,7 +585,7 @@ namespace oni {
                     // something along the lines of take the updated texture data and point to where the offsets point
                     // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
                     // at all what I intended
-                    image = mTextureManager->loadOrGetImage("resources/images/smoke/1.png");
+                    image = mTextureManager->loadOrGetImage("resources/images/explosion/1.png");
                     break;
                 }
                 default: {

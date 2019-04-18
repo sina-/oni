@@ -190,6 +190,10 @@ namespace oni {
                 height = texture.image.height - yOffset;
             }
 
+            if (width <= 0 || height <= 0) {
+                return;
+            }
+
             assert(width > 0);
             assert(height > 0);
 
@@ -214,27 +218,21 @@ namespace oni {
                     assert(m >= 0);
                     assert(m + a < texture.image.data.size());
 
-                    // NOTE: Implicit cast from uint8 to uint16 to avoid over-flow during blending
-                    common::uint16 oldR = texture.image.data[m + r];
-                    common::uint16 oldG = texture.image.data[m + g];
-                    common::uint16 oldB = texture.image.data[m + b];
-                    common::uint16 oldA = texture.image.data[m + a];
+                    common::real32 oldR = texture.image.data[m + r] / 255.f;
+                    common::real32 oldG = texture.image.data[m + g] / 255.f;
+                    common::real32 oldB = texture.image.data[m + b] / 255.f;
+                    common::real32 oldA = texture.image.data[m + a] / 255.f;
 
-                    common::uint16 newR = image.data[n + r];
-                    common::uint16 newG = image.data[n + g];
-                    common::uint16 newB = image.data[n + b];
-                    common::uint16 newA = image.data[n + a];
+                    common::real32 newR = image.data[n + r] / 255.f;
+                    common::real32 newG = image.data[n + g] / 255.f;
+                    common::real32 newB = image.data[n + b] / 255.f;
+                    common::real32 newA = image.data[n + a] / 255.f;
 
-                    float blendR = 0;
-                    float blendG = 0;
-                    float blendB = 0;
-
-                    float blendA = 1 - (1 - newA / 255.f) * (1 - oldA / 255.f);
-                    if (blendA > 0) {
-                        blendR = newR * newA / blendA + oldR * oldA * (1 - newA) / blendA;
-                        blendG = newG * newA / blendA + oldG * oldA * (1 - newA) / blendA;
-                        blendB = newB * newA / blendA + oldB * oldA * (1 - newA) / blendA;
-                    }
+                    // https://stackoverflow.com/a/9014763
+                    common::real32 blendR = newR * newA + (oldR * (1 - newA));
+                    common::real32 blendG = newG * newA + (oldG * (1 - newA));
+                    common::real32 blendB = newB * newA + (oldB * (1 - newA));
+                    common::real32 blendA = newA + oldA;
 
                     math::clip(blendR, 0.f, 1.f);
                     math::clip(blendG, 0.f, 1.f);
@@ -242,16 +240,16 @@ namespace oni {
                     math::clip(blendA, 0.f, 1.f);
 
                     // Reuse the array to avoid memory allocation
-                    image.data[n + r] = (common::uint8)(blendR * 255);
-                    image.data[n + g] = (common::uint8)(blendG * 255);
-                    image.data[n + b] = (common::uint8)(blendB * 255);
-                    image.data[n + a] = (common::uint8)(blendA * 255);
+                    image.data[n + r] = (common::uint8) (blendR * 255);
+                    image.data[n + g] = (common::uint8) (blendG * 255);
+                    image.data[n + b] = (common::uint8) (blendB * 255);
+                    image.data[n + a] = (common::uint8) (blendA * 255);
 
                     // NOTE: Store the blend for future blending
-                    texture.image.data[m + r] = (common::uint8)(blendR * 255);
-                    texture.image.data[m + g] = (common::uint8)(blendG * 255);
-                    texture.image.data[m + b] = (common::uint8)(blendB * 255);
-                    texture.image.data[m + a] = (common::uint8)(blendA * 255);
+                    texture.image.data[m + r] = (common::uint8) (blendR * 255);
+                    texture.image.data[m + g] = (common::uint8) (blendG * 255);
+                    texture.image.data[m + b] = (common::uint8) (blendB * 255);
+                    texture.image.data[m + a] = (common::uint8) (blendA * 255);
                 }
             }
 

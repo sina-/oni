@@ -356,6 +356,7 @@ namespace oni {
             particle.pos = worldPos;
             particle.age = 0.f;
             particle.halfSize = halfSize;
+            particle.maxAge = 1.f;
 
             auto &appearance = createComponent<component::Appearance>(entityID);
             appearance.color = color;

@@ -551,7 +551,9 @@ namespace oni {
                 mCanvasTileLookup.emplace(xy, entityID);
             }
 
-            return mCanvasTileLookup.at(xy);
+            auto entity = mCanvasTileLookup.at(xy);
+            assert(entity);
+            return entity;
         }
 
         void

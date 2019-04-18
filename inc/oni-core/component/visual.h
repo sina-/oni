@@ -33,17 +33,18 @@ namespace oni {
         };
 
         struct Image {
-            std::vector<common::uint8> data;
+            std::vector<common::uint8> data{};
             common::uint16 width{};
             common::uint16 height{};
         };
 
         struct Texture {
-            Image image;
+            Image image{};
             common::oniGLuint textureID{0};
-            // GL_BGRA
+            // GL_BGRA          0x80E1
             common::oniGLenum format{0x80E1};
-            // GL_UNSIGNED_BYTE
+            // GL_UNSIGNED_BYTE 0x1401
+            // GL_FLOAT         0x1406
             common::oniGLenum type{0x1401};
             std::string filePath{};
             std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},

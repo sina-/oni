@@ -135,17 +135,6 @@ namespace oni {
                                          common::oniGLint width,
                                          common::oniGLint height,
                                          const std::vector<common::uint8> &bits) {
-            // Clip
-            if (xOffset + width >= texture.image.width) {
-                width = texture.image.width - xOffset;
-            }
-            if (yOffset + height >= texture.image.height) {
-                height = texture.image.height - yOffset;
-            }
-
-            math::zeroClip(xOffset);
-            math::zeroClip(yOffset);
-
             assert(texture.image.width > xOffset);
             assert(texture.image.height > yOffset);
             assert(texture.image.width > 0);
@@ -158,6 +147,7 @@ namespace oni {
             assert(yOffset >= 0);
             assert(texture.image.width >= width);
             assert(texture.image.height >= height);
+
             glTextureSubImage2D(texture.textureID, 0, xOffset, yOffset, width, height, texture.format, texture.type,
                                 bits.data());
         }
@@ -234,7 +224,7 @@ namespace oni {
                     common::int32 m = (yTexture * textureStride) + (xTexture * mElementsInRGBA);
                     common::int32 p = (ySubImage * subImageStride) + (xSubImage * mElementsInRGBA);
 
-                    // TODO: NO
+                    // TODO: Why does this happen? :/
                     if (p + a >= subImage.size()) {
                         continue;
                     }
@@ -242,6 +232,10 @@ namespace oni {
                     assert(n + a < image.data.size());
                     assert(m + a < texture.image.data.size());
                     assert(p + a < subImage.size());
+
+                    assert(n >= 0);
+                    assert(m >= 0);
+                    assert(p >= 0);
 
                     common::real32 oldR = texture.image.data[m + r] / 255.f;
                     common::real32 oldG = texture.image.data[m + g] / 255.f;
@@ -253,7 +247,7 @@ namespace oni {
                     common::real32 newB = image.data[n + b] / 255.f;
                     common::real32 newA = image.data[n + a] / 255.f;
 
-                    // https://stackoverflow.com/a/9014763
+                    // Partially based on https://stackoverflow.com/a/9014763
                     common::real32 blendR = newR * newA + (oldR * (1 - newA));
                     common::real32 blendG = newG * newA + (oldG * (1 - newA));
                     common::real32 blendB = newB * newA + (oldB * (1 - newA));
@@ -276,6 +270,9 @@ namespace oni {
                     texture.image.data[m + a] = (common::uint8) (blendA * 255);
                 }
             }
+
+            math::zeroClip(xOffset);
+            math::zeroClip(yOffset);
 
             updateSubTexture(texture, xOffset, yOffset, subImageWidth, subImageHeight, subImage);
         }

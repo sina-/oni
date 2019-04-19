@@ -596,6 +596,8 @@ namespace oni {
             assert(image.width);
             assert(image.height);
 
+            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
+            // in game units at this point.
             auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (image.width / 2.f));
             auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (image.height / 2.f));
 

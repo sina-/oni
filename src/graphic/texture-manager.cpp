@@ -167,56 +167,81 @@ namespace oni {
                                               common::oniGLint xOffset,
                                               common::oniGLint yOffset,
                                               component::Image &image) {
-            auto width = image.width;
-            auto height = image.height;
-
-            if (xOffset < 0) {
-                width += xOffset;
-                xOffset = 0;
-            }
-            if (yOffset < 0) {
-                height += yOffset;
-                yOffset = 0;
-            }
-
-            math::clipUpper(xOffset, texture.image.width - 1);
-            math::clipUpper(yOffset, texture.image.height - 1);
-
-            // Clip
-            if (xOffset + width >= texture.image.width) {
-                width = texture.image.width - xOffset;
-            }
-            if (yOffset + height >= texture.image.height) {
-                height = texture.image.height - yOffset;
-            }
-
-            if (width <= 0 || height <= 0) {
-                return;
-            }
-
-            assert(width > 0);
-            assert(height > 0);
-
-            assert(texture.image.width >= xOffset + width);
-            assert(texture.image.height >= yOffset + height);
-
-            common::uint16 brushStride = width * mElementsInRGBA;
-            common::uint16 textureStride = texture.image.width * mElementsInRGBA;
-
             auto r = FI_RGBA_RED;
             auto g = FI_RGBA_GREEN;
             auto b = FI_RGBA_BLUE;
             auto a = FI_RGBA_ALPHA;
 
-            common::int32 textureOffset = (yOffset * textureStride) + (xOffset * mElementsInRGBA);
+            common::int32 brushStride = image.width * mElementsInRGBA;
+            common::int32 textureStride = texture.image.width * mElementsInRGBA;
 
-            for (common::uint32 y = 0; y < height; ++y) {
-                for (common::uint32 x = 0; x < width; ++x) {
+            common::int32 subImageWidth = image.width;
+            common::int32 subImageHeight = image.height;
+
+            if (yOffset < 0) {
+                subImageHeight = image.height + yOffset;
+            }
+            if (yOffset + image.height > texture.image.height) {
+                subImageHeight = texture.image.height - yOffset;
+            }
+
+            if (xOffset < 0) {
+                subImageWidth = image.width + xOffset;
+            }
+            if (xOffset + image.width > texture.image.width) {
+                subImageWidth = texture.image.width - xOffset;
+            }
+
+            if (subImageHeight <= 0 || subImageWidth <= 0) {
+                return;
+            }
+
+            assert(subImageHeight > 0);
+            assert(subImageWidth > 0);
+
+            common::uint32 subImageStride = subImageWidth * mElementsInRGBA;
+            std::vector<common::uint8> subImage;
+            subImage.resize(subImageHeight * subImageStride, 0);
+
+            for (common::int32 y = 0; y < image.height; ++y) {
+                for (common::int32 x = 0; x < image.width; ++x) {
+                    common::int32 xTexture = x + xOffset;
+                    common::int32 yTexture = y + yOffset;
+
+                    if (xTexture < 0 || yTexture < 0) {
+                        continue;
+                    }
+                    if (xTexture > texture.image.width || yTexture > texture.image.height) {
+                        continue;
+                    }
+
+                    common::int32 ySubImage = y;
+                    common::int32 xSubImage = x;
+
+                    if (yOffset < 0) {
+                        ySubImage += yOffset;
+                    }
+                    if (xOffset < 0) {
+                        xSubImage += xOffset;
+                    }
+
+                    assert(ySubImage >= 0);
+                    assert(xSubImage >= 0);
+                    assert(xTexture >= 0);
+                    assert(yTexture >= 0);
+
                     common::int32 n = (y * brushStride) + (x * mElementsInRGBA);
-                    common::int32 m = textureOffset + (y * textureStride) + (x * mElementsInRGBA);
+                    common::int32 m = (yTexture * textureStride) + (xTexture * mElementsInRGBA);
+                    common::int32 p = (ySubImage * subImageStride) + (xSubImage * mElementsInRGBA);
 
-                    assert(m >= 0);
+                    // TODO: NO
+                    if (p + a >= subImage.size()) {
+                        continue;
+                    }
+
+                    assert(n + a < image.data.size());
                     assert(m + a < texture.image.data.size());
+                    assert(p + a < subImage.size());
 
                     common::real32 oldR = texture.image.data[m + r] / 255.f;
                     common::real32 oldG = texture.image.data[m + g] / 255.f;
@@ -239,13 +264,12 @@ namespace oni {
                     math::clip(blendB, 0.f, 1.f);
                     math::clip(blendA, 0.f, 1.f);
 
-                    // Reuse the array to avoid memory allocation
-                    image.data[n + r] = (common::uint8) (blendR * 255);
-                    image.data[n + g] = (common::uint8) (blendG * 255);
-                    image.data[n + b] = (common::uint8) (blendB * 255);
-                    image.data[n + a] = (common::uint8) (blendA * 255);
+                    subImage[p + r] = (common::uint8) (blendR * 255);
+                    subImage[p + g] = (common::uint8) (blendG * 255);
+                    subImage[p + b] = (common::uint8) (blendB * 255);
+                    subImage[p + a] = (common::uint8) (blendA * 255);
 
-                    // NOTE: Store the blend for future blending
+                    // NOTE: Store the blend for future
                     texture.image.data[m + r] = (common::uint8) (blendR * 255);
                     texture.image.data[m + g] = (common::uint8) (blendG * 255);
                     texture.image.data[m + b] = (common::uint8) (blendB * 255);
@@ -253,7 +277,7 @@ namespace oni {
                 }
             }
 
-            updateSubTexture(texture, xOffset, yOffset, width, height, image.data);
+            updateSubTexture(texture, xOffset, yOffset, subImageWidth, subImageHeight, subImage);
         }
 
         common::oniGLuint

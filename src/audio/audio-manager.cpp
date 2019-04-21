@@ -39,8 +39,8 @@ namespace oni {
             setVolume(backgroundSoundID, 0.2f);
             //playSound(backgroundSoundID);*/
 
-            ENGINE_IDLE = "resources/audio/car/car-2/idle-low-slow.wav";
-            loadSound(ENGINE_IDLE);
+            mEngineIdleSound = component::SoundID{"resources/audio/car/car-2/idle-low-slow.wav"};
+            loadSound(mEngineIdleSound);
 
 /*            component::SoundID rocketFastSoundID = "resources/audio/rocket/1-fast.wav";
             loadSound(rocketFastSoundID);
@@ -48,10 +48,11 @@ namespace oni {
             component::SoundID rocketSlowSoundID = "resources/audio/rocket/1-slow.wav";
             loadSound(rocketSlowSoundID);*/
 
-            ROCKET = "resources/audio/rocket/2-idle-fast.wav";
-            loadSound(ROCKET);
+            mRocketSound = component::SoundID{"resources/audio/rocket/2-idle-fast.wav"};
+            loadSound(mRocketSound);
 
-            loadSound("resources/audio/rocket/1-shot.wav");
+            auto shotSound = component::SoundID{"resources/audio/rocket/1-shot.wav"};
+            loadSound(shotSound);
 
             preLoadCollisionSoundEffects();
         }
@@ -74,9 +75,7 @@ namespace oni {
                     math::vec3 velocity{car.velocity.x, car.velocity.y, 0.f};
 
                     // TODO: Using soundTag find the correct sound to play.
-                    component::SoundID soundID = ENGINE_IDLE;
-
-                    auto &entityChannel = getOrCreateLooping3DChannel(soundID, entity);
+                    auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity);
                     auto &entityPos = placement.position;
                     auto distance = (entityPos - mPlayerPos).len();
                     if (distance < mMaxAudibleDistance) {
@@ -102,9 +101,7 @@ namespace oni {
                     if (soundTag != component::SoundTag::ROCKET) {
                         continue;
                     }
-                    component::SoundID soundID = ROCKET;
-
-                    auto &entityChannel = getOrCreateLooping3DChannel(soundID, entity);
+                    auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity);
                     auto distance = (pos - mPlayerPos).len();
                     if (distance < mMaxAudibleDistance) {
 
@@ -150,7 +147,7 @@ namespace oni {
 
         void
         AudioManager::preLoadCollisionSoundEffects() {
-            component::SoundID rocketWithUnknown = "resources/audio/collision/rocket-with-unknown.wav";
+            auto rocketWithUnknown = component::SoundID{"resources/audio/collision/rocket-with-unknown.wav"};
             loadSound(rocketWithUnknown);
             for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
                  i < static_cast<common::uint16>(component::EntityType::LAST);
@@ -178,11 +175,12 @@ namespace oni {
         void
         AudioManager::loadSound(const component::SoundID &id) {
             FMOD::Sound *sound{};
-            auto result = mSystem->createSound(id.c_str(), FMOD_DEFAULT, nullptr, &sound);
+            auto result = mSystem->createSound(id.value, FMOD_DEFAULT, nullptr, &sound);
             ERRCHECK(result);
             assert(sound);
 
-            mSounds[id] = std::unique_ptr<FMOD::Sound, FMODDeleter>(sound, FMODDeleter());
+            std::unique_ptr<FMOD::Sound, FMODDeleter> value(sound);
+            mSounds.insert({id, std::move(value)});
         }
 
         FMOD::Channel *
@@ -240,15 +238,15 @@ namespace oni {
         }
 
         AudioManager::SoundEntityID
-        AudioManager::getID(const component::SoundID &soundID,
-                            common::EntityID entityID) {
-            return soundID + std::to_string(entityID);
+        AudioManager::createNewID(const component::SoundID &soundID,
+                                  common::EntityID entityID) {
+            return std::string(soundID.value) + std::to_string(entityID);
         }
 
         AudioManager::EntityChannel &
         AudioManager::getOrCreateLooping3DChannel(const component::SoundID &soundID,
                                                   common::EntityID entityID) {
-            auto id = getID(soundID, entityID);
+            auto id = createNewID(soundID, entityID);
             if (mLooping3DChannels.find(id) == mLooping3DChannels.end()) {
                 EntityChannel entityChannel;
                 entityChannel.entityID = entityID;

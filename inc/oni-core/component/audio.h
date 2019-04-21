@@ -16,7 +16,10 @@ namespace oni {
             ENGINE_IDLE,
         };
 
-        using SoundID = std::string;
+        struct SoundID {
+            const char *value;
+        };
+
         using SoundPos = math::vec2;
     }
 }

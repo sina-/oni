@@ -105,7 +105,8 @@ namespace oni {
             ServerGame::postDisconnectHook(const common::PeerID &peerID) {
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
-                removeRaceCar(clientCarEntityID);
+                mEntityFactory->removeEntity(clientCarEntityID,
+                                             true, false);
                 mClientDataManager->deleteClient(peerID);
             }
 
@@ -262,13 +263,6 @@ namespace oni {
                 }
 
                 return carEntity;
-            }
-
-            void
-            ServerGame::removeRaceCar(common::EntityID carEntityID) {
-                mEntityFactory->removeEntity(carEntityID,
-                                             component::EntityType::RACE_CAR,
-                                             true, false);
             }
 
             common::EntityID

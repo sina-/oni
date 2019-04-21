@@ -96,6 +96,13 @@ namespace oni {
                   CollidingEntity &collidingEntity) {
             archive(collidingEntity.entityA, collidingEntity.entityB);
         }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  SoundID &soundID) {
+            archive(std::string(soundID.value));
+        }
     }
 
     namespace entities {

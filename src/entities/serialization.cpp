@@ -263,7 +263,7 @@ namespace oni {
                 >(snapshotType, input,
                         // NOTE: Entities might keep references to other entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct
-                        // mapping from client side tire ids to server side ids for each entity.
+                        // mapping from client side ids to server side ids for each entity.
                   &component::EntityAttachment::entities,
                   &component::EntityAttachee::entityID,
                   &component::CarLapInfo::entityID

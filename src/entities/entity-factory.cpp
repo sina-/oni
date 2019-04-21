@@ -68,9 +68,30 @@ namespace oni {
 
         void
         EntityFactory::removeEntity(common::EntityID entityID,
-                                    component::EntityType entityType,
                                     bool track,
                                     bool safe) {
+            if (safe && !mRegistryManager->valid(entityID)) {
+                return;
+            }
+
+            auto entityType = mRegistryManager->get<component::EntityType>(entityID);
+            _removeEntity(entityID, entityType, track, safe);
+
+            if (track) {
+                mRegistryManager->destroyAndTrack(entityID);
+            } else {
+                mRegistryManager->destroy(entityID);
+            }
+        }
+
+        void
+        EntityFactory::_removeEntity(common::EntityID entityID,
+                                     component::EntityType entityType,
+                                     bool track,
+                                     bool safe) {
+            // TODO: I hate this, for every new type and every change to old types I have to remember to add, or update,
+            // the deletion procedure. Technically dtor would be the right solution, then I can remove all this code
+            // and only depend on registry->destroy() method calling the dtor.
             switch (entityType) {
                 case component::EntityType::RACE_CAR: {
                     _removeEntity<component::EntityType::RACE_CAR>(entityID, track, safe);
@@ -95,27 +116,15 @@ namespace oni {
                 case component::EntityType::SIMPLE_SPRITE:
                 case component::EntityType::SIMPLE_PARTICLE:
                 case component::EntityType::TEXT:
-                case component::EntityType::WORLD_CHUNK:
+                case component::EntityType::WORLD_CHUNK: {
+                    break;
+                }
                 case component::EntityType::LAST:
-                case component::EntityType::UNKNOWN: {
+                case component::EntityType::UNKNOWN:
+                default: {
                     assert(false);
                     break;
                 }
-            }
-            removeEntity(entityID, track, safe);
-        }
-
-        void
-        EntityFactory::removeEntity(common::EntityID entityID,
-                                    bool track,
-                                    bool safe) {
-            if (safe && !mRegistryManager->valid(entityID)) {
-                return;
-            }
-            if (track) {
-                mRegistryManager->destroyAndTrack(entityID);
-            } else {
-                mRegistryManager->destroy(entityID);
             }
         }
 
@@ -619,6 +628,8 @@ namespace oni {
             // TODO: When notifying clients of this, the texture in memory should be evicted.
 
 
+            // TODO: For some reason this is the wrong list of entities, check valid() call returning false,
+            //  on client side even though during serialization I tell entt to keep mapping these ids to client side ids
             auto &attachments = mRegistryManager->get<component::EntityAttachment>(entityID);
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 auto attachmentType = attachments.entityTypes[i];
@@ -647,8 +658,12 @@ namespace oni {
 
         void
         EntityFactory::removePhysicalBody(common::EntityID entityID) {
-            auto entityPhysicalProps = mRegistryManager->get<component::PhysicalProperties>(entityID);
-            mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
+            // TODO: This is server side only at the moment, so deletion on client side would fail, if I add client
+            // side prediction I can remove this check
+            if (mRegistryManager->has<component::PhysicalProperties>(entityID)) {
+                auto entityPhysicalProps = mRegistryManager->get<component::PhysicalProperties>(entityID);
+                mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
+            }
         }
 
         void

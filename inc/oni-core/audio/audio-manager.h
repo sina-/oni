@@ -40,10 +40,6 @@ namespace oni {
                         common::real32 pitch);
 
         private:
-            void
-            loadSound(const component::SoundID &);
-
-        private:
             class FMODDeleter {
             public:
                 void
@@ -60,6 +56,22 @@ namespace oni {
                 FMOD::Channel *channel{nullptr};
             };
 
+            struct SoundIDHash {
+                std::size_t
+                operator()(const component::SoundID &soundID) const noexcept {
+                    std::hash<std::string> func{};
+                    return func(std::string(soundID.value));
+                }
+            };
+
+            struct SoundIDCompare {
+                bool
+                operator()(const component::SoundID &left,
+                           const component::SoundID &right) const {
+                    return std::string(left.value) == std::string(right.value);
+                }
+            };
+
         private:
             common::UInt16Pack
             createCollisionEffectID(component::EntityType,
@@ -68,9 +80,12 @@ namespace oni {
             FMOD::Channel *
             createChannel(const component::SoundID &);
 
+            void
+            loadSound(const component::SoundID &);
+
             SoundEntityID
-            getID(const component::SoundID &,
-                  common::EntityID);
+            createNewID(const component::SoundID &soundID,
+                        common::EntityID entityID);
 
             EntityChannel &
             getOrCreateLooping3DChannel(const component::SoundID &soundID,
@@ -103,7 +118,7 @@ namespace oni {
 
         private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
-            std::unordered_map<component::SoundID, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
+            std::unordered_map<component::SoundID, std::unique_ptr<FMOD::Sound, FMODDeleter>, AudioManager::SoundIDHash, AudioManager::SoundIDCompare> mSounds;
 
             std::map<SoundEntityID, EntityChannel> mLooping3DChannels;
 
@@ -115,8 +130,8 @@ namespace oni {
             common::int32 mMaxNumberOfChannels{0};
 
         private:
-            component::SoundID ENGINE_IDLE;
-            component::SoundID ROCKET;
+            component::SoundID mEngineIdleSound;
+            component::SoundID mRocketSound;
         };
     }
 }

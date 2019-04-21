@@ -75,12 +75,6 @@ namespace oni {
 
             void
             removeEntity(common::EntityID,
-                         component::EntityType entityType,
-                         bool track,
-                         bool safe);
-
-            void
-            removeEntity(common::EntityID,
                          bool track,
                          bool safe);
 
@@ -133,6 +127,12 @@ namespace oni {
             template<>
             void
             _apply<component::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &);
+
+            void
+            _removeEntity(common::EntityID,
+                          component::EntityType entityType,
+                          bool track,
+                          bool safe);
 
             template<component::EntityType entityType>
             void
@@ -319,6 +319,7 @@ namespace oni {
             template<class Component>
             Component &
             createComponent(common::EntityID entityID) {
+                static_assert(std::is_aggregate_v<Component> || std::is_enum_v<Component>);
                 return mRegistryManager->assign<Component>(entityID, Component{});
             }
 

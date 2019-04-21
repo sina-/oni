@@ -106,9 +106,6 @@ namespace oni {
                 EntityID
                 spawnRaceCar();
 
-                void
-                removeRaceCar(EntityID carEntityID);
-
                 EntityID
                 spawnTruck();
 

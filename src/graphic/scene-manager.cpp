@@ -705,16 +705,14 @@ namespace oni {
             {
                 begin(*mColorShader, *mColorRenderer, true, true, true);
                 renderColorSprites(serverEntityManager, viewWidth, viewHeight);
+                end(*mColorShader, *mColorRenderer);
             }
-
-            end(*mColorShader, *mColorRenderer);
 
             {
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(serverEntityManager, viewWidth, viewHeight);
+                end(*mParticleShader, *mParticleRenderer);
             }
-
-            end(*mParticleShader, *mParticleRenderer);
 
             {
                 if (lookAtEntity && serverEntityManager.has<component::Placement>(lookAtEntity)) {
@@ -726,10 +724,9 @@ namespace oni {
                 renderStaticText(serverEntityManager, viewWidth, viewHeight);
                 renderStaticTextures(serverEntityManager, viewWidth, viewHeight);
                 renderDynamicTextures(serverEntityManager, viewWidth, viewHeight);
-                // Release the lock as soon as we are done with the registry.
+                end(*mTextureShader, *mTextureRenderer);
             }
 
-            end(*mTextureShader, *mTextureRenderer);
 
             renderClientSideEntities(clientEntityManager);
         }
@@ -742,29 +739,27 @@ namespace oni {
             {
                 begin(*mColorShader, *mColorRenderer, true, true, true);
                 renderColorSprites(entityManager, viewWidth, viewHeight);
+                end(*mColorShader, *mColorRenderer);
             }
-
-            end(*mColorShader, *mColorRenderer);
 
             {
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
                 renderStaticTextures(entityManager, viewWidth, viewHeight);
+                end(*mTextureShader, *mTextureRenderer);
             }
-            end(*mTextureShader, *mTextureRenderer);
 
             {
                 // Render UI text with fixed camera
                 begin(*mTextureShader, *mTextureRenderer, false, false, true);
                 renderStaticText(entityManager, viewWidth, viewHeight);
+                end(*mTextureShader, *mTextureRenderer);
             }
-            end(*mTextureShader, *mTextureRenderer);
 
             {
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(entityManager, viewWidth, viewHeight);
+                end(*mParticleShader, *mParticleRenderer);
             }
-
-            end(*mParticleShader, *mParticleRenderer);
 
         }
 
@@ -834,9 +829,6 @@ namespace oni {
         SceneManager::renderDynamicTextures(entities::EntityManager &manager,
                                             common::real32 viewWidth,
                                             common::real32 viewHeight) {
-            // TODO: Maybe I can switch to none-locking view if I can split the registry so that rendering and
-            // other systems don't share any entity component, or the shared section is minimum and I can create
-            // copy of that data before starting rendering and only lock the registry at that point
             auto view = manager.createView<component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::Placement, component::Tag_Dynamic>();
             for (const auto &entity: view) {
@@ -1044,6 +1036,5 @@ namespace oni {
             auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
             return entityID;
         }
-
     }
 }

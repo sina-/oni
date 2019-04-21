@@ -175,7 +175,7 @@ namespace oni {
         void
         AudioManager::loadSound(const component::SoundID &id) {
             FMOD::Sound *sound{};
-            auto result = mSystem->createSound(id.value, FMOD_DEFAULT, nullptr, &sound);
+            auto result = mSystem->createSound(id.value.data(), FMOD_DEFAULT, nullptr, &sound);
             ERRCHECK(result);
             assert(sound);
 

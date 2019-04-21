@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <sstream>
 
 #include <cereal/archives/portable_binary.hpp>
@@ -101,7 +102,8 @@ namespace oni {
         void
         serialize(Archive &archive,
                   SoundID &soundID) {
-            archive(std::string(soundID.value));
+            assert(!soundID.value.empty());
+            archive(soundID.value);
         }
     }
 

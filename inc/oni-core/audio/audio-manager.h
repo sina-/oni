@@ -60,7 +60,7 @@ namespace oni {
                 std::size_t
                 operator()(const component::SoundID &soundID) const noexcept {
                     std::hash<std::string> func{};
-                    return func(std::string(soundID.value));
+                    return func(soundID.value);
                 }
             };
 
@@ -68,7 +68,7 @@ namespace oni {
                 bool
                 operator()(const component::SoundID &left,
                            const component::SoundID &right) const {
-                    return std::string(left.value) == std::string(right.value);
+                    return left.value == right.value;
                 }
             };
 

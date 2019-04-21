@@ -21,17 +21,18 @@ namespace oni {
                 return std::chrono::steady_clock::now();
             }
 
-            std::chrono::seconds
+            template<class Duration>
+            Duration
             elapsed() const {
-                return std::chrono::duration_cast<std::chrono::seconds>(now() - mStartTime);
+                return std::chrono::duration_cast<Duration>(now() - mStartTime);
             }
 
             // Return elapsed time in seconds
             oni::common::real64
-            elapsed_in_seconds() const { return (now() - mStartTime).count() * 1e-9; }
+            elapsedInSeconds() const { return (now() - mStartTime).count() * 1e-9; }
 
             common::uint64
-            elapsed_in_nanoseconds() const {
+            elapsedInNanoseconds() const {
                 return static_cast<common::uint64>((now() - mStartTime).count());
             }
 

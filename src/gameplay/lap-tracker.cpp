@@ -30,7 +30,7 @@ namespace oni {
         LapTracker::tick() {
             std::vector<common::EntityID> entitiesToUpdate;
             {
-                auto carView = mEntityManager.createViewWithLock<component::Shape, component::Placement, component::Car>();
+                auto carView = mEntityManager.createView<component::Shape, component::Placement, component::Car>();
                 for (auto &&entity: carView) {
 
                     // TODO: This is obsolete if registry is only modified from one thread. Then I can expose addNewPlayer()
@@ -61,9 +61,9 @@ namespace oni {
             if (!entitiesToUpdate.empty()) {
                 // NOTE: I don't need the components::Car but Entt requires at least two components for a view
                 // for some freaking reason.
-                auto carLapView = mEntityManager.createViewWithLock<component::CarLapInfo, component::Car>();
+                auto carLapView = mEntityManager.createView<component::CarLapInfo, component::Car>();
                 for (auto &&entity: entitiesToUpdate) {
-                    auto currentTime = mTimers[entity].elapsed();
+                    auto currentTime = mTimers[entity].elapsed<std::chrono::seconds>();
                     auto currentBest = mBestLaps[entity];
                     if (currentTime < currentBest) {
                         mBestLaps[entity] = currentTime;

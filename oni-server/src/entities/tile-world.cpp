@@ -479,8 +479,6 @@ namespace oni {
                 common::real32 wallWidth = 0.5f;
                 common::real32 heading = 0.f; // For static objects facing angle does not matter.
 
-                auto lock = mEntityFactory.getEntityManager().scopedLock();
-
                 for (size_t i = 0; i < wallCount; ++i) {
                     auto &wallPos = position[i];
                     auto &xTileIndex = indices[i].x;
@@ -590,7 +588,6 @@ namespace oni {
             TileWorld::genSprite(math::vec4 &color,
                                  math::vec2 &tileSize,
                                  math::vec3 &worldPos) {
-                auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
                 auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, tileSize,
                                                                                                 heading,
@@ -603,7 +600,6 @@ namespace oni {
             TileWorld::genTexture(const math::vec2 &size,
                                   const math::vec3 &worldPos,
                                   const std::string &path) {
-                auto lock = mEntityFactory.getEntityManager().scopedLock();
                 common::real32 heading = 0.f;
                 auto entityID = mEntityFactory.createEntity<component::EntityType::WORLD_CHUNK>(worldPos, size, heading,
                                                                                                 path);

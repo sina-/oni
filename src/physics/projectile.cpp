@@ -22,7 +22,7 @@ namespace oni {
                          common::real64 tickTime) {
             // Update cool-downs
             {
-                auto view = entityFactory.getEntityManager().createViewWithLock<component::GunCoolDown>();
+                auto view = entityFactory.getEntityManager().createView<component::GunCoolDown>();
                 for (auto &&entity: view) {
                     auto &coolDown = view.get<component::GunCoolDown>(entity);
                     if (coolDown.value > 0) {
@@ -33,7 +33,7 @@ namespace oni {
 
             // Spawn projectile
             {
-                auto carView = entityFactory.getEntityManager().createViewWithLock<
+                auto carView = entityFactory.getEntityManager().createView<
                         component::Placement,
                         component::Car,
                         component::CarConfig,
@@ -42,7 +42,6 @@ namespace oni {
                 common::real32 velocity{200.f};
 
                 for (auto &&entity: carView) {
-                    auto clientLock = clientData.scopedLock();
                     auto *input = clientData.getClientInput(entity);
                     if (!input) {
                         continue;

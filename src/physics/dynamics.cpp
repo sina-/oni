@@ -140,10 +140,9 @@ namespace oni {
                 // One solutions could be, if this loop is very heavy, is to create a copy of all the data I need to
                 // operate on and do all the calculation and then lock the registry and update all the corresponding
                 // entities.
-                auto carView = manager.createViewWithLock<component::Placement, component::Car, component::CarConfig>();
+                auto carView = manager.createView<component::Placement, component::Car, component::CarConfig>();
 
                 for (auto &&entity: carView) {
-                    auto clientLock = clientData.scopedLock();
                     auto input = clientData.getClientInput(entity);
                     // NOTE: This could happen just at the moment when a client joins, an entity is created by the
                     // client data structures are not initialized.
@@ -217,8 +216,6 @@ namespace oni {
             }
 
             {
-                // NOTE: Step() function will modify collision status of entities, so we have to lock the registry.
-                auto lock = manager.scopedLock();
                 // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
                 // One way to hide it is to provide a function in physics library that creates physical entities
                 // for a given entity id an maintains an internal mapping between them without leaking the
@@ -229,7 +226,7 @@ namespace oni {
             mProjectile->tick(entityFactory, clientData, tickTime);
 
             {
-                auto carPhysicsView = manager.createViewWithLock<component::Car, component::PhysicalProperties>();
+                auto carPhysicsView = manager.createView<component::Car, component::PhysicalProperties>();
 
                 // Handle collision
                 for (auto entity: carPhysicsView) {
@@ -274,7 +271,7 @@ namespace oni {
 
             {
                 // Handle collision
-                auto view = manager.createViewWithLock<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createView<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
                 for (auto entity: view) {
                     auto &props = view.get<component::PhysicalProperties>(entity);
@@ -288,7 +285,7 @@ namespace oni {
             }
             {
                 // Update placement
-                auto view = manager.createViewWithLock<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createView<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
 
                 for (auto entity: view) {
@@ -317,7 +314,7 @@ namespace oni {
 
             {
                 // Update tires
-                auto view = manager.createViewWithLock<component::EntityAttachment, component::Car>();
+                auto view = manager.createView<component::EntityAttachment, component::Car>();
                 for (auto &&entity : view) {
                     const auto &attachments = view.get<component::EntityAttachment>(entity);
                     const auto &car = view.get<component::Car>(entity);
@@ -335,7 +332,6 @@ namespace oni {
             }
 
             {
-                auto lock = manager.scopedLock();
                 for (auto &&entity : entitiesToBeUpdated) {
                     manager.tagForComponentSync(entity);
                 }

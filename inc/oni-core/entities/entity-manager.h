@@ -300,12 +300,6 @@ namespace oni {
                         {
                             auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
                             if (!view.empty()) {
-/*                                for (auto &&entity: view) {
-                                    std::cout << "Updating: "
-                                              << static_cast<int>(mRegistry->get<component::EntityType>(entity))
-                                              << " id: " << entity
-                                              << "\n";
-                                }*/
                                 mRegistry->snapshot().template component<ArchiveComponents...>(archive,
                                                                                                view.begin(),
                                                                                                view.end());
@@ -448,6 +442,5 @@ namespace oni {
 
             std::vector<EntityType> mDeletedEntities{};
         };
-
     }
 }

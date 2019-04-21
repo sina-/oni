@@ -124,8 +124,6 @@ namespace oni {
 
         void
         Server::broadcastEvents(entities::EntityFactory &entityFactory) {
-            auto lock = entityFactory.getEntityManager().scopedLock();
-
             std::vector<CollisionEventPacket> collisionPackets;
             {
                 std::function<void(component::CollidingEntity &,

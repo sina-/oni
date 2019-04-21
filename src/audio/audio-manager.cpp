@@ -65,7 +65,7 @@ namespace oni {
 
             // Engine
             {
-                auto view = entityFactory.getEntityManager().createViewWithLock<component::Tag_Audible,
+                auto view = entityFactory.getEntityManager().createView<component::Tag_Audible,
                         component::Placement, component::Car, component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &car = view.get<component::Car>(entity);
@@ -92,7 +92,7 @@ namespace oni {
             }
 
             {
-                auto view = entityFactory.getEntityManager().createViewWithLock<component::Tag_Audible,
+                auto view = entityFactory.getEntityManager().createView<component::Tag_Audible,
                         component::Placement, component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &pos = view.get<component::Placement>(entity).position;

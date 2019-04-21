@@ -63,7 +63,7 @@ namespace oni {
             assert(mPacketHandlers.find(header) != mPacketHandlers.end());
             switch (header) {
                 case (PacketType::PING): {
-                    auto latency = mTimer->elapsed_in_seconds();
+                    auto latency = mTimer->elapsedInSeconds();
                     mTimer->restart();
                     mPacketHandlers[PacketType::PING](peerID, std::to_string(latency * 1000));
                     break;

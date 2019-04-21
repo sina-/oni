@@ -328,8 +328,7 @@ namespace oni {
                 common::real32 particleSize = particleHalfSize * 2;
                 common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
-                auto lock = clientEntityFactory.getEntityManager().scopedLock();
-                auto view = serverEntityFactory.getEntityManager().createViewWithLock<component::Trail, component::Placement>();
+                auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::Placement>();
                 for (auto &&entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     const auto &currentPos = placement.position;
@@ -407,7 +406,7 @@ namespace oni {
                 std::vector<math::vec2> skidPosList{};
                 std::vector<common::uint8> skidOpacity{};
                 {
-                    auto carView = serverEntityFactory.getEntityManager().createViewWithLock<component::Car, component::Placement, component::CarConfig>();
+                    auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::Placement, component::CarConfig>();
                     for (auto &&carEntity: carView) {
 
                         const auto car = carView.get<component::Car>(carEntity);
@@ -454,7 +453,7 @@ namespace oni {
 
             // Update Laps
             {
-                auto carLapView = serverEntityFactory.getEntityManager().createViewWithLock<component::Car, component::CarLapInfo>();
+                auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, component::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -479,7 +478,6 @@ namespace oni {
                             const component::PixelRGBA &color,
                             const math::vec2 &worldPos) {
             auto &entityManager = entityFactory.getEntityManager();
-            auto lock = entityManager.scopedLock();
 
             std::set<common::EntityID> tileEntities;
 
@@ -610,7 +608,7 @@ namespace oni {
         void
         SceneManager::updateParticles(entities::EntityFactory &entityFactory,
                                       common::real64 tickTime) {
-            auto view = entityFactory.getEntityManager().createViewWithLock<component::Particle>();
+            auto view = entityFactory.getEntityManager().createView<component::Particle>();
             for (const auto &entity: view) {
                 auto &particle = view.get<component::Particle>(entity);
                 // TODO: Maybe you want a single place to store these variables?
@@ -705,7 +703,6 @@ namespace oni {
             auto viewHeight = getViewHeight();
 
             {
-                auto lock = serverEntityManager.scopedLock();
                 begin(*mColorShader, *mColorRenderer, true, true, true);
                 renderColorSprites(serverEntityManager, viewWidth, viewHeight);
             }
@@ -713,7 +710,6 @@ namespace oni {
             end(*mColorShader, *mColorRenderer);
 
             {
-                auto lock = serverEntityManager.scopedLock();
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(serverEntityManager, viewWidth, viewHeight);
             }
@@ -721,7 +717,6 @@ namespace oni {
             end(*mParticleShader, *mParticleRenderer);
 
             {
-                auto lock = serverEntityManager.scopedLock();
                 if (lookAtEntity && serverEntityManager.has<component::Placement>(lookAtEntity)) {
                     const auto &pos = serverEntityManager.get<component::Placement>(lookAtEntity).position;
                     lookAt(pos.x, pos.y);
@@ -745,7 +740,6 @@ namespace oni {
             auto viewHeight = getViewHeight();
 
             {
-                auto lock = entityManager.scopedLock();
                 begin(*mColorShader, *mColorRenderer, true, true, true);
                 renderColorSprites(entityManager, viewWidth, viewHeight);
             }
@@ -753,14 +747,12 @@ namespace oni {
             end(*mColorShader, *mColorRenderer);
 
             {
-                auto lock = entityManager.scopedLock();
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
                 renderStaticTextures(entityManager, viewWidth, viewHeight);
             }
             end(*mTextureShader, *mTextureRenderer);
 
             {
-                auto lock = entityManager.scopedLock();
                 // Render UI text with fixed camera
                 begin(*mTextureShader, *mTextureRenderer, false, false, true);
                 renderStaticText(entityManager, viewWidth, viewHeight);
@@ -768,7 +760,6 @@ namespace oni {
             end(*mTextureShader, *mTextureRenderer);
 
             {
-                auto lock = entityManager.scopedLock();
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(entityManager, viewWidth, viewHeight);
             }

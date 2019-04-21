@@ -90,7 +90,6 @@ namespace oni {
                 mServer->sendCarEntityID(carEntity, clientID);
                 mServer->sendEntitiesAll(mEntityFactory->getEntityManager());
 
-                auto lock = mClientDataManager->scopedLock();
                 mClientDataManager->addNewClient(clientID, carEntity);
             }
 
@@ -99,13 +98,11 @@ namespace oni {
                                                  const std::string &data) {
                 auto input = oni::entities::deserialize<io::Input>(data);
                 // TODO: Avoid copy by using a unique_ptr or something
-                auto lock = mClientDataManager->scopedLock();
                 mClientDataManager->setClientInput(clientID, input);
             }
 
             void
             ServerGame::postDisconnectHook(const common::PeerID &peerID) {
-                auto clientDataLock = mClientDataManager->scopedLock();
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
                 removeRaceCar(clientCarEntityID);
@@ -127,7 +124,6 @@ namespace oni {
 
                 {
                     auto &entityManager = mEntityFactory->getEntityManager();
-                    auto lock = entityManager.scopedLock();
                     mServer->broadcastDeletedEntities(entityManager);
                 }
             }
@@ -147,8 +143,6 @@ namespace oni {
                     // point of multi threading? Maybe I should drop this whole multi-thread everything shenanigans and just do
                     // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
                     auto &manager = mEntityFactory->getEntityManager();
-                    auto registryLock = manager.scopedLock();
-                    auto clientDataLock = mClientDataManager->scopedLock();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
                         const auto &carPlacement = manager.get<component::Placement>(carEntity);
                         tickPositions.push_back(carPlacement.position.getXY());
@@ -200,7 +194,6 @@ namespace oni {
                 std::string carTextureID = "resources/images/car/1/car.png";
 
                 auto &manager = mEntityFactory->getEntityManager();
-                auto lock = manager.scopedLock();
 
                 auto carEntity = mEntityFactory->createEntity<component::EntityType::RACE_CAR>(pos,
                                                                                                size,
@@ -273,7 +266,6 @@ namespace oni {
 
             void
             ServerGame::removeRaceCar(common::EntityID carEntityID) {
-                auto lock = mEntityFactory->getEntityManager().scopedLock();
                 mEntityFactory->removeEntity(carEntityID,
                                              component::EntityType::RACE_CAR,
                                              true, false);
@@ -287,7 +279,6 @@ namespace oni {
                 common::real32 heading = 0.f;
                 std::string textureID = "resources/images/car/2/truck.png";
 
-                auto lock = mEntityFactory->getEntityManager().scopedLock();
                 auto entityID = mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading,
                                                                                              textureID);
                 mEntityFactory->tagForNetworkSync(entityID);

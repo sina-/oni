@@ -23,145 +23,119 @@ namespace oni {
 
         void
         Game::run() {
-            std::thread pollThread(&Game::poll, this);
-            std::thread simThread(&Game::sim, this);
-            std::thread renderThread(&Game::render, this);
+            initRenderer();
 
             while (!mShouldTerminate) {
                 if (shouldTerminate()) {
                     mShouldTerminate = true;
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                sim();
+                poll();
+                render();
             }
-
-            pollThread.join();
-            simThread.join();
-            renderThread.join();
         }
 
         void
         Game::sim() {
-            utils::Timer simTimer{};
-            utils::Timer loopTimer{};
-            common::uint16 updateCounter{0};
-            common::real64 excessPerSecond{0.0f};
+            auto elapsed = mSimLoopTimer.elapsedInSeconds();
+            if (elapsed >= 1.0f) {
+                auto sps = mSimUpdateCounter / elapsed;
+                auto set = mSimExcessPerSecond / elapsed;
+                showSPS(static_cast<common::int16>(sps));
+                showSET(static_cast<common::int16>(set));
 
-            while (!mShouldTerminate) {
-                auto elapsed = loopTimer.elapsed_in_seconds();
-                if (elapsed >= 1.0f) {
-                    auto sps = updateCounter / elapsed;
-                    auto set = excessPerSecond / elapsed;
-                    showSPS(static_cast<common::int16>(sps));
-                    showSET(static_cast<common::int16>(set));
-
-                    loopTimer.restart();
-                    updateCounter = 0;
-                    excessPerSecond = 0.0f;
-                }
-
-                simTimer.restart();
-
-                _sim(mSimMS);
-
-                auto simDuration = simTimer.elapsed_in_seconds();
-                auto excess = mSimMS - simDuration;
-                excess *= 1000;
-
-                if (excess > 0.0f) {
-                    auto sleepFor = static_cast<common::int64>(excess);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
-                } else {
-                    std::cout << "WARN: Couldn't sleep during sim(). Deficit: " << excess << "ms\n";
-                }
-
-                excessPerSecond += excess;
-                ++updateCounter;
+                mSimLoopTimer.restart();
+                mSimUpdateCounter = 0;
+                mSimExcessPerSecond = 0.0f;
             }
+
+            mSimTimer.restart();
+
+            _sim(mSimMS);
+
+            auto simDuration = mSimTimer.elapsedInSeconds();
+            auto excess = mTickMS - simDuration;
+            excess *= 1000;
+
+            if (excess > 0.0f) {
+                auto sleepFor = static_cast<common::int64>(excess);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+            } else {
+                std::cout << "WARN: Couldn't sleep during sim(). Deficit: " << excess << "ms\n";
+            }
+
+            mSimExcessPerSecond += excess;
+            ++mSimUpdateCounter;
         }
 
         void
         Game::poll() {
-            utils::Timer pollTimer{};
-            utils::Timer loopTimer{};
-            common::uint16 updateCounter{0};
-            common::real64 excessPerSecond{0.0f};
+            auto elapsed = mPollLoopTimer.elapsedInSeconds();
+            if (elapsed >= 1.0f) {
+                auto pps = mPollUpdateCounter / elapsed;
+                auto pet = mPollExcessPerSecond / elapsed;
+                showPPS(static_cast<common::int16>(pps));
+                showPET(static_cast<common::int16>(pet));
 
-            while (!mShouldTerminate) {
-                auto elapsed = loopTimer.elapsed_in_seconds();
-                if (elapsed >= 1.0f) {
-                    auto pps = updateCounter / elapsed;
-                    auto pet = excessPerSecond / elapsed;
-                    showPPS(static_cast<common::int16>(pps));
-                    showPET(static_cast<common::int16>(pet));
-
-                    loopTimer.restart();
-                    updateCounter = 0;
-                    excessPerSecond = 0.0f;
-                }
-
-                pollTimer.restart();
-
-                _poll();
-
-                auto pollDuration = pollTimer.elapsed_in_seconds();
-                auto excess = mPollMS - pollDuration;
-                excess *= 1000;
-
-                if (excess >= 0.0f) {
-                    auto sleepFor = static_cast<common::int64>(excess);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
-                } else {
-                    std::cout << "WARN: Couldn't sleep during poll(). Deficit: " << excess << "ms\n";
-                }
-
-                excessPerSecond += excess;
-                ++updateCounter;
+                mPollLoopTimer.restart();
+                mPollUpdateCounter = 0;
+                mPollExcessPerSecond = 0.0f;
             }
+
+            mPollTimer.restart();
+
+            _poll();
+
+            auto pollDuration = mPollTimer.elapsedInSeconds();
+            auto excess = mTickMS - pollDuration;
+            excess *= 1000;
+
+            if (excess >= 0.0f) {
+                auto sleepFor = static_cast<common::int64>(excess);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+            } else {
+                std::cout << "WARN: Couldn't sleep during poll(). Deficit: " << excess << "ms\n";
+            }
+
+            mPollExcessPerSecond += excess;
+            ++mPollUpdateCounter;
         }
 
         void
         Game::render() {
-            utils::Timer renderTimer{};
-            utils::Timer loopTimer{};
-            common::uint16 updateCounter{0};
-            common::real64 excessPerSecond{0.0f};
+            auto elapsed = mRenderLoopTimer.elapsedInSeconds();
+            if (elapsed >= 1.0f) {
+                auto fps = mRenderUpdateCounter / elapsed;
+                auto ret = mRenderExcessPerSecond / elapsed;
+                showFPS(static_cast<common::int16>(fps));
+                showRET(static_cast<common::int16>(ret));
 
-            initRenderer();
-
-            while (!mShouldTerminate) {
-                auto elapsed = loopTimer.elapsed_in_seconds();
-                if (elapsed >= 1.0f) {
-                    auto fps = updateCounter / elapsed;
-                    auto ret = excessPerSecond / elapsed;
-                    showFPS(static_cast<common::int16>(fps));
-                    showRET(static_cast<common::int16>(ret));
-
-                    loopTimer.restart();
-                    updateCounter = 0;
-                    excessPerSecond = 0.0f;
-                }
-
-                renderTimer.restart();
-
-                _render(mSimMS);
-
-                auto renderDuration = renderTimer.elapsed_in_seconds();
-                auto excess = mRenderMS - renderDuration;
-                excess *= 1000;
-
-                if (excess >= 0.0f) {
-                    auto sleepFor = static_cast<common::int64>(excess);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
-                } else {
-                    std::cout << "WARN: Couldn't sleep during render(). Deficit: " << excess << "ms\n";
-                }
-
-                // NOTE: Only display the result at the end after mSimMS amount of time has passed.
-                display();
-
-                excessPerSecond += excess;
-                ++updateCounter;
+                mRenderLoopTimer.restart();
+                mRenderUpdateCounter = 0;
+                mRenderExcessPerSecond = 0.0f;
             }
+
+            mRenderTimer.restart();
+
+            _render(mSimMS);
+
+            auto renderDuration = mRenderTimer.elapsedInSeconds();
+            auto excess = mTickMS - renderDuration;
+            excess *= 1000;
+
+            if (excess >= 0.0f) {
+                auto sleepFor = static_cast<common::int64>(excess);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleepFor));
+            } else {
+                std::cout << "WARN: Couldn't sleep during render(). Render time: " << renderDuration << ". Deficit: "
+                          << excess << "ms\n";
+            }
+
+            // NOTE: Display the result at the end after mSimMS amount of time has passed.
+            display();
+
+            mRenderExcessPerSecond += excess;
+            ++mRenderUpdateCounter;
         }
 
         void

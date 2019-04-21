@@ -192,7 +192,6 @@ namespace oni {
                   component::SnapshotType snapshotType) {
             std::stringstream storage{};
             {
-                auto lock = manager.scopedLock();
                 cereal::PortableBinaryOutputArchive output{storage};
                 manager.snapshot<cereal::PortableBinaryOutputArchive,
                         component::Car,
@@ -236,7 +235,6 @@ namespace oni {
             storage.str(data);
 
             {
-                auto lock = manager.scopedLock();
                 cereal::PortableBinaryInputArchive input{storage};
                 manager.restore<cereal::PortableBinaryInputArchive,
                         component::Car,

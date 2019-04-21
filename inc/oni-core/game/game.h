@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/utils/timer.h>
 
 namespace oni {
     namespace game {
@@ -75,11 +76,27 @@ namespace oni {
             // 60Hz
             const common::real64 mSimMS{1 / 60.0f};
             const common::real64 mRenderMS{1 / 60.0f};
-            const common::real64 mPollMS{1 / 30.0f};
+            const common::real64 mPollMS{1 / 60.0f};
             // 30Hz
-            // const common::real32 mMinTickMS{1 / 30.0f};
+            const common::real32 mTickMS{1 / 180.0f};
 
             std::atomic<bool> mShouldTerminate{false};
+
+        protected:
+            utils::Timer mSimTimer{};
+            utils::Timer mSimLoopTimer{};
+            common::uint16 mSimUpdateCounter{0};
+            common::real64 mSimExcessPerSecond{0.0f};
+
+            utils::Timer mPollTimer{};
+            utils::Timer mPollLoopTimer{};
+            common::uint16 mPollUpdateCounter{0};
+            common::real64 mPollExcessPerSecond{0.0f};
+
+            utils::Timer mRenderTimer{};
+            utils::Timer mRenderLoopTimer{};
+            common::uint16 mRenderUpdateCounter{0};
+            common::real64 mRenderExcessPerSecond{0.0f};
         };
     }
 }

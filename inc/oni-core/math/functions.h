@@ -15,11 +15,31 @@ namespace oni {
         }
 
         template<class T>
+        inline T
+        max(const T &x,
+            const T &y) {
+            if (x > y) {
+                return x;
+            }
+            return y;
+        }
+
+        template<class T>
+        inline T
+        min(const T &x,
+            const T &y) {
+            if(x < y){
+                return x;
+            }
+            return y;
+        }
+
+        template<class T>
         inline void
         clip(T &n,
              const T &lower,
              const T &upper) {
-            n = std::max(lower, std::min(n, upper));
+            n = max(lower, min(n, upper));
         }
 
         template<class T>
@@ -27,7 +47,7 @@ namespace oni {
         clip(const T &n,
              const T &lower,
              const T &upper) {
-            return std::max(lower, std::min(n, upper));
+            return max(lower, min(n, upper));
         }
 
         template<class T>
@@ -86,7 +106,7 @@ namespace oni {
             // So it kinda shifts all the values in the reverse order from max(std::uint32_t) / 2 + 1 to max(std::uint32_t)
             // And that is why this function is bijective, which is an important property since it has to always map
             // unique inputs to a unique output.
-            // There are other ways to do this: https://stackoverflow.com/a/13871379
+            // There are other ways to do this: https://stackoverflow.com/a/13871379 (Cantor pairing function and Szudzik's improved implementation)
             // I could also just yank the numbers together and save it as a string.
             auto _x = static_cast<common::uint64>(static_cast<common::uint32>(x)) << 32;
             auto _y = static_cast<common::uint64>(static_cast<common::uint32>(y));
@@ -101,11 +121,11 @@ namespace oni {
             return x << 16 | y;
         }
 
-        template<class Type>
-        inline Type
-        lerp(Type a,
-             Type b,
-             Type t) {
+        template<class T>
+        inline T
+        lerp(T a,
+             T b,
+             T t) {
             return (1 - t) * a + t * b;
         }
     }

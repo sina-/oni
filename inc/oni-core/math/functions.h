@@ -100,5 +100,13 @@ namespace oni {
                    common::uint16 y) {
             return x << 16 | y;
         }
+
+        template<class Type>
+        inline Type
+        lerp(Type a,
+             Type b,
+             Type t) {
+            return (1 - t) * a + t * b;
+        }
     }
 }

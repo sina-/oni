@@ -247,10 +247,9 @@ namespace oni {
                     common::real32 newB = image.data[n + b] / 255.f;
                     common::real32 newA = image.data[n + a] / 255.f;
 
-                    // Partially based on https://stackoverflow.com/a/9014763
-                    common::real32 blendR = newR * newA + (oldR * (1 - newA));
-                    common::real32 blendG = newG * newA + (oldG * (1 - newA));
-                    common::real32 blendB = newB * newA + (oldB * (1 - newA));
+                    common::real32 blendR = math::lerp(oldR, newR, newA);
+                    common::real32 blendG = math::lerp(oldG, newG, newA);
+                    common::real32 blendB = math::lerp(oldB, newB, newA);
                     common::real32 blendA = newA + oldA;
 
                     math::clip(blendR, 0.f, 1.f);

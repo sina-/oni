@@ -9,6 +9,7 @@
 #include <oni-core/buffer/index-buffer.h>
 #include <oni-core/buffer/vertex-array.h>
 #include <oni-core/component/geometry.h>
+#include <oni-core/component/physic.h>
 
 namespace oni {
     namespace graphic {
@@ -126,16 +127,19 @@ namespace oni {
 
         void
         BatchRenderer2D::_submit(const component::Particle &particle,
+                                 const component::Placement &placement,
+                                 const component::Age &age,
+                                 const component::Velocity &velocity,
                                  const component::Appearance &appearance) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
             auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
 
-            buffer->position = particle.pos;
+            buffer->position = placement.position;
             buffer->color = appearance.color;
-            buffer->age = particle.age;
-            buffer->heading = particle.heading;
-            buffer->velocity = particle.velocity;
+            buffer->age = age.currentAge;
+            buffer->heading = placement.rotation;
+            buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = -1;
             buffer->halfSize = particle.halfSize;
             buffer++;
@@ -148,6 +152,9 @@ namespace oni {
 
         void
         BatchRenderer2D::_submit(const component::Particle &particle,
+                                 const component::Placement &placement,
+                                 const component::Age &age,
+                                 const component::Velocity &velocity,
                                  const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
@@ -155,11 +162,11 @@ namespace oni {
 
             auto samplerID = getSamplerID(texture.textureID);
 
-            buffer->position = particle.pos;
+            buffer->position = placement.position;
             buffer->color = {};
-            buffer->age = particle.age;
-            buffer->heading = particle.heading;
-            buffer->velocity = particle.velocity;
+            buffer->age = age.currentAge;
+            buffer->heading = placement.rotation;
+            buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = samplerID;
             buffer->halfSize = particle.halfSize;
             buffer++;

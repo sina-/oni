@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include <oni-core/component/visual.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/component/entity.h>
 
 namespace oni {
     namespace math {

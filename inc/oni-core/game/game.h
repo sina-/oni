@@ -74,11 +74,11 @@ namespace oni {
 
         protected:
             // 60Hz
-            const common::real64 mSimMS{1 / 60.0f};
-            const common::real64 mRenderMS{1 / 60.0f};
-            const common::real64 mPollMS{1 / 60.0f};
+            const common::real64 mSimS{1 / 60.0f};
+            const common::real64 mRenderS{1 / 60.0f};
+            const common::real64 mPollS{1 / 60.0f};
             // 30Hz
-            const common::real32 mTickMS{1 / 180.0f};
+            const common::real32 mTickS{1 / 180.0f};
 
             std::atomic<bool> mShouldTerminate{false};
 

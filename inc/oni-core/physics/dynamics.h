@@ -57,6 +57,11 @@ namespace oni {
                  entities::ClientDataManager &clientData,
                  common::real64 tickTime);
 
+            void
+            tickAge(entities::EntityFactory &entityFactory,
+                    common::real64 tickTime,
+                    const component::EntityOperationPolicy&);
+
         private:
             void
             handleRocketCollision(entities::EntityFactory &,

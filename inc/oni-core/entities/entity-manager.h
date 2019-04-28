@@ -8,7 +8,7 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/component/entity.h>
 #include <oni-core/component/tag.h>
 #include <oni-core/component/visual.h>
 

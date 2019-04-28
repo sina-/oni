@@ -8,7 +8,7 @@
 #include <cereal/types/vector.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/component/entity.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/component/visual.h>
 
@@ -87,8 +87,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   Particle &particle) {
-            archive(particle.age, particle.maxAge, particle.pos, particle.heading, particle.velocity,
-                    particle.halfSize);
+            archive(particle.halfSize);
         }
 
         template<class Archive>

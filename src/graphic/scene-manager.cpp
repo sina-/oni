@@ -383,13 +383,19 @@ namespace oni {
                         */
                             trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
                                     pos, textureID, particleHalfSize, false);
-                            auto &particle = clientEntityFactory.getEntityManager().get<component::Particle>(
+                            auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
                                     trailEntity);
                             // TODO: I don't use any other velocity than the first one, should I just not store the rest?
                             // or should I update this code to use all by iterating over trail.previousPos?
-                            particle.maxAge = 1.f - (distance - i) / trail.velocity[0];
-                            particle.heading = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
-                            particle.velocity = mRand->nextReal32(2.f, 10.f);
+                            age.maxAge = 1.f - (distance - i) / trail.velocity[0];
+
+                            auto &velocity = clientEntityFactory.getEntityManager().get<component::Velocity>(
+                                    trailEntity);
+                            velocity.currentVelocity = mRand->nextReal32(2.f, 10.f);
+
+                            auto &particlePlacement = clientEntityFactory.getEntityManager().get<component::Placement>(
+                                    trailEntity);
+                            particlePlacement.rotation = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
 
                             pos.x += particleSize * std::sin(alpha);
                             pos.y += particleSize * std::cos(alpha);
@@ -399,6 +405,21 @@ namespace oni {
 //                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
 //                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
                 }
+            }
+
+            // Entities that leave mark
+            {
+                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::Placement>();
+                auto brush = component::Brush{};
+                brush.textureID = "resources/images/smoke/1.png";
+                brush.type = component::BrushType::CUSTOM_TEXTURE;
+                brush.size = math::vec2{1, 1};
+
+                for (auto &&entity: view) {
+                    const auto &pos = view.get<component::Placement>(entity).position.getXY();
+                    splat(clientEntityFactory, brush, pos);
+                }
+
             }
 
             // Update Skid lines.
@@ -441,12 +462,13 @@ namespace oni {
                 }
 
                 {
-                    auto brushType = component::BrushType::PLAIN_RECTANGLE;
-                    auto brushSize = math::vec2{0.5f, 0.5f};
+                    auto brush = component::Brush{};
+                    brush.type = component::BrushType::PLAIN_RECTANGLE;
+                    brush.size = math::vec2{0.5f, 0.5f};
 
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
-                        component::PixelRGBA color{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientEntityFactory, brushType, brushSize, color, skidPosList[i]);
+                        brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
+                        splat(clientEntityFactory, brush, skidPosList[i]);
                     }
                 }
             }
@@ -473,9 +495,7 @@ namespace oni {
 
         void
         SceneManager::splat(entities::EntityFactory &entityFactory,
-                            component::BrushType brushType,
-                            const math::vec2 &brushSize,
-                            const component::PixelRGBA &color,
+                            component::Brush brush,
                             const math::vec2 &worldPos) {
             auto &entityManager = entityFactory.getEntityManager();
 
@@ -484,24 +504,24 @@ namespace oni {
             auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
             tileEntities.insert(entityID);
 
-            auto lowerLeft = worldPos - brushSize / 2.f;
+            auto lowerLeft = worldPos - brush.size / 2.f;
             auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
             tileEntities.insert(lowerLeftEntityID);
 
-            auto topRight = worldPos + brushSize / 2.f;
+            auto topRight = worldPos + brush.size / 2.f;
             auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
             tileEntities.insert(topRightEntityID);
 
-            math::vec2 topLeft{worldPos.x - brushSize.x / 2.f, worldPos.y + brushSize.y / 2.f};
+            math::vec2 topLeft{worldPos.x - brush.size.x / 2.f, worldPos.y + brush.size.y / 2.f};
             auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
             tileEntities.insert(topLeftEntityID);
 
-            math::vec2 lowerRight{worldPos.x + brushSize.x / 2.f, worldPos.y - brushSize.y / 2.f};
+            math::vec2 lowerRight{worldPos.x + brush.size.x / 2.f, worldPos.y - brush.size.y / 2.f};
             auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
             tileEntities.insert(lowerRightEntityID);
 
             for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(entityManager, tileEntity, brushType, brushSize, color, worldPos);
+                updateCanvasTile(entityManager, tileEntity, brush, worldPos);
             }
         }
 
@@ -557,9 +577,7 @@ namespace oni {
         void
         SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
                                        common::EntityID entityID,
-                                       component::BrushType brushType,
-                                       const math::vec2 &brushSize,
-                                       const component::PixelRGBA &color,
+                                       const component::Brush &brush,
                                        const math::vec2 &worldPos) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
             // TODO: why the hell from Shape and not Placement?
@@ -570,24 +588,25 @@ namespace oni {
                                                            brushTexturePos);
 
             component::Image image{};
-            switch (brushType) {
+            switch (brush.type) {
                 case component::BrushType::PLAIN_RECTANGLE: {
-                    image.width = static_cast<uint16>(brushSize.x * mGameUnitToPixels);
-                    image.height = static_cast<uint16>(brushSize.y * mGameUnitToPixels);
-                    mTextureManager->fill(image, color);
+                    image.width = static_cast<uint16>(brush.size.x * mGameUnitToPixels);
+                    image.height = static_cast<uint16>(brush.size.y * mGameUnitToPixels);
+                    mTextureManager->fill(image, brush.color);
                     break;
                 }
-                case component::BrushType::EXPLOSION: {
+                case component::BrushType::CUSTOM_TEXTURE: {
                     // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
                     // as long as down the line I can call sub texture update with the texture data only,
                     // something along the lines of take the updated texture data and point to where the offsets point
                     // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
                     // at all what I intended
-                    image = mTextureManager->loadOrGetImage("resources/images/explosion/1.png");
+                    image = mTextureManager->loadOrGetImage(brush.textureID);
                     break;
                 }
                 default: {
                     assert(false);
+                    return;
                 }
             }
 
@@ -608,15 +627,6 @@ namespace oni {
         void
         SceneManager::updateParticles(entities::EntityFactory &entityFactory,
                                       common::real64 tickTime) {
-            auto view = entityFactory.getEntityManager().createView<component::Particle>();
-            for (const auto &entity: view) {
-                auto &particle = view.get<component::Particle>(entity);
-                // TODO: Maybe you want a single place to store these variables?
-                particle.age += tickTime;
-                if (particle.age > particle.maxAge) {
-                    entityFactory.removeEntity(entity, false, false);
-                }
-            }
         }
 
 
@@ -888,36 +898,44 @@ namespace oni {
         SceneManager::renderParticles(entities::EntityManager &manager,
                                       common::real32 viewWidth,
                                       common::real32 viewHeight) {
+            // Particles with color shading
             {
-                auto view = manager.createView<component::Particle, component::Appearance>();
+                auto view = manager.createView<component::Particle, component::Appearance, component::Placement, component::Age, component::Velocity>();
 
                 for (const auto &entity: view) {
-                    const auto &particle = view.get<component::Particle>(entity);
-                    if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    const auto &placement = view.get<component::Placement>(entity);
+                    if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
+                    const auto &particle = view.get<component::Particle>(entity);
+                    const auto &age = view.get<component::Age>(entity);
+                    const auto &velocity = view.get<component::Velocity>(entity);
                     const auto &appearance = view.get<component::Appearance>(entity);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(particle, appearance);
+                    mParticleRenderer->submit(particle, placement, age, velocity, appearance);
                 }
             }
 
+            // Particles with texture shading
             {
-                auto view = manager.createView<component::Particle, component::Texture>();
+                auto view = manager.createView<component::Particle, component::Texture, component::Age, component::Velocity, component::Placement>();
                 for (const auto &entity: view) {
-                    const auto &particle = view.get<component::Particle>(entity);
-                    if (!math::intersects(particle.pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    const auto &placement = view.get<component::Placement>(entity);
+                    if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
+                    const auto &particle = view.get<component::Particle>(entity);
+                    const auto &age = view.get<component::Age>(entity);
+                    const auto &velocity = view.get<component::Velocity>(entity);
 
                     auto &texture = view.get<component::Texture>(entity);
                     prepareTexture(texture);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(particle, texture);
+                    mParticleRenderer->submit(particle, placement, age, velocity, texture);
                 }
             }
 

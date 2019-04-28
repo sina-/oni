@@ -1,7 +1,7 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/component/entity.h>
 #include <oni-core/math/vec3.h>
 
 class b2Body;
@@ -30,6 +30,16 @@ namespace oni {
             RACE_CAR = 3,
             ROCKET = 4,
             WALL = 5,
+        };
+
+        struct Velocity {
+            common::real32 currentVelocity{0.f};
+            common::real32 maxVelocity{0.f};
+        };
+
+        struct Age {
+            common::duration currentAge{0.f};
+            common::duration maxAge{1.f};
         };
 
         struct PhysicalProperties {

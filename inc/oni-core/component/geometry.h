@@ -1,7 +1,7 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/component/entity.h>
 #include <oni-core/math/vec2.h>
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>

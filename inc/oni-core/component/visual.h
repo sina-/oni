@@ -53,13 +53,6 @@ namespace oni {
         };
 
         struct Particle {
-            common::real32 age{0.f};
-            common::real32 maxAge{0};
-            // TODO: Don't keep this inside the struct, use WorldCoord.
-            math::vec3 pos{0.f, 0.f, 0.f};
-
-            common::real32 heading{0.f};
-            common::real32 velocity{0.f};
             common::real32 halfSize{2.f};
         };
 
@@ -83,10 +76,10 @@ namespace oni {
         };
 
         struct PixelRGBA {
-            unsigned char red{0};
-            unsigned char blue{0};
-            unsigned char green{0};
-            unsigned char alpha{0};
+            common::uint8 red{0};
+            common::uint8 blue{0};
+            common::uint8 green{0};
+            common::uint8 alpha{0};
         };
 
         struct ScreenBounds {
@@ -118,8 +111,21 @@ namespace oni {
         using ZLayer = std::unordered_map<component::ZLayerDef, common::real32>;
 
         enum class BrushType : common::uint8 {
+            UNKNOWN,
+
             PLAIN_RECTANGLE,
-            EXPLOSION,
+            CUSTOM_TEXTURE,
+
+            LAST
+        };
+
+        struct Brush {
+            BrushType type{BrushType::UNKNOWN};
+            math::vec2 size{};
+            union {
+                PixelRGBA color{};
+                const char *textureID;
+            };
         };
 
     }

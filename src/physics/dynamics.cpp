@@ -131,6 +131,7 @@ namespace oni {
         Dynamics::tick(entities::EntityFactory &entityFactory,
                        entities::ClientDataManager &clientData,
                        common::real64 tickTime) {
+
             auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, component::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
@@ -223,7 +224,9 @@ namespace oni {
                 mPhysicsWorld->Step(mTickFrequency, 6, 2);
             }
 
-            mProjectile->tick(entityFactory, clientData, tickTime);
+            {
+                mProjectile->tick(entityFactory, clientData, tickTime);
+            }
 
             {
                 auto carPhysicsView = manager.createView<component::Car, component::PhysicalProperties>();
@@ -252,7 +255,7 @@ namespace oni {
                                 true);
                         car.isColliding = false;
                     } else {
-                        if (auto colliding = isColliding(props.body)) {
+                        if (isColliding(props.body)) {
                             car.velocity = math::vec2{props.body->GetLinearVelocity().x,
                                                       props.body->GetLinearVelocity().y};
                             car.angularVelocity = props.body->GetAngularVelocity();
@@ -374,7 +377,7 @@ namespace oni {
                                                                            component::EntityType::UNKNOWN,
                                                                            pos);
 
-                entityFactory.removeEntity(entityID, true, false);
+                entityFactory.removeEntity(entityID, component::EntityOperationPolicy{true, false});
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
@@ -429,6 +432,18 @@ namespace oni {
             manager.tagForComponentSync(entity);
         }
 
+        void
+        Dynamics::tickAge(entities::EntityFactory &entityFactory,
+                          common::real64 tickTime,
+                          const component::EntityOperationPolicy &policy) {
+            auto view = entityFactory.getEntityManager().createView<component::Age>();
+            for (const auto &entity: view) {
+                auto &age = view.get<component::Age>(entity);
+                age.currentAge += tickTime;
+                if (age.currentAge > age.maxAge) {
+                    entityFactory.removeEntity(entity, policy);
+                }
+            }
+        }
     }
-
 }

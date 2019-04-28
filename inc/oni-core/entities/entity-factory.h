@@ -5,7 +5,7 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/common/typedefs-graphics.h>
-#include <oni-core/component/entity-definition.h>
+#include <oni-core/component/entity.h>
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/component/entity-event.h>
 #include <oni-core/component/audio.h>
@@ -75,8 +75,7 @@ namespace oni {
 
             void
             removeEntity(common::EntityID,
-                         bool track,
-                         bool safe);
+                         const component::EntityOperationPolicy &);
 
             void
             resetEvents();
@@ -131,14 +130,12 @@ namespace oni {
             void
             _removeEntity(common::EntityID,
                           component::EntityType entityType,
-                          bool track,
-                          bool safe);
+                          const component::EntityOperationPolicy &policy);
 
             template<component::EntityType entityType>
             void
             _removeEntity(common::EntityID,
-                          bool track,
-                          bool safe) = delete;
+                          const component::EntityOperationPolicy &policy) = delete;
 
             template<>
             void
@@ -223,6 +220,14 @@ namespace oni {
 
             template<>
             void
+            _createEntity<component::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID,
+                                                                        const math::vec3 &worldPos,
+                                                                        const std::string &textureID,
+                                                                        const common::real32 &halfSize,
+                                                                        const bool &randomize);
+
+            template<>
+            void
             _createEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID,
                                                                 const math::vec3 &pos,
                                                                 const math::vec2 &size,
@@ -276,20 +281,20 @@ namespace oni {
             template<>
             void
             _removeEntity<component::EntityType::RACE_CAR>(common::EntityID,
-                                                           bool track,
-                                                           bool safe);
+                                                           const component::EntityOperationPolicy &policy
+            );
 
             template<>
             void
             _removeEntity<component::EntityType::WALL>(common::EntityID,
-                                                       bool track,
-                                                       bool safe);
+                                                       const component::EntityOperationPolicy &policy
+            );
 
             template<>
             void
             _removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID,
-                                                                bool track,
-                                                                bool safe);
+                                                                const component::EntityOperationPolicy &policy
+            );
 
         private:
             b2Body *

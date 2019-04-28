@@ -106,7 +106,7 @@ namespace oni {
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
                 mEntityFactory->removeEntity(clientCarEntityID,
-                                             true, false);
+                                             component::EntityOperationPolicy{true, false});
                 mClientDataManager->deleteClient(peerID);
             }
 

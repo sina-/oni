@@ -14,9 +14,9 @@ namespace oni {
         Game::Game(common::uint8 simRate,
                    common::uint8 pollRate,
                    common::uint8 renderRate) :
-                mSimMS(1.0f / simRate),
-                mPollMS(1.0f / pollRate),
-                mRenderMS(1.0f / renderRate) {
+                mSimS(1.0f / simRate),
+                mPollS(1.0f / pollRate),
+                mRenderS(1.0f / renderRate) {
         }
 
         Game::~Game() = default;
@@ -51,10 +51,10 @@ namespace oni {
 
             mSimTimer.restart();
 
-            _sim(mSimMS);
+            _sim(mSimS);
 
             auto simDuration = mSimTimer.elapsedInSeconds();
-            auto excess = mTickMS - simDuration;
+            auto excess = mTickS - simDuration;
             excess *= 1000;
 
             if (excess > 0.0f) {
@@ -87,7 +87,7 @@ namespace oni {
             _poll();
 
             auto pollDuration = mPollTimer.elapsedInSeconds();
-            auto excess = mTickMS - pollDuration;
+            auto excess = mTickS - pollDuration;
             excess *= 1000;
 
             if (excess >= 0.0f) {
@@ -117,10 +117,10 @@ namespace oni {
 
             mRenderTimer.restart();
 
-            _render(mSimMS);
+            _render(mSimS);
 
             auto renderDuration = mRenderTimer.elapsedInSeconds();
-            auto excess = mTickMS - renderDuration;
+            auto excess = mTickS - renderDuration;
             excess *= 1000;
 
             if (excess >= 0.0f) {
@@ -131,7 +131,7 @@ namespace oni {
                           << excess << "ms\n";
             }
 
-            // NOTE: Display the result at the end after mSimMS amount of time has passed.
+            // NOTE: Display the result at the end after mSimS amount of time has passed.
             display();
 
             mRenderExcessPerSecond += excess;
@@ -145,7 +145,7 @@ namespace oni {
 
         common::real32
         Game::getTickFrequency() {
-            return mSimMS;
+            return mSimS;
         }
 
         void

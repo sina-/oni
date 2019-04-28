@@ -17,6 +17,12 @@ namespace oni {
         struct Tag_Audible {
         };
 
+        struct Tag_LeavesMark {
+        };
+
+        struct Tag_Particle {
+        };
+
         struct Tag_RequiresNetworkSync {
         };
 

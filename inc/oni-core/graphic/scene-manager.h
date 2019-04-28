@@ -71,9 +71,7 @@ namespace oni {
 
             void
             splat(entities::EntityFactory &entityFactory,
-                  component::BrushType brushType,
-                  const math::vec2 &brushSize,
-                  const component::PixelRGBA &color,
+                  component::Brush brush,
                   const math::vec2 &worldPos);
 
             void
@@ -211,9 +209,7 @@ namespace oni {
             void
             updateCanvasTile(entities::EntityManager &,
                              common::EntityID,
-                             component::BrushType,
-                             const math::vec2 &brushSize,
-                             const component::PixelRGBA &,
+                             const component::Brush &,
                              const math::vec2 &worldPos);
 
         private:

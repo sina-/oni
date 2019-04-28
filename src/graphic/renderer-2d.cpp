@@ -2,11 +2,7 @@
 
 namespace oni {
     namespace graphic {
-        Renderer2D::Renderer2D() {
-            // identity matrix is the grand parent of all transformations, and
-            // it should always stay in the stack.
-            //mTransformationStack.push_back(math::mat4::identity());
-        }
+        Renderer2D::Renderer2D() = default;
 
         Renderer2D::~Renderer2D() = default;
 
@@ -23,14 +19,20 @@ namespace oni {
 
         void
         Renderer2D::submit(const component::Particle &particle,
+                           const component::Placement &placement,
+                           const component::Age &age,
+                           const component::Velocity &velocity,
                            const component::Appearance &color) {
-            _submit(particle, color);
+            _submit(particle, placement, age, velocity, color);
         }
 
         void
         Renderer2D::submit(const component::Particle &particle,
+                           const component::Placement &placement,
+                           const component::Age &age,
+                           const component::Velocity &velocity,
                            const component::Texture &texture) {
-            _submit(particle, texture);
+            _submit(particle, placement, age, velocity, texture);
         }
 
         void

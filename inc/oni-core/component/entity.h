@@ -20,6 +20,7 @@ namespace oni {
 
             SIMPLE_SPRITE,
             SIMPLE_PARTICLE,
+            SIMPLE_BLAST_PARTICLE,
             SIMPLE_ROCKET,
 
             TEXT,
@@ -38,6 +39,12 @@ namespace oni {
         struct DeletedEntity {
             component::EntityType type;
             common::EntityID entity;
+        };
+
+        // TODO: move this into entities module
+        struct EntityOperationPolicy {
+            bool track{true};
+            bool safe{false};
         };
     }
 }

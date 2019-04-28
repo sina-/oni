@@ -1,8 +1,11 @@
 #include <oni-core/audio/audio-manager.h>
 
+#include <assert.h>
+
 #include <fmod.hpp>
 
 #include <oni-core/component/geometry.h>
+#include <oni-core/entities/entity-factory.h>
 
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
 #define VALID(MAP, ID) assert(MAP.find(id) != MAP.end())

@@ -68,16 +68,15 @@ namespace oni {
 
         void
         EntityFactory::removeEntity(common::EntityID entityID,
-                                    bool track,
-                                    bool safe) {
-            if (safe && !mRegistryManager->valid(entityID)) {
+                                    const component::EntityOperationPolicy &policy) {
+            if (policy.safe && !mRegistryManager->valid(entityID)) {
                 return;
             }
 
             auto entityType = mRegistryManager->get<component::EntityType>(entityID);
-            _removeEntity(entityID, entityType, track, safe);
+            _removeEntity(entityID, entityType, policy);
 
-            if (track) {
+            if (policy.track) {
                 mRegistryManager->destroyAndTrack(entityID);
             } else {
                 mRegistryManager->destroy(entityID);
@@ -87,22 +86,21 @@ namespace oni {
         void
         EntityFactory::_removeEntity(common::EntityID entityID,
                                      component::EntityType entityType,
-                                     bool track,
-                                     bool safe) {
+                                     const component::EntityOperationPolicy &policy) {
             // TODO: I hate this, for every new type and every change to old types I have to remember to add, or update,
             // the deletion procedure. Technically dtor would be the right solution, then I can remove all this code
             // and only depend on registry->destroy() method calling the dtor.
             switch (entityType) {
                 case component::EntityType::RACE_CAR: {
-                    _removeEntity<component::EntityType::RACE_CAR>(entityID, track, safe);
+                    _removeEntity<component::EntityType::RACE_CAR>(entityID, policy);
                     break;
                 }
                 case component::EntityType::WALL: {
-                    _removeEntity<component::EntityType::WALL>(entityID, track, safe);
+                    _removeEntity<component::EntityType::WALL>(entityID, policy);
                     break;
                 }
                 case component::EntityType::SIMPLE_ROCKET: {
-                    _removeEntity<component::EntityType::SIMPLE_ROCKET>(entityID, track, safe);
+                    _removeEntity<component::EntityType::SIMPLE_ROCKET>(entityID, policy);
                     break;
                 }
                 case component::EntityType::VEHICLE_GUN:
@@ -115,6 +113,7 @@ namespace oni {
                 case component::EntityType::UI:
                 case component::EntityType::SIMPLE_SPRITE:
                 case component::EntityType::SIMPLE_PARTICLE:
+                case component::EntityType::SIMPLE_BLAST_PARTICLE:
                 case component::EntityType::TEXT:
                 case component::EntityType::WORLD_CHUNK: {
                     break;
@@ -362,18 +361,23 @@ namespace oni {
                                                                              const common::real32 &halfSize,
                                                                              const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
-            particle.pos = worldPos;
-            particle.age = 0.f;
             particle.halfSize = halfSize;
-            particle.maxAge = 1.f;
+
+            auto &placement = createComponent<component::Placement>(entityID);
+            placement.position = worldPos;
 
             auto &appearance = createComponent<component::Appearance>(entityID);
             appearance.color = color;
 
+            auto &velocity = createComponent<component::Velocity>(entityID);
+
+            auto &age = createComponent<component::Age>(entityID);
+            age.currentAge = 0.f;
+
             if (randomize) {
-                particle.heading = mRand->nextReal32(0, 6.28f); // NOTE: 6.28f is 2 * pi in radians (360 degrees)
-                particle.velocity = mRand->nextReal32(1.f, 7.f);
-                particle.maxAge = mRand->nextReal32(0.2f, 1.f);
+                placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
+                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
+                age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
         }
 
@@ -385,19 +389,57 @@ namespace oni {
                                                                              const common::real32 &halfSize,
                                                                              const bool &randomize) {
             auto &particle = createComponent<component::Particle>(entityID);
-            particle.pos = worldPos;
-            particle.age = 0.f;
             particle.halfSize = halfSize;
+
+            auto &placement = createComponent<component::Placement>(entityID);
+            placement.position = worldPos;
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
+            auto &velocity = createComponent<component::Velocity>(entityID);
+
+            auto &age = createComponent<component::Age>(entityID);
+            age.currentAge = 0.f;
+
             if (randomize) {
-                particle.heading = mRand->nextReal32(0, 6.28f); // NOTE: 6.28f is 2 * pi in radians (360 degrees)
-                particle.velocity = mRand->nextReal32(1.f, 7.f);
-                particle.maxAge = mRand->nextReal32(0.2f, 1.f);
+                placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
+                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
+                age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
+        }
+
+        template<>
+        void
+        EntityFactory::_createEntity<component::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID entityID,
+                                                                                   const math::vec3 &worldPos,
+                                                                                   const std::string &textureID,
+                                                                                   const common::real32 &halfSize,
+                                                                                   const bool &randomize) {
+            // TODO: Particle component and Velocity + Age components do the same thing, first one for shaders, the other
+            // for the engine to track the location and render it
+            auto &particle = createComponent<component::Particle>(entityID);
+            particle.halfSize = halfSize;
+
+            auto &placement = createComponent<component::Placement>(entityID);
+            placement.position = worldPos;
+
+            auto &texture = createComponent<component::Texture>(entityID);
+            texture.filePath = textureID;
+            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+
+            auto &velocity = createComponent<component::Velocity>(entityID);
+            auto &age = createComponent<component::Age>(entityID);
+            age.currentAge = 0.f;
+
+            if (randomize) {
+                placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
+                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
+                age.maxAge = mRand->nextReal32(1.f, 2.f);
+            }
+
+            assignTag<component::Tag_LeavesMark>(entityID);
         }
 
         template<>
@@ -623,8 +665,7 @@ namespace oni {
         template<>
         void
         EntityFactory::_removeEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                                      bool track,
-                                                                      bool safe) {
+                                                                      const component::EntityOperationPolicy &policy) {
             // TODO: When notifying clients of this, the texture in memory should be evicted.
 
 
@@ -634,7 +675,7 @@ namespace oni {
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 auto attachmentType = attachments.entityTypes[i];
                 auto attachmentEntityID = attachments.entities[i];
-                removeEntity(attachmentEntityID, track, safe);
+                removeEntity(attachmentEntityID, policy);
             }
 
             removePhysicalBody(entityID);
@@ -643,16 +684,14 @@ namespace oni {
         template<>
         void
         EntityFactory::_removeEntity<component::EntityType::WALL>(common::EntityID entityID,
-                                                                  bool track,
-                                                                  bool safe) {
+                                                                  const component::EntityOperationPolicy &policy) {
             removePhysicalBody(entityID);
         }
 
         template<>
         void
         EntityFactory::_removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
-                                                                           bool track,
-                                                                           bool safe) {
+                                                                           const component::EntityOperationPolicy &policy) {
             removePhysicalBody(entityID);
         }
 

@@ -3,9 +3,12 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <unordered_map>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/entities/entity-factory.h>
+#include <oni-core/component/audio.h>
+#include <oni-core/component/entity.h>
+#include <oni-core/component/physic.h>
 
 namespace FMOD {
     class Sound;
@@ -16,6 +19,13 @@ namespace FMOD {
 }
 
 namespace oni {
+    namespace entities {
+        class EntityFactory;
+    }
+
+    namespace math {
+        struct vec3;
+    }
     namespace audio {
         class AudioManager {
         public:

@@ -28,5 +28,7 @@ namespace oni {
         typedef uint32 EntityID;
 
         typedef std::string PeerID;
+
+        typedef real32 duration; // Duration in fraction of seconds.
     }
 }

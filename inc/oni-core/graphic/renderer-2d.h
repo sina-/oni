@@ -7,6 +7,12 @@ namespace oni {
     namespace component {
         class Appearance;
 
+        class Placement;
+
+        class Age;
+
+        class Velocity;
+
         class Texture;
 
         class Text;
@@ -43,10 +49,16 @@ namespace oni {
 
             void
             submit(const component::Particle &,
+                   const component::Placement &,
+                   const component::Age &,
+                   const component::Velocity &,
                    const component::Appearance &);
 
             void
             submit(const component::Particle &,
+                   const component::Placement &,
+                   const component::Age &,
+                   const component::Velocity &,
                    const component::Texture &);
 
             void
@@ -78,10 +90,16 @@ namespace oni {
 
             virtual void
             _submit(const component::Particle &,
+                    const component::Placement &,
+                    const component::Age &,
+                    const component::Velocity &,
                     const component::Appearance &) = 0;
 
             virtual void
             _submit(const component::Particle &,
+                    const component::Placement &,
+                    const component::Age &,
+                    const component::Velocity &,
                     const component::Texture &) = 0;
 
             virtual void

@@ -18,21 +18,21 @@ namespace oni {
         }
 
         void
-        Renderer2D::submit(const component::Particle &particle,
+        Renderer2D::submit(const component::Tessellation &tessellation,
                            const component::Placement &placement,
                            const component::Age &age,
                            const component::Velocity &velocity,
                            const component::Appearance &color) {
-            _submit(particle, placement, age, velocity, color);
+            _submit(tessellation, placement, age, velocity, color);
         }
 
         void
-        Renderer2D::submit(const component::Particle &particle,
+        Renderer2D::submit(const component::Tessellation &tessellation,
                            const component::Placement &placement,
                            const component::Age &age,
                            const component::Velocity &velocity,
                            const component::Texture &texture) {
-            _submit(particle, placement, age, velocity, texture);
+            _submit(tessellation, placement, age, velocity, texture);
         }
 
         void

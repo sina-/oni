@@ -7,7 +7,7 @@ namespace oni {
     namespace component {
         class Appearance;
 
-        class Placement;
+        class Tessellation;
 
         class Age;
 
@@ -19,7 +19,7 @@ namespace oni {
 
         class Shape;
 
-        class Particle;
+        class Placement;
     }
 
     namespace graphic {
@@ -48,14 +48,14 @@ namespace oni {
                    const component::Appearance &);
 
             void
-            submit(const component::Particle &,
+            submit(const component::Tessellation &,
                    const component::Placement &,
                    const component::Age &,
                    const component::Velocity &,
                    const component::Appearance &);
 
             void
-            submit(const component::Particle &,
+            submit(const component::Tessellation &,
                    const component::Placement &,
                    const component::Age &,
                    const component::Velocity &,
@@ -89,14 +89,14 @@ namespace oni {
                     const component::Appearance &) = 0;
 
             virtual void
-            _submit(const component::Particle &,
+            _submit(const component::Tessellation &,
                     const component::Placement &,
                     const component::Age &,
                     const component::Velocity &,
                     const component::Appearance &) = 0;
 
             virtual void
-            _submit(const component::Particle &,
+            _submit(const component::Tessellation &,
                     const component::Placement &,
                     const component::Age &,
                     const component::Velocity &,

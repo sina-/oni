@@ -126,7 +126,7 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Particle &particle,
+        BatchRenderer2D::_submit(const component::Tessellation &tessellation,
                                  const component::Placement &placement,
                                  const component::Age &age,
                                  const component::Velocity &velocity,
@@ -141,7 +141,7 @@ namespace oni {
             buffer->heading = placement.rotation;
             buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = -1;
-            buffer->halfSize = particle.halfSize;
+            buffer->halfSize = tessellation.halfSize;
             buffer++;
 
             // Update the mBuffer to point to the head.
@@ -151,7 +151,7 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Particle &particle,
+        BatchRenderer2D::_submit(const component::Tessellation &tessellation,
                                  const component::Placement &placement,
                                  const component::Age &age,
                                  const component::Velocity &velocity,
@@ -168,7 +168,7 @@ namespace oni {
             buffer->heading = placement.rotation;
             buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = samplerID;
-            buffer->halfSize = particle.halfSize;
+            buffer->halfSize = tessellation.halfSize;
             buffer++;
 
             // Update the mBuffer to point to the head.

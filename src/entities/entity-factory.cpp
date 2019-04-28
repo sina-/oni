@@ -360,8 +360,8 @@ namespace oni {
                                                                              const math::vec4 &color,
                                                                              const common::real32 &halfSize,
                                                                              const bool &randomize) {
-            auto &particle = createComponent<component::Particle>(entityID);
-            particle.halfSize = halfSize;
+            auto &tessellation = createComponent<component::Tessellation>(entityID);
+            tessellation.halfSize = halfSize;
 
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = worldPos;
@@ -379,6 +379,8 @@ namespace oni {
                 velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
                 age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
+
+            assignTag<component::Tag_Particle>(entityID);
         }
 
         template<>
@@ -388,8 +390,8 @@ namespace oni {
                                                                              const std::string &textureID,
                                                                              const common::real32 &halfSize,
                                                                              const bool &randomize) {
-            auto &particle = createComponent<component::Particle>(entityID);
-            particle.halfSize = halfSize;
+            auto &tessellation = createComponent<component::Tessellation>(entityID);
+            tessellation.halfSize = halfSize;
 
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = worldPos;
@@ -408,6 +410,8 @@ namespace oni {
                 velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
                 age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
+
+            assignTag<component::Tag_Particle>(entityID);
         }
 
         template<>
@@ -417,10 +421,8 @@ namespace oni {
                                                                                    const std::string &textureID,
                                                                                    const common::real32 &halfSize,
                                                                                    const bool &randomize) {
-            // TODO: Particle component and Velocity + Age components do the same thing, first one for shaders, the other
-            // for the engine to track the location and render it
-            auto &particle = createComponent<component::Particle>(entityID);
-            particle.halfSize = halfSize;
+            auto &tessellation = createComponent<component::Tessellation>(entityID);
+            tessellation.halfSize = halfSize;
 
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = worldPos;
@@ -440,6 +442,7 @@ namespace oni {
             }
 
             assignTag<component::Tag_LeavesMark>(entityID);
+            assignTag<component::Tag_Particle>(entityID);
         }
 
         template<>

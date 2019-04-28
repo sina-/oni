@@ -52,8 +52,8 @@ namespace oni {
             TextureStatus status{TextureStatus::INVALID};
         };
 
-        struct Particle {
-            common::real32 halfSize{2.f};
+        struct Tessellation {
+            common::real32 halfSize{1.f};
         };
 
         using WorldCoord = math::vec3;

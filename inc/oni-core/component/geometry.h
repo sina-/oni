@@ -123,7 +123,6 @@ namespace oni {
                 }
                 return shape;
             }
-
         };
 
         struct Placement {

@@ -5,7 +5,6 @@
 #include <oni-core/graphic/renderer-2d.h>
 #include <oni-core/component/buffer.h>
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/buffer.h>
 
 namespace oni {
     namespace buffer {
@@ -54,14 +53,14 @@ namespace oni {
                     const component::Appearance &) override;
 
             void
-            _submit(const component::Particle &,
-                    const component::Placement &,
-                    const component::Age &,
-                    const component::Velocity &,
-                    const component::Appearance &) override;
+            _submit(const component::Tessellation &tessellation,
+                    const component::Placement &placement,
+                    const component::Age &age,
+                    const component::Velocity &velocity,
+                    const component::Appearance &appearance) override;
 
             void
-            _submit(const component::Particle &,
+            _submit(const component::Tessellation &,
                     const component::Placement &,
                     const component::Age &,
                     const component::Velocity &,

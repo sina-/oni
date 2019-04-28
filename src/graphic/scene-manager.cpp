@@ -900,33 +900,33 @@ namespace oni {
                                       common::real32 viewHeight) {
             // Particles with color shading
             {
-                auto view = manager.createView<component::Particle, component::Appearance, component::Placement, component::Age, component::Velocity>();
+                auto view = manager.createView<component::Tessellation, component::Appearance, component::Placement, component::Age, component::Velocity>();
 
                 for (const auto &entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &particle = view.get<component::Particle>(entity);
+                    const auto &tessellation = view.get<component::Tessellation>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
                     const auto &appearance = view.get<component::Appearance>(entity);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(particle, placement, age, velocity, appearance);
+                    mParticleRenderer->submit(tessellation, placement, age, velocity, appearance);
                 }
             }
 
             // Particles with texture shading
             {
-                auto view = manager.createView<component::Particle, component::Texture, component::Age, component::Velocity, component::Placement>();
+                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::Placement>();
                 for (const auto &entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &particle = view.get<component::Particle>(entity);
+                    const auto &tessellation = view.get<component::Tessellation>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
 
@@ -935,7 +935,7 @@ namespace oni {
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(particle, placement, age, velocity, texture);
+                    mParticleRenderer->submit(tessellation, placement, age, velocity, texture);
                 }
             }
 

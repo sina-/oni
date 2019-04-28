@@ -86,8 +86,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  Particle &particle) {
-            archive(particle.halfSize);
+                  Tessellation &tessellationFactor) {
+            archive(tessellationFactor.halfSize);
         }
 
         template<class Archive>

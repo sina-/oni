@@ -410,12 +410,14 @@ namespace oni {
             // Entities that leave mark
             {
                 auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::Placement>();
-                auto brush = component::Brush{};
-                brush.textureID = "resources/images/smoke/1.png";
-                brush.type = component::BrushType::CUSTOM_TEXTURE;
-                brush.size = math::vec2{1, 1};
-
                 for (auto &&entity: view) {
+                    const auto &texture = view.get<component::Texture>(entity);
+                    auto brush = component::Brush{};
+                    // TODO: This is messy distinction between texture path and textureID!
+                    brush.textureID = texture.filePath.c_str();
+                    brush.type = component::BrushType::CUSTOM_TEXTURE;
+                    brush.size = math::vec2{1, 1};
+
                     const auto &pos = view.get<component::Placement>(entity).position.getXY();
                     splat(clientEntityFactory, brush, pos);
                 }
@@ -899,7 +901,10 @@ namespace oni {
                                       common::real32 viewHeight) {
             // Particles with color shading
             {
-                auto view = manager.createView<component::Tessellation, component::Appearance, component::Placement, component::Age, component::Velocity, component::Tag_Particle>();
+                auto view = manager.createView<component::Tessellation, component::Appearance, component::Placement, component::Age, component::Velocity, component::Tag_Particle,
+                        component::Tag_ShaderOnlyParticlePhysics>();
+
+                mParticleShader->setUniform1i("shaderPhysics", true);
 
                 for (const auto &entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
@@ -919,7 +924,10 @@ namespace oni {
 
             // Particles with texture shading
             {
-                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::Placement, component::Tag_Particle>();
+                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::Placement, component::Tag_Particle,
+                        component::Tag_ShaderOnlyParticlePhysics>();
+                mParticleShader->setUniform1i("shaderPhysics", true);
+
                 for (const auto &entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {

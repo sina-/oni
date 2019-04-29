@@ -270,8 +270,8 @@ namespace oni {
             common::EntityID
             ServerGame::spawnTruck() {
                 auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::VEHICLE);
-                math::vec2 size{1.0f, 3.0f};
-                math::vec3 worldPos{-60.0f, -30.0f, vehicleZ};
+                math::vec2 size{4.0f, 12.0f};
+                math::vec3 worldPos{-20.0f, -30.0f, vehicleZ};
                 common::real32 heading = 0.f;
                 std::string textureID = "resources/images/car/2/truck.png";
 

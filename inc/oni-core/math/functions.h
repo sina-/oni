@@ -152,7 +152,7 @@ namespace oni {
             }
             T result = a;
             while (--up) {
-                result *= result;
+                result *= a;
             }
             return result;
         }

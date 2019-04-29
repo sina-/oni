@@ -20,6 +20,14 @@ namespace oni {
         struct Tag_LeavesMark {
         };
 
+        // NOTE: Engine does not track placement, shader figures it out given particle age
+        struct Tag_ShaderOnlyParticlePhysics {
+        };
+
+        // NOTE: Engine tracks placement, shader only draws them just like sprites
+        struct Tag_EngineOnlyParticlePhysics {
+        };
+
         struct Tag_Particle {
         };
 

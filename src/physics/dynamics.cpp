@@ -467,18 +467,14 @@ namespace oni {
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
                                   common::real64 tickTime,
                                   const component::EntityOperationPolicy &policy) {
-            auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age>();
+            auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age, component::Tag_EngineOnlyParticlePhysics>();
             for (const auto &entity: view) {
                 auto &placement = view.get<component::Placement>(entity);
-                auto &velocity = view.get<component::Velocity>(entity);
-                auto &age = view.get<component::Age>(entity);
+                const auto &velocity = view.get<component::Velocity>(entity);
+                const auto &age = view.get<component::Age>(entity);
 
-                auto currentAge = age.currentAge + 1; // age starts at 0, +1 to avoid division by zero
-                common::real32 decay = 1.f / math::pow(currentAge, 6);
-                common::real32 correctedDecay = 1 - decay; // -1 to compensate for the +1
-
-                auto currentVelocity =
-                        velocity.currentVelocity * correctedDecay; // particles slow down faster as time passes
+                auto currentVelocity = (velocity.currentVelocity * tickTime) -  math::pow(age.currentAge, 10);
+                math::zeroClip(currentVelocity);
 
                 common::real32 x = std::cos(placement.rotation) * currentVelocity;
                 common::real32 y = std::sin(placement.rotation) * currentVelocity;
@@ -486,7 +482,6 @@ namespace oni {
                 placement.position.x += x;
                 placement.position.y += y;
             }
-
         }
     }
 }

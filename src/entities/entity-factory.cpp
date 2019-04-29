@@ -381,6 +381,7 @@ namespace oni {
             }
 
             assignTag<component::Tag_Particle>(entityID);
+            assignTag<component::Tag_ShaderOnlyParticlePhysics>(entityID);
         }
 
         template<>
@@ -412,6 +413,7 @@ namespace oni {
             }
 
             assignTag<component::Tag_Particle>(entityID);
+            assignTag<component::Tag_ShaderOnlyParticlePhysics>(entityID);
         }
 
         template<>
@@ -421,9 +423,6 @@ namespace oni {
                                                                                    const std::string &textureID,
                                                                                    const common::real32 &halfSize,
                                                                                    const bool &randomize) {
-            auto &tessellation = createComponent<component::Tessellation>(entityID);
-            tessellation.halfSize = halfSize;
-
             auto &placement = createComponent<component::Placement>(entityID);
             placement.position = worldPos;
 
@@ -437,12 +436,12 @@ namespace oni {
 
             if (randomize) {
                 placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
-                age.maxAge = mRand->nextReal32(1.f, 2.f);
+                velocity.currentVelocity = mRand->nextReal32(10.0f, 20.f);
+                age.maxAge = mRand->nextReal32(0.4f, 0.5f);
             }
 
             assignTag<component::Tag_LeavesMark>(entityID);
-            assignTag<component::Tag_Particle>(entityID);
+            assignTag<component::Tag_EngineOnlyParticlePhysics>(entityID);
         }
 
         template<>

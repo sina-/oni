@@ -53,14 +53,14 @@ namespace oni {
             getPhysicsWorld();
 
             void
-            tick(entities::EntityFactory &entityFactory,
-                 entities::ClientDataManager &clientData,
-                 common::real64 tickTime);
+            tickServerSide(entities::EntityFactory &entityFactory,
+                           entities::ClientDataManager &clientData,
+                           common::real64 tickTime);
 
             void
-            tickAge(entities::EntityFactory &entityFactory,
-                    common::real64 tickTime,
-                    const component::EntityOperationPolicy&);
+            tickClientSide(entities::EntityFactory &entityFactory,
+                           common::real64 tickTime,
+                           const component::EntityOperationPolicy &);
 
         private:
             void
@@ -100,6 +100,16 @@ namespace oni {
             updateTransformParent(entities::EntityManager &manager,
                                   common::EntityID entity,
                                   const component::TransformParent &transformParent);
+
+            void
+            updateAge(entities::EntityFactory &,
+                      common::real64 tickTime,
+                      const component::EntityOperationPolicy &);
+
+            void
+            updatePlacement(entities::EntityFactory &,
+                            common::real64 tickTime,
+                            const component::EntityOperationPolicy &);
 
 
         private:

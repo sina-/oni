@@ -134,8 +134,9 @@ namespace oni {
                 // Fake lag
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
-                mDynamics->tick(*mEntityFactory, *mClientDataManager, tickTime);
-                mDynamics->tickAge(*mEntityFactory, tickTime, component::EntityOperationPolicy{true, false});
+                {
+                    mDynamics->tickServerSide(*mEntityFactory, *mClientDataManager, tickTime);
+                }
 
                 std::vector<math::vec2> tickPositions{};
                 {

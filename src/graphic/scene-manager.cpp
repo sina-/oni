@@ -419,7 +419,6 @@ namespace oni {
                     const auto &pos = view.get<component::Placement>(entity).position.getXY();
                     splat(clientEntityFactory, brush, pos);
                 }
-
             }
 
             // Update Skid lines.
@@ -900,7 +899,7 @@ namespace oni {
                                       common::real32 viewHeight) {
             // Particles with color shading
             {
-                auto view = manager.createView<component::Tessellation, component::Appearance, component::Placement, component::Age, component::Velocity>();
+                auto view = manager.createView<component::Tessellation, component::Appearance, component::Placement, component::Age, component::Velocity, component::Tag_Particle>();
 
                 for (const auto &entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
@@ -920,7 +919,7 @@ namespace oni {
 
             // Particles with texture shading
             {
-                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::Placement>();
+                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::Placement, component::Tag_Particle>();
                 for (const auto &entity: view) {
                     const auto &placement = view.get<component::Placement>(entity);
                     if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {

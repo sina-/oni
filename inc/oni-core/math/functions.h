@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
+#include <cassert>
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/common/consts.h>
@@ -28,7 +29,7 @@ namespace oni {
         inline T
         min(const T &x,
             const T &y) {
-            if(x < y){
+            if (x < y) {
                 return x;
             }
             return y;
@@ -127,6 +128,33 @@ namespace oni {
              T b,
              T t) {
             return (1 - t) * a + t * b;
+        }
+
+        template<class T>
+        inline T
+        abs(T a) {
+            if (a < 0) {
+                return -1 * a;
+            }
+            return a;
+        }
+
+        template<class T>
+        inline T
+        pow(T a,
+            common::int16 up) {
+            if (up == 0) {
+                return 1;
+            }
+            if (up < 0) {
+                assert(false);
+                return 1;
+            }
+            T result = a;
+            while (--up) {
+                result *= result;
+            }
+            return result;
         }
     }
 }

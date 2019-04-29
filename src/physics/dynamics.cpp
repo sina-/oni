@@ -128,21 +128,17 @@ namespace oni {
         Dynamics::~Dynamics() = default;
 
         void
-        Dynamics::tick(entities::EntityFactory &entityFactory,
-                       entities::ClientDataManager &clientData,
-                       common::real64 tickTime) {
+        Dynamics::tickServerSide(entities::EntityFactory &entityFactory,
+                                 entities::ClientDataManager &clientData,
+                                 common::real64 tickTime) {
 
             auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, component::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
-            {
-                // NOTE: Need to lock it because network system might remove cars for clients that have disconnected.
-                // TODO: Maybe there is a better way to tick the cars without needing to lock the whole registry!
-                // One solutions could be, if this loop is very heavy, is to create a copy of all the data I need to
-                // operate on and do all the calculation and then lock the registry and update all the corresponding
-                // entities.
-                auto carView = manager.createView<component::Placement, component::Car, component::CarConfig>();
 
+            // Apply user input
+            {
+                auto carView = manager.createView<component::Placement, component::Car, component::CarConfig>();
                 for (auto &&entity: carView) {
                     auto input = clientData.getClientInput(entity);
                     // NOTE: This could happen just at the moment when a client joins, an entity is created by the
@@ -216,6 +212,7 @@ namespace oni {
                 }
             }
 
+            // Update box2d world
             {
                 // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
                 // One way to hide it is to provide a function in physics library that creates physical entities
@@ -224,14 +221,10 @@ namespace oni {
                 mPhysicsWorld->Step(mTickFrequency, 6, 2);
             }
 
-            {
-                mProjectile->tick(entityFactory, clientData, tickTime);
-            }
 
+            // Handle car collisions
             {
                 auto carPhysicsView = manager.createView<component::Car, component::PhysicalProperties>();
-
-                // Handle collision
                 for (auto entity: carPhysicsView) {
                     auto &props = carPhysicsView.get<component::PhysicalProperties>(entity);
                     auto &car = carPhysicsView.get<component::Car>(entity);
@@ -272,8 +265,8 @@ namespace oni {
                 }
             }
 
+            // Handle general collision
             {
-                // Handle collision
                 auto view = manager.createView<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
                 for (auto entity: view) {
@@ -286,8 +279,9 @@ namespace oni {
                                                                placement);
                 }
             }
+
+            // Sync placement with box2d
             {
-                // Update placement
                 auto view = manager.createView<component::Placement, component::Tag_Dynamic,
                         component::PhysicalProperties>();
 
@@ -315,8 +309,8 @@ namespace oni {
                 }
             }
 
+            // Update tires
             {
-                // Update tires
                 auto view = manager.createView<component::EntityAttachment, component::Car>();
                 for (auto &&entity : view) {
                     const auto &attachments = view.get<component::EntityAttachment>(entity);
@@ -334,6 +328,21 @@ namespace oni {
                 }
             }
 
+            // Update Projectiles
+            {
+                mProjectile->tick(entityFactory, clientData, tickTime);
+            }
+
+            // Update age
+            {
+                auto policy = component::EntityOperationPolicy{false, false};
+                policy.safe = false;
+                policy.track = true;
+                updateAge(entityFactory, tickTime, policy);
+
+            }
+
+            // Tag to sync with client
             {
                 for (auto &&entity : entitiesToBeUpdated) {
                     manager.tagForComponentSync(entity);
@@ -433,9 +442,17 @@ namespace oni {
         }
 
         void
-        Dynamics::tickAge(entities::EntityFactory &entityFactory,
-                          common::real64 tickTime,
-                          const component::EntityOperationPolicy &policy) {
+        Dynamics::tickClientSide(entities::EntityFactory &entityFactory,
+                                 common::real64 tickTime,
+                                 const component::EntityOperationPolicy &policy) {
+            updateAge(entityFactory, tickTime, policy);
+            updatePlacement(entityFactory, tickTime, policy);
+        }
+
+        void
+        Dynamics::updateAge(entities::EntityFactory &entityFactory,
+                            common::real64 tickTime,
+                            const component::EntityOperationPolicy &policy) {
             auto view = entityFactory.getEntityManager().createView<component::Age>();
             for (const auto &entity: view) {
                 auto &age = view.get<component::Age>(entity);
@@ -444,6 +461,32 @@ namespace oni {
                     entityFactory.removeEntity(entity, policy);
                 }
             }
+        }
+
+        void
+        Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
+                                  common::real64 tickTime,
+                                  const component::EntityOperationPolicy &policy) {
+            auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age>();
+            for (const auto &entity: view) {
+                auto &placement = view.get<component::Placement>(entity);
+                auto &velocity = view.get<component::Velocity>(entity);
+                auto &age = view.get<component::Age>(entity);
+
+                auto currentAge = age.currentAge + 1; // age starts at 0, +1 to avoid division by zero
+                common::real32 decay = 1.f / math::pow(currentAge, 6);
+                common::real32 correctedDecay = 1 - decay; // -1 to compensate for the +1
+
+                auto currentVelocity =
+                        velocity.currentVelocity * correctedDecay; // particles slow down faster as time passes
+
+                common::real32 x = std::cos(placement.rotation) * currentVelocity;
+                common::real32 y = std::sin(placement.rotation) * currentVelocity;
+
+                placement.position.x += x;
+                placement.position.y += y;
+            }
+
         }
     }
 }

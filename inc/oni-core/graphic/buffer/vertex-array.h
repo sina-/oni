@@ -12,7 +12,7 @@ namespace oni {
         class VertexArray {
         public:
             VertexArray(
-                    const std::vector<component::BufferStructure> &,
+                    const std::vector<graphic::BufferStructure> &,
                     common::oniGLsizei maxBufferSize);
 
             ~VertexArray();
@@ -32,7 +32,7 @@ namespace oni {
         private:
             common::oniGLuint mArrayID{0};
             std::unique_ptr<Buffer> mVertexBuffers;
-            std::vector<component::BufferStructure> mBufferStructure;
+            std::vector<graphic::BufferStructure> mBufferStructure;
             common::oniGLsizei mMaxBufferSize{0};
         };
 

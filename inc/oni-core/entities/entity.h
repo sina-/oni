@@ -1,7 +1,7 @@
 #pragma once
 
 namespace oni {
-    namespace component {
+    namespace entities {
         enum class EntityType : common::uint16 {
             UNKNOWN,
 
@@ -39,11 +39,10 @@ namespace oni {
         };
 
         struct DeletedEntity {
-            component::EntityType type;
+            entities::EntityType type;
             common::EntityID entity;
         };
 
-        // TODO: move this into entities module
         struct EntityOperationPolicy {
             bool track{true};
             bool safe{false};

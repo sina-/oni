@@ -5,9 +5,9 @@
 
 #include <oni-core/graphic/batch-renderer-2d.h>
 #include <oni-core/graphic/texture-manager.h>
-#include <oni-core/buffer/buffer.h>
-#include <oni-core/buffer/index-buffer.h>
-#include <oni-core/buffer/vertex-array.h>
+#include <oni-core/graphic/buffer/buffer.h>
+#include <oni-core/graphic/buffer/index-buffer.h>
+#include <oni-core/graphic/buffer/vertex-array.h>
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/physic.h>
 
@@ -16,7 +16,7 @@ namespace oni {
         BatchRenderer2D::BatchRenderer2D(const common::oniGLsizei maxSpriteCount,
                                          const common::oniGLint maxNumTextureSamplers,
                                          const common::oniGLsizei maxVertexSize,
-                                         const std::vector<component::BufferStructure> &bufferStructure,
+                                         const std::vector<graphic::BufferStructure> &bufferStructure,
                                          PrimitiveType type)
                 : mIndexCount{0},
                   mMaxPrimitiveCount{maxSpriteCount},
@@ -81,7 +81,7 @@ namespace oni {
             // TODO: This seems to trigger even in none-debug mode
             assert(mIndexCount + 6 < mMaxIndicesCount);
 
-            auto buffer = static_cast<component::ColoredVertex *>(mBuffer);
+            auto buffer = static_cast<graphic::ColoredVertex *>(mBuffer);
 
             /** The vertices are absolute coordinates, there is no model matrix.
              *    b    c
@@ -133,7 +133,7 @@ namespace oni {
                                  const component::Appearance &appearance) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
-            auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
+            auto buffer = static_cast<graphic::ParticleVertex *>(mBuffer);
 
             buffer->position = placement.position;
             buffer->color = appearance.color;
@@ -158,7 +158,7 @@ namespace oni {
                                  const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
-            auto buffer = static_cast<component::ParticleVertex *>(mBuffer);
+            auto buffer = static_cast<graphic::ParticleVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(texture.textureID);
 
@@ -185,7 +185,7 @@ namespace oni {
 
             auto samplerID = getSamplerID(texture.textureID);
 
-            auto buffer = static_cast<component::TexturedVertex *>(mBuffer);
+            auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
 
             buffer->position = position.vertexA;
             buffer->uv = texture.uv[0];
@@ -214,7 +214,7 @@ namespace oni {
 
         void
         BatchRenderer2D::_submit(const component::Text &text) {
-            auto buffer = static_cast<component::TexturedVertex *>(mBuffer);
+            auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
 

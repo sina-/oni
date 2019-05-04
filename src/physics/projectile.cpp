@@ -67,7 +67,7 @@ namespace oni {
                                const common::CarSimDouble &heading,
                                const component::EntityAttachment &attachments) {
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
-                if (attachments.entityTypes[i] == component::EntityType::VEHICLE_GUN) {
+                if (attachments.entityTypes[i] == entities::EntityType::VEHICLE_GUN) {
                     auto &gunCoolDown = entityFactory.getEntityManager().get<component::GunCoolDown>(
                             attachments.entities[i]);
                     if (gunCoolDown.value > 0) {
@@ -99,14 +99,14 @@ namespace oni {
 
                     std::string textureID = "resources/images/bullet/2.png";
 
-                    auto rocketEntity = entityFactory.createEntity<component::EntityType::SIMPLE_ROCKET>(pos,
+                    auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(pos,
                                                                                                          size,
                                                                                                          carPlacement.rotation,
                                                                                                          textureID,
                                                                                                          velocity);
                     entityFactory.tagForNetworkSync(rocketEntity);
 
-                    entityFactory.createEvent<component::EventType::ROCKET_LAUNCH>(pos.getXY());
+                    entityFactory.createEvent<game::EventType::ROCKET_LAUNCH>(pos.getXY());
                 }
             }
         }

@@ -5,6 +5,7 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/math/transformation.h>
 #include <oni-core/math/intesects.h>
+#include <oni-core/component/physic.h>
 
 namespace oni {
     namespace gameplay {
@@ -61,7 +62,7 @@ namespace oni {
             if (!entitiesToUpdate.empty()) {
                 // NOTE: I don't need the components::Car but Entt requires at least two components for a view
                 // for some freaking reason.
-                auto carLapView = mEntityManager.createView<component::CarLapInfo, component::Car>();
+                auto carLapView = mEntityManager.createView<gameplay::CarLapInfo, component::Car>();
                 for (auto &&entity: entitiesToUpdate) {
                     auto currentTime = mTimers[entity].elapsed<std::chrono::seconds>();
                     auto currentBest = mBestLaps[entity];
@@ -71,7 +72,7 @@ namespace oni {
                     std::cout << "Lap time: " << currentTime.count() << "s" << "\n";
                     std::cout << "Current best time: " << mBestLaps[entity].count() << "s" << "\n";
 
-                    auto &carLap = carLapView.get<component::CarLapInfo>(entity);
+                    auto &carLap = carLapView.get<gameplay::CarLapInfo>(entity);
                     ++carLap.lap;
                     carLap.bestLapTimeS = static_cast<common::uint32>(mBestLaps[entity].count());
                     carLap.lapTimeS = static_cast<common::uint32>(currentTime.count());

@@ -1,11 +1,11 @@
 #include <oni-core/physics/car.h>
 #include <oni-core/component/input-data.h>
-#include <oni-core/component/geometry.h>
+#include <oni-core/component/physic.h>
+#include <oni-core/math/functions.h>
 
 
 namespace oni {
     namespace physics {
-
         void
         tickCar(component::Car &car,
                 const component::CarConfig &config,

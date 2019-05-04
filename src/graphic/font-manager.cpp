@@ -74,7 +74,7 @@ namespace oni {
                                           const std::string &text,
                                           const math::vec3 &position) {
             auto &entityRegistry = entityFactory.getEntityManager();
-            auto entityID = entityFactory.createEntity<component::EntityType::TEXT>(position, text);
+            auto entityID = entityFactory.createEntity<entities::EntityType::TEXT>(position, text);
             auto &textComponent = entityRegistry.get<component::Text>(entityID);
             assignGlyphs(textComponent);
 

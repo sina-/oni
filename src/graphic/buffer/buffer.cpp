@@ -1,10 +1,10 @@
-#include <oni-core/buffer/buffer.h>
+#include <oni-core/graphic/buffer/buffer.h>
 
 #include <cassert>
 
 #include <GL/glew.h>
 
-#include <oni-core/component/buffer.h>
+#include <oni-core/graphic/buffer/buffer-data.h>
 
 namespace oni {
     namespace buffer {

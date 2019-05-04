@@ -13,17 +13,20 @@
 #include <oni-core/component/hierarchy.h>
 #include <oni-core/component/visual.h>
 #include <oni-core/component/gameplay.h>
+#include <oni-core/gameplay/lap-tracker.h>
 
 
 namespace oni {
-    namespace component {
+    namespace gameplay {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::CarLapInfo &carLapInfo) {
+                  gameplay::CarLapInfo &carLapInfo) {
             archive(carLapInfo.entityID, carLapInfo.lap, carLapInfo.lapTimeS, carLapInfo.bestLapTimeS);
         }
+    }
 
+    namespace component {
         template<class Archive>
         void
         serialize(Archive &archive,
@@ -189,7 +192,7 @@ namespace oni {
     namespace entities {
         std::string
         serialize(entities::EntityManager &manager,
-                  component::SnapshotType snapshotType) {
+                  entities::SnapshotType snapshotType) {
             std::stringstream storage{};
             {
                 cereal::PortableBinaryOutputArchive output{storage};
@@ -197,14 +200,14 @@ namespace oni {
                         component::Car,
                         component::CarConfig,
                         component::Placement,
-                        component::CarLapInfo,
+                        gameplay::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
                         component::Point,
                         component::Appearance,
                         component::Texture,
                         component::Trail,
-                        component::EntityType,
+                        entities::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
                         component::SoundTag,
@@ -230,7 +233,7 @@ namespace oni {
         void
         deserialize(EntityManager &manager,
                     const std::string &data,
-                    component::SnapshotType snapshotType) {
+                    entities::SnapshotType snapshotType) {
             std::stringstream storage;
             storage.str(data);
 
@@ -240,14 +243,14 @@ namespace oni {
                         component::Car,
                         component::CarConfig,
                         component::Placement,
-                        component::CarLapInfo,
+                        gameplay::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
                         component::Point,
                         component::Appearance,
                         component::Texture,
                         component::Trail,
-                        component::EntityType,
+                        entities::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
                         component::SoundTag,
@@ -266,7 +269,7 @@ namespace oni {
                         // mapping from client side ids to server side ids for each entity.
                   &component::EntityAttachment::entities,
                   &component::EntityAttachee::entityID,
-                  &component::CarLapInfo::entityID
+                  &gameplay::CarLapInfo::entityID
                 );
             }
         }

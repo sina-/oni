@@ -3,7 +3,7 @@
 #include <map>
 
 #include <oni-core/graphic/renderer-2d.h>
-#include <oni-core/component/buffer.h>
+#include <oni-core/graphic/buffer/buffer-data.h>
 #include <oni-core/common/typedefs.h>
 
 namespace oni {
@@ -30,7 +30,7 @@ namespace oni {
             BatchRenderer2D(common::oniGLsizei maxSpriteCount,
                             common::oniGLsizei maxNumTextureSamplers,
                             common::oniGLsizei maxVertexSize,
-                            const std::vector<component::BufferStructure> &bufferStructures,
+                            const std::vector<graphic::BufferStructure> &bufferStructures,
                             PrimitiveType type
             );
 

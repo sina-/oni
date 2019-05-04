@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include <oni-core/component/visual.h>
-#include <oni-core/component/entity.h>
+#include <oni-core/entities/entity.h>
 
 namespace oni {
     namespace math {
@@ -14,7 +14,7 @@ namespace oni {
             explicit ZLayerManager(const component::ZLayer &);
 
             common::real32
-            getZForEntity(component::EntityType) const;
+            getZForEntity(entities::EntityType) const;
 
             common::real32
             getNextZAtLayer(component::ZLayerDef);
@@ -33,7 +33,7 @@ namespace oni {
             component::ZLayer mZLayer{};
             component::ZLayer mZLayerTop{};
 
-            std::unordered_map<component::EntityType, common::real32> mEntityZLayers;
+            std::unordered_map<entities::EntityType, common::real32> mEntityZLayers;
         };
     }
 }

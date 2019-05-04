@@ -71,7 +71,7 @@ namespace oni {
 
         void
         Server::sendEntitiesAll(entities::EntityManager &manager) {
-            std::string data = entities::serialize(manager, component::SnapshotType::ENTIRE_REGISTRY);
+            std::string data = entities::serialize(manager, entities::SnapshotType::ENTIRE_REGISTRY);
             auto type = PacketType::REGISTRY_REPLACE_ALL_ENTITIES;
 
             if (data.size() > 1) {
@@ -82,7 +82,7 @@ namespace oni {
         void
         Server::sendComponentsUpdate(entities::EntityManager &manager) {
             // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-            std::string data = entities::serialize(manager, component::SnapshotType::ONLY_COMPONENTS);
+            std::string data = entities::serialize(manager, entities::SnapshotType::ONLY_COMPONENTS);
             auto type = PacketType::REGISTRY_ONLY_COMPONENT_UPDATE;
 
             if (data.size() > 1) {
@@ -93,7 +93,7 @@ namespace oni {
         void
         Server::sendNewEntities(entities::EntityManager &manager) {
             // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-            std::string data = entities::serialize(manager, component::SnapshotType::ONLY_NEW_ENTITIES);
+            std::string data = entities::serialize(manager, entities::SnapshotType::ONLY_NEW_ENTITIES);
             auto type = PacketType::REGISTRY_ADD_NEW_ENTITIES;
 
             if (data.size() > 1) {
@@ -135,21 +135,21 @@ namespace oni {
                     packet.collisionPos = collisionPos;
                     collisionPackets.emplace_back(packet);
                 };
-                entityFactory.apply<component::EventType::COLLISION>(func);
+                entityFactory.apply<game::EventType::COLLISION>(func);
             }
 
             std::vector<SoundPlayEventPacket> soundPlayPackets;
             {
                 std::function<void(component::SoundID &,
-                                   component::SoundPos &)> func = [&soundPlayPackets](
+                                   component::WorldPos &)> func = [&soundPlayPackets](
                         component::SoundID &soundEffectID,
-                        component::SoundPos &soundPos) {
+                        component::WorldPos &soundPos) {
                     SoundPlayEventPacket packet;
                     packet.soundID = soundEffectID;
                     packet.pos = soundPos;
                     soundPlayPackets.emplace_back(packet);
                 };
-                entityFactory.apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(func);
+                entityFactory.apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(func);
             }
 
             std::vector<RocketLaunchEventPacket> rocketLaunchPackets;
@@ -159,7 +159,7 @@ namespace oni {
                     packet.pos = pos;
                     rocketLaunchPackets.emplace_back(packet);
                 };
-                entityFactory.apply<component::EventType::ROCKET_LAUNCH>(func);
+                entityFactory.apply<game::EventType::ROCKET_LAUNCH>(func);
             }
 
             entityFactory.resetEvents();

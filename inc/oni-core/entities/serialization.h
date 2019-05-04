@@ -8,7 +8,7 @@
 #include <cereal/types/vector.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity.h>
+#include <oni-core/entities/entity.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/component/visual.h>
 
@@ -104,6 +104,13 @@ namespace oni {
             assert(!soundID.value.empty());
             archive(soundID.value);
         }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  WorldPos &pos) {
+            archive(pos.value);
+        }
     }
 
     namespace entities {
@@ -111,12 +118,12 @@ namespace oni {
 
         std::string
         serialize(entities::EntityManager &manager,
-                  component::SnapshotType snapshotType);
+                  entities::SnapshotType snapshotType);
 
         void
         deserialize(oni::entities::EntityManager &manager,
                     const std::string &data,
-                    component::SnapshotType snapshotType);
+                    entities::SnapshotType snapshotType);
 
         template<class T>
         T

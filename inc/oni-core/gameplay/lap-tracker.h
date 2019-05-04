@@ -19,6 +19,13 @@ namespace oni {
     }
 
     namespace gameplay {
+        struct CarLapInfo {
+            common::EntityID entityID{0};
+            common::uint16 lap{0};
+            common::uint32 lapTimeS{0};
+            common::uint32 bestLapTimeS{0};
+        };
+
         class LapTracker {
         public:
             explicit LapTracker(entities::EntityManager &entityManager,

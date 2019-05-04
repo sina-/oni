@@ -22,6 +22,12 @@ namespace oni {
         class ZLayerManager;
     }
 
+    namespace level {
+        struct ChunkIndex;
+        struct RoadTileIndex;
+        struct TileIndex;
+    }
+
     namespace server {
         namespace entities {
 
@@ -44,15 +50,15 @@ namespace oni {
                 void
                 tickChunk(const oni::math::vec2 &position);
 
-                oni::component::ChunkIndex
+                oni::level::ChunkIndex
                 groundChunkPosToIndex(const oni::math::vec2 &position) const;
 
                 oni::math::vec3
-                groundChunkIndexToPos(const oni::component::ChunkIndex &chunkIndex) const;
+                groundChunkIndexToPos(const oni::level::ChunkIndex &chunkIndex) const;
 
                 oni::math::vec3
-                roadTileIndexToPos(const oni::component::ChunkIndex &chunkIndex,
-                                   oni::component::RoadTileIndex roadTileIndices) const;
+                roadTileIndexToPos(const oni::level::ChunkIndex &chunkIndex,
+                                   oni::level::RoadTileIndex roadTileIndices) const;
 
                 oni::math::vec2
                 unpackCoordinates(oni::common::uint64 coord) const;
@@ -84,29 +90,29 @@ namespace oni {
                                      oni::common::int64 chunkY);
 
                 void
-                genTileRoad(const oni::component::ChunkIndex &chunkIndex,
-                            const oni::component::RoadTileIndex &roadTileIndex);
+                genTileRoad(const oni::level::ChunkIndex &chunkIndex,
+                            const oni::level::RoadTileIndex &roadTileIndex);
 
                 void
-                genTileRoad(const oni::component::ChunkIndex &chunkIndex,
-                            const oni::component::RoadTileIndex &roadTileIndex,
+                genTileRoad(const oni::level::ChunkIndex &chunkIndex,
+                            const oni::level::RoadTileIndex &roadTileIndex,
                             const std::string &texturePath);
 
                 void
-                genTileRoad(const oni::component::ChunkIndex &chunkIndex,
-                            oni::component::RoadTileIndex startingRoadTileIndex,
-                            oni::component::RoadTileIndex endingRoadTileIndex);
+                genTileRoad(const oni::level::ChunkIndex &chunkIndex,
+                            oni::level::RoadTileIndex startingRoadTileIndex,
+                            oni::level::RoadTileIndex endingRoadTileIndex);
 
                 bool
                 isInMap(oni::common::uint64 packedIndex,
                         const std::map<oni::common::uint64, oni::common::EntityID> &map) const;
 
                 bool
-                shouldGenerateRoad(const oni::component::ChunkIndex &chunkIndex) const;
+                shouldGenerateRoad(const oni::level::ChunkIndex &chunkIndex) const;
 
                 void
                 createWall(const std::vector<oni::component::WallTilePosition> &position,
-                           const std::vector<oni::component::TileIndex> &indices);
+                           const std::vector<oni::level::TileIndex> &indices);
 
                 oni::math::vec2
                 getTileSize() const;

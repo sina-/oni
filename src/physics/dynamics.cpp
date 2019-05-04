@@ -316,7 +316,7 @@ namespace oni {
                     const auto &attachments = view.get<component::EntityAttachment>(entity);
                     const auto &car = view.get<component::Car>(entity);
                     for (common::size i = 0; i < attachments.entities.size(); ++i) {
-                        if (attachments.entityTypes[i] == component::EntityType::VEHICLE_TIRE_FRONT) {
+                        if (attachments.entityTypes[i] == entities::EntityType::VEHICLE_TIRE_FRONT) {
                             auto &tirePlacement = manager.get<component::Placement>(attachments.entities[i]);
 
                             // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
@@ -335,7 +335,7 @@ namespace oni {
 
             // Update age
             {
-                auto policy = component::EntityOperationPolicy{false, false};
+                auto policy = entities::EntityOperationPolicy{false, false};
                 policy.safe = false;
                 policy.track = true;
                 updateAge(entityFactory, tickTime, policy);
@@ -381,12 +381,12 @@ namespace oni {
 
                 // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
                 // sound effects, etc.
-                entityFactory.createEvent<component::EventType::COLLISION>(component::EntityType::SIMPLE_ROCKET,
+                entityFactory.createEvent<game::EventType::COLLISION>(entities::EntityType::SIMPLE_ROCKET,
                         // TODO: use the proper type for the other entity instead of UNKNOWN
-                                                                           component::EntityType::UNKNOWN,
+                                                                           entities::EntityType::UNKNOWN,
                                                                            pos);
 
-                entityFactory.removeEntity(entityID, component::EntityOperationPolicy{true, false});
+                entityFactory.removeEntity(entityID, entities::EntityOperationPolicy{true, false});
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
@@ -444,7 +444,7 @@ namespace oni {
         void
         Dynamics::tickClientSide(entities::EntityFactory &entityFactory,
                                  common::real64 tickTime,
-                                 const component::EntityOperationPolicy &policy) {
+                                 const entities::EntityOperationPolicy &policy) {
             updateAge(entityFactory, tickTime, policy);
             updatePlacement(entityFactory, tickTime, policy);
         }
@@ -452,7 +452,7 @@ namespace oni {
         void
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
                             common::real64 tickTime,
-                            const component::EntityOperationPolicy &policy) {
+                            const entities::EntityOperationPolicy &policy) {
             auto view = entityFactory.getEntityManager().createView<component::Age>();
             for (const auto &entity: view) {
                 auto &age = view.get<component::Age>(entity);
@@ -466,7 +466,7 @@ namespace oni {
         void
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
                                   common::real64 tickTime,
-                                  const component::EntityOperationPolicy &policy) {
+                                  const entities::EntityOperationPolicy &policy) {
             // Update particle placement
             {
                 auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age, component::Tag_EngineOnlyParticlePhysics>();

@@ -60,7 +60,7 @@ namespace oni {
             void
             tickClientSide(entities::EntityFactory &entityFactory,
                            common::real64 tickTime,
-                           const component::EntityOperationPolicy &);
+                           const entities::EntityOperationPolicy &);
 
         private:
             void
@@ -104,12 +104,12 @@ namespace oni {
             void
             updateAge(entities::EntityFactory &,
                       common::real64 tickTime,
-                      const component::EntityOperationPolicy &);
+                      const entities::EntityOperationPolicy &);
 
             void
             updatePlacement(entities::EntityFactory &,
                             common::real64 tickTime,
-                            const component::EntityOperationPolicy &);
+                            const entities::EntityOperationPolicy &);
 
 
         private:

@@ -11,12 +11,17 @@ namespace oni {
         struct vec2;
         struct vec3;
     }
+
     namespace entities {
         class EntityManager;
 
         class EntityFactory;
 
         class ClientDataManager;
+    }
+
+    namespace component {
+        struct CarConfig;
     }
 
     namespace physics {

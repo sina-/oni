@@ -1,4 +1,4 @@
-#include <oni-core/buffer/index-buffer.h>
+#include <oni-core/graphic/buffer/index-buffer.h>
 
 #include <GL/glew.h>
 

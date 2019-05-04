@@ -6,6 +6,7 @@
 #include <oni-core/network/packet-types.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/component/audio.h>
+#include <oni-core/component/visual.h>
 
 
 namespace oni {
@@ -25,7 +26,7 @@ namespace oni {
 
         struct SoundPlayEventPacket {
             component::SoundID soundID{};
-            component::SoundPos pos{};
+            component::WorldPos pos{};
         };
 
         struct RocketLaunchEventPacket {

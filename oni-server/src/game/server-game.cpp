@@ -10,6 +10,7 @@
 #include <oni-core/entities/entity-factory.h>
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/entities/entity-manager.h>
+#include <oni-core/entities/entity.h>
 #include <oni-core/entities/serialization.h>
 #include <oni-core/math/transformation.h>
 // TODO: Compile fails if this is not here even though this file doesn't need it :( I had this issue in the past hmm...
@@ -106,7 +107,7 @@ namespace oni {
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
                 mEntityFactory->removeEntity(clientCarEntityID,
-                                             component::EntityOperationPolicy{true, false});
+                                             oni::entities::EntityOperationPolicy{true, false});
                 mClientDataManager->deleteClient(peerID);
             }
 
@@ -189,7 +190,7 @@ namespace oni {
 
             common::EntityID
             ServerGame::spawnRaceCar() {
-                auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::RACE_CAR);
+                auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
                 math::vec3 pos{-70.f, -30.f, vehicleZ};
                 math::vec2 size{2.5f, 1.1f};
@@ -198,24 +199,24 @@ namespace oni {
 
                 auto &manager = mEntityFactory->getEntityManager();
 
-                auto carEntity = mEntityFactory->createEntity<component::EntityType::RACE_CAR>(pos,
-                                                                                               size,
-                                                                                               heading,
-                                                                                               carTextureID);
+                auto carEntity = mEntityFactory->createEntity<oni::entities::EntityType::RACE_CAR>(pos,
+                                                                                                   size,
+                                                                                                   heading,
+                                                                                                   carTextureID);
 
                 mEntityFactory->tagForNetworkSync(carEntity);
 
                 math::vec2 gunSize{2.f, 0.5f};
-                math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(component::EntityType::VEHICLE_GUN)};
+                math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(oni::entities::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
-                auto carGunEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_GUN>(gunPos,
-                                                                                                     gunSize,
-                                                                                                     heading,
-                                                                                                     gunTextureID);
+                auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(gunPos,
+                                                                                                         gunSize,
+                                                                                                         heading,
+                                                                                                         gunTextureID);
                 mEntityFactory->tagForNetworkSync(carGunEntity);
 
-                mEntityFactory->attach(carEntity, carGunEntity, component::EntityType::RACE_CAR,
-                                       component::EntityType::VEHICLE_GUN);
+                mEntityFactory->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
+                                       oni::entities::EntityType::VEHICLE_GUN);
 
                 auto &carConfig = manager.get<component::CarConfig>(carEntity);
                 std::string tireTextureID = "resources/images/car/1/car-tire.png";
@@ -240,28 +241,28 @@ namespace oni {
 
                 for (auto &&carTire: carTiresFront) {
                     math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(
+                    auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_FRONT>(
                             tirePos,
                             tireSize,
                             tireRotation,
                             tireTextureID);
                     mEntityFactory->tagForNetworkSync(tireEntity);
 
-                    mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
-                                           component::EntityType::VEHICLE_TIRE_FRONT);
+                    mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
+                                           oni::entities::EntityType::VEHICLE_TIRE_FRONT);
                 }
 
                 for (auto &&carTire: carTiresRear) {
                     math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity<component::EntityType::VEHICLE_TIRE_REAR>(
+                    auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_REAR>(
                             tirePos,
                             tireSize,
                             tireRotation,
                             tireTextureID);
                     mEntityFactory->tagForNetworkSync(tireEntity);
 
-                    mEntityFactory->attach(carEntity, tireEntity, component::EntityType::RACE_CAR,
-                                           component::EntityType::VEHICLE_TIRE_REAR);
+                    mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
+                                           oni::entities::EntityType::VEHICLE_TIRE_REAR);
                 }
 
                 return carEntity;
@@ -269,14 +270,14 @@ namespace oni {
 
             common::EntityID
             ServerGame::spawnTruck() {
-                auto vehicleZ = mZLayerManager->getZForEntity(component::EntityType::VEHICLE);
+                auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::VEHICLE);
                 math::vec2 size{4.0f, 12.0f};
                 math::vec3 worldPos{-20.0f, -30.0f, vehicleZ};
                 common::real32 heading = 0.f;
                 std::string textureID = "resources/images/car/2/truck.png";
 
-                auto entityID = mEntityFactory->createEntity<component::EntityType::VEHICLE>(worldPos, size, heading,
-                                                                                             textureID);
+                auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(worldPos, size, heading,
+                                                                                            textureID);
                 mEntityFactory->tagForNetworkSync(entityID);
                 return entityID;
             }

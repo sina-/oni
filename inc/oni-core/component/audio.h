@@ -19,7 +19,5 @@ namespace oni {
         struct SoundID {
             std::string value;
         };
-
-        using SoundPos = math::vec2;
     }
 }

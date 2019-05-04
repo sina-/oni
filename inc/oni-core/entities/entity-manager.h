@@ -8,14 +8,14 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/typedefs.h>
-#include <oni-core/component/entity.h>
+#include <oni-core/entities/entity.h>
 #include <oni-core/component/tag.h>
 #include <oni-core/component/visual.h>
 
 
 namespace oni {
     namespace entities {
-        typedef common::EntityID EntityType;
+        typedef common::EntityID EntityIDType;
 
         class EntityFactory;
 
@@ -28,11 +28,11 @@ namespace oni {
             private:
                 friend EntityManager;
 
-                explicit EntityView(entt::basic_registry<EntityType> &registry) :
+                explicit EntityView(entt::basic_registry<EntityIDType> &registry) :
                         mView(registry.view<Components...>()) {
                 }
 
-                EntityView(entt::basic_registry<EntityType> &registry,
+                EntityView(entt::basic_registry<EntityIDType> &registry,
                            std::unique_lock<std::mutex> registryLock) :
                         mView(registry.view<Components...>()),
                         mRegistryLock(std::move(registryLock)) {
@@ -65,7 +65,7 @@ namespace oni {
 
                 template<class Component>
                 Component &
-                get(EntityType entityID) noexcept {
+                get(EntityIDType entityID) noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mView.get(entityID);
                     } else {
@@ -75,7 +75,7 @@ namespace oni {
 
                 template<class Component>
                 const Component &
-                get(EntityType entityID) const noexcept {
+                get(EntityIDType entityID) const noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mView.get(entityID);
                     } else {
@@ -97,11 +97,11 @@ namespace oni {
             private:
                 friend EntityManager;
 
-                explicit EntityGroup(entt::basic_registry<EntityType> &registry) :
+                explicit EntityGroup(entt::basic_registry<EntityIDType> &registry) :
                         mGroup(registry.group<Components...>()) {
                 }
 
-                EntityGroup(entt::basic_registry<EntityType> &registry,
+                EntityGroup(entt::basic_registry<EntityIDType> &registry,
                             std::unique_lock<std::mutex> registryLock) :
                         mGroup(registry.group<Components...>()),
                         mRegistryLock(std::move(registryLock)) {
@@ -134,7 +134,7 @@ namespace oni {
 
                 template<class Component>
                 Component &
-                get(EntityType entityID) noexcept {
+                get(EntityIDType entityID) noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mGroup.get(entityID);
                     } else {
@@ -144,7 +144,7 @@ namespace oni {
 
                 template<class Component>
                 const Component &
-                get(EntityType entityID) const noexcept {
+                get(EntityIDType entityID) const noexcept {
                     if constexpr(sizeof...(Components) == 1) {
                         return mGroup.get(entityID);
                     } else {
@@ -165,7 +165,7 @@ namespace oni {
 
             EntityManager() {
                 mRegistry = std::make_unique<entt::basic_registry<common::uint32 >>();
-                mLoader = std::make_unique<entt::basic_continuous_loader<EntityType>>(*mRegistry);
+                mLoader = std::make_unique<entt::basic_continuous_loader<EntityIDType>>(*mRegistry);
                 //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
             }
 
@@ -197,39 +197,39 @@ namespace oni {
             }
 
             template<class... ViewComponents>
-            EntityView<EntityType, ViewComponents...>
+            EntityView<EntityIDType, ViewComponents...>
             createView() {
-                return EntityView<EntityType, ViewComponents...>(*mRegistry);
+                return EntityView<EntityIDType, ViewComponents...>(*mRegistry);
             }
 
             template<class... ViewComponents>
-            EntityView<EntityType, ViewComponents...>
+            EntityView<EntityIDType, ViewComponents...>
             createViewWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<EntityType, ViewComponents...>(*mRegistry, std::move(registryLock));
+                return EntityView<EntityIDType, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityType, GroupComponents...>
+            EntityGroup<EntityIDType, GroupComponents...>
             createGroup() {
-                return EntityGroup<EntityType, GroupComponents...>(*mRegistry);
+                return EntityGroup<EntityIDType, GroupComponents...>(*mRegistry);
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityType, GroupComponents...>
+            EntityGroup<EntityIDType, GroupComponents...>
             createGroupWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<EntityType, GroupComponents...>(*mRegistry, std::move(registryLock));
+                return EntityView<EntityIDType, GroupComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class Component>
             Component &
-            get(EntityType entityID) noexcept {
+            get(EntityIDType entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
             }
 
-            EntityType
-            map(EntityType entityID) {
+            EntityIDType
+            map(EntityIDType entityID) {
                 auto result = mLoader->map(entityID);
                 if (result == entt::null) {
                     return 0;
@@ -244,7 +244,7 @@ namespace oni {
 
             template<class Component>
             bool
-            has(EntityType entityID) noexcept {
+            has(EntityIDType entityID) noexcept {
                 assert(mRegistry->valid(entityID));
 
                 bool result{false};
@@ -254,7 +254,7 @@ namespace oni {
 
             template<class Component, class... Args>
             void
-            replace(EntityType entityID,
+            replace(EntityIDType entityID,
                     Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
@@ -264,19 +264,19 @@ namespace oni {
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
             void
-            restore(component::SnapshotType snapshotType,
+            restore(entities::SnapshotType snapshotType,
                     Archive &archive,
                     Member Type::*... member) {
                 switch (snapshotType) {
-                    case component::SnapshotType::ENTIRE_REGISTRY: {
+                    case entities::SnapshotType::ENTIRE_REGISTRY: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
                         break;
                     }
-                    case component::SnapshotType::ONLY_COMPONENTS: {
+                    case entities::SnapshotType::ONLY_COMPONENTS: {
                         mLoader->template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
-                    case component::SnapshotType::ONLY_NEW_ENTITIES: {
+                    case entities::SnapshotType::ONLY_NEW_ENTITIES: {
                         mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
                         break;
                     }
@@ -293,9 +293,9 @@ namespace oni {
             template<class Archive, class ...ArchiveComponents>
             void
             snapshot(Archive &archive,
-                     component::SnapshotType snapshotType) {
+                     entities::SnapshotType snapshotType) {
                 switch (snapshotType) {
-                    case component::SnapshotType::ONLY_COMPONENTS: {
+                    case entities::SnapshotType::ONLY_COMPONENTS: {
                         // TODO: Rather not have this class know about specific components!
                         {
                             auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
@@ -321,7 +321,7 @@ namespace oni {
                         }
                         break;
                     }
-                    case component::SnapshotType::ONLY_NEW_ENTITIES: {
+                    case entities::SnapshotType::ONLY_NEW_ENTITIES: {
                         {
                             auto view = mRegistry->view<component::Tag_RequiresNetworkSync>();
                             if (!view.empty()) {
@@ -341,7 +341,7 @@ namespace oni {
                         }
                         break;
                     }
-                    case component::SnapshotType::ENTIRE_REGISTRY: {
+                    case entities::SnapshotType::ENTIRE_REGISTRY: {
                         mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
                         break;
                     }
@@ -365,13 +365,13 @@ namespace oni {
                 mDeletedEntities.clear();
             }
 
-            const std::vector<EntityType> &
+            const std::vector<EntityIDType> &
             getDeletedEntities() const {
                 return mDeletedEntities;
             }
 
             void
-            tagForComponentSync(EntityType entity) {
+            tagForComponentSync(EntityIDType entity) {
                 accommodate<component::Tag_OnlyComponentUpdate>(entity);
             }
 
@@ -382,29 +382,29 @@ namespace oni {
             }
 
         private:
-            EntityType
+            EntityIDType
             create() {
-                EntityType result{};
+                EntityIDType result{};
                 result = mRegistry->create();
                 return result;
             }
 
             template<class Component>
             void
-            remove(EntityType entityID) {
+            remove(EntityIDType entityID) {
                 mRegistry->remove<Component>(entityID);
             }
 
             template<class Component, class... Args>
             Component &
-            assign(EntityType entityID,
+            assign(EntityIDType entityID,
                    Args &&... args) {
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
             template<class Component, class... Args>
             void
-            accommodate(EntityType entityID,
+            accommodate(EntityIDType entityID,
                         Args &&... args) {
                 {
                     //std::lock_guard<std::mutex> registryLock(mMutex);
@@ -413,7 +413,7 @@ namespace oni {
             }
 
             void
-            destroy(EntityType entityID) {
+            destroy(EntityIDType entityID) {
                 mRegistry->destroy(entityID);
             }
 
@@ -424,23 +424,23 @@ namespace oni {
             }
 
             void
-            destroyAndTrack(EntityType entityID) {
+            destroyAndTrack(EntityIDType entityID) {
                 mRegistry->destroy(entityID);
                 mDeletedEntities.push_back(entityID);
             }
 
             bool
-            valid(EntityType entityID) {
+            valid(EntityIDType entityID) {
                 return mRegistry->valid(entityID);
             }
 
         private:
-            std::unique_ptr<entt::basic_registry<EntityType>> mRegistry{};
-            std::unique_ptr<entt::basic_continuous_loader<EntityType>> mLoader{};
+            std::unique_ptr<entt::basic_registry<EntityIDType>> mRegistry{};
+            std::unique_ptr<entt::basic_continuous_loader<EntityIDType>> mLoader{};
             mutable std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
 
-            std::vector<EntityType> mDeletedEntities{};
+            std::vector<EntityIDType> mDeletedEntities{};
         };
     }
 }

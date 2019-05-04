@@ -3,7 +3,7 @@
 #include <oni-core/common/typedefs.h>
 
 namespace oni {
-    namespace component {
+    namespace game {
         enum class EventType : common::uint8 {
             COLLISION,
             SPAWN_PARTICLE,

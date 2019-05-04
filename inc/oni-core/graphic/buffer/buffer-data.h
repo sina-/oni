@@ -10,7 +10,8 @@
 #include <oni-core/math/mat4.h>
 
 namespace oni {
-    namespace component {
+    namespace graphic {
+        // TODO: These are not components and shouldn't be here, move them to graphics package
         struct Vertex {
             math::vec3 position{0.f, 0.f, 0.f};
         };

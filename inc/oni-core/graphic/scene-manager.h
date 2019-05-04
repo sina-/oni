@@ -5,6 +5,7 @@
 
 #include <oni-core/component/visual.h>
 #include <oni-core/math/mat4.h>
+#include <oni-core/gameplay/lap-tracker.h>
 
 class b2World;
 
@@ -189,7 +190,7 @@ namespace oni {
             const RaceInfoEntities &
             getOrCreateLapText(entities::EntityFactory &,
                                common::EntityID carEntityID,
-                               const component::CarLapInfo &carLap);
+                               const gameplay::CarLapInfo &carLap);
 
             common::EntityID
             createText(entities::EntityFactory &,
@@ -202,7 +203,7 @@ namespace oni {
 
             void
             updateRaceInfo(entities::EntityManager &,
-                           const component::CarLapInfo &carLap,
+                           const gameplay::CarLapInfo&carLap,
                            const RaceInfoEntities &carLapTextEntities);
 
             common::EntityID

@@ -7,7 +7,7 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/audio.h>
-#include <oni-core/component/entity.h>
+#include <oni-core/entities/entity.h>
 #include <oni-core/component/physic.h>
 
 namespace FMOD {
@@ -36,8 +36,8 @@ namespace oni {
                  const math::vec3 &playerPos);
 
             void
-            playCollisionSoundEffect(component::EntityType,
-                                     component::EntityType,
+            playCollisionSoundEffect(entities::EntityType,
+                                     entities::EntityType,
                                      const component::CollisionPos &);
 
             void
@@ -84,8 +84,8 @@ namespace oni {
 
         private:
             common::UInt16Pack
-            createCollisionEffectID(component::EntityType,
-                                    component::EntityType);
+            createCollisionEffectID(entities::EntityType,
+                                    entities::EntityType);
 
             FMOD::Channel *
             createChannel(const component::SoundID &);

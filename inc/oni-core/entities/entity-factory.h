@@ -5,9 +5,9 @@
 #include <oni-core/common/typedefs.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/common/typedefs-graphics.h>
-#include <oni-core/component/entity.h>
+#include <oni-core/entities/entity.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/component/entity-event.h>
+#include <oni-core/game/entity-event.h>
 #include <oni-core/component/audio.h>
 
 class b2World;
@@ -47,27 +47,27 @@ namespace oni {
             EntityManager &
             getEntityManager();
 
-            template<component::EntityType entityType, class ...Args>
+            template<entities::EntityType entityType, class ...Args>
             common::EntityID
             createEntity(const Args &... args) {
                 common::EntityID entityID = createEntity();
-                auto &type = createComponent<component::EntityType>(entityID);
+                auto &type = createComponent<entities::EntityType>(entityID);
                 type = entityType;
                 _createEntity<entityType>(entityID, args...);
                 return entityID;
             }
 
-            template<component::EventType eventType, class ...Args>
+            template<game::EventType eventType, class ...Args>
             common::EntityID
             createEvent(const Args &... args) {
                 common::EntityID entityID = createEntity();
-                auto &type = createComponent<component::EventType>(entityID);
+                auto &type = createComponent<game::EventType>(entityID);
                 type = eventType;
                 _createEvent<eventType>(entityID, args...);
                 return entityID;
             }
 
-            template<component::EventType eventType, class Func>
+            template<game::EventType eventType, class Func>
             void
             apply(Func &func) {
                 _apply<eventType>(func);
@@ -75,7 +75,7 @@ namespace oni {
 
             void
             removeEntity(common::EntityID,
-                         const component::EntityOperationPolicy &);
+                         const entities::EntityOperationPolicy &);
 
             void
             resetEvents();
@@ -83,8 +83,8 @@ namespace oni {
             void
             attach(common::EntityID parent,
                    common::EntityID child,
-                   component::EntityType parentType,
-                   component::EntityType childType);
+                   entities::EntityType parentType,
+                   entities::EntityType childType);
 
             void
             tagForNetworkSync(common::EntityID);
@@ -99,55 +99,47 @@ namespace oni {
             common::EntityID
             createEntity();
 
-            template<component::EntityType, class ...Args>
+            template<entities::EntityType, class ...Args>
             void
             _createEntity(common::EntityID,
                           const Args &...) = delete;
 
-            template<component::EventType, class ...Args>
+            template<game::EventType, class ...Args>
             void
             _createEvent(common::EntityID,
                          const Args &...) = delete;
 
-            template<component::EventType eventType, class Func>
+            template<game::EventType eventType, class Func>
             void
             _apply(Func &func) = delete;
 
             template<>
             void
-            _apply<component::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
-                                                                       component::CollisionPos &)> &);
+            _apply<game::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
+                                                                  component::CollisionPos &)> &);
 
             template<>
             void
-            _apply<component::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                   component::SoundPos &)> &);
+            _apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
+                                                                              component::WorldPos &)> &);
 
             template<>
             void
-            _apply<component::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &);
+            _apply<game::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &);
 
             void
             _removeEntity(common::EntityID,
-                          component::EntityType entityType,
-                          const component::EntityOperationPolicy &policy);
+                          entities::EntityType entityType,
+                          const entities::EntityOperationPolicy &policy);
 
-            template<component::EntityType entityType>
+            template<entities::EntityType entityType>
             void
             _removeEntity(common::EntityID,
-                          const component::EntityOperationPolicy &policy) = delete;
+                          const entities::EntityOperationPolicy &policy) = delete;
 
             template<>
             void
-            _createEntity<component::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                           const math::vec3 &pos,
-                                                           const math::vec2 &size,
-                                                           const common::real32 &heading,
-                                                           const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<component::EntityType::VEHICLE>(common::EntityID entityID,
+            _createEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
                                                           const math::vec3 &pos,
                                                           const math::vec2 &size,
                                                           const common::real32 &heading,
@@ -155,23 +147,23 @@ namespace oni {
 
             template<>
             void
-            _createEntity<component::EntityType::VEHICLE_GUN>(common::EntityID,
-                                                              const math::vec3 &pos,
-                                                              const math::vec2 &size,
-                                                              const common::real32 &heading,
-                                                              const std::string &textureID);
+            _createEntity<entities::EntityType::VEHICLE>(common::EntityID entityID,
+                                                         const math::vec3 &pos,
+                                                         const math::vec2 &size,
+                                                         const common::real32 &heading,
+                                                         const std::string &textureID);
 
             template<>
             void
-            _createEntity<component::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID,
-                                                                     const math::vec3 &pos,
-                                                                     const math::vec2 &size,
-                                                                     const common::real32 &heading,
-                                                                     const std::string &textureID);
+            _createEntity<entities::EntityType::VEHICLE_GUN>(common::EntityID,
+                                                             const math::vec3 &pos,
+                                                             const math::vec2 &size,
+                                                             const common::real32 &heading,
+                                                             const std::string &textureID);
 
             template<>
             void
-            _createEntity<component::EntityType::VEHICLE_TIRE_REAR>(common::EntityID,
+            _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID,
                                                                     const math::vec3 &pos,
                                                                     const math::vec2 &size,
                                                                     const common::real32 &heading,
@@ -179,128 +171,136 @@ namespace oni {
 
             template<>
             void
-            _createEntity<component::EntityType::WALL>(common::EntityID,
-                                                       const math::vec3 &pos,
-                                                       const math::vec2 &size,
-                                                       const common::real32 &heading,
-                                                       const std::string &textureID);
+            _createEntity<entities::EntityType::VEHICLE_TIRE_REAR>(common::EntityID,
+                                                                   const math::vec3 &pos,
+                                                                   const math::vec2 &size,
+                                                                   const common::real32 &heading,
+                                                                   const std::string &textureID);
 
             template<>
             void
-            _createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                                const math::vec3 &worldPos,
-                                                                const math::vec2 &size,
-                                                                const common::real32 &heading,
-                                                                const math::vec4 &color);
+            _createEntity<entities::EntityType::WALL>(common::EntityID,
+                                                      const math::vec3 &pos,
+                                                      const math::vec2 &size,
+                                                      const common::real32 &heading,
+                                                      const std::string &textureID);
 
             template<>
             void
-            _createEntity<component::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                                const math::vec3 &worldPos,
-                                                                const math::vec2 &size,
-                                                                const common::real32 &heading,
-                                                                const std::string &textureID);
+            _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
+                                                               const math::vec3 &worldPos,
+                                                               const math::vec2 &size,
+                                                               const common::real32 &heading,
+                                                               const math::vec4 &color);
 
             template<>
             void
-            _createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                  const math::vec3 &worldPos,
-                                                                  const math::vec4 &color,
-                                                                  const common::real32 &halfSize,
+            _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
+                                                               const math::vec3 &worldPos,
+                                                               const math::vec2 &size,
+                                                               const common::real32 &heading,
+                                                               const std::string &textureID);
+
+            template<>
+            void
+            _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
+                                                                 const math::vec3 &worldPos,
+                                                                 const math::vec4 &color,
+                                                                 const common::real32 &halfSize,
                     // TODO: Is there a way to avoid need for const &?
-                                                                  const bool &randomize);
+                                                                 const bool &randomize);
 
             template<>
             void
-            _createEntity<component::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                  const math::vec3 &worldPos,
-                                                                  const std::string &textureID,
-                                                                  const common::real32 &halfSize,
-                                                                  const bool &randomize);
+            _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
+                                                                 const math::vec3 &worldPos,
+                                                                 const std::string &textureID,
+                                                                 const common::real32 &halfSize,
+                                                                 const bool &randomize);
 
             template<>
             void
-            _createEntity<component::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID,
-                                                                        const math::vec3 &worldPos,
-                                                                        const std::string &textureID,
-                                                                        const common::real32 &halfSize,
-                                                                        const bool &randomize);
+            _createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID,
+                                                                       const math::vec3 &worldPos,
+                                                                       const std::string &textureID,
+                                                                       const common::real32 &halfSize,
+                                                                       const bool &randomize);
 
             template<>
             void
-            _createEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID,
-                                                                const math::vec3 &pos,
-                                                                const math::vec2 &size,
-                                                                const common::real32 &heading,
-                                                                const std::string &textureID,
-                                                                const common::real32 &velocity);
+            _createEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
+                                                               const math::vec3 &pos,
+                                                               const math::vec2 &size,
+                                                               const common::real32 &heading,
+                                                               const std::string &textureID,
+                                                               const common::real32 &velocity);
 
             template<>
             void
-            _createEntity<component::EntityType::ROCKET_BLAST_MARK>(common::EntityID,
-                                                                    const math::vec2 &worldPos,
-                                                                    const common::real32 &sizef,
-                                                                    const common::real32 &stddev,
-                                                                    const component::PixelRGBA &color);
+            _createEntity<entities::EntityType::ROCKET_BLAST_MARK>(common::EntityID,
+                                                                   const math::vec2 &worldPos,
+                                                                   const common::real32 &sizef,
+                                                                   const common::real32 &stddev,
+                                                                   const component::PixelRGBA &color);
 
             template<>
             void
-            _createEntity<component::EntityType::TEXT>(common::EntityID,
-                                                       const math::vec3 &pos,
-                                                       const std::string &text);
+            _createEntity<entities::EntityType::TEXT>(common::EntityID,
+                                                      const math::vec3 &pos,
+                                                      const std::string &text);
 
             template<>
             void
-            _createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID,
-                                                              const math::vec3 &worldPos,
-                                                              const math::vec2 &size,
-                                                              const common::real32 &heading,
-                                                              const std::string &textureID);
+            _createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID,
+                                                             const math::vec3 &worldPos,
+                                                             const math::vec2 &size,
+                                                             const common::real32 &heading,
+                                                             const std::string &textureID);
 
             template<>
             void
-            _createEntity<component::EntityType::WORLD_CHUNK>(common::EntityID,
-                                                              const math::vec3 &worldPos,
-                                                              const math::vec2 &size,
-                                                              const common::real32 &heading,
-                                                              const math::vec4 &color);
-
-        private:
-            template<>
-            void
-            _createEvent<component::EventType::COLLISION>(common::EntityID,
-                                                          const component::EntityType &,
-                                                          const component::EntityType &,
-                                                          const math::vec3 &worldPos);
-
-            template<>
-            void
-            _createEvent<component::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID,
-                                                                      const component::SoundID &,
-                                                                      const math::vec2 &worldPos);
-
-            template<>
-            void
-            _createEvent<component::EventType::ROCKET_LAUNCH>(common::EntityID,
-                                                              const math::vec2 &worldPos);
+            _createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID,
+                                                             const math::vec3 &worldPos,
+                                                             const math::vec2 &size,
+                                                             const common::real32 &heading,
+                                                             const math::vec4 &color);
 
         private:
             template<>
             void
-            _removeEntity<component::EntityType::RACE_CAR>(common::EntityID,
-                                                           const component::EntityOperationPolicy &policy
+            _createEvent<game::EventType::COLLISION>(common::EntityID,
+                                                     const entities::EntityType &,
+                                                     const entities::EntityType &,
+                                                     const math::vec3 &worldPos);
+
+            template<>
+            void
+            _createEvent<game::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID,
+                                                                 const component::SoundID &,
+                                                                 const math::vec2 &worldPos);
+
+            template<>
+            void
+            _createEvent<game::EventType::ROCKET_LAUNCH>(common::EntityID,
+                                                         const math::vec2 &worldPos);
+
+        private:
+            template<>
+            void
+            _removeEntity<entities::EntityType::RACE_CAR>(common::EntityID,
+                                                          const entities::EntityOperationPolicy &policy
             );
 
             template<>
             void
-            _removeEntity<component::EntityType::WALL>(common::EntityID,
-                                                       const component::EntityOperationPolicy &policy
+            _removeEntity<entities::EntityType::WALL>(common::EntityID,
+                                                      const entities::EntityOperationPolicy &policy
             );
 
             template<>
             void
-            _removeEntity<component::EntityType::SIMPLE_ROCKET>(common::EntityID,
-                                                                const component::EntityOperationPolicy &policy
+            _removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
+                                                               const entities::EntityOperationPolicy &policy
             );
 
         private:

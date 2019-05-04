@@ -97,9 +97,9 @@ namespace oni {
                 assert(false);
             }
 
-            common::oniGLsizei stride = sizeof(component::ParticleVertex);
+            common::oniGLsizei stride = sizeof(graphic::ParticleVertex);
 
-            component::BufferStructure position;
+            graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
             position.componentCount = 3;
             position.componentType = GL_FLOAT;
@@ -107,67 +107,67 @@ namespace oni {
             position.stride = stride;
             position.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
-            component::BufferStructure color;
+            graphic::BufferStructure color;
             color.index = static_cast<common::oniGLuint>(colorIndex);
             color.componentCount = 4;
             color.componentType = GL_FLOAT;
             color.normalized = GL_TRUE;
             color.stride = stride;
             color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ParticleVertex,
+                    graphic::ParticleVertex,
                     color));
 
-            component::BufferStructure age;
+            graphic::BufferStructure age;
             age.index = static_cast<common::oniGLuint>(ageIndex);
             age.componentCount = 1;
             age.componentType = GL_FLOAT;
             age.normalized = GL_FALSE;
             age.stride = stride;
             age.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ParticleVertex,
+                    graphic::ParticleVertex,
                     age));
 
-            component::BufferStructure heading;
+            graphic::BufferStructure heading;
             heading.index = static_cast<common::oniGLuint>(headingIndex);
             heading.componentCount = 1;
             heading.componentType = GL_FLOAT;
             heading.normalized = GL_FALSE;
             heading.stride = stride;
             heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ParticleVertex,
+                    graphic::ParticleVertex,
                     heading));
 
-            component::BufferStructure velocity;
+            graphic::BufferStructure velocity;
             velocity.index = static_cast<common::oniGLuint>(velocityIndex);
             velocity.componentCount = 1;
             velocity.componentType = GL_FLOAT;
             velocity.normalized = GL_FALSE;
             velocity.stride = stride;
             velocity.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ParticleVertex,
+                    graphic::ParticleVertex,
                     velocity));
 
-            component::BufferStructure sampler;
+            graphic::BufferStructure sampler;
             sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
             sampler.componentCount = 1;
             sampler.componentType = GL_FLOAT;
             sampler.normalized = GL_FALSE;
             sampler.stride = stride;
             sampler.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ParticleVertex,
+                    graphic::ParticleVertex,
                     samplerID));
 
-            component::BufferStructure halfSize;
+            graphic::BufferStructure halfSize;
             halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
             halfSize.componentCount = 1;
             halfSize.componentType = GL_FLOAT;
             halfSize.normalized = GL_FALSE;
             halfSize.stride = stride;
             halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ParticleVertex,
+                    graphic::ParticleVertex,
                     halfSize));
 
-            std::vector<component::BufferStructure> bufferStructures;
+            std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
             bufferStructures.push_back(age);
@@ -180,7 +180,7 @@ namespace oni {
                     mMaxSpriteCount,
                     // TODO: If there are more than this number of textures to render in a draw call, it will fail
                     common::maxNumTextureSamplers,
-                    sizeof(component::ParticleVertex),
+                    sizeof(graphic::ParticleVertex),
                     bufferStructures,
                     PrimitiveType::POINT
             );
@@ -197,9 +197,9 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
-            common::oniGLsizei stride = sizeof(component::ColoredVertex);
+            common::oniGLsizei stride = sizeof(graphic::ColoredVertex);
 
-            component::BufferStructure position;
+            graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
             position.componentCount = 3;
             position.componentType = GL_FLOAT;
@@ -207,24 +207,24 @@ namespace oni {
             position.stride = stride;
             position.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
-            component::BufferStructure color;
+            graphic::BufferStructure color;
             color.index = static_cast<common::oniGLuint>(colorIndex);
             color.componentCount = 4;
             color.componentType = GL_FLOAT;
             color.normalized = GL_TRUE;
             color.stride = stride;
             color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::ColoredVertex,
+                    graphic::ColoredVertex,
                     color));
 
-            std::vector<component::BufferStructure> bufferStructures;
+            std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
 
             mColorRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
                     common::maxNumTextureSamplers,
-                    sizeof(component::ColoredVertex),
+                    sizeof(graphic::ColoredVertex),
                     bufferStructures,
                     PrimitiveType::TRIANGLE
             );
@@ -242,9 +242,9 @@ namespace oni {
                 throw std::runtime_error("Invalid attribute name.");
             }
 
-            common::oniGLsizei stride = sizeof(component::TexturedVertex);
+            common::oniGLsizei stride = sizeof(graphic::TexturedVertex);
 
-            component::BufferStructure position;
+            graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
             position.componentCount = 3;
             position.componentType = GL_FLOAT;
@@ -252,27 +252,27 @@ namespace oni {
             position.stride = stride;
             position.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
-            component::BufferStructure sampler;
+            graphic::BufferStructure sampler;
             sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
             sampler.componentCount = 1;
             sampler.componentType = GL_FLOAT;
             sampler.normalized = GL_FALSE;
             sampler.stride = stride;
             sampler.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::TexturedVertex,
+                    graphic::TexturedVertex,
                     samplerID));
 
-            component::BufferStructure uv;
+            graphic::BufferStructure uv;
             uv.index = static_cast<common::oniGLuint>(uvIndex);
             uv.componentCount = 2;
             uv.componentType = GL_FLOAT;
             uv.normalized = GL_FALSE;
             uv.stride = stride;
             uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    component::TexturedVertex,
+                    graphic::TexturedVertex,
                     uv));
 
-            std::vector<component::BufferStructure> bufferStructure;
+            std::vector<graphic::BufferStructure> bufferStructure;
             bufferStructure.push_back(position);
             bufferStructure.push_back(sampler);
             bufferStructure.push_back(uv);
@@ -281,7 +281,7 @@ namespace oni {
                     mMaxSpriteCount,
                     // TODO: If there are more than this number of textures to render in a draw call, it will fail
                     common::maxNumTextureSamplers,
-                    sizeof(component::TexturedVertex),
+                    sizeof(graphic::TexturedVertex),
                     bufferStructure,
                     PrimitiveType::TRIANGLE);
 
@@ -312,11 +312,11 @@ namespace oni {
             if (add) {
                 math::vec2 size{10, 10};
                 common::real32 heading = 0;
-                clientEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
+                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
 
-                clientEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
+                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
 
-                clientEntityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
+                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
                 add = false;
             }
 */
@@ -342,7 +342,7 @@ namespace oni {
                     //math::vec4 color{1.f, 1.f, 1.f, 1.f};
 
                     if (trail.previousPos.empty()) {
-                        auto trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                        auto trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
                                 currentPos, textureID, particleHalfSize, false);
                         continue;
                     }
@@ -369,19 +369,19 @@ namespace oni {
                         math::vec3 pos{x, y, currentPos.z};
                         for (common::real32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
-                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
                         }
                         else if (i >= distance ){
-                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{1.f, 0.f, 0.f, 1.f}, false);
                         }
                         else{
-                            trailEntity = mInternalEntityFactory->createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
                                     pos, color, false);
                         }
                         */
-                            trailEntity = clientEntityFactory.createEntity<component::EntityType::SIMPLE_PARTICLE>(
+                            trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
                                     pos, textureID, particleHalfSize, false);
                             auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
                                     trailEntity);
@@ -476,7 +476,7 @@ namespace oni {
 
             // Update Laps
             {
-                auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, component::CarLapInfo>();
+                auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, gameplay::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -486,7 +486,7 @@ namespace oni {
                      * Player 1: 4, 1:12, :1:50
                      * Player 2: 5, 0:02, :1:50
                      */
-                    const auto &carLap = carLapView.get<component::CarLapInfo>(carEntity);
+                    const auto &carLap = carLapView.get<gameplay::CarLapInfo>(carEntity);
 
                     const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
                     updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
@@ -540,7 +540,7 @@ namespace oni {
                 auto tilePosY = math::binPos(y, mCanvasTileSizeY);
 
                 auto worldPos = math::vec3{tilePosX, tilePosY,
-                                           mZLayerManager.getZForEntity(component::EntityType::CANVAS)};
+                                           mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
                 auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
                                            static_cast<common::real32>(mCanvasTileSizeY)};
 
@@ -548,7 +548,7 @@ namespace oni {
                 std::string emptyTextureID;
 
                 // TODO: Should this be a canvas type?
-                auto entityID = entityFactory.createEntity<component::EntityType::SIMPLE_SPRITE>(worldPos,
+                auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(worldPos,
                                                                                                  tileSize,
                                                                                                  heading,
                                                                                                  emptyTextureID);
@@ -751,7 +751,7 @@ namespace oni {
             {
                 renderAndUpdateAnimation(entityFactory);
             }
-            
+
             {
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(entityManager, viewWidth, viewHeight);
@@ -779,7 +779,7 @@ namespace oni {
 
         void
         SceneManager::renderAndUpdateAnimation(entities::EntityFactory &entityFactory) {
-            auto policy = component::EntityOperationPolicy{};
+            auto policy = entities::EntityOperationPolicy{};
             policy.safe = false;
             policy.track = false;
 
@@ -954,17 +954,15 @@ namespace oni {
                     mParticleRenderer->submit(tessellation, placement, age, velocity, texture);
                 }
             }
-
         }
-
 
         const SceneManager::RaceInfoEntities &
         SceneManager::getOrCreateLapText(entities::EntityFactory &entityFactory,
                                          common::EntityID carEntityID,
-                                         const component::CarLapInfo &carLap) {
+                                         const gameplay::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
             if (!exists) {
-                auto zLevel = mZLayerManager.getZForEntity(component::EntityType::UI);
+                auto zLevel = mZLayerManager.getZForEntity(entities::EntityType::UI);
                 RaceInfoEntities carLapText{0};
                 math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, zLevel};
                 math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, zLevel};
@@ -982,7 +980,7 @@ namespace oni {
 
         void
         SceneManager::updateRaceInfo(entities::EntityManager &entityManager,
-                                     const component::CarLapInfo &carLap,
+                                     const gameplay::CarLapInfo &carLap,
                                      const SceneManager::RaceInfoEntities &carLapTextEntities) {
             // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
             auto &lapText = entityManager.get<component::Text>(carLapTextEntities.lapEntity);

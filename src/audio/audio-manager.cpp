@@ -120,8 +120,8 @@ namespace oni {
         }
 
         void
-        AudioManager::playCollisionSoundEffect(component::EntityType A,
-                                               component::EntityType B,
+        AudioManager::playCollisionSoundEffect(entities::EntityType A,
+                                               entities::EntityType B,
                                                const component::CollisionPos &pos) {
             auto soundID = createCollisionEffectID(A, B);
             assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
@@ -134,8 +134,8 @@ namespace oni {
         }
 
         common::UInt16Pack
-        AudioManager::createCollisionEffectID(component::EntityType A,
-                                              component::EntityType B) {
+        AudioManager::createCollisionEffectID(entities::EntityType A,
+                                              entities::EntityType B) {
             static_assert(sizeof(A) == sizeof(common::uint16), "Hashing will fail due to size mismatch");
             auto x = static_cast<common::uint16 >(A);
             auto y = static_cast<common::uint16 >(B);
@@ -152,11 +152,11 @@ namespace oni {
         AudioManager::preLoadCollisionSoundEffects() {
             auto rocketWithUnknown = component::SoundID{"resources/audio/collision/rocket-with-unknown.wav"};
             loadSound(rocketWithUnknown);
-            for (auto i = static_cast<common::uint16 >(component::EntityType::UNKNOWN);
-                 i < static_cast<common::uint16>(component::EntityType::LAST);
+            for (auto i = static_cast<common::uint16 >(entities::EntityType::UNKNOWN);
+                 i < static_cast<common::uint16>(entities::EntityType::LAST);
                  ++i) {
-                auto id = createCollisionEffectID(component::EntityType::SIMPLE_ROCKET,
-                                                  static_cast<component::EntityType>(i));
+                auto id = createCollisionEffectID(entities::EntityType::SIMPLE_ROCKET,
+                                                  static_cast<entities::EntityType>(i));
                 mCollisionEffects[id] = rocketWithUnknown;
             }
         }

@@ -1,14 +1,14 @@
-#include <oni-core/buffer/buffer.h>
+#include <oni-core/graphic/buffer/buffer.h>
 
 #include <GL/glew.h>
 
-#include <oni-core/component/buffer.h>
-#include <oni-core/buffer/vertex-array.h>
+#include <oni-core/graphic/buffer/buffer-data.h>
+#include <oni-core/graphic/buffer/vertex-array.h>
 
 namespace oni {
     namespace buffer {
         VertexArray::VertexArray(
-                const std::vector<component::BufferStructure> &bufferStructure,
+                const std::vector<graphic::BufferStructure> &bufferStructure,
                 common::oniGLsizei maxBufferSize) : mMaxBufferSize{maxBufferSize} {
             mVertexBuffers = std::make_unique<buffer::Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
                                                               GL_STATIC_DRAW);

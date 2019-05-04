@@ -120,6 +120,11 @@ namespace oni {
             LAST
         };
 
+        // TODO: This is a good example to start thinking about what should be considered a component. Does it make sense
+        // for every entity to have Brush component? What is the expected behaviour from it? I could think of it as a
+        // component that can convert any entity to splat, then I can remove the color and textureID as those would be
+        // required to have and I just have a size. Otherwise, if not every entity can have this component then it is
+        // just a data structure used by systems and shouldn't be here.
         struct Brush {
             BrushType type{BrushType::UNKNOWN};
             math::vec2 size{};

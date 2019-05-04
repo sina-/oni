@@ -8,6 +8,7 @@
 #include <oni-core/graphic/texture-manager.h>
 #include <oni-core/component/tag.h>
 #include <oni-core/entities/entity-factory.h>
+#include <oni-core/component/geometry.h>
 
 namespace oni {
     namespace graphic {
@@ -72,7 +73,7 @@ namespace oni {
         common::EntityID
         FontManager::createTextFromString(entities::EntityFactory &entityFactory,
                                           const std::string &text,
-                                          const math::vec3 &position) {
+                                          const component::WorldP3D &position) {
             auto &entityRegistry = entityFactory.getEntityManager();
             auto entityID = entityFactory.createEntity<entities::EntityType::TEXT>(position, text);
             auto &textComponent = entityRegistry.get<component::Text>(entityID);

@@ -39,11 +39,11 @@ namespace oni {
         private:
             void
             fireRocket(entities::EntityFactory &entityFactory,
-                       const common::real32 speed,
-                       const component::Placement &,
-                       const component::CarConfig &,
-                       const common::CarSimDouble &heading,
-                       const component::EntityAttachment &
+                       const common::real32 velocity,
+                       const component::WorldP3D &pos,
+                       const component::Heading &heading,
+                       const component::CarConfig &carConfig,
+                       const component::EntityAttachment &attachments
             );
 
         private:

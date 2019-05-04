@@ -54,14 +54,16 @@ namespace oni {
 
             void
             _submit(const component::Tessellation &tessellation,
-                    const component::Placement &placement,
+                    const component::WorldP3D &placement,
+                    const component::Heading &,
                     const component::Age &age,
                     const component::Velocity &velocity,
                     const component::Appearance &appearance) override;
 
             void
             _submit(const component::Tessellation &,
-                    const component::Placement &,
+                    const component::WorldP3D &,
+                    const component::Heading &,
                     const component::Age &,
                     const component::Velocity &,
                     const component::Texture &) override;
@@ -71,7 +73,8 @@ namespace oni {
                     const component::Texture &) override;
 
             void
-            _submit(const component::Text &) override;
+            _submit(const component::Text &,
+                    const component::WorldP3D &) override;
 
             void
             _flush() override;

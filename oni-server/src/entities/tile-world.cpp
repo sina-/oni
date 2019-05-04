@@ -82,12 +82,12 @@ namespace oni {
             }
 
             void
-            TileWorld::tick(const math::vec2 &position) {
+            TileWorld::tick(const component::WorldP2D &position) {
                 tickChunk(position);
             }
 
             void
-            TileWorld::tickChunk(const math::vec2 &position) {
+            TileWorld::tickChunk(const component::WorldP2D &position) {
                 auto chunkIndex = groundChunkPosToIndex(position);
 
                 // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
@@ -165,12 +165,12 @@ namespace oni {
                         0};
 
                 level::RoadTileIndex westBoarderRoadTileIndex{0,
-                                                                  static_cast<uint16>(std::rand() %
-                                                                                      mTilesPerChunkY)};
+                                                              static_cast<uint16>(std::rand() %
+                                                                                  mTilesPerChunkY)};
 
                 level::RoadTileIndex eastBoarderRoadTileIndex{static_cast<uint16>(mTilesPerChunkX - 1),
-                                                                  static_cast<uint16>(std::rand() %
-                                                                                      mTilesPerChunkY)};
+                                                              static_cast<uint16>(std::rand() %
+                                                                                  mTilesPerChunkY)};
 
                 if (northChunkHasRoads && southChunkHasRoads) {
                     edgeRoads.southBoarder = level::RoadTileIndex{};
@@ -336,7 +336,8 @@ namespace oni {
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
                 auto chunkEntityID = mChunkLookup[chunkID];
                 auto &chunk = mEntityFactory.getEntityManager().get<level::Chunk>(chunkEntityID);
-                chunk.position = worldPos;
+                auto &chunkPos = mEntityFactory.getEntityManager().get<component::WorldP3D>(chunkEntityID);
+                chunkPos = worldPos;
                 chunk.index = chunkID;
                 chunk.edgeRoad = edgeRoads;
             }
@@ -423,9 +424,9 @@ namespace oni {
                         auto B = (std::rand() % 255) / 255.0f;
                         auto color = math::vec4{R, G, B, 1.0f};
 
-                        auto worldPos = math::vec3{static_cast<common::real32>(i),
-                                                   static_cast<common::real32>(j),
-                                                   mGroundZ};
+                        auto worldPos = component::WorldP3D{static_cast<common::real32>(i),
+                                                            static_cast<common::real32>(j),
+                                                            mGroundZ};
 
                         auto tileID = genSprite(color, tileSize, worldPos);
 
@@ -439,31 +440,34 @@ namespace oni {
                 return chunkIndex.y == 0;
             }
 
-            math::vec3
+            component::WorldP3D
             TileWorld::groundChunkIndexToPos(const level::ChunkIndex &chunkIndex) const {
-                return math::vec3{static_cast<common::real32>(chunkIndex.x * mChunkSizeX),
-                                  static_cast<common::real32>(chunkIndex.y * mChunkSizeY),
+                auto pos = component::WorldP3D{
+                        static_cast<common::real32>(chunkIndex.x * mChunkSizeX),
+                        static_cast<common::real32>(chunkIndex.y * mChunkSizeY),
                         // TODO: Should I keep Z as part of ChunkIndex maybe?
-                                  mGroundZ};
+                        mGroundZ};
+                return pos;
             }
 
             level::ChunkIndex
-            TileWorld::groundChunkPosToIndex(const math::vec2 &position) const {
-                auto x = floor(position.x / mChunkSizeX);
+            TileWorld::groundChunkPosToIndex(const component::WorldP2D &position) const {
+                auto x = floor(position.value.x / mChunkSizeX);
                 auto xIndex = static_cast<common::int64>(x);
-                auto y = floor(position.y / mChunkSizeY);
+                auto y = floor(position.value.y / mChunkSizeY);
                 auto yIndex = static_cast<common::int64>(y);
                 return level::ChunkIndex{xIndex, yIndex};
             }
 
-            math::vec3
+            component::WorldP3D
             TileWorld::roadTileIndexToPos(const level::ChunkIndex &chunkIndex,
                                           level::RoadTileIndex roadTileIndex) const {
 
                 auto chunkPos = groundChunkIndexToPos(chunkIndex);
                 auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndex.x * mTileSizeX),
                                           static_cast<common::real32>(roadTileIndex.y * mTileSizeY)};
-                math::vec3 pos{chunkPos.x + tilePos.x, chunkPos.y + tilePos.y, chunkPos.z};
+                auto pos = component::WorldP3D{chunkPos.value.x + tilePos.x, chunkPos.value.y + tilePos.y,
+                                               chunkPos.value.z};
                 return pos;
             }
 
@@ -478,14 +482,14 @@ namespace oni {
                 wallEntities.reserve(wallCount);
 
                 common::real32 wallWidth = 0.5f;
-                common::real32 heading = 0.f; // For static objects facing angle does not matter.
+                auto heading = component::Heading{0.f}; // For static objects facing angle does not matter.
 
                 for (size_t i = 0; i < wallCount; ++i) {
                     auto &wallPos = position[i];
                     auto &xTileIndex = indices[i].x;
                     auto &yTileIndex = indices[i].y;
 
-                    math::vec3 wallPositionInWorld;
+                    auto wallPositionInWorld = component::WorldP3D{};
                     math::vec2 wallSize;
                     std::string wallTexturePath;
 
@@ -498,9 +502,9 @@ namespace oni {
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
 
-                            wallPositionInWorld.x = currentTileX + mTileSizeX - wallWidth;
-                            wallPositionInWorld.y = currentTileY + wallWidth;
-                            wallPositionInWorld.z = mWallZ;
+                            wallPositionInWorld.value.x = currentTileX + mTileSizeX - wallWidth;
+                            wallPositionInWorld.value.y = currentTileY + wallWidth;
+                            wallPositionInWorld.value.z = mWallZ;
                             break;
                         }
                         case level::WallTilePosition::TOP: {
@@ -508,9 +512,9 @@ namespace oni {
                             wallSize.y = wallWidth;
                             wallTexturePath = "resources/images/wall/1/horizontal.png";
 
-                            wallPositionInWorld.x = currentTileX + wallWidth;
-                            wallPositionInWorld.y = currentTileY + mTileSizeY - wallWidth;
-                            wallPositionInWorld.z = mWallZ;
+                            wallPositionInWorld.value.x = currentTileX + wallWidth;
+                            wallPositionInWorld.value.y = currentTileY + mTileSizeY - wallWidth;
+                            wallPositionInWorld.value.z = mWallZ;
                             break;
                         }
                         case level::WallTilePosition::LEFT: {
@@ -518,9 +522,9 @@ namespace oni {
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
 
-                            wallPositionInWorld.x = currentTileX;
-                            wallPositionInWorld.y = currentTileY + wallWidth;
-                            wallPositionInWorld.z = mWallZ;
+                            wallPositionInWorld.value.x = currentTileX;
+                            wallPositionInWorld.value.y = currentTileY + wallWidth;
+                            wallPositionInWorld.value.z = mWallZ;
                             break;
                         }
                         case level::WallTilePosition::BOTTOM: {
@@ -528,9 +532,9 @@ namespace oni {
                             wallSize.y = wallWidth;
                             wallTexturePath = "resources/images/wall/1/horizontal.png";
 
-                            wallPositionInWorld.x = currentTileX + wallWidth;
-                            wallPositionInWorld.y = currentTileY;
-                            wallPositionInWorld.z = mWallZ;
+                            wallPositionInWorld.value.x = currentTileX + wallWidth;
+                            wallPositionInWorld.value.y = currentTileY;
+                            wallPositionInWorld.value.z = mWallZ;
                             break;
                         }
                     }
@@ -588,22 +592,23 @@ namespace oni {
             common::EntityID
             TileWorld::genSprite(math::vec4 &color,
                                  math::vec2 &tileSize,
-                                 math::vec3 &worldPos) {
-                common::real32 heading = 0.f;
+                                 component::WorldP3D &worldPos) {
+                auto heading = component::Heading{0.f};
                 auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(worldPos, tileSize,
-                                                                                                heading,
-                                                                                                color);
+                                                                                                    heading,
+                                                                                                    color);
                 mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }
 
             common::EntityID
             TileWorld::genTexture(const math::vec2 &size,
-                                  const math::vec3 &worldPos,
+                                  const component::WorldP3D &worldPos,
                                   const std::string &path) {
-                common::real32 heading = 0.f;
-                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(worldPos, size, heading,
-                                                                                                path);
+                auto heading = component::Heading{0.f};
+                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(worldPos, size,
+                                                                                                    heading,
+                                                                                                    path);
                 mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }

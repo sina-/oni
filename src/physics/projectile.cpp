@@ -34,7 +34,8 @@ namespace oni {
             // Spawn projectile
             {
                 auto carView = entityFactory.getEntityManager().createView<
-                        component::Placement,
+                        component::WorldP3D,
+                        component::Heading,
                         component::Car,
                         component::CarConfig,
                         component::EntityAttachment>();
@@ -48,12 +49,12 @@ namespace oni {
                     }
 
                     if (input->isPressed(GLFW_KEY_F)) {
-                        const auto &carPlacement = carView.get<component::Placement>(entity);
+                        const auto &carPos = carView.get<component::WorldP3D>(entity);
+                        const auto &carHeading = carView.get<component::Heading>(entity);
                         const auto &carConfig = carView.get<component::CarConfig>(entity);
                         const auto &car = carView.get<component::Car>(entity);
-                        const auto &heading = carView.get<component::Car>(entity).heading;
                         const auto &attachments = carView.get<component::EntityAttachment>(entity);
-                        fireRocket(entityFactory, velocity, carPlacement, carConfig, heading, attachments);
+                        fireRocket(entityFactory, velocity, carPos, carHeading, carConfig, attachments);
                     }
                 }
             }
@@ -62,9 +63,9 @@ namespace oni {
         void
         Projectile::fireRocket(entities::EntityFactory &entityFactory,
                                const common::real32 velocity,
-                               const component::Placement &carPlacement,
+                               const component::WorldP3D &pos,
+                               const component::Heading &heading,
                                const component::CarConfig &carConfig,
-                               const common::CarSimDouble &heading,
                                const component::EntityAttachment &attachments) {
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 if (attachments.entityTypes[i] == entities::EntityType::VEHICLE_GUN) {
@@ -87,26 +88,25 @@ namespace oni {
                     auto offset = sqrt(carHalfX * carHalfX + carHalfY * carHalfY);
 
                     math::vec2 size{1.0f, 0.3f};
-                    auto &carPos = carPlacement.position;
                     auto projectileOffset = sqrt(
                             size.x * size.x / 4.f + size.y * size.y / 4.f);
                     common::real32 fudge = 0.2f;
 
-                    math::vec3 pos{
-                            carPos.x + (offset + projectileOffset + fudge) * cos(carPlacement.rotation),
-                            carPos.y + (offset + projectileOffset + fudge) * sin(carPlacement.rotation),
-                            carPos.z};
+                    auto rocketPos = component::WorldP3D{};
+                    rocketPos.value.x = pos.value.x + (offset + projectileOffset + fudge) * cos(heading.value);
+                    rocketPos.value.y = pos.value.y + (offset + projectileOffset + fudge) * sin(heading.value);
+                    rocketPos.value.z = pos.value.z;
 
                     std::string textureID = "resources/images/bullet/2.png";
 
-                    auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(pos,
-                                                                                                         size,
-                                                                                                         carPlacement.rotation,
-                                                                                                         textureID,
-                                                                                                         velocity);
+                    auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(rocketPos,
+                                                                                                        size,
+                                                                                                        heading,
+                                                                                                        textureID,
+                                                                                                        velocity);
                     entityFactory.tagForNetworkSync(rocketEntity);
 
-                    entityFactory.createEvent<game::EventType::ROCKET_LAUNCH>(pos.getXY());
+                    entityFactory.createEvent<game::EventType::ROCKET_LAUNCH>(rocketPos);
                 }
             }
         }

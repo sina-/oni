@@ -73,7 +73,7 @@ namespace oni {
             void
             splat(entities::EntityFactory &entityFactory,
                   component::Brush brush,
-                  const math::vec2 &worldPos);
+                  const component::WorldP3D &worldPos);
 
             void
             lookAt(common::real32 x,
@@ -193,8 +193,8 @@ namespace oni {
                                const gameplay::CarLapInfo &carLap);
 
             common::EntityID
-            createText(entities::EntityFactory &,
-                       const math::vec3 &worldPos,
+            createText(entities::EntityFactory &entityFactory,
+                       const component::WorldP3D &worldPos,
                        const std::string &text);
 
             void
@@ -208,13 +208,13 @@ namespace oni {
 
             common::EntityID
             getOrCreateCanvasTile(entities::EntityFactory &,
-                                  const math::vec2 &pos);
+                                  const component::WorldP3D &pos);
 
             void
             updateCanvasTile(entities::EntityManager &,
                              common::EntityID,
                              const component::Brush &,
-                             const math::vec2 &worldPos);
+                             const component::WorldP3D &worldPos);
 
         private:
             std::unique_ptr<Shader> mColorShader{};

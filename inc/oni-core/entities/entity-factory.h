@@ -28,7 +28,8 @@ namespace oni {
     }
 
     namespace component {
-        class Texture;
+        struct Texture;
+        struct WorldP3D;
     }
 
     namespace entities {
@@ -125,7 +126,7 @@ namespace oni {
 
             template<>
             void
-            _apply<game::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &);
+            _apply<game::EventType::ROCKET_LAUNCH>(std::function<void(component::WorldP3D &)> &);
 
             void
             _removeEntity(common::EntityID,
@@ -140,71 +141,71 @@ namespace oni {
             template<>
             void
             _createEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                          const math::vec3 &pos,
+                                                          const component::WorldP3D &pos,
                                                           const math::vec2 &size,
-                                                          const common::real32 &heading,
+                                                          const component::Heading &heading,
                                                           const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::VEHICLE>(common::EntityID entityID,
-                                                         const math::vec3 &pos,
+                                                         const component::WorldP3D &pos,
                                                          const math::vec2 &size,
-                                                         const common::real32 &heading,
+                                                         const component::Heading &heading,
                                                          const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::VEHICLE_GUN>(common::EntityID,
-                                                             const math::vec3 &pos,
+                                                             const component::WorldP3D &pos,
                                                              const math::vec2 &size,
-                                                             const common::real32 &heading,
+                                                             const component::Heading &heading,
                                                              const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID,
-                                                                    const math::vec3 &pos,
+                                                                    const component::WorldP3D &pos,
                                                                     const math::vec2 &size,
-                                                                    const common::real32 &heading,
+                                                                    const component::Heading &heading,
                                                                     const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::VEHICLE_TIRE_REAR>(common::EntityID,
-                                                                   const math::vec3 &pos,
+                                                                   const component::WorldP3D &pos,
                                                                    const math::vec2 &size,
-                                                                   const common::real32 &heading,
+                                                                   const component::Heading &heading,
                                                                    const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::WALL>(common::EntityID,
-                                                      const math::vec3 &pos,
+                                                      const component::WorldP3D &pos,
                                                       const math::vec2 &size,
-                                                      const common::real32 &heading,
+                                                      const component::Heading &heading,
                                                       const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                               const math::vec3 &worldPos,
+                                                               const component::WorldP3D &worldPos,
                                                                const math::vec2 &size,
-                                                               const common::real32 &heading,
+                                                               const component::Heading &heading,
                                                                const math::vec4 &color);
 
             template<>
             void
             _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                               const math::vec3 &worldPos,
+                                                               const component::WorldP3D &worldPos,
                                                                const math::vec2 &size,
-                                                               const common::real32 &heading,
+                                                               const component::Heading &heading,
                                                                const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                 const math::vec3 &worldPos,
+                                                                 const component::WorldP3D &worldPos,
                                                                  const math::vec4 &color,
                                                                  const common::real32 &halfSize,
                     // TODO: Is there a way to avoid need for const &?
@@ -213,7 +214,7 @@ namespace oni {
             template<>
             void
             _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                 const math::vec3 &worldPos,
+                                                                 const component::WorldP3D &worldPos,
                                                                  const std::string &textureID,
                                                                  const common::real32 &halfSize,
                                                                  const bool &randomize);
@@ -221,7 +222,7 @@ namespace oni {
             template<>
             void
             _createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID,
-                                                                       const math::vec3 &worldPos,
+                                                                       const component::WorldP3D &worldPos,
                                                                        const std::string &textureID,
                                                                        const common::real32 &halfSize,
                                                                        const bool &randomize);
@@ -229,40 +230,40 @@ namespace oni {
             template<>
             void
             _createEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
-                                                               const math::vec3 &pos,
+                                                               const component::WorldP3D &pos,
                                                                const math::vec2 &size,
-                                                               const common::real32 &heading,
+                                                               const component::Heading &heading,
                                                                const std::string &textureID,
                                                                const common::real32 &velocity);
 
             template<>
             void
             _createEntity<entities::EntityType::ROCKET_BLAST_MARK>(common::EntityID,
-                                                                   const math::vec2 &worldPos,
-                                                                   const common::real32 &sizef,
+                                                                   const component::WorldP2D &worldPos,
+                                                                   const common::real32 &size,
                                                                    const common::real32 &stddev,
                                                                    const component::PixelRGBA &color);
 
             template<>
             void
             _createEntity<entities::EntityType::TEXT>(common::EntityID,
-                                                      const math::vec3 &pos,
+                                                      const component::WorldP3D &pos,
                                                       const std::string &text);
 
             template<>
             void
             _createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID,
-                                                             const math::vec3 &worldPos,
+                                                             const component::WorldP3D &worldPos,
                                                              const math::vec2 &size,
-                                                             const common::real32 &heading,
+                                                             const component::Heading &heading,
                                                              const std::string &textureID);
 
             template<>
             void
             _createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID,
-                                                             const math::vec3 &worldPos,
+                                                             const component::WorldP3D &worldPos,
                                                              const math::vec2 &size,
-                                                             const common::real32 &heading,
+                                                             const component::Heading &heading,
                                                              const math::vec4 &color);
 
         private:
@@ -271,18 +272,18 @@ namespace oni {
             _createEvent<game::EventType::COLLISION>(common::EntityID,
                                                      const entities::EntityType &,
                                                      const entities::EntityType &,
-                                                     const math::vec3 &worldPos);
+                                                     const component::WorldP3D &worldPos);
 
             template<>
             void
             _createEvent<game::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID,
                                                                  const component::SoundID &,
-                                                                 const math::vec2 &worldPos);
+                                                                 const component::WorldP2D &worldPos);
 
             template<>
             void
             _createEvent<game::EventType::ROCKET_LAUNCH>(common::EntityID,
-                                                         const math::vec2 &worldPos);
+                                                         const component::WorldP3D &worldPos);
 
         private:
             template<>
@@ -306,7 +307,7 @@ namespace oni {
         private:
             b2Body *
             createPhysicalBody(
-                    const math::vec3 &worldPos,
+                    const component::WorldP3D &worldPos,
                     const math::vec2 &size,
                     const common::real32 heading,
                     component::PhysicalProperties &properties

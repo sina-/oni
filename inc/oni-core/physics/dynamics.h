@@ -4,6 +4,7 @@
 
 #include <oni-core/entities/client-data-manager.h>
 #include <oni-core/component/physic.h>
+#include <oni-core/component/geometry.h>
 
 class b2World;
 
@@ -18,8 +19,6 @@ namespace oni {
         class ClientDataManager;
     }
     namespace component {
-        struct Placement;
-
         struct TransformParent;
     }
 
@@ -67,25 +66,25 @@ namespace oni {
             handleRocketCollision(entities::EntityFactory &,
                                   common::EntityID,
                                   component::PhysicalProperties &,
-                                  component::Placement &);
+                                  component::WorldP3D &pos);
 
             void
             handleVehicleCollision(entities::EntityFactory &,
                                    common::EntityID,
                                    component::PhysicalProperties &,
-                                   component::Placement &);
+                                   component::WorldP3D &);
 
             void
             handleRaceCarCollision(entities::EntityFactory &,
                                    common::EntityID,
                                    component::PhysicalProperties &,
-                                   component::Placement &);
+                                   component::WorldP3D &);
 
             void
             handleCollision(entities::EntityFactory &,
                             common::EntityID,
                             component::PhysicalProperties &,
-                            component::Placement &);
+                            component::WorldP3D &);
 
             bool
             isColliding(b2Body *);
@@ -94,7 +93,9 @@ namespace oni {
             void
             updateTransforms(entities::EntityManager &manager,
                              common::EntityID entity,
-                             const component::Placement &placement);
+                             const oni::component::WorldP3D &pos,
+                             const component::Heading &heading,
+                             const component::Scale &scale);
 
             void
             updateTransformParent(entities::EntityManager &manager,
@@ -121,7 +122,7 @@ namespace oni {
                     std::function<void(entities::EntityFactory &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
-                                       component::Placement &
+                                       component::WorldP3D &
                     )>> mCollisionHandlers{};
             common::real32 mTickFrequency{};
 

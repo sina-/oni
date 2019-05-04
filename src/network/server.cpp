@@ -132,7 +132,7 @@ namespace oni {
                         component::WorldP3D &collisionPos) {
                     CollisionEventPacket packet;
                     packet.collidingEntity = collidingEntity;
-                    packet.pos = collisionPos.pos;
+                    packet.pos = collisionPos;
                     collisionPackets.emplace_back(packet);
                 };
                 entityFactory.apply<game::EventType::COLLISION>(func);
@@ -146,7 +146,7 @@ namespace oni {
                         component::WorldP3D &soundPos) {
                     SoundPlayEventPacket packet;
                     packet.soundID = soundEffectID;
-                    packet.pos = soundPos.pos;
+                    packet.pos = soundPos;
                     soundPlayPackets.emplace_back(packet);
                 };
                 entityFactory.apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(func);
@@ -154,7 +154,7 @@ namespace oni {
 
             std::vector<RocketLaunchEventPacket> rocketLaunchPackets;
             {
-                std::function<void(math::vec2 &pos)> func = [&rocketLaunchPackets](math::vec2 &pos) {
+                std::function<void(component::WorldP3D &pos)> func = [&rocketLaunchPackets](component::WorldP3D &pos) {
                     RocketLaunchEventPacket packet;
                     packet.pos = pos;
                     rocketLaunchPackets.emplace_back(packet);

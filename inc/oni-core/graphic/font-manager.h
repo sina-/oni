@@ -13,7 +13,8 @@ namespace ftgl {
 
 namespace oni {
     namespace component {
-        class Text;
+        struct Text;
+        struct WorldP3D;
     }
 
     namespace entities {
@@ -38,9 +39,9 @@ namespace oni {
             operator=(FontManager &) = delete;
 
             common::EntityID
-            createTextFromString(entities::EntityFactory &,
+            createTextFromString(entities::EntityFactory &entityFactory,
                                  const std::string &text,
-                                 const math::vec3 &position);
+                                 const component::WorldP3D &position);
 
             void
             updateText(const std::string &textContent,

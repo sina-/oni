@@ -31,7 +31,7 @@ namespace oni {
         LapTracker::tick() {
             std::vector<common::EntityID> entitiesToUpdate;
             {
-                auto carView = mEntityManager.createView<component::Shape, component::Placement, component::Car>();
+                auto carView = mEntityManager.createView<component::Shape, component::WorldP3D, component::Car>();
                 for (auto &&entity: carView) {
 
                     // TODO: This is obsolete if registry is only modified from one thread. Then I can expose addNewPlayer()
@@ -45,8 +45,8 @@ namespace oni {
 
                     const auto &nextCheckpoint = mRemainingCheckpoints[entity].back();
                     auto carShapeWorld = carView.get<component::Shape>(entity);
-                    auto entityPlacement = carView.get<component::Placement>(entity);
-                    math::Transformation::localToWorldTranslation(entityPlacement.position, carShapeWorld);
+                    auto entityPlacement = carView.get<component::WorldP3D>(entity);
+                    math::localToWorldTranslation(entityPlacement, carShapeWorld);
 
                     if (math::intersects(nextCheckpoint, carShapeWorld)) {
                         mRemainingCheckpoints[entity].pop_back();

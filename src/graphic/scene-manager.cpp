@@ -328,12 +328,13 @@ namespace oni {
                 common::real32 particleSize = particleHalfSize * 2;
                 common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
 
-                auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::Placement>();
+                auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::WorldP3D, component::Heading>();
                 for (auto &&entity: view) {
-                    const auto &placement = view.get<component::Placement>(entity);
-                    const auto &currentPos = placement.position;
+                    const auto &worldPos = view.get<component::WorldP3D>(entity);
+                    const auto &heading = view.get<component::Heading>(entity);
+                    const auto &currentPos = worldPos;
                     const auto &trail = view.get<component::Trail>(entity);
-                    common::real32 projectileHeading = placement.rotation;
+                    common::real32 projectileHeading = heading.value;
                     common::real32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
                     common::real32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
 
@@ -354,19 +355,19 @@ namespace oni {
                         continue;
                     }
 
-                    common::real32 dX = currentPos.x - previousPos.x;
-                    common::real32 dY = currentPos.y - previousPos.y;
+                    common::real32 dX = currentPos.value.x - previousPos.value.x;
+                    common::real32 dY = currentPos.value.y - previousPos.value.y;
 
                     common::real32 distance = std::sqrt(dX * dX + dY * dY);
 
-                    auto x = previousPos.x;
-                    auto y = previousPos.y;
+                    auto x = previousPos.value.x;
+                    auto y = previousPos.value.y;
 
                     auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
 
                     common::EntityID trailEntity;
                     for (auto numParticles = 0; numParticles < mRand->nextUint8(1, 2); ++numParticles) {
-                        math::vec3 pos{x, y, currentPos.z};
+                        auto pos = component::WorldP3D{x, y, currentPos.value.z};
                         for (common::real32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
                             trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
@@ -393,12 +394,12 @@ namespace oni {
                                     trailEntity);
                             velocity.currentVelocity = mRand->nextReal32(2.f, 10.f);
 
-                            auto &particlePlacement = clientEntityFactory.getEntityManager().get<component::Placement>(
+                            auto &particleHeading = clientEntityFactory.getEntityManager().get<component::Heading>(
                                     trailEntity);
-                            particlePlacement.rotation = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
+                            particleHeading.value = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
 
-                            pos.x += particleSize * std::sin(alpha);
-                            pos.y += particleSize * std::cos(alpha);
+                            pos.value.x += particleSize * std::sin(alpha);
+                            pos.value.y += particleSize * std::cos(alpha);
                         }
                     }
 
@@ -409,7 +410,7 @@ namespace oni {
 
             // Entities that leave mark
             {
-                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::Placement>();
+                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D>();
                 for (auto &&entity: view) {
                     const auto &texture = view.get<component::Texture>(entity);
                     auto brush = component::Brush{};
@@ -418,24 +419,26 @@ namespace oni {
                     brush.type = component::BrushType::CUSTOM_TEXTURE;
                     brush.size = math::vec2{1, 1};
 
-                    const auto &pos = view.get<component::Placement>(entity).position.getXY();
+                    const auto &pos = view.get<component::WorldP3D>(entity);
                     splat(clientEntityFactory, brush, pos);
                 }
             }
 
             // Update Skid lines.
             {
-                std::vector<math::vec2> skidPosList{};
+                std::vector<component::WorldP3D> skidPosList{};
                 std::vector<common::uint8> skidOpacity{};
                 {
-                    auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::Placement, component::CarConfig>();
+                    auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::WorldP3D, component::Heading, component::Scale, component::CarConfig>();
                     for (auto &&carEntity: carView) {
 
                         const auto car = carView.get<component::Car>(carEntity);
                         // NOTE: Technically I should use slippingRear, but this gives better effect
                         if (car.slippingFront || true) {
                             const auto &carConfig = carView.get<component::CarConfig>(carEntity);
-                            const auto &placement = carView.get<component::Placement>(carEntity);
+                            const auto &pos = carView.get<component::WorldP3D>(carEntity);
+                            const auto &heading = carView.get<component::Heading>(carEntity);
+                            const auto &scale = carView.get<component::Scale>(carEntity);
 
                             // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
                             // same logic is hard-coded when spawningCar server side.
@@ -448,11 +451,11 @@ namespace oni {
                                                  static_cast<common::real32>(-carConfig.wheelWidth -
                                                                              carConfig.halfWidth / 2),
                                                  0.f};
-                            auto transform = math::Transformation::createTransformation(placement.position,
-                                                                                        placement.rotation,
-                                                                                        placement.scale);
-                            skidPosList.emplace_back((transform * skidPosRL).getXY());
-                            skidPosList.emplace_back((transform * skidPosRR).getXY());
+                            auto transform = math::createTransformation(pos, heading, scale);
+                            auto posRL = transform * skidPosRL;
+                            auto posRR = transform * skidPosRR;
+                            skidPosList.push_back(component::WorldP3D{posRL.x, posRL.y, posRL.z});
+                            skidPosList.push_back(component::WorldP3D{posRR.x, posRR.y, posRR.z});
 
 //                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
 //                                                                    255);
@@ -497,7 +500,7 @@ namespace oni {
         void
         SceneManager::splat(entities::EntityFactory &entityFactory,
                             component::Brush brush,
-                            const math::vec2 &worldPos) {
+                            const component::WorldP3D &worldPos) {
             auto &entityManager = entityFactory.getEntityManager();
 
             std::set<common::EntityID> tileEntities;
@@ -505,19 +508,28 @@ namespace oni {
             auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
             tileEntities.insert(entityID);
 
-            auto lowerLeft = worldPos - brush.size / 2.f;
+            auto lowerLeft = worldPos;
+            lowerLeft.value.x -= brush.size.x / 2.f;
+            lowerLeft.value.y -= brush.size.y / 2.f;
             auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
             tileEntities.insert(lowerLeftEntityID);
 
-            auto topRight = worldPos + brush.size / 2.f;
+            auto topRight = worldPos;
+            topRight.value.x += brush.size.x / 2.f;
+            topRight.value.y += brush.size.y / 2.f;
+
             auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
             tileEntities.insert(topRightEntityID);
 
-            math::vec2 topLeft{worldPos.x - brush.size.x / 2.f, worldPos.y + brush.size.y / 2.f};
+            auto topLeft = worldPos;
+            topLeft.value.x -= brush.size.x / 2.f;
+            topLeft.value.y += brush.size.y / 2.f;
             auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
             tileEntities.insert(topLeftEntityID);
 
-            math::vec2 lowerRight{worldPos.x + brush.size.x / 2.f, worldPos.y - brush.size.y / 2.f};
+            auto lowerRight = worldPos;
+            lowerRight.value.x += brush.size.x / 2.f;
+            lowerRight.value.y -= brush.size.y / 2.f;
             auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
             tileEntities.insert(lowerRightEntityID);
 
@@ -528,9 +540,9 @@ namespace oni {
 
         common::EntityID
         SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
-                                            const math::vec2 &pos) {
-            auto x = math::findBin(pos.x, mCanvasTileSizeX);
-            auto y = math::findBin(pos.y, mCanvasTileSizeY);
+                                            const component::WorldP3D &pos) {
+            auto x = math::findBin(pos.value.x, mCanvasTileSizeX);
+            auto y = math::findBin(pos.value.y, mCanvasTileSizeY);
             auto xy = math::packInt64(x, y);
             auto &entityRegistry = entityFactory.getEntityManager();
 
@@ -539,19 +551,19 @@ namespace oni {
                 auto tilePosX = math::binPos(x, mCanvasTileSizeX);
                 auto tilePosY = math::binPos(y, mCanvasTileSizeY);
 
-                auto worldPos = math::vec3{tilePosX, tilePosY,
-                                           mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
+                auto worldPos = component::WorldP3D{tilePosX, tilePosY,
+                                                    mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
                 auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
                                            static_cast<common::real32>(mCanvasTileSizeY)};
 
-                common::real32 heading = 0.f;
+                auto heading = component::Heading{0.f};
                 std::string emptyTextureID;
 
                 // TODO: Should this be a canvas type?
                 auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(worldPos,
-                                                                                                 tileSize,
-                                                                                                 heading,
-                                                                                                 emptyTextureID);
+                                                                                                tileSize,
+                                                                                                heading,
+                                                                                                emptyTextureID);
 
                 auto &texture = entityRegistry.get<component::Texture>(entityID);
 
@@ -579,14 +591,14 @@ namespace oni {
         SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
                                        common::EntityID entityID,
                                        const component::Brush &brush,
-                                       const math::vec2 &worldPos) {
+                                       const component::WorldP3D &worldPos) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
             // TODO: why the hell from Shape and not Placement?
             auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
 
-            auto brushTexturePos = math::vec3{worldPos.x, worldPos.y, 0.f};
-            math::Transformation::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
-                                                           brushTexturePos);
+            auto brushTexturePos = worldPos;
+            math::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
+                                           brushTexturePos);
 
             component::Image image{};
             switch (brush.type) {
@@ -616,8 +628,8 @@ namespace oni {
 
             // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
             // in game units at this point.
-            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (image.width / 2.f));
-            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (image.height / 2.f));
+            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.value.x - (image.width / 2.f));
+            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.value.y - (image.height / 2.f));
 
             mTextureManager->blendAndUpdateTexture(canvasTexture,
                                                    textureOffsetX,
@@ -710,10 +722,10 @@ namespace oni {
         SceneManager::render(entities::EntityFactory &serverEntityFactory,
                              entities::EntityFactory &clientEntityFactory,
                              common::EntityID lookAtEntity) {
-            if (lookAtEntity && serverEntityFactory.getEntityManager().has<component::Placement>(lookAtEntity)) {
-                const auto &pos = serverEntityFactory.getEntityManager().get<component::Placement>(
-                        lookAtEntity).position;
-                lookAt(pos.x, pos.y);
+            if (lookAtEntity && serverEntityFactory.getEntityManager().has<component::WorldP3D>(lookAtEntity)) {
+                const auto &pos = serverEntityFactory.getEntityManager().get<component::WorldP3D>(
+                        lookAtEntity);
+                lookAt(pos.value.x, pos.value.y);
             }
 
             render(serverEntityFactory);
@@ -787,7 +799,7 @@ namespace oni {
             auto now = std::chrono::steady_clock::now().time_since_epoch().count();
             for (auto &&entity: view) {
                 const auto &animatedSplat = view.get<component::AnimatedSplat>(entity);
-                const auto &pos = view.get<component::WorldP3D>(entity).pos.getXY();
+                const auto &pos = view.get<component::WorldP3D>(entity);
                 if (animatedSplat.diesAt >= now) {
                     splat(entityFactory, animatedSplat.brush, pos);
                     entityFactory.removeEntity(entity, policy);
@@ -804,14 +816,15 @@ namespace oni {
         SceneManager::renderStaticText(entities::EntityManager &manager,
                                        common::real32 viewWidth,
                                        common::real32 viewHeight) {
-            auto staticTextView = manager.createView<component::Text, component::Tag_Static>();
+            auto staticTextView = manager.createView<component::Text, component::Tag_Static, component::WorldP3D>();
             for (const auto &entity: staticTextView) {
                 auto &text = staticTextView.get<component::Text>(entity);
+                auto &pos = staticTextView.get<component::WorldP3D>(entity);
 
                 ++mRenderedSpritesPerFrame;
                 ++mRenderedTexturesPerFrame;
 
-                mTextureRenderer->submit(text);
+                mTextureRenderer->submit(text, pos);
             }
         }
 
@@ -850,14 +863,14 @@ namespace oni {
                                             common::real32 viewWidth,
                                             common::real32 viewHeight) {
             auto view = manager.createView<component::Tag_TextureShaded, component::Shape,
-                    component::Texture, component::Placement, component::Tag_Dynamic>();
+                    component::Texture, component::WorldP3D, component::Heading, component::Scale, component::Tag_Dynamic>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<component::Shape>(entity);
-                const auto &placement = view.get<component::Placement>(entity);
+                const auto &pos = view.get<component::WorldP3D>(entity);
+                const auto &heading = view.get<component::Heading>(entity);
+                const auto &scale = view.get<component::Scale>(entity);
 
-                auto transformation = math::Transformation::createTransformation(placement.position,
-                                                                                 placement.rotation,
-                                                                                 placement.scale);
+                auto transformation = math::createTransformation(pos, heading, scale);
 
                 // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
                 // separately for each entity and each time a physics system updates an entity it will automatically
@@ -870,7 +883,7 @@ namespace oni {
                     transformation = transformParent.transform * transformation;
                 }
 
-                auto shapeTransformed = math::Transformation::shapeTransformation(transformation, shape);
+                auto shapeTransformed = math::shapeTransformation(transformation, shape);
                 if (!math::intersects(shapeTransformed, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                     continue;
                 }
@@ -910,48 +923,50 @@ namespace oni {
                                       common::real32 viewHeight) {
             // Particles with color shading
             {
-                auto view = manager.createView<component::Tessellation, component::Appearance, component::Placement, component::Age, component::Velocity, component::Tag_Particle,
+                auto view = manager.createView<component::Tessellation, component::Appearance, component::WorldP3D, component::Heading, component::Age, component::Velocity, component::Tag_Particle,
                         component::Tag_ShaderOnlyParticlePhysics>();
 
                 mParticleShader->setUniform1i("shaderPhysics", true);
 
                 for (const auto &entity: view) {
-                    const auto &placement = view.get<component::Placement>(entity);
-                    if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    const auto &pos = view.get<component::WorldP3D>(entity);
+                    if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
                     const auto &tessellation = view.get<component::Tessellation>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
+                    const auto &heading = view.get<component::Heading>(entity);
                     const auto &appearance = view.get<component::Appearance>(entity);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(tessellation, placement, age, velocity, appearance);
+                    mParticleRenderer->submit(tessellation, pos, heading, age, velocity, appearance);
                 }
             }
 
             // Particles with texture shading
             {
-                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::Placement, component::Tag_Particle,
+                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::WorldP3D, component::Heading, component::Tag_Particle,
                         component::Tag_ShaderOnlyParticlePhysics>();
                 mParticleShader->setUniform1i("shaderPhysics", true);
 
                 for (const auto &entity: view) {
-                    const auto &placement = view.get<component::Placement>(entity);
-                    if (!math::intersects(placement.position, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    const auto &pos = view.get<component::WorldP3D>(entity);
+                    if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
                     const auto &tessellation = view.get<component::Tessellation>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
+                    const auto &heading = view.get<component::Heading>(entity);
 
                     auto &texture = view.get<component::Texture>(entity);
                     prepareTexture(texture);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(tessellation, placement, age, velocity, texture);
+                    mParticleRenderer->submit(tessellation, pos, heading, age, velocity, texture);
                 }
             }
         }
@@ -964,9 +979,11 @@ namespace oni {
             if (!exists) {
                 auto zLevel = mZLayerManager.getZForEntity(entities::EntityType::UI);
                 RaceInfoEntities carLapText{0};
-                math::vec3 lapRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, zLevel};
-                math::vec3 lapTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f, zLevel};
-                math::vec3 bestTimeRenderPos{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f, zLevel};
+                auto lapRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, zLevel};
+                auto lapTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f,
+                                                            zLevel};
+                auto bestTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f,
+                                                             zLevel};
 
                 carLapText.lapEntity = createText(entityFactory, lapRenderPos, "Lap: " + std::to_string(carLap.lap));
                 carLapText.lapTimeEntity = createText(entityFactory, lapTimeRenderPos,
@@ -1063,7 +1080,7 @@ namespace oni {
 
         common::EntityID
         SceneManager::createText(entities::EntityFactory &entityFactory,
-                                 const math::vec3 &worldPos,
+                                 const component::WorldP3D &worldPos,
                                  const std::string &text) {
             auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
             return entityID;

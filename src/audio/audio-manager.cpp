@@ -62,7 +62,7 @@ namespace oni {
 
         void
         AudioManager::tick(entities::EntityFactory &entityFactory,
-                           const math::vec3 &playerPos) {
+                           const component::WorldP3D &playerPos) {
             mPlayerPos = playerPos;
             auto result = mSystem->update();
             ERRCHECK(result);
@@ -70,21 +70,20 @@ namespace oni {
             // Engine
             {
                 auto view = entityFactory.getEntityManager().createView<component::Tag_Audible,
-                        component::Placement, component::Car, component::SoundTag>();
+                        component::WorldP3D, component::Car, component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &car = view.get<component::Car>(entity);
-                    auto &placement = view.get<component::Placement>(entity);
+                    auto &pos = view.get<component::WorldP3D>(entity);
                     auto &soundTag = view.get<component::SoundTag>(entity);
                     math::vec3 velocity{car.velocity.x, car.velocity.y, 0.f};
 
                     // TODO: Using soundTag find the correct sound to play.
                     auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity);
-                    auto &entityPos = placement.position;
-                    auto distance = (entityPos - mPlayerPos).len();
+                    auto distance = (pos.value - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
                         auto pitch = static_cast< common::real32>(car.rpm) / 2000;
                         setPitch(*entityChannel.channel, pitch);
-                        set3DPos(*entityChannel.channel, entityPos - mPlayerPos, velocity);
+                        set3DPos(*entityChannel.channel, pos.value - mPlayerPos.value, velocity);
 
                         unPause(*entityChannel.channel);
                     } else {
@@ -95,9 +94,9 @@ namespace oni {
 
             {
                 auto view = entityFactory.getEntityManager().createView<component::Tag_Audible,
-                        component::Placement, component::SoundTag>();
+                        component::WorldP3D, component::SoundTag>();
                 for (auto &&entity : view) {
-                    auto &pos = view.get<component::Placement>(entity).position;
+                    auto &pos = view.get<component::WorldP3D>(entity).value;
                     auto &soundTag = view.get<component::SoundTag>(entity);
 
                     // TODO: Using soundTag find the correct sound to play.
@@ -105,12 +104,12 @@ namespace oni {
                         continue;
                     }
                     auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity);
-                    auto distance = (pos - mPlayerPos).len();
+                    auto distance = (pos - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
 
                         // TODO: Does it matter if this is accurate?
                         math::vec3 vel{1.f, 0.f, 0.f};
-                        set3DPos(*entityChannel.channel, pos - mPlayerPos, vel);
+                        set3DPos(*entityChannel.channel, pos - mPlayerPos.value, vel);
                         unPause(*entityChannel.channel);
                     } else {
                         pause(*entityChannel.channel);
@@ -122,10 +121,10 @@ namespace oni {
         void
         AudioManager::playCollisionSoundEffect(entities::EntityType A,
                                                entities::EntityType B,
-                                               const math::vec3 &pos) {
+                                               const component::WorldP3D &pos) {
             auto soundID = createCollisionEffectID(A, B);
             assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
-            auto distance = mPlayerPos - pos;
+            auto distance = mPlayerPos.value - pos.value;
             // TODO: use ChannelGroup and use the volume from it
             common::real32 volume = 0.1f;
             common::real32 pitch = 1.f;

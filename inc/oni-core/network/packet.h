@@ -6,7 +6,7 @@
 #include <oni-core/network/packet-types.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/component/audio.h>
-#include <oni-core/component/visual.h>
+#include <oni-core/component/geometry.h>
 #include <oni-core/game/entity-event.h>
 
 
@@ -22,16 +22,16 @@ namespace oni {
 
         struct CollisionEventPacket {
             game::CollidingEntity collidingEntity{};
-            math::vec3 pos{};
+            component::WorldP3D pos{};
         };
 
         struct SoundPlayEventPacket {
             component::SoundID soundID{};
-            math::vec3 pos{};
+            component::WorldP3D pos{};
         };
 
         struct RocketLaunchEventPacket {
-            math::vec2 pos{};
+            component::WorldP3D pos{};
         };
     }
 }

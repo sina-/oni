@@ -65,8 +65,15 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Placement &placement) {
-            archive(placement.position, placement.rotation, placement.scale);
+                  component::Heading &heading) {
+            archive(heading.value);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  component::Scale &scale) {
+            archive(scale.value);
         }
 
         template<class Archive>
@@ -199,7 +206,9 @@ namespace oni {
                 manager.snapshot<cereal::PortableBinaryOutputArchive,
                         component::Car,
                         component::CarConfig,
-                        component::Placement,
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
                         gameplay::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
@@ -242,7 +251,9 @@ namespace oni {
                 manager.restore<cereal::PortableBinaryInputArchive,
                         component::Car,
                         component::CarConfig,
-                        component::Placement,
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
                         gameplay::CarLapInfo,
                         //components::Chunk,
                         component::Shape,

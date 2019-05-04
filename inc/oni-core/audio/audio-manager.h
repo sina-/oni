@@ -9,7 +9,7 @@
 #include <oni-core/component/audio.h>
 #include <oni-core/entities/entity.h>
 #include <oni-core/component/physic.h>
-#include <oni-core/component/visual.h>
+#include <oni-core/component/geometry.h>
 
 namespace FMOD {
     class Sound;
@@ -33,13 +33,13 @@ namespace oni {
             AudioManager();
 
             void
-            tick(entities::EntityFactory &,
-                 const math::vec3 &playerPos);
+            tick(entities::EntityFactory &entityFactory,
+                 const component::WorldP3D &playerPos);
 
             void
             playCollisionSoundEffect(entities::EntityType A,
                                      entities::EntityType B,
-                                     const math::vec3 &pos);
+                                     const component::WorldP3D &pos);
 
             void
             kill(common::EntityID);
@@ -135,7 +135,7 @@ namespace oni {
 
             std::unordered_map<common::UInt16Pack, component::SoundID> mCollisionEffects;
 
-            math::vec3 mPlayerPos{};
+            component::WorldP3D mPlayerPos{};
 
             common::real32 mMaxAudibleDistance{0.f};
             common::int32 mMaxNumberOfChannels{0};

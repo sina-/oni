@@ -29,7 +29,6 @@ namespace oni {
         };
 
         struct Chunk {
-            math::vec3 position{0.f, 0.f, 0.f};
             common::uint64 index{0};
             EdgeRoadTile edgeRoad{};
         };

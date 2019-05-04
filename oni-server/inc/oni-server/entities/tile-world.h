@@ -41,7 +41,7 @@ namespace oni {
                 ~TileWorld();
 
                 void
-                tick(const oni::math::vec2 &position);
+                tick(const component::WorldP2D &position);
 
                 void
                 genDemoRaceCourse();
@@ -49,17 +49,17 @@ namespace oni {
             private:
 
                 void
-                tickChunk(const oni::math::vec2 &position);
+                tickChunk(const component::WorldP2D &position);
 
                 oni::level::ChunkIndex
-                groundChunkPosToIndex(const oni::math::vec2 &position) const;
+                groundChunkPosToIndex(const component::WorldP2D &position) const;
 
-                oni::math::vec3
+                component::WorldP3D
                 groundChunkIndexToPos(const oni::level::ChunkIndex &chunkIndex) const;
 
-                oni::math::vec3
+                component::WorldP3D
                 roadTileIndexToPos(const oni::level::ChunkIndex &chunkIndex,
-                                   oni::level::RoadTileIndex roadTileIndices) const;
+                                   oni::level::RoadTileIndex roadTileIndex) const;
 
                 oni::math::vec2
                 unpackCoordinates(oni::common::uint64 coord) const;
@@ -71,11 +71,11 @@ namespace oni {
                 oni::common::EntityID
                 genSprite(oni::math::vec4 &color,
                           oni::math::vec2 &tileSize,
-                          oni::math::vec3 &worldPos);
+                          component::WorldP3D &worldPos);
 
                 oni::common::EntityID
                 genTexture(const oni::math::vec2 &size,
-                           const oni::math::vec3 &worldPos,
+                           const component::WorldP3D &worldPos,
                            const std::string &path);
 
                 void

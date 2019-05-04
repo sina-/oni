@@ -19,7 +19,9 @@ namespace oni {
 
         class Shape;
 
-        class Placement;
+        class WorldP3D;
+
+        class Heading;
     }
 
     namespace graphic {
@@ -37,9 +39,6 @@ namespace oni {
             virtual ~Renderer2D();
 
         public:
-            /**
-             * Preparation work, if needed.
-             */
             void
             begin();
 
@@ -49,14 +48,16 @@ namespace oni {
 
             void
             submit(const component::Tessellation &,
-                   const component::Placement &,
+                   const component::WorldP3D &,
+                   const component::Heading &,
                    const component::Age &,
                    const component::Velocity &,
                    const component::Appearance &);
 
             void
             submit(const component::Tessellation &,
-                   const component::Placement &,
+                   const component::WorldP3D &,
+                   const component::Heading &,
                    const component::Age &,
                    const component::Velocity &,
                    const component::Texture &);
@@ -66,17 +67,12 @@ namespace oni {
                    const component::Texture &);
 
             void
-            submit(const component::Text &);
+            submit(const component::Text &,
+                   const component::WorldP3D &);
 
-            /**
-             * Draw the element(s).
-             */
             void
             flush();
 
-            /**
-             * Clean up, if needed.
-             */
             void
             end();
 
@@ -90,14 +86,16 @@ namespace oni {
 
             virtual void
             _submit(const component::Tessellation &,
-                    const component::Placement &,
+                    const component::WorldP3D &,
+                    const component::Heading &,
                     const component::Age &,
                     const component::Velocity &,
                     const component::Appearance &) = 0;
 
             virtual void
             _submit(const component::Tessellation &,
-                    const component::Placement &,
+                    const component::WorldP3D &,
+                    const component::Heading &,
                     const component::Age &,
                     const component::Velocity &,
                     const component::Texture &) = 0;
@@ -107,17 +105,12 @@ namespace oni {
                     const component::Texture &) = 0;
 
             virtual void
-            _submit(const component::Text &) = 0;
+            _submit(const component::Text &,
+                    const component::WorldP3D &) = 0;
 
-            /**
-             * Draw the element(s).
-             */
             virtual void
             _flush() = 0;
 
-            /**
-             * Clean up, if needed.
-             */
             virtual void
             _end() = 0;
         };

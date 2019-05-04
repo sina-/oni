@@ -10,6 +10,7 @@
 #include <oni-core/math/mat4.h>
 #include <oni-core/common/typedefs.h>
 #include <oni-core/common/typedefs-graphics.h>
+#include <oni-core/component/geometry.h>
 
 namespace oni {
     namespace component {
@@ -19,7 +20,7 @@ namespace oni {
         };
 
         struct Trail {
-            std::vector<math::vec3> previousPos{};
+            std::vector<component::WorldP3D> previousPos{};
             std::vector<common::real32> velocity{};
         };
 
@@ -56,21 +57,12 @@ namespace oni {
             common::real32 halfSize{1.f};
         };
 
-        struct WorldP3D {
-            math::vec3 pos;
-        };
-
-        struct WorldP2D{
-            math::vec2 pos;
-        };
-
         struct Text {
             common::EntityID entityID{0};
             common::real32 xScaling{1.f};
             common::real32 yScaling{1.f};
             common::oniGLuint textureID{0};
             std::string textContent{};
-            math::vec3 position{0.f, 0.f, 0.f};
             std::vector<size_t> width{};
             std::vector<size_t> height{};
             std::vector<common::uint32> offsetX{};
@@ -112,7 +104,7 @@ namespace oni {
 
         struct AnimatedSplat {
             common::int64 diesAt{0};
-            math::vec2 origin{};
+            component::WorldP2D origin{};
             component::Brush brush{};
         };
     }

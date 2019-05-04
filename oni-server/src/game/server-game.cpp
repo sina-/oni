@@ -139,7 +139,7 @@ namespace oni {
                     mDynamics->tickServerSide(*mEntityFactory, *mClientDataManager, tickTime);
                 }
 
-                std::vector<math::vec2> tickPositions{};
+                std::vector<component::WorldP2D> tickPositions{};
                 {
                     // TODO: This is just awful :( so many locks. Accessing entities from registry without a view, which
                     // is slow and by the time the positions are passed to other systems, such as TileWorld, the entities
@@ -148,8 +148,8 @@ namespace oni {
                     // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
                     auto &manager = mEntityFactory->getEntityManager();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
-                        const auto &carPlacement = manager.get<component::Placement>(carEntity);
-                        tickPositions.push_back(carPlacement.position.getXY());
+                        const auto &pos = manager.get<component::WorldP3D>(carEntity);
+                        tickPositions.push_back({pos.value.x, pos.value.y});
                     }
                 }
 
@@ -192,9 +192,9 @@ namespace oni {
             ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
-                math::vec3 pos{-70.f, -30.f, vehicleZ};
+                auto pos = component::WorldP3D{-70.f, -30.f, vehicleZ};
                 math::vec2 size{2.5f, 1.1f};
-                common::real32 heading = 0.f;
+                auto heading = component::Heading{0.f};
                 std::string carTextureID = "resources/images/car/1/car.png";
 
                 auto &manager = mEntityFactory->getEntityManager();
@@ -207,7 +207,8 @@ namespace oni {
                 mEntityFactory->tagForNetworkSync(carEntity);
 
                 math::vec2 gunSize{2.f, 0.5f};
-                math::vec3 gunPos{1.f, 0.f, mZLayerManager->getZForEntity(oni::entities::EntityType::VEHICLE_GUN)};
+                auto gunPos = component::WorldP3D{1.f, 0.f, mZLayerManager->getZForEntity(
+                        oni::entities::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
                 auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(gunPos,
                                                                                                          gunSize,
@@ -220,7 +221,7 @@ namespace oni {
 
                 auto &carConfig = manager.get<component::CarConfig>(carEntity);
                 std::string tireTextureID = "resources/images/car/1/car-tire.png";
-                auto tireRotation = static_cast< common::real32>( math::toRadians(90.0f));
+                auto tireHeading = component::Heading{static_cast< common::real32>( math::toRadians(90.0f))};
                 math::vec2 tireSize{
                         static_cast<common::real32>(carConfig.wheelWidth),
                         static_cast<common::real32>(carConfig.wheelRadius * 2)
@@ -240,11 +241,11 @@ namespace oni {
                 };
 
                 for (auto &&carTire: carTiresFront) {
-                    math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
+                    auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_FRONT>(
                             tirePos,
                             tireSize,
-                            tireRotation,
+                            tireHeading,
                             tireTextureID);
                     mEntityFactory->tagForNetworkSync(tireEntity);
 
@@ -253,11 +254,11 @@ namespace oni {
                 }
 
                 for (auto &&carTire: carTiresRear) {
-                    math::vec3 tirePos{carTire.x, carTire.y, vehicleZ};
+                    auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_REAR>(
                             tirePos,
                             tireSize,
-                            tireRotation,
+                            tireHeading,
                             tireTextureID);
                     mEntityFactory->tagForNetworkSync(tireEntity);
 
@@ -272,12 +273,13 @@ namespace oni {
             ServerGame::spawnTruck() {
                 auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::VEHICLE);
                 math::vec2 size{4.0f, 12.0f};
-                math::vec3 worldPos{-20.0f, -30.0f, vehicleZ};
-                common::real32 heading = 0.f;
+                auto worldPos = component::WorldP3D{-20.0f, -30.0f, vehicleZ};
+                auto heading = component::Heading{0.f};
                 std::string textureID = "resources/images/car/2/truck.png";
 
-                auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(worldPos, size, heading,
-                                                                                            textureID);
+                auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(worldPos, size,
+                                                                                                 heading,
+                                                                                                 textureID);
                 mEntityFactory->tagForNetworkSync(entityID);
                 return entityID;
             }

@@ -16,7 +16,7 @@ namespace oni {
                 mZLayerManager(zLayerManager),
                 mPhysicsWorld{physicsWorld} {
             mRand = std::make_unique<math::Rand>(0);
-            mRegistryManager = std::make_unique<oni::entities::EntityManager>();
+            mRegistryManager = std::make_unique<entities::EntityManager>();
         }
 
         EntityManager &
@@ -46,7 +46,7 @@ namespace oni {
         template<>
         void
         EntityFactory::_apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                         component::WorldP3D &)> &func) {
+                                                                                         component::WorldP3D&)> &func) {
             auto group = mRegistryManager->createView<component::SoundID, component::WorldP3D, game::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<game::EventType>(entity);
@@ -58,12 +58,12 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_apply<game::EventType::ROCKET_LAUNCH>(std::function<void(math::vec2 &)> &func) {
-            auto group = mRegistryManager->createView<math::vec2, game::EventType>();
+        EntityFactory::_apply<game::EventType::ROCKET_LAUNCH>(std::function<void(component::WorldP3D &)> &func) {
+            auto group = mRegistryManager->createView<component::WorldP3D, game::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<game::EventType>(entity);
                         event == game::EventType::ROCKET_LAUNCH) {
-                    func(group.get<math::vec2>(entity));
+                    func(group.get<component::WorldP3D>(entity));
                 }
             }
         }
@@ -138,9 +138,9 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                                     const math::vec3 &pos,
+                                                                     const component::WorldP3D &worldPos,
                                                                      const math::vec2 &size,
-                                                                     const common::real32 &heading,
+                                                                     const component::Heading &heading,
                                                                      const std::string &textureID) {
             auto &carConfig = createComponent<component::CarConfig>(entityID);
             carConfig.cgToRear = size.x / 2;
@@ -148,29 +148,33 @@ namespace oni {
             carConfig.halfWidth = size.y / 2;
             assert(size.x - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
 
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = pos;
-            placement.rotation = heading;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = worldPos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+            h = heading;
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
-            properties.physicalCategory = oni::component::PhysicalCategory::RACE_CAR;
+            properties.physicalCategory = component::PhysicalCategory::RACE_CAR;
             properties.bodyType = component::BodyType::DYNAMIC;
             properties.highPrecision = true;
 
             // TODO: Does this make sense? Or should it be same as createComponent?
-            auto *body = createPhysicalBody(pos, size, heading, properties);
+            auto *body = createPhysicalBody(worldPos, size, heading.value, properties);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &car = createComponent<component::Car>(entityID);
-            car.position.x = pos.x;
-            car.position.y = pos.y;
+            car.position.x = worldPos.value.x;
+            car.position.y = worldPos.value.y;
             car.applyConfiguration(carConfig);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -194,9 +198,9 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::VEHICLE>(common::EntityID entityID,
-                                                                    const math::vec3 &pos,
+                                                                    const component::WorldP3D &pos,
                                                                     const math::vec2 &size,
-                                                                    const common::real32 &heading,
+                                                                    const component::Heading &heading,
                                                                     const std::string &textureID) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.friction = 1.f;
@@ -207,18 +211,22 @@ namespace oni {
             properties.bodyType = component::BodyType::DYNAMIC;
             properties.physicalCategory = component::PhysicalCategory::VEHICLE;
 
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = pos;
-            placement.rotation = heading;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = pos;
 
-            auto *body = createPhysicalBody(pos, size, heading, properties);
+            auto &h = createComponent<component::Heading>(entityID);
+            h = heading;
+
+            auto &s = createComponent<component::Scale>(entityID);
+
+            auto *body = createPhysicalBody(pos, size, heading.value, properties);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
+            shape.setZ(pos.value.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -229,20 +237,24 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::VEHICLE_GUN>(common::EntityID entityID,
-                                                                        const oni::math::vec3 &pos,
-                                                                        const oni::math::vec2 &size,
-                                                                        const common::real32 &heading,
+                                                                        const component::WorldP3D &worldPos,
+                                                                        const math::vec2 &size,
+                                                                        const component::Heading &heading,
                                                                         const std::string &textureID) {
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = pos;
-            placement.rotation = heading;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = worldPos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+            h = heading;
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -257,20 +269,24 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID,
-                                                                               const math::vec3 &pos,
+                                                                               const component::WorldP3D &pos,
                                                                                const math::vec2 &size,
-                                                                               const common::real32 &heading,
+                                                                               const component::Heading &heading,
                                                                                const std::string &textureID) {
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = pos;
-            placement.rotation = heading;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = pos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+            h = heading;
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
+            shape.setZ(pos.value.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -284,9 +300,9 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID,
-                                                                              const math::vec3 &pos,
+                                                                              const component::WorldP3D &pos,
                                                                               const math::vec2 &size,
-                                                                              const common::real32 &heading,
+                                                                              const component::Heading &heading,
                                                                               const std::string &textureID) {
             _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(entityID, pos, size, heading, textureID);
         }
@@ -294,18 +310,18 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::WALL>(common::EntityID entityID,
-                                                                 const math::vec3 &worldPos,
+                                                                 const component::WorldP3D &worldPos,
                                                                  const math::vec2 &size,
-                                                                 const common::real32 &heading,
+                                                                 const component::Heading &heading,
                                                                  const std::string &textureID) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.highPrecision = false;
-            properties.bodyType = oni::component::BodyType::STATIC;
-            properties.physicalCategory = oni::component::PhysicalCategory::WALL;
-            auto *body = createPhysicalBody(worldPos, size, heading, properties);
+            properties.bodyType = component::BodyType::STATIC;
+            properties.physicalCategory = component::PhysicalCategory::WALL;
+            auto *body = createPhysicalBody(worldPos, size, heading.value, properties);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.moveToWorldCoordinates(worldPos);
 
@@ -320,12 +336,12 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
-                                                                          const math::vec3 &worldPos,
+                                                                          const component::WorldP3D &worldPos,
                                                                           const math::vec2 &size,
-                                                                          const common::real32 &heading,
+                                                                          const component::Heading &heading,
                                                                           const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.moveToWorldCoordinates(worldPos);
 
@@ -339,12 +355,12 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
-                                                                          const math::vec3 &worldPos,
+                                                                          const component::WorldP3D &worldPos,
                                                                           const math::vec2 &size,
-                                                                          const common::real32 &heading,
+                                                                          const component::Heading &heading,
                                                                           const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.moveToWorldCoordinates(worldPos);
 
@@ -359,15 +375,19 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                            const math::vec3 &worldPos,
+                                                                            const component::WorldP3D &pos,
                                                                             const math::vec4 &color,
                                                                             const common::real32 &halfSize,
                                                                             const bool &randomize) {
             auto &tessellation = createComponent<component::Tessellation>(entityID);
             tessellation.halfSize = halfSize;
 
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = worldPos;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = pos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &appearance = createComponent<component::Appearance>(entityID);
             appearance.color = color;
@@ -378,7 +398,7 @@ namespace oni {
             age.currentAge = 0.f;
 
             if (randomize) {
-                placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
+                h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
                 velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
                 age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
@@ -390,15 +410,19 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                            const math::vec3 &worldPos,
+                                                                            const component::WorldP3D &pos,
                                                                             const std::string &textureID,
                                                                             const common::real32 &halfSize,
                                                                             const bool &randomize) {
             auto &tessellation = createComponent<component::Tessellation>(entityID);
             tessellation.halfSize = halfSize;
 
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = worldPos;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = pos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
@@ -410,7 +434,7 @@ namespace oni {
             age.currentAge = 0.f;
 
             if (randomize) {
-                placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
+                h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
                 velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
                 age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
@@ -422,12 +446,16 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID entityID,
-                                                                                  const math::vec3 &worldPos,
+                                                                                  const component::WorldP3D &pos,
                                                                                   const std::string &textureID,
                                                                                   const common::real32 &halfSize,
                                                                                   const bool &randomize) {
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = worldPos;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = pos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
@@ -438,7 +466,7 @@ namespace oni {
             age.currentAge = 0.f;
 
             if (randomize) {
-                placement.rotation = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
+                h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
                 velocity.currentVelocity = mRand->nextReal32(10.0f, 20.f);
                 age.maxAge = mRand->nextReal32(0.4f, 0.5f);
             }
@@ -450,9 +478,9 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
-                                                                          const math::vec3 &pos,
+                                                                          const component::WorldP3D &pos,
                                                                           const math::vec2 &size,
-                                                                          const common::real32 &heading,
+                                                                          const component::Heading &heading,
                                                                           const std::string &textureID,
                                                                           const common::real32 &velocity
         ) {
@@ -462,25 +490,29 @@ namespace oni {
             properties.angularDamping = 2.f;
             properties.linearDamping = 0.1f;
             properties.highPrecision = true;
-            properties.bodyType = oni::component::BodyType::DYNAMIC;
-            properties.physicalCategory = oni::component::PhysicalCategory::ROCKET;
+            properties.bodyType = component::BodyType::DYNAMIC;
+            properties.physicalCategory = component::PhysicalCategory::ROCKET;
             properties.collisionWithinCategory = false;
 
-            auto *body = createPhysicalBody(pos, size, heading, properties);
+            auto *body = createPhysicalBody(pos, size, heading.value, properties);
 
             body->ApplyForceToCenter(
-                    b2Vec2(static_cast<common::real32>(cos(heading) * velocity),
-                           static_cast<common::real32>(sin(heading) * velocity)),
+                    b2Vec2(static_cast<common::real32>(cos(heading.value) * velocity),
+                           static_cast<common::real32>(sin(heading.value) * velocity)),
                     true);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
+            shape.setZ(pos.value.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
-            auto &placement = createComponent<component::Placement>(entityID);
-            placement.position = pos;
-            placement.rotation = heading;
+            auto &p = createComponent<component::WorldP3D>(entityID);
+            p = pos;
+
+            auto &h = createComponent<component::Heading>(entityID);
+            h = heading;
+
+            auto &s = createComponent<component::Scale>(entityID);
 
             auto &trail = createComponent<component::Trail>(entityID);
             trail.previousPos.push_back(pos);
@@ -501,14 +533,14 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::ROCKET_BLAST_MARK>(common::EntityID entityID,
-                                                                              const math::vec2 &worldPos,
+                                                                              const component::WorldP2D &worldPos,
                                                                               const common::real32 &size,
                                                                               const common::real32 &stddev,
                                                                               const component::PixelRGBA &color) {
 
             auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos.pos.x = worldPos.x + mRand->nextReal64Normal(0.f, stddev);
-            pos.pos.y = worldPos.y + mRand->nextReal64Normal(0.f, stddev);
+            pos.value.x = worldPos.value.x + mRand->nextReal64Normal(0.f, stddev);
+            pos.value.y = worldPos.value.y + mRand->nextReal64Normal(0.f, stddev);
 
             auto &splat = createComponent<component::AnimatedSplat>(entityID);
             splat.brush.color = color;
@@ -526,12 +558,14 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::TEXT>(common::EntityID entityID,
-                                                                 const math::vec3 &pos,
+                                                                 const component::WorldP3D &worldPos,
                                                                  const std::string &text) {
 
             auto &textComponent = createComponent<component::Text>(entityID);
-            textComponent.position = pos;
             textComponent.textContent = text;
+
+            auto &pos = createComponent<component::WorldP3D>(entityID);
+            pos = worldPos;
 
             assignTag<component::Tag_Static>(entityID);
         }
@@ -539,14 +573,17 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID entityID,
-                                                                        const math::vec3 &worldPos,
+                                                                        const component::WorldP3D &worldPos,
                                                                         const math::vec2 &size,
-                                                                        const common::real32 &heading,
+                                                                        const component::Heading &heading,
                                                                         const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.moveToWorldCoordinates(worldPos);
+
+            auto &pos = createComponent<component::WorldP3D>(entityID);
+            pos = worldPos;
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
@@ -561,12 +598,12 @@ namespace oni {
         template<>
         void
         EntityFactory::_createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID entityID,
-                                                                        const math::vec3 &worldPos,
+                                                                        const component::WorldP3D &worldPos,
                                                                         const math::vec2 &size,
-                                                                        const common::real32 &heading,
+                                                                        const component::Heading &heading,
                                                                         const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.z);
+            shape.setZ(worldPos.value.z);
             shape.setSizeFromOrigin(size);
             shape.moveToWorldCoordinates(worldPos);
 
@@ -584,46 +621,44 @@ namespace oni {
         EntityFactory::_createEvent<game::EventType::COLLISION>(common::EntityID entityID,
                                                                 const entities::EntityType &a,
                                                                 const entities::EntityType &b,
-                                                                const math::vec3 &worldPos) {
+                                                                const component::WorldP3D &worldPos) {
             auto &collidingEntity = createComponent<game::CollidingEntity>(entityID);
             collidingEntity.entityA = a;
             collidingEntity.entityB = b;
 
             auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos.pos.x = worldPos.x;
-            pos.pos.y = worldPos.y;
-            pos.pos.z = worldPos.z;
+            pos = worldPos;
         }
 
         template<>
         void
         EntityFactory::_createEvent<game::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID entityID,
                                                                             const component::SoundID &id,
-                                                                            const math::vec2 &worldPos) {
+                                                                            const component::WorldP2D &worldPos) {
             auto &soundID = createComponent<component::SoundID>(entityID);
             soundID = id;
 
             auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos.pos.x = worldPos.x;
-            pos.pos.y = worldPos.y;
+            pos = worldPos.to3D(0.f);
         }
 
         template<>
         void
         EntityFactory::_createEvent<game::EventType::ROCKET_LAUNCH>(common::EntityID entityID,
-                                                                    const math::vec2 &worldPos) {
-            auto &pos = createComponent<math::vec2>(entityID);
-            pos.x = worldPos.x;
-            pos.y = worldPos.y;
+                                                                    const component::WorldP3D &worldPos) {
+            auto &pos = createComponent<component::WorldP3D>(entityID);
+            pos = worldPos;
         }
 
         b2Body *
-        EntityFactory::createPhysicalBody(const math::vec3 &worldPos,
+        EntityFactory::createPhysicalBody(const component::WorldP3D &worldPos,
                                           const math::vec2 &size,
                                           common::real32 heading,
                                           component::PhysicalProperties &properties) {
             b2PolygonShape shape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
+
+            auto &pos = worldPos.value;
 
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             b2Body *body{};
@@ -642,8 +677,8 @@ namespace oni {
 
             switch (properties.bodyType) {
                 case component::BodyType::DYNAMIC : {
-                    bodyDef.position.x = worldPos.x;
-                    bodyDef.position.y = worldPos.y;
+                    bodyDef.position.x = pos.x;
+                    bodyDef.position.y = pos.y;
                     bodyDef.type = b2_dynamicBody;
                     body = mPhysicsWorld.CreateBody(&bodyDef);
 
@@ -664,16 +699,16 @@ namespace oni {
                 case component::BodyType::STATIC: {
                     // NOTE: for static entities position in world is the bottom left corner of the sprite. But
                     // bodyDef.position is the center of gravity of the entity.
-                    bodyDef.position.x = worldPos.x + size.x / 2.0f;
-                    bodyDef.position.y = worldPos.y + size.y / 2.0f;
+                    bodyDef.position.x = pos.x + size.x / 2.0f;
+                    bodyDef.position.y = pos.y + size.y / 2.0f;
                     bodyDef.type = b2_staticBody;
                     body = mPhysicsWorld.CreateBody(&bodyDef);
                     body->CreateFixture(&shape, 0.f);
                     break;
                 }
                 case component::BodyType::KINEMATIC: {
-                    bodyDef.position.x = worldPos.x;
-                    bodyDef.position.y = worldPos.y;
+                    bodyDef.position.x = pos.x;
+                    bodyDef.position.y = pos.y;
                     bodyDef.type = b2_kinematicBody;
                     body = mPhysicsWorld.CreateBody(&bodyDef);
                     body->CreateFixture(&fixtureDef);

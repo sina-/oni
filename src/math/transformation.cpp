@@ -6,66 +6,65 @@
 
 namespace oni {
     namespace math {
-
         void
-        Transformation::worldToLocalTranslation(const math::vec3 &reference,
-                                                math::vec3 &operand) {
-            operand.x -= reference.x;
-            operand.y -= reference.y;
+        worldToLocalTranslation(const component::WorldP3D &reference,
+                                component::WorldP3D &operand) {
+            operand.value.x -= reference.value.x;
+            operand.value.y -= reference.value.y;
         }
 
         void
-        Transformation::localToWorldTranslation(const math::vec3 &reference,
-                                                math::vec3 &operand) {
-            operand.x += reference.x;
-            operand.y += reference.y;
+        localToWorldTranslation(const component::WorldP3D &reference,
+                                component::WorldP3D &operand) {
+            operand.value.x += reference.value.x;
+            operand.value.y += reference.value.y;
         }
 
         void
-        Transformation::localToWorldTranslation(const math::vec3 &reference,
-                                                component::Shape &shape) {
-            Transformation::localToWorldTranslation(reference, shape.vertexA);
-            Transformation::localToWorldTranslation(reference, shape.vertexB);
-            Transformation::localToWorldTranslation(reference, shape.vertexC);
-            Transformation::localToWorldTranslation(reference, shape.vertexD);
+        localToWorldTranslation(const component::WorldP3D &reference,
+                                component::Shape &shape) {
+            localToWorldTranslation(reference, shape.vertexA);
+            localToWorldTranslation(reference, shape.vertexB);
+            localToWorldTranslation(reference, shape.vertexC);
+            localToWorldTranslation(reference, shape.vertexD);
         }
 
         void
-        Transformation::localToTextureTranslation(const common::real32 ratio,
-                                                  math::vec3 &operand) {
-            operand.x *= ratio;
-            operand.y *= ratio;
+        localToTextureTranslation(common::real32 ratio,
+                                  component::WorldP3D &operand) {
+            operand.value.x *= ratio;
+            operand.value.y *= ratio;
         }
 
         void
-        Transformation::worldToTextureCoordinate(const math::vec3 &reference,
-                                                 common::real32 ratio,
-                                                 math::vec3 &operand) {
-            Transformation::worldToLocalTranslation(reference, operand);
-            Transformation::localToTextureTranslation(ratio, operand);
+        worldToTextureCoordinate(const component::WorldP3D &reference,
+                                 common::real32 ratio,
+                                 component::WorldP3D &operand) {
+            worldToLocalTranslation(reference, operand);
+            localToTextureTranslation(ratio, operand);
         }
 
         component::Shape
-        Transformation::shapeTransformation(const math::mat4 &transformation,
-                                            const component::Shape &shape) {
+        shapeTransformation(const math::mat4 &transformation,
+                            const component::Shape &shape) {
             auto vertexA = shape.vertexA;
             auto vertexB = shape.vertexB;
             auto vertexC = shape.vertexC;
             auto vertexD = shape.vertexD;
 
-            return component::Shape{transformation * vertexA,
-                                    transformation * vertexB,
-                                    transformation * vertexC,
-                                    transformation * vertexD};
+            return component::Shape{transformation * vertexA.value,
+                                    transformation * vertexB.value,
+                                    transformation * vertexC.value,
+                                    transformation * vertexD.value};
         }
 
         math::mat4
-        Transformation::createTransformation(const math::vec3 &position,
-                                             const common::real32 rotation,
-                                             const math::vec3 &scale) {
-            auto translationMat = math::mat4::translation(position);
-            auto rotationMat = math::mat4::rotation(rotation, math::vec3{0.0f, 0.0f, 1.0f});
-            auto scaleMat = math::mat4::scale(scale);
+        createTransformation(const component::WorldP3D &position,
+                             const component::Heading &rotation,
+                             const component::Scale &scale) {
+            auto translationMat = math::mat4::translation(position.value);
+            auto rotationMat = math::mat4::rotation(rotation.value, math::vec3{0.0f, 0.0f, 1.0f});
+            auto scaleMat = math::mat4::scale(scale.value);
             auto transformation = translationMat * rotationMat * scaleMat;
             return transformation;
         }

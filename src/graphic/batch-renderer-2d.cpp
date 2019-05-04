@@ -92,22 +92,22 @@ namespace oni {
              */
 
             // a.
-            buffer->position = position.vertexA;
+            buffer->position = position.vertexA.value;
             buffer->color = appearance.color;
             buffer++;
 
             // b.
-            buffer->position = position.vertexB;
+            buffer->position = position.vertexB.value;
             buffer->color = appearance.color;
             buffer++;
 
             // c.
-            buffer->position = position.vertexC;
+            buffer->position = position.vertexC.value;
             buffer->color = appearance.color;
             buffer++;
 
             // d.
-            buffer->position = position.vertexD;
+            buffer->position = position.vertexD.value;
             buffer->color = appearance.color;
             buffer++;
 
@@ -127,7 +127,8 @@ namespace oni {
 
         void
         BatchRenderer2D::_submit(const component::Tessellation &tessellation,
-                                 const component::Placement &placement,
+                                 const component::WorldP3D &pos,
+                                 const component::Heading &heading,
                                  const component::Age &age,
                                  const component::Velocity &velocity,
                                  const component::Appearance &appearance) {
@@ -135,10 +136,10 @@ namespace oni {
 
             auto buffer = static_cast<graphic::ParticleVertex *>(mBuffer);
 
-            buffer->position = placement.position;
+            buffer->position = pos.value;
             buffer->color = appearance.color;
             buffer->age = age.currentAge;
-            buffer->heading = placement.rotation;
+            buffer->heading = heading.value;
             buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = -1;
             buffer->halfSize = tessellation.halfSize;
@@ -152,7 +153,8 @@ namespace oni {
 
         void
         BatchRenderer2D::_submit(const component::Tessellation &tessellation,
-                                 const component::Placement &placement,
+                                 const component::WorldP3D &pos,
+                                 const component::Heading &heading,
                                  const component::Age &age,
                                  const component::Velocity &velocity,
                                  const component::Texture &texture) {
@@ -162,10 +164,10 @@ namespace oni {
 
             auto samplerID = getSamplerID(texture.textureID);
 
-            buffer->position = placement.position;
+            buffer->position = pos.value;
             buffer->color = {};
             buffer->age = age.currentAge;
-            buffer->heading = placement.rotation;
+            buffer->heading = heading.value;
             buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = samplerID;
             buffer->halfSize = tessellation.halfSize;
@@ -187,22 +189,22 @@ namespace oni {
 
             auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
 
-            buffer->position = position.vertexA;
+            buffer->position = position.vertexA.value;
             buffer->uv = texture.uv[0];
             buffer->samplerID = samplerID;
             buffer++;
 
-            buffer->position = position.vertexB;
+            buffer->position = position.vertexB.value;
             buffer->uv = texture.uv[1];
             buffer->samplerID = samplerID;
             buffer++;
 
-            buffer->position = position.vertexC;
+            buffer->position = position.vertexC.value;
             buffer->uv = texture.uv[2];
             buffer->samplerID = samplerID;
             buffer++;
 
-            buffer->position = position.vertexD;
+            buffer->position = position.vertexD.value;
             buffer->uv = texture.uv[3];
             buffer->samplerID = samplerID;
             buffer++;
@@ -213,7 +215,8 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Text &text) {
+        BatchRenderer2D::_submit(const component::Text &text,
+                                 const component::WorldP3D &pos) {
             auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
@@ -228,8 +231,8 @@ namespace oni {
             for (common::uint32 i = 0; i < text.textContent.size(); i++) {
                 assert(mIndexCount + 6 < mMaxIndicesCount);
 
-                auto x0 = text.position.x + text.offsetX[i] / scaleX + advance;
-                auto y0 = text.position.y + text.offsetY[i] / scaleY;
+                auto x0 = pos.value.x + text.offsetX[i] / scaleX + advance;
+                auto y0 = pos.value.y + text.offsetY[i] / scaleY;
                 auto x1 = x0 + text.width[i] / scaleX;
                 auto y1 = y0 - text.height[i] / scaleY;
 

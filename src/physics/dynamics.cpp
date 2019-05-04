@@ -86,40 +86,36 @@ namespace oni {
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4
-                    );
+                              std::placeholders::_4);
 
             mCollisionHandlers[component::PhysicalCategory::VEHICLE] =
                     std::bind(&Dynamics::handleVehicleCollision, this,
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4
-                    );
+                              std::placeholders::_4);
 
             mCollisionHandlers[component::PhysicalCategory::RACE_CAR] =
                     std::bind(&Dynamics::handleRaceCarCollision, this,
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4
-                    );
+                              std::placeholders::_4);
 
             mCollisionHandlers[component::PhysicalCategory::WALL] =
                     std::bind(&Dynamics::handleCollision, this,
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4
-                    );
+                              std::placeholders::_4);
 
             mCollisionHandlers[component::PhysicalCategory::GENERIC] =
                     std::bind(&Dynamics::handleCollision, this,
                               std::placeholders::_1,
                               std::placeholders::_2,
                               std::placeholders::_3,
-                              std::placeholders::_4
-                    );
+                              std::placeholders::_4);
+
             // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
             // skipping some of them!
             // mPhysicsWorld->SetContactListener(mCollisionHandler.get());
@@ -138,7 +134,7 @@ namespace oni {
 
             // Apply user input
             {
-                auto carView = manager.createView<component::Placement, component::Car, component::CarConfig>();
+                auto carView = manager.createView<component::WorldP3D, component::Heading, component::Scale, component::Car, component::CarConfig>();
                 for (auto &&entity: carView) {
                     auto input = clientData.getClientInput(entity);
                     // NOTE: This could happen just at the moment when a client joins, an entity is created by the
@@ -192,21 +188,23 @@ namespace oni {
 
                     tickCar(car, carConfig, carInput[entity], tickTime);
 
-                    auto &carPlacement = carView.get<component::Placement>(entity);
+                    auto &carPos = carView.get<component::WorldP3D>(entity);
+                    auto &heading = carView.get<component::Heading>(entity);
+                    auto &scale = carView.get<component::Scale>(entity);
 
                     auto velocity = car.velocityLocal.len();
                     auto distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
-                    if (std::abs(carPlacement.position.x - car.position.x) > common::EP ||
-                        std::abs(carPlacement.position.y - car.position.y) > common::EP ||
-                        std::abs(carPlacement.rotation - car.heading) > common::EP ||
+                    if (std::abs(carPos.value.x - car.position.x) > common::EP ||
+                        std::abs(carPos.value.y - car.position.y) > common::EP ||
+                        std::abs(carPos.value.z - car.heading) > common::EP ||
                         std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP
                             ) {
-                        carPlacement.position.x = car.position.x;
-                        carPlacement.position.y = car.position.y;
-                        carPlacement.rotation = static_cast<common::real32>(car.heading);
+                        carPos.value.x = car.position.x;
+                        carPos.value.y = car.position.y;
+                        heading.value = static_cast<common::real32>(car.heading);
                         car.distanceFromCamera = distanceFromCamera;
 
-                        updateTransforms(manager, entity, carPlacement);
+                        updateTransforms(manager, entity, carPos, heading, scale);
                         entitiesToBeUpdated.push_back(entity);
                     }
                 }
@@ -267,43 +265,45 @@ namespace oni {
 
             // Handle general collision
             {
-                auto view = manager.createView<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createView<component::WorldP3D, component::Tag_Dynamic,
                         component::PhysicalProperties>();
                 for (auto entity: view) {
                     auto &props = view.get<component::PhysicalProperties>(entity);
-                    auto &placement = view.get<component::Placement>(entity);
+                    auto &pos = view.get<component::WorldP3D>(entity);
 
                     mCollisionHandlers[props.physicalCategory](entityFactory,
                                                                entity,
                                                                props,
-                                                               placement);
+                                                               pos);
                 }
             }
 
             // Sync placement with box2d
             {
-                auto view = manager.createView<component::Placement, component::Tag_Dynamic,
+                auto view = manager.createView<component::WorldP3D, component::Tag_Dynamic, component::Heading, component::Scale,
                         component::PhysicalProperties>();
 
                 for (auto entity: view) {
                     auto &props = view.get<component::PhysicalProperties>(entity);
                     auto &position = props.body->GetPosition();
-                    auto &placement = view.get<component::Placement>(entity);
+                    auto &pos = view.get<component::WorldP3D>(entity);
+                    auto &heading = view.get<component::Heading>(entity);
+                    auto &scale = view.get<component::Scale>(entity);
 
-                    if (std::abs(placement.position.x - position.x) > common::EP ||
-                        std::abs(placement.position.y - position.y) > common::EP ||
-                        std::abs(placement.rotation - props.body->GetAngle()) > common::EP) {
+                    if (std::abs(pos.value.x - position.x) > common::EP ||
+                        std::abs(pos.value.y - position.y) > common::EP ||
+                        std::abs(heading.value - props.body->GetAngle()) > common::EP) {
                         if (manager.has<component::Trail>(entity)) {
                             auto &trail = manager.get<component::Trail>(entity);
-                            trail.previousPos.push_back(placement.position);
+                            trail.previousPos.push_back(pos);
                             trail.velocity.push_back(props.body->GetLinearVelocity().Length());
                             assert(trail.previousPos.size() == trail.velocity.size());
                         }
 
-                        placement.position.x = position.x;
-                        placement.position.y = position.y;
-                        placement.rotation = props.body->GetAngle();
-                        updateTransforms(manager, entity, placement);
+                        pos.value.x = position.x;
+                        pos.value.y = position.y;
+                        heading.value = props.body->GetAngle();
+                        updateTransforms(manager, entity, pos, heading, scale);
                         entitiesToBeUpdated.push_back(entity);
                     }
                 }
@@ -317,12 +317,12 @@ namespace oni {
                     const auto &car = view.get<component::Car>(entity);
                     for (common::size i = 0; i < attachments.entities.size(); ++i) {
                         if (attachments.entityTypes[i] == entities::EntityType::VEHICLE_TIRE_FRONT) {
-                            auto &tirePlacement = manager.get<component::Placement>(attachments.entities[i]);
+                            auto &heading = manager.get<component::Heading>(attachments.entities[i]).value;
 
                             // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
                             // There seems to be something wrong with the way tires are created in the beginning
-                            tirePlacement.rotation = static_cast<oni::common::real32>(car.steerAngle +
-                                                                                      math::toRadians(90.0f));
+                            heading = static_cast<oni::common::real32>(car.steerAngle +
+                                                                       math::toRadians(90.0f));
                         }
                     }
                 }
@@ -372,19 +372,22 @@ namespace oni {
         Dynamics::handleRocketCollision(entities::EntityFactory &entityFactory,
                                         common::EntityID entityID,
                                         component::PhysicalProperties &props,
-                                        component::Placement &) {
+                                        component::WorldP3D &pos) {
 
             if (isColliding(props.body)) {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
-                math::vec3 pos{props.body->GetPosition().x, props.body->GetPosition().y, particleZ};
+                auto worldPos = component::WorldP3D{};
+                worldPos.value.x = props.body->GetPosition().x;
+                worldPos.value.y = props.body->GetPosition().y;
+                worldPos.value.z = particleZ;
 
                 // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
                 // sound effects, etc.
                 entityFactory.createEvent<game::EventType::COLLISION>(entities::EntityType::SIMPLE_ROCKET,
                         // TODO: use the proper type for the other entity instead of UNKNOWN
-                                                                           entities::EntityType::UNKNOWN,
-                                                                           pos);
+                                                                      entities::EntityType::UNKNOWN,
+                                                                      worldPos);
 
                 entityFactory.removeEntity(entityID, entities::EntityOperationPolicy{true, false});
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
@@ -395,37 +398,16 @@ namespace oni {
         }
 
         void
-        Dynamics::handleVehicleCollision(entities::EntityFactory &entityFactory,
-                                         common::EntityID entity,
-                                         component::PhysicalProperties &props,
-                                         component::Placement &placement) {
-        }
-
-        void
-        Dynamics::handleCollision(entities::EntityFactory &entityFactory,
-                                  common::EntityID entity,
-                                  component::PhysicalProperties &props,
-                                  component::Placement &placement) {
-        }
-
-        void
-        Dynamics::handleRaceCarCollision(entities::EntityFactory &entityFactory,
-                                         common::EntityID entity,
-                                         component::PhysicalProperties &props,
-                                         component::Placement &placement) {
-        }
-
-        void
         Dynamics::updateTransforms(entities::EntityManager &manager,
                                    common::EntityID entity,
-                                   const component::Placement &placement) {
+                                   const component::WorldP3D &pos,
+                                   const component::Heading &heading,
+                                   const component::Scale &scale) {
             if (manager.has<component::TransformChildren>(entity)) {
                 auto transformChildren = manager.get<component::TransformChildren>(entity);
                 for (auto child: transformChildren.children) {
                     auto transformParent = manager.get<component::TransformParent>(child);
-                    transformParent.transform = math::Transformation::createTransformation(placement.position,
-                                                                                           placement.rotation,
-                                                                                           placement.scale);
+                    transformParent.transform = math::createTransformation(pos, heading, scale);
 
                     updateTransformParent(manager, child, transformParent);
                 }
@@ -469,22 +451,48 @@ namespace oni {
                                   const entities::EntityOperationPolicy &policy) {
             // Update particle placement
             {
-                auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age, component::Tag_EngineOnlyParticlePhysics>();
+                auto view = entityFactory.getEntityManager().createView<component::WorldP3D, component::Velocity, component::Heading, component::Age, component::Tag_EngineOnlyParticlePhysics>();
                 for (const auto &entity: view) {
-                    auto &placement = view.get<component::Placement>(entity);
+                    auto &pos = view.get<component::WorldP3D>(entity).value;
                     const auto &velocity = view.get<component::Velocity>(entity);
                     const auto &age = view.get<component::Age>(entity);
+                    const auto &heading = view.get<component::Heading>(entity).value;
 
-                    auto currentVelocity = 5 *(velocity.currentVelocity * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
+                    auto currentVelocity =
+                            5 * (velocity.currentVelocity * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
                     math::zeroClip(currentVelocity);
 
-                    common::real32 x = std::cos(placement.rotation) * currentVelocity;
-                    common::real32 y = std::sin(placement.rotation) * currentVelocity;
+                    common::real32 x = std::cos(heading) * currentVelocity;
+                    common::real32 y = std::sin(heading) * currentVelocity;
 
-                    placement.position.x += x;
-                    placement.position.y += y;
+                    pos.x += x;
+                    pos.y += y;
                 }
             }
+        }
+
+        void
+        Dynamics::handleCollision(entities::EntityFactory &,
+                                  common::EntityID,
+                                  component::PhysicalProperties &,
+                                  component::WorldP3D &) {
+
+        }
+
+        void
+        Dynamics::handleRaceCarCollision(entities::EntityFactory &,
+                                         common::EntityID,
+                                         component::PhysicalProperties &,
+                                         component::WorldP3D &) {
+
+        }
+
+        void
+        Dynamics::handleVehicleCollision(entities::EntityFactory &,
+                                         common::EntityID,
+                                         component::PhysicalProperties &,
+                                         component::WorldP3D &) {
+
         }
     }
 }

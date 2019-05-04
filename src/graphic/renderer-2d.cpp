@@ -19,20 +19,22 @@ namespace oni {
 
         void
         Renderer2D::submit(const component::Tessellation &tessellation,
-                           const component::Placement &placement,
+                           const component::WorldP3D &pos,
+                           const component::Heading &heading,
                            const component::Age &age,
                            const component::Velocity &velocity,
                            const component::Appearance &color) {
-            _submit(tessellation, placement, age, velocity, color);
+            _submit(tessellation, pos, heading, age, velocity, color);
         }
 
         void
         Renderer2D::submit(const component::Tessellation &tessellation,
-                           const component::Placement &placement,
+                           const component::WorldP3D &pos,
+                           const component::Heading &heading,
                            const component::Age &age,
                            const component::Velocity &velocity,
                            const component::Texture &texture) {
-            _submit(tessellation, placement, age, velocity, texture);
+            _submit(tessellation, pos, heading, age, velocity, texture);
         }
 
         void
@@ -42,8 +44,9 @@ namespace oni {
         }
 
         void
-        Renderer2D::submit(const component::Text &text) {
-            _submit(text);
+        Renderer2D::submit(const component::Text &text,
+                           const component::WorldP3D &pos) {
+            _submit(text, pos);
         }
 
         void

@@ -11,6 +11,7 @@
 #include <oni-core/entities/entity.h>
 #include <oni-core/network/packet.h>
 #include <oni-core/component/visual.h>
+#include <oni-core/component/geometry.h>
 
 namespace oni {
     // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
@@ -102,7 +103,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   WorldP3D &pos) {
-            archive(pos.pos.x, pos.pos.y, pos.pos.z);
+            archive(pos.value);
         }
     }
 

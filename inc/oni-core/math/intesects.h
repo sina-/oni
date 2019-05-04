@@ -5,9 +5,9 @@
 
 namespace oni {
     namespace component {
-        class Shape;
-
-        using Point = math::vec3;
+        struct Shape;
+        struct WorldP3D;
+        struct Point;
     }
 
     namespace math {
@@ -21,6 +21,13 @@ namespace oni {
 
         bool
         intersects(const component::Shape &first,
+                   common::real32 x,
+                   common::real32 y,
+                   common::real32 lengthX,
+                   common::real32 lengthY);
+
+        bool
+        intersects(const component::WorldP3D &first,
                    common::real32 x,
                    common::real32 y,
                    common::real32 lengthX,

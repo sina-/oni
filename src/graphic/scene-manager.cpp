@@ -24,7 +24,7 @@
 
 namespace oni {
     namespace graphic {
-        SceneManager::SceneManager(const component::ScreenBounds &screenBounds,
+        SceneManager::SceneManager(const graphic::ScreenBounds &screenBounds,
                                    FontManager &fontManager,
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
@@ -993,7 +993,7 @@ namespace oni {
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        const component::Camera &
+        const graphic::Camera &
         SceneManager::getCamera() const {
             return mCamera;
         }

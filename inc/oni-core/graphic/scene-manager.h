@@ -6,6 +6,7 @@
 #include <oni-core/component/visual.h>
 #include <oni-core/math/mat4.h>
 #include <oni-core/gameplay/lap-tracker.h>
+#include <oni-core/graphic/camera.h>
 
 class b2World;
 
@@ -26,7 +27,6 @@ namespace oni {
 
     namespace component {
         struct Shape;
-        struct CarLapInfo;
     }
 
     namespace graphic {
@@ -44,7 +44,7 @@ namespace oni {
 
         class SceneManager {
         public:
-            SceneManager(const component::ScreenBounds &,
+            SceneManager(const graphic::ScreenBounds &,
                          FontManager &,
                          math::ZLayerManager &,
                          b2World &,
@@ -87,7 +87,7 @@ namespace oni {
             void
             zoom(common::real32 distance);
 
-            const component::Camera &
+            const graphic::Camera &
             getCamera() const;
 
             const math::mat4 &
@@ -242,8 +242,8 @@ namespace oni {
             const common::real32 mHalfCanvasTileSizeX{0.0f};
             const common::real32 mHalfCanvasTileSizeY{0.0f};
 
-            component::ScreenBounds mScreenBounds{};
-            component::Camera mCamera{0.0f, 0.0f, 1.0f};
+            graphic::ScreenBounds mScreenBounds{};
+            graphic::Camera mCamera{0.0f, 0.0f, 1.0f};
 
             const common::uint16 mMaxSpriteCount{0};
             const common::real32 mGameUnitToPixels{0};

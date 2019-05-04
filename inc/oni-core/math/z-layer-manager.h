@@ -4,6 +4,7 @@
 
 #include <oni-core/component/visual.h>
 #include <oni-core/entities/entity.h>
+#include <oni-core/graphic/camera.h>
 
 namespace oni {
     namespace math {
@@ -11,15 +12,15 @@ namespace oni {
         public:
             ZLayerManager();
 
-            explicit ZLayerManager(const component::ZLayer &);
+            explicit ZLayerManager(const graphic::ZLayer &);
 
             common::real32
             getZForEntity(entities::EntityType) const;
 
             common::real32
-            getNextZAtLayer(component::ZLayerDef);
+            getNextZAtLayer(graphic::ZLayerDef);
 
-            component::ZLayer
+            graphic::ZLayer
             getZLayer() const;
 
         private:
@@ -30,8 +31,8 @@ namespace oni {
             const common::real32 mMajorLayerDelta{0.1f};
             const common::real32 mMinorLayerDelta{0.001f};
 
-            component::ZLayer mZLayer{};
-            component::ZLayer mZLayerTop{};
+            graphic::ZLayer mZLayer{};
+            graphic::ZLayer mZLayerTop{};
 
             std::unordered_map<entities::EntityType, common::real32> mEntityZLayers;
         };

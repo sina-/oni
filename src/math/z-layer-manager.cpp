@@ -5,7 +5,7 @@
 namespace oni {
     namespace math {
         ZLayerManager::ZLayerManager() {
-            using namespace component;
+            using namespace graphic;
 
             mZLayer[ZLayerDef::LAYER_0] = 0.f;
             mZLayer[ZLayerDef::LAYER_1] = mZLayer[ZLayerDef::LAYER_0] + mMajorLayerDelta;
@@ -23,14 +23,14 @@ namespace oni {
             constructEntityLayers();
         }
 
-        ZLayerManager::ZLayerManager(const component::ZLayer &zLayer) : mZLayer(zLayer) {
+        ZLayerManager::ZLayerManager(const graphic::ZLayer &zLayer) : mZLayer(zLayer) {
             constructEntityLayers();
         }
 
         void
         ZLayerManager::constructEntityLayers() {
             using namespace entities;
-            using namespace component;
+            using namespace graphic;
             mEntityZLayers[EntityType::BACKGROUND] = getNextZAtLayer(ZLayerDef::LAYER_0);
             mEntityZLayers[EntityType::ROAD] = getNextZAtLayer(ZLayerDef::LAYER_0);
             mEntityZLayers[EntityType::WALL] = getNextZAtLayer(ZLayerDef::LAYER_0);
@@ -52,9 +52,9 @@ namespace oni {
         }
 
         common::real32
-        ZLayerManager::getNextZAtLayer(component::ZLayerDef layer) {
-            assert(layer >= component::ZLayerDef::LAYER_0 &&
-                   layer <= component::ZLayerDef::LAYER_9);
+        ZLayerManager::getNextZAtLayer(graphic::ZLayerDef layer) {
+            assert(layer >= graphic::ZLayerDef::LAYER_0 &&
+                   layer <= graphic::ZLayerDef::LAYER_9);
 
             auto currentTop = mZLayerTop[layer];
 
@@ -64,7 +64,7 @@ namespace oni {
             return currentTop;
         }
 
-        component::ZLayer
+        graphic::ZLayer
         ZLayerManager::getZLayer() const {
             return mZLayer;
         }

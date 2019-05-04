@@ -233,8 +233,15 @@ namespace oni {
                                                                 const math::vec2 &size,
                                                                 const common::real32 &heading,
                                                                 const std::string &textureID,
-                                                                const common::real32 &velocity
-            );
+                                                                const common::real32 &velocity);
+
+            template<>
+            void
+            _createEntity<component::EntityType::ROCKET_BLAST_MARK>(common::EntityID,
+                                                                    const math::vec2 &worldPos,
+                                                                    const common::real32 &sizef,
+                                                                    const common::real32 &stddev,
+                                                                    const component::PixelRGBA &color);
 
             template<>
             void

@@ -707,45 +707,24 @@ namespace oni {
         }
 
         void
-        SceneManager::render(entities::EntityManager &serverEntityManager,
-                             entities::EntityManager &clientEntityManager,
+        SceneManager::render(entities::EntityFactory &serverEntityFactory,
+                             entities::EntityFactory &clientEntityFactory,
                              common::EntityID lookAtEntity) {
-            auto viewWidth = getViewWidth();
-            auto viewHeight = getViewHeight();
-
-            {
-                begin(*mColorShader, *mColorRenderer, true, true, true);
-                renderColorSprites(serverEntityManager, viewWidth, viewHeight);
-                end(*mColorShader, *mColorRenderer);
+            if (lookAtEntity && serverEntityFactory.getEntityManager().has<component::Placement>(lookAtEntity)) {
+                const auto &pos = serverEntityFactory.getEntityManager().get<component::Placement>(
+                        lookAtEntity).position;
+                lookAt(pos.x, pos.y);
             }
 
-            {
-                begin(*mParticleShader, *mParticleRenderer, true, true, true);
-                renderParticles(serverEntityManager, viewWidth, viewHeight);
-                end(*mParticleShader, *mParticleRenderer);
-            }
-
-            {
-                if (lookAtEntity && serverEntityManager.has<component::Placement>(lookAtEntity)) {
-                    const auto &pos = serverEntityManager.get<component::Placement>(lookAtEntity).position;
-                    lookAt(pos.x, pos.y);
-                }
-
-                begin(*mTextureShader, *mTextureRenderer, true, true, true);
-                renderStaticText(serverEntityManager, viewWidth, viewHeight);
-                renderStaticTextures(serverEntityManager, viewWidth, viewHeight);
-                renderDynamicTextures(serverEntityManager, viewWidth, viewHeight);
-                end(*mTextureShader, *mTextureRenderer);
-            }
-
-
-            renderClientSideEntities(clientEntityManager);
+            render(serverEntityFactory);
+            render(clientEntityFactory);
         }
 
         void
-        SceneManager::renderClientSideEntities(entities::EntityManager &entityManager) {
+        SceneManager::render(entities::EntityFactory &entityFactory) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
+            auto &entityManager = entityFactory.getEntityManager();
 
             {
                 begin(*mColorShader, *mColorRenderer, true, true, true);
@@ -755,17 +734,24 @@ namespace oni {
 
             {
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
+                renderStaticText(entityManager, viewWidth, viewHeight);
                 renderStaticTextures(entityManager, viewWidth, viewHeight);
+                renderDynamicTextures(entityManager, viewWidth, viewHeight);
                 end(*mTextureShader, *mTextureRenderer);
             }
 
             {
                 // Render UI text with fixed camera
                 begin(*mTextureShader, *mTextureRenderer, false, false, true);
-                renderStaticText(entityManager, viewWidth, viewHeight);
+                // TODO: This should actually be split up from static text and entities part of UI should be tagged so
+                // renderStaticText(entityManager, viewWidth, viewHeight);
                 end(*mTextureShader, *mTextureRenderer);
             }
 
+            {
+                renderAndUpdateAnimation(entityFactory);
+            }
+            
             {
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(entityManager, viewWidth, viewHeight);
@@ -789,6 +775,29 @@ namespace oni {
         void
         SceneManager::endColorRendering() {
             end(*mColorShader, *mColorRenderer);
+        }
+
+        void
+        SceneManager::renderAndUpdateAnimation(entities::EntityFactory &entityFactory) {
+            auto policy = component::EntityOperationPolicy{};
+            policy.safe = false;
+            policy.track = false;
+
+            auto view = entityFactory.getEntityManager().createView<component::AnimatedSplat, component::WorldPos>();
+            auto now = std::chrono::steady_clock::now().time_since_epoch().count();
+            for (auto &&entity: view) {
+                const auto &animatedSplat = view.get<component::AnimatedSplat>(entity);
+                const auto &pos = view.get<component::WorldPos>(entity).value.getXY();
+                if (animatedSplat.diesAt >= now) {
+                    splat(entityFactory, animatedSplat.brush, pos);
+                    entityFactory.removeEntity(entity, policy);
+                } else {
+                    // TODO: Render a the particle using particle shader, not sure if I should do the physics calculation
+                    // on the shader or here, probably I can do it on the shader but I have to make sure that I can
+                    // consistently find the final position correctly
+
+                }
+            }
         }
 
         void

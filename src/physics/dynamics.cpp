@@ -467,20 +467,23 @@ namespace oni {
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
                                   common::real64 tickTime,
                                   const component::EntityOperationPolicy &policy) {
-            auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age, component::Tag_EngineOnlyParticlePhysics>();
-            for (const auto &entity: view) {
-                auto &placement = view.get<component::Placement>(entity);
-                const auto &velocity = view.get<component::Velocity>(entity);
-                const auto &age = view.get<component::Age>(entity);
+            // Update particle placement
+            {
+                auto view = entityFactory.getEntityManager().createView<component::Placement, component::Velocity, component::Age, component::Tag_EngineOnlyParticlePhysics>();
+                for (const auto &entity: view) {
+                    auto &placement = view.get<component::Placement>(entity);
+                    const auto &velocity = view.get<component::Velocity>(entity);
+                    const auto &age = view.get<component::Age>(entity);
 
-                auto currentVelocity = (velocity.currentVelocity * tickTime) -  math::pow(age.currentAge, 10);
-                math::zeroClip(currentVelocity);
+                    auto currentVelocity = 5 *(velocity.currentVelocity * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
+                    math::zeroClip(currentVelocity);
 
-                common::real32 x = std::cos(placement.rotation) * currentVelocity;
-                common::real32 y = std::sin(placement.rotation) * currentVelocity;
+                    common::real32 x = std::cos(placement.rotation) * currentVelocity;
+                    common::real32 y = std::sin(placement.rotation) * currentVelocity;
 
-                placement.position.x += x;
-                placement.position.y += y;
+                    placement.position.x += x;
+                    placement.position.y += y;
+                }
             }
         }
     }

@@ -56,13 +56,17 @@ namespace oni {
             common::real32 halfSize{1.f};
         };
 
-        using WorldCoord = math::vec3;
+        struct WorldPos {
+            math::vec3 value;
+        };
 
         struct Text {
-            // TODO: ordering?
+            common::EntityID entityID{0};
+            common::real32 xScaling{1.f};
+            common::real32 yScaling{1.f};
             common::oniGLuint textureID{0};
-            math::vec3 position{0.f, 0.f, 0.f};
             std::string textContent{};
+            math::vec3 position{0.f, 0.f, 0.f};
             std::vector<size_t> width{};
             std::vector<size_t> height{};
             std::vector<common::uint32> offsetX{};
@@ -70,9 +74,6 @@ namespace oni {
             std::vector<common::real32> advanceX{};
             std::vector<common::real32> advanceY{};
             std::vector<math::vec4> uv{};
-            common::real32 xScaling{1.f};
-            common::real32 yScaling{1.f};
-            common::EntityID entityID{0};
         };
 
         struct PixelRGBA {
@@ -128,5 +129,10 @@ namespace oni {
             };
         };
 
+        struct AnimatedSplat {
+            common::int64 diesAt{0};
+            math::vec2 origin{};
+            component::Brush brush{};
+        };
     }
 }

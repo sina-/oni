@@ -60,5 +60,12 @@ namespace oni {
             std::uniform_real_distribution distribution(lowerBound, upperBound);
             return distribution(mEngine);
         }
+
+        common::real64
+        Rand::nextReal64Normal(common::real64 mean,
+                               common::real64 stddev) {
+            std::normal_distribution distribution(mean, stddev);
+            return distribution(mEngine);
+        }
     }
 }

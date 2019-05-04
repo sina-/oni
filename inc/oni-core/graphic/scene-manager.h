@@ -53,8 +53,8 @@ namespace oni {
             ~SceneManager();
 
             void
-            render(entities::EntityManager &server,
-                   entities::EntityManager &client,
+            render(entities::EntityFactory &server,
+                   entities::EntityFactory &client,
                    common::EntityID lookAtEntity);
 
             void
@@ -125,6 +125,9 @@ namespace oni {
 
         private:
             void
+            render(entities::EntityFactory &);
+
+            void
             renderStaticTextures(entities::EntityManager &,
                                  common::real32 viewWidth,
                                  common::real32 viewHeight);
@@ -150,7 +153,7 @@ namespace oni {
                             common::real32 viewHeight);
 
             void
-            renderClientSideEntities(entities::EntityManager &);
+            renderAndUpdateAnimation(entities::EntityFactory &);
 
         private:
             struct RaceInfoEntities {

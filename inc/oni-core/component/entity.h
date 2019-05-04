@@ -23,6 +23,8 @@ namespace oni {
             SIMPLE_BLAST_PARTICLE,
             SIMPLE_ROCKET,
 
+            ROCKET_BLAST_MARK,
+
             TEXT,
             WORLD_CHUNK,
 

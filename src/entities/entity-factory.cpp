@@ -114,6 +114,7 @@ namespace oni {
                 case component::EntityType::SIMPLE_SPRITE:
                 case component::EntityType::SIMPLE_PARTICLE:
                 case component::EntityType::SIMPLE_BLAST_PARTICLE:
+                case component::EntityType::ROCKET_BLAST_MARK:
                 case component::EntityType::TEXT:
                 case component::EntityType::WORLD_CHUNK: {
                     break;
@@ -493,6 +494,31 @@ namespace oni {
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Audible>(entityID);
+        }
+
+        template<>
+        void
+        EntityFactory::_createEntity<component::EntityType::ROCKET_BLAST_MARK>(common::EntityID entityID,
+                                                                               const math::vec2 &worldPos,
+                                                                               const common::real32 &size,
+                                                                               const common::real32 &stddev,
+                                                                               const component::PixelRGBA &color) {
+
+            auto &pos = createComponent<component::WorldPos>(entityID);
+            pos.value.x = worldPos.x + mRand->nextReal64Normal(0.f, stddev);
+            pos.value.y = worldPos.y + mRand->nextReal64Normal(0.f, stddev);
+
+            auto &splat = createComponent<component::AnimatedSplat>(entityID);
+            splat.brush.color = color;
+            splat.brush.type = component::BrushType::PLAIN_RECTANGLE;
+            splat.brush.size.x = size;
+            splat.brush.size.y = size;
+
+            splat.origin = worldPos;
+
+            auto timeOffset = 100; // TODO: Calculate it from min(pos.x, pos.y)
+            auto when = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeOffset);
+            splat.diesAt = when.time_since_epoch().count();
         }
 
         template<>

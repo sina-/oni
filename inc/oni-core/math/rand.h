@@ -36,6 +36,10 @@ namespace oni {
             nextReal32(common::real32 lowerBound,
                        common::real32 upperBound);
 
+            common::real64
+            nextReal64Normal(common::real64 mean,
+                             common::real64 stddev);
+
         private:
             std::mt19937 mEngine{};
         };

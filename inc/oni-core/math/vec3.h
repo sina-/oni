@@ -8,9 +8,9 @@
 namespace oni {
     namespace math {
         struct vec3 {
-            oni::common::real32 x{0.0f};
-            oni::common::real32 y{0.0f};
-            oni::common::real32 z{0.0f};
+            common::real32 x{0.0f};
+            common::real32 y{0.0f};
+            common::real32 z{0.0f};
 
             vec3 &
             add(const vec3 &other);

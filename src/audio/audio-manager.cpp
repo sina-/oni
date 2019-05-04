@@ -122,7 +122,7 @@ namespace oni {
         void
         AudioManager::playCollisionSoundEffect(entities::EntityType A,
                                                entities::EntityType B,
-                                               const component::CollisionPos &pos) {
+                                               const math::vec3 &pos) {
             auto soundID = createCollisionEffectID(A, B);
             assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
             auto distance = mPlayerPos - pos;

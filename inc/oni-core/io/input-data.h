@@ -3,7 +3,7 @@
 #include <oni-core/common/typedefs.h>
 
 namespace oni {
-    namespace component {
+    namespace io {
         typedef common::uint16 oniKeyPress;
 
         struct CarInput {

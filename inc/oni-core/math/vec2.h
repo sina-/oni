@@ -7,8 +7,8 @@
 namespace oni {
     namespace math {
         struct vec2 {
-            oni::common::real32 x{0.0f};
-            oni::common::real32 y{0.0f};
+            common::real32 x{0.0f};
+            common::real32 y{0.0f};
 
             vec2 &
             add(const vec2 &other);

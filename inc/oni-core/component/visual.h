@@ -56,8 +56,12 @@ namespace oni {
             common::real32 halfSize{1.f};
         };
 
-        struct WorldPos {
-            math::vec3 value;
+        struct WorldP3D {
+            math::vec3 pos;
+        };
+
+        struct WorldP2D{
+            math::vec2 pos;
         };
 
         struct Text {

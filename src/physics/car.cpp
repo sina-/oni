@@ -1,5 +1,5 @@
 #include <oni-core/physics/car.h>
-#include <oni-core/component/input-data.h>
+#include <oni-core/io/input-data.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/math/functions.h>
 
@@ -9,7 +9,7 @@ namespace oni {
         void
         tickCar(component::Car &car,
                 const component::CarConfig &config,
-                const component::CarInput &inputs,
+                const io::CarInput &inputs,
                 common::real64 dt) {
             using common::CarSimDouble;
             CarSimDouble sn = std::sin(car.heading);

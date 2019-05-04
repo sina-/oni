@@ -15,14 +15,16 @@ namespace oni {
         class CarConfig;
 
         class CarInput;
-
     }
+    namespace io {
+        struct CarInput;
+    };
     namespace physics {
 
         void
         tickCar(component::Car &car,
                 const component::CarConfig &config,
-                const component::CarInput &inputs,
+                const io::CarInput &inputs,
                 common::real64 dt);
 
 

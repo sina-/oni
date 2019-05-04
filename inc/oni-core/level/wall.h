@@ -1,0 +1,13 @@
+#pragma once
+
+namespace oni {
+    namespace level {
+        enum class WallTilePosition : common::uint8 {
+            TOP = 1,
+            RIGHT = 2,
+            BOTTOM = 3,
+            LEFT = 4,
+        };
+
+    }
+}

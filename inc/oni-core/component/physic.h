@@ -89,14 +89,6 @@ namespace oni {
             }
         };
 
-        // TODO: Not sure if this is the right place to define this
-        enum class WallTilePosition : common::uint8 {
-            TOP = 1,
-            RIGHT = 2,
-            BOTTOM = 3,
-            LEFT = 4,
-        };
-
         enum class BodyType : common::uint8 {
             UNKNOWN = 0,
             STATIC = 1,
@@ -137,12 +129,5 @@ namespace oni {
             // I don't think there is a better way.
             b2Body *body{nullptr};
         };
-
-        struct CollidingEntity {
-            entities::EntityType entityA{entities::EntityType::UNKNOWN};
-            entities::EntityType entityB{entities::EntityType::UNKNOWN};
-        };
-
-        using CollisionPos = math::vec3;
     }
 }

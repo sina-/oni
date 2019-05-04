@@ -32,13 +32,13 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_apply<game::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
-                                                                             component::CollisionPos &)> &func) {
-            auto group = mRegistryManager->createView<component::CollidingEntity, component::CollisionPos, game::EventType>();
+        EntityFactory::_apply<game::EventType::COLLISION>(std::function<void(game::CollidingEntity &,
+                                                                             component::WorldP3D &)> &func) {
+            auto group = mRegistryManager->createView<game::CollidingEntity, component::WorldP3D, game::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<game::EventType>(entity);
                         event == game::EventType::COLLISION) {
-                    func(group.get<component::CollidingEntity>(entity), group.get<component::CollisionPos>(entity));
+                    func(group.get<game::CollidingEntity>(entity), group.get<component::WorldP3D>(entity));
                 }
             }
         }
@@ -46,12 +46,12 @@ namespace oni {
         template<>
         void
         EntityFactory::_apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                         component::WorldPos &)> &func) {
-            auto group = mRegistryManager->createView<component::SoundID, component::WorldPos, game::EventType>();
+                                                                                         component::WorldP3D &)> &func) {
+            auto group = mRegistryManager->createView<component::SoundID, component::WorldP3D, game::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<game::EventType>(entity);
                         event == game::EventType::ONE_SHOT_SOUND_EFFECT) {
-                    func(group.get<component::SoundID>(entity), group.get<component::WorldPos>(entity));
+                    func(group.get<component::SoundID>(entity), group.get<component::WorldP3D>(entity));
                 }
             }
         }
@@ -506,9 +506,9 @@ namespace oni {
                                                                               const common::real32 &stddev,
                                                                               const component::PixelRGBA &color) {
 
-            auto &pos = createComponent<component::WorldPos>(entityID);
-            pos.value.x = worldPos.x + mRand->nextReal64Normal(0.f, stddev);
-            pos.value.y = worldPos.y + mRand->nextReal64Normal(0.f, stddev);
+            auto &pos = createComponent<component::WorldP3D>(entityID);
+            pos.pos.x = worldPos.x + mRand->nextReal64Normal(0.f, stddev);
+            pos.pos.y = worldPos.y + mRand->nextReal64Normal(0.f, stddev);
 
             auto &splat = createComponent<component::AnimatedSplat>(entityID);
             splat.brush.color = color;
@@ -585,14 +585,14 @@ namespace oni {
                                                                 const entities::EntityType &a,
                                                                 const entities::EntityType &b,
                                                                 const math::vec3 &worldPos) {
-            auto &collidingEntity = createComponent<component::CollidingEntity>(entityID);
+            auto &collidingEntity = createComponent<game::CollidingEntity>(entityID);
             collidingEntity.entityA = a;
             collidingEntity.entityB = b;
 
-            auto &pos = createComponent<component::CollisionPos>(entityID);
-            pos.x = worldPos.x;
-            pos.y = worldPos.y;
-            pos.z = worldPos.z;
+            auto &pos = createComponent<component::WorldP3D>(entityID);
+            pos.pos.x = worldPos.x;
+            pos.pos.y = worldPos.y;
+            pos.pos.z = worldPos.z;
         }
 
         template<>
@@ -603,9 +603,9 @@ namespace oni {
             auto &soundID = createComponent<component::SoundID>(entityID);
             soundID = id;
 
-            auto &pos = createComponent<component::WorldPos>(entityID);
-            pos.value.x = worldPos.x;
-            pos.value.y = worldPos.y;
+            auto &pos = createComponent<component::WorldP3D>(entityID);
+            pos.pos.x = worldPos.x;
+            pos.pos.y = worldPos.y;
         }
 
         template<>

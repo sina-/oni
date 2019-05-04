@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <oni-core/component/input-data.h>
+#include <oni-core/io/input-data.h>
 
 namespace oni {
     namespace io {
@@ -17,27 +17,27 @@ namespace oni {
             }
 
             void
-            update(component::oniKeyPress keyPressed,
-                   component::oniKeyPress keyReleased);
+            update(io::oniKeyPress keyPressed,
+                   io::oniKeyPress keyReleased);
 
             bool
-            isPressed(component::oniKeyPress key) const;
+            isPressed(io::oniKeyPress key) const;
 
             bool
-            isReleased(component::oniKeyPress key) const;
+            isReleased(io::oniKeyPress key) const;
 
             void
-            setPressed(component::oniKeyPress key);
+            setPressed(io::oniKeyPress key);
 
             void
-            setReleased(component::oniKeyPress key);
+            setReleased(io::oniKeyPress key);
 
             void
             reset();
 
         private:
-            std::vector<component::oniKeyPress> mKeysPressed;
-            std::vector<component::oniKeyPress> mKeysReleased;
+            std::vector<io::oniKeyPress> mKeysPressed;
+            std::vector<io::oniKeyPress> mKeysReleased;
         };
     }
 }

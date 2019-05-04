@@ -10,5 +10,10 @@ namespace oni {
             ONE_SHOT_SOUND_EFFECT,
             ROCKET_LAUNCH,
         };
+
+        struct CollidingEntity {
+            entities::EntityType entityA{entities::EntityType::UNKNOWN};
+            entities::EntityType entityB{entities::EntityType::UNKNOWN};
+        };
     }
 }

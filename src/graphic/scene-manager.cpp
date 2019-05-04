@@ -783,11 +783,11 @@ namespace oni {
             policy.safe = false;
             policy.track = false;
 
-            auto view = entityFactory.getEntityManager().createView<component::AnimatedSplat, component::WorldPos>();
+            auto view = entityFactory.getEntityManager().createView<component::AnimatedSplat, component::WorldP3D>();
             auto now = std::chrono::steady_clock::now().time_since_epoch().count();
             for (auto &&entity: view) {
                 const auto &animatedSplat = view.get<component::AnimatedSplat>(entity);
-                const auto &pos = view.get<component::WorldPos>(entity).value.getXY();
+                const auto &pos = view.get<component::WorldP3D>(entity).pos.getXY();
                 if (animatedSplat.diesAt >= now) {
                     splat(entityFactory, animatedSplat.brush, pos);
                     entityFactory.removeEntity(entity, policy);

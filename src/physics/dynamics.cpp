@@ -133,7 +133,7 @@ namespace oni {
                                  common::real64 tickTime) {
 
             auto &manager = entityFactory.getEntityManager();
-            std::map<common::EntityID, component::CarInput> carInput{};
+            std::map<common::EntityID, io::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
 
             // Apply user input

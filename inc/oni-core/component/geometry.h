@@ -125,7 +125,7 @@ namespace oni {
             }
         };
 
-        struct Placement {
+        struct Placement { // TODO: break this up into three components
             math::vec3 position{0.f, 0.f, 0.f};
             common::real32 rotation{0.f}; // In radians
             math::vec3 scale{1.0f, 1.0f, 0.f};

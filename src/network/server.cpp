@@ -126,13 +126,13 @@ namespace oni {
         Server::broadcastEvents(entities::EntityFactory &entityFactory) {
             std::vector<CollisionEventPacket> collisionPackets;
             {
-                std::function<void(component::CollidingEntity &,
-                                   component::CollisionPos &)> func = [&collisionPackets](
-                        component::CollidingEntity &collidingEntity,
-                        component::CollisionPos &collisionPos) {
+                std::function<void(game::CollidingEntity &,
+                                   component::WorldP3D &)> func = [&collisionPackets](
+                        game::CollidingEntity &collidingEntity,
+                        component::WorldP3D &collisionPos) {
                     CollisionEventPacket packet;
                     packet.collidingEntity = collidingEntity;
-                    packet.collisionPos = collisionPos;
+                    packet.pos = collisionPos.pos;
                     collisionPackets.emplace_back(packet);
                 };
                 entityFactory.apply<game::EventType::COLLISION>(func);
@@ -141,12 +141,12 @@ namespace oni {
             std::vector<SoundPlayEventPacket> soundPlayPackets;
             {
                 std::function<void(component::SoundID &,
-                                   component::WorldPos &)> func = [&soundPlayPackets](
+                                   component::WorldP3D &)> func = [&soundPlayPackets](
                         component::SoundID &soundEffectID,
-                        component::WorldPos &soundPos) {
+                        component::WorldP3D &soundPos) {
                     SoundPlayEventPacket packet;
                     packet.soundID = soundEffectID;
-                    packet.pos = soundPos;
+                    packet.pos = soundPos.pos;
                     soundPlayPackets.emplace_back(packet);
                 };
                 entityFactory.apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(func);

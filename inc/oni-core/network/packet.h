@@ -7,6 +7,7 @@
 #include <oni-core/component/physic.h>
 #include <oni-core/component/audio.h>
 #include <oni-core/component/visual.h>
+#include <oni-core/game/entity-event.h>
 
 
 namespace oni {
@@ -20,13 +21,13 @@ namespace oni {
         };
 
         struct CollisionEventPacket {
-            component::CollidingEntity collidingEntity{};
-            component::CollisionPos collisionPos{};
+            game::CollidingEntity collidingEntity{};
+            math::vec3 pos{};
         };
 
         struct SoundPlayEventPacket {
             component::SoundID soundID{};
-            component::WorldPos pos{};
+            math::vec3 pos{};
         };
 
         struct RocketLaunchEventPacket {

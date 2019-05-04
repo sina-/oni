@@ -115,13 +115,13 @@ namespace oni {
 
             template<>
             void
-            _apply<game::EventType::COLLISION>(std::function<void(component::CollidingEntity &,
-                                                                  component::CollisionPos &)> &);
+            _apply<game::EventType::COLLISION>(std::function<void(game::CollidingEntity &,
+                                                                  component::WorldP3D &)> &);
 
             template<>
             void
             _apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                              component::WorldPos &)> &);
+                                                                              component::WorldP3D &)> &);
 
             template<>
             void

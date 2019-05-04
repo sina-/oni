@@ -34,7 +34,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   CollisionEventPacket &packet) {
-            archive(packet.collidingEntity, packet.collisionPos);
+            archive(packet.collidingEntity, packet.pos);
         }
 
         template<class Archive>
@@ -93,13 +93,6 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  CollidingEntity &collidingEntity) {
-            archive(collidingEntity.entityA, collidingEntity.entityB);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   SoundID &soundID) {
             assert(!soundID.value.empty());
             archive(soundID.value);
@@ -108,8 +101,17 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  WorldPos &pos) {
-            archive(pos.value);
+                  WorldP3D &pos) {
+            archive(pos.pos.x, pos.pos.y, pos.pos.z);
+        }
+    }
+
+    namespace game {
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  game::CollidingEntity &collidingEntity) {
+            archive(collidingEntity.entityA, collidingEntity.entityB);
         }
     }
 

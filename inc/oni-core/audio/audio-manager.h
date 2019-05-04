@@ -9,6 +9,7 @@
 #include <oni-core/component/audio.h>
 #include <oni-core/entities/entity.h>
 #include <oni-core/component/physic.h>
+#include <oni-core/component/visual.h>
 
 namespace FMOD {
     class Sound;
@@ -36,9 +37,9 @@ namespace oni {
                  const math::vec3 &playerPos);
 
             void
-            playCollisionSoundEffect(entities::EntityType,
-                                     entities::EntityType,
-                                     const component::CollisionPos &);
+            playCollisionSoundEffect(entities::EntityType A,
+                                     entities::EntityType B,
+                                     const math::vec3 &pos);
 
             void
             kill(common::EntityID);

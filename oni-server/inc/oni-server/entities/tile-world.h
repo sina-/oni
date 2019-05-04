@@ -2,12 +2,13 @@
 
 #include <map>
 
-#include <oni-core/math/vec2.h>
-#include <oni-core/math/vec4.h>
 #include <oni-core/component/geometry.h>
 #include <oni-core/component/physic.h>
 #include <oni-core/component/visual.h>
+#include <oni-core/level/wall.h>
 #include <oni-core/math/z-layer-manager.h>
+#include <oni-core/math/vec2.h>
+#include <oni-core/math/vec4.h>
 
 class b2World;
 
@@ -111,7 +112,7 @@ namespace oni {
                 shouldGenerateRoad(const oni::level::ChunkIndex &chunkIndex) const;
 
                 void
-                createWall(const std::vector<oni::component::WallTilePosition> &position,
+                createWall(const std::vector<oni::level::WallTilePosition> &position,
                            const std::vector<oni::level::TileIndex> &indices);
 
                 oni::math::vec2

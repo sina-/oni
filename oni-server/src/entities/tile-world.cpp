@@ -468,7 +468,7 @@ namespace oni {
             }
 
             void
-            TileWorld::createWall(const std::vector<component::WallTilePosition> &position,
+            TileWorld::createWall(const std::vector<level::WallTilePosition> &position,
                                   const std::vector<level::TileIndex> &indices) {
                 assert(position.size() == indices.size());
 
@@ -493,7 +493,7 @@ namespace oni {
                     common::real32 currentTileY = yTileIndex * mTileSizeY;
 
                     switch (wallPos) {
-                        case component::WallTilePosition::RIGHT: {
+                        case level::WallTilePosition::RIGHT: {
                             wallSize.x = wallWidth;
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
@@ -503,7 +503,7 @@ namespace oni {
                             wallPositionInWorld.z = mWallZ;
                             break;
                         }
-                        case component::WallTilePosition::TOP: {
+                        case level::WallTilePosition::TOP: {
                             wallSize.x = mTileSizeX - 2 * wallWidth;
                             wallSize.y = wallWidth;
                             wallTexturePath = "resources/images/wall/1/horizontal.png";
@@ -513,7 +513,7 @@ namespace oni {
                             wallPositionInWorld.z = mWallZ;
                             break;
                         }
-                        case component::WallTilePosition::LEFT: {
+                        case level::WallTilePosition::LEFT: {
                             wallSize.x = wallWidth;
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
@@ -523,7 +523,7 @@ namespace oni {
                             wallPositionInWorld.z = mWallZ;
                             break;
                         }
-                        case component::WallTilePosition::BOTTOM: {
+                        case level::WallTilePosition::BOTTOM: {
                             wallSize.x = mTileSizeX - 2 * wallWidth;
                             wallSize.y = wallWidth;
                             wallTexturePath = "resources/images/wall/1/horizontal.png";
@@ -617,29 +617,29 @@ namespace oni {
                     }
                 }
 
-                std::vector<component::WallTilePosition> wallPosInTile{};
+                std::vector<level::WallTilePosition> wallPosInTile{};
                 std::vector<level::TileIndex> wallTiles{};
 
                 common::int8 outerTrackWidth = 8;
                 common::int8 outerTrackHeight = 4;
 
                 for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::BOTTOM);
+                    wallPosInTile.emplace_back(level::WallTilePosition::BOTTOM);
                     wallTiles.emplace_back(level::TileIndex{i, -outerTrackHeight});
                 }
 
                 for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::RIGHT);
+                    wallPosInTile.emplace_back(level::WallTilePosition::RIGHT);
                     wallTiles.emplace_back(level::TileIndex{outerTrackWidth, i});
                 }
 
                 for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::TOP);
+                    wallPosInTile.emplace_back(level::WallTilePosition::TOP);
                     wallTiles.emplace_back(level::TileIndex{i, outerTrackHeight});
                 }
 
                 for (auto i = -outerTrackHeight; i <= outerTrackHeight; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::LEFT);
+                    wallPosInTile.emplace_back(level::WallTilePosition::LEFT);
                     wallTiles.emplace_back(level::TileIndex{-outerTrackWidth, i});
                 }
 
@@ -647,22 +647,22 @@ namespace oni {
                 common::int8 innerTrackHeight = 2;
 
                 for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::BOTTOM);
+                    wallPosInTile.emplace_back(level::WallTilePosition::BOTTOM);
                     wallTiles.emplace_back(level::TileIndex{i, -innerTrackHeight});
                 }
 
                 for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::RIGHT);
+                    wallPosInTile.emplace_back(level::WallTilePosition::RIGHT);
                     wallTiles.emplace_back(level::TileIndex{innerTrackWidth, i});
                 }
 
                 for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::TOP);
+                    wallPosInTile.emplace_back(level::WallTilePosition::TOP);
                     wallTiles.emplace_back(level::TileIndex{i, innerTrackHeight});
                 }
 
                 for (auto i = -innerTrackHeight; i <= innerTrackHeight; ++i) {
-                    wallPosInTile.emplace_back(component::WallTilePosition::LEFT);
+                    wallPosInTile.emplace_back(level::WallTilePosition::LEFT);
                     wallTiles.emplace_back(level::TileIndex{-innerTrackWidth, i});
                 }
 

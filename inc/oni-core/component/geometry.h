@@ -32,6 +32,10 @@ namespace oni {
             }
         };
 
+        struct OriginP2D {
+            math::vec2 value{};
+        };
+
         struct Heading {
             common::real32 value{0.f};
         };
@@ -61,25 +65,25 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            component::WorldP3D vertexA{0.f, 0.f, 1.f};
-            component::WorldP3D vertexB{0.f, 1.f, 1.f};
-            component::WorldP3D vertexC{1.f, 1.f, 1.f};
-            component::WorldP3D vertexD{1.f, 0.f, 1.f};
+            math::vec3 vertexA{0.f, 0.f, 1.f};
+            math::vec3 vertexB{0.f, 1.f, 1.f};
+            math::vec3 vertexC{1.f, 1.f, 1.f};
+            math::vec3 vertexD{1.f, 0.f, 1.f};
 
-            component::WorldP3D
+            math::vec3
             getPosition() const { return vertexA; }
 
             math::vec2
             getSize() const {
-                return math::vec2{vertexD.value.x - vertexA.value.x, vertexB.value.y - vertexA.value.y};
+                return math::vec2{vertexD.x - vertexA.x, vertexB.y - vertexA.y};
             }
 
             void
             setSizeFromOrigin(const math::vec2 &size) {
-                vertexB.value.y = size.y;
-                vertexC.value.x = size.x;
-                vertexC.value.y = size.y;
-                vertexD.value.x = size.x;
+                vertexB.y = size.y;
+                vertexC.x = size.x;
+                vertexC.y = size.y;
+                vertexD.x = size.x;
             }
 
             void
@@ -90,24 +94,24 @@ namespace oni {
             void
             centerAlign() {
                 math::vec2 halfSize{};
-                halfSize.x = (vertexD.value.x - vertexA.value.x) / 2;
-                halfSize.y = (vertexB.value.y - vertexA.value.y) / 2;
-                vertexA.value.x -= halfSize.x;
-                vertexA.value.y -= halfSize.y;
-                vertexB.value.x -= halfSize.x;
-                vertexB.value.y -= halfSize.y;
-                vertexC.value.x -= halfSize.x;
-                vertexC.value.y -= halfSize.y;
-                vertexD.value.x -= halfSize.x;
-                vertexD.value.y -= halfSize.y;
+                halfSize.x = (vertexD.x - vertexA.x) / 2;
+                halfSize.y = (vertexB.y - vertexA.y) / 2;
+                vertexA.x -= halfSize.x;
+                vertexA.y -= halfSize.y;
+                vertexB.x -= halfSize.x;
+                vertexB.y -= halfSize.y;
+                vertexC.x -= halfSize.x;
+                vertexC.y -= halfSize.y;
+                vertexD.x -= halfSize.x;
+                vertexD.y -= halfSize.y;
             }
 
             void
             setZ(common::real32 z) {
-                vertexA.value.z = z;
-                vertexB.value.z = z;
-                vertexC.value.z = z;
-                vertexD.value.z = z;
+                vertexA.z = z;
+                vertexB.z = z;
+                vertexC.z = z;
+                vertexD.z = z;
             }
 
             static Shape
@@ -124,30 +128,30 @@ namespace oni {
             fromSizeAndRotation(const math::vec3 &size,
                                 const common::real32 rotation) {
                 auto shape = Shape{
-                        component::WorldP3D{0, 0, size.z},
-                        component::WorldP3D{0, size.y, size.z},
-                        component::WorldP3D{size.x, size.y, size.z},
-                        component::WorldP3D{size.x, 0, size.z}
+                        {0, 0, size.z},
+                        {0, size.y, size.z},
+                        {size.x, size.y, size.z},
+                        {size.x, 0, size.z}
                 };
                 // Cast to ignore float imprecision.
                 if (static_cast<common::uint16>(rotation)) {
                     auto halfSize = math::vec3{size.x / 2.0f, size.y / 2.0f, size.z};
 
-                    shape.vertexA.value -= halfSize;
-                    shape.vertexB.value -= halfSize;
-                    shape.vertexC.value -= halfSize;
-                    shape.vertexD.value -= halfSize;
+                    shape.vertexA -= halfSize;
+                    shape.vertexB -= halfSize;
+                    shape.vertexC -= halfSize;
+                    shape.vertexD -= halfSize;
 
                     auto rotationMat = math::mat4::rotation(math::toRadians(rotation), math::vec3{0.f, 0.f, 1.0f});
-                    shape.vertexA.value = rotationMat * shape.vertexA.value;
-                    shape.vertexB.value = rotationMat * shape.vertexB.value;
-                    shape.vertexC.value = rotationMat * shape.vertexC.value;
-                    shape.vertexD.value = rotationMat * shape.vertexD.value;
+                    shape.vertexA = rotationMat * shape.vertexA;
+                    shape.vertexB = rotationMat * shape.vertexB;
+                    shape.vertexC = rotationMat * shape.vertexC;
+                    shape.vertexD = rotationMat * shape.vertexD;
 
-                    shape.vertexA.value += halfSize;
-                    shape.vertexB.value += halfSize;
-                    shape.vertexC.value += halfSize;
-                    shape.vertexD.value += halfSize;
+                    shape.vertexA += halfSize;
+                    shape.vertexB += halfSize;
+                    shape.vertexC += halfSize;
+                    shape.vertexD += halfSize;
                 }
                 return shape;
             }

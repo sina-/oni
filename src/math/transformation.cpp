@@ -15,9 +15,9 @@ namespace oni {
 
         void
         localToWorldTranslation(const component::WorldP3D &reference,
-                                component::WorldP3D &operand) {
-            operand.value.x += reference.value.x;
-            operand.value.y += reference.value.y;
+                                vec3 &operand) {
+            operand.x += reference.value.x;
+            operand.y += reference.value.y;
         }
 
         void
@@ -52,10 +52,10 @@ namespace oni {
             auto vertexC = shape.vertexC;
             auto vertexD = shape.vertexD;
 
-            return component::Shape{transformation * vertexA.value,
-                                    transformation * vertexB.value,
-                                    transformation * vertexC.value,
-                                    transformation * vertexD.value};
+            return component::Shape{transformation * vertexA,
+                                    transformation * vertexB,
+                                    transformation * vertexC,
+                                    transformation * vertexD};
         }
 
         math::mat4

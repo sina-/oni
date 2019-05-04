@@ -92,22 +92,22 @@ namespace oni {
              */
 
             // a.
-            buffer->position = position.vertexA.value;
+            buffer->position = position.vertexA;
             buffer->color = appearance.color;
             buffer++;
 
             // b.
-            buffer->position = position.vertexB.value;
+            buffer->position = position.vertexB;
             buffer->color = appearance.color;
             buffer++;
 
             // c.
-            buffer->position = position.vertexC.value;
+            buffer->position = position.vertexC;
             buffer->color = appearance.color;
             buffer++;
 
             // d.
-            buffer->position = position.vertexD.value;
+            buffer->position = position.vertexD;
             buffer->color = appearance.color;
             buffer++;
 
@@ -189,22 +189,22 @@ namespace oni {
 
             auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
 
-            buffer->position = position.vertexA.value;
+            buffer->position = position.vertexA;
             buffer->uv = texture.uv[0];
             buffer->samplerID = samplerID;
             buffer++;
 
-            buffer->position = position.vertexB.value;
+            buffer->position = position.vertexB;
             buffer->uv = texture.uv[1];
             buffer->samplerID = samplerID;
             buffer++;
 
-            buffer->position = position.vertexC.value;
+            buffer->position = position.vertexC;
             buffer->uv = texture.uv[2];
             buffer->samplerID = samplerID;
             buffer++;
 
-            buffer->position = position.vertexD.value;
+            buffer->position = position.vertexD;
             buffer->uv = texture.uv[3];
             buffer->samplerID = samplerID;
             buffer++;

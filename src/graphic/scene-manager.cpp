@@ -595,10 +595,10 @@ namespace oni {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
             // TODO: why the hell from Shape and not Placement?
             auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
+            auto pos = component::WorldP3D{canvasTilePos.x, canvasTilePos.y, canvasTilePos.z};
 
             auto brushTexturePos = worldPos;
-            math::worldToTextureCoordinate(canvasTilePos, mGameUnitToPixels,
-                                           brushTexturePos);
+            math::worldToTextureCoordinate(pos, mGameUnitToPixels, brushTexturePos);
 
             component::Image image{};
             switch (brush.type) {

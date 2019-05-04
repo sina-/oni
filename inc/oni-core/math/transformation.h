@@ -38,7 +38,7 @@ namespace oni {
 
         void
         localToWorldTranslation(const component::WorldP3D &reference,
-                                component::WorldP3D &operand);
+                                vec3 &operand);
 
         void
         localToWorldTranslation(const component::WorldP3D &reference,

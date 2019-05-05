@@ -48,6 +48,15 @@ namespace oni {
             };
         };
 
+        union OriginP3D {
+            math::vec3 value{};
+            struct {
+                common::real32 x;
+                common::real32 y;
+                common::real32 z;
+            };
+        };
+
         struct Heading {
             common::real32 value{0.f};
         };

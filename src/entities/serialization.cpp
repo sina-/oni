@@ -44,6 +44,20 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
+                  component::WorldP2D &pos) {
+            archive(pos.value);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  component::Size &size) {
+            archive(size.value);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
                   component::Trail &trail) {
             archive(trail.previousPos, trail.velocity);
         }
@@ -190,6 +204,13 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
+                  component::Age &age) {
+            archive(age.currentAge, age.maxAge);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
                   component::Texture &texture) {
             archive(texture.image, texture.textureID, texture.format, texture.type, texture.filePath,
                     texture.uv, texture.status);
@@ -207,13 +228,16 @@ namespace oni {
                         component::Car,
                         component::CarConfig,
                         component::WorldP3D,
+                        component::WorldP2D,
                         component::Heading,
                         component::Scale,
                         gameplay::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
+                        component::Size,
                         component::Point,
                         component::Appearance,
+                        component::Age,
                         component::Texture,
                         component::Trail,
                         entities::EntityType,
@@ -252,13 +276,16 @@ namespace oni {
                         component::Car,
                         component::CarConfig,
                         component::WorldP3D,
+                        component::WorldP2D,
                         component::Heading,
                         component::Scale,
                         gameplay::CarLapInfo,
                         //components::Chunk,
                         component::Shape,
+                        component::Size,
                         component::Point,
                         component::Appearance,
+                        component::Age,
                         component::Texture,
                         component::Trail,
                         entities::EntityType,

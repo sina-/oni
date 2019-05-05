@@ -339,7 +339,6 @@ namespace oni {
                 policy.safe = false;
                 policy.track = true;
                 updateAge(entityFactory, tickTime, policy);
-
             }
 
             // Tag to sync with client
@@ -435,14 +434,6 @@ namespace oni {
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
                             common::real64 tickTime,
                             const entities::EntityOperationPolicy &policy) {
-            auto view = entityFactory.getEntityManager().createView<component::Age>();
-            for (const auto &entity: view) {
-                auto &age = view.get<component::Age>(entity);
-                age.currentAge += tickTime;
-                if (age.currentAge > age.maxAge) {
-                    entityFactory.removeEntity(entity, policy);
-                }
-            }
         }
 
         void

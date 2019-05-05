@@ -117,7 +117,6 @@ namespace oni {
                 case entities::EntityType::SIMPLE_SPRITE:
                 case entities::EntityType::SIMPLE_PARTICLE:
                 case entities::EntityType::SIMPLE_BLAST_PARTICLE:
-                case entities::EntityType::ROCKET_BLAST_MARK:
                 case entities::EntityType::TEXT:
                 case entities::EntityType::WORLD_CHUNK: {
                     break;
@@ -451,6 +450,9 @@ namespace oni {
                                                                                   const std::string &textureID,
                                                                                   const common::real32 &halfSize,
                                                                                   const bool &randomize) {
+            auto &tessellation = createComponent<component::Tessellation>(entityID);
+            tessellation.halfSize = halfSize;
+
             auto &p = createComponent<component::WorldP3D>(entityID);
             p = pos;
 
@@ -458,26 +460,27 @@ namespace oni {
 
             auto &s = createComponent<component::Scale>(entityID);
 
-            auto &size = createComponent<component::Size>(entityID);
-            size.x = halfSize * 2;
-            size.y = halfSize * 2;
+//            auto &appearance = createComponent<component::Appearance>(entityID);
+//            appearance.color = {.5f, .5f, .5f, 1.f};
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &velocity = createComponent<component::Velocity>(entityID);
+
             auto &age = createComponent<component::Age>(entityID);
             age.currentAge = 0.f;
 
             if (randomize) {
                 h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->nextReal32(10.0f, 20.f);
-                age.maxAge = mRand->nextReal32(0.4f, 0.5f);
+                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
+                age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
 
-            assignTag<component::Tag_LeavesMark>(entityID);
-            assignTag<component::Tag_EngineOnlyParticlePhysics>(entityID);
+            assignTag<component::Tag_Particle>(entityID);
+            assignTag<component::Tag_ShaderOnlyParticlePhysics>(entityID);
+            assignTag<component::Tag_SplatOnDeath>(entityID);
         }
 
         template<>
@@ -487,8 +490,7 @@ namespace oni {
                                                                           const math::vec2 &size,
                                                                           const component::Heading &heading,
                                                                           const std::string &textureID,
-                                                                          const common::real32 &velocity
-        ) {
+                                                                          const common::real32 &velocity) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.friction = 1.f;
             properties.density = 0.1f;
@@ -533,33 +535,6 @@ namespace oni {
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Audible>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::ROCKET_BLAST_MARK>(common::EntityID entityID,
-                                                                              const component::WorldP2D &worldPos,
-                                                                              const common::real32 &size,
-                                                                              const common::real32 &stddev,
-                                                                              const component::PixelRGBA &color) {
-
-            auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos.x = worldPos.x + mRand->nextReal64Normal(0.f, stddev);
-            pos.y = worldPos.y + mRand->nextReal64Normal(0.f, stddev);
-
-            auto &splat = createComponent<component::AnimatedSplat>(entityID);
-            splat.brush.color = color;
-            splat.brush.type = component::BrushType::SPRITE;
-
-            auto &markSize = createComponent<component::Size>(entityID);
-            markSize.x = size;
-            markSize.y = size;
-
-            splat.origin = worldPos;
-
-            auto timeOffset = 100; // TODO: Calculate it from min(pos.x, pos.y)
-            auto when = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeOffset);
-            splat.diesAt = when.time_since_epoch().count();
         }
 
         template<>

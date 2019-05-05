@@ -238,14 +238,6 @@ namespace oni {
 
             template<>
             void
-            _createEntity<entities::EntityType::ROCKET_BLAST_MARK>(common::EntityID,
-                                                                   const component::WorldP2D &worldPos,
-                                                                   const common::real32 &size,
-                                                                   const common::real32 &stddev,
-                                                                   const component::PixelRGBA &color);
-
-            template<>
-            void
             _createEntity<entities::EntityType::TEXT>(common::EntityID,
                                                       const component::WorldP3D &pos,
                                                       const std::string &text);

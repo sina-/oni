@@ -20,6 +20,9 @@ namespace oni {
         struct Tag_LeavesMark {
         };
 
+        struct Tag_SplatOnDeath {
+        };
+
         // NOTE: Engine does not track placement, shader figures it out given particle age
         struct Tag_ShaderOnlyParticlePhysics {
         };

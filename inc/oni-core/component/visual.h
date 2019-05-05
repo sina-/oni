@@ -100,12 +100,5 @@ namespace oni {
                 const char *textureID;
             };
         };
-
-        // TODO: Remove this component, use Age, Brush, and OriginP2D, and Tag_SplatOnDeath
-        struct AnimatedSplat {
-            common::int64 diesAt{0};
-            component::WorldP2D origin{};
-            component::Brush brush{};
-        };
     }
 }

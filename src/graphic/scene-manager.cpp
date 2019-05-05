@@ -438,26 +438,6 @@ namespace oni {
 
         void
         SceneManager::renderAndUpdateAnimation(entities::EntityFactory &entityFactory) {
-            auto policy = entities::EntityOperationPolicy{};
-            policy.safe = false;
-            policy.track = false;
-
-            auto view = entityFactory.getEntityManager().createView<component::AnimatedSplat, component::WorldP3D, component::Size>();
-            auto now = std::chrono::steady_clock::now().time_since_epoch().count();
-            for (auto &&entity: view) {
-                const auto &animatedSplat = view.get<component::AnimatedSplat>(entity);
-                const auto &pos = view.get<component::WorldP3D>(entity);
-                const auto &size = view.get<component::Size>(entity);
-                if (animatedSplat.diesAt >= now) {
-                    splat(entityFactory, animatedSplat.brush, pos, size);
-                    entityFactory.removeEntity(entity, policy);
-                } else {
-                    // TODO: Render a the particle using particle shader, not sure if I should do the physics calculation
-                    // on the shader or here, probably I can do it on the shader but I have to make sure that I can
-                    // consistently find the final position correctly
-
-                }
-            }
         }
 
         void
@@ -653,6 +633,7 @@ namespace oni {
 
             // trails
             {
+#if 1
                 std::string textureID = "resources/images/smoke/1.png";
                 common::real32 particleHalfSize = 0.35f;
                 common::real32 particleSize = particleHalfSize * 2;
@@ -736,6 +717,7 @@ namespace oni {
 //                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
 //                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
                 }
+#endif
             }
 
             // Entities that leave mark
@@ -972,6 +954,33 @@ namespace oni {
         void
         SceneManager::updateParticles(entities::EntityFactory &entityFactory,
                                       common::real64 tickTime) {
+            auto &entityManager = entityFactory.getEntityManager();
+            auto view = entityManager.createView<component::Age, component::WorldP3D, component::Tessellation, component::Heading, component::Velocity>();
+            auto policy = entities::EntityOperationPolicy{false, false};
+            for (const auto &entity: view) {
+                auto &age = view.get<component::Age>(entity);
+                age.currentAge += tickTime;
+                if (age.currentAge > age.maxAge) {
+                    if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
+                        auto &pos = view.get<component::WorldP3D>(entity);
+                        auto &tess = view.get<component::Tessellation>(entity);
+                        auto &heading = view.get<component::Heading>(entity);
+                        auto &velocity = view.get<component::Velocity>(entity);
+                        pos.x += std::cos(heading.value) * velocity.currentVelocity;
+                        pos.y += std::sin(heading.value) * velocity.currentVelocity;
+
+                        // TODO: Use the view
+                        auto &texture = entityManager.get<component::Texture>(entity);
+
+                        auto size = component::Size{tess.halfSize, tess.halfSize};
+                        auto brush = component::Brush{};
+                        brush.type = component::BrushType::TEXTURE;
+                        brush.textureID = texture.filePath.c_str();
+                        splat(entityFactory, brush, pos, size);
+                    }
+                    entityFactory.removeEntity(entity, policy);
+                }
+            }
         }
 
         const SceneManager::RaceInfoEntities &

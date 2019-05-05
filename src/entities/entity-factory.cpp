@@ -549,7 +549,7 @@ namespace oni {
 
             auto &splat = createComponent<component::AnimatedSplat>(entityID);
             splat.brush.color = color;
-            splat.brush.type = component::BrushType::PLAIN_RECTANGLE;
+            splat.brush.type = component::BrushType::SPRITE;
 
             auto &markSize = createComponent<component::Size>(entityID);
             markSize.x = size;

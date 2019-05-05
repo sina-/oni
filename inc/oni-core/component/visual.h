@@ -82,8 +82,8 @@ namespace oni {
         enum class BrushType : common::uint8 {
             UNKNOWN,
 
-            PLAIN_RECTANGLE,
-            CUSTOM_TEXTURE,
+            SPRITE,
+            TEXTURE,
 
             LAST
         };

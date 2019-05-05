@@ -747,7 +747,7 @@ namespace oni {
                     auto brush = component::Brush{};
                     // TODO: This is messy distinction between texture path and textureID!
                     brush.textureID = texture.filePath.c_str();
-                    brush.type = component::BrushType::CUSTOM_TEXTURE;
+                    brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
                     splat(clientEntityFactory, brush, pos, size);
@@ -797,7 +797,7 @@ namespace oni {
 
                 {
                     auto brush = component::Brush{};
-                    brush.type = component::BrushType::PLAIN_RECTANGLE;
+                    brush.type = component::BrushType::SPRITE;
                     auto size = component::Size{0.5f, 0.5f};
 
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
@@ -934,13 +934,13 @@ namespace oni {
 
             component::Image image{};
             switch (brush.type) {
-                case component::BrushType::PLAIN_RECTANGLE: {
+                case component::BrushType::SPRITE: {
                     image.width = static_cast<uint16>(size.x * mGameUnitToPixels);
                     image.height = static_cast<uint16>(size.y * mGameUnitToPixels);
                     mTextureManager->fill(image, brush.color);
                     break;
                 }
-                case component::BrushType::CUSTOM_TEXTURE: {
+                case component::BrushType::TEXTURE: {
                     // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
                     // as long as down the line I can call sub texture update with the texture data only,
                     // something along the lines of take the updated texture data and point to where the offsets point

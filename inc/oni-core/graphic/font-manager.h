@@ -14,7 +14,7 @@ namespace ftgl {
 namespace oni {
     namespace component {
         struct Text;
-        struct WorldP3D;
+        union WorldP3D;
     }
 
     namespace entities {

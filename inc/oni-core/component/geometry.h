@@ -6,7 +6,6 @@
 #include <oni-core/math/vec3.h>
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
-#include <oni-core/math/transformation.h>
 
 #define DEFINE_ACCESSORS_3D auto &x() { return value.x; } auto &y() { return value.y; } auto &z() { return value.z; } \
                             const auto&x() const{ return value.x;} const auto&y() const{ return value.y;} const auto&z() const{ return value.y;}
@@ -15,16 +14,30 @@
 
 namespace oni {
     namespace component {
-        struct Point {
+        union Point {
             math::vec3 value{};
+            struct {
+                common::real32 x;
+                common::real32 y;
+                common::real32 z;
+            };
         };
 
-        struct WorldP3D {
+        union WorldP3D {
             math::vec3 value{};
+            struct {
+                common::real32 x;
+                common::real32 y;
+                common::real32 z;
+            };
         };
 
-        struct WorldP2D {
+        union WorldP2D {
             math::vec2 value{};
+            struct {
+                common::real32 x;
+                common::real32 y;
+            };
 
             WorldP3D
             to3D(common::real32 z) const {
@@ -32,16 +45,25 @@ namespace oni {
             }
         };
 
-        struct OriginP2D {
+        union OriginP2D {
             math::vec2 value{};
+            struct {
+                common::real32 x;
+                common::real32 y;
+            };
         };
 
         struct Heading {
             common::real32 value{0.f};
         };
 
-        struct Scale {
+        union Scale {
             math::vec3 value{1.f, 1.f, 1.f};
+            struct {
+                common::real32 x;
+                common::real32 y;
+                common::real32 z;
+            };
         };
 
         struct EntityAttachment {
@@ -87,11 +109,6 @@ namespace oni {
             }
 
             void
-            moveToWorldCoordinates(const WorldP3D &worldPos) {
-                math::localToWorldTranslation(worldPos, *this);
-            }
-
-            void
             centerAlign() {
                 math::vec2 halfSize{};
                 halfSize.x = (vertexD.x - vertexA.x) / 2;
@@ -128,10 +145,10 @@ namespace oni {
             fromSizeAndRotation(const math::vec3 &size,
                                 const common::real32 rotation) {
                 auto shape = Shape{
-                        {0, 0, size.z},
-                        {0, size.y, size.z},
+                        {0,      0,      size.z},
+                        {0,      size.y, size.z},
                         {size.x, size.y, size.z},
-                        {size.x, 0, size.z}
+                        {size.x, 0,      size.z}
                 };
                 // Cast to ignore float imprecision.
                 if (static_cast<common::uint16>(rotation)) {

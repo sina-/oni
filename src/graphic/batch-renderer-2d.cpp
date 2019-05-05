@@ -231,8 +231,8 @@ namespace oni {
             for (common::uint32 i = 0; i < text.textContent.size(); i++) {
                 assert(mIndexCount + 6 < mMaxIndicesCount);
 
-                auto x0 = pos.value.x + text.offsetX[i] / scaleX + advance;
-                auto y0 = pos.value.y + text.offsetY[i] / scaleY;
+                auto x0 = pos.x + text.offsetX[i] / scaleX + advance;
+                auto y0 = pos.y + text.offsetY[i] / scaleY;
                 auto x1 = x0 + text.width[i] / scaleX;
                 auto y1 = y0 - text.height[i] / scaleY;
 

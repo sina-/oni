@@ -291,359 +291,6 @@ namespace oni {
         }
 
         void
-        SceneManager::tick(entities::EntityFactory &serverEntityFactory,
-                           entities::EntityFactory &clientEntityFactory,
-                           common::real64 tickTime) {
-            updateParticles(clientEntityFactory, tickTime);
-
-            auto viewWidth = getViewWidth();
-            auto viewHeight = getViewHeight();
-
-/*
-            math::vec4 red{1, 0, 0, 0.25};
-            math::vec4 green{0, 1, 0, 0.25};
-            math::vec4 blue{0, 0, 1, 1};
-
-            math::vec3 redPos{0, 0, 1};
-            math::vec3 greenPos{5, 5, 0.1f};
-            math::vec3 bluePos{0, 5, 0.0f};
-
-            static bool add = true;
-            if (add) {
-                math::vec2 size{10, 10};
-                common::real32 heading = 0;
-                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
-
-                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
-
-                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
-                add = false;
-            }
-*/
-
-            // trails
-            {
-                std::string textureID = "resources/images/smoke/1.png";
-                common::real32 particleHalfSize = 0.35f;
-                common::real32 particleSize = particleHalfSize * 2;
-                common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
-
-                auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::WorldP3D, component::Heading>();
-                for (auto &&entity: view) {
-                    const auto &worldPos = view.get<component::WorldP3D>(entity);
-                    const auto &heading = view.get<component::Heading>(entity);
-                    const auto &currentPos = worldPos;
-                    const auto &trail = view.get<component::Trail>(entity);
-                    common::real32 projectileHeading = heading.value;
-                    common::real32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
-                    common::real32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
-
-                    assert(trail.previousPos.size() == trail.velocity.size());
-
-                    //math::vec4 color{1.f, 1.f, 1.f, 1.f};
-
-                    if (trail.previousPos.empty()) {
-                        auto trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                currentPos, textureID, particleHalfSize, false);
-                        continue;
-                    }
-
-                    const auto &previousPos = trail.previousPos[0];
-
-                    if (!math::intersects(currentPos, mCamera.x, mCamera.y, viewWidth, viewHeight) &&
-                        !math::intersects(previousPos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                        continue;
-                    }
-
-                    common::real32 dX = currentPos.value.x - previousPos.value.x;
-                    common::real32 dY = currentPos.value.y - previousPos.value.y;
-
-                    common::real32 distance = std::sqrt(dX * dX + dY * dY);
-
-                    auto x = previousPos.value.x;
-                    auto y = previousPos.value.y;
-
-                    auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
-
-                    common::EntityID trailEntity;
-                    for (auto numParticles = 0; numParticles < mRand->nextUint8(1, 2); ++numParticles) {
-                        auto pos = component::WorldP3D{x, y, currentPos.value.z};
-                        for (common::real32 i = 0.f; i <= distance; i += particleSize) {
-/*                        if(i == 0){
-                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
-                        }
-                        else if (i >= distance ){
-                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, math::vec4{1.f, 0.f, 0.f, 1.f}, false);
-                        }
-                        else{
-                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, color, false);
-                        }
-                        */
-                            trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, textureID, particleHalfSize, false);
-                            auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
-                                    trailEntity);
-                            // TODO: I don't use any other velocity than the first one, should I just not store the rest?
-                            // or should I update this code to use all by iterating over trail.previousPos?
-                            age.maxAge = 1.f - (distance - i) / trail.velocity[0];
-
-                            auto &velocity = clientEntityFactory.getEntityManager().get<component::Velocity>(
-                                    trailEntity);
-                            velocity.currentVelocity = mRand->nextReal32(2.f, 10.f);
-
-                            auto &particleHeading = clientEntityFactory.getEntityManager().get<component::Heading>(
-                                    trailEntity);
-                            particleHeading.value = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
-
-                            pos.value.x += particleSize * std::sin(alpha);
-                            pos.value.y += particleSize * std::cos(alpha);
-                        }
-                    }
-
-//                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
-//                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
-                }
-            }
-
-            // Entities that leave mark
-            {
-                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D>();
-                for (auto &&entity: view) {
-                    const auto &texture = view.get<component::Texture>(entity);
-                    auto brush = component::Brush{};
-                    // TODO: This is messy distinction between texture path and textureID!
-                    brush.textureID = texture.filePath.c_str();
-                    brush.type = component::BrushType::CUSTOM_TEXTURE;
-                    brush.size = math::vec2{1, 1};
-
-                    const auto &pos = view.get<component::WorldP3D>(entity);
-                    splat(clientEntityFactory, brush, pos);
-                }
-            }
-
-            // Update Skid lines.
-            {
-                std::vector<component::WorldP3D> skidPosList{};
-                std::vector<common::uint8> skidOpacity{};
-                {
-                    auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::WorldP3D, component::Heading, component::Scale, component::CarConfig>();
-                    for (auto &&carEntity: carView) {
-
-                        const auto car = carView.get<component::Car>(carEntity);
-                        // NOTE: Technically I should use slippingRear, but this gives better effect
-                        if (car.slippingFront || true) {
-                            const auto &carConfig = carView.get<component::CarConfig>(carEntity);
-                            const auto &pos = carView.get<component::WorldP3D>(carEntity);
-                            const auto &heading = carView.get<component::Heading>(carEntity);
-                            const auto &scale = carView.get<component::Scale>(carEntity);
-
-                            // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
-                            // same logic is hard-coded when spawningCar server side.
-                            math::vec3 skidPosRL{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                                 static_cast<common::real32>(carConfig.wheelWidth +
-                                                                             carConfig.halfWidth / 2),
-                                    // NOTE: This z-value is unused.
-                                                 0.f};
-                            math::vec3 skidPosRR{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                                 static_cast<common::real32>(-carConfig.wheelWidth -
-                                                                             carConfig.halfWidth / 2),
-                                                 0.f};
-                            auto transform = math::createTransformation(pos, heading, scale);
-                            auto posRL = transform * skidPosRL;
-                            auto posRR = transform * skidPosRR;
-                            skidPosList.push_back(component::WorldP3D{posRL.x, posRL.y, posRL.z});
-                            skidPosList.push_back(component::WorldP3D{posRR.x, posRR.y, posRR.z});
-
-//                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
-//                                                                    255);
-                            // TODO: arbitrary number based on number of frames, think about better way of determining this
-                            skidOpacity.push_back(10);
-                        }
-                    }
-                }
-
-                {
-                    auto brush = component::Brush{};
-                    brush.type = component::BrushType::PLAIN_RECTANGLE;
-                    brush.size = math::vec2{0.5f, 0.5f};
-
-                    for (size_t i = 0; i < skidPosList.size(); ++i) {
-                        brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientEntityFactory, brush, skidPosList[i]);
-                    }
-                }
-            }
-
-            // Update Laps
-            {
-                auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, gameplay::CarLapInfo>();
-                for (auto &&carEntity: carLapView) {
-                    // TODO: This will render all player laps on top of each other. I should render the data in rows
-                    // instead. Something like:
-                    /**
-                     * Player Name: lap, lap time, best time
-                     *
-                     * Player 1: 4, 1:12, :1:50
-                     * Player 2: 5, 0:02, :1:50
-                     */
-                    const auto &carLap = carLapView.get<gameplay::CarLapInfo>(carEntity);
-
-                    const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
-                    updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
-                }
-            }
-        }
-
-        void
-        SceneManager::splat(entities::EntityFactory &entityFactory,
-                            component::Brush brush,
-                            const component::WorldP3D &worldPos) {
-            auto &entityManager = entityFactory.getEntityManager();
-
-            std::set<common::EntityID> tileEntities;
-
-            auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
-            tileEntities.insert(entityID);
-
-            auto lowerLeft = worldPos;
-            lowerLeft.value.x -= brush.size.x / 2.f;
-            lowerLeft.value.y -= brush.size.y / 2.f;
-            auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
-            tileEntities.insert(lowerLeftEntityID);
-
-            auto topRight = worldPos;
-            topRight.value.x += brush.size.x / 2.f;
-            topRight.value.y += brush.size.y / 2.f;
-
-            auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
-            tileEntities.insert(topRightEntityID);
-
-            auto topLeft = worldPos;
-            topLeft.value.x -= brush.size.x / 2.f;
-            topLeft.value.y += brush.size.y / 2.f;
-            auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
-            tileEntities.insert(topLeftEntityID);
-
-            auto lowerRight = worldPos;
-            lowerRight.value.x += brush.size.x / 2.f;
-            lowerRight.value.y -= brush.size.y / 2.f;
-            auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
-            tileEntities.insert(lowerRightEntityID);
-
-            for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(entityManager, tileEntity, brush, worldPos);
-            }
-        }
-
-        common::EntityID
-        SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
-                                            const component::WorldP3D &pos) {
-            auto x = math::findBin(pos.value.x, mCanvasTileSizeX);
-            auto y = math::findBin(pos.value.y, mCanvasTileSizeY);
-            auto xy = math::packInt64(x, y);
-            auto &entityRegistry = entityFactory.getEntityManager();
-
-            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
-            if (missing) {
-                auto tilePosX = math::binPos(x, mCanvasTileSizeX);
-                auto tilePosY = math::binPos(y, mCanvasTileSizeY);
-
-                auto worldPos = component::WorldP3D{tilePosX, tilePosY,
-                                                    mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
-                auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
-                                           static_cast<common::real32>(mCanvasTileSizeY)};
-
-                auto heading = component::Heading{0.f};
-                std::string emptyTextureID;
-
-                // TODO: Should this be a canvas type?
-                auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(worldPos,
-                                                                                                tileSize,
-                                                                                                heading,
-                                                                                                emptyTextureID);
-
-                auto &texture = entityRegistry.get<component::Texture>(entityID);
-
-                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                                 common::EP);
-                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                                  common::EP);
-
-                texture.image.width = widthInPixels;
-                texture.image.height = heightInPixels;
-
-                auto defaultColor = component::PixelRGBA{};
-                mTextureManager->fill(texture.image, defaultColor);
-                mTextureManager->loadFromImage(texture);
-
-                mCanvasTileLookup.emplace(xy, entityID);
-            }
-
-            auto entity = mCanvasTileLookup.at(xy);
-            assert(entity);
-            return entity;
-        }
-
-        void
-        SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
-                                       common::EntityID entityID,
-                                       const component::Brush &brush,
-                                       const component::WorldP3D &worldPos) {
-            auto &canvasTexture = entityManager.get<component::Texture>(entityID);
-            // TODO: why the hell from Shape and not Placement?
-            auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
-            auto pos = component::WorldP3D{canvasTilePos.x, canvasTilePos.y, canvasTilePos.z};
-
-            auto brushTexturePos = worldPos;
-            math::worldToTextureCoordinate(pos, mGameUnitToPixels, brushTexturePos);
-
-            component::Image image{};
-            switch (brush.type) {
-                case component::BrushType::PLAIN_RECTANGLE: {
-                    image.width = static_cast<uint16>(brush.size.x * mGameUnitToPixels);
-                    image.height = static_cast<uint16>(brush.size.y * mGameUnitToPixels);
-                    mTextureManager->fill(image, brush.color);
-                    break;
-                }
-                case component::BrushType::CUSTOM_TEXTURE: {
-                    // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
-                    // as long as down the line I can call sub texture update with the texture data only,
-                    // something along the lines of take the updated texture data and point to where the offsets point
-                    // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
-                    // at all what I intended
-                    image = mTextureManager->loadOrGetImage(brush.textureID);
-                    break;
-                }
-                default: {
-                    assert(false);
-                    return;
-                }
-            }
-
-            assert(image.width);
-            assert(image.height);
-
-            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
-            // in game units at this point.
-            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.value.x - (image.width / 2.f));
-            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.value.y - (image.height / 2.f));
-
-            mTextureManager->blendAndUpdateTexture(canvasTexture,
-                                                   textureOffsetX,
-                                                   textureOffsetY,
-                                                   image);
-        }
-
-        void
-        SceneManager::updateParticles(entities::EntityFactory &entityFactory,
-                                      common::real64 tickTime) {
-        }
-
-
-        void
         SceneManager::begin(const Shader &shader,
                             Renderer2D &renderer2D,
                             bool translate,
@@ -725,7 +372,7 @@ namespace oni {
             if (lookAtEntity && serverEntityFactory.getEntityManager().has<component::WorldP3D>(lookAtEntity)) {
                 const auto &pos = serverEntityFactory.getEntityManager().get<component::WorldP3D>(
                         lookAtEntity);
-                lookAt(pos.value.x, pos.value.y);
+                lookAt(pos.x, pos.y);
             }
 
             render(serverEntityFactory);
@@ -969,6 +616,359 @@ namespace oni {
                     mParticleRenderer->submit(tessellation, pos, heading, age, velocity, texture);
                 }
             }
+        }
+
+
+        void
+        SceneManager::tick(entities::EntityFactory &serverEntityFactory,
+                           entities::EntityFactory &clientEntityFactory,
+                           common::real64 tickTime) {
+            updateParticles(clientEntityFactory, tickTime);
+
+            auto viewWidth = getViewWidth();
+            auto viewHeight = getViewHeight();
+
+/*
+            math::vec4 red{1, 0, 0, 0.25};
+            math::vec4 green{0, 1, 0, 0.25};
+            math::vec4 blue{0, 0, 1, 1};
+
+            math::vec3 redPos{0, 0, 1};
+            math::vec3 greenPos{5, 5, 0.1f};
+            math::vec3 bluePos{0, 5, 0.0f};
+
+            static bool add = true;
+            if (add) {
+                math::vec2 size{10, 10};
+                common::real32 heading = 0;
+                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
+
+                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
+
+                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
+                add = false;
+            }
+*/
+
+            // trails
+            {
+                std::string textureID = "resources/images/smoke/1.png";
+                common::real32 particleHalfSize = 0.35f;
+                common::real32 particleSize = particleHalfSize * 2;
+                common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
+
+                auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::WorldP3D, component::Heading>();
+                for (auto &&entity: view) {
+                    const auto &worldPos = view.get<component::WorldP3D>(entity);
+                    const auto &heading = view.get<component::Heading>(entity);
+                    const auto &currentPos = worldPos;
+                    const auto &trail = view.get<component::Trail>(entity);
+                    common::real32 projectileHeading = heading.value;
+                    common::real32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
+                    common::real32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
+
+                    assert(trail.previousPos.size() == trail.velocity.size());
+
+                    //math::vec4 color{1.f, 1.f, 1.f, 1.f};
+
+                    if (trail.previousPos.empty()) {
+                        auto trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
+                                currentPos, textureID, particleHalfSize, false);
+                        continue;
+                    }
+
+                    const auto &previousPos = trail.previousPos[0];
+
+                    if (!math::intersects(currentPos, mCamera.x, mCamera.y, viewWidth, viewHeight) &&
+                        !math::intersects(previousPos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        continue;
+                    }
+
+                    common::real32 dX = currentPos.x - previousPos.x;
+                    common::real32 dY = currentPos.y - previousPos.y;
+
+                    common::real32 distance = std::sqrt(dX * dX + dY * dY);
+
+                    auto x = previousPos.x;
+                    auto y = previousPos.y;
+
+                    auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
+
+                    common::EntityID trailEntity;
+                    for (auto numParticles = 0; numParticles < mRand->nextUint8(1, 2); ++numParticles) {
+                        auto pos = component::WorldP3D{x, y, currentPos.z};
+                        for (common::real32 i = 0.f; i <= distance; i += particleSize) {
+/*                        if(i == 0){
+                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
+                                    pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
+                        }
+                        else if (i >= distance ){
+                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
+                                    pos, math::vec4{1.f, 0.f, 0.f, 1.f}, false);
+                        }
+                        else{
+                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
+                                    pos, color, false);
+                        }
+                        */
+                            trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
+                                    pos, textureID, particleHalfSize, false);
+                            auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
+                                    trailEntity);
+                            // TODO: I don't use any other velocity than the first one, should I just not store the rest?
+                            // or should I update this code to use all by iterating over trail.previousPos?
+                            age.maxAge = 1.f - (distance - i) / trail.velocity[0];
+
+                            auto &velocity = clientEntityFactory.getEntityManager().get<component::Velocity>(
+                                    trailEntity);
+                            velocity.currentVelocity = mRand->nextReal32(2.f, 10.f);
+
+                            auto &particleHeading = clientEntityFactory.getEntityManager().get<component::Heading>(
+                                    trailEntity);
+                            particleHeading.value = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
+
+                            pos.x += particleSize * std::sin(alpha);
+                            pos.y += particleSize * std::cos(alpha);
+                        }
+                    }
+
+//                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
+//                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
+                }
+            }
+
+            // Entities that leave mark
+            {
+                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D>();
+                for (auto &&entity: view) {
+                    const auto &texture = view.get<component::Texture>(entity);
+                    auto brush = component::Brush{};
+                    // TODO: This is messy distinction between texture path and textureID!
+                    brush.textureID = texture.filePath.c_str();
+                    brush.type = component::BrushType::CUSTOM_TEXTURE;
+                    brush.size = math::vec2{1, 1};
+
+                    const auto &pos = view.get<component::WorldP3D>(entity);
+                    splat(clientEntityFactory, brush, pos);
+                }
+            }
+
+            // Update Skid lines.
+            {
+                std::vector<component::WorldP3D> skidPosList{};
+                std::vector<common::uint8> skidOpacity{};
+                {
+                    auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::WorldP3D, component::Heading, component::Scale, component::CarConfig>();
+                    for (auto &&carEntity: carView) {
+
+                        const auto car = carView.get<component::Car>(carEntity);
+                        // NOTE: Technically I should use slippingRear, but this gives better effect
+                        if (car.slippingFront || true) {
+                            const auto &carConfig = carView.get<component::CarConfig>(carEntity);
+                            const auto &pos = carView.get<component::WorldP3D>(carEntity);
+                            const auto &heading = carView.get<component::Heading>(carEntity);
+                            const auto &scale = carView.get<component::Scale>(carEntity);
+
+                            // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
+                            // same logic is hard-coded when spawningCar server side.
+                            math::vec3 skidPosRL{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                                 static_cast<common::real32>(carConfig.wheelWidth +
+                                                                             carConfig.halfWidth / 2),
+                                    // NOTE: This z-value is unused.
+                                                 0.f};
+                            math::vec3 skidPosRR{static_cast<common::real32>(-carConfig.cgToRearAxle),
+                                                 static_cast<common::real32>(-carConfig.wheelWidth -
+                                                                             carConfig.halfWidth / 2),
+                                                 0.f};
+                            auto transform = math::createTransformation(pos, heading, scale);
+                            auto posRL = transform * skidPosRL;
+                            auto posRR = transform * skidPosRR;
+                            skidPosList.push_back(component::WorldP3D{posRL.x, posRL.y, posRL.z});
+                            skidPosList.push_back(component::WorldP3D{posRR.x, posRR.y, posRR.z});
+
+//                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
+//                                                                    255);
+                            // TODO: arbitrary number based on number of frames, think about better way of determining this
+                            skidOpacity.push_back(10);
+                        }
+                    }
+                }
+
+                {
+                    auto brush = component::Brush{};
+                    brush.type = component::BrushType::PLAIN_RECTANGLE;
+                    brush.size = math::vec2{0.5f, 0.5f};
+
+                    for (size_t i = 0; i < skidPosList.size(); ++i) {
+                        brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
+                        splat(clientEntityFactory, brush, skidPosList[i]);
+                    }
+                }
+            }
+
+            // Update Laps
+            {
+                auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, gameplay::CarLapInfo>();
+                for (auto &&carEntity: carLapView) {
+                    // TODO: This will render all player laps on top of each other. I should render the data in rows
+                    // instead. Something like:
+                    /**
+                     * Player Name: lap, lap time, best time
+                     *
+                     * Player 1: 4, 1:12, :1:50
+                     * Player 2: 5, 0:02, :1:50
+                     */
+                    const auto &carLap = carLapView.get<gameplay::CarLapInfo>(carEntity);
+
+                    const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
+                    updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
+                }
+            }
+        }
+
+        void
+        SceneManager::splat(entities::EntityFactory &entityFactory,
+                            component::Brush brush,
+                            const component::WorldP3D &worldPos) {
+            auto &entityManager = entityFactory.getEntityManager();
+
+            std::set<common::EntityID> tileEntities;
+
+            auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
+            tileEntities.insert(entityID);
+
+            auto lowerLeft = worldPos;
+            lowerLeft.x -= brush.size.x / 2.f;
+            lowerLeft.y -= brush.size.y / 2.f;
+            auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
+            tileEntities.insert(lowerLeftEntityID);
+
+            auto topRight = worldPos;
+            topRight.x += brush.size.x / 2.f;
+            topRight.y += brush.size.y / 2.f;
+
+            auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
+            tileEntities.insert(topRightEntityID);
+
+            auto topLeft = worldPos;
+            topLeft.x -= brush.size.x / 2.f;
+            topLeft.y += brush.size.y / 2.f;
+            auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
+            tileEntities.insert(topLeftEntityID);
+
+            auto lowerRight = worldPos;
+            lowerRight.x += brush.size.x / 2.f;
+            lowerRight.y -= brush.size.y / 2.f;
+            auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
+            tileEntities.insert(lowerRightEntityID);
+
+            for (auto &&tileEntity: tileEntities) {
+                updateCanvasTile(entityManager, tileEntity, brush, worldPos);
+            }
+        }
+
+        common::EntityID
+        SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
+                                            const component::WorldP3D &pos) {
+            auto x = math::findBin(pos.x, mCanvasTileSizeX);
+            auto y = math::findBin(pos.y, mCanvasTileSizeY);
+            auto xy = math::packInt64(x, y);
+            auto &entityRegistry = entityFactory.getEntityManager();
+
+            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
+            if (missing) {
+                auto tilePosX = math::binPos(x, mCanvasTileSizeX);
+                auto tilePosY = math::binPos(y, mCanvasTileSizeY);
+
+                auto worldPos = component::WorldP3D{tilePosX, tilePosY,
+                                                    mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
+                auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
+                                           static_cast<common::real32>(mCanvasTileSizeY)};
+
+                auto heading = component::Heading{0.f};
+                std::string emptyTextureID;
+
+                // TODO: Should this be a canvas type?
+                auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(worldPos,
+                                                                                                tileSize,
+                                                                                                heading,
+                                                                                                emptyTextureID);
+
+                auto &texture = entityRegistry.get<component::Texture>(entityID);
+
+                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
+                                                                 common::EP);
+                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
+                                                                  common::EP);
+
+                texture.image.width = widthInPixels;
+                texture.image.height = heightInPixels;
+
+                auto defaultColor = component::PixelRGBA{};
+                mTextureManager->fill(texture.image, defaultColor);
+                mTextureManager->loadFromImage(texture);
+
+                mCanvasTileLookup.emplace(xy, entityID);
+            }
+
+            auto entity = mCanvasTileLookup.at(xy);
+            assert(entity);
+            return entity;
+        }
+
+        void
+        SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
+                                       common::EntityID entityID,
+                                       const component::Brush &brush,
+                                       const component::WorldP3D &worldPos) {
+            auto &canvasTexture = entityManager.get<component::Texture>(entityID);
+            // TODO: why the hell from Shape and not Placement?
+            auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
+            auto pos = component::WorldP3D{canvasTilePos.x, canvasTilePos.y, canvasTilePos.z};
+
+            auto brushTexturePos = worldPos;
+            math::worldToTextureCoordinate(pos, mGameUnitToPixels, brushTexturePos);
+
+            component::Image image{};
+            switch (brush.type) {
+                case component::BrushType::PLAIN_RECTANGLE: {
+                    image.width = static_cast<uint16>(brush.size.x * mGameUnitToPixels);
+                    image.height = static_cast<uint16>(brush.size.y * mGameUnitToPixels);
+                    mTextureManager->fill(image, brush.color);
+                    break;
+                }
+                case component::BrushType::CUSTOM_TEXTURE: {
+                    // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
+                    // as long as down the line I can call sub texture update with the texture data only,
+                    // something along the lines of take the updated texture data and point to where the offsets point
+                    // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
+                    // at all what I intended
+                    image = mTextureManager->loadOrGetImage(brush.textureID);
+                    break;
+                }
+                default: {
+                    assert(false);
+                    return;
+                }
+            }
+
+            assert(image.width);
+            assert(image.height);
+
+            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
+            // in game units at this point.
+            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (image.width / 2.f));
+            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (image.height / 2.f));
+
+            mTextureManager->blendAndUpdateTexture(canvasTexture,
+                                                   textureOffsetX,
+                                                   textureOffsetY,
+                                                   image);
+        }
+
+        void
+        SceneManager::updateParticles(entities::EntityFactory &entityFactory,
+                                      common::real64 tickTime) {
         }
 
         const SceneManager::RaceInfoEntities &

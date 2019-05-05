@@ -149,7 +149,7 @@ namespace oni {
                     auto &manager = mEntityFactory->getEntityManager();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
                         const auto &pos = manager.get<component::WorldP3D>(carEntity);
-                        tickPositions.push_back({pos.value.x, pos.value.y});
+                        tickPositions.push_back({pos.x, pos.y});
                     }
                 }
 

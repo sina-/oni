@@ -93,9 +93,9 @@ namespace oni {
                     common::real32 fudge = 0.2f;
 
                     auto rocketPos = component::WorldP3D{};
-                    rocketPos.value.x = pos.value.x + (offset + projectileOffset + fudge) * cos(heading.value);
-                    rocketPos.value.y = pos.value.y + (offset + projectileOffset + fudge) * sin(heading.value);
-                    rocketPos.value.z = pos.value.z;
+                    rocketPos.x = pos.x + (offset + projectileOffset + fudge) * cos(heading.value);
+                    rocketPos.y = pos.y + (offset + projectileOffset + fudge) * sin(heading.value);
+                    rocketPos.z = pos.z;
 
                     std::string textureID = "resources/images/bullet/2.png";
 

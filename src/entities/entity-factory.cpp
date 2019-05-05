@@ -8,6 +8,7 @@
 #include <oni-core/component/gameplay.h>
 #include <oni-core/gameplay/lap-tracker.h>
 #include <oni-core/level/chunk.h>
+#include <oni-core/math/transformation.h>
 
 namespace oni {
     namespace entities {
@@ -169,12 +170,12 @@ namespace oni {
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &car = createComponent<component::Car>(entityID);
-            car.position.x = worldPos.value.x;
-            car.position.y = worldPos.value.y;
+            car.position.x = worldPos.x;
+            car.position.y = worldPos.y;
             car.applyConfiguration(carConfig);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -226,7 +227,7 @@ namespace oni {
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.value.z);
+            shape.setZ(pos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -254,7 +255,7 @@ namespace oni {
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -286,7 +287,7 @@ namespace oni {
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.value.z);
+            shape.setZ(pos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -321,9 +322,9 @@ namespace oni {
             auto *body = createPhysicalBody(worldPos, size, heading.value, properties);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
-            shape.moveToWorldCoordinates(worldPos);
+            math::localToWorldTranslation(worldPos, shape);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
@@ -341,9 +342,9 @@ namespace oni {
                                                                           const component::Heading &heading,
                                                                           const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
-            shape.moveToWorldCoordinates(worldPos);
+            math::localToWorldTranslation(worldPos, shape);
 
             auto &appearance = createComponent<component::Appearance>(entityID);
             appearance.color = color;
@@ -360,9 +361,9 @@ namespace oni {
                                                                           const component::Heading &heading,
                                                                           const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
-            shape.moveToWorldCoordinates(worldPos);
+            math::localToWorldTranslation(worldPos, shape);
 
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
@@ -502,7 +503,7 @@ namespace oni {
                     true);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.value.z);
+            shape.setZ(pos.z);
             shape.setSizeFromOrigin(size);
             shape.centerAlign();
 
@@ -539,8 +540,8 @@ namespace oni {
                                                                               const component::PixelRGBA &color) {
 
             auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos.value.x = worldPos.value.x + mRand->nextReal64Normal(0.f, stddev);
-            pos.value.y = worldPos.value.y + mRand->nextReal64Normal(0.f, stddev);
+            pos.x = worldPos.x + mRand->nextReal64Normal(0.f, stddev);
+            pos.y = worldPos.y + mRand->nextReal64Normal(0.f, stddev);
 
             auto &splat = createComponent<component::AnimatedSplat>(entityID);
             splat.brush.color = color;
@@ -578,9 +579,9 @@ namespace oni {
                                                                         const component::Heading &heading,
                                                                         const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
-            shape.moveToWorldCoordinates(worldPos);
+            math::localToWorldTranslation(worldPos, shape);
 
             auto &pos = createComponent<component::WorldP3D>(entityID);
             pos = worldPos;
@@ -603,9 +604,9 @@ namespace oni {
                                                                         const component::Heading &heading,
                                                                         const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(worldPos.value.z);
+            shape.setZ(worldPos.z);
             shape.setSizeFromOrigin(size);
-            shape.moveToWorldCoordinates(worldPos);
+            math::localToWorldTranslation(worldPos, shape);
 
             auto &appearance = createComponent<component::Appearance>(entityID);
             appearance.color = color;

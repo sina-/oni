@@ -1,9 +1,9 @@
 #pragma once
 
 #include <oni-core/common/typedefs.h>
+#include <oni-core/component/geometry.h>
 
 namespace oni {
-
     namespace entities {
         class EntityManager;
     }
@@ -15,11 +15,7 @@ namespace oni {
     }
 
     namespace component {
-        struct Shape;
         struct TransformParent;
-        struct WorldP3D;
-        struct Heading;
-        struct Scale;
     }
 
     namespace math {

@@ -29,7 +29,7 @@ namespace oni {
 
     namespace component {
         struct Texture;
-        struct WorldP3D;
+        union WorldP3D;
     }
 
     namespace entities {

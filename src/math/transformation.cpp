@@ -2,22 +2,21 @@
 
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/component/hierarchy.h>
-#include <oni-core/component/geometry.h>
 
 namespace oni {
     namespace math {
         void
         worldToLocalTranslation(const component::WorldP3D &reference,
                                 component::WorldP3D &operand) {
-            operand.value.x -= reference.value.x;
-            operand.value.y -= reference.value.y;
+            operand.x -= reference.x;
+            operand.y -= reference.y;
         }
 
         void
         localToWorldTranslation(const component::WorldP3D &reference,
                                 vec3 &operand) {
-            operand.x += reference.value.x;
-            operand.y += reference.value.y;
+            operand.x += reference.x;
+            operand.y += reference.y;
         }
 
         void
@@ -32,8 +31,8 @@ namespace oni {
         void
         localToTextureTranslation(common::real32 ratio,
                                   component::WorldP3D &operand) {
-            operand.value.x *= ratio;
-            operand.value.y *= ratio;
+            operand.x *= ratio;
+            operand.y *= ratio;
         }
 
         void

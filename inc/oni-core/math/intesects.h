@@ -2,12 +2,13 @@
 
 #include <oni-core/common/typedefs.h>
 #include <oni-core/math/vec3.h>
+#include <oni-core/component/geometry.h>
 
 namespace oni {
     namespace component {
         struct Shape;
-        struct WorldP3D;
-        struct Point;
+        union WorldP3D;
+        union Point;
     }
 
     namespace math {

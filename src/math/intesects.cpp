@@ -1,6 +1,5 @@
 #include <oni-core/math/intesects.h>
 
-#include <oni-core/component/geometry.h>
 #include <oni-core/common/typedefs-graphics.h>
 
 namespace oni {
@@ -31,8 +30,8 @@ namespace oni {
             auto firstCenterY = (first.vertexA.y + first.vertexC.y) / 2.0f;
             auto firstSize = first.getSize();
 
-            return (std::abs(firstCenterX - second.value.x) * 2 < (firstSize.x)) &&
-                   (std::abs(firstCenterY - second.value.y) * 2 < (firstSize.y));
+            return (std::abs(firstCenterX - second.x) * 2 < (firstSize.x)) &&
+                   (std::abs(firstCenterY - second.y) * 2 < (firstSize.y));
         }
 
         bool
@@ -55,8 +54,8 @@ namespace oni {
                    common::real32 y,
                    common::real32 lengthX,
                    common::real32 lengthY) {
-            return (std::abs(first.value.x - x) * 2 < lengthX) &&
-                   (std::abs(first.value.y - y) * 2 < lengthY);
+            return (std::abs(first.x - x) * 2 < lengthX) &&
+                   (std::abs(first.y - y) * 2 < lengthY);
         }
 
         bool
@@ -65,8 +64,8 @@ namespace oni {
                    common::real32 y,
                    common::real32 lengthX,
                    common::real32 lengthY) {
-            return (std::abs(first.value.x - x) * 2 < lengthX) &&
-                   (std::abs(first.value.y - y) * 2 < lengthY);
+            return (std::abs(first.x - x) * 2 < lengthX) &&
+                   (std::abs(first.y - y) * 2 < lengthY);
         }
     }
 }

@@ -194,13 +194,13 @@ namespace oni {
 
                     auto velocity = car.velocityLocal.len();
                     auto distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
-                    if (std::abs(carPos.value.x - car.position.x) > common::EP ||
-                        std::abs(carPos.value.y - car.position.y) > common::EP ||
-                        std::abs(carPos.value.z - car.heading) > common::EP ||
+                    if (std::abs(carPos.x - car.position.x) > common::EP ||
+                        std::abs(carPos.y - car.position.y) > common::EP ||
+                        std::abs(carPos.z - car.heading) > common::EP ||
                         std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP
                             ) {
-                        carPos.value.x = car.position.x;
-                        carPos.value.y = car.position.y;
+                        carPos.x = car.position.x;
+                        carPos.y = car.position.y;
                         heading.value = static_cast<common::real32>(car.heading);
                         car.distanceFromCamera = distanceFromCamera;
 
@@ -290,8 +290,8 @@ namespace oni {
                     auto &heading = view.get<component::Heading>(entity);
                     auto &scale = view.get<component::Scale>(entity);
 
-                    if (std::abs(pos.value.x - position.x) > common::EP ||
-                        std::abs(pos.value.y - position.y) > common::EP ||
+                    if (std::abs(pos.x - position.x) > common::EP ||
+                        std::abs(pos.y - position.y) > common::EP ||
                         std::abs(heading.value - props.body->GetAngle()) > common::EP) {
                         if (manager.has<component::Trail>(entity)) {
                             auto &trail = manager.get<component::Trail>(entity);
@@ -300,8 +300,8 @@ namespace oni {
                             assert(trail.previousPos.size() == trail.velocity.size());
                         }
 
-                        pos.value.x = position.x;
-                        pos.value.y = position.y;
+                        pos.x = position.x;
+                        pos.y = position.y;
                         heading.value = props.body->GetAngle();
                         updateTransforms(manager, entity, pos, heading, scale);
                         entitiesToBeUpdated.push_back(entity);
@@ -378,9 +378,9 @@ namespace oni {
                 // TODO: Proper Z level!
                 common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 auto worldPos = component::WorldP3D{};
-                worldPos.value.x = props.body->GetPosition().x;
-                worldPos.value.y = props.body->GetPosition().y;
-                worldPos.value.z = particleZ;
+                worldPos.x = props.body->GetPosition().x;
+                worldPos.y = props.body->GetPosition().y;
+                worldPos.z = particleZ;
 
                 // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
                 // sound effects, etc.

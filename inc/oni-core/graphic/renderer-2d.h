@@ -19,7 +19,7 @@ namespace oni {
 
         class Shape;
 
-        class WorldP3D;
+        union WorldP3D;
 
         class Heading;
     }

@@ -452,9 +452,9 @@ namespace oni {
 
             level::ChunkIndex
             TileWorld::groundChunkPosToIndex(const component::WorldP2D &position) const {
-                auto x = floor(position.value.x / mChunkSizeX);
+                auto x = floor(position.x / mChunkSizeX);
                 auto xIndex = static_cast<common::int64>(x);
-                auto y = floor(position.value.y / mChunkSizeY);
+                auto y = floor(position.y / mChunkSizeY);
                 auto yIndex = static_cast<common::int64>(y);
                 return level::ChunkIndex{xIndex, yIndex};
             }
@@ -466,8 +466,8 @@ namespace oni {
                 auto chunkPos = groundChunkIndexToPos(chunkIndex);
                 auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndex.x * mTileSizeX),
                                           static_cast<common::real32>(roadTileIndex.y * mTileSizeY)};
-                auto pos = component::WorldP3D{chunkPos.value.x + tilePos.x, chunkPos.value.y + tilePos.y,
-                                               chunkPos.value.z};
+                auto pos = component::WorldP3D{chunkPos.x + tilePos.x, chunkPos.y + tilePos.y,
+                                               chunkPos.z};
                 return pos;
             }
 
@@ -502,9 +502,9 @@ namespace oni {
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
 
-                            wallPositionInWorld.value.x = currentTileX + mTileSizeX - wallWidth;
-                            wallPositionInWorld.value.y = currentTileY + wallWidth;
-                            wallPositionInWorld.value.z = mWallZ;
+                            wallPositionInWorld.x = currentTileX + mTileSizeX - wallWidth;
+                            wallPositionInWorld.y = currentTileY + wallWidth;
+                            wallPositionInWorld.z = mWallZ;
                             break;
                         }
                         case level::WallTilePosition::TOP: {
@@ -512,9 +512,9 @@ namespace oni {
                             wallSize.y = wallWidth;
                             wallTexturePath = "resources/images/wall/1/horizontal.png";
 
-                            wallPositionInWorld.value.x = currentTileX + wallWidth;
-                            wallPositionInWorld.value.y = currentTileY + mTileSizeY - wallWidth;
-                            wallPositionInWorld.value.z = mWallZ;
+                            wallPositionInWorld.x = currentTileX + wallWidth;
+                            wallPositionInWorld.y = currentTileY + mTileSizeY - wallWidth;
+                            wallPositionInWorld.z = mWallZ;
                             break;
                         }
                         case level::WallTilePosition::LEFT: {
@@ -522,9 +522,9 @@ namespace oni {
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
 
-                            wallPositionInWorld.value.x = currentTileX;
-                            wallPositionInWorld.value.y = currentTileY + wallWidth;
-                            wallPositionInWorld.value.z = mWallZ;
+                            wallPositionInWorld.x = currentTileX;
+                            wallPositionInWorld.y = currentTileY + wallWidth;
+                            wallPositionInWorld.z = mWallZ;
                             break;
                         }
                         case level::WallTilePosition::BOTTOM: {
@@ -532,9 +532,9 @@ namespace oni {
                             wallSize.y = wallWidth;
                             wallTexturePath = "resources/images/wall/1/horizontal.png";
 
-                            wallPositionInWorld.value.x = currentTileX + wallWidth;
-                            wallPositionInWorld.value.y = currentTileY;
-                            wallPositionInWorld.value.z = mWallZ;
+                            wallPositionInWorld.x = currentTileX + wallWidth;
+                            wallPositionInWorld.y = currentTileY;
+                            wallPositionInWorld.z = mWallZ;
                             break;
                         }
                     }

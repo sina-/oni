@@ -47,7 +47,7 @@ namespace oni {
         template<>
         void
         EntityFactory::_apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                         component::WorldP3D&)> &func) {
+                                                                                         component::WorldP3D &)> &func) {
             auto group = mRegistryManager->createView<component::SoundID, component::WorldP3D, game::EventType>();
             for (auto &&entity: group) {
                 if (auto event = group.get<game::EventType>(entity);
@@ -458,6 +458,10 @@ namespace oni {
 
             auto &s = createComponent<component::Scale>(entityID);
 
+            auto &size = createComponent<component::Size>(entityID);
+            size.x = halfSize * 2;
+            size.y = halfSize * 2;
+
             auto &texture = createComponent<component::Texture>(entityID);
             texture.filePath = textureID;
             texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
@@ -546,8 +550,10 @@ namespace oni {
             auto &splat = createComponent<component::AnimatedSplat>(entityID);
             splat.brush.color = color;
             splat.brush.type = component::BrushType::PLAIN_RECTANGLE;
-            splat.brush.size.x = size;
-            splat.brush.size.y = size;
+
+            auto &markSize = createComponent<component::Size>(entityID);
+            markSize.x = size;
+            markSize.y = size;
 
             splat.origin = worldPos;
 

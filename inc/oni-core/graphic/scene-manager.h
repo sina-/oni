@@ -73,7 +73,8 @@ namespace oni {
             void
             splat(entities::EntityFactory &entityFactory,
                   component::Brush brush,
-                  const component::WorldP3D &worldPos);
+                  const component::WorldP3D &worldPos,
+                  const component::Size &size);
 
             void
             lookAt(common::real32 x,
@@ -211,10 +212,11 @@ namespace oni {
                                   const component::WorldP3D &pos);
 
             void
-            updateCanvasTile(entities::EntityManager &,
-                             common::EntityID,
-                             const component::Brush &,
-                             const component::WorldP3D &worldPos);
+            updateCanvasTile(entities::EntityManager &entityManager,
+                             common::EntityID entityID,
+                             const component::Brush &brush,
+                             const component::WorldP3D &worldPos,
+                             const component::Size &size);
 
         private:
             std::unique_ptr<Shader> mColorShader{};

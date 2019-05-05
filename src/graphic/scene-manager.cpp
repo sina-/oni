@@ -442,13 +442,14 @@ namespace oni {
             policy.safe = false;
             policy.track = false;
 
-            auto view = entityFactory.getEntityManager().createView<component::AnimatedSplat, component::WorldP3D>();
+            auto view = entityFactory.getEntityManager().createView<component::AnimatedSplat, component::WorldP3D, component::Size>();
             auto now = std::chrono::steady_clock::now().time_since_epoch().count();
             for (auto &&entity: view) {
                 const auto &animatedSplat = view.get<component::AnimatedSplat>(entity);
                 const auto &pos = view.get<component::WorldP3D>(entity);
+                const auto &size = view.get<component::Size>(entity);
                 if (animatedSplat.diesAt >= now) {
-                    splat(entityFactory, animatedSplat.brush, pos);
+                    splat(entityFactory, animatedSplat.brush, pos, size);
                     entityFactory.removeEntity(entity, policy);
                 } else {
                     // TODO: Render a the particle using particle shader, not sure if I should do the physics calculation
@@ -739,17 +740,17 @@ namespace oni {
 
             // Entities that leave mark
             {
-                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D>();
+                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D, component::Size>();
                 for (auto &&entity: view) {
                     const auto &texture = view.get<component::Texture>(entity);
+                    const auto &size = view.get<component::Size>(entity);
                     auto brush = component::Brush{};
                     // TODO: This is messy distinction between texture path and textureID!
                     brush.textureID = texture.filePath.c_str();
                     brush.type = component::BrushType::CUSTOM_TEXTURE;
-                    brush.size = math::vec2{1, 1};
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
-                    splat(clientEntityFactory, brush, pos);
+                    splat(clientEntityFactory, brush, pos, size);
                 }
             }
 
@@ -797,11 +798,11 @@ namespace oni {
                 {
                     auto brush = component::Brush{};
                     brush.type = component::BrushType::PLAIN_RECTANGLE;
-                    brush.size = math::vec2{0.5f, 0.5f};
+                    auto size = component::Size{0.5f, 0.5f};
 
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
                         brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientEntityFactory, brush, skidPosList[i]);
+                        splat(clientEntityFactory, brush, skidPosList[i], size);
                     }
                 }
             }
@@ -829,7 +830,8 @@ namespace oni {
         void
         SceneManager::splat(entities::EntityFactory &entityFactory,
                             component::Brush brush,
-                            const component::WorldP3D &worldPos) {
+                            const component::WorldP3D &worldPos,
+                            const component::Size &size) {
             auto &entityManager = entityFactory.getEntityManager();
 
             std::set<common::EntityID> tileEntities;
@@ -838,32 +840,32 @@ namespace oni {
             tileEntities.insert(entityID);
 
             auto lowerLeft = worldPos;
-            lowerLeft.x -= brush.size.x / 2.f;
-            lowerLeft.y -= brush.size.y / 2.f;
+            lowerLeft.x -= size.x / 2.f;
+            lowerLeft.y -= size.y / 2.f;
             auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
             tileEntities.insert(lowerLeftEntityID);
 
             auto topRight = worldPos;
-            topRight.x += brush.size.x / 2.f;
-            topRight.y += brush.size.y / 2.f;
+            topRight.x += size.x / 2.f;
+            topRight.y += size.y / 2.f;
 
             auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
             tileEntities.insert(topRightEntityID);
 
             auto topLeft = worldPos;
-            topLeft.x -= brush.size.x / 2.f;
-            topLeft.y += brush.size.y / 2.f;
+            topLeft.x -= size.x / 2.f;
+            topLeft.y += size.y / 2.f;
             auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
             tileEntities.insert(topLeftEntityID);
 
             auto lowerRight = worldPos;
-            lowerRight.x += brush.size.x / 2.f;
-            lowerRight.y -= brush.size.y / 2.f;
+            lowerRight.x += size.x / 2.f;
+            lowerRight.y -= size.y / 2.f;
             auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
             tileEntities.insert(lowerRightEntityID);
 
             for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(entityManager, tileEntity, brush, worldPos);
+                updateCanvasTile(entityManager, tileEntity, brush, worldPos, size);
             }
         }
 
@@ -920,7 +922,8 @@ namespace oni {
         SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
                                        common::EntityID entityID,
                                        const component::Brush &brush,
-                                       const component::WorldP3D &worldPos) {
+                                       const component::WorldP3D &worldPos,
+                                       const component::Size &size) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
             // TODO: why the hell from Shape and not Placement?
             auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
@@ -932,8 +935,8 @@ namespace oni {
             component::Image image{};
             switch (brush.type) {
                 case component::BrushType::PLAIN_RECTANGLE: {
-                    image.width = static_cast<uint16>(brush.size.x * mGameUnitToPixels);
-                    image.height = static_cast<uint16>(brush.size.y * mGameUnitToPixels);
+                    image.width = static_cast<uint16>(size.x * mGameUnitToPixels);
+                    image.height = static_cast<uint16>(size.y * mGameUnitToPixels);
                     mTextureManager->fill(image, brush.color);
                     break;
                 }

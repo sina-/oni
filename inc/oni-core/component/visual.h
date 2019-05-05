@@ -95,7 +95,6 @@ namespace oni {
         // just a data structure used by systems and shouldn't be here.
         struct Brush {
             BrushType type{BrushType::UNKNOWN};
-            math::vec2 size{};
             union {
                 PixelRGBA color{};
                 const char *textureID;

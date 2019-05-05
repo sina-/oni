@@ -7,11 +7,6 @@
 #include <oni-core/math/vec4.h>
 #include <oni-core/math/mat4.h>
 
-#define DEFINE_ACCESSORS_3D auto &x() { return value.x; } auto &y() { return value.y; } auto &z() { return value.z; } \
-                            const auto&x() const{ return value.x;} const auto&y() const{ return value.y;} const auto&z() const{ return value.y;}
-#define DEFINE_ACCESSORS_2D auto &x() { return value.x; } auto &y() { return value.y; } \
-                            const auto&x() const{ return value.x;} const auto&y() const{ return value.y;}
-
 namespace oni {
     namespace component {
         union Point {
@@ -55,6 +50,14 @@ namespace oni {
 
         struct Heading {
             common::real32 value{0.f};
+        };
+
+        union Size {
+            math::vec2 value{};
+            struct {
+                common::real32 x;
+                common::real32 y;
+            };
         };
 
         union Scale {

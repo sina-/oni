@@ -14,11 +14,6 @@
 
 namespace oni {
     namespace component {
-        // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
-        struct Appearance {
-            math::vec4 color{0.f, 0.f, 0.f, 0.f};
-        };
-
         struct Trail {
             std::vector<component::WorldP3D> previousPos{};
             std::vector<common::real32> velocity{};
@@ -78,6 +73,20 @@ namespace oni {
             common::uint8 green{0};
             common::uint8 alpha{0};
         };
+
+        // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
+        struct Appearance {
+            math::vec4 color{0.f, 0.f, 0.f, 0.f};
+
+            PixelRGBA
+            toRGBA() {
+                return PixelRGBA{static_cast<common::uint8>(color.x * 255),
+                                 static_cast<common::uint8>(color.y * 255),
+                                 static_cast<common::uint8>(color.z * 255),
+                                 static_cast<common::uint8>(color.w * 255)};
+            }
+        };
+
 
         enum class BrushType : common::uint8 {
             UNKNOWN,

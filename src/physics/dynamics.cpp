@@ -434,6 +434,11 @@ namespace oni {
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
                             common::real64 tickTime,
                             const entities::EntityOperationPolicy &policy) {
+            // TODO: SO this is annoying. Particles are the only entities with age at the moment and they have on death
+            // effects that is handled by graphics system so I had to move their life-time management to scene-manager
+            // but now I like to add Age to rockets so they die after a while or their fuze runs out, which ever, but
+            // that logic needs to be handled here :/ I have to come up with better system to handle this inter-system
+            // communication. Maybe I should look into listners. Or come up with some sort of event bus.
         }
 
         void

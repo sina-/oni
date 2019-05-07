@@ -969,13 +969,16 @@ namespace oni {
                         pos.x += std::cos(heading.value) * velocity.currentVelocity;
                         pos.y += std::sin(heading.value) * velocity.currentVelocity;
 
-                        // TODO: Use the view
-                        auto &texture = entityManager.get<component::Texture>(entity);
-
                         auto size = component::Size{tess.halfSize, tess.halfSize};
                         auto brush = component::Brush{};
-                        brush.type = component::BrushType::TEXTURE;
-                        brush.textureID = texture.filePath.c_str();
+                        if (entityManager.has<component::Appearance>(entity)) {
+                            brush.color = entityManager.get<component::Appearance>(entity).toRGBA();
+                            brush.type = component::BrushType::SPRITE;
+                        } else {
+                            auto &texture = entityManager.get<component::Texture>(entity);
+                            brush.textureID = texture.filePath.c_str();
+                            brush.type = component::BrushType::TEXTURE;
+                        }
                         splat(entityFactory, brush, pos, size);
                     }
                     entityFactory.removeEntity(entity, policy);

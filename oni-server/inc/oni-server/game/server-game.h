@@ -70,6 +70,9 @@ namespace oni {
                 _poll() override;
 
                 void
+                _finish() override;
+
+                void
                 showFPS(oni::common::int16 fps) override;
 
                 void
@@ -79,13 +82,13 @@ namespace oni {
                 showPPS(oni::common::int16 pps) override;
 
                 void
-                showRET(oni::common::int16 ret) override;
+                showRT(oni::common::int16) override;
 
                 void
-                showPET(oni::common::int16 pet) override;
+                showPT(oni::common::int16) override;
 
                 void
-                showSET(oni::common::int16 set) override;
+                showST(oni::common::int16) override;
 
             private:
                 void

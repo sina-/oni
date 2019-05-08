@@ -162,8 +162,6 @@ namespace oni {
                 entityFactory.apply<game::EventType::ROCKET_LAUNCH>(func);
             }
 
-            entityFactory.resetEvents();
-
             auto data = entities::serialize(collisionPackets);
             auto type = PacketType::EVENT_COLLISION;
 

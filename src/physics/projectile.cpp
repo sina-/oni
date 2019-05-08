@@ -105,6 +105,20 @@ namespace oni {
                                                                                                         textureID,
                                                                                                         velocity);
                     entityFactory.tagForNetworkSync(rocketEntity);
+/*
+                    entityFactory.createEvent(ROCKET_LAUNCH, component::WorldP3D);
+                    entityFactory.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);
+
+                    entityFactory.createEvent_RocketLaunch(component::WorldP3D);
+                    entityFactory.createEvent_Collision(ENTITY_A, ENTITY_B, component::WorldP3D);
+
+                    for(event: entityFactory.getEvent_RocketLaunch()){
+                        server.send(packet_RocketLaunch);
+                    }
+
+                    for(event: entityFactory.getEvent_Collision()){
+                        server.send(packet_Collision);
+                    }*/
 
                     entityFactory.createEvent<game::EventType::ROCKET_LAUNCH>(rocketPos);
                 }

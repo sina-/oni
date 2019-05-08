@@ -167,6 +167,11 @@ namespace oni {
             ServerGame::_display() {}
 
             void
+            ServerGame::_finish() {
+                mEntityFactory->resetEvents();
+            }
+
+            void
             ServerGame::showFPS(common::int16 fps) {}
 
             void
@@ -180,13 +185,13 @@ namespace oni {
             }
 
             void
-            ServerGame::showPET(common::int16 pet) {}
+            ServerGame::showPT(common::int16) {}
 
             void
-            ServerGame::showSET(common::int16 set) {}
+            ServerGame::showST(common::int16) {}
 
             void
-            ServerGame::showRET(common::int16 ret) {}
+            ServerGame::showRT(common::int16) {}
 
             common::EntityID
             ServerGame::spawnRaceCar() {

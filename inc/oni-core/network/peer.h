@@ -46,6 +46,9 @@ namespace oni {
             poll();
 
             void
+            flush();
+
+            void
             registerPacketHandler(PacketType type,
                                   std::function<void(const common::PeerID &,
                                                      const std::string &)> &&handler);
@@ -80,6 +83,10 @@ namespace oni {
             void
             broadcast(PacketType type,
                       std::string &data);
+
+            void
+            queueForBroadcast(PacketType type,
+                              std::string &data);
 
             virtual void
             postConnectHook(const ENetEvent *event) = 0;

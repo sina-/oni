@@ -69,7 +69,7 @@ namespace oni {
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = entities::deserialize<DataPacket>(data, size);
+                    auto packet = entities::deserialize<Packet_Data>(data, size);
                     std::cout << packet.data << std::endl;
                     break;
                 }
@@ -78,7 +78,7 @@ namespace oni {
                 case (PacketType::REGISTRY_ONLY_COMPONENT_UPDATE):
                 case (PacketType::REGISTRY_ADD_NEW_ENTITIES):
                 case (PacketType::REGISTRY_DESTROYED_ENTITIES):
-                case (PacketType::EVENT_ONE_SHOT_SOUND_EFFECT):
+                case (PacketType::EVENT_SOUND_PLAY):
                 case (PacketType::EVENT_ROCKET_LAUNCH):
                 case (PacketType::EVENT_COLLISION): {
                     auto dataString = std::string(reinterpret_cast<char *>(data), size);
@@ -95,8 +95,8 @@ namespace oni {
         void
         Client::sendMessage(std::string &&message) {
             auto type = PacketType::MESSAGE;
-            auto messagePacket = DataPacket{std::move(message)};
-            auto data = entities::serialize<DataPacket>(messagePacket);
+            auto messagePacket = Packet_Data{std::move(message)};
+            auto data = entities::serialize<Packet_Data>(messagePacket);
 
             send(type, data, mEnetServer);
         }

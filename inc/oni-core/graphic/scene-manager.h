@@ -42,6 +42,8 @@ namespace oni {
 
         class DebugDrawBox2D;
 
+        struct Brush;
+
         class SceneManager {
         public:
             SceneManager(const graphic::ScreenBounds &,
@@ -72,9 +74,9 @@ namespace oni {
 
             void
             splat(entities::EntityFactory &entityFactory,
-                  component::Brush brush,
                   const component::WorldP3D &worldPos,
-                  const component::Size &size);
+                  const component::Size &size,
+                  graphic::Brush brush);
 
             void
             lookAt(common::real32 x,
@@ -199,10 +201,6 @@ namespace oni {
                        const std::string &text);
 
             void
-            updateParticles(entities::EntityFactory &entityFactory,
-                            common::real64 tickTime);
-
-            void
             updateRaceInfo(entities::EntityManager &,
                            const gameplay::CarLapInfo&carLap,
                            const RaceInfoEntities &carLapTextEntities);
@@ -214,7 +212,7 @@ namespace oni {
             void
             updateCanvasTile(entities::EntityManager &entityManager,
                              common::EntityID entityID,
-                             const component::Brush &brush,
+                             const graphic::Brush &brush,
                              const component::WorldP3D &worldPos,
                              const component::Size &size);
 

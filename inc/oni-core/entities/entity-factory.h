@@ -7,7 +7,6 @@
 #include <oni-core/common/typedefs-graphics.h>
 #include <oni-core/entities/entity.h>
 #include <oni-core/entities/entity-manager.h>
-#include <oni-core/game/entity-event.h>
 #include <oni-core/component/audio.h>
 
 class b2World;
@@ -58,28 +57,9 @@ namespace oni {
                 return entityID;
             }
 
-            template<game::EventType eventType, class ...Args>
-            common::EntityID
-            createEvent(const Args &... args) {
-                common::EntityID entityID = createEntity();
-                auto &type = createComponent<game::EventType>(entityID);
-                type = eventType;
-                _createEvent<eventType>(entityID, args...);
-                return entityID;
-            }
-
-            template<game::EventType eventType, class Func>
-            void
-            apply(Func &func) {
-                _apply<eventType>(func);
-            }
-
             void
             removeEntity(common::EntityID,
                          const entities::EntityOperationPolicy &);
-
-            void
-            resetEvents();
 
             void
             attach(common::EntityID parent,
@@ -104,29 +84,6 @@ namespace oni {
             void
             _createEntity(common::EntityID,
                           const Args &...) = delete;
-
-            template<game::EventType, class ...Args>
-            void
-            _createEvent(common::EntityID,
-                         const Args &...) = delete;
-
-            template<game::EventType eventType, class Func>
-            void
-            _apply(Func &func) = delete;
-
-            template<>
-            void
-            _apply<game::EventType::COLLISION>(std::function<void(game::CollidingEntity &,
-                                                                  component::WorldP3D &)> &);
-
-            template<>
-            void
-            _apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                              component::WorldP3D &)> &);
-
-            template<>
-            void
-            _apply<game::EventType::ROCKET_LAUNCH>(std::function<void(component::WorldP3D &)> &);
 
             void
             _removeEntity(common::EntityID,
@@ -257,25 +214,6 @@ namespace oni {
                                                              const math::vec2 &size,
                                                              const component::Heading &heading,
                                                              const math::vec4 &color);
-
-        private:
-            template<>
-            void
-            _createEvent<game::EventType::COLLISION>(common::EntityID,
-                                                     const entities::EntityType &,
-                                                     const entities::EntityType &,
-                                                     const component::WorldP3D &worldPos);
-
-            template<>
-            void
-            _createEvent<game::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID,
-                                                                 const component::SoundID &,
-                                                                 const component::WorldP2D &worldPos);
-
-            template<>
-            void
-            _createEvent<game::EventType::ROCKET_LAUNCH>(common::EntityID,
-                                                         const component::WorldP3D &worldPos);
 
         private:
             template<>

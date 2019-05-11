@@ -49,7 +49,7 @@ namespace oni {
                     break;
                 }
                 case (PacketType::MESSAGE): {
-                    auto packet = entities::deserialize<DataPacket>(data, size);
+                    auto packet = entities::deserialize<Packet_Data>(data, size);
                     break;
                 }
                 case (PacketType::SETUP_SESSION): {
@@ -115,7 +115,7 @@ namespace oni {
         void
         Server::sendCarEntityID(common::EntityID entityID,
                                 const common::PeerID &peerID) {
-            auto packet = EntityPacket{entityID};
+            auto packet = Packet_EntityID{entityID};
             auto data = entities::serialize(packet);
             auto type = PacketType::CAR_ENTITY_ID;
 
@@ -123,59 +123,27 @@ namespace oni {
         }
 
         void
-        Server::broadcastEvents(entities::EntityFactory &entityFactory) {
-            std::vector<CollisionEventPacket> collisionPackets;
-            {
-                std::function<void(game::CollidingEntity &,
-                                   component::WorldP3D &)> func = [&collisionPackets](
-                        game::CollidingEntity &collidingEntity,
-                        component::WorldP3D &collisionPos) {
-                    CollisionEventPacket packet;
-                    packet.collidingEntity = collidingEntity;
-                    packet.pos = collisionPos;
-                    collisionPackets.emplace_back(packet);
-                };
-                entityFactory.apply<game::EventType::COLLISION>(func);
-            }
+        Server::handleEvent_Collision(const oni::game::Event_Collision &event) {
+            auto data = oni::entities::serialize(event);
+            auto packetType = oni::network::PacketType::EVENT_COLLISION;
 
-            std::vector<SoundPlayEventPacket> soundPlayPackets;
-            {
-                std::function<void(component::SoundID &,
-                                   component::WorldP3D &)> func = [&soundPlayPackets](
-                        component::SoundID &soundEffectID,
-                        component::WorldP3D &soundPos) {
-                    SoundPlayEventPacket packet;
-                    packet.soundID = soundEffectID;
-                    packet.pos = soundPos;
-                    soundPlayPackets.emplace_back(packet);
-                };
-                entityFactory.apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(func);
-            }
+            queueForBroadcast(packetType, data);
+        }
 
-            std::vector<RocketLaunchEventPacket> rocketLaunchPackets;
-            {
-                std::function<void(component::WorldP3D &pos)> func = [&rocketLaunchPackets](component::WorldP3D &pos) {
-                    RocketLaunchEventPacket packet;
-                    packet.pos = pos;
-                    rocketLaunchPackets.emplace_back(packet);
-                };
-                entityFactory.apply<game::EventType::ROCKET_LAUNCH>(func);
-            }
+        void
+        Server::handleEvent_SoundPlay(const oni::game::Event_SoundPlay &event) {
+            auto data = oni::entities::serialize(event);
+            auto packetType = oni::network::PacketType::EVENT_SOUND_PLAY;
 
-            auto data = entities::serialize(collisionPackets);
-            auto type = PacketType::EVENT_COLLISION;
+            queueForBroadcast(packetType, data);
+        }
 
-            broadcast(type, data);
+        void
+        Server::handleEvent_RocketLaunch(const oni::game::Event_RocketLaunch &event) {
+            auto data = oni::entities::serialize(event);
+            auto packetType = oni::network::PacketType::EVENT_ROCKET_LAUNCH;
 
-            data = entities::serialize(soundPlayPackets);
-            type = PacketType::EVENT_ONE_SHOT_SOUND_EFFECT;
-
-            broadcast(type, data);
-
-            data = entities::serialize(rocketLaunchPackets);
-            type = PacketType::EVENT_ROCKET_LAUNCH;
-
-            broadcast(type, data);
+            queueForBroadcast(packetType, data);
         }
     }
 }

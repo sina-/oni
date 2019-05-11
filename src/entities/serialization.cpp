@@ -21,8 +21,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  gameplay::CarLapInfo &carLapInfo) {
-            archive(carLapInfo.entityID, carLapInfo.lap, carLapInfo.lapTimeS, carLapInfo.bestLapTimeS);
+                  gameplay::CarLapInfo &data) {
+            archive(data.entityID, data.lap, data.lapTimeS, data.bestLapTimeS);
         }
     }
 
@@ -30,136 +30,136 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Shape &shape) {
-            archive(shape.vertexA, shape.vertexB, shape.vertexC, shape.vertexD);
+                  component::Shape &data) {
+            archive(data.vertexA, data.vertexB, data.vertexC, data.vertexD);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Point &point) {
-            archive(point);
+                  component::Point &data) {
+            archive(data);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::WorldP2D &pos) {
-            archive(pos.value);
+                  component::WorldP2D &data) {
+            archive(data.value);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Size &size) {
-            archive(size.value);
+                  component::Size &data) {
+            archive(data.value);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Trail &trail) {
-            archive(trail.previousPos, trail.velocity);
+                  component::Trail &data) {
+            archive(data.previousPos, data.velocity);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::EntityAttachment &attachment) {
-            archive(attachment.entities, attachment.entityTypes);
+                  component::EntityAttachment &data) {
+            archive(data.entities, data.entityTypes);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::EntityAttachee &attachee) {
-            archive(attachee.entityID, attachee.entityType);
+                  component::EntityAttachee &data) {
+            archive(data.entityID, data.entityType);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Heading &heading) {
-            archive(heading.value);
+                  component::Heading &data) {
+            archive(data.value);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Scale &scale) {
-            archive(scale.value);
+                  component::Scale &data) {
+            archive(data.value);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::CarConfig &carConfig) {
-            archive(carConfig.gravity,
-                    carConfig.mass,
-                    carConfig.inertialScale,
-                    carConfig.halfWidth,
-                    carConfig.cgToFront,
-                    carConfig.cgToRear,
-                    carConfig.cgToFrontAxle,
-                    carConfig.cgToRearAxle,
-                    carConfig.cgHeight,
-                    carConfig.wheelRadius,
-                    carConfig.wheelWidth,
-                    carConfig.tireGrip,
-                    carConfig.lockGrip,
-                    carConfig.engineForce,
-                    carConfig.brakeForce,
-                    carConfig.eBrakeForce,
-                    carConfig.weightTransfer,
-                    carConfig.maxSteer,
-                    carConfig.cornerStiffnessFront,
-                    carConfig.cornerStiffnessRear,
-                    carConfig.airResist,
-                    carConfig.rollResist,
-                    carConfig.gearRatio,
-                    carConfig.differentialRatio
+                  component::CarConfig &data) {
+            archive(data.gravity,
+                    data.mass,
+                    data.inertialScale,
+                    data.halfWidth,
+                    data.cgToFront,
+                    data.cgToRear,
+                    data.cgToFrontAxle,
+                    data.cgToRearAxle,
+                    data.cgHeight,
+                    data.wheelRadius,
+                    data.wheelWidth,
+                    data.tireGrip,
+                    data.lockGrip,
+                    data.engineForce,
+                    data.brakeForce,
+                    data.eBrakeForce,
+                    data.weightTransfer,
+                    data.maxSteer,
+                    data.cornerStiffnessFront,
+                    data.cornerStiffnessRear,
+                    data.airResist,
+                    data.rollResist,
+                    data.gearRatio,
+                    data.differentialRatio
             );
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Car &car) {
+                  component::Car &data) {
             archive(
-                    car.heading,
-                    car.velocityAbsolute,
-                    car.angularVelocity,
-                    car.steer,
-                    car.steerAngle,
-                    car.inertia,
-                    car.wheelBase,
-                    car.axleWeightRatioFront,
-                    car.axleWeightRatioRear,
-                    car.rpm,
-                    car.maxVelocityAbsolute,
-                    car.accumulatedEBrake,
-                    car.slipAngleFront,
-                    car.slipAngleRear,
-                    car.position,
-                    car.velocity,
-                    car.velocityLocal,
-                    car.acceleration,
-                    car.accelerationLocal,
-                    car.accelerating,
-                    car.slippingFront,
-                    car.slippingRear,
-                    car.smoothSteer,
-                    car.safeSteer,
-                    car.distanceFromCamera,
-                    car.isColliding
+                    data.heading,
+                    data.velocityAbsolute,
+                    data.angularVelocity,
+                    data.steer,
+                    data.steerAngle,
+                    data.inertia,
+                    data.wheelBase,
+                    data.axleWeightRatioFront,
+                    data.axleWeightRatioRear,
+                    data.rpm,
+                    data.maxVelocityAbsolute,
+                    data.accumulatedEBrake,
+                    data.slipAngleFront,
+                    data.slipAngleRear,
+                    data.position,
+                    data.velocity,
+                    data.velocityLocal,
+                    data.acceleration,
+                    data.accelerationLocal,
+                    data.accelerating,
+                    data.slippingFront,
+                    data.slippingRear,
+                    data.smoothSteer,
+                    data.safeSteer,
+                    data.distanceFromCamera,
+                    data.isColliding
             );
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::TransformParent &transformParent) {
-            archive(transformParent.parent, transformParent.transform);
+                  component::TransformParent &data) {
+            archive(data.parent, data.transform);
         }
 
         template<class Archive>
@@ -190,30 +190,30 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Appearance &appearance) {
-            archive(appearance.color);
+                  component::Appearance &data) {
+            archive(data.color);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Image &image) {
-            archive(image.data, image.width, image.height);
+                  component::Image &data) {
+            archive(data.data, data.width, data.height);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Age &age) {
-            archive(age.currentAge, age.maxAge);
+                  component::Age &data) {
+            archive(data.currentAge, data.maxAge);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Texture &texture) {
-            archive(texture.image, texture.textureID, texture.format, texture.type, texture.filePath,
-                    texture.uv, texture.status);
+                  component::Texture &data) {
+            archive(data.image, data.textureID, data.format, data.type, data.filePath,
+                    data.uv, data.status);
         }
     }
 

@@ -7,6 +7,7 @@
 #include <oni-core/entities/entity-manager.h>
 #include <oni-core/entities/entity-factory.h>
 #include <oni-core/component/gameplay.h>
+#include <oni-core/game/entity-event.h>
 
 namespace oni {
     namespace physics {
@@ -120,7 +121,7 @@ namespace oni {
                         server.send(packet_Collision);
                     }*/
 
-                    entityFactory.createEvent<game::EventType::ROCKET_LAUNCH>(rocketPos);
+                    entityFactory.getEntityManager().enqueueEvent<game::Event_RocketLaunch>(rocketPos);
                 }
             }
         }

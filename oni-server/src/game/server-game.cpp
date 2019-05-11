@@ -52,6 +52,15 @@ namespace oni {
                 mServer->registerPostDisconnectHook(std::bind(&ServerGame::postDisconnectHook, this,
                                                               std::placeholders::_1));
 
+                mEntityFactory->getEntityManager().registerEventHandler<oni::game::Event_Collision, &network::Server::handleEvent_Collision>(
+                        mServer.get());
+
+                mEntityFactory->getEntityManager().registerEventHandler<oni::game::Event_SoundPlay, &network::Server::handleEvent_SoundPlay>(
+                        mServer.get());
+
+                mEntityFactory->getEntityManager().registerEventHandler<oni::game::Event_RocketLaunch, &network::Server::handleEvent_RocketLaunch>(
+                        mServer.get());
+
                 loadLevel();
             }
 
@@ -122,7 +131,6 @@ namespace oni {
 
                 mServer->sendComponentsUpdate(mEntityFactory->getEntityManager());
                 mServer->sendNewEntities(mEntityFactory->getEntityManager());
-                mServer->broadcastEvents(*mEntityFactory);
 
                 {
                     auto &entityManager = mEntityFactory->getEntityManager();
@@ -168,7 +176,8 @@ namespace oni {
 
             void
             ServerGame::_finish() {
-                mEntityFactory->resetEvents();
+                mEntityFactory->getEntityManager().dispatchEvents();
+                mServer->flush();
             }
 
             void

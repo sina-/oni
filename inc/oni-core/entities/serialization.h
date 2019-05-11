@@ -13,6 +13,7 @@
 #include <oni-core/component/visual.h>
 #include <oni-core/component/geometry.h>
 
+
 namespace oni {
     // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
     // other compilation units such as server.cpp
@@ -20,36 +21,15 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  DataPacket &packet) {
+                  Packet_Data &packet) {
             archive(packet.data);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  EntityPacket &packet) {
+                  Packet_EntityID &packet) {
             archive(packet.entity);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
-                  CollisionEventPacket &packet) {
-            archive(packet.collidingEntity, packet.pos);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
-                  SoundPlayEventPacket &packet) {
-            archive(packet.soundID, packet.pos);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
-                  RocketLaunchEventPacket &packet) {
-            archive(packet.pos);
         }
     }
 
@@ -113,6 +93,34 @@ namespace oni {
         serialize(Archive &archive,
                   game::CollidingEntity &collidingEntity) {
             archive(collidingEntity.entityA, collidingEntity.entityB);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  game::Event_Collision &data) {
+            archive(data.pos, data.colliding);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  game::Event_RocketLaunch &data) {
+            archive(data.pos);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  game::Event_SoundPlay &data) {
+            archive(data.pos, data.soundID);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  game::Event_SplatOnDeath &data) {
+            archive(data.pos, data.size, data.textureID);
         }
     }
 

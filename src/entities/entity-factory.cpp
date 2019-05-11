@@ -31,43 +31,6 @@ namespace oni {
             return entityID;
         }
 
-        template<>
-        void
-        EntityFactory::_apply<game::EventType::COLLISION>(std::function<void(game::CollidingEntity &,
-                                                                             component::WorldP3D &)> &func) {
-            auto group = mRegistryManager->createView<game::CollidingEntity, component::WorldP3D, game::EventType>();
-            for (auto &&entity: group) {
-                if (auto event = group.get<game::EventType>(entity);
-                        event == game::EventType::COLLISION) {
-                    func(group.get<game::CollidingEntity>(entity), group.get<component::WorldP3D>(entity));
-                }
-            }
-        }
-
-        template<>
-        void
-        EntityFactory::_apply<game::EventType::ONE_SHOT_SOUND_EFFECT>(std::function<void(component::SoundID &,
-                                                                                         component::WorldP3D &)> &func) {
-            auto group = mRegistryManager->createView<component::SoundID, component::WorldP3D, game::EventType>();
-            for (auto &&entity: group) {
-                if (auto event = group.get<game::EventType>(entity);
-                        event == game::EventType::ONE_SHOT_SOUND_EFFECT) {
-                    func(group.get<component::SoundID>(entity), group.get<component::WorldP3D>(entity));
-                }
-            }
-        }
-
-        template<>
-        void
-        EntityFactory::_apply<game::EventType::ROCKET_LAUNCH>(std::function<void(component::WorldP3D &)> &func) {
-            auto group = mRegistryManager->createView<component::WorldP3D, game::EventType>();
-            for (auto &&entity: group) {
-                if (auto event = group.get<game::EventType>(entity);
-                        event == game::EventType::ROCKET_LAUNCH) {
-                    func(group.get<component::WorldP3D>(entity));
-                }
-            }
-        }
 
         void
         EntityFactory::removeEntity(common::EntityID entityID,
@@ -128,11 +91,6 @@ namespace oni {
                     break;
                 }
             }
-        }
-
-        void
-        EntityFactory::resetEvents() {
-            mRegistryManager->destroy<game::EventType>();
         }
 
         template<>
@@ -596,40 +554,6 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_ColorShaded>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEvent<game::EventType::COLLISION>(common::EntityID entityID,
-                                                                const entities::EntityType &a,
-                                                                const entities::EntityType &b,
-                                                                const component::WorldP3D &worldPos) {
-            auto &collidingEntity = createComponent<game::CollidingEntity>(entityID);
-            collidingEntity.entityA = a;
-            collidingEntity.entityB = b;
-
-            auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos = worldPos;
-        }
-
-        template<>
-        void
-        EntityFactory::_createEvent<game::EventType::ONE_SHOT_SOUND_EFFECT>(common::EntityID entityID,
-                                                                            const component::SoundID &id,
-                                                                            const component::WorldP2D &worldPos) {
-            auto &soundID = createComponent<component::SoundID>(entityID);
-            soundID = id;
-
-            auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos = worldPos.to3D(0.f);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEvent<game::EventType::ROCKET_LAUNCH>(common::EntityID entityID,
-                                                                    const component::WorldP3D &worldPos) {
-            auto &pos = createComponent<component::WorldP3D>(entityID);
-            pos = worldPos;
         }
 
         b2Body *

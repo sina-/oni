@@ -100,10 +100,6 @@ namespace oni {
                                          const std::string &);
 
                 void
-                zLayerPacketHandler(const oni::common::PeerID &,
-                                    const std::string &);
-
-                void
                 postDisconnectHook(const oni::common::PeerID &);
 
                 EntityID

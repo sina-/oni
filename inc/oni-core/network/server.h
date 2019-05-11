@@ -42,8 +42,15 @@ namespace oni {
             sendCarEntityID(common::EntityID,
                             const common::PeerID &);
 
+        public:
             void
-            broadcastEvents(entities::EntityFactory &entityFactory);
+            handleEvent_Collision(const oni::game::Event_Collision &event);
+
+            void
+            handleEvent_SoundPlay(const oni::game::Event_SoundPlay &event);
+
+            void
+            handleEvent_RocketLaunch(const oni::game::Event_RocketLaunch &event);
 
         private:
             Server();
@@ -59,6 +66,8 @@ namespace oni {
 
             void
             postDisconnectHook(const ENetEvent *) override;
+
+        private:
         };
     }
 }

@@ -166,6 +166,7 @@ namespace oni {
             EntityManager() {
                 mRegistry = std::make_unique<entt::basic_registry<common::uint32 >>();
                 mLoader = std::make_unique<entt::basic_continuous_loader<EntityIDType>>(*mRegistry);
+                mDispatcher = std::make_unique<entt::dispatcher>();
                 //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
             }
 
@@ -381,6 +382,29 @@ namespace oni {
                 mRegistry->sort<Component, Comparator>(std::move(comparator));
             }
 
+            template<class Event, auto Method, class MethodInstance>
+            void
+            registerEventHandler(MethodInstance *instance) {
+                mDispatcher->sink<Event>().template connect<Method>(instance);
+            }
+
+            template<class Event, class... Args>
+            void
+            enqueueEvent(Args &&...args) {
+                mDispatcher->enqueue<Event>(std::forward<Args>(args)...);
+            }
+
+            template<class Event>
+            void
+            enqueueEvent() {
+                mDispatcher->enqueue<Event>();
+            }
+
+            void
+            dispatchEvents() {
+                mDispatcher->update();
+            }
+
         private:
             EntityIDType
             create() {
@@ -437,6 +461,7 @@ namespace oni {
         private:
             std::unique_ptr<entt::basic_registry<EntityIDType>> mRegistry{};
             std::unique_ptr<entt::basic_continuous_loader<EntityIDType>> mLoader{};
+            std::unique_ptr<entt::dispatcher> mDispatcher{};
             mutable std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
 

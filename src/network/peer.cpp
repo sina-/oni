@@ -38,6 +38,11 @@ namespace oni {
         }
 
         void
+        Peer::flush() {
+            enet_host_flush(mEnetHost);
+        }
+
+        void
         Peer::poll() {
             ENetEvent event;
 
@@ -139,6 +144,15 @@ namespace oni {
             enet_host_broadcast(mEnetHost, 0, packetToPeers);
 
             enet_host_flush(mEnetHost);
+        }
+
+        void
+        Peer::queueForBroadcast(PacketType type,
+                                std::string &data) {
+            data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
+            ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
+            assert(packetToPeers);
+            enet_host_broadcast(mEnetHost, 0, packetToPeers);
         }
 
         void

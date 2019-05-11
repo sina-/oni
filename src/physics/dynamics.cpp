@@ -15,6 +15,7 @@
 #include <oni-core/physics/projectile.h>
 #include <oni-core/entities/entity-factory.h>
 #include <oni-core/component/hierarchy.h>
+#include <oni-core/game/entity-event.h>
 
 namespace oni {
     namespace physics {
@@ -381,12 +382,14 @@ namespace oni {
                 worldPos.y = props.body->GetPosition().y;
                 worldPos.z = particleZ;
 
+                auto colliding = game::CollidingEntity{};
+                colliding.entityA = entities::EntityType::SIMPLE_ROCKET;
+                // TODO: use the proper type for the other entity instead of UNKNOWN
+                colliding.entityB = entities::EntityType::UNKNOWN;
+
                 // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
                 // sound effects, etc.
-                entityFactory.createEvent<game::EventType::COLLISION>(entities::EntityType::SIMPLE_ROCKET,
-                        // TODO: use the proper type for the other entity instead of UNKNOWN
-                                                                      entities::EntityType::UNKNOWN,
-                                                                      worldPos);
+                entityFactory.getEntityManager().enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
                 entityFactory.removeEntity(entityID, entities::EntityOperationPolicy{true, false});
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
@@ -434,11 +437,37 @@ namespace oni {
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
                             common::real64 tickTime,
                             const entities::EntityOperationPolicy &policy) {
-            // TODO: SO this is annoying. Particles are the only entities with age at the moment and they have on death
-            // effects that is handled by graphics system so I had to move their life-time management to scene-manager
-            // but now I like to add Age to rockets so they die after a while or their fuze runs out, which ever, but
-            // that logic needs to be handled here :/ I have to come up with better system to handle this inter-system
-            // communication. Maybe I should look into listners. Or come up with some sort of event bus.
+            auto &entityManager = entityFactory.getEntityManager();
+            // TODO: NOT very happy with this design. In essence I can't just look at Age component, and remove entities with age > maxAge.
+            // I need more information to act on it. But as is now this requires so many components that it is hard to keep it in sync with other systems.
+            // Maybe it is okay to have it as is. But think about the future when you have 10 different behaviours for on death effect, how would you
+            // partition the components space to select the right entities to handle the effects in each loop block?
+            // TODO: One thing that makes this code complicated is the fact that Particles are special type of entities where the engine doesn't
+            // know about WorldP3D, the shader calculates their location only at draw time but when they die the effect has to take place
+            // where the shader last drawn it, so I have to calculate the same position again here. If WorlP3D was correct, the loop would have
+            // been much simpler and more generic, meaning, I can just look at Age, and create the event for the pos if it has Tag_SplatOnDeath.
+            // And the problem with this special case is that the fact that I am processing Particles, a given EntityType, is implicit, but the
+            // code masquerades itself as generic. So that is messed up.
+            auto view = entityManager.createView<component::Age, component::WorldP3D, component::Tessellation, component::Heading, component::Velocity>();
+            for (const auto &entity: view) {
+                auto &age = view.get<component::Age>(entity);
+                age.currentAge += tickTime;
+                if (age.currentAge > age.maxAge) {
+                    if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
+                        auto &pos = view.get<component::WorldP3D>(entity);
+                        auto &tess = view.get<component::Tessellation>(entity);
+                        auto &heading = view.get<component::Heading>(entity);
+                        auto &velocity = view.get<component::Velocity>(entity);
+                        pos.x += std::cos(heading.value) * velocity.currentVelocity;
+                        pos.y += std::sin(heading.value) * velocity.currentVelocity;
+
+                        auto size = component::Size{tess.halfSize, tess.halfSize};
+                        auto &texture = entityManager.get<component::Texture>(entity);
+                        entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.filePath);
+                    }
+                    entityFactory.removeEntity(entity, policy);
+                }
+            }
         }
 
         void

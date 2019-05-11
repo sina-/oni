@@ -20,6 +20,7 @@
 #include <oni-core/math/intesects.h>
 #include <oni-core/math/rand.h>
 #include <oni-core/math/z-layer-manager.h>
+#include <oni-core/graphic/brush.h>
 
 
 namespace oni {
@@ -604,8 +605,6 @@ namespace oni {
         SceneManager::tick(entities::EntityFactory &serverEntityFactory,
                            entities::EntityFactory &clientEntityFactory,
                            common::real64 tickTime) {
-            updateParticles(clientEntityFactory, tickTime);
-
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
@@ -726,13 +725,13 @@ namespace oni {
                 for (auto &&entity: view) {
                     const auto &texture = view.get<component::Texture>(entity);
                     const auto &size = view.get<component::Size>(entity);
-                    auto brush = component::Brush{};
+                    auto brush = graphic::Brush{};
                     // TODO: This is messy distinction between texture path and textureID!
                     brush.textureID = texture.filePath.c_str();
                     brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
-                    splat(clientEntityFactory, brush, pos, size);
+                    splat(clientEntityFactory, pos, size, brush);
                 }
             }
 
@@ -778,13 +777,13 @@ namespace oni {
                 }
 
                 {
-                    auto brush = component::Brush{};
+                    auto brush = graphic::Brush{};
                     brush.type = component::BrushType::SPRITE;
                     auto size = component::Size{0.5f, 0.5f};
 
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
                         brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientEntityFactory, brush, skidPosList[i], size);
+                        splat(clientEntityFactory, skidPosList[i], size, brush);
                     }
                 }
             }
@@ -811,9 +810,9 @@ namespace oni {
 
         void
         SceneManager::splat(entities::EntityFactory &entityFactory,
-                            component::Brush brush,
                             const component::WorldP3D &worldPos,
-                            const component::Size &size) {
+                            const component::Size &size,
+                            graphic::Brush brush) {
             auto &entityManager = entityFactory.getEntityManager();
 
             std::set<common::EntityID> tileEntities;
@@ -903,7 +902,7 @@ namespace oni {
         void
         SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
                                        common::EntityID entityID,
-                                       const component::Brush &brush,
+                                       const graphic::Brush &brush,
                                        const component::WorldP3D &worldPos,
                                        const component::Size &size) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
@@ -949,41 +948,6 @@ namespace oni {
                                                    textureOffsetX,
                                                    textureOffsetY,
                                                    image);
-        }
-
-        void
-        SceneManager::updateParticles(entities::EntityFactory &entityFactory,
-                                      common::real64 tickTime) {
-            auto &entityManager = entityFactory.getEntityManager();
-            auto view = entityManager.createView<component::Age, component::WorldP3D, component::Tessellation, component::Heading, component::Velocity>();
-            auto policy = entities::EntityOperationPolicy{false, false};
-            for (const auto &entity: view) {
-                auto &age = view.get<component::Age>(entity);
-                age.currentAge += tickTime;
-                if (age.currentAge > age.maxAge) {
-                    if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
-                        auto &pos = view.get<component::WorldP3D>(entity);
-                        auto &tess = view.get<component::Tessellation>(entity);
-                        auto &heading = view.get<component::Heading>(entity);
-                        auto &velocity = view.get<component::Velocity>(entity);
-                        pos.x += std::cos(heading.value) * velocity.currentVelocity;
-                        pos.y += std::sin(heading.value) * velocity.currentVelocity;
-
-                        auto size = component::Size{tess.halfSize, tess.halfSize};
-                        auto brush = component::Brush{};
-                        if (entityManager.has<component::Appearance>(entity)) {
-                            brush.color = entityManager.get<component::Appearance>(entity).toRGBA();
-                            brush.type = component::BrushType::SPRITE;
-                        } else {
-                            auto &texture = entityManager.get<component::Texture>(entity);
-                            brush.textureID = texture.filePath.c_str();
-                            brush.type = component::BrushType::TEXTURE;
-                        }
-                        splat(entityFactory, brush, pos, size);
-                    }
-                    entityFactory.removeEntity(entity, policy);
-                }
-            }
         }
 
         const SceneManager::RaceInfoEntities &

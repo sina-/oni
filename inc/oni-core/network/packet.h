@@ -12,26 +12,12 @@
 
 namespace oni {
     namespace network {
-        struct EntityPacket {
+        struct Packet_EntityID {
             common::uint32 entity{0};
         };
 
-        struct DataPacket {
+        struct Packet_Data {
             std::string data{};
-        };
-
-        struct CollisionEventPacket {
-            game::CollidingEntity collidingEntity{};
-            component::WorldP3D pos{};
-        };
-
-        struct SoundPlayEventPacket {
-            component::SoundID soundID{};
-            component::WorldP3D pos{};
-        };
-
-        struct RocketLaunchEventPacket {
-            component::WorldP3D pos{};
         };
     }
 }

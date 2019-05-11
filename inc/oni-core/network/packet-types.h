@@ -20,7 +20,6 @@ namespace oni {
             EVENT_SOUND_PLAY = 10,
             EVENT_COLLISION = 11,
             EVENT_ROCKET_LAUNCH = 12,
-            GAME_EVENT = 13,
         };
     }
 }

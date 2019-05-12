@@ -474,7 +474,7 @@ namespace oni {
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
                                   common::real64 tickTime,
                                   const entities::EntityOperationPolicy &policy) {
-            // Update particle placement
+            /// Update particle placement
             {
                 auto view = entityFactory.getEntityManager().createView<component::WorldP3D, component::Velocity, component::Heading, component::Age, component::Tag_EngineOnlyParticlePhysics>();
                 for (const auto &entity: view) {

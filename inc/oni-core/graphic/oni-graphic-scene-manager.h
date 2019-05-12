@@ -56,9 +56,7 @@ namespace oni {
             ~SceneManager();
 
             void
-            render(entities::EntityFactory &server,
-                   entities::EntityFactory &client,
-                   common::EntityID lookAtEntity);
+            render(entities::EntityFactory &);
 
             void
             renderPhysicsDebugData();
@@ -128,8 +126,6 @@ namespace oni {
             endColorRendering();
 
         private:
-            void
-            render(entities::EntityFactory &);
 
             void
             renderStaticTextures(entities::EntityManager &,
@@ -155,9 +151,6 @@ namespace oni {
             renderParticles(entities::EntityManager &,
                             common::real32 viewWidth,
                             common::real32 viewHeight);
-
-            void
-            renderAndUpdateAnimation(entities::EntityFactory &);
 
         private:
             struct RaceInfoEntities {

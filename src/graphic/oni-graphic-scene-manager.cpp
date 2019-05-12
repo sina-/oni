@@ -367,31 +367,19 @@ namespace oni {
         }
 
         void
-        SceneManager::render(entities::EntityFactory &serverEntityFactory,
-                             entities::EntityFactory &clientEntityFactory,
-                             common::EntityID lookAtEntity) {
-            if (lookAtEntity && serverEntityFactory.getEntityManager().has<component::WorldP3D>(lookAtEntity)) {
-                const auto &pos = serverEntityFactory.getEntityManager().get<component::WorldP3D>(
-                        lookAtEntity);
-                lookAt(pos.x, pos.y);
-            }
-
-            render(serverEntityFactory);
-            render(clientEntityFactory);
-        }
-
-        void
         SceneManager::render(entities::EntityFactory &entityFactory) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
             auto &entityManager = entityFactory.getEntityManager();
 
+            /// Sprites - color
             {
                 begin(*mColorShader, *mColorRenderer, true, true, true);
                 renderColorSprites(entityManager, viewWidth, viewHeight);
                 end(*mColorShader, *mColorRenderer);
             }
 
+            /// Sprites - texture
             {
                 begin(*mTextureShader, *mTextureRenderer, true, true, true);
                 renderStaticText(entityManager, viewWidth, viewHeight);
@@ -400,6 +388,7 @@ namespace oni {
                 end(*mTextureShader, *mTextureRenderer);
             }
 
+            /// UI
             {
                 // Render UI text with fixed camera
                 begin(*mTextureShader, *mTextureRenderer, false, false, true);
@@ -408,16 +397,12 @@ namespace oni {
                 end(*mTextureShader, *mTextureRenderer);
             }
 
-            {
-                renderAndUpdateAnimation(entityFactory);
-            }
-
+            /// Particles
             {
                 begin(*mParticleShader, *mParticleRenderer, true, true, true);
                 renderParticles(entityManager, viewWidth, viewHeight);
                 end(*mParticleShader, *mParticleRenderer);
             }
-
         }
 
         void
@@ -435,10 +420,6 @@ namespace oni {
         void
         SceneManager::endColorRendering() {
             end(*mColorShader, *mColorRenderer);
-        }
-
-        void
-        SceneManager::renderAndUpdateAnimation(entities::EntityFactory &entityFactory) {
         }
 
         void

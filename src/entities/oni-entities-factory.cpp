@@ -465,6 +465,7 @@ namespace oni {
                     b2Vec2(static_cast<common::real32>(cos(heading.value) * velocity),
                            static_cast<common::real32>(sin(heading.value) * velocity)),
                     true);
+            body->ApplyAngularImpulse(1, true);
 
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);

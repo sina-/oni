@@ -142,7 +142,7 @@ namespace oni {
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
                 {
-                    mDynamics->tickServerSide(*mEntityFactory, *mClientDataManager, tickTime);
+                    mDynamics->tick(*mEntityFactory, mClientDataManager.get(), tickTime);
                 }
 
                 std::vector<component::WorldP2D> tickPositions{};
@@ -212,7 +212,7 @@ namespace oni {
                 auto &manager = mEntityFactory->getEntityManager();
 
                 auto carEntity = mEntityFactory->createEntity<oni::entities::EntityType::RACE_CAR>(
-                        entities::NetMode::CLIENT_SERVER,
+                        entities::SimMode::SERVER,
                         pos,
                         size,
                         heading,
@@ -225,7 +225,7 @@ namespace oni {
                         oni::entities::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
                 auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(
-                        entities::NetMode::CLIENT_SERVER,
+                        entities::SimMode::SERVER,
                         gunPos,
                         gunSize,
                         heading,
@@ -259,7 +259,7 @@ namespace oni {
                 for (auto &&carTire: carTiresFront) {
                     auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_FRONT>(
-                            entities::NetMode::CLIENT_SERVER,
+                            entities::SimMode::SERVER,
                             tirePos,
                             tireSize,
                             tireHeading,
@@ -273,7 +273,7 @@ namespace oni {
                 for (auto &&carTire: carTiresRear) {
                     auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_REAR>(
-                            entities::NetMode::CLIENT_SERVER,
+                            entities::SimMode::SERVER,
                             tirePos,
                             tireSize,
                             tireHeading,
@@ -296,7 +296,7 @@ namespace oni {
                 std::string textureID = "resources/images/car/2/truck.png";
 
                 auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(
-                        entities::NetMode::CLIENT_SERVER,
+                        entities::SimMode::SERVER,
                         worldPos, size,
                         heading,
                         textureID);

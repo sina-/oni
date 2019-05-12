@@ -49,13 +49,24 @@ namespace oni {
 
             template<entities::EntityType entityType, class ...Args>
             common::EntityID
-            createEntity(NetMode entityNetworkMode,
+            createEntity(SimMode entityNetworkMode,
                          const Args &... args) {
                 common::EntityID entityID = createEntity();
                 auto &type = createComponent<entities::EntityType>(entityID);
                 type = entityType;
-                auto &networkMode = createComponent<entities::NetMode>(entityID);
-                networkMode = entityNetworkMode;
+                switch (entityNetworkMode) {
+                    case SimMode::CLIENT: {
+                        createComponent<component::Tag_SimModeClient>(entityID);
+                        break;
+                    }
+                    case SimMode::SERVER: {
+                        createComponent<component::Tag_SimModeServer>(entityID);
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                    }
+                }
                 _createEntity<entityType>(entityID, args...);
                 return entityID;
             }

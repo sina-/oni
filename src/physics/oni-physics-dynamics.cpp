@@ -125,19 +125,24 @@ namespace oni {
         Dynamics::~Dynamics() = default;
 
         void
-        Dynamics::tickServerSide(entities::EntityFactory &entityFactory,
-                                 entities::ClientDataManager &clientData,
-                                 common::real64 tickTime) {
-
+        Dynamics::tick(entities::EntityFactory &entityFactory,
+                       entities::ClientDataManager *clientData,
+                       common::real64 tickTime) {
             auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, io::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
 
-            // Apply user input
+            /// Input
             {
-                auto carView = manager.createView<component::WorldP3D, component::Heading, component::Scale, component::Car, component::CarConfig>();
+                auto carView = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Car,
+                        component::CarConfig>();
                 for (auto &&entity: carView) {
-                    auto input = clientData.getClientInput(entity);
+                    auto input = clientData->getClientInput(entity);
                     // NOTE: This could happen just at the moment when a client joins, an entity is created by the
                     // client data structures are not initialized.
                     if (!input) {
@@ -198,8 +203,7 @@ namespace oni {
                     if (std::abs(carPos.x - car.position.x) > common::EP ||
                         std::abs(carPos.y - car.position.y) > common::EP ||
                         std::abs(carPos.z - car.heading) > common::EP ||
-                        std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP
-                            ) {
+                        std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP) {
                         carPos.x = car.position.x;
                         carPos.y = car.position.y;
                         heading.value = static_cast<common::real32>(car.heading);
@@ -211,7 +215,7 @@ namespace oni {
                 }
             }
 
-            // Update box2d world
+            /// Update box2d world
             {
                 // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
                 // One way to hide it is to provide a function in physics library that creates physical entities
@@ -221,9 +225,12 @@ namespace oni {
             }
 
 
-            // Handle car collisions
+            /// Car collisions
             {
-                auto carPhysicsView = manager.createView<component::Car, component::PhysicalProperties>();
+                auto carPhysicsView = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::Car,
+                        component::PhysicalProperties>();
                 for (auto entity: carPhysicsView) {
                     auto &props = carPhysicsView.get<component::PhysicalProperties>(entity);
                     auto &car = carPhysicsView.get<component::Car>(entity);
@@ -264,9 +271,12 @@ namespace oni {
                 }
             }
 
-            // Handle general collision
+            /// General collision
             {
-                auto view = manager.createView<component::WorldP3D, component::Tag_Dynamic,
+                auto view = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::Tag_Dynamic,
+                        component::WorldP3D,
                         component::PhysicalProperties>();
                 for (auto entity: view) {
                     auto &props = view.get<component::PhysicalProperties>(entity);
@@ -279,9 +289,14 @@ namespace oni {
                 }
             }
 
-            // Sync placement with box2d
+            /// Sync placement with box2d
             {
-                auto view = manager.createView<component::WorldP3D, component::Tag_Dynamic, component::Heading, component::Scale,
+                auto view = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::Tag_Dynamic,
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
                         component::PhysicalProperties>();
 
                 for (auto entity: view) {
@@ -310,9 +325,12 @@ namespace oni {
                 }
             }
 
-            // Update tires
+            /// Update tires
             {
-                auto view = manager.createView<component::EntityAttachment, component::Car>();
+                auto view = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::EntityAttachment,
+                        component::Car>();
                 for (auto &&entity : view) {
                     const auto &attachments = view.get<component::EntityAttachment>(entity);
                     const auto &car = view.get<component::Car>(entity);
@@ -329,20 +347,22 @@ namespace oni {
                 }
             }
 
-            // Update Projectiles
+            /// Update Projectiles
             {
                 mProjectile->tick(entityFactory, clientData, tickTime);
             }
 
-            // Update age
+            /// Update age
             {
-                auto policy = entities::EntityOperationPolicy{false, false};
-                policy.safe = false;
-                policy.track = true;
-                updateAge(entityFactory, tickTime, policy);
+                updateAge(entityFactory, tickTime);
             }
 
-            // Tag to sync with client
+            /// Update placement
+            {
+                updatePlacement(entityFactory, tickTime);
+            }
+
+            /// Tag to sync with client
             {
                 for (auto &&entity : entitiesToBeUpdated) {
                     manager.tagForComponentSync(entity);
@@ -426,57 +446,67 @@ namespace oni {
         }
 
         void
-        Dynamics::tickClientSide(entities::EntityFactory &entityFactory,
-                                 common::real64 tickTime,
-                                 const entities::EntityOperationPolicy &policy) {
-            updateAge(entityFactory, tickTime, policy);
-            updatePlacement(entityFactory, tickTime, policy);
-        }
-
-        void
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
-                            common::real64 tickTime,
-                            const entities::EntityOperationPolicy &policy) {
-            auto &entityManager = entityFactory.getEntityManager();
-            // TODO: NOT very happy with this design. In essence I can't just look at Age component, and remove entities with age > maxAge.
-            // I need more information to act on it. But as is now this requires so many components that it is hard to keep it in sync with other systems.
-            // Maybe it is okay to have it as is. But think about the future when you have 10 different behaviours for on death effect, how would you
-            // partition the components space to select the right entities to handle the effects in each loop block?
-            // TODO: One thing that makes this code complicated is the fact that Particles are special type of entities where the engine doesn't
-            // know about WorldP3D, the shader calculates their location only at draw time but when they die the effect has to take place
-            // where the shader last drawn it, so I have to calculate the same position again here. If WorlP3D was correct, the loop would have
-            // been much simpler and more generic, meaning, I can just look at Age, and create the event for the pos if it has Tag_SplatOnDeath.
-            // And the problem with this special case is that the fact that I am processing Particles, a given EntityType, is implicit, but the
-            // code masquerades itself as generic. So that is messed up.
-            auto view = entityManager.createView<component::Age, component::WorldP3D, component::Tessellation, component::Heading, component::Velocity>();
-            for (const auto &entity: view) {
-                auto &age = view.get<component::Age>(entity);
-                age.currentAge += tickTime;
-                if (age.currentAge > age.maxAge) {
-                    if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
-                        auto &pos = view.get<component::WorldP3D>(entity);
-                        auto &tess = view.get<component::Tessellation>(entity);
-                        auto &heading = view.get<component::Heading>(entity);
-                        auto &velocity = view.get<component::Velocity>(entity);
-                        pos.x += std::cos(heading.value) * velocity.currentVelocity;
-                        pos.y += std::sin(heading.value) * velocity.currentVelocity;
+                            common::real64 tickTime) {
+            {
+                /// Client side
+                auto &entityManager = entityFactory.getEntityManager();
+                // TODO: NOT very happy with this design. In essence I can't just look at Age component, and remove entities with age > maxAge.
+                // I need more information to act on it. But as is now this requires so many components that it is hard to keep it in sync with other systems.
+                // Maybe it is okay to have it as is. But think about the future when you have 10 different behaviours for on death effect, how would you
+                // partition the components space to select the right entities to handle the effects in each loop block?
+                // TODO: One thing that makes this code complicated is the fact that Particles are special type of entities where the engine doesn't
+                // know about WorldP3D, the shader calculates their location only at draw time but when they die the effect has to take place
+                // where the shader last drawn it, so I have to calculate the same position again here. If WorlP3D was correct, the loop would have
+                // been much simpler and more generic, meaning, I can just look at Age, and create the event for the pos if it has Tag_SplatOnDeath.
+                // And the problem with this special case is that the fact that I am processing Particles, a given EntityType, is implicit, but the
+                // code masquerades itself as generic. So that is messed up.
+                auto policy = entities::EntityOperationPolicy::client();
+                auto view = entityManager.createView<
+                        component::Tag_SimModeClient,
+                        component::Age,
+                        component::WorldP3D,
+                        component::Tessellation,
+                        component::Heading,
+                        component::Velocity>();
+                for (const auto &entity: view) {
+                    auto &age = view.get<component::Age>(entity);
+                    age.currentAge += tickTime;
+                    if (age.currentAge > age.maxAge) {
+                        if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
+                            auto &pos = view.get<component::WorldP3D>(entity);
+                            auto &tess = view.get<component::Tessellation>(entity);
+                            auto &heading = view.get<component::Heading>(entity);
+                            auto &velocity = view.get<component::Velocity>(entity);
+                            pos.x += std::cos(heading.value) * velocity.currentVelocity;
+                            pos.y += std::sin(heading.value) * velocity.currentVelocity;
 
-                        auto size = component::Size{tess.halfSize, tess.halfSize};
-                        auto &texture = entityManager.get<component::Texture>(entity);
-                        entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.filePath);
+                            auto size = component::Size{tess.halfSize, tess.halfSize};
+                            auto &texture = entityManager.get<component::Texture>(entity);
+                            entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.filePath);
+                        }
+                        entityFactory.removeEntity(entity, policy);
                     }
-                    entityFactory.removeEntity(entity, policy);
                 }
+            }
+            /// Client and server
+            {
+
             }
         }
 
         void
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
-                                  common::real64 tickTime,
-                                  const entities::EntityOperationPolicy &policy) {
+                                  common::real64 tickTime) {
             /// Update particle placement
             {
-                auto view = entityFactory.getEntityManager().createView<component::WorldP3D, component::Velocity, component::Heading, component::Age, component::Tag_EngineOnlyParticlePhysics>();
+                auto view = entityFactory.getEntityManager().createView<
+                        component::Tag_EngineOnlyParticlePhysics,
+                        component::Tag_SimModeClient,
+                        component::WorldP3D,
+                        component::Velocity,
+                        component::Heading,
+                        component::Age>();
                 for (const auto &entity: view) {
                     auto &pos = view.get<component::WorldP3D>(entity).value;
                     const auto &velocity = view.get<component::Velocity>(entity);

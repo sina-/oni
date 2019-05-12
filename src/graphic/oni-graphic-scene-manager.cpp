@@ -635,7 +635,7 @@ namespace oni {
 
                     if (trail.previousPos.empty()) {
                         auto trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                entities::NetMode::CLIENT, currentPos, textureID, particleHalfSize, false);
+                                entities::SimMode::CLIENT, currentPos, textureID, particleHalfSize, false);
                         continue;
                     }
 
@@ -674,7 +674,7 @@ namespace oni {
                         }
                         */
                             trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    entities::NetMode::CLIENT,
+                                    entities::SimMode::CLIENT,
                                     pos, textureID, particleHalfSize, false);
                             auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
                                     trailEntity);
@@ -855,7 +855,7 @@ namespace oni {
 
                 // TODO: Should this be a canvas type?
                 auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(
-                        entities::NetMode::CLIENT,
+                        entities::SimMode::CLIENT,
                         worldPos,
                         tileSize,
                         heading,

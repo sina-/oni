@@ -540,7 +540,7 @@ namespace oni {
                     }
 
                     auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WALL>(
-                            entities::NetMode::CLIENT_SERVER,
+                            entities::SimMode::SERVER,
                             wallPositionInWorld,
                             wallSize,
                             heading,
@@ -596,7 +596,7 @@ namespace oni {
                                  component::WorldP3D &worldPos) {
                 auto heading = component::Heading{0.f};
                 auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(
-                        entities::NetMode::CLIENT_SERVER,
+                        entities::SimMode::SERVER,
                         worldPos, tileSize,
                         heading,
                         color);
@@ -610,7 +610,7 @@ namespace oni {
                                   const std::string &path) {
                 auto heading = component::Heading{0.f};
                 auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(
-                        entities::NetMode::CLIENT_SERVER,
+                        entities::SimMode::SERVER,
                         worldPos, size,
                         heading,
                         path);

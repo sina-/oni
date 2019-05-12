@@ -19,7 +19,7 @@ namespace oni {
 
         void
         Projectile::tick(entities::EntityFactory &entityFactory,
-                         entities::ClientDataManager &clientData,
+                         entities::ClientDataManager *clientData,
                          common::real64 tickTime) {
             // Update cool-downs
             {
@@ -44,7 +44,7 @@ namespace oni {
                 common::real32 velocity{200.f};
 
                 for (auto &&entity: carView) {
-                    auto *input = clientData.getClientInput(entity);
+                    auto *input = clientData->getClientInput(entity);
                     if (!input) {
                         continue;
                     }
@@ -101,7 +101,7 @@ namespace oni {
                     std::string textureID = "resources/images/bullet/2.png";
 
                     auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(
-                            entities::NetMode::CLIENT_SERVER,
+                            entities::SimMode::SERVER,
                             rocketPos,
                             size,
                             heading,

@@ -33,7 +33,7 @@ namespace oni {
 
             void
             tick(entities::EntityFactory &,
-                 entities::ClientDataManager &,
+                 entities::ClientDataManager *,
                  common::real64 tickTime);
 
         private:

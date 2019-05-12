@@ -28,16 +28,14 @@ namespace oni {
         struct Tag_Particle {
         };
 
+        /// Sim
+        struct Tag_SimModeServer {
+        };
+
+        struct Tag_SimModeClient {
+        };
+
         /// Network
-        struct Tag_ClientOnlyEntity {
-        };
-
-        struct Tag_ServerOnlyEntity {
-        };
-
-        struct Tag_ClientAndServerEntity {
-        };
-
         struct Tag_RequiresNetworkSync {
         };
 

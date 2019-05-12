@@ -30,10 +30,9 @@ namespace oni {
             LAST
         };
 
-        enum class NetMode : common::uint8 {
+        enum class SimMode : common::uint8 {
             CLIENT,
             SERVER,
-            CLIENT_SERVER
         };
 
         enum class SnapshotType {
@@ -50,6 +49,22 @@ namespace oni {
         struct EntityOperationPolicy {
             bool track{true};
             bool safe{false};
+
+            inline static EntityOperationPolicy
+            client() {
+                auto policy = EntityOperationPolicy{};
+                policy.track = false;
+                policy.safe = false;
+                return policy;
+            }
+
+            inline static EntityOperationPolicy
+            server() {
+                auto policy = EntityOperationPolicy{};
+                policy.track = true;
+                return policy;
+            }
         };
+
     }
 }

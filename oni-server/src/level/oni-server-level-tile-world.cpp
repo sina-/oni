@@ -165,12 +165,12 @@ namespace oni {
                         0};
 
                 oni::level::RoadTileIndex westBoarderRoadTileIndex{0,
-                                                              static_cast<uint16>(std::rand() %
-                                                                                  mTilesPerChunkY)};
+                                                                   static_cast<uint16>(std::rand() %
+                                                                                       mTilesPerChunkY)};
 
                 oni::level::RoadTileIndex eastBoarderRoadTileIndex{static_cast<uint16>(mTilesPerChunkX - 1),
-                                                              static_cast<uint16>(std::rand() %
-                                                                                  mTilesPerChunkY)};
+                                                                   static_cast<uint16>(std::rand() %
+                                                                                       mTilesPerChunkY)};
 
                 if (northChunkHasRoads && southChunkHasRoads) {
                     edgeRoads.southBoarder = oni::level::RoadTileIndex{};
@@ -540,6 +540,7 @@ namespace oni {
                     }
 
                     auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WALL>(
+                            entities::NetMode::CLIENT_SERVER,
                             wallPositionInWorld,
                             wallSize,
                             heading,
@@ -594,9 +595,11 @@ namespace oni {
                                  math::vec2 &tileSize,
                                  component::WorldP3D &worldPos) {
                 auto heading = component::Heading{0.f};
-                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(worldPos, tileSize,
-                                                                                                    heading,
-                                                                                                    color);
+                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(
+                        entities::NetMode::CLIENT_SERVER,
+                        worldPos, tileSize,
+                        heading,
+                        color);
                 mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }
@@ -606,9 +609,11 @@ namespace oni {
                                   const component::WorldP3D &worldPos,
                                   const std::string &path) {
                 auto heading = component::Heading{0.f};
-                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(worldPos, size,
-                                                                                                    heading,
-                                                                                                    path);
+                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(
+                        entities::NetMode::CLIENT_SERVER,
+                        worldPos, size,
+                        heading,
+                        path);
                 mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }

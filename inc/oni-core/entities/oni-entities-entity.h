@@ -30,10 +30,10 @@ namespace oni {
             LAST
         };
 
-        enum class EntityClass : common::uint8 {
-            CLIENT_SIDE,
-            SERVER_SIDE,
-            CLIENT_AND_SERVER_SIDE
+        enum class NetMode : common::uint8 {
+            CLIENT,
+            SERVER,
+            CLIENT_SERVER
         };
 
         enum class SnapshotType {

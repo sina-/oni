@@ -100,11 +100,13 @@ namespace oni {
 
                     std::string textureID = "resources/images/bullet/2.png";
 
-                    auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(rocketPos,
-                                                                                                        size,
-                                                                                                        heading,
-                                                                                                        textureID,
-                                                                                                        velocity);
+                    auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(
+                            entities::NetMode::CLIENT_SERVER,
+                            rocketPos,
+                            size,
+                            heading,
+                            textureID,
+                            velocity);
                     entityFactory.tagForNetworkSync(rocketEntity);
 /*
                     entityFactory.createEvent(ROCKET_LAUNCH, component::WorldP3D);

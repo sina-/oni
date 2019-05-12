@@ -49,10 +49,13 @@ namespace oni {
 
             template<entities::EntityType entityType, class ...Args>
             common::EntityID
-            createEntity(const Args &... args) {
+            createEntity(NetMode entityNetworkMode,
+                         const Args &... args) {
                 common::EntityID entityID = createEntity();
                 auto &type = createComponent<entities::EntityType>(entityID);
                 type = entityType;
+                auto &networkMode = createComponent<entities::NetMode>(entityID);
+                networkMode = entityNetworkMode;
                 _createEntity<entityType>(entityID, args...);
                 return entityID;
             }

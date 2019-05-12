@@ -31,8 +31,8 @@ namespace oni {
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
                 mTileWorld = std::make_unique<server::level::TileWorld>(*mEntityFactory,
-                                                                           *mDynamics->getPhysicsWorld(),
-                                                                           *mZLayerManager);
+                                                                        *mDynamics->getPhysicsWorld(),
+                                                                        *mZLayerManager);
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
                 mLapTracker = std::make_unique<gameplay::LapTracker>(mEntityFactory->getEntityManager(),
@@ -211,10 +211,12 @@ namespace oni {
 
                 auto &manager = mEntityFactory->getEntityManager();
 
-                auto carEntity = mEntityFactory->createEntity<oni::entities::EntityType::RACE_CAR>(pos,
-                                                                                                   size,
-                                                                                                   heading,
-                                                                                                   carTextureID);
+                auto carEntity = mEntityFactory->createEntity<oni::entities::EntityType::RACE_CAR>(
+                        entities::NetMode::CLIENT_SERVER,
+                        pos,
+                        size,
+                        heading,
+                        carTextureID);
 
                 mEntityFactory->tagForNetworkSync(carEntity);
 
@@ -222,10 +224,12 @@ namespace oni {
                 auto gunPos = component::WorldP3D{1.f, 0.f, mZLayerManager->getZForEntity(
                         oni::entities::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
-                auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(gunPos,
-                                                                                                         gunSize,
-                                                                                                         heading,
-                                                                                                         gunTextureID);
+                auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(
+                        entities::NetMode::CLIENT_SERVER,
+                        gunPos,
+                        gunSize,
+                        heading,
+                        gunTextureID);
                 mEntityFactory->tagForNetworkSync(carGunEntity);
 
                 mEntityFactory->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
@@ -255,6 +259,7 @@ namespace oni {
                 for (auto &&carTire: carTiresFront) {
                     auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_FRONT>(
+                            entities::NetMode::CLIENT_SERVER,
                             tirePos,
                             tireSize,
                             tireHeading,
@@ -268,6 +273,7 @@ namespace oni {
                 for (auto &&carTire: carTiresRear) {
                     auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_REAR>(
+                            entities::NetMode::CLIENT_SERVER,
                             tirePos,
                             tireSize,
                             tireHeading,
@@ -289,9 +295,11 @@ namespace oni {
                 auto heading = component::Heading{0.f};
                 std::string textureID = "resources/images/car/2/truck.png";
 
-                auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(worldPos, size,
-                                                                                                 heading,
-                                                                                                 textureID);
+                auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(
+                        entities::NetMode::CLIENT_SERVER,
+                        worldPos, size,
+                        heading,
+                        textureID);
                 mEntityFactory->tagForNetworkSync(entityID);
                 return entityID;
             }

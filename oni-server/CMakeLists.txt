@@ -14,7 +14,7 @@ subdirs(${oni_SOURCE_DIR}/src/math)
 subdirs(${oni_SOURCE_DIR}/src/io)
 
 add_subdirectory(${oni-server_SOURCE_DIR}/src/game)
-add_subdirectory(${oni-server_SOURCE_DIR}/src/entities)
+add_subdirectory(${oni-server_SOURCE_DIR}/src/level)
 
 add_executable(oni-server ${oni-server_SOURCE_DIR}/main.cpp)
 

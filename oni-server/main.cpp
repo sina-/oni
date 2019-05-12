@@ -1,5 +1,5 @@
-#include <oni-core/network/server.h>
-#include <oni-server/game/server-game.h>
+#include <oni-core/network/oni-network-server.h>
+#include <oni-server/game/oni-server-game.h>
 
 #include <thread>
 

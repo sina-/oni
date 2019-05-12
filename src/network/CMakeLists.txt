@@ -1,4 +1,4 @@
-add_library(oni-core-network server.cpp client.cpp peer.cpp)
+add_library(oni-core-network oni-network-server.cpp oni-network-client.cpp oni-network-peer.cpp)
 
 target_compile_features(oni-core-network
         PUBLIC

@@ -1,4 +1,4 @@
-add_library(oni-core-utils file.cpp)
+add_library(oni-core-utils oni-util-file.cpp)
 
 target_compile_features(oni-core-utils
         PUBLIC

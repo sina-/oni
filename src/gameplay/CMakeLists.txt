@@ -1,4 +1,4 @@
-add_library(oni-core-gameplay lap-tracker.cpp)
+add_library(oni-core-gameplay oni-gameplay-lap-tracker.cpp)
 
 target_compile_features(oni-core-gameplay
         PUBLIC

@@ -1,4 +1,4 @@
-add_library(oni-core-io input.cpp output.cpp)
+add_library(oni-core-io oni-io-input.cpp oni-io-output.cpp)
 
 target_compile_features(oni-core-io
         PUBLIC

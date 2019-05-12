@@ -1,4 +1,4 @@
-add_library(oni-server-game server-game.cpp)
+add_library(oni-server-game oni-server-game.cpp)
 
 target_compile_features(oni-server-game
         PUBLIC

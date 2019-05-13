@@ -25,7 +25,7 @@ namespace oni {
     }
 
     namespace graphic {
-        enum class PrimitiveType : common::uint8 {
+        enum class PrimitiveType : common::u8 {
             POINT = 0,
             LINE = 1,
             TRIANGLE = 2,

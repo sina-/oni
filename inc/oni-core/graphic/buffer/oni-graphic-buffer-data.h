@@ -31,11 +31,11 @@ namespace oni {
         struct ParticleVertex {
             math::vec3 position{0.f, 0.f, 0.f};
             math::vec4 color{0.f, 0.f, 0.f, 0.f};
-            common::real32 age{0.f};
-            common::real32 heading{0.f};
-            common::real32 velocity{0.f};
+            common::r32 age{0.f};
+            common::r32 heading{0.f};
+            common::r32 velocity{0.f};
             common::oniGLint samplerID{-1};
-            common::real32 halfSize{2.f};
+            common::r32 halfSize{2.f};
         };
 
         struct BufferStructure {

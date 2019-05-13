@@ -41,7 +41,7 @@ namespace oni {
         private:
             void
             handle(ENetPeer *peer,
-                   common::uint8 *data,
+                   common::u8 *data,
                    size_t size,
                    PacketType header) override;
 

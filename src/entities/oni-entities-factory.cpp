@@ -335,7 +335,7 @@ namespace oni {
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
                                                                             const component::WorldP3D &pos,
                                                                             const math::vec4 &color,
-                                                                            const common::real32 &halfSize,
+                                                                            const common::r32 &halfSize,
                                                                             const bool &randomize) {
             auto &tessellation = createComponent<component::Tessellation>(entityID);
             tessellation.halfSize = halfSize;
@@ -370,7 +370,7 @@ namespace oni {
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
                                                                             const component::WorldP3D &pos,
                                                                             const std::string &textureID,
-                                                                            const common::real32 &halfSize,
+                                                                            const common::r32 &halfSize,
                                                                             const bool &randomize) {
             auto &tessellation = createComponent<component::Tessellation>(entityID);
             tessellation.halfSize = halfSize;
@@ -406,7 +406,7 @@ namespace oni {
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID entityID,
                                                                                   const component::WorldP3D &pos,
                                                                                   const std::string &textureID,
-                                                                                  const common::real32 &halfSize,
+                                                                                  const common::r32 &halfSize,
                                                                                   const bool &randomize) {
             auto &tessellation = createComponent<component::Tessellation>(entityID);
             tessellation.halfSize = halfSize;
@@ -448,7 +448,7 @@ namespace oni {
                                                                           const math::vec2 &size,
                                                                           const component::Heading &heading,
                                                                           const std::string &textureID,
-                                                                          const common::real32 &velocity) {
+                                                                          const common::r32 &velocity) {
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.friction = 1.f;
             properties.density = 0.1f;
@@ -462,8 +462,8 @@ namespace oni {
             auto *body = createPhysicalBody(pos, size, heading.value, properties);
 
             body->ApplyForceToCenter(
-                    b2Vec2(static_cast<common::real32>(cos(heading.value) * velocity),
-                           static_cast<common::real32>(sin(heading.value) * velocity)),
+                    b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),
+                           static_cast<common::r32>(sin(heading.value) * velocity)),
                     true);
             body->ApplyAngularImpulse(1, true);
 
@@ -560,7 +560,7 @@ namespace oni {
         b2Body *
         EntityFactory::createPhysicalBody(const component::WorldP3D &worldPos,
                                           const math::vec2 &size,
-                                          common::real32 heading,
+                                          common::r32 heading,
                                           component::PhysicalProperties &properties) {
             b2PolygonShape shape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
@@ -596,7 +596,7 @@ namespace oni {
                     collisionSensor.friction = properties.friction;
 
                     if (!properties.collisionWithinCategory) {
-                        collisionSensor.filter.groupIndex = -static_cast<common::int16>(properties.physicalCategory);
+                        collisionSensor.filter.groupIndex = -static_cast<common::i16>(properties.physicalCategory);
                     }
 
                     body->CreateFixture(&fixtureDef);

@@ -29,7 +29,7 @@ namespace oni {
         }
 
         void
-        localToTextureTranslation(common::real32 ratio,
+        localToTextureTranslation(common::r32 ratio,
                                   component::WorldP3D &operand) {
             operand.x *= ratio;
             operand.y *= ratio;
@@ -37,7 +37,7 @@ namespace oni {
 
         void
         worldToTextureCoordinate(const component::WorldP3D &reference,
-                                 common::real32 ratio,
+                                 common::r32 ratio,
                                  component::WorldP3D &operand) {
             worldToLocalTranslation(reference, operand);
             localToTextureTranslation(ratio, operand);

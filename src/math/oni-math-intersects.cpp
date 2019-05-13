@@ -36,10 +36,10 @@ namespace oni {
 
         bool
         intersects(const component::Shape &first,
-                   common::real32 x,
-                   common::real32 y,
-                   common::real32 lengthX,
-                   common::real32 lengthY) {
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY) {
             auto firstCenterX = (first.vertexA.x + first.vertexC.x) / 2.0f;
             auto firstCenterY = (first.vertexA.y + first.vertexC.y) / 2.0f;
             auto firstSize = first.getSize();
@@ -50,20 +50,20 @@ namespace oni {
 
         bool
         intersects(const component::Point &first,
-                   common::real32 x,
-                   common::real32 y,
-                   common::real32 lengthX,
-                   common::real32 lengthY) {
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY) {
             return (std::abs(first.x - x) * 2 < lengthX) &&
                    (std::abs(first.y - y) * 2 < lengthY);
         }
 
         bool
         intersects(const component::WorldP3D &first,
-                   common::real32 x,
-                   common::real32 y,
-                   common::real32 lengthX,
-                   common::real32 lengthY) {
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY) {
             return (std::abs(first.x - x) * 2 < lengthX) &&
                    (std::abs(first.y - y) * 2 < lengthY);
         }

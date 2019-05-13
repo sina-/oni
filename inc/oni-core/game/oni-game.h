@@ -11,7 +11,7 @@ namespace oni {
         public:
             Game();
 
-            Game(common::uint16 tickRate);
+            Game(common::u16 tickRate);
 
             virtual ~Game();
 
@@ -19,7 +19,7 @@ namespace oni {
             run();
 
         protected:
-            common::real32
+            common::r32
             getTickFrequency();
 
             virtual bool
@@ -44,10 +44,10 @@ namespace oni {
             finish() final;
 
             virtual void
-            _sim(common::real64 simTime) = 0;
+            _sim(common::r64 simTime) = 0;
 
             virtual void
-            _render(common::real64 simTime) = 0;
+            _render(common::r64 simTime) = 0;
 
             virtual void
             _display() = 0;
@@ -59,42 +59,42 @@ namespace oni {
             _finish() = 0;
 
             virtual void
-            showFPS(common::int16) = 0;
+            showFPS(common::i16) = 0;
 
             virtual void
-            showSPS(common::int16) = 0;
+            showSPS(common::i16) = 0;
 
             virtual void
-            showPPS(common::int16) = 0;
+            showPPS(common::i16) = 0;
 
             virtual void
-            showRT(common::int16) = 0;
+            showRT(common::i16) = 0;
 
             virtual void
-            showST(common::int16) = 0;
+            showST(common::i16) = 0;
 
             virtual void
-            showPT(common::int16) = 0;
+            showPT(common::i16) = 0;
 
         private:
             // 60Hz
-            const common::real32 mTickS{1 / 60.0f};
+            const common::r32 mTickS{1 / 60.0f};
 
         protected:
             utils::Timer mSimTimer{};
             utils::Timer mSimLoopTimer{};
-            common::uint16 mSimUpdateCounter{0};
-            common::real64 mSimMS{0.0f};
+            common::u16 mSimUpdateCounter{0};
+            common::r64 mSimMS{0.0f};
 
             utils::Timer mPollTimer{};
             utils::Timer mPollLoopTimer{};
-            common::uint16 mPollUpdateCounter{0};
-            common::real64 mPollMS{0.0f};
+            common::u16 mPollUpdateCounter{0};
+            common::r64 mPollMS{0.0f};
 
             utils::Timer mRenderTimer{};
             utils::Timer mRenderLoopTimer{};
-            common::uint16 mRenderUpdateCounter{0};
-            common::real64 mRenderMS{0.0f};
+            common::u16 mRenderUpdateCounter{0};
+            common::r64 mRenderMS{0.0f};
 
             utils::Timer mGameLoopTimer{};
         };

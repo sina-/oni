@@ -124,10 +124,10 @@ namespace oni {
         mat4 &
         mat4::multiply(const mat4 &other) {
             std::array<float, 4 * 4> result{};
-            for (common::uint8 i = 0; i < 4; i++) {
-                for (common::uint8 j = 0; j < 4; j++) {
+            for (common::u8 i = 0; i < 4; i++) {
+                for (common::u8 j = 0; j < 4; j++) {
                     float sum = 0.0f;
-                    for (common::uint8 k = 0; k < 4; k++)
+                    for (common::u8 k = 0; k < 4; k++)
                         sum += elements[j + k * 4] * other.elements[k + i * 4];
                     result[j + i * 4] = sum;
                 }

@@ -1,8 +1,10 @@
 #pragma once
 
+#include<oni-core/common/oni-common-typedef.h>
+
 namespace oni {
     namespace entities {
-        enum class EntityType : common::uint16 {
+        enum class EntityType : common::u16 {
             UNKNOWN,
 
             BACKGROUND,
@@ -30,7 +32,7 @@ namespace oni {
             LAST
         };
 
-        enum class SimMode : common::uint8 {
+        enum class SimMode : common::u8 {
             CLIENT,
             SERVER,
         };

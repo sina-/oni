@@ -25,13 +25,13 @@ namespace oni {
         tickCar(component::Car &car,
                 const component::CarConfig &config,
                 const io::CarInput &inputs,
-                common::real64 dt);
+                common::r64 dt);
 
 
         common::CarSimDouble
         applySmoothSteer(const component::Car &car,
                          common::CarSimDouble steerInput,
-                         common::real64 dt);
+                         common::r64 dt);
 
         common::CarSimDouble
         applySafeSteer(const component::Car &car,

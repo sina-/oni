@@ -178,7 +178,7 @@ namespace oni {
             _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
                                                                  const component::WorldP3D &worldPos,
                                                                  const math::vec4 &color,
-                                                                 const common::real32 &halfSize,
+                                                                 const common::r32 &halfSize,
                     // TODO: Is there a way to avoid need for const &?
                                                                  const bool &randomize);
 
@@ -187,7 +187,7 @@ namespace oni {
             _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
                                                                  const component::WorldP3D &worldPos,
                                                                  const std::string &textureID,
-                                                                 const common::real32 &halfSize,
+                                                                 const common::r32 &halfSize,
                                                                  const bool &randomize);
 
             template<>
@@ -195,7 +195,7 @@ namespace oni {
             _createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID,
                                                                        const component::WorldP3D &worldPos,
                                                                        const std::string &textureID,
-                                                                       const common::real32 &halfSize,
+                                                                       const common::r32 &halfSize,
                                                                        const bool &randomize);
 
             template<>
@@ -205,7 +205,7 @@ namespace oni {
                                                                const math::vec2 &size,
                                                                const component::Heading &heading,
                                                                const std::string &textureID,
-                                                               const common::real32 &velocity);
+                                                               const common::r32 &velocity);
 
             template<>
             void
@@ -253,7 +253,7 @@ namespace oni {
             createPhysicalBody(
                     const component::WorldP3D &worldPos,
                     const math::vec2 &size,
-                    const common::real32 heading,
+                    const common::r32 heading,
                     component::PhysicalProperties &properties
             );
 

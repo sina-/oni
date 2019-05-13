@@ -14,15 +14,15 @@ namespace oni {
             // https://stackoverflow.com/a/18177444
             union {
                 // Column major ordering
-                std::array<oni::common::real32, 4 * 4> elements{};
+                std::array<oni::common::r32, 4 * 4> elements{};
                 vec4 columns[4];
             };
 
             mat4();
 
-            explicit mat4(oni::common::real32 diag);
+            explicit mat4(oni::common::r32 diag);
 
-            const oni::common::real32 *
+            const oni::common::r32 *
             getArray() const { return &elements.front(); };
 
             vec3
@@ -32,26 +32,26 @@ namespace oni {
             identity();
 
             static mat4
-            orthographic(oni::common::real32 left,
-                         oni::common::real32 right,
-                         oni::common::real32 bottom,
-                         oni::common::real32 top,
-                         oni::common::real32 near,
-                         oni::common::real32 far);
+            orthographic(oni::common::r32 left,
+                         oni::common::r32 right,
+                         oni::common::r32 bottom,
+                         oni::common::r32 top,
+                         oni::common::r32 near,
+                         oni::common::r32 far);
 
             static mat4
-            perspective(oni::common::real32 fov,
-                        oni::common::real32 aspectRatio,
-                        oni::common::real32 near,
-                        oni::common::real32 far);
+            perspective(oni::common::r32 fov,
+                        oni::common::r32 aspectRatio,
+                        oni::common::r32 near,
+                        oni::common::r32 far);
 
             static mat4
             translation(const vec3 &translation);
 
             static mat4
-            translation(oni::common::real32 x,
-                        oni::common::real32 y,
-                        oni::common::real32 z);
+            translation(oni::common::r32 x,
+                        oni::common::r32 y,
+                        oni::common::r32 z);
 
             /**
              * create rotation matrix
@@ -60,7 +60,7 @@ namespace oni {
              * @return
              */
             static mat4
-            rotation(oni::common::real32 angle,
+            rotation(oni::common::r32 angle,
                      const vec3 &axis);
 
             static mat4

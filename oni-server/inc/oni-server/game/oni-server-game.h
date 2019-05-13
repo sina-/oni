@@ -60,10 +60,10 @@ namespace oni {
 
             protected:
                 void
-                _sim(oni::common::real64 simTime) override;
+                _sim(oni::common::r64 simTime) override;
 
                 void
-                _render(oni::common::real64 simTime) override;
+                _render(oni::common::r64 simTime) override;
 
                 void
                 _display() override;
@@ -75,22 +75,22 @@ namespace oni {
                 _finish() override;
 
                 void
-                showFPS(oni::common::int16 fps) override;
+                showFPS(oni::common::i16 fps) override;
 
                 void
-                showSPS(oni::common::int16 tps) override;
+                showSPS(oni::common::i16 tps) override;
 
                 void
-                showPPS(oni::common::int16 pps) override;
+                showPPS(oni::common::i16 pps) override;
 
                 void
-                showRT(oni::common::int16) override;
+                showRT(oni::common::i16) override;
 
                 void
-                showPT(oni::common::int16) override;
+                showPT(oni::common::i16) override;
 
                 void
-                showST(oni::common::int16) override;
+                showST(oni::common::i16) override;
 
             private:
                 void

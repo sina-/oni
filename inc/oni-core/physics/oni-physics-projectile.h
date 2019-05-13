@@ -34,12 +34,12 @@ namespace oni {
             void
             tick(entities::EntityFactory &,
                  entities::ClientDataManager *,
-                 common::real64 tickTime);
+                 common::r64 tickTime);
 
         private:
             void
             fireRocket(entities::EntityFactory &entityFactory,
-                       const common::real32 velocity,
+                       const common::r32 velocity,
                        const component::WorldP3D &pos,
                        const component::Heading &heading,
                        const component::CarConfig &carConfig,
@@ -49,7 +49,7 @@ namespace oni {
         private:
             b2World *mPhysicsWorld{};
 
-            const common::real32 mGunCoolDownS;
+            const common::r32 mGunCoolDownS;
         };
     }
 }

@@ -102,7 +102,7 @@ namespace oni {
             return vec2{x, y};
         }
 
-        common::real32
+        common::r32
         vec3::len() {
             return std::sqrt(x * x + y * y + z * z);
         }

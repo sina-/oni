@@ -13,9 +13,9 @@ namespace oni {
         printl(int text);
 
         void
-        printl(oni::common::real64 text);
+        printl(oni::common::r64 text);
 
         void
-        printl(common::real32 text);
+        printl(common::r32 text);
     }
 }

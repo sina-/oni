@@ -20,7 +20,7 @@ namespace oni {
         void
         Projectile::tick(entities::EntityFactory &entityFactory,
                          entities::ClientDataManager *clientData,
-                         common::real64 tickTime) {
+                         common::r64 tickTime) {
             // Update cool-downs
             {
                 auto view = entityFactory.getEntityManager().createView<component::GunCoolDown>();
@@ -41,7 +41,7 @@ namespace oni {
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::real32 velocity{200.f};
+                common::r32 velocity{200.f};
 
                 for (auto &&entity: carView) {
                     auto *input = clientData->getClientInput(entity);
@@ -63,7 +63,7 @@ namespace oni {
 
         void
         Projectile::fireRocket(entities::EntityFactory &entityFactory,
-                               const common::real32 velocity,
+                               const common::r32 velocity,
                                const component::WorldP3D &pos,
                                const component::Heading &heading,
                                const component::CarConfig &carConfig,
@@ -83,15 +83,15 @@ namespace oni {
                     // of car nose, which is where we like to spawn the bullet projectiles.
                     // TODO: This looks unnecessary, can I not just use attached gun position to find the bullet
                     // spawn location?
-                    common::real32 carHalfX =
-                            static_cast<common::real32 >(carConfig.cgToFront + carConfig.cgToRear) / 2.f;
-                    auto carHalfY = static_cast<common::real32>(carConfig.halfWidth);
+                    common::r32 carHalfX =
+                            static_cast<common::r32 >(carConfig.cgToFront + carConfig.cgToRear) / 2.f;
+                    auto carHalfY = static_cast<common::r32>(carConfig.halfWidth);
                     auto offset = sqrt(carHalfX * carHalfX + carHalfY * carHalfY);
 
                     math::vec2 size{1.0f, 0.3f};
                     auto projectileOffset = sqrt(
                             size.x * size.x / 4.f + size.y * size.y / 4.f);
-                    common::real32 fudge = 0.2f;
+                    common::r32 fudge = 0.2f;
 
                     auto rocketPos = component::WorldP3D{};
                     rocketPos.x = pos.x + (offset + projectileOffset + fudge) * cos(heading.value);

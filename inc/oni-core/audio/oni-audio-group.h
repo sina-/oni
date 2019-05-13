@@ -4,7 +4,7 @@
 
 namespace oni {
     namespace audio {
-        enum class AudioGroup : common::uint8 {
+        enum class AudioGroup : common::u8 {
             MASTER,
             MUSIC,
             EFFECTS,

@@ -5,7 +5,7 @@
 namespace oni {
     namespace component {
         struct GunCoolDown {
-            common::real32 value{0.f};
+            common::r32 value{0.f};
         };
     }
 }

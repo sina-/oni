@@ -11,13 +11,13 @@ namespace oni {
 
         Game::Game() = default;
 
-        Game::Game(common::uint16 rate) :
+        Game::Game(common::u16 rate) :
                 mTickS(1.f / rate) {
         }
 
         Game::~Game() = default;
 
-        common::real32
+        common::r32
         Game::getTickFrequency() {
             return mTickS;
         }
@@ -29,7 +29,7 @@ namespace oni {
         void
         Game::run() {
             initRenderer();
-            auto tickTime = std::chrono::microseconds(static_cast<common::uint64>(mTickS * 1000 * 1000));
+            auto tickTime = std::chrono::microseconds(static_cast<common::u64>(mTickS * 1000 * 1000));
 
             while (!shouldTerminate()) {
                 mGameLoopTimer.restart();
@@ -52,8 +52,8 @@ namespace oni {
             if (elapsed >= 1.0f) {
                 auto sps = mSimUpdateCounter / elapsed;
                 auto st = mSimMS / elapsed;
-                showSPS(static_cast<common::int16>(sps));
-                showST(static_cast<common::int16>(st * 1000));
+                showSPS(static_cast<common::i16>(sps));
+                showST(static_cast<common::i16>(st * 1000));
 
                 mSimLoopTimer.restart();
                 mSimUpdateCounter = 0;
@@ -73,8 +73,8 @@ namespace oni {
             if (elapsed >= 1.0f) {
                 auto pps = mPollUpdateCounter / elapsed;
                 auto pt = mPollMS / elapsed;
-                showPPS(static_cast<common::int16>(pps));
-                showPT(static_cast<common::int16>(pt * 1000));
+                showPPS(static_cast<common::i16>(pps));
+                showPT(static_cast<common::i16>(pt * 1000));
 
                 mPollLoopTimer.restart();
                 mPollUpdateCounter = 0;
@@ -94,8 +94,8 @@ namespace oni {
             if (elapsed >= 1.0f) {
                 auto fps = mRenderUpdateCounter / elapsed;
                 auto rt = mRenderMS / elapsed;
-                showFPS(static_cast<common::int16>(fps));
-                showRT(static_cast<common::int16>(rt * 1000));
+                showFPS(static_cast<common::i16>(fps));
+                showRT(static_cast<common::i16>(rt * 1000));
 
                 mRenderLoopTimer.restart();
                 mRenderUpdateCounter = 0;

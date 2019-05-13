@@ -33,7 +33,7 @@ namespace oni {
                 if (status == GL_FALSE) {
                     common::oniGLint length;
                     glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
-                    std::vector<char> error(static_cast<common::uint32>(length));
+                    std::vector<char> error(static_cast<common::u32>(length));
                     glGetShaderInfoLog(shaderID, length, &length, &error[0]);
                     glDeleteShader(shaderID);
                     std::cout << std::string(error.data()) << "\n";
@@ -100,7 +100,7 @@ namespace oni {
 
         void
         Shader::setUniform1f(const common::oniGLchar *name,
-                             oni::common::real32 value) const {
+                             oni::common::r32 value) const {
             glUniform1f(getUniformLocation(name), value);
         }
 
@@ -124,7 +124,7 @@ namespace oni {
 
         void
         Shader::setUniform1i(const common::oniGLchar *name,
-                             common::int32 value) const {
+                             common::i32 value) const {
             glUniform1i(getUniformLocation(name), value);
         }
 

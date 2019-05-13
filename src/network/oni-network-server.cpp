@@ -11,8 +11,8 @@
 namespace oni {
     namespace network {
         Server::Server(const Address *address,
-                       common::uint8 numClients,
-                       common::uint8 numChannels) :
+                       common::u8 numClients,
+                       common::u8 numChannels) :
                 Peer::Peer(address, numClients, numChannels, 0, 0) {
         }
 

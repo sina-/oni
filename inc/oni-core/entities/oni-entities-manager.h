@@ -164,7 +164,7 @@ namespace oni {
             };
 
             EntityManager() {
-                mRegistry = std::make_unique<entt::basic_registry<common::uint32 >>();
+                mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();
                 mLoader = std::make_unique<entt::basic_continuous_loader<EntityIDType>>(*mRegistry);
                 mDispatcher = std::make_unique<entt::dispatcher>();
                 //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);

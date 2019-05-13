@@ -15,8 +15,8 @@ namespace oni {
 
         FontManager::FontManager(std::string font,
                                  unsigned char size,
-                                 common::real32 gameWidth,
-                                 common::real32 gameHeight)
+                                 common::r32 gameWidth,
+                                 common::r32 gameHeight)
 //                m_FTAtlas(, ftgl::texture_atlas_delete),
 //                m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/Vera.ttf"),
 //                         ftgl::texture_font_delete) {

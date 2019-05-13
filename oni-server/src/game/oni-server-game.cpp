@@ -137,7 +137,7 @@ namespace oni {
             }
 
             void
-            ServerGame::_sim(const common::real64 tickTime) {
+            ServerGame::_sim(const common::r64 tickTime) {
                 // Fake lag
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
@@ -167,7 +167,7 @@ namespace oni {
             }
 
             void
-            ServerGame::_render(common::real64 simTime) {}
+            ServerGame::_render(common::r64 simTime) {}
 
             void
             ServerGame::_display() {}
@@ -179,26 +179,26 @@ namespace oni {
             }
 
             void
-            ServerGame::showFPS(common::int16 fps) {}
+            ServerGame::showFPS(common::i16 fps) {}
 
             void
-            ServerGame::showSPS(common::int16 tps) {}
+            ServerGame::showSPS(common::i16 tps) {}
 
             void
-            ServerGame::showPPS(common::int16 pps) {
+            ServerGame::showPPS(common::i16 pps) {
                 if (pps < 30) {
                     std::cout << "PPS " << pps << "\n";
                 }
             }
 
             void
-            ServerGame::showPT(common::int16) {}
+            ServerGame::showPT(common::i16) {}
 
             void
-            ServerGame::showST(common::int16) {}
+            ServerGame::showST(common::i16) {}
 
             void
-            ServerGame::showRT(common::int16) {}
+            ServerGame::showRT(common::i16) {}
 
             common::EntityID
             ServerGame::spawnRaceCar() {
@@ -237,23 +237,23 @@ namespace oni {
 
                 auto &carConfig = manager.get<component::CarConfig>(carEntity);
                 std::string tireTextureID = "resources/images/car/1/car-tire.png";
-                auto tireHeading = component::Heading{static_cast< common::real32>( math::toRadians(90.0f))};
+                auto tireHeading = component::Heading{static_cast< common::r32>( math::toRadians(90.0f))};
                 math::vec2 tireSize{
-                        static_cast<common::real32>(carConfig.wheelWidth),
-                        static_cast<common::real32>(carConfig.wheelRadius * 2)
+                        static_cast<common::r32>(carConfig.wheelWidth),
+                        static_cast<common::r32>(carConfig.wheelRadius * 2)
                 };
 
                 std::array<math::vec2, 2> carTiresFront{
-                        math::vec2{static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
-                                   static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
-                        math::vec2{static_cast<common::real32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
-                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)}
+                        math::vec2{static_cast<common::r32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
+                                   static_cast<common::r32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
+                        math::vec2{static_cast<common::r32>(carConfig.cgToFrontAxle - carConfig.wheelRadius),
+                                   static_cast<common::r32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)}
                 };
                 std::array<math::vec2, 2> carTiresRear{
-                        math::vec2{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                   static_cast<common::real32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
-                        math::vec2{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                   static_cast<common::real32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)}
+                        math::vec2{static_cast<common::r32>(-carConfig.cgToRearAxle),
+                                   static_cast<common::r32>(carConfig.halfWidth / 2 + carConfig.wheelWidth)},
+                        math::vec2{static_cast<common::r32>(-carConfig.cgToRearAxle),
+                                   static_cast<common::r32>(-carConfig.halfWidth / 2 - carConfig.wheelWidth)}
                 };
 
                 for (auto &&carTire: carTiresFront) {

@@ -74,7 +74,7 @@ namespace oni {
             }*/
         };
 
-        Dynamics::Dynamics(common::real32 tickFreq)
+        Dynamics::Dynamics(common::r32 tickFreq)
                 : mTickFrequency(tickFreq) {
             b2Vec2 gravity(0.0f, 0.0f);
             mCollisionHandler = std::make_unique<CollisionHandler>();
@@ -127,7 +127,7 @@ namespace oni {
         void
         Dynamics::tick(entities::EntityFactory &entityFactory,
                        entities::ClientDataManager *clientData,
-                       common::real64 tickTime) {
+                       common::r64 tickTime) {
             auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, io::CarInput> carInput{};
             std::vector<common::EntityID> entitiesToBeUpdated{};
@@ -166,14 +166,14 @@ namespace oni {
                         carInput[entity].right = 1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
-                        car.velocity = car.velocity + math::vec2{static_cast<common::real32>(cos(car.heading)),
-                                                                 static_cast<common::real32>(sin(car.heading))};
+                        car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(car.heading)),
+                                                                 static_cast<common::r32>(sin(car.heading))};
                     }
                     if (input->isPressed(GLFW_KEY_SPACE)) {
                         if (car.accumulatedEBrake < 1.0f) {
                             car.accumulatedEBrake += 0.01f;
                         }
-                        carInput[entity].eBrake = static_cast<common::real32>(car.accumulatedEBrake);
+                        carInput[entity].eBrake = static_cast<common::r32>(car.accumulatedEBrake);
                     } else {
                         car.accumulatedEBrake = 0.0f;
                     }
@@ -206,7 +206,7 @@ namespace oni {
                         std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP) {
                         carPos.x = car.position.x;
                         carPos.y = car.position.y;
-                        heading.value = static_cast<common::real32>(car.heading);
+                        heading.value = static_cast<common::r32>(car.heading);
                         car.distanceFromCamera = distanceFromCamera;
 
                         updateTransforms(manager, entity, carPos, heading, scale);
@@ -247,9 +247,9 @@ namespace oni {
                         // carconfig?
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
                         props.body->ApplyForceToCenter(
-                                b2Vec2(static_cast<common::real32>(std::cos(car.heading) * 30 *
+                                b2Vec2(static_cast<common::r32>(std::cos(car.heading) * 30 *
                                                                    carInput[entity].throttle),
-                                       static_cast<common::real32>(std::sin(car.heading) * 30 *
+                                       static_cast<common::r32>(std::sin(car.heading) * 30 *
                                                                    carInput[entity].throttle)),
                                 true);
                         car.isColliding = false;
@@ -340,7 +340,7 @@ namespace oni {
 
                             // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
                             // There seems to be something wrong with the way tires are created in the beginning
-                            heading = static_cast<oni::common::real32>(car.steerAngle +
+                            heading = static_cast<oni::common::r32>(car.steerAngle +
                                                                        math::toRadians(90.0f));
                         }
                     }
@@ -396,7 +396,7 @@ namespace oni {
 
             if (isColliding(props.body)) {
                 // TODO: Proper Z level!
-                common::real32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
+                common::r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 auto worldPos = component::WorldP3D{};
                 worldPos.x = props.body->GetPosition().x;
                 worldPos.y = props.body->GetPosition().y;
@@ -447,7 +447,7 @@ namespace oni {
 
         void
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
-                            common::real64 tickTime) {
+                            common::r64 tickTime) {
             {
                 /// Client side
                 auto &entityManager = entityFactory.getEntityManager();
@@ -497,7 +497,7 @@ namespace oni {
 
         void
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
-                                  common::real64 tickTime) {
+                                  common::r64 tickTime) {
             /// Update particle placement
             {
                 auto view = entityFactory.getEntityManager().createView<
@@ -517,8 +517,8 @@ namespace oni {
                             5 * (velocity.currentVelocity * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
                     math::zeroClip(currentVelocity);
 
-                    common::real32 x = std::cos(heading) * currentVelocity;
-                    common::real32 y = std::sin(heading) * currentVelocity;
+                    common::r32 x = std::cos(heading) * currentVelocity;
+                    common::r32 y = std::sin(heading) * currentVelocity;
 
                     pos.x += x;
                     pos.y += y;

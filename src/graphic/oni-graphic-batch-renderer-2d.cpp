@@ -48,7 +48,7 @@ namespace oni {
                     assert(false);
             }
 
-            auto maxUIntSize = std::numeric_limits<common::int32>::max();
+            auto maxUIntSize = std::numeric_limits<common::i32>::max();
             assert(mMaxIndicesCount < maxUIntSize);
 
             common::oniGLsizei maxBufferSize{mMaxPrimitiveSize * mMaxPrimitiveCount};
@@ -226,9 +226,9 @@ namespace oni {
             auto scaleX = text.xScaling;
             auto scaleY = text.yScaling;
 
-            common::real32 z = 1.f;
+            common::r32 z = 1.f;
 
-            for (common::uint32 i = 0; i < text.textContent.size(); i++) {
+            for (common::u32 i = 0; i < text.textContent.size(); i++) {
                 assert(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = pos.x + text.offsetX[i] / scaleX + advance;

@@ -8,7 +8,7 @@
 namespace oni {
     namespace network {
         struct Packet_EntityID {
-            common::uint32 entity{0};
+            common::u32 entity{0};
         };
 
         struct Packet_Data {

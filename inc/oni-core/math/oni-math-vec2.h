@@ -7,8 +7,8 @@
 namespace oni {
     namespace math {
         struct vec2 {
-            common::real32 x{0.0f};
-            common::real32 y{0.0f};
+            common::r32 x{0.0f};
+            common::r32 y{0.0f};
 
             vec2 &
             add(const vec2 &other);
@@ -23,7 +23,7 @@ namespace oni {
             divide(const vec2 &other);
 
             vec2 &
-            divide(common::real32);
+            divide(common::r32);
 
             friend vec2
             operator+(const vec2 &left,
@@ -43,7 +43,7 @@ namespace oni {
 
             friend vec2
             operator/(const vec2 &left,
-                      common::real32 right);
+                      common::r32 right);
 
             vec2 &
             operator+=(const vec2 &other);
@@ -63,7 +63,7 @@ namespace oni {
             bool
             operator!=(const vec2 &other);
 
-            common::real32
+            common::r32
             len() const;
 
             friend std::ostream &

@@ -8,7 +8,7 @@
 
 namespace oni {
     namespace game {
-        enum class EventType : common::uint8 {
+        enum class EventType : common::u8 {
             COLLISION,
             SPAWN_PARTICLE,
             SOUND_PLAY,

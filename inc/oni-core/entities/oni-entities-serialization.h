@@ -154,7 +154,7 @@ namespace oni {
 
         template<class T>
         T
-        deserialize(const common::uint8 *data,
+        deserialize(const common::u8 *data,
                     size_t size) {
             std::istringstream storage;
             storage.str(std::string(reinterpret_cast<const char *>(data), size));

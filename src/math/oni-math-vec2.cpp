@@ -33,7 +33,7 @@ namespace oni {
         }
 
         vec2 &
-        vec2::divide(common::real32 divisor) {
+        vec2::divide(common::r32 divisor) {
             x /= divisor;
             y /= divisor;
             return *this;
@@ -100,14 +100,14 @@ namespace oni {
             return stream;
         }
 
-        common::real32
+        common::r32
         vec2::len() const {
             return std::sqrt(x * x + y * y);
         }
 
         vec2
         operator/(const vec2 &left,
-                  common::real32 divisor) {
+                  common::r32 divisor) {
             return vec2{left.x, left.y}.divide(divisor);
         }
     }

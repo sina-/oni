@@ -35,7 +35,7 @@ namespace oni {
         class Dynamics {
 
         public:
-            explicit Dynamics(common::real32 tickFreq);
+            explicit Dynamics(common::r32 tickFreq);
 
             ~Dynamics();
 
@@ -55,7 +55,7 @@ namespace oni {
             void
             tick(entities::EntityFactory &entityFactory,
                  entities::ClientDataManager *clientData,
-                 common::real64 tickTime);
+                 common::r64 tickTime);
 
         private:
             void
@@ -100,11 +100,11 @@ namespace oni {
 
             void
             updateAge(entities::EntityFactory &,
-                      common::real64 tickTime);
+                      common::r64 tickTime);
 
             void
             updatePlacement(entities::EntityFactory &,
-                            common::real64 tickTime);
+                            common::r64 tickTime);
 
 
         private:
@@ -118,7 +118,7 @@ namespace oni {
                                        component::PhysicalProperties &,
                                        component::WorldP3D &
                     )>> mCollisionHandlers{};
-            common::real32 mTickFrequency{};
+            common::r32 mTickFrequency{};
 
             std::unique_ptr<math::Rand> mRand{};
         };

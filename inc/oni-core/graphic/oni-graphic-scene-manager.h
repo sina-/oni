@@ -50,7 +50,7 @@ namespace oni {
                          FontManager &,
                          math::ZLayerManager &,
                          b2World &,
-                         common::real32
+                         common::r32
             );
 
             ~SceneManager();
@@ -64,7 +64,7 @@ namespace oni {
             void
             tick(entities::EntityFactory &server,
                  entities::EntityFactory &client,
-                 common::real64 tickTime);
+                 common::r64 tickTime);
 
             void
             renderRaw(const component::Shape &,
@@ -77,16 +77,16 @@ namespace oni {
                   graphic::Brush brush);
 
             void
-            lookAt(common::real32 x,
-                   common::real32 y);
+            lookAt(common::r32 x,
+                   common::r32 y);
 
             void
-            lookAt(common::real32 x,
-                   common::real32 y,
-                   common::real32 distance);
+            lookAt(common::r32 x,
+                   common::r32 y,
+                   common::r32 distance);
 
             void
-            zoom(common::real32 distance);
+            zoom(common::r32 distance);
 
             const graphic::Camera &
             getCamera() const;
@@ -97,19 +97,19 @@ namespace oni {
             const math::mat4 &
             getViewMatrix() const;
 
-            common::real32
+            common::r32
             getViewWidth() const;
 
-            common::real32
+            common::r32
             getViewHeight() const;
 
-            common::uint16
+            common::u16
             getSpritesPerFrame() const;
 
-            common::uint16
+            common::u16
             getParticlesPerFrame() const;
 
-            common::uint16
+            common::u16
             getTexturesPerFrame() const;
 
             void
@@ -129,28 +129,28 @@ namespace oni {
 
             void
             renderStaticTextures(entities::EntityManager &,
-                                 common::real32 viewWidth,
-                                 common::real32 viewHeight);
+                                 common::r32 viewWidth,
+                                 common::r32 viewHeight);
 
             void
             renderStaticText(entities::EntityManager &,
-                             common::real32 viewWidth,
-                             common::real32 viewHeight);
+                             common::r32 viewWidth,
+                             common::r32 viewHeight);
 
             void
             renderDynamicTextures(entities::EntityManager &,
-                                  common::real32 viewWidth,
-                                  common::real32 viewHeight);
+                                  common::r32 viewWidth,
+                                  common::r32 viewHeight);
 
             void
             renderColorSprites(entities::EntityManager &,
-                               common::real32 viewWidth,
-                               common::real32 viewHeight);
+                               common::r32 viewWidth,
+                               common::r32 viewHeight);
 
             void
             renderParticles(entities::EntityManager &,
-                            common::real32 viewWidth,
-                            common::real32 viewHeight);
+                            common::r32 viewWidth,
+                            common::r32 viewHeight);
 
         private:
             struct RaceInfoEntities {
@@ -227,23 +227,23 @@ namespace oni {
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            std::map<common::uint64, common::EntityID> mCanvasTileLookup{};
+            std::map<common::u64, common::EntityID> mCanvasTileLookup{};
             std::map<common::EntityID, RaceInfoEntities> mLapInfoLookup{};
 
-            const common::uint16 mCanvasTileSizeX{0};
-            const common::uint16 mCanvasTileSizeY{0};
-            const common::real32 mHalfCanvasTileSizeX{0.0f};
-            const common::real32 mHalfCanvasTileSizeY{0.0f};
+            const common::u16 mCanvasTileSizeX{0};
+            const common::u16 mCanvasTileSizeY{0};
+            const common::r32 mHalfCanvasTileSizeX{0.0f};
+            const common::r32 mHalfCanvasTileSizeY{0.0f};
 
             graphic::ScreenBounds mScreenBounds{};
             graphic::Camera mCamera{0.0f, 0.0f, 1.0f};
 
-            const common::uint16 mMaxSpriteCount{0};
-            const common::real32 mGameUnitToPixels{0};
+            const common::u16 mMaxSpriteCount{0};
+            const common::r32 mGameUnitToPixels{0};
 
-            common::uint16 mRenderedSpritesPerFrame{0};
-            common::uint16 mRenderedTexturesPerFrame{0};
-            common::uint16 mRenderedParticlesPerFrame{0};
+            common::u16 mRenderedSpritesPerFrame{0};
+            common::u16 mRenderedTexturesPerFrame{0};
+            common::u16 mRenderedParticlesPerFrame{0};
 
             math::ZLayerManager &mZLayerManager;
         };

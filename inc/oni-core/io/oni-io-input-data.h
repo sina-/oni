@@ -4,14 +4,14 @@
 
 namespace oni {
     namespace io {
-        typedef common::uint16 oniKeyPress;
+        typedef common::u16 oniKeyPress;
 
         struct CarInput {
-            common::real32 left{0.0f};
-            common::real32 right{0.0f};
-            common::real32 throttle{0.0f};
-            common::real32 brake{0.0f};
-            common::real32 eBrake{0.0f};
+            common::r32 left{0.0f};
+            common::r32 right{0.0f};
+            common::r32 throttle{0.0f};
+            common::r32 brake{0.0f};
+            common::r32 eBrake{0.0f};
         };
     }
 }

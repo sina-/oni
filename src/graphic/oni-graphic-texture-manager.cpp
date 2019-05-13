@@ -115,11 +115,11 @@ namespace oni {
 
             image.width = image.width;
             image.height = image.height;
-            image.data.resize(static_cast<common::uint32>(mElementsInRGBA * image.width * image.height), 0);
-            common::uint16 stride = image.width * mElementsInRGBA;
+            image.data.resize(static_cast<common::u32>(mElementsInRGBA * image.width * image.height), 0);
+            common::u16 stride = image.width * mElementsInRGBA;
 
-            for (common::uint32 y = 0; y < image.height; ++y) {
-                for (common::uint32 x = 0; x < image.width; ++x) {
+            for (common::u32 y = 0; y < image.height; ++y) {
+                for (common::u32 x = 0; x < image.width; ++x) {
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = pixel.blue;
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = pixel.green;
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = pixel.red;
@@ -134,7 +134,7 @@ namespace oni {
                                          common::oniGLint yOffset,
                                          common::oniGLint width,
                                          common::oniGLint height,
-                                         const std::vector<common::uint8> &bits) {
+                                         const std::vector<common::u8> &bits) {
             assert(texture.image.width > xOffset);
             assert(texture.image.height > yOffset);
             assert(texture.image.width > 0);
@@ -162,11 +162,11 @@ namespace oni {
             auto b = FI_RGBA_BLUE;
             auto a = FI_RGBA_ALPHA;
 
-            common::int32 brushStride = image.width * mElementsInRGBA;
-            common::int32 textureStride = texture.image.width * mElementsInRGBA;
+            common::i32 brushStride = image.width * mElementsInRGBA;
+            common::i32 textureStride = texture.image.width * mElementsInRGBA;
 
-            common::int32 subImageWidth = image.width;
-            common::int32 subImageHeight = image.height;
+            common::i32 subImageWidth = image.width;
+            common::i32 subImageHeight = image.height;
 
             if (yOffset < 0) {
                 subImageHeight = image.height + yOffset;
@@ -189,14 +189,14 @@ namespace oni {
             assert(subImageHeight > 0);
             assert(subImageWidth > 0);
 
-            common::uint32 subImageStride = subImageWidth * mElementsInRGBA;
-            std::vector<common::uint8> subImage;
+            common::u32 subImageStride = subImageWidth * mElementsInRGBA;
+            std::vector<common::u8> subImage;
             subImage.resize(subImageHeight * subImageStride, 0);
 
-            for (common::int32 y = 0; y < image.height; ++y) {
-                for (common::int32 x = 0; x < image.width; ++x) {
-                    common::int32 xTexture = x + xOffset;
-                    common::int32 yTexture = y + yOffset;
+            for (common::i32 y = 0; y < image.height; ++y) {
+                for (common::i32 x = 0; x < image.width; ++x) {
+                    common::i32 xTexture = x + xOffset;
+                    common::i32 yTexture = y + yOffset;
 
                     if (xTexture < 0 || yTexture < 0) {
                         continue;
@@ -205,8 +205,8 @@ namespace oni {
                         continue;
                     }
 
-                    common::int32 ySubImage = y;
-                    common::int32 xSubImage = x;
+                    common::i32 ySubImage = y;
+                    common::i32 xSubImage = x;
 
                     if (yOffset < 0) {
                         ySubImage += yOffset;
@@ -220,9 +220,9 @@ namespace oni {
                     assert(xTexture >= 0);
                     assert(yTexture >= 0);
 
-                    common::int32 n = (y * brushStride) + (x * mElementsInRGBA);
-                    common::int32 m = (yTexture * textureStride) + (xTexture * mElementsInRGBA);
-                    common::int32 p = (ySubImage * subImageStride) + (xSubImage * mElementsInRGBA);
+                    common::i32 n = (y * brushStride) + (x * mElementsInRGBA);
+                    common::i32 m = (yTexture * textureStride) + (xTexture * mElementsInRGBA);
+                    common::i32 p = (ySubImage * subImageStride) + (xSubImage * mElementsInRGBA);
 
                     // TODO: Why does this happen? :/
                     if (p + a >= subImage.size()) {
@@ -237,36 +237,36 @@ namespace oni {
                     assert(m >= 0);
                     assert(p >= 0);
 
-                    common::real32 oldR = texture.image.data[m + r] / 255.f;
-                    common::real32 oldG = texture.image.data[m + g] / 255.f;
-                    common::real32 oldB = texture.image.data[m + b] / 255.f;
-                    common::real32 oldA = texture.image.data[m + a] / 255.f;
+                    common::r32 oldR = texture.image.data[m + r] / 255.f;
+                    common::r32 oldG = texture.image.data[m + g] / 255.f;
+                    common::r32 oldB = texture.image.data[m + b] / 255.f;
+                    common::r32 oldA = texture.image.data[m + a] / 255.f;
 
-                    common::real32 newR = image.data[n + r] / 255.f;
-                    common::real32 newG = image.data[n + g] / 255.f;
-                    common::real32 newB = image.data[n + b] / 255.f;
-                    common::real32 newA = image.data[n + a] / 255.f;
+                    common::r32 newR = image.data[n + r] / 255.f;
+                    common::r32 newG = image.data[n + g] / 255.f;
+                    common::r32 newB = image.data[n + b] / 255.f;
+                    common::r32 newA = image.data[n + a] / 255.f;
 
-                    common::real32 blendR = math::lerp(oldR, newR, newA);
-                    common::real32 blendG = math::lerp(oldG, newG, newA);
-                    common::real32 blendB = math::lerp(oldB, newB, newA);
-                    common::real32 blendA = newA + oldA;
+                    common::r32 blendR = math::lerp(oldR, newR, newA);
+                    common::r32 blendG = math::lerp(oldG, newG, newA);
+                    common::r32 blendB = math::lerp(oldB, newB, newA);
+                    common::r32 blendA = newA + oldA;
 
                     math::clip(blendR, 0.f, 1.f);
                     math::clip(blendG, 0.f, 1.f);
                     math::clip(blendB, 0.f, 1.f);
                     math::clip(blendA, 0.f, 1.f);
 
-                    subImage[p + r] = (common::uint8) (blendR * 255);
-                    subImage[p + g] = (common::uint8) (blendG * 255);
-                    subImage[p + b] = (common::uint8) (blendB * 255);
-                    subImage[p + a] = (common::uint8) (blendA * 255);
+                    subImage[p + r] = (common::u8) (blendR * 255);
+                    subImage[p + g] = (common::u8) (blendG * 255);
+                    subImage[p + b] = (common::u8) (blendB * 255);
+                    subImage[p + a] = (common::u8) (blendA * 255);
 
                     // NOTE: Store the blend for future
-                    texture.image.data[m + r] = (common::uint8) (blendR * 255);
-                    texture.image.data[m + g] = (common::uint8) (blendG * 255);
-                    texture.image.data[m + b] = (common::uint8) (blendB * 255);
-                    texture.image.data[m + a] = (common::uint8) (blendA * 255);
+                    texture.image.data[m + r] = (common::u8) (blendR * 255);
+                    texture.image.data[m + g] = (common::u8) (blendG * 255);
+                    texture.image.data[m + b] = (common::u8) (blendB * 255);
+                    texture.image.data[m + a] = (common::u8) (blendA * 255);
                 }
             }
 

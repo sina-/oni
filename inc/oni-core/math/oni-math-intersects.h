@@ -22,23 +22,23 @@ namespace oni {
 
         bool
         intersects(const component::Shape &first,
-                   common::real32 x,
-                   common::real32 y,
-                   common::real32 lengthX,
-                   common::real32 lengthY);
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY);
 
         bool
         intersects(const component::WorldP3D &first,
-                   common::real32 x,
-                   common::real32 y,
-                   common::real32 lengthX,
-                   common::real32 lengthY);
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY);
 
         bool
         intersects(const component::Point &first,
-                   common::real32 x,
-                   common::real32 y,
-                   common::real32 lengthX,
-                   common::real32 lengthY);
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY);
     }
 }

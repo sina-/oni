@@ -89,14 +89,14 @@ namespace oni {
             }
         };
 
-        enum class BodyType : common::uint8 {
+        enum class BodyType : common::u8 {
             UNKNOWN = 0,
             STATIC = 1,
             KINEMATIC = 2,
             DYNAMIC = 3,
         };
 
-        enum class PhysicalCategory : common::uint8 {
+        enum class PhysicalCategory : common::u8 {
             UNKNOWN = 0,
             GENERIC = 1,
             VEHICLE = 2,
@@ -106,8 +106,8 @@ namespace oni {
         };
 
         struct Velocity {
-            common::real32 currentVelocity{0.f};
-            common::real32 maxVelocity{0.f};
+            common::r32 currentVelocity{0.f};
+            common::r32 maxVelocity{0.f};
         };
 
         struct Age {
@@ -116,10 +116,10 @@ namespace oni {
         };
 
         struct PhysicalProperties {
-            common::real32 linearDamping{2.f};
-            common::real32 angularDamping{2.f};
-            common::real32 density{0.1f};
-            common::real32 friction{1.0f};
+            common::r32 linearDamping{2.f};
+            common::r32 angularDamping{2.f};
+            common::r32 density{0.1f};
+            common::r32 friction{1.0f};
             bool highPrecision{false};
             bool colliding{false};
             bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other

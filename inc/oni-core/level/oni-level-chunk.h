@@ -6,19 +6,19 @@
 namespace oni {
     namespace level {
         struct ChunkIndex {
-            common::int64 x{0};
-            common::int64 y{0};
+            common::i64 x{0};
+            common::i64 y{0};
         };
 
         struct RoadTileIndex {
             // NOTE: This is relative to Chunk
-            common::uint16 x{0};
-            common::uint16 y{0};
+            common::u16 x{0};
+            common::u16 y{0};
         };
 
         struct TileIndex {
-            common::int64 x{0};
-            common::int64 y{0};
+            common::i64 x{0};
+            common::i64 y{0};
         };
 
         struct EdgeRoadTile {
@@ -29,7 +29,7 @@ namespace oni {
         };
 
         struct Chunk {
-            common::uint64 index{0};
+            common::u64 index{0};
             EdgeRoadTile edgeRoad{};
         };
     }

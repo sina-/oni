@@ -18,22 +18,22 @@ namespace oni {
          */
         class Window {
             std::string mTitle{};
-            common::int32 mWidth{};
-            common::int32 mHeight{};
-            common::int32 mGameWidth{};
-            common::int32 mGameHeight{};
+            common::i32 mWidth{};
+            common::i32 mHeight{};
+            common::i32 mGameWidth{};
+            common::i32 mGameHeight{};
             GLFWwindow *mWindow{};
-            common::int32 mMouseButton{};
-            common::real64 mCursorX{};
-            common::real64 mCursorY{};
-            std::vector<common::int32> mKeysPressed{};
-            std::vector<common::int32> mKeysReleased{};
+            common::i32 mMouseButton{};
+            common::r64 mCursorX{};
+            common::r64 mCursorY{};
+            std::vector<common::i32> mKeysPressed{};
+            std::vector<common::i32> mKeysReleased{};
 
 
         public:
             Window(std::string &&name,
-                   common::int32 gameWidth,
-                   common::int32 gameHeight);
+                   common::i32 gameWidth,
+                   common::i32 gameHeight);
 
             ~Window();
 
@@ -55,45 +55,45 @@ namespace oni {
             clear() const;
 
             void
-            setWidth(common::int32 width) { mWidth = width; }
+            setWidth(common::i32 width) { mWidth = width; }
 
-            const common::int32 &
+            const common::i32 &
             getWidth() const { return mWidth; }
 
             void
-            setHeight(common::int32 height) { mHeight = height; }
+            setHeight(common::i32 height) { mHeight = height; }
 
-            const common::int32 &
+            const common::i32 &
             getHeight() const { return mHeight; }
 
-            common::int32
+            common::i32
             getGameWidth() { return mGameWidth; }
 
-            common::int32
+            common::i32
             getGameHeight() { return mGameHeight; }
 
             void
-            addKeyPressed(common::int32 key) { mKeysPressed.push_back(key); }
+            addKeyPressed(common::i32 key) { mKeysPressed.push_back(key); }
 
             void
-            addKeyReleased(common::int32 key) { mKeysReleased.push_back(key); }
+            addKeyReleased(common::i32 key) { mKeysReleased.push_back(key); }
 
             void
-            setMouseButton(common::int32 button) { mMouseButton = button; }
+            setMouseButton(common::i32 button) { mMouseButton = button; }
 
-            const common::int32 &
+            const common::i32 &
             getMouseButton() const { return mMouseButton; }
 
             void
-            setCursorX(oni::common::real64 x) { mCursorX = x; }
+            setCursorX(oni::common::r64 x) { mCursorX = x; }
 
-            const oni::common::real64 &
+            const oni::common::r64 &
             getCursorX() const { return mCursorX; }
 
             void
-            setCursorY(oni::common::real64 y) { mCursorY = y; }
+            setCursorY(oni::common::r64 y) { mCursorY = y; }
 
-            const oni::common::real64 &
+            const oni::common::r64 &
             getCursorY() const { return mCursorY; }
 
             static Window *
@@ -101,26 +101,26 @@ namespace oni {
 
             static void
             windowResizeCallback(GLFWwindow *window,
-                                 common::int32 width,
-                                 common::int32 height);
+                                 common::i32 width,
+                                 common::i32 height);
 
             static void
             keyCallback(GLFWwindow *window,
-                        common::int32 key,
-                        common::int32 scancode,
-                        common::int32 action,
-                        common::int32 mods);
+                        common::i32 key,
+                        common::i32 scancode,
+                        common::i32 action,
+                        common::i32 mods);
 
             static void
             mouseCallback(GLFWwindow *window,
-                          common::int32 button,
-                          common::int32 action,
-                          common::int32 mods);
+                          common::i32 button,
+                          common::i32 action,
+                          common::i32 mods);
 
             static void
             cursorPosCallback(GLFWwindow *window,
-                              oni::common::real64 x,
-                              oni::common::real64 y);
+                              oni::common::r64 x,
+                              oni::common::r64 y);
 
         private:
             static void

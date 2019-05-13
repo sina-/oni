@@ -29,7 +29,7 @@ namespace oni {
                                    FontManager &fontManager,
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
-                                   common::real32 gameUnitToPixels) :
+                                   common::r32 gameUnitToPixels) :
                 mCanvasTileSizeX{110},
                 mCanvasTileSizeY{110},
                 mHalfCanvasTileSizeX{mCanvasTileSizeX / 2.f},
@@ -424,8 +424,8 @@ namespace oni {
 
         void
         SceneManager::renderStaticText(entities::EntityManager &manager,
-                                       common::real32 viewWidth,
-                                       common::real32 viewHeight) {
+                                       common::r32 viewWidth,
+                                       common::r32 viewHeight) {
             auto staticTextView = manager.createView<component::Text, component::Tag_Static, component::WorldP3D>();
             for (const auto &entity: staticTextView) {
                 auto &text = staticTextView.get<component::Text>(entity);
@@ -440,8 +440,8 @@ namespace oni {
 
         void
         SceneManager::renderStaticTextures(entities::EntityManager &manager,
-                                           common::real32 viewWidth,
-                                           common::real32 viewHeight) {
+                                           common::r32 viewWidth,
+                                           common::r32 viewHeight) {
             auto staticTextureView = manager.createView<component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::Tag_Static>();
             for (const auto &entity: staticTextureView) {
@@ -470,8 +470,8 @@ namespace oni {
 
         void
         SceneManager::renderDynamicTextures(entities::EntityManager &manager,
-                                            common::real32 viewWidth,
-                                            common::real32 viewHeight) {
+                                            common::r32 viewWidth,
+                                            common::r32 viewHeight) {
             auto view = manager.createView<component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::WorldP3D, component::Heading, component::Scale, component::Tag_Dynamic>();
             for (const auto &entity: view) {
@@ -510,8 +510,8 @@ namespace oni {
 
         void
         SceneManager::renderColorSprites(entities::EntityManager &manager,
-                                         common::real32 viewWidth,
-                                         common::real32 viewHeight) {
+                                         common::r32 viewWidth,
+                                         common::r32 viewHeight) {
             auto view = manager.createView<component::Tag_ColorShaded, component::Shape,
                     component::Appearance, component::Tag_Static>();
             for (const auto &entity: view) {
@@ -529,8 +529,8 @@ namespace oni {
 
         void
         SceneManager::renderParticles(entities::EntityManager &manager,
-                                      common::real32 viewWidth,
-                                      common::real32 viewHeight) {
+                                      common::r32 viewWidth,
+                                      common::r32 viewHeight) {
             // Particles with color shading
             {
                 auto view = manager.createView<component::Tessellation, component::Appearance, component::WorldP3D, component::Heading, component::Age, component::Velocity, component::Tag_Particle,
@@ -585,7 +585,7 @@ namespace oni {
         void
         SceneManager::tick(entities::EntityFactory &serverEntityFactory,
                            entities::EntityFactory &clientEntityFactory,
-                           common::real64 tickTime) {
+                           common::r64 tickTime) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
@@ -601,7 +601,7 @@ namespace oni {
             static bool add = true;
             if (add) {
                 math::vec2 size{10, 10};
-                common::real32 heading = 0;
+                common::r32 heading = 0;
                 clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
 
                 clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
@@ -615,9 +615,9 @@ namespace oni {
             {
 #if 1
                 std::string textureID = "resources/images/smoke/1.png";
-                common::real32 particleHalfSize = 0.35f;
-                common::real32 particleSize = particleHalfSize * 2;
-                common::real32 halfConeAngle = static_cast<common::real32>(math::toRadians(45)) / 2.f;
+                common::r32 particleHalfSize = 0.35f;
+                common::r32 particleSize = particleHalfSize * 2;
+                common::r32 halfConeAngle = static_cast<common::r32>(math::toRadians(45)) / 2.f;
 
                 auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::WorldP3D, component::Heading>();
                 for (auto &&entity: view) {
@@ -625,9 +625,9 @@ namespace oni {
                     const auto &heading = view.get<component::Heading>(entity);
                     const auto &currentPos = worldPos;
                     const auto &trail = view.get<component::Trail>(entity);
-                    common::real32 projectileHeading = heading.value;
-                    common::real32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
-                    common::real32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
+                    common::r32 projectileHeading = heading.value;
+                    common::r32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
+                    common::r32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
 
                     assert(trail.previousPos.size() == trail.velocity.size());
 
@@ -646,10 +646,10 @@ namespace oni {
                         continue;
                     }
 
-                    common::real32 dX = currentPos.x - previousPos.x;
-                    common::real32 dY = currentPos.y - previousPos.y;
+                    common::r32 dX = currentPos.x - previousPos.x;
+                    common::r32 dY = currentPos.y - previousPos.y;
 
-                    common::real32 distance = std::sqrt(dX * dX + dY * dY);
+                    common::r32 distance = std::sqrt(dX * dX + dY * dY);
 
                     auto x = previousPos.x;
                     auto y = previousPos.y;
@@ -659,7 +659,7 @@ namespace oni {
                     common::EntityID trailEntity;
                     for (auto numParticles = 0; numParticles < mRand->nextUint8(1, 2); ++numParticles) {
                         auto pos = component::WorldP3D{x, y, currentPos.z};
-                        for (common::real32 i = 0.f; i <= distance; i += particleSize) {
+                        for (common::r32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
                             trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
                                     pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
@@ -720,7 +720,7 @@ namespace oni {
             // Update Skid lines.
             {
                 std::vector<component::WorldP3D> skidPosList{};
-                std::vector<common::uint8> skidOpacity{};
+                std::vector<common::u8> skidOpacity{};
                 {
                     auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::WorldP3D, component::Heading, component::Scale, component::CarConfig>();
                     for (auto &&carEntity: carView) {
@@ -735,13 +735,13 @@ namespace oni {
 
                             // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
                             // same logic is hard-coded when spawningCar server side.
-                            math::vec3 skidPosRL{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                                 static_cast<common::real32>(carConfig.wheelWidth +
+                            math::vec3 skidPosRL{static_cast<common::r32>(-carConfig.cgToRearAxle),
+                                                 static_cast<common::r32>(carConfig.wheelWidth +
                                                                              carConfig.halfWidth / 2),
                                     // NOTE: This z-value is unused.
                                                  0.f};
-                            math::vec3 skidPosRR{static_cast<common::real32>(-carConfig.cgToRearAxle),
-                                                 static_cast<common::real32>(-carConfig.wheelWidth -
+                            math::vec3 skidPosRR{static_cast<common::r32>(-carConfig.cgToRearAxle),
+                                                 static_cast<common::r32>(-carConfig.wheelWidth -
                                                                              carConfig.halfWidth / 2),
                                                  0.f};
                             auto transform = math::createTransformation(pos, heading, scale);
@@ -750,7 +750,7 @@ namespace oni {
                             skidPosList.push_back(component::WorldP3D{posRL.x, posRL.y, posRL.z});
                             skidPosList.push_back(component::WorldP3D{posRR.x, posRR.y, posRR.z});
 
-//                            auto alpha = static_cast<common::uint8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
+//                            auto alpha = static_cast<common::u8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
 //                                                                    255);
                             // TODO: arbitrary number based on number of frames, think about better way of determining this
                             skidOpacity.push_back(10);
@@ -847,8 +847,8 @@ namespace oni {
 
                 auto worldPos = component::WorldP3D{tilePosX, tilePosY,
                                                     mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
-                auto tileSize = math::vec2{static_cast<common::real32>(mCanvasTileSizeX),
-                                           static_cast<common::real32>(mCanvasTileSizeY)};
+                auto tileSize = math::vec2{static_cast<common::r32>(mCanvasTileSizeX),
+                                           static_cast<common::r32>(mCanvasTileSizeY)};
 
                 auto heading = component::Heading{0.f};
                 std::string emptyTextureID;
@@ -863,9 +863,9 @@ namespace oni {
 
                 auto &texture = entityRegistry.get<component::Texture>(entityID);
 
-                auto widthInPixels = static_cast<common::uint16>(mCanvasTileSizeX * mGameUnitToPixels +
+                auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                                  common::EP);
-                auto heightInPixels = static_cast<common::uint16>(mCanvasTileSizeY * mGameUnitToPixels +
+                auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
                                                                   common::EP);
 
                 texture.image.width = widthInPixels;
@@ -979,21 +979,21 @@ namespace oni {
         }
 
         void
-        SceneManager::zoom(common::real32 distance) {
+        SceneManager::zoom(common::r32 distance) {
             mCamera.z = 1 / distance;
         }
 
         void
-        SceneManager::lookAt(common::real32 x,
-                             common::real32 y) {
+        SceneManager::lookAt(common::r32 x,
+                             common::r32 y) {
             mCamera.x = x;
             mCamera.y = y;
         }
 
         void
-        SceneManager::lookAt(common::real32 x,
-                             common::real32 y,
-                             common::real32 distance) {
+        SceneManager::lookAt(common::r32 x,
+                             common::r32 y,
+                             common::r32 distance) {
             mCamera.x = x;
             mCamera.y = y;
             mCamera.z = 1 / distance;
@@ -1009,27 +1009,27 @@ namespace oni {
             return mViewMatrix;
         }
 
-        common::uint16
+        common::u16
         SceneManager::getSpritesPerFrame() const {
             return mRenderedSpritesPerFrame;
         }
 
-        common::uint16
+        common::u16
         SceneManager::getParticlesPerFrame() const {
             return mRenderedParticlesPerFrame;
         }
 
-        common::uint16
+        common::u16
         SceneManager::getTexturesPerFrame() const {
             return mRenderedTexturesPerFrame;
         }
 
-        common::real32
+        common::r32
         SceneManager::getViewWidth() const {
             return (mScreenBounds.xMax - mScreenBounds.xMin) * (1.0f / mCamera.z);
         }
 
-        common::real32
+        common::r32
         SceneManager::getViewHeight() const {
             return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
         }

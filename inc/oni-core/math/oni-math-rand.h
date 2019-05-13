@@ -6,39 +6,39 @@ namespace oni {
     namespace math {
         class Rand {
         public:
-            Rand(common::uint32 seed);
+            Rand(common::u32 seed);
 
-            common::int8
-            nextInt8(common::int8 lowerBound,
-                     common::int8 upperBound);
+            common::i8
+            nextInt8(common::i8 lowerBound,
+                     common::i8 upperBound);
 
-            common::uint8
-            nextUint8(common::uint8 lowerBound,
-                      common::uint8 upperBound);
+            common::u8
+            nextUint8(common::u8 lowerBound,
+                      common::u8 upperBound);
 
-            common::int16
-            nextInt16(common::int16 lowerBound,
-                      common::int16 upperBound);
+            common::i16
+            nextInt16(common::i16 lowerBound,
+                      common::i16 upperBound);
 
-            common::uint16
-            nextUint16(common::uint16 lowerBound,
-                       common::uint16 upperBound);
+            common::u16
+            nextUint16(common::u16 lowerBound,
+                       common::u16 upperBound);
 
-            common::int32
-            nextInt32(common::int32 lowerBound,
-                      common::int32 upperBound);
+            common::i32
+            nextInt32(common::i32 lowerBound,
+                      common::i32 upperBound);
 
-            common::uint32
-            nextUint32(common::uint32 lowerBound,
-                       common::uint32 upperBound);
+            common::u32
+            nextUint32(common::u32 lowerBound,
+                       common::u32 upperBound);
 
-            common::real32
-            nextReal32(common::real32 lowerBound,
-                       common::real32 upperBound);
+            common::r32
+            nextReal32(common::r32 lowerBound,
+                       common::r32 upperBound);
 
-            common::real64
-            nextReal64Normal(common::real64 mean,
-                             common::real64 stddev);
+            common::r64
+            nextReal64Normal(common::r64 mean,
+                             common::r64 stddev);
 
         private:
             std::mt19937 mEngine{};

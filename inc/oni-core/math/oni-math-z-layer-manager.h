@@ -14,10 +14,10 @@ namespace oni {
 
             explicit ZLayerManager(const graphic::ZLayer &);
 
-            common::real32
+            common::r32
             getZForEntity(entities::EntityType) const;
 
-            common::real32
+            common::r32
             getNextZAtLayer(graphic::ZLayerDef);
 
             graphic::ZLayer
@@ -28,13 +28,13 @@ namespace oni {
             constructEntityLayers();
 
         private:
-            const common::real32 mMajorLayerDelta{0.1f};
-            const common::real32 mMinorLayerDelta{0.001f};
+            const common::r32 mMajorLayerDelta{0.1f};
+            const common::r32 mMinorLayerDelta{0.001f};
 
             graphic::ZLayer mZLayer{};
             graphic::ZLayer mZLayerTop{};
 
-            std::unordered_map<entities::EntityType, common::real32> mEntityZLayers;
+            std::unordered_map<entities::EntityType, common::r32> mEntityZLayers;
         };
     }
 }

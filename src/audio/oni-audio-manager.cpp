@@ -21,7 +21,7 @@ namespace oni {
             ERRCHECK(result);
             mSystem = std::unique_ptr<FMOD::System, FMODDeleter>(system, FMODDeleter());
 
-            common::uint32 version;
+            common::u32 version;
             result = system->getVersion(&version);
             ERRCHECK(result);
 
@@ -81,7 +81,7 @@ namespace oni {
                     auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity);
                     auto distance = (pos.value - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
-                        auto pitch = static_cast< common::real32>(car.rpm) / 2000;
+                        auto pitch = static_cast< common::r32>(car.rpm) / 2000;
                         setPitch(*entityChannel.channel, pitch);
                         set3DPos(*entityChannel.channel, pos.value - mPlayerPos.value, velocity);
 
@@ -126,18 +126,18 @@ namespace oni {
             assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
             auto distance = mPlayerPos.value - pos.value;
             // TODO: use ChannelGroup and use the volume from it
-            common::real32 volume = 0.1f;
-            common::real32 pitch = 1.f;
+            common::r32 volume = 0.1f;
+            common::r32 pitch = 1.f;
             playOneShot(mCollisionEffects[soundID], distance, volume, pitch);
             playOneShot(mCollisionEffects[soundID], distance, volume, pitch);
         }
 
-        common::UInt16Pack
+        common::u16p
         AudioManager::createCollisionEffectID(entities::EntityType A,
                                               entities::EntityType B) {
-            static_assert(sizeof(A) == sizeof(common::uint16), "Hashing will fail due to size mismatch");
-            auto x = static_cast<common::uint16 >(A);
-            auto y = static_cast<common::uint16 >(B);
+            static_assert(sizeof(A) == sizeof(common::u16), "Hashing will fail due to size mismatch");
+            auto x = static_cast<common::u16 >(A);
+            auto y = static_cast<common::u16 >(B);
 
             if (x > y) {
                 std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
@@ -151,8 +151,8 @@ namespace oni {
         AudioManager::preLoadCollisionSoundEffects() {
             auto rocketWithUnknown = component::SoundID{"resources/audio/collision/rocket-with-unknown.wav"};
             loadSound(rocketWithUnknown);
-            for (auto i = static_cast<common::uint16 >(entities::EntityType::UNKNOWN);
-                 i < static_cast<common::uint16>(entities::EntityType::LAST);
+            for (auto i = static_cast<common::u16 >(entities::EntityType::UNKNOWN);
+                 i < static_cast<common::u16>(entities::EntityType::LAST);
                  ++i) {
                 auto id = createCollisionEffectID(entities::EntityType::SIMPLE_ROCKET,
                                                   static_cast<entities::EntityType>(i));
@@ -199,8 +199,8 @@ namespace oni {
         void
         AudioManager::playOneShot(const component::SoundID &id,
                                   const math::vec3 &distance,
-                                  common::real32 volume,
-                                  common::real32 pitch) {
+                                  common::r32 volume,
+                                  common::r32 pitch) {
             VALID(mSounds, id);
             auto channel = createChannel(id);
 
@@ -264,7 +264,7 @@ namespace oni {
 
         void
         AudioManager::setPitch(FMOD::Channel &channel,
-                               common::real32 pitch) {
+                               common::r32 pitch) {
             if (pitch > 256) {
                 pitch = 256;
             }
@@ -325,7 +325,7 @@ namespace oni {
 
         void
         AudioManager::setVolume(FMOD::Channel &channel,
-                                common::real32 volume) {
+                                common::r32 volume) {
             auto result = channel.setVolume(volume);
             ERRCHECK(result);
         }

@@ -8,9 +8,9 @@
 namespace oni {
     namespace math {
         struct vec3 {
-            common::real32 x{0.0f};
-            common::real32 y{0.0f};
-            common::real32 z{0.0f};
+            common::r32 x{0.0f};
+            common::r32 y{0.0f};
+            common::r32 z{0.0f};
 
             vec3 &
             add(const vec3 &other);
@@ -65,7 +65,7 @@ namespace oni {
             operator<<(std::ostream &stream,
                        const vec3 &vector);
 
-            common::real32
+            common::r32
             len();
         };
     }

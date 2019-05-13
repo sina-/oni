@@ -16,10 +16,10 @@ namespace oni {
     namespace component {
         struct Trail {
             std::vector<component::WorldP3D> previousPos{};
-            std::vector<common::real32> velocity{};
+            std::vector<common::r32> velocity{};
         };
 
-        enum class TextureStatus : common::uint8 {
+        enum class TextureStatus : common::u8 {
             INVALID = 0,
             READY = 1,
             NEEDS_LOADING_USING_PATH = 2,
@@ -29,9 +29,9 @@ namespace oni {
         };
 
         struct Image {
-            std::vector<common::uint8> data{};
-            common::uint16 width{};
-            common::uint16 height{};
+            std::vector<common::u8> data{};
+            common::u16 width{};
+            common::u16 height{};
         };
 
         struct Texture {
@@ -49,29 +49,29 @@ namespace oni {
         };
 
         struct Tessellation {
-            common::real32 halfSize{1.f};
+            common::r32 halfSize{1.f};
         };
 
         struct Text {
             common::EntityID entityID{0};
-            common::real32 xScaling{1.f};
-            common::real32 yScaling{1.f};
+            common::r32 xScaling{1.f};
+            common::r32 yScaling{1.f};
             common::oniGLuint textureID{0};
             std::string textContent{};
             std::vector<size_t> width{};
             std::vector<size_t> height{};
-            std::vector<common::uint32> offsetX{};
-            std::vector<common::uint32> offsetY{};
-            std::vector<common::real32> advanceX{};
-            std::vector<common::real32> advanceY{};
+            std::vector<common::u32> offsetX{};
+            std::vector<common::u32> offsetY{};
+            std::vector<common::r32> advanceX{};
+            std::vector<common::r32> advanceY{};
             std::vector<math::vec4> uv{};
         };
 
         struct PixelRGBA {
-            common::uint8 red{0};
-            common::uint8 blue{0};
-            common::uint8 green{0};
-            common::uint8 alpha{0};
+            common::u8 red{0};
+            common::u8 blue{0};
+            common::u8 green{0};
+            common::u8 alpha{0};
         };
 
         // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
@@ -80,14 +80,14 @@ namespace oni {
 
             PixelRGBA
             toRGBA() {
-                return PixelRGBA{static_cast<common::uint8>(color.x * 255),
-                                 static_cast<common::uint8>(color.y * 255),
-                                 static_cast<common::uint8>(color.z * 255),
-                                 static_cast<common::uint8>(color.w * 255)};
+                return PixelRGBA{static_cast<common::u8>(color.x * 255),
+                                 static_cast<common::u8>(color.y * 255),
+                                 static_cast<common::u8>(color.z * 255),
+                                 static_cast<common::u8>(color.w * 255)};
             }
         };
 
-        enum class BrushType : common::uint8 {
+        enum class BrushType : common::u8 {
             UNKNOWN,
 
             SPRITE,

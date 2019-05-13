@@ -9,10 +9,10 @@ namespace oni {
         Peer::Peer() = default;
 
         Peer::Peer(const Address *address,
-                   common::uint8 peerCount,
-                   common::uint8 channelLimit,
-                   common::uint32 incomingBandwidth,
-                   common::uint32 outgoingBandwidth) {
+                   common::u8 peerCount,
+                   common::u8 channelLimit,
+                   common::u32 incomingBandwidth,
+                   common::u32 outgoingBandwidth) {
 
             auto result = enet_initialize();
             if (result) {
@@ -99,7 +99,7 @@ namespace oni {
         }
 
         void
-        Peer::send(const common::uint8 *data,
+        Peer::send(const common::u8 *data,
                    size_t size,
                    ENetPeer *peer) {
             ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE |
@@ -126,7 +126,7 @@ namespace oni {
         }
 
         PacketType
-        Peer::getHeader(const common::uint8 *data) const {
+        Peer::getHeader(const common::u8 *data) const {
             if (!data) {
                 return PacketType::UNKNOWN;
             }

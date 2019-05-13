@@ -27,9 +27,9 @@ namespace oni {
         class FontManager {
         public:
             FontManager(std::string font,
-                        common::uint8 size,
-                        common::real32 gameWidth,
-                        common::real32 gameHeight);
+                        common::u8 size,
+                        common::r32 gameWidth,
+                        common::r32 gameHeight);
 
             ~FontManager();
 
@@ -73,8 +73,8 @@ namespace oni {
             ftgl::texture_atlas_t *m_FTAtlas;
             ftgl::texture_font_t *m_FTFont;
 
-            common::real32 mGameWidth;
-            common::real32 mGameHeight;
+            common::r32 mGameWidth;
+            common::r32 mGameHeight;
 
         };
     }

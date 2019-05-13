@@ -74,8 +74,8 @@ namespace oni {
 
                     auto &carLap = carLapView.get<gameplay::CarLapInfo>(entity);
                     ++carLap.lap;
-                    carLap.bestLapTimeS = static_cast<common::uint32>(mBestLaps[entity].count());
-                    carLap.lapTimeS = static_cast<common::uint32>(currentTime.count());
+                    carLap.bestLapTimeS = static_cast<common::u32>(mBestLaps[entity].count());
+                    carLap.lapTimeS = static_cast<common::u32>(currentTime.count());
 
                     std::cout << "Laps completed: " << carLap.lap << "\n";
                     mEntityManager.tagForComponentSync(entity);

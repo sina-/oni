@@ -10,7 +10,7 @@ namespace oni {
         tickCar(component::Car &car,
                 const component::CarConfig &config,
                 const io::CarInput &inputs,
-                common::real64 dt) {
+                common::r64 dt) {
             using common::CarSimDouble;
             CarSimDouble sn = std::sin(car.heading);
             CarSimDouble cs = std::cos(car.heading);
@@ -126,7 +126,7 @@ namespace oni {
         common::CarSimDouble
         applySmoothSteer(const component::Car &car,
                          common::CarSimDouble steerInput,
-                         common::real64 dt) {
+                         common::r64 dt) {
             common::CarSimDouble steer = 0;
 
             if (std::abs(steerInput) > 0.001) {

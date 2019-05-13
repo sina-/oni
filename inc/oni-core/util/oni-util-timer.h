@@ -28,12 +28,12 @@ namespace oni {
             }
 
             // Return elapsed time in seconds
-            oni::common::real64
+            oni::common::r64
             elapsedInSeconds() const { return (now() - mStartTime).count() * 1e-9; }
 
-            common::uint64
+            common::u64
             elapsedInNanoseconds() const {
-                return static_cast<common::uint64>((now() - mStartTime).count());
+                return static_cast<common::u64>((now() - mStartTime).count());
             }
 
         private:

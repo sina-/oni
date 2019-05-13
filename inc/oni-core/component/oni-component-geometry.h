@@ -14,30 +14,30 @@ namespace oni {
         union Point {
             math::vec3 value{};
             struct {
-                common::real32 x;
-                common::real32 y;
-                common::real32 z;
+                common::r32 x;
+                common::r32 y;
+                common::r32 z;
             };
         };
 
         union WorldP3D {
             math::vec3 value{};
             struct {
-                common::real32 x;
-                common::real32 y;
-                common::real32 z;
+                common::r32 x;
+                common::r32 y;
+                common::r32 z;
             };
         };
 
         union WorldP2D {
             math::vec2 value{};
             struct {
-                common::real32 x;
-                common::real32 y;
+                common::r32 x;
+                common::r32 y;
             };
 
             WorldP3D
-            to3D(common::real32 z) const {
+            to3D(common::r32 z) const {
                 return WorldP3D{value.x, value.y, z};
             }
         };
@@ -45,38 +45,38 @@ namespace oni {
         union OriginP2D {
             math::vec2 value{};
             struct {
-                common::real32 x;
-                common::real32 y;
+                common::r32 x;
+                common::r32 y;
             };
         };
 
         union OriginP3D {
             math::vec3 value{};
             struct {
-                common::real32 x;
-                common::real32 y;
-                common::real32 z;
+                common::r32 x;
+                common::r32 y;
+                common::r32 z;
             };
         };
 
         struct Heading {
-            common::real32 value{0.f};
+            common::r32 value{0.f};
         };
 
         union Size {
             math::vec2 value{};
             struct {
-                common::real32 x;
-                common::real32 y;
+                common::r32 x;
+                common::r32 y;
             };
         };
 
         union Scale {
             math::vec3 value{1.f, 1.f, 1.f};
             struct {
-                common::real32 x;
-                common::real32 y;
-                common::real32 z;
+                common::r32 x;
+                common::r32 y;
+                common::r32 z;
             };
         };
 
@@ -138,7 +138,7 @@ namespace oni {
             }
 
             void
-            setZ(common::real32 z) {
+            setZ(common::r32 z) {
                 vertexA.z = z;
                 vertexB.z = z;
                 vertexC.z = z;
@@ -157,7 +157,7 @@ namespace oni {
 
             static Shape
             fromSizeAndRotation(const math::vec3 &size,
-                                const common::real32 rotation) {
+                                const common::r32 rotation) {
                 auto shape = Shape{
                         {0,      0,      size.z},
                         {0,      size.y, size.z},
@@ -165,7 +165,7 @@ namespace oni {
                         {size.x, 0,      size.z}
                 };
                 // Cast to ignore float imprecision.
-                if (static_cast<common::uint16>(rotation)) {
+                if (static_cast<common::u16>(rotation)) {
                     auto halfSize = math::vec3{size.x / 2.0f, size.y / 2.0f, size.z};
 
                     shape.vertexA -= halfSize;

@@ -42,7 +42,7 @@ namespace oni {
                              common::oniGLint yOffset,
                              common::oniGLint width,
                              common::oniGLint height,
-                             const std::vector<common::uint8> &bits);
+                             const std::vector<common::u8> &bits);
 
             void
             blendAndUpdateTexture(component::Texture &texture,
@@ -87,7 +87,7 @@ namespace oni {
         private:
             std::unordered_map<std::string, component::Texture> mTextureMap{};
             std::unordered_map<std::string, component::Image> mImageMap{};
-            const common::uint8 mElementsInRGBA{4};
+            const common::u8 mElementsInRGBA{4};
         };
     }
 }

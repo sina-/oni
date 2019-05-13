@@ -29,8 +29,8 @@ namespace oni {
         class Server : public Peer {
         public:
             Server(const Address *,
-                   common::uint8,
-                   common::uint8);
+                   common::u8,
+                   common::u8);
 
             ~Server() override;
 
@@ -65,7 +65,7 @@ namespace oni {
 
             void
             handle(ENetPeer *,
-                   common::uint8 *,
+                   common::u8 *,
                    size_t,
                    PacketType) override;
 

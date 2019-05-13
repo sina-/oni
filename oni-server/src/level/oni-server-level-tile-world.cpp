@@ -22,10 +22,10 @@ namespace oni {
                     //mHalfTileSizeX{mTileSizeX / 2.0f},
                     //mHalfTileSizeY{mTileSizeY / 2.0f},
                     mTilesPerChunkX{11}, mTilesPerChunkY{11},
-                    mChunkSizeX{static_cast<common::uint16 >(mTileSizeX * mTilesPerChunkX)},
-                    mChunkSizeY{static_cast<common::uint16 >(mTileSizeY * mTilesPerChunkY)},
-                    mHalfChunkSizeX{static_cast<common::uint16 >(mChunkSizeX / 2)},
-                    mHalfChunkSizeY{static_cast<common::uint16>(mChunkSizeY / 2)} {
+                    mChunkSizeX{static_cast<common::u16 >(mTileSizeX * mTilesPerChunkX)},
+                    mChunkSizeY{static_cast<common::u16 >(mTileSizeY * mTilesPerChunkY)},
+                    mHalfChunkSizeX{static_cast<common::u16 >(mChunkSizeX / 2)},
+                    mHalfChunkSizeY{static_cast<common::u16>(mChunkSizeY / 2)} {
                 std::srand(std::time(nullptr));
 
                 // NOTE: A road chunk is filled with road tiles, therefore road chunk size should be,
@@ -65,13 +65,13 @@ namespace oni {
 
 
             bool
-            TileWorld::isInMap(common::uint64 packedIndex,
-                               const std::map<common::uint64, common::EntityID> &map) const {
+            TileWorld::isInMap(common::u64 packedIndex,
+                               const std::map<common::u64, common::EntityID> &map) const {
                 return map.find(packedIndex) != map.end();
             }
 
             math::vec2
-            TileWorld::unpackCoordinates(common::uint64 coord) const {
+            TileWorld::unpackCoordinates(common::u64 coord) const {
                 // TODO: This function is incorrect. Need to match it to packInt64 function if I ever use it
                 assert(false);
                 //auto x = static_cast<int>(coord >> 32) * mTileSizeX;
@@ -110,8 +110,8 @@ namespace oni {
             }
 
             void
-            TileWorld::genChunkRoads(common::int64 chunkX,
-                                     common::int64 chunkY) {
+            TileWorld::genChunkRoads(common::i64 chunkX,
+                                     common::i64 chunkY) {
                 /**
                  * 1. Check if there should be a road in this chunk
                  * 2. Find the neighbours connected by road to current chunk
@@ -238,8 +238,8 @@ namespace oni {
                     startingRoadTileIndex = edgeRoads.westBoarder;
                     endingRoadTileIndex = edgeRoads.eastBoarder;
 
-                    common::uint16 currentTileX = startingRoadTileIndex.x;
-                    common::uint16 currentTileY = startingRoadTileIndex.y;
+                    common::u16 currentTileX = startingRoadTileIndex.x;
+                    common::u16 currentTileY = startingRoadTileIndex.y;
 
                     auto previousRoadTexture = mWestToEast;
 
@@ -402,8 +402,8 @@ namespace oni {
             }
 
             void
-            TileWorld::genChunkTiles(common::int64 xChunkIndex,
-                                     common::int64 yChunkIndex) {
+            TileWorld::genChunkTiles(common::i64 xChunkIndex,
+                                     common::i64 yChunkIndex) {
 
                 auto firstTileX = xChunkIndex * mChunkSizeX;
                 auto lastTileX = xChunkIndex * mChunkSizeX + mChunkSizeX;
@@ -424,8 +424,8 @@ namespace oni {
                         auto B = (std::rand() % 255) / 255.0f;
                         auto color = math::vec4{R, G, B, 1.0f};
 
-                        auto worldPos = component::WorldP3D{static_cast<common::real32>(i),
-                                                            static_cast<common::real32>(j),
+                        auto worldPos = component::WorldP3D{static_cast<common::r32>(i),
+                                                            static_cast<common::r32>(j),
                                                             mGroundZ};
 
                         auto tileID = genSprite(color, tileSize, worldPos);
@@ -443,8 +443,8 @@ namespace oni {
             component::WorldP3D
             TileWorld::groundChunkIndexToPos(const oni::level::ChunkIndex &chunkIndex) const {
                 auto pos = component::WorldP3D{
-                        static_cast<common::real32>(chunkIndex.x * mChunkSizeX),
-                        static_cast<common::real32>(chunkIndex.y * mChunkSizeY),
+                        static_cast<common::r32>(chunkIndex.x * mChunkSizeX),
+                        static_cast<common::r32>(chunkIndex.y * mChunkSizeY),
                         // TODO: Should I keep Z as part of ChunkIndex maybe?
                         mGroundZ};
                 return pos;
@@ -453,9 +453,9 @@ namespace oni {
             oni::level::ChunkIndex
             TileWorld::groundChunkPosToIndex(const component::WorldP2D &position) const {
                 auto x = floor(position.x / mChunkSizeX);
-                auto xIndex = static_cast<common::int64>(x);
+                auto xIndex = static_cast<common::i64>(x);
                 auto y = floor(position.y / mChunkSizeY);
-                auto yIndex = static_cast<common::int64>(y);
+                auto yIndex = static_cast<common::i64>(y);
                 return oni::level::ChunkIndex{xIndex, yIndex};
             }
 
@@ -464,8 +464,8 @@ namespace oni {
                                           oni::level::RoadTileIndex roadTileIndex) const {
 
                 auto chunkPos = groundChunkIndexToPos(chunkIndex);
-                auto tilePos = math::vec2{static_cast<common::real32>(roadTileIndex.x * mTileSizeX),
-                                          static_cast<common::real32>(roadTileIndex.y * mTileSizeY)};
+                auto tilePos = math::vec2{static_cast<common::r32>(roadTileIndex.x * mTileSizeX),
+                                          static_cast<common::r32>(roadTileIndex.y * mTileSizeY)};
                 auto pos = component::WorldP3D{chunkPos.x + tilePos.x, chunkPos.y + tilePos.y,
                                                chunkPos.z};
                 return pos;
@@ -481,7 +481,7 @@ namespace oni {
                 std::vector<common::EntityID> wallEntities{};
                 wallEntities.reserve(wallCount);
 
-                common::real32 wallWidth = 0.5f;
+                common::r32 wallWidth = 0.5f;
                 auto heading = component::Heading{0.f}; // For static objects facing angle does not matter.
 
                 for (size_t i = 0; i < wallCount; ++i) {
@@ -493,8 +493,8 @@ namespace oni {
                     math::vec2 wallSize;
                     std::string wallTexturePath;
 
-                    common::real32 currentTileX = xTileIndex * mTileSizeX;
-                    common::real32 currentTileY = yTileIndex * mTileSizeY;
+                    common::r32 currentTileX = xTileIndex * mTileSizeX;
+                    common::r32 currentTileY = yTileIndex * mTileSizeY;
 
                     switch (wallPos) {
                         case oni::level::WallTilePosition::RIGHT: {
@@ -550,8 +550,8 @@ namespace oni {
             }
 
             void
-            TileWorld::genChunkGroundTexture(common::int64 chunkX,
-                                             common::int64 chunkY) {
+            TileWorld::genChunkGroundTexture(common::i64 chunkX,
+                                             common::i64 chunkY) {
                 auto chunkIndex = oni::level::ChunkIndex{chunkX, chunkY};
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
 
@@ -561,15 +561,15 @@ namespace oni {
             }
 
             void
-            TileWorld::genChunkGroundSprite(common::int64 chunkX,
-                                            common::int64 chunkY) {
+            TileWorld::genChunkGroundSprite(common::i64 chunkX,
+                                            common::i64 chunkY) {
                 auto chunkID = math::packInt64(chunkX, chunkY);
                 auto R = (std::rand() % 255) / 255.0f;
                 auto G = (std::rand() % 255) / 255.0f;
                 auto B = (std::rand() % 255) / 255.0f;
                 math::vec4 color{R, G, B, 0.1f};
-                math::vec2 size{static_cast<common::real32>(mChunkSizeX),
-                                static_cast<common::real32 >(mChunkSizeY)};
+                math::vec2 size{static_cast<common::r32>(mChunkSizeX),
+                                static_cast<common::r32 >(mChunkSizeY)};
                 oni::level::ChunkIndex currentChunkIndex{chunkX, chunkY};
                 auto worldPos = groundChunkIndexToPos(currentChunkIndex);
                 auto chunkEntityID = genSprite(color, size, worldPos);
@@ -580,14 +580,14 @@ namespace oni {
 
             math::vec2
             TileWorld::getTileSize() const {
-                return math::vec2{static_cast<common::real32>(mTileSizeX),
-                                  static_cast<common::real32 >(mTileSizeY)};
+                return math::vec2{static_cast<common::r32>(mTileSizeX),
+                                  static_cast<common::r32 >(mTileSizeY)};
             }
 
             math::vec2
             TileWorld::getChunkSize() const {
-                return math::vec2{static_cast<common::real32>(mChunkSizeX),
-                                  static_cast<common::real32 >(mChunkSizeY)};
+                return math::vec2{static_cast<common::r32>(mChunkSizeX),
+                                  static_cast<common::r32 >(mChunkSizeY)};
             }
 
             common::EntityID
@@ -630,8 +630,8 @@ namespace oni {
                 std::vector<oni::level::WallTilePosition> wallPosInTile{};
                 std::vector<oni::level::TileIndex> wallTiles{};
 
-                common::int8 outerTrackWidth = 8;
-                common::int8 outerTrackHeight = 4;
+                common::i8 outerTrackWidth = 8;
+                common::i8 outerTrackHeight = 4;
 
                 for (auto i = -outerTrackWidth; i <= outerTrackWidth; ++i) {
                     wallPosInTile.emplace_back(oni::level::WallTilePosition::BOTTOM);
@@ -653,8 +653,8 @@ namespace oni {
                     wallTiles.emplace_back(oni::level::TileIndex{-outerTrackWidth, i});
                 }
 
-                common::int8 innerTrackWidth = 6;
-                common::int8 innerTrackHeight = 2;
+                common::i8 innerTrackWidth = 6;
+                common::i8 innerTrackHeight = 2;
 
                 for (auto i = -innerTrackWidth; i <= innerTrackWidth; ++i) {
                     wallPosInTile.emplace_back(oni::level::WallTilePosition::BOTTOM);

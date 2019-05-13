@@ -14,8 +14,8 @@ namespace oni {
     namespace graphic {
 
         Window::Window(std::string &&title,
-                       common::int32 gameWidth,
-                       common::int32 gameHeight) :
+                       common::i32 gameWidth,
+                       common::i32 gameHeight) :
                 mTitle{std::move(title)},
                 mGameWidth{gameWidth},
                 mGameHeight{gameHeight},
@@ -26,7 +26,7 @@ namespace oni {
             if (!glfwInit())
                 throw std::runtime_error("Failed to init GLFW!");
 
-/*            common::int32 monitorCount{};
+/*            common::i32 monitorCount{};
             auto monitors = glfwGetMonitors(&monitorCount);
             const GLFWvidmode *mode = glfwGetVideoMode(monitors[0]);
             glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -66,12 +66,12 @@ namespace oni {
             glfwSetWindowUserPointer(mWindow, reinterpret_cast<void *>(this));
             /*
             1) First try
-            auto windowResizeCallback = [](GLFWwindow* w, common::int32 width, common::int32 height)
+            auto windowResizeCallback = [](GLFWwindow* w, common::i32 width, common::i32 height)
             {
                 static_cast<Window*>(glfwGetWindowUserPointer(w))->windowResizeCallback(w, width, height);
             };
             2) Second try. It didn't work :(
-            std::function<void(GLFWwindow*, common::int32, common::int32)> windowResizeCallback = std::bind(&Window::windowResizeCallback,
+            std::function<void(GLFWwindow*, common::i32, common::i32)> windowResizeCallback = std::bind(&Window::windowResizeCallback,
                 this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
             */
 
@@ -149,8 +149,8 @@ namespace oni {
 
         void
         Window::windowResizeCallback(GLFWwindow *window,
-                                     common::int32 width,
-                                     common::int32 height) {
+                                     common::i32 width,
+                                     common::i32 height) {
             auto thiz = getThisFromGLFWWindow(window);
             TwWindowSize(width, height);
 
@@ -161,10 +161,10 @@ namespace oni {
 
         void
         Window::keyCallback(GLFWwindow *window,
-                            common::int32 key,
-                            common::int32 scancode,
-                            common::int32 action,
-                            common::int32 mods) {
+                            common::i32 key,
+                            common::i32 scancode,
+                            common::i32 action,
+                            common::i32 mods) {
             UNUSED(scancode);
             UNUSED(mods);
             auto thiz = getThisFromGLFWWindow(window);
@@ -176,9 +176,9 @@ namespace oni {
 
         void
         Window::mouseCallback(GLFWwindow *window,
-                              common::int32 button,
-                              common::int32 action,
-                              common::int32 mods) {
+                              common::i32 button,
+                              common::i32 action,
+                              common::i32 mods) {
             UNUSED(mods);
             TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);

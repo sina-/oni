@@ -36,7 +36,7 @@ namespace oni {
 
             void
             setUniform1f(const common::oniGLchar *name,
-                         oni::common::real32 value) const;
+                         oni::common::r32 value) const;
 
             void
             setUniform2f(const common::oniGLchar *name,
@@ -52,7 +52,7 @@ namespace oni {
 
             void
             setUniform1i(const common::oniGLchar *name,
-                         common::int32 value) const;
+                         common::i32 value) const;
 
             void
             setUniformMat4(const common::oniGLchar *name,

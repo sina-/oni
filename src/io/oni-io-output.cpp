@@ -11,7 +11,7 @@ namespace oni {
         }
 
         void
-        printl(const common::int32 text) {
+        printl(const common::i32 text) {
             std::cout << text << std::endl;
         }
 
@@ -21,7 +21,7 @@ namespace oni {
         }
 
         void
-        printl(common::real32 text) {
+        printl(common::r32 text) {
             std::cout << text << std::endl;
         }
     }

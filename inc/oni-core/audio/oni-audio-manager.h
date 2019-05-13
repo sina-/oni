@@ -47,8 +47,8 @@ namespace oni {
             void
             playOneShot(const component::SoundID &id,
                         const math::vec3 &distance,
-                        common::real32 volume,
-                        common::real32 pitch);
+                        common::r32 volume,
+                        common::r32 pitch);
 
         private:
             class FMODDeleter {
@@ -84,7 +84,7 @@ namespace oni {
             };
 
         private:
-            common::UInt16Pack
+            common::u16p
             createCollisionEffectID(entities::EntityType,
                                     entities::EntityType);
 
@@ -107,7 +107,7 @@ namespace oni {
 
             void
             setPitch(FMOD::Channel &,
-                     common::real32 pitch);
+                     common::r32 pitch);
 
             void
             set3DPos(FMOD::Channel &,
@@ -125,7 +125,7 @@ namespace oni {
 
             void
             setVolume(FMOD::Channel &,
-                      common::real32 volume);
+                      common::r32 volume);
 
         private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
@@ -133,12 +133,12 @@ namespace oni {
 
             std::map<SoundEntityID, EntityChannel> mLooping3DChannels;
 
-            std::unordered_map<common::UInt16Pack, component::SoundID> mCollisionEffects;
+            std::unordered_map<common::u16p, component::SoundID> mCollisionEffects;
 
             component::WorldP3D mPlayerPos{};
 
-            common::real32 mMaxAudibleDistance{0.f};
-            common::int32 mMaxNumberOfChannels{0};
+            common::r32 mMaxAudibleDistance{0.f};
+            common::i32 mMaxNumberOfChannels{0};
 
         private:
             component::SoundID mEngineIdleSound;

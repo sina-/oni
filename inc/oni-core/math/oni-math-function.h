@@ -10,8 +10,8 @@
 
 namespace oni {
     namespace math {
-        inline common::real64
-        toRadians(common::real64 degrees) {
+        inline common::r64
+        toRadians(common::r64 degrees) {
             return degrees * (common::PI / 180.0f);
         }
 
@@ -78,28 +78,28 @@ namespace oni {
         }
 
         template<class T>
-        inline common::int32
+        inline common::i32
         sign(T n) {
             return (T(0) < n) - (T(0) > n);
         }
 
-        inline common::int64
-        findBin(const common::real64 position,
-                const common::uint16 binSize) {
+        inline common::i64
+        findBin(const common::r64 position,
+                const common::u16 binSize) {
             auto result = std::floor(position / binSize);
-            auto truncated = static_cast<common::int64>(result);
+            auto truncated = static_cast<common::i64>(result);
             return truncated;
         }
 
-        inline common::real32
-        binPos(const common::int64 index,
-               const common::uint16 binSize) {
+        inline common::r32
+        binPos(const common::i64 index,
+               const common::u16 binSize) {
             return binSize * index;
         }
 
-        inline common::Int64Pack
-        packInt64(const common::int64 x,
-                  const common::int64 y) {
+        inline common::i64p
+        packInt64(const common::i64 x,
+                  const common::i64 y) {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -109,16 +109,16 @@ namespace oni {
             // unique inputs to a unique output.
             // There are other ways to do this: https://stackoverflow.com/a/13871379 (Cantor pairing function and Szudzik's improved implementation)
             // I could also just yank the numbers together and save it as a string.
-            auto _x = static_cast<common::uint64>(static_cast<common::uint32>(x)) << 32;
-            auto _y = static_cast<common::uint64>(static_cast<common::uint32>(y));
+            auto _x = static_cast<common::u64>(static_cast<common::u32>(x)) << 32;
+            auto _y = static_cast<common::u64>(static_cast<common::u32>(y));
             auto result = _x | _y;
 
             return result;
         }
 
-        inline common::UInt16Pack
-        packUInt16(common::uint16 x,
-                   common::uint16 y) {
+        inline common::u16p
+        packUInt16(common::u16 x,
+                   common::u16 y) {
             return x << 16 | y;
         }
 
@@ -142,7 +142,7 @@ namespace oni {
         template<class T>
         inline T
         pow(T a,
-            common::int16 up) {
+            common::i16 up) {
             if (up == 0) {
                 return 1;
             }

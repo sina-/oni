@@ -27,7 +27,7 @@ namespace oni {
     namespace network {
         struct Address {
             std::string host;
-            common::uint16 port;
+            common::u16 port;
         };
 
         class Peer {
@@ -35,10 +35,10 @@ namespace oni {
             Peer();
 
             Peer(const Address *address,
-                 common::uint8 peerCount,
-                 common::uint8 channelLimit,
-                 common::uint32 incomingBandwidth,
-                 common::uint32 outgoingBandwidth);
+                 common::u8 peerCount,
+                 common::u8 channelLimit,
+                 common::u32 incomingBandwidth,
+                 common::u32 outgoingBandwidth);
 
         public:
             virtual ~Peer();
@@ -60,7 +60,7 @@ namespace oni {
         protected:
             virtual void
             handle(ENetPeer *peer,
-                   common::uint8 *data,
+                   common::u8 *data,
                    size_t size,
                    PacketType header) = 0;
 
@@ -68,7 +68,7 @@ namespace oni {
             getPeerID(const ENetPeer &peer) const;
 
             PacketType
-            getHeader(const common::uint8 *data) const;
+            getHeader(const common::u8 *data) const;
 
             // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
             void
@@ -77,7 +77,7 @@ namespace oni {
                  ENetPeer *peer);
 
             void
-            send(const common::uint8 *data,
+            send(const common::u8 *data,
                  size_t size,
                  ENetPeer *peer);
 

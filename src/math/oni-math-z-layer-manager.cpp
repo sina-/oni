@@ -45,13 +45,13 @@ namespace oni {
             mEntityZLayers[EntityType::UI] = getNextZAtLayer(ZLayerDef::LAYER_8);
         }
 
-        common::real32
+        common::r32
         ZLayerManager::getZForEntity(entities::EntityType type) const {
             assert(mEntityZLayers.find(type) != mEntityZLayers.end());
             return mEntityZLayers.at(type);
         }
 
-        common::real32
+        common::r32
         ZLayerManager::getNextZAtLayer(graphic::ZLayerDef layer) {
             assert(layer >= graphic::ZLayerDef::LAYER_0 &&
                    layer <= graphic::ZLayerDef::LAYER_9);

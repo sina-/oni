@@ -248,9 +248,9 @@ namespace oni {
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
                         props.body->ApplyForceToCenter(
                                 b2Vec2(static_cast<common::r32>(std::cos(car.heading) * 30 *
-                                                                   carInput[entity].throttle),
+                                                                carInput[entity].throttle),
                                        static_cast<common::r32>(std::sin(car.heading) * 30 *
-                                                                   carInput[entity].throttle)),
+                                                                carInput[entity].throttle)),
                                 true);
                         car.isColliding = false;
                     } else {
@@ -341,7 +341,7 @@ namespace oni {
                             // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
                             // There seems to be something wrong with the way tires are created in the beginning
                             heading = static_cast<oni::common::r32>(car.steerAngle +
-                                                                       math::toRadians(90.0f));
+                                                                    math::toRadians(90.0f));
                         }
                     }
                 }
@@ -451,24 +451,12 @@ namespace oni {
             {
                 /// Client side
                 auto &entityManager = entityFactory.getEntityManager();
-                // TODO: NOT very happy with this design. In essence I can't just look at Age component, and remove entities with age > maxAge.
-                // I need more information to act on it. But as is now this requires so many components that it is hard to keep it in sync with other systems.
-                // Maybe it is okay to have it as is. But think about the future when you have 10 different behaviours for on death effect, how would you
-                // partition the components space to select the right entities to handle the effects in each loop block?
-                // TODO: One thing that makes this code complicated is the fact that Particles are special type of entities where the engine doesn't
-                // know about WorldP3D, the shader calculates their location only at draw time but when they die the effect has to take place
-                // where the shader last drawn it, so I have to calculate the same position again here. If WorlP3D was correct, the loop would have
-                // been much simpler and more generic, meaning, I can just look at Age, and create the event for the pos if it has Tag_SplatOnDeath.
-                // And the problem with this special case is that the fact that I am processing Particles, a given EntityType, is implicit, but the
-                // code masquerades itself as generic. So that is messed up.
                 auto policy = entities::EntityOperationPolicy::client();
                 auto view = entityManager.createView<
                         component::Tag_SimModeClient,
                         component::Age,
                         component::WorldP3D,
-                        component::Size,
-                        component::Heading,
-                        component::Velocity>();
+                        component::Size>();
                 for (const auto &entity: view) {
                     auto &age = view.get<component::Age>(entity);
                     age.currentAge += tickTime;
@@ -476,10 +464,6 @@ namespace oni {
                         if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
                             auto &pos = view.get<component::WorldP3D>(entity);
                             auto &size = view.get<component::Size>(entity);
-                            auto &heading = view.get<component::Heading>(entity);
-                            auto &velocity = view.get<component::Velocity>(entity);
-                            pos.x += std::cos(heading.value) * velocity.currentVelocity;
-                            pos.y += std::sin(heading.value) * velocity.currentVelocity;
 
                             auto &texture = entityManager.get<component::Texture>(entity);
                             entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.filePath);
@@ -498,16 +482,17 @@ namespace oni {
         Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
                                   common::r64 tickTime) {
             /// Update particle placement
+            /// Client
             {
                 auto view = entityFactory.getEntityManager().createView<
-                        component::Tag_EngineOnlyParticlePhysics,
                         component::Tag_SimModeClient,
+                        component::Tag_Particle,
                         component::WorldP3D,
                         component::Velocity,
                         component::Heading,
                         component::Age>();
                 for (const auto &entity: view) {
-                    auto &pos = view.get<component::WorldP3D>(entity).value;
+                    auto &pos = view.get<component::WorldP3D>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &heading = view.get<component::Heading>(entity).value;

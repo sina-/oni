@@ -49,17 +49,11 @@ namespace oni {
             void
             submit(const component::Size &,
                    const component::WorldP3D &,
-                   const component::Heading &,
-                   const component::Age &,
-                   const component::Velocity &,
                    const component::Appearance &);
 
             void
             submit(const component::Size &,
                    const component::WorldP3D &,
-                   const component::Heading &,
-                   const component::Age &,
-                   const component::Velocity &,
                    const component::Texture &);
 
             void
@@ -87,17 +81,11 @@ namespace oni {
             virtual void
             _submit(const component::Size &,
                     const component::WorldP3D &,
-                    const component::Heading &,
-                    const component::Age &,
-                    const component::Velocity &,
                     const component::Appearance &) = 0;
 
             virtual void
             _submit(const component::Size &,
                     const component::WorldP3D &,
-                    const component::Heading &,
-                    const component::Age &,
-                    const component::Velocity &,
                     const component::Texture &) = 0;
 
             virtual void

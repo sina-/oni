@@ -41,14 +41,5 @@ namespace oni {
 
         struct Tag_OnlyComponentUpdate {
         };
-
-        /// Physics
-        struct Tag_ShaderOnlyParticlePhysics {
-            // NOTE: Engine does not track placement, shader figures it out given particle age
-        };
-
-        struct Tag_EngineOnlyParticlePhysics {
-            // NOTE: Engine tracks placement, shader only draws them just like sprites
-        };
     }
 }

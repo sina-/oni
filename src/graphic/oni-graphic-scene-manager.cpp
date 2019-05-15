@@ -87,14 +87,10 @@ namespace oni {
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
-            auto ageIndex = glGetAttribLocation(program, "age");
-            auto velocityIndex = glGetAttribLocation(program, "velocity");
-            auto headingIndex = glGetAttribLocation(program, "heading");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
             auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
 
-            if (positionIndex == -1 || colorIndex == -1 || ageIndex == -1 || velocityIndex == -1 ||
-                headingIndex == -1 || samplerIDIndex == -1 || halfSizeIndex == -1) {
+            if (positionIndex == -1 || colorIndex == -1 || samplerIDIndex == -1 || halfSizeIndex == -1) {
                 assert(false);
             }
 
@@ -117,36 +113,6 @@ namespace oni {
             color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
                     graphic::ParticleVertex,
                     color));
-
-            graphic::BufferStructure age;
-            age.index = static_cast<common::oniGLuint>(ageIndex);
-            age.componentCount = 1;
-            age.componentType = GL_FLOAT;
-            age.normalized = GL_FALSE;
-            age.stride = stride;
-            age.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ParticleVertex,
-                    age));
-
-            graphic::BufferStructure heading;
-            heading.index = static_cast<common::oniGLuint>(headingIndex);
-            heading.componentCount = 1;
-            heading.componentType = GL_FLOAT;
-            heading.normalized = GL_FALSE;
-            heading.stride = stride;
-            heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ParticleVertex,
-                    heading));
-
-            graphic::BufferStructure velocity;
-            velocity.index = static_cast<common::oniGLuint>(velocityIndex);
-            velocity.componentCount = 1;
-            velocity.componentType = GL_FLOAT;
-            velocity.normalized = GL_FALSE;
-            velocity.stride = stride;
-            velocity.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ParticleVertex,
-                    velocity));
 
             graphic::BufferStructure sampler;
             sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
@@ -171,9 +137,6 @@ namespace oni {
             std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
-            bufferStructures.push_back(age);
-            bufferStructures.push_back(heading);
-            bufferStructures.push_back(velocity);
             bufferStructures.push_back(sampler);
             bufferStructures.push_back(halfSize);
 
@@ -537,10 +500,7 @@ namespace oni {
             // Particles with color shading
             {
                 auto view = manager.createView<
-                        component::Size, component::Appearance, component::WorldP3D, component::Heading, component::Age, component::Velocity, component::Tag_Particle,
-                        component::Tag_ShaderOnlyParticlePhysics>();
-
-                mParticleShader->setUniform1i("shaderPhysics", true);
+                        component::Size, component::Appearance, component::WorldP3D,  component::Tag_Particle>();
 
                 for (const auto &entity: view) {
                     const auto &pos = view.get<component::WorldP3D>(entity);
@@ -548,23 +508,18 @@ namespace oni {
                         continue;
                     }
                     const auto &size = view.get<component::Size>(entity);
-                    const auto &age = view.get<component::Age>(entity);
-                    const auto &velocity = view.get<component::Velocity>(entity);
-                    const auto &heading = view.get<component::Heading>(entity);
                     const auto &appearance = view.get<component::Appearance>(entity);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(size, pos, heading, age, velocity, appearance);
+                    mParticleRenderer->submit(size, pos,  appearance);
                 }
             }
 
             // Particles with texture shading
             {
                 auto view = manager.createView<
-                        component::Size, component::Texture, component::Age, component::Velocity, component::WorldP3D, component::Heading, component::Tag_Particle,
-                        component::Tag_ShaderOnlyParticlePhysics>();
-                mParticleShader->setUniform1i("shaderPhysics", true);
+                        component::Size, component::Texture, component::WorldP3D, component::Tag_Particle>();
 
                 for (const auto &entity: view) {
                     const auto &pos = view.get<component::WorldP3D>(entity);
@@ -572,16 +527,13 @@ namespace oni {
                         continue;
                     }
                     const auto &size = view.get<component::Size>(entity);
-                    const auto &age = view.get<component::Age>(entity);
-                    const auto &velocity = view.get<component::Velocity>(entity);
-                    const auto &heading = view.get<component::Heading>(entity);
 
                     auto &texture = view.get<component::Texture>(entity);
                     prepareTexture(texture);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(size, pos, heading, age, velocity, texture);
+                    mParticleRenderer->submit(size, pos, texture);
                 }
             }
         }
@@ -618,7 +570,7 @@ namespace oni {
 
             /// Particle trails
             {
-#if 0
+#if 1
                 std::string textureID = "resources/images/smoke/1.png";
                 common::r32 particleHalfSize = 0.35f;
                 common::r32 particleSize = particleHalfSize * 2;

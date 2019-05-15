@@ -128,9 +128,6 @@ namespace oni {
         void
         BatchRenderer2D::_submit(const component::Size &size,
                                  const component::WorldP3D &pos,
-                                 const component::Heading &heading,
-                                 const component::Age &age,
-                                 const component::Velocity &velocity,
                                  const component::Appearance &appearance) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
@@ -138,9 +135,6 @@ namespace oni {
 
             buffer->position = pos.value;
             buffer->color = appearance.color;
-            buffer->age = age.currentAge;
-            buffer->heading = heading.value;
-            buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = -1;
             buffer->halfSize = size.x;
             buffer++;
@@ -154,9 +148,6 @@ namespace oni {
         void
         BatchRenderer2D::_submit(const component::Size &size,
                                  const component::WorldP3D &pos,
-                                 const component::Heading &heading,
-                                 const component::Age &age,
-                                 const component::Velocity &velocity,
                                  const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
@@ -166,9 +157,6 @@ namespace oni {
 
             buffer->position = pos.value;
             buffer->color = {};
-            buffer->age = age.currentAge;
-            buffer->heading = heading.value;
-            buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = samplerID;
             buffer->halfSize = size.x;
             buffer++;

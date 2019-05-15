@@ -356,7 +356,6 @@ namespace oni {
             }
 
             assignTag<component::Tag_Particle>(entityID);
-            assignTag<component::Tag_ShaderOnlyParticlePhysics>(entityID);
         }
 
         template<>
@@ -390,7 +389,6 @@ namespace oni {
             }
 
             assignTag<component::Tag_Particle>(entityID);
-            assignTag<component::Tag_ShaderOnlyParticlePhysics>(entityID);
         }
 
         template<>
@@ -422,12 +420,11 @@ namespace oni {
 
             if (randomize) {
                 h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
+                velocity.currentVelocity = mRand->nextReal32(1.f, 2.f);
                 age.maxAge = mRand->nextReal32(0.2f, 1.f);
             }
 
             assignTag<component::Tag_Particle>(entityID);
-            assignTag<component::Tag_ShaderOnlyParticlePhysics>(entityID);
             assignTag<component::Tag_SplatOnDeath>(entityID);
         }
 

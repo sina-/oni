@@ -55,17 +55,11 @@ namespace oni {
             void
             _submit(const component::Size &,
                     const component::WorldP3D &,
-                    const component::Heading &,
-                    const component::Age &,
-                    const component::Velocity &,
                     const component::Appearance &) override;
 
             void
             _submit(const component::Size &,
                     const component::WorldP3D &,
-                    const component::Heading &,
-                    const component::Age &,
-                    const component::Velocity &,
                     const component::Texture &) override;
 
             void

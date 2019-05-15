@@ -126,7 +126,7 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Tessellation &tessellation,
+        BatchRenderer2D::_submit(const component::Size &size,
                                  const component::WorldP3D &pos,
                                  const component::Heading &heading,
                                  const component::Age &age,
@@ -142,7 +142,7 @@ namespace oni {
             buffer->heading = heading.value;
             buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = -1;
-            buffer->halfSize = tessellation.halfSize;
+            buffer->halfSize = size.x;
             buffer++;
 
             // Update the mBuffer to point to the head.
@@ -152,7 +152,7 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Tessellation &tessellation,
+        BatchRenderer2D::_submit(const component::Size &size,
                                  const component::WorldP3D &pos,
                                  const component::Heading &heading,
                                  const component::Age &age,
@@ -170,7 +170,7 @@ namespace oni {
             buffer->heading = heading.value;
             buffer->velocity = velocity.currentVelocity;
             buffer->samplerID = samplerID;
-            buffer->halfSize = tessellation.halfSize;
+            buffer->halfSize = size.x;
             buffer++;
 
             // Update the mBuffer to point to the head.

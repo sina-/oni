@@ -53,15 +53,15 @@ namespace oni {
                     const component::Appearance &) override;
 
             void
-            _submit(const component::Tessellation &tessellation,
-                    const component::WorldP3D &placement,
+            _submit(const component::Size &,
+                    const component::WorldP3D &,
                     const component::Heading &,
-                    const component::Age &age,
-                    const component::Velocity &velocity,
-                    const component::Appearance &appearance) override;
+                    const component::Age &,
+                    const component::Velocity &,
+                    const component::Appearance &) override;
 
             void
-            _submit(const component::Tessellation &,
+            _submit(const component::Size &,
                     const component::WorldP3D &,
                     const component::Heading &,
                     const component::Age &,

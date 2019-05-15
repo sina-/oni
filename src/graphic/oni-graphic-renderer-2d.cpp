@@ -18,23 +18,23 @@ namespace oni {
         }
 
         void
-        Renderer2D::submit(const component::Tessellation &tessellation,
+        Renderer2D::submit(const component::Size &size,
                            const component::WorldP3D &pos,
                            const component::Heading &heading,
                            const component::Age &age,
                            const component::Velocity &velocity,
                            const component::Appearance &color) {
-            _submit(tessellation, pos, heading, age, velocity, color);
+            _submit(size, pos, heading, age, velocity, color);
         }
 
         void
-        Renderer2D::submit(const component::Tessellation &tessellation,
+        Renderer2D::submit(const component::Size &size,
                            const component::WorldP3D &pos,
                            const component::Heading &heading,
                            const component::Age &age,
                            const component::Velocity &velocity,
                            const component::Texture &texture) {
-            _submit(tessellation, pos, heading, age, velocity, texture);
+            _submit(size, pos, heading, age, velocity, texture);
         }
 
         void

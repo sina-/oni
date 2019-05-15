@@ -466,7 +466,7 @@ namespace oni {
                         component::Tag_SimModeClient,
                         component::Age,
                         component::WorldP3D,
-                        component::Tessellation,
+                        component::Size,
                         component::Heading,
                         component::Velocity>();
                 for (const auto &entity: view) {
@@ -475,13 +475,12 @@ namespace oni {
                     if (age.currentAge > age.maxAge) {
                         if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
                             auto &pos = view.get<component::WorldP3D>(entity);
-                            auto &tess = view.get<component::Tessellation>(entity);
+                            auto &size = view.get<component::Size>(entity);
                             auto &heading = view.get<component::Heading>(entity);
                             auto &velocity = view.get<component::Velocity>(entity);
                             pos.x += std::cos(heading.value) * velocity.currentVelocity;
                             pos.y += std::sin(heading.value) * velocity.currentVelocity;
 
-                            auto size = component::Size{tess.halfSize, tess.halfSize};
                             auto &texture = entityManager.get<component::Texture>(entity);
                             entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.filePath);
                         }

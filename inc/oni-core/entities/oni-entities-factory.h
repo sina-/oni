@@ -52,8 +52,7 @@ namespace oni {
             createEntity(SimMode entityNetworkMode,
                          const Args &... args) {
                 common::EntityID entityID = createEntity();
-                auto &type = createComponent<entities::EntityType>(entityID);
-                type = entityType;
+                createComponent<entities::EntityType>(entityID, entityType);
                 switch (entityNetworkMode) {
                     case SimMode::CLIENT: {
                         createComponent<component::Tag_SimModeClient>(entityID);
@@ -273,11 +272,12 @@ namespace oni {
                 mRegistryManager->remove<T>(entityID);
             }
 
-            template<class Component>
+            template<class Component, class... Args>
             Component &
-            createComponent(common::EntityID entityID) {
+            createComponent(common::EntityID entityID,
+                            Args &&...args) {
                 static_assert(std::is_aggregate_v<Component> || std::is_enum_v<Component>);
-                return mRegistryManager->assign<Component>(entityID, Component{});
+                return mRegistryManager->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
             template<class Component>

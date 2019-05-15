@@ -69,13 +69,6 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  Tessellation &tessellationFactor) {
-            archive(tessellationFactor.halfSize);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   SoundID &soundID) {
             assert(!soundID.value.empty());
             archive(soundID.value);

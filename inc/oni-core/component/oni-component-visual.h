@@ -48,10 +48,6 @@ namespace oni {
             TextureStatus status{TextureStatus::INVALID};
         };
 
-        struct Tessellation {
-            common::r32 halfSize{1.f};
-        };
-
         struct Text {
             common::EntityID entityID{0};
             common::r32 xScaling{1.f};

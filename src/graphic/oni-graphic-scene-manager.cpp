@@ -442,7 +442,8 @@ namespace oni {
         SceneManager::renderStaticTextures(entities::EntityManager &manager,
                                            common::r32 viewWidth,
                                            common::r32 viewHeight) {
-            auto staticTextureView = manager.createView<component::Tag_TextureShaded, component::Shape,
+            auto staticTextureView = manager.createView<
+                    component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::Tag_Static>();
             for (const auto &entity: staticTextureView) {
                 const auto &shape = staticTextureView.get<component::Shape>(entity);
@@ -472,7 +473,8 @@ namespace oni {
         SceneManager::renderDynamicTextures(entities::EntityManager &manager,
                                             common::r32 viewWidth,
                                             common::r32 viewHeight) {
-            auto view = manager.createView<component::Tag_TextureShaded, component::Shape,
+            auto view = manager.createView<
+                    component::Tag_TextureShaded, component::Shape,
                     component::Texture, component::WorldP3D, component::Heading, component::Scale, component::Tag_Dynamic>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<component::Shape>(entity);
@@ -512,7 +514,8 @@ namespace oni {
         SceneManager::renderColorSprites(entities::EntityManager &manager,
                                          common::r32 viewWidth,
                                          common::r32 viewHeight) {
-            auto view = manager.createView<component::Tag_ColorShaded, component::Shape,
+            auto view = manager.createView<
+                    component::Tag_ColorShaded, component::Shape,
                     component::Appearance, component::Tag_Static>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<component::Shape>(entity);
@@ -533,7 +536,8 @@ namespace oni {
                                       common::r32 viewHeight) {
             // Particles with color shading
             {
-                auto view = manager.createView<component::Tessellation, component::Appearance, component::WorldP3D, component::Heading, component::Age, component::Velocity, component::Tag_Particle,
+                auto view = manager.createView<
+                        component::Size, component::Appearance, component::WorldP3D, component::Heading, component::Age, component::Velocity, component::Tag_Particle,
                         component::Tag_ShaderOnlyParticlePhysics>();
 
                 mParticleShader->setUniform1i("shaderPhysics", true);
@@ -543,7 +547,7 @@ namespace oni {
                     if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &tessellation = view.get<component::Tessellation>(entity);
+                    const auto &size = view.get<component::Size>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
                     const auto &heading = view.get<component::Heading>(entity);
@@ -551,13 +555,14 @@ namespace oni {
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(tessellation, pos, heading, age, velocity, appearance);
+                    mParticleRenderer->submit(size, pos, heading, age, velocity, appearance);
                 }
             }
 
             // Particles with texture shading
             {
-                auto view = manager.createView<component::Tessellation, component::Texture, component::Age, component::Velocity, component::WorldP3D, component::Heading, component::Tag_Particle,
+                auto view = manager.createView<
+                        component::Size, component::Texture, component::Age, component::Velocity, component::WorldP3D, component::Heading, component::Tag_Particle,
                         component::Tag_ShaderOnlyParticlePhysics>();
                 mParticleShader->setUniform1i("shaderPhysics", true);
 
@@ -566,7 +571,7 @@ namespace oni {
                     if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &tessellation = view.get<component::Tessellation>(entity);
+                    const auto &size = view.get<component::Size>(entity);
                     const auto &age = view.get<component::Age>(entity);
                     const auto &velocity = view.get<component::Velocity>(entity);
                     const auto &heading = view.get<component::Heading>(entity);
@@ -576,7 +581,7 @@ namespace oni {
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(tessellation, pos, heading, age, velocity, texture);
+                    mParticleRenderer->submit(size, pos, heading, age, velocity, texture);
                 }
             }
         }
@@ -611,9 +616,9 @@ namespace oni {
             }
 */
 
-            // trails
+            /// Particle trails
             {
-#if 1
+#if 0
                 std::string textureID = "resources/images/smoke/1.png";
                 common::r32 particleHalfSize = 0.35f;
                 common::r32 particleSize = particleHalfSize * 2;
@@ -701,7 +706,7 @@ namespace oni {
 #endif
             }
 
-            // Entities that leave mark
+            /// Entities that leave mark
             {
                 auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D, component::Size>();
                 for (auto &&entity: view) {
@@ -717,7 +722,7 @@ namespace oni {
                 }
             }
 
-            // Update Skid lines.
+            /// Update Skid lines.
             {
                 std::vector<component::WorldP3D> skidPosList{};
                 std::vector<common::u8> skidOpacity{};
@@ -737,12 +742,12 @@ namespace oni {
                             // same logic is hard-coded when spawningCar server side.
                             math::vec3 skidPosRL{static_cast<common::r32>(-carConfig.cgToRearAxle),
                                                  static_cast<common::r32>(carConfig.wheelWidth +
-                                                                             carConfig.halfWidth / 2),
+                                                                          carConfig.halfWidth / 2),
                                     // NOTE: This z-value is unused.
                                                  0.f};
                             math::vec3 skidPosRR{static_cast<common::r32>(-carConfig.cgToRearAxle),
                                                  static_cast<common::r32>(-carConfig.wheelWidth -
-                                                                             carConfig.halfWidth / 2),
+                                                                          carConfig.halfWidth / 2),
                                                  0.f};
                             auto transform = math::createTransformation(pos, heading, scale);
                             auto posRL = transform * skidPosRL;
@@ -754,6 +759,16 @@ namespace oni {
 //                                                                    255);
                             // TODO: arbitrary number based on number of frames, think about better way of determining this
                             skidOpacity.push_back(10);
+                        }
+                        if (car.slippingFront) {
+                           // TODO: Smoke cloud which is basically particle but certain behaviour:
+                           // 1) It fades out -> CURRENT: Shader implementation
+                           // 2) Each of them has a random maxAge -> CURRENT: set random value in the engine
+                           // 3) Slight rotation of sprite over-time -> CURRENT: No implementation
+                           // 4) Moves outwards -> CURRENT: Shader implementation
+                           // Optional:
+                           // 5) Collision with other entities adds slight angular velocity
+
                         }
                     }
                 }
@@ -770,7 +785,7 @@ namespace oni {
                 }
             }
 
-            // Update Laps
+            /// Update Laps
             {
                 auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, gameplay::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
@@ -864,9 +879,9 @@ namespace oni {
                 auto &texture = entityRegistry.get<component::Texture>(entityID);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                                 common::EP);
+                                                              common::EP);
                 auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                                  common::EP);
+                                                               common::EP);
 
                 texture.image.width = widthInPixels;
                 texture.image.height = heightInPixels;

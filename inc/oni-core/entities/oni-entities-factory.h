@@ -47,6 +47,9 @@ namespace oni {
             EntityManager &
             getEntityManager();
 
+            EntityManager &
+            getEntityManager() const;
+
             template<entities::EntityType entityType, class ...Args>
             common::EntityID
             createEntity(SimMode entityNetworkMode,

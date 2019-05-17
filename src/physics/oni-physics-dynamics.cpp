@@ -486,6 +486,8 @@ namespace oni {
             {
                 auto view = entityFactory.getEntityManager().createView<
                         component::Tag_SimModeClient,
+                        // TODO: This tag is not neccessary anymore, this could be generalized to a structure that encapsulates the
+                        // motion curve of the object and using the curve any object can be simulated.
                         component::Tag_Particle,
                         component::WorldP3D,
                         component::Velocity,

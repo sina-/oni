@@ -62,7 +62,7 @@ namespace oni {
             renderPhysicsDebugData();
 
             void
-            tick(entities::EntityFactory &server,
+            tick(const entities::EntityFactory &server,
                  entities::EntityFactory &client,
                  common::r64 tickTime);
 

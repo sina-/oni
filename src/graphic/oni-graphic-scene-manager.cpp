@@ -540,7 +540,7 @@ namespace oni {
 
 
         void
-        SceneManager::tick(entities::EntityFactory &serverEntityFactory,
+        SceneManager::tick(const entities::EntityFactory &serverEntityFactory,
                            entities::EntityFactory &clientEntityFactory,
                            common::r64 tickTime) {
             auto viewWidth = getViewWidth();

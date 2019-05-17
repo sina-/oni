@@ -25,6 +25,11 @@ namespace oni {
             return *mRegistryManager;
         }
 
+        EntityManager &
+        EntityFactory::getEntityManager() const {
+            return *mRegistryManager;
+        }
+
         common::EntityID
         EntityFactory::createEntity() {
             auto entityID = mRegistryManager->create();

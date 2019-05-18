@@ -101,7 +101,6 @@ namespace oni {
                     std::string textureID = "resources/images/bullet/2.png";
 
                     auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(
-                            entities::SimMode::SERVER,
                             rocketPos,
                             size,
                             heading,

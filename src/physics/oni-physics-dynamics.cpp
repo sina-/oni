@@ -411,7 +411,7 @@ namespace oni {
                 // sound effects, etc.
                 entityFactory.getEntityManager().enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
-                entityFactory.removeEntity(entityID, entities::EntityOperationPolicy{true, false});
+                entityFactory.removeEntity(entityID);
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
@@ -429,7 +429,9 @@ namespace oni {
                 auto transformChildren = manager.get<component::TransformChildren>(entity);
                 for (auto child: transformChildren.children) {
                     auto transformParent = manager.get<component::TransformParent>(child);
-                    transformParent.transform = math::createTransformation(pos, heading, scale);
+                    // TODO: Not using scale, this transform structure is broken, have to remake it
+                    auto s = component::Scale{};
+                    transformParent.transform = math::createTransformation(pos, heading, s);
 
                     updateTransformParent(manager, child, transformParent);
                 }
@@ -451,24 +453,21 @@ namespace oni {
             {
                 /// Client side
                 auto &entityManager = entityFactory.getEntityManager();
-                auto policy = entities::EntityOperationPolicy::client();
                 auto view = entityManager.createView<
                         component::Tag_SimModeClient,
-                        component::Age,
-                        component::WorldP3D,
-                        component::Size>();
+                        component::Age>();
                 for (const auto &entity: view) {
                     auto &age = view.get<component::Age>(entity);
                     age.currentAge += tickTime;
                     if (age.currentAge > age.maxAge) {
                         if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
-                            auto &pos = view.get<component::WorldP3D>(entity);
-                            auto &size = view.get<component::Size>(entity);
-
+                            auto &pos = entityManager.get<component::WorldP3D>(entity);
+                            auto &size = entityManager.get<component::Size>(entity);
                             auto &texture = entityManager.get<component::Texture>(entity);
-                            entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.filePath);
+
+                            entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
                         }
-                        entityFactory.removeEntity(entity, policy);
+                        entityFactory.removeEntity(entity);
                     }
                 }
             }
@@ -486,9 +485,6 @@ namespace oni {
             {
                 auto view = entityFactory.getEntityManager().createView<
                         component::Tag_SimModeClient,
-                        // TODO: This tag is not neccessary anymore, this could be generalized to a structure that encapsulates the
-                        // motion curve of the object and using the curve any object can be simulated.
-                        component::Tag_Particle,
                         component::WorldP3D,
                         component::Velocity,
                         component::Heading,

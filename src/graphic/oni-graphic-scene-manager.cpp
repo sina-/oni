@@ -290,7 +290,7 @@ namespace oni {
                     break;
                 }
                 case component::TextureStatus::NEEDS_LOADING_USING_PATH: {
-                    const auto &loadedTexture = mTextureManager->loadOrGetTexture(texture.filePath.c_str());
+                    const auto &loadedTexture = mTextureManager->loadOrGetTexture(texture.path.c_str());
                     texture = loadedTexture;
                     break;
                 }
@@ -500,7 +500,7 @@ namespace oni {
             // Particles with color shading
             {
                 auto view = manager.createView<
-                        component::Size, component::Appearance, component::WorldP3D,  component::Tag_Particle>();
+                        component::Size, component::Appearance, component::WorldP3D, component::Tag_Particle>();
 
                 for (const auto &entity: view) {
                     const auto &pos = view.get<component::WorldP3D>(entity);
@@ -512,7 +512,7 @@ namespace oni {
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(size, pos,  appearance);
+                    mParticleRenderer->submit(size, pos, appearance);
                 }
             }
 
@@ -576,7 +576,10 @@ namespace oni {
                 common::r32 particleSize = particleHalfSize * 2;
                 common::r32 halfConeAngle = static_cast<common::r32>(math::toRadians(45)) / 2.f;
 
-                auto view = serverEntityFactory.getEntityManager().createView<component::Trail, component::WorldP3D, component::Heading>();
+                auto view = serverEntityFactory.getEntityManager().createView<
+                        component::Trail,
+                        component::WorldP3D,
+                        component::Heading>();
                 for (auto &&entity: view) {
                     const auto &worldPos = view.get<component::WorldP3D>(entity);
                     const auto &heading = view.get<component::Heading>(entity);
@@ -592,7 +595,7 @@ namespace oni {
 
                     if (trail.previousPos.empty()) {
                         auto trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                entities::SimMode::CLIENT, currentPos, textureID, particleHalfSize, false);
+                                currentPos, textureID, particleHalfSize, false);
                         continue;
                     }
 
@@ -614,7 +617,7 @@ namespace oni {
                     auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
 
                     common::EntityID trailEntity;
-                    for (auto numParticles = 0; numParticles < mRand->nextUint8(1, 2); ++numParticles) {
+                    for (auto numParticles = 0; numParticles < mRand->next_u8(1, 2); ++numParticles) {
                         auto pos = component::WorldP3D{x, y, currentPos.z};
                         for (common::r32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
@@ -631,7 +634,6 @@ namespace oni {
                         }
                         */
                             trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    entities::SimMode::CLIENT,
                                     pos, textureID, particleHalfSize, false);
                             auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
                                     trailEntity);
@@ -641,11 +643,11 @@ namespace oni {
 
                             auto &velocity = clientEntityFactory.getEntityManager().get<component::Velocity>(
                                     trailEntity);
-                            velocity.currentVelocity = mRand->nextReal32(2.f, 10.f);
+                            velocity.currentVelocity = mRand->next_r32(2.f, 10.f);
 
                             auto &particleHeading = clientEntityFactory.getEntityManager().get<component::Heading>(
                                     trailEntity);
-                            particleHeading.value = mRand->nextReal32(spawnMinAngle, spawnMaxAngle);
+                            particleHeading.value = mRand->next_r32(spawnMinAngle, spawnMaxAngle);
 
                             pos.x += particleSize * std::sin(alpha);
                             pos.y += particleSize * std::cos(alpha);
@@ -666,7 +668,7 @@ namespace oni {
                     const auto &size = view.get<component::Size>(entity);
                     auto brush = graphic::Brush{};
                     // TODO: This is messy distinction between texture path and textureID!
-                    brush.textureID = texture.filePath.c_str();
+                    brush.textureID = texture.path.c_str();
                     brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
@@ -688,7 +690,7 @@ namespace oni {
                             const auto &carConfig = carView.get<component::CarConfig>(carEntity);
                             const auto &pos = carView.get<component::WorldP3D>(carEntity);
                             const auto &heading = carView.get<component::Heading>(carEntity);
-                            const auto &scale = carView.get<component::Scale>(carEntity);
+                            const auto scale = component::Scale{};
 
                             // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
                             // same logic is hard-coded when spawningCar server side.
@@ -713,14 +715,22 @@ namespace oni {
                             skidOpacity.push_back(10);
                         }
                         if (car.slippingFront) {
-                           // TODO: Smoke cloud which is basically particle but certain behaviour:
-                           // 1) It fades out -> CURRENT: Shader implementation
-                           // 2) Each of them has a random maxAge -> CURRENT: set random value in the engine
-                           // 3) Slight rotation of sprite over-time -> CURRENT: No implementation
-                           // 4) Moves outwards -> CURRENT: Shader implementation
-                           // Optional:
-                           // 5) Collision with other entities adds slight angular velocity
-
+                            // TODO: Smoke cloud which is basically particle but certain behaviour:
+                            // 1) It fades out -> CURRENT: Shader implementation
+                            // 2) Each of them has a random maxAge -> CURRENT: set random value in the engine
+                            // 3) Slight rotation of sprite over-time -> CURRENT: No implementation
+                            // 4) Moves outwards -> CURRENT: Shader implementation
+                            // Optional:
+                            // 5) Collision with other entities adds slight angular velocity
+                            auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
+                            for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
+                                auto id = clientEntityFactory.createEntity_SmokeCloud();
+                                clientEntityFactory.setWorldP3D(id, car.position.x, car.position.y, z);
+                                clientEntityFactory.setTexture(id, "resources/images/smoke/1.png");
+                                clientEntityFactory.setRandAge(id, 1, 3);
+                                clientEntityFactory.setRandHeading(id);
+                                clientEntityFactory.setRandVelocity(id, 1, 2);
+                            }
                         }
                     }
                 }
@@ -809,8 +819,8 @@ namespace oni {
 
             auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
             if (missing) {
-                auto tilePosX = math::binPos(x, mCanvasTileSizeX);
-                auto tilePosY = math::binPos(y, mCanvasTileSizeY);
+                auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
+                auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
 
                 auto worldPos = component::WorldP3D{tilePosX, tilePosY,
                                                     mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
@@ -822,7 +832,6 @@ namespace oni {
 
                 // TODO: Should this be a canvas type?
                 auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(
-                        entities::SimMode::CLIENT,
                         worldPos,
                         tileSize,
                         heading,

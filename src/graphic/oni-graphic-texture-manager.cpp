@@ -354,7 +354,7 @@ namespace oni {
             texture.type = type;
             // TODO: The path is empty, might be useful to generate a unique path for procgen textures. Maybe with the
             // seed.
-            texture.filePath = "";
+            texture.path = "";
             texture.uv = uv;
             texture.status = component::TextureStatus::READY;
         }

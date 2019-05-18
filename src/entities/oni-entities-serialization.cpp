@@ -213,7 +213,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   component::Texture &data) {
-            archive(data.image, data.textureID, data.format, data.type, data.filePath,
+            archive(data.image, data.textureID, data.format, data.type, data.path,
                     data.uv, data.status);
         }
     }

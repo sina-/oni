@@ -24,7 +24,8 @@ namespace oni {
             ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
                 mZLayerManager = std::make_unique<math::ZLayerManager>();
                 mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
-                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(*mZLayerManager,
+                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(entities::SimMode::SERVER,
+                                                                                *mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
 
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
@@ -113,8 +114,7 @@ namespace oni {
             ServerGame::postDisconnectHook(const common::PeerID &peerID) {
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
-                mEntityFactory->removeEntity(clientCarEntityID,
-                                             oni::entities::EntityOperationPolicy{true, false});
+                mEntityFactory->removeEntity(clientCarEntityID);
                 mClientDataManager->deleteClient(peerID);
             }
 
@@ -212,7 +212,6 @@ namespace oni {
                 auto &manager = mEntityFactory->getEntityManager();
 
                 auto carEntity = mEntityFactory->createEntity<oni::entities::EntityType::RACE_CAR>(
-                        entities::SimMode::SERVER,
                         pos,
                         size,
                         heading,
@@ -221,11 +220,10 @@ namespace oni {
                 mEntityFactory->tagForNetworkSync(carEntity);
 
                 math::vec2 gunSize{2.f, 0.5f};
-                auto gunPos = component::WorldP3D{1.f, 0.f, mZLayerManager->getZForEntity(
+                auto gunPos = component::WorldP3D{0.5f, 0.f, mZLayerManager->getZForEntity(
                         oni::entities::EntityType::VEHICLE_GUN)};
                 std::string gunTextureID = "resources/images/minigun/1.png";
                 auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(
-                        entities::SimMode::SERVER,
                         gunPos,
                         gunSize,
                         heading,
@@ -240,7 +238,7 @@ namespace oni {
                 auto tireHeading = component::Heading{static_cast< common::r32>( math::toRadians(90.0f))};
                 math::vec2 tireSize{
                         static_cast<common::r32>(carConfig.wheelWidth),
-                        static_cast<common::r32>(carConfig.wheelRadius * 2)
+                        static_cast<common::r32>(carConfig.wheelRadius * 2.f)
                 };
 
                 std::array<math::vec2, 2> carTiresFront{
@@ -259,7 +257,6 @@ namespace oni {
                 for (auto &&carTire: carTiresFront) {
                     auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_FRONT>(
-                            entities::SimMode::SERVER,
                             tirePos,
                             tireSize,
                             tireHeading,
@@ -273,7 +270,6 @@ namespace oni {
                 for (auto &&carTire: carTiresRear) {
                     auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
                     auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_REAR>(
-                            entities::SimMode::SERVER,
                             tirePos,
                             tireSize,
                             tireHeading,
@@ -296,7 +292,6 @@ namespace oni {
                 std::string textureID = "resources/images/car/2/truck.png";
 
                 auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(
-                        entities::SimMode::SERVER,
                         worldPos, size,
                         heading,
                         textureID);

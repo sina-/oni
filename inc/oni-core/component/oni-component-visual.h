@@ -29,9 +29,9 @@ namespace oni {
         };
 
         struct Image {
-            std::vector<common::u8> data{};
             common::u16 width{};
             common::u16 height{};
+            std::vector<common::u8> data{};
         };
 
         struct Texture {
@@ -42,10 +42,10 @@ namespace oni {
             // GL_UNSIGNED_BYTE 0x1401
             // GL_FLOAT         0x1406
             common::oniGLenum type{0x1401};
-            std::string filePath{};
+            std::string path{};
             std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},
                                          math::vec2{1.f, 1.f}, math::vec2{0.f, 1.f}};
-            TextureStatus status{TextureStatus::INVALID};
+            TextureStatus status{TextureStatus::NEEDS_LOADING_USING_PATH};
         };
 
         struct Text {

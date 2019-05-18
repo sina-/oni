@@ -76,7 +76,6 @@ namespace oni {
                                           const component::WorldP3D &position) {
             auto &entityRegistry = entityFactory.getEntityManager();
             auto entityID = entityFactory.createEntity<entities::EntityType::TEXT>(
-                    entities::SimMode::CLIENT,
                     position, text);
             auto &textComponent = entityRegistry.get<component::Text>(entityID);
             assignGlyphs(textComponent);

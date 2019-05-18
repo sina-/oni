@@ -38,7 +38,8 @@ namespace oni {
             // might be interested in creating entities that requires those systems. I should think about if it makes
             // sense to break up this factory into factories for special purposes, maybe one per system or combination
             // of them?
-            EntityFactory(const math::ZLayerManager &,
+            EntityFactory(entities::SimMode sMode,
+                          const math::ZLayerManager &,
                           b2World &);
 
             // TODO: Ideally I would have one interface into Entity world where I can request entities to be created,
@@ -52,26 +53,15 @@ namespace oni {
 
             template<entities::EntityType entityType, class ...Args>
             common::EntityID
-            createEntity(SimMode entityNetworkMode,
-                         const Args &... args) {
-                common::EntityID entityID = createEntity();
-                createComponent<entities::EntityType>(entityID, entityType);
-                switch (entityNetworkMode) {
-                    case SimMode::CLIENT: {
-                        createComponent<component::Tag_SimModeClient>(entityID);
-                        break;
-                    }
-                    case SimMode::SERVER: {
-                        createComponent<component::Tag_SimModeServer>(entityID);
-                        break;
-                    }
-                    default: {
-                        assert(false);
-                    }
-                }
-                _createEntity<entityType>(entityID, args...);
-                return entityID;
+            createEntity(const Args &... args) {
+                auto id = createEntity();
+                createComponent<entities::EntityType>(id, entityType);
+                _createEntity<entityType>(id, args...);
+                return id;
             }
+
+            void
+            removeEntity(common::EntityID);
 
             void
             removeEntity(common::EntityID,
@@ -92,9 +82,49 @@ namespace oni {
                 mRegistryManager->clearDeletedEntitiesList();
             }
 
+            common::EntityID
+            createEntity_SmokeCloud();
+
+            EntityFactory &
+            createComponent_WorldP3D() {
+                return *this;
+            }
+
+            void
+            setWorldP3D(common::EntityID,
+                        common::r32 x,
+                        common::r32 y,
+                        common::r32 z);
+
+            void
+            setTexture(common::EntityID,
+                       std::string_view path);
+
+            void
+            setScale(common::EntityID,
+                     common::r32 x,
+                     common::r32 y);
+
+            void
+            setRandAge(common::EntityID id,
+                       common::i32 lower,
+                       common::i32 upper);
+
+            void
+            setRandHeading(common::EntityID id);
+
+            void
+            setRandVelocity(common::EntityID id,
+                            common::i32 lower,
+                            common::i32 upper);
+
         private:
             common::EntityID
             createEntity();
+
+            void
+            assignSimMode(common::EntityID,
+                          entities::SimMode);
 
             template<entities::EntityType, class ...Args>
             void
@@ -305,6 +335,8 @@ namespace oni {
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};
+            entities::SimMode mSimMode{entities::SimMode::CLIENT};
+            entities::EntityOperationPolicy mEntityOperationPolicy{};
         };
     }
 }

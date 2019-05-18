@@ -28,6 +28,7 @@ namespace oni {
             TEXT,
             WORLD_CHUNK,
 
+            SMOKE,
 
             LAST
         };

@@ -101,10 +101,10 @@ namespace oni {
              *    +----+
              *    A    D
              */
-            math::vec3 vertexA{0.f, 0.f, 1.f};
-            math::vec3 vertexB{0.f, 1.f, 1.f};
-            math::vec3 vertexC{1.f, 1.f, 1.f};
-            math::vec3 vertexD{1.f, 0.f, 1.f};
+            math::vec3 vertexA{-0.5f, -0.5f, 0.f};
+            math::vec3 vertexB{-0.5f, 0.5f, 0.f};
+            math::vec3 vertexC{0.5f, 0.5f, 0.f};
+            math::vec3 vertexD{0.5f, -0.5f, 0.f};
 
             math::vec3
             getPosition() const { return vertexA; }
@@ -115,11 +115,23 @@ namespace oni {
             }
 
             void
-            setSizeFromOrigin(const math::vec2 &size) {
-                vertexB.y = size.y;
-                vertexC.x = size.x;
-                vertexC.y = size.y;
-                vertexD.x = size.x;
+            setSize(const math::vec2 &size) {
+                assert(size.x > 0);
+                assert(size.y > 0);
+                auto halfX = size.x / 2.f;
+                auto halfY = size.y / 2.f;
+
+                vertexA.x = -halfX;
+                vertexA.y = -halfY;
+
+                vertexB.x = -halfX;
+                vertexB.y = halfY;
+
+                vertexC.x = halfX;
+                vertexC.y = halfY;
+
+                vertexD.x = halfX;
+                vertexD.y = -halfY;
             }
 
             void
@@ -127,14 +139,14 @@ namespace oni {
                 math::vec2 halfSize{};
                 halfSize.x = (vertexD.x - vertexA.x) / 2;
                 halfSize.y = (vertexB.y - vertexA.y) / 2;
-                vertexA.x -= halfSize.x;
-                vertexA.y -= halfSize.y;
-                vertexB.x -= halfSize.x;
-                vertexB.y -= halfSize.y;
-                vertexC.x -= halfSize.x;
-                vertexC.y -= halfSize.y;
-                vertexD.x -= halfSize.x;
-                vertexD.y -= halfSize.y;
+                vertexA.x = -halfSize.x;
+                vertexA.y = -halfSize.y;
+                vertexB.x = -halfSize.x;
+                vertexB.y = halfSize.y;
+                vertexC.x = halfSize.x;
+                vertexC.y = halfSize.y;
+                vertexD.x = halfSize.x;
+                vertexD.y = -halfSize.y;
             }
 
             void
@@ -146,6 +158,7 @@ namespace oni {
             }
 
             static Shape
+            // TODO: This is referenced from vertex A, but point of reference should be center of the sprite.
             fromPositionAndSize(const math::vec3 &position,
                                 const math::vec2 &size) {
                 return Shape{
@@ -156,6 +169,7 @@ namespace oni {
             }
 
             static Shape
+            // TODO: This is referenced from vertex A, but point of reference should be center of the sprite.
             fromSizeAndRotation(const math::vec3 &size,
                                 const common::r32 rotation) {
                 auto shape = Shape{

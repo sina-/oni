@@ -42,6 +42,8 @@ namespace oni {
 
             mEntityZLayers[EntityType::VEHICLE_GUN] = getNextZAtLayer(ZLayerDef::LAYER_2);
 
+            mEntityZLayers[EntityType::SMOKE] = getNextZAtLayer(ZLayerDef::LAYER_4);
+
             mEntityZLayers[EntityType::UI] = getNextZAtLayer(ZLayerDef::LAYER_8);
         }
 

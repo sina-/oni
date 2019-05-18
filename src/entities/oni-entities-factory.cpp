@@ -12,10 +12,27 @@
 
 namespace oni {
     namespace entities {
-        EntityFactory::EntityFactory(const math::ZLayerManager &zLayerManager,
-                                     b2World &physicsWorld) :
+        EntityFactory::EntityFactory(
+                entities::SimMode sMode,
+                const math::ZLayerManager &zLayerManager,
+                b2World &physicsWorld) :
                 mZLayerManager(zLayerManager),
-                mPhysicsWorld{physicsWorld} {
+                mPhysicsWorld(physicsWorld),
+                mSimMode(sMode) {
+            switch (sMode) {
+                case SimMode::CLIENT: {
+                    mEntityOperationPolicy = entities::EntityOperationPolicy::client();
+                    break;
+                }
+                case SimMode::SERVER: {
+                    mEntityOperationPolicy = entities::EntityOperationPolicy::server();
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
             mRand = std::make_unique<math::Rand>(0);
             mRegistryManager = std::make_unique<entities::EntityManager>();
         }
@@ -32,25 +49,30 @@ namespace oni {
 
         common::EntityID
         EntityFactory::createEntity() {
-            auto entityID = mRegistryManager->create();
-            return entityID;
+            auto id = mRegistryManager->create();
+            assignSimMode(id, mSimMode);
+            return id;
         }
 
+        void
+        EntityFactory::removeEntity(common::EntityID id) {
+            removeEntity(id, mEntityOperationPolicy);
+        }
 
         void
-        EntityFactory::removeEntity(common::EntityID entityID,
+        EntityFactory::removeEntity(common::EntityID id,
                                     const entities::EntityOperationPolicy &policy) {
-            if (policy.safe && !mRegistryManager->valid(entityID)) {
+            if (policy.safe && !mRegistryManager->valid(id)) {
                 return;
             }
 
-            auto entityType = mRegistryManager->get<entities::EntityType>(entityID);
-            _removeEntity(entityID, entityType, policy);
+            auto entityType = mRegistryManager->get<entities::EntityType>(id);
+            _removeEntity(id, entityType, policy);
 
             if (policy.track) {
-                mRegistryManager->destroyAndTrack(entityID);
+                mRegistryManager->destroyAndTrack(id);
             } else {
-                mRegistryManager->destroy(entityID);
+                mRegistryManager->destroy(id);
             }
         }
 
@@ -86,6 +108,7 @@ namespace oni {
                 case entities::EntityType::SIMPLE_PARTICLE:
                 case entities::EntityType::SIMPLE_BLAST_PARTICLE:
                 case entities::EntityType::TEXT:
+                case entities::EntityType::SMOKE:
                 case entities::EntityType::WORLD_CHUNK: {
                     break;
                 }
@@ -117,6 +140,8 @@ namespace oni {
             h = heading;
 
             auto &s = createComponent<component::Scale>(entityID);
+            s.x = size.x;
+            s.y = size.y;
 
             auto &properties = createComponent<component::PhysicalProperties>(entityID);
             properties.physicalCategory = component::PhysicalCategory::RACE_CAR;
@@ -127,8 +152,7 @@ namespace oni {
             auto *body = createPhysicalBody(pos, size, heading.value, properties);
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &car = createComponent<component::Car>(entityID);
             car.position.x = pos.x;
@@ -136,9 +160,6 @@ namespace oni {
             car.applyConfiguration(carConfig);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
-            shape.centerAlign();
 
             auto &carLap = createComponent<gameplay::CarLapInfo>(entityID);
             carLap.entityID = entityID;
@@ -179,17 +200,15 @@ namespace oni {
             h = heading;
 
             auto &s = createComponent<component::Scale>(entityID);
+            s.x = size.x;
+            s.y = size.y;
 
             auto *body = createPhysicalBody(pos, size, heading.value, properties);
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
-            shape.centerAlign();
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
@@ -208,15 +227,13 @@ namespace oni {
             h = heading;
 
             auto &s = createComponent<component::Scale>(entityID);
+            s.x = size.x;
+            s.y = size.y;
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
-            shape.centerAlign();
 
             createComponent<component::EntityAttachee>(entityID);
             createComponent<component::TransformParent>(entityID);
@@ -239,15 +256,13 @@ namespace oni {
             h = heading;
 
             auto &s = createComponent<component::Scale>(entityID);
+            s.x = size.x;
+            s.y = size.y;
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
-            shape.centerAlign();
 
             createComponent<component::EntityAttachee>(entityID);
             createComponent<component::TransformParent>(entityID);
@@ -281,12 +296,11 @@ namespace oni {
 
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
+            shape.setSize(size);
             math::localToWorldTranslation(pos, shape);
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
@@ -301,7 +315,7 @@ namespace oni {
                                                                           const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
+            shape.setSize(size);
             math::localToWorldTranslation(pos, shape);
 
             auto &appearance = createComponent<component::Appearance>(entityID);
@@ -320,12 +334,11 @@ namespace oni {
                                                                           const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
+            shape.setSize(size);
             math::localToWorldTranslation(pos, shape);
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
@@ -355,9 +368,9 @@ namespace oni {
             age.currentAge = 0.f;
 
             if (randomize) {
-                h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
-                age.maxAge = mRand->nextReal32(0.2f, 1.f);
+                h.value = mRand->next_r32(0, common::FULL_CIRCLE_IN_RAD);
+                velocity.currentVelocity = mRand->next_r32(1.f, 7.f);
+                age.maxAge = mRand->next_r32(0.2f, 1.f);
             }
 
             assignTag<component::Tag_Particle>(entityID);
@@ -379,8 +392,7 @@ namespace oni {
             auto &s = createComponent<component::Scale>(entityID);
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &velocity = createComponent<component::Velocity>(entityID);
 
@@ -388,9 +400,9 @@ namespace oni {
             age.currentAge = 0.f;
 
             if (randomize) {
-                h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->nextReal32(1.f, 7.f);
-                age.maxAge = mRand->nextReal32(0.2f, 1.f);
+                h.value = mRand->next_r32(0, common::FULL_CIRCLE_IN_RAD);
+                velocity.currentVelocity = mRand->next_r32(1.f, 7.f);
+                age.maxAge = mRand->next_r32(0.2f, 1.f);
             }
 
             assignTag<component::Tag_Particle>(entityID);
@@ -415,8 +427,7 @@ namespace oni {
 //            appearance.color = {.5f, .5f, .5f, 1.f};
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &velocity = createComponent<component::Velocity>(entityID);
 
@@ -424,9 +435,9 @@ namespace oni {
             age.currentAge = 0.f;
 
             if (randomize) {
-                h.value = mRand->nextReal32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->nextReal32(1.f, 2.f);
-                age.maxAge = mRand->nextReal32(0.2f, 1.f);
+                h.value = mRand->next_r32(0, common::FULL_CIRCLE_IN_RAD);
+                velocity.currentVelocity = mRand->next_r32(1.f, 2.f);
+                age.maxAge = mRand->next_r32(0.2f, 1.f);
             }
 
             assignTag<component::Tag_Particle>(entityID);
@@ -460,9 +471,6 @@ namespace oni {
             body->ApplyAngularImpulse(1, true);
 
             auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
-            shape.centerAlign();
 
             createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
 
@@ -470,14 +478,15 @@ namespace oni {
             h = heading;
 
             auto &s = createComponent<component::Scale>(entityID);
+            s.x = size.x;
+            s.y = size.y;
 
             auto &trail = createComponent<component::Trail>(entityID);
             trail.previousPos.push_back(pos);
             trail.velocity.push_back(velocity);
 
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             auto &soundTag = createComponent<component::SoundTag>(entityID);
             soundTag = component::SoundTag::ROCKET;
@@ -510,14 +519,11 @@ namespace oni {
                                                                         const std::string &textureID) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
+            shape.setSize(size);
             math::localToWorldTranslation(pos, shape);
 
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
             auto &texture = createComponent<component::Texture>(entityID);
-            texture.filePath = textureID;
-            texture.status = component::TextureStatus::NEEDS_LOADING_USING_PATH;
+            texture.path = textureID;
 
             createComponent<level::Chunk>(entityID);
 
@@ -534,7 +540,7 @@ namespace oni {
                                                                         const math::vec4 &color) {
             auto &shape = createComponent<component::Shape>(entityID);
             shape.setZ(pos.z);
-            shape.setSizeFromOrigin(size);
+            shape.setSize(size);
             math::localToWorldTranslation(pos, shape);
 
             auto &appearance = createComponent<component::Appearance>(entityID);
@@ -544,6 +550,24 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_ColorShaded>(entityID);
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_SmokeCloud() {
+            auto id = createEntity();
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Age>(id);
+            createComponent<component::Velocity>(id);
+            createComponent<entities::EntityType>(id, entities::EntityType::SMOKE);
+
+            assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_Dynamic>(id);
+
+            return id;
         }
 
         b2Body *
@@ -684,6 +708,73 @@ namespace oni {
         void
         EntityFactory::tagForNetworkSync(common::EntityID entityID) {
             assignTag<component::Tag_RequiresNetworkSync>(entityID);
+        }
+
+        void
+        EntityFactory::assignSimMode(common::EntityID id,
+                                     entities::SimMode sMode) {
+            switch (sMode) {
+                case SimMode::CLIENT: {
+                    createComponent<component::Tag_SimModeClient>(id);
+                    break;
+                }
+                case SimMode::SERVER: {
+                    createComponent<component::Tag_SimModeServer>(id);
+                    break;
+                }
+                default: {
+                    assert(false);
+                }
+            }
+        }
+
+        void
+        EntityFactory::setTexture(common::EntityID id,
+                                  std::string_view path) {
+            mRegistryManager->get<component::Texture>(id).path = path;
+        }
+
+        void
+        EntityFactory::setRandAge(common::EntityID id,
+                                  common::i32 lower,
+                                  common::i32 upper) {
+            auto &age = mRegistryManager->get<component::Age>(id);
+            age.maxAge = mRand->next_i32(lower, upper);
+        }
+
+        void
+        EntityFactory::setRandHeading(common::EntityID id) {
+            auto &heading = mRegistryManager->get<component::Heading>(id);
+            heading.value = mRand->next_r32(0.f, common::PI_TIMES_TWO);
+        }
+
+        void
+        EntityFactory::setRandVelocity(common::EntityID id,
+                                       common::i32 lower,
+                                       common::i32 upper) {
+            auto &velocity = mRegistryManager->get<component::Velocity>(id);
+            velocity.currentVelocity = mRand->next_r32(lower, upper);
+            velocity.maxVelocity = velocity.currentVelocity;
+        }
+
+        void
+        EntityFactory::setWorldP3D(common::EntityID id,
+                                   common::r32 x,
+                                   common::r32 y,
+                                   common::r32 z) {
+            auto &pos = mRegistryManager->get<component::WorldP3D>(id);
+            pos.x = x;
+            pos.y = y;
+            pos.z = z;
+        }
+
+        void
+        EntityFactory::setScale(common::EntityID id,
+                                common::r32 x,
+                                common::r32 y) {
+            auto &scale = mRegistryManager->get<component::Scale>(id);
+            scale.x = x;
+            scale.y = y;
         }
     }
 }

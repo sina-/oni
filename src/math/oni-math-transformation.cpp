@@ -46,15 +46,10 @@ namespace oni {
         component::Shape
         shapeTransformation(const math::mat4 &transformation,
                             const component::Shape &shape) {
-            auto vertexA = shape.vertexA;
-            auto vertexB = shape.vertexB;
-            auto vertexC = shape.vertexC;
-            auto vertexD = shape.vertexD;
-
-            return component::Shape{transformation * vertexA,
-                                    transformation * vertexB,
-                                    transformation * vertexC,
-                                    transformation * vertexD};
+            return component::Shape{transformation * shape.vertexA,
+                                    transformation * shape.vertexB,
+                                    transformation * shape.vertexC,
+                                    transformation * shape.vertexD};
         }
 
         math::mat4

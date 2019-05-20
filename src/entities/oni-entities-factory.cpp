@@ -172,6 +172,7 @@ namespace oni {
 
             createComponent<component::TransformChildren>(entityID);
             createComponent<component::EntityAttachment>(entityID);
+            createComponent<component::Emitter>(entityID);
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);
@@ -745,7 +746,7 @@ namespace oni {
         void
         EntityFactory::setRandHeading(common::EntityID id) {
             auto &heading = mRegistryManager->get<component::Heading>(id);
-            heading.value = mRand->next_r32(0.f, common::PI_TIMES_TWO);
+            heading.value = mRand->next_r32(0.f, common::FULL_CIRCLE_IN_RAD);
         }
 
         void

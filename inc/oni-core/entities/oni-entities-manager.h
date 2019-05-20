@@ -3,7 +3,7 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include <iostream>
+#include <unordered_map>
 
 #include <entt/entt.hpp>
 
@@ -464,6 +464,7 @@ namespace oni {
             std::unique_ptr<entt::dispatcher> mDispatcher{};
             mutable std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
+            std::unordered_map<common::EntityID, common::EntityID> mMappedEntity{};
 
             std::vector<EntityIDType> mDeletedEntities{};
         };

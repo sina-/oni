@@ -45,6 +45,13 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
+                  component::Emitter &data) {
+            archive(data.currentCD);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
                   component::WorldP2D &data) {
             archive(data.value);
         }
@@ -225,15 +232,15 @@ namespace oni {
             std::stringstream storage{};
             {
                 cereal::PortableBinaryOutputArchive output{storage};
-                manager.snapshot<cereal::PortableBinaryOutputArchive,
+                manager.snapshot<
+                        cereal::PortableBinaryOutputArchive,
                         component::Car,
                         component::CarConfig,
                         component::WorldP3D,
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
-                        gameplay::CarLapInfo,
-                        //components::Chunk,
+                        //component::Emitter,
                         component::Shape,
                         component::Size,
                         component::Point,
@@ -241,10 +248,13 @@ namespace oni {
                         component::Age,
                         component::Texture,
                         component::Trail,
-                        entities::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
+                        component::TransformParent,
                         component::SoundTag,
+
+                        entities::EntityType,
+                        gameplay::CarLapInfo,
 
                         // TODO: This is a cluster fuck of a design. This is just a raw pointer. Client doesnt need
                         // to know what it points to at the moment because sever does the physics calculations and only
@@ -252,13 +262,12 @@ namespace oni {
                         // find a solution to this shit.
                         //components::PhysicalProperties,
 
-                        component::TransformParent,
                         component::Tag_Dynamic,
                         component::Tag_Static,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
                         component::Tag_Audible
-                >(output, snapshotType);
+                                >(output, snapshotType);
             }
 
             return storage.str();
@@ -273,15 +282,15 @@ namespace oni {
 
             {
                 cereal::PortableBinaryInputArchive input{storage};
-                manager.restore<cereal::PortableBinaryInputArchive,
+                manager.restore<
+                        cereal::PortableBinaryInputArchive,
                         component::Car,
                         component::CarConfig,
                         component::WorldP3D,
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
-                        gameplay::CarLapInfo,
-                        //components::Chunk,
+                        //component::Emitter,
                         component::Shape,
                         component::Size,
                         component::Point,
@@ -289,26 +298,28 @@ namespace oni {
                         component::Age,
                         component::Texture,
                         component::Trail,
-                        entities::EntityType,
                         component::EntityAttachment,
                         component::EntityAttachee,
+                        component::TransformParent,
                         component::SoundTag,
+
+                        entities::EntityType,
+                        gameplay::CarLapInfo,
 
                         //components::PhysicalProperties,
 
-                        component::TransformParent,
                         component::Tag_Dynamic,
                         component::Tag_Static,
                         component::Tag_TextureShaded,
                         component::Tag_ColorShaded,
                         component::Tag_Audible
-                >(snapshotType, input,
+                               >(snapshotType, input,
                         // NOTE: Entities might keep references to other entities but those ids might change during
                         // client-server sync process, this will make sure that the client side does the correct
                         // mapping from client side ids to server side ids for each entity.
-                  &component::EntityAttachment::entities,
-                  &component::EntityAttachee::entityID,
-                  &gameplay::CarLapInfo::entityID
+                                 &component::EntityAttachment::entities,
+                                 &component::EntityAttachee::entityID,
+                                 &gameplay::CarLapInfo::entityID
                 );
             }
         }

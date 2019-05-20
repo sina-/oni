@@ -681,16 +681,22 @@ namespace oni {
                 std::vector<component::WorldP3D> skidPosList{};
                 std::vector<common::u8> skidOpacity{};
                 {
-                    auto carView = serverEntityFactory.getEntityManager().createView<component::Car, component::WorldP3D, component::Heading, component::Scale, component::CarConfig>();
-                    for (auto &&carEntity: carView) {
+                    auto view = serverEntityFactory.getEntityManager().createView<
+                            component::Car,
+                            component::WorldP3D,
+                            component::Heading,
+                            component::Scale,
+                            component::CarConfig>();
+                    for (auto &&carEntity: view) {
 
-                        const auto car = carView.get<component::Car>(carEntity);
+                        const auto car = view.get<component::Car>(carEntity);
                         // NOTE: Technically I should use slippingRear, but this gives better effect
                         if (car.slippingFront || true) {
-                            const auto &carConfig = carView.get<component::CarConfig>(carEntity);
-                            const auto &pos = carView.get<component::WorldP3D>(carEntity);
-                            const auto &heading = carView.get<component::Heading>(carEntity);
-                            const auto scale = component::Scale{};
+                            const auto &carConfig = view.get<component::CarConfig>(carEntity);
+                            const auto &pos = view.get<component::WorldP3D>(carEntity);
+                            const auto &heading = view.get<component::Heading>(carEntity);
+                            const auto scale = component::Scale{}; // TODO: This is unused, think about how the parent scale
+                            // affects children
 
                             // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
                             // same logic is hard-coded when spawningCar server side.
@@ -714,7 +720,7 @@ namespace oni {
                             // TODO: arbitrary number based on number of frames, think about better way of determining this
                             skidOpacity.push_back(10);
                         }
-                        if (car.slippingFront) {
+                        if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f || true) {
                             // TODO: Smoke cloud which is basically particle but certain behaviour:
                             // 1) It fades out -> CURRENT: Shader implementation
                             // 2) Each of them has a random maxAge -> CURRENT: set random value in the engine
@@ -723,13 +729,18 @@ namespace oni {
                             // Optional:
                             // 5) Collision with other entities adds slight angular velocity
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
-                            for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
-                                auto id = clientEntityFactory.createEntity_SmokeCloud();
-                                clientEntityFactory.setWorldP3D(id, car.position.x, car.position.y, z);
-                                clientEntityFactory.setTexture(id, "resources/images/smoke/1.png");
-                                clientEntityFactory.setRandAge(id, 1, 3);
-                                clientEntityFactory.setRandHeading(id);
-                                clientEntityFactory.setRandVelocity(id, 1, 2);
+                            auto &emitter = getOrCreateEmitter(carEntity);
+                            if (math::safeZero(emitter.currentCD)) {
+                                for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
+                                    auto id = clientEntityFactory.createEntity_SmokeCloud();
+                                    clientEntityFactory.setWorldP3D(id, car.position.x, car.position.y, z);
+                                    clientEntityFactory.setTexture(id, "resources/images/cloud/1.png");
+                                    clientEntityFactory.setRandAge(id, 1, 3);
+                                    clientEntityFactory.setRandHeading(id);
+                                    clientEntityFactory.setRandVelocity(id, 1, 2);
+                                    clientEntityFactory.setScale(id, 10, 10);
+                                }
+                                emitter.currentCD = emitter.initialCD;
                             }
                         }
                     }
@@ -763,6 +774,13 @@ namespace oni {
 
                     const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
                     updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
+                }
+            }
+
+            /// Update Emitters
+            {
+                for (auto &&emitter: mEmitters) {
+                    math::subAndZeroClip(emitter.second.currentCD, tickTime);
                 }
             }
         }
@@ -814,7 +832,7 @@ namespace oni {
                                             const component::WorldP3D &pos) {
             auto x = math::findBin(pos.x, mCanvasTileSizeX);
             auto y = math::findBin(pos.y, mCanvasTileSizeY);
-            auto xy = math::packInt64(x, y);
+            auto xy = math::pack_i64(x, y);
             auto &entityRegistry = entityFactory.getEntityManager();
 
             auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
@@ -932,6 +950,17 @@ namespace oni {
                 mLapInfoLookup[carEntityID] = carLapText;
             }
             return mLapInfoLookup.at(carEntityID);
+        }
+
+        component::Emitter &
+        SceneManager::getOrCreateEmitter(common::EntityID id) {
+            auto exists = mEmitters.find(id) != mEmitters.end();
+            if (!exists) {
+                mEmitters[id] = component::Emitter{};
+                mEmitters[id].currentCD = 0.f;
+                mEmitters[id].initialCD = 0.5f;
+            }
+            return mEmitters[id];
         }
 
         void

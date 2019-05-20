@@ -91,5 +91,10 @@ namespace oni {
 
             LAST
         };
+
+        struct Emitter {
+            common::r64 currentCD{0.f};
+            common::r64 initialCD{1.f};
+        };
     }
 }

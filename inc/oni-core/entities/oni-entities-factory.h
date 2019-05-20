@@ -85,11 +85,6 @@ namespace oni {
             common::EntityID
             createEntity_SmokeCloud();
 
-            EntityFactory &
-            createComponent_WorldP3D() {
-                return *this;
-            }
-
             void
             setWorldP3D(common::EntityID,
                         common::r32 x,

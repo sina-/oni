@@ -72,7 +72,7 @@ namespace oni {
         template<class T>
         inline void
         zeroClip(T &val) {
-            if (val < 0) {
+            if (val < common::EP) {
                 val = 0;
             }
         }
@@ -98,8 +98,8 @@ namespace oni {
         }
 
         inline common::i64p
-        packInt64(const common::i64 x,
-                  const common::i64 y) {
+        pack_i64(const common::i64 x,
+                 const common::i64 y) {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -117,31 +117,34 @@ namespace oni {
         }
 
         inline common::u16p
-        packUInt16(common::u16 x,
-                   common::u16 y) {
+        pack_u16(common::u16 x,
+                 common::u16 y) {
             return x << 16 | y;
         }
 
         template<class T>
         inline T
-        lerp(T a,
-             T b,
+        lerp(T x,
+             T y,
              T t) {
-            return (1 - t) * a + t * b;
+            return (1 - t) * x + t * y;
         }
 
         template<class T>
         inline T
-        abs(T a) {
-            if (a < 0) {
-                return -1 * a;
+        abs(T x) {
+            return std::abs(x);
+
+            // This is wrong for 0.0. And (x < 0) is wrong for -0.0
+            if (x <= 0) {
+                return -1 * x;
             }
-            return a;
+            return x;
         }
 
         template<class T>
         inline T
-        pow(T a,
+        pow(T x,
             common::i16 up) {
             if (up == 0) {
                 return 1;
@@ -150,11 +153,58 @@ namespace oni {
                 assert(false);
                 return 1;
             }
-            T result = a;
+            T result = x;
             while (--up) {
-                result *= a;
+                result *= x;
             }
             return result;
+        }
+
+        template<class T>
+        bool
+        safeEqual(T x,
+                  T y) {
+            return abs(x - y) <= common::EP;
+        }
+
+        template<class T>
+        bool
+        safeZero(T x) {
+            return abs(x) <= common::EP;
+        }
+
+        template<class T>
+        bool
+        safeLess(T x,
+                 T y) {
+            return x - y <= common::EP;
+        }
+
+        template<class T>
+        bool
+        safeGreater(T x,
+                    T y) {
+            return x - y >= common::EP;
+        }
+
+        template<class T>
+        bool
+        safePos(T x) {
+            return x >= common::EP;
+        }
+
+        template<class T>
+        bool
+        safeNeg(T x) {
+            return x < 0;
+        }
+
+        template<class T>
+        void
+        subAndZeroClip(T &x,
+                       const T y) {
+            x -= y;
+            zeroClip(x);
         }
     }
 }

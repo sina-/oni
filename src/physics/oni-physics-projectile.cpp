@@ -21,18 +21,16 @@ namespace oni {
         Projectile::tick(entities::EntityFactory &entityFactory,
                          entities::ClientDataManager *clientData,
                          common::r64 tickTime) {
-            // Update cool-downs
+            /// Update cool-downs
             {
                 auto view = entityFactory.getEntityManager().createView<component::GunCoolDown>();
                 for (auto &&entity: view) {
                     auto &coolDown = view.get<component::GunCoolDown>(entity);
-                    if (coolDown.value > 0) {
-                        coolDown.value -= tickTime;
-                    }
+                    math::subAndZeroClip(coolDown.value, tickTime);
                 }
             }
 
-            // Spawn projectile
+            /// Spawn projectile
             {
                 auto carView = entityFactory.getEntityManager().createView<
                         component::WorldP3D,

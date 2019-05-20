@@ -143,7 +143,7 @@ namespace oni {
                 std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
             }
 
-            auto soundID = math::packUInt16(x, y);
+            auto soundID = math::pack_u16(x, y);
             return soundID;
         }
 

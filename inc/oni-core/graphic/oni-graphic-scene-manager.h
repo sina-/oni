@@ -46,6 +46,7 @@ namespace oni {
 
         class SceneManager {
         public:
+            // TODO: Getting quite big, I can split it into, SceneRenderer, SceneUpdater, and SceneManager
             SceneManager(const graphic::ScreenBounds &,
                          FontManager &,
                          math::ZLayerManager &,
@@ -183,11 +184,6 @@ namespace oni {
             void
             prepareTexture(component::Texture &texture);
 
-            const RaceInfoEntities &
-            getOrCreateLapText(entities::EntityFactory &,
-                               common::EntityID carEntityID,
-                               const gameplay::CarLapInfo &carLap);
-
             common::EntityID
             createText(entities::EntityFactory &entityFactory,
                        const component::WorldP3D &worldPos,
@@ -195,12 +191,8 @@ namespace oni {
 
             void
             updateRaceInfo(entities::EntityManager &,
-                           const gameplay::CarLapInfo&carLap,
+                           const gameplay::CarLapInfo &carLap,
                            const RaceInfoEntities &carLapTextEntities);
-
-            common::EntityID
-            getOrCreateCanvasTile(entities::EntityFactory &,
-                                  const component::WorldP3D &pos);
 
             void
             updateCanvasTile(entities::EntityManager &entityManager,
@@ -208,6 +200,19 @@ namespace oni {
                              const graphic::Brush &brush,
                              const component::WorldP3D &worldPos,
                              const component::Size &size);
+
+
+            const RaceInfoEntities &
+            getOrCreateLapText(entities::EntityFactory &,
+                               common::EntityID carEntityID,
+                               const gameplay::CarLapInfo &carLap);
+
+            common::EntityID
+            getOrCreateCanvasTile(entities::EntityFactory &,
+                                  const component::WorldP3D &pos);
+
+            component::Emitter &
+            getOrCreateEmitter(common::EntityID);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -229,6 +234,7 @@ namespace oni {
 
             std::map<common::u64, common::EntityID> mCanvasTileLookup{};
             std::map<common::EntityID, RaceInfoEntities> mLapInfoLookup{};
+            std::map<common::EntityID, component::Emitter> mEmitters{};
 
             const common::u16 mCanvasTileSizeX{0};
             const common::u16 mCanvasTileSizeY{0};

@@ -4,10 +4,10 @@
 
 namespace oni {
     namespace common {
-        static const r32 EP{0.000001f};
-        static const unsigned long maxNumTextureSamplers{32};
-        static const r32 PI = 3.14159265358979323846f;
-        static const r32 PI_TIMES_TWO = PI * 2;
-        static const r32 FULL_CIRCLE_IN_RAD = PI_TIMES_TWO;
+        static constexpr r32 EP = std::numeric_limits<r32>::epsilon();
+        static constexpr u32 maxNumTextureSamplers{32};
+        static constexpr r32 PI = 3.14159265358979323846f;
+        static constexpr r32 PI_TIMES_TWO = PI * 2;
+        static constexpr r32 FULL_CIRCLE_IN_RAD = PI_TIMES_TWO;
     }
 }

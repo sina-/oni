@@ -33,8 +33,8 @@ namespace oni {
 
             while (!shouldTerminate()) {
                 mGameLoopTimer.restart();
-                sim();
                 poll();
+                sim();
                 render();
                 finish();
                 auto elapsed = mGameLoopTimer.elapsed<std::chrono::microseconds>();

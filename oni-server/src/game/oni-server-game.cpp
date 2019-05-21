@@ -175,7 +175,7 @@ namespace oni {
             void
             ServerGame::_finish() {
                 mEntityFactory->getEntityManager().dispatchEvents();
-                mServer->flush();
+                mServer->flush(); // TODO: Can this happen on separate thread?
             }
 
             void

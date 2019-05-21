@@ -172,6 +172,37 @@ namespace oni {
 
             ~EntityManager() = default;
 
+            EntityManager(const EntityManager &) = delete;
+
+            EntityManager
+            operator=(const EntityManager &) const = delete;
+
+            EntityIDType
+            createComplementTo(EntityIDType id) {
+                assert(mComplementaryEntities.find(id) == mComplementaryEntities.end());
+                auto result = create();
+                assign<entities::EntityType>(result, entities::EntityType::COMPLEMENT);
+                mComplementaryEntities[id] = result;
+                return result;
+            }
+
+            EntityIDType
+            getComplementOf(EntityIDType id) {
+                assert(mComplementaryEntities.find(id) != mComplementaryEntities.end());
+                return mComplementaryEntities[id];
+            }
+
+            void
+            complement(EntityIDType a,
+                       EntityIDType b) {
+                mComplementaryEntities[a] = b;
+            }
+
+            bool
+            hasComplement(EntityIDType id) {
+                return mComplementaryEntities.find(id) != mComplementaryEntities.end();
+            }
+
             size_t
             size() noexcept {
                 auto result = mRegistry->size();
@@ -405,11 +436,17 @@ namespace oni {
                 mDispatcher->update();
             }
 
+            template<class Component, class... Args>
+            Component &
+            assign(EntityIDType entityID,
+                   Args &&... args) {
+                return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
+            }
+
         private:
             EntityIDType
             create() {
-                EntityIDType result{};
-                result = mRegistry->create();
+                auto result = mRegistry->create();
                 return result;
             }
 
@@ -417,13 +454,6 @@ namespace oni {
             void
             remove(EntityIDType entityID) {
                 mRegistry->remove<Component>(entityID);
-            }
-
-            template<class Component, class... Args>
-            Component &
-            assign(EntityIDType entityID,
-                   Args &&... args) {
-                return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
             template<class Component, class... Args>
@@ -464,7 +494,10 @@ namespace oni {
             std::unique_ptr<entt::dispatcher> mDispatcher{};
             mutable std::mutex mMutex{};
             //std::unique_lock<std::mutex> mLock{};
-            std::unordered_map<common::EntityID, common::EntityID> mMappedEntity{};
+
+            // NOTE: Entities that are complement of entities in other registry. Used for creating components on
+            // client side only that are specific for server side entities.
+            std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
 
             std::vector<EntityIDType> mDeletedEntities{};
         };

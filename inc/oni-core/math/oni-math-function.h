@@ -72,7 +72,7 @@ namespace oni {
         template<class T>
         inline void
         zeroClip(T &val) {
-            if (val < common::EP) {
+            if (val <= common::EP) {
                 val = 0;
             }
         }

@@ -45,7 +45,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Emitter &data) {
+                  component::SmokeEmitterCD &data) {
             archive(data.currentCD);
         }
 
@@ -240,7 +240,7 @@ namespace oni {
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
-                        //component::Emitter,
+                        //component::SmokeEmitterCD,
                         component::Shape,
                         component::Size,
                         component::Point,
@@ -290,7 +290,7 @@ namespace oni {
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
-                        //component::Emitter,
+                        //component::SmokeEmitterCD,
                         component::Shape,
                         component::Size,
                         component::Point,

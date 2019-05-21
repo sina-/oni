@@ -30,6 +30,8 @@ namespace oni {
 
             SMOKE,
 
+            COMPLEMENT,
+
             LAST
         };
 

@@ -211,8 +211,9 @@ namespace oni {
             getOrCreateCanvasTile(entities::EntityFactory &,
                                   const component::WorldP3D &pos);
 
-            component::Emitter &
-            getOrCreateEmitter(common::EntityID);
+            component::SmokeEmitterCD &
+            getOrCreateEmitterCD(entities::EntityFactory &,
+                                 common::EntityID);
 
         private:
             std::unique_ptr<Shader> mColorShader{};
@@ -234,7 +235,6 @@ namespace oni {
 
             std::map<common::u64, common::EntityID> mCanvasTileLookup{};
             std::map<common::EntityID, RaceInfoEntities> mLapInfoLookup{};
-            std::map<common::EntityID, component::Emitter> mEmitters{};
 
             const common::u16 mCanvasTileSizeX{0};
             const common::u16 mCanvasTileSizeY{0};

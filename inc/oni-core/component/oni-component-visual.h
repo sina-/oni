@@ -92,7 +92,7 @@ namespace oni {
             LAST
         };
 
-        struct Emitter {
+        struct SmokeEmitterCD {
             common::r64 currentCD{0.f};
             common::r64 initialCD{1.f};
         };

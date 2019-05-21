@@ -568,6 +568,15 @@ namespace oni {
             }
 */
 
+            /// Update Emitters
+            {
+                auto view = clientEntityFactory.getEntityManager().createView<component::SmokeEmitterCD>();
+                for (auto &&id: view) {
+                    auto &emitter = view.get<component::SmokeEmitterCD>(id);
+                    math::subAndZeroClip(emitter.currentCD, tickTime);
+                }
+            }
+
             /// Particle trails
             {
 #if 1
@@ -721,15 +730,8 @@ namespace oni {
                             skidOpacity.push_back(10);
                         }
                         if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f || true) {
-                            // TODO: Smoke cloud which is basically particle but certain behaviour:
-                            // 1) It fades out -> CURRENT: Shader implementation
-                            // 2) Each of them has a random maxAge -> CURRENT: set random value in the engine
-                            // 3) Slight rotation of sprite over-time -> CURRENT: No implementation
-                            // 4) Moves outwards -> CURRENT: Shader implementation
-                            // Optional:
-                            // 5) Collision with other entities adds slight angular velocity
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
-                            auto &emitter = getOrCreateEmitter(carEntity);
+                            auto &emitter = getOrCreateEmitterCD(clientEntityFactory, carEntity);
                             if (math::safeZero(emitter.currentCD)) {
                                 for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
                                     auto id = clientEntityFactory.createEntity_SmokeCloud();
@@ -774,13 +776,6 @@ namespace oni {
 
                     const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
                     updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
-                }
-            }
-
-            /// Update Emitters
-            {
-                for (auto &&emitter: mEmitters) {
-                    math::subAndZeroClip(emitter.second.currentCD, tickTime);
                 }
             }
         }
@@ -952,15 +947,19 @@ namespace oni {
             return mLapInfoLookup.at(carEntityID);
         }
 
-        component::Emitter &
-        SceneManager::getOrCreateEmitter(common::EntityID id) {
-            auto exists = mEmitters.find(id) != mEmitters.end();
-            if (!exists) {
-                mEmitters[id] = component::Emitter{};
-                mEmitters[id].currentCD = 0.f;
-                mEmitters[id].initialCD = 0.5f;
+        component::SmokeEmitterCD &
+        SceneManager::getOrCreateEmitterCD(entities::EntityFactory &entityFactory,
+                                           common::EntityID id) {
+            auto &manager = entityFactory.getEntityManager();
+            if (manager.hasComplement(id)) {
+                auto complementID = manager.getComplementOf(id);
+                auto &emitter = manager.get<component::SmokeEmitterCD>(complementID);
+                return emitter;
+            } else {
+                auto complementID = manager.createComplementTo(id);
+                auto &emitter = manager.assign<component::SmokeEmitterCD>(complementID);
+                return emitter;
             }
-            return mEmitters[id];
         }
 
         void

@@ -109,6 +109,7 @@ namespace oni {
                 case entities::EntityType::SIMPLE_BLAST_PARTICLE:
                 case entities::EntityType::TEXT:
                 case entities::EntityType::SMOKE:
+                case entities::EntityType::COMPLEMENT:
                 case entities::EntityType::WORLD_CHUNK: {
                     break;
                 }
@@ -172,7 +173,7 @@ namespace oni {
 
             createComponent<component::TransformChildren>(entityID);
             createComponent<component::EntityAttachment>(entityID);
-            createComponent<component::Emitter>(entityID);
+            createComponent<component::SmokeEmitterCD>(entityID);
 
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Dynamic>(entityID);

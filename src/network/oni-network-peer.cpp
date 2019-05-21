@@ -108,7 +108,7 @@ namespace oni {
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);
 
-            enet_host_flush(mEnetHost);
+            // enet_host_flush(mEnetHost);
         }
 
         void
@@ -122,7 +122,7 @@ namespace oni {
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);
 
-            enet_host_flush(mEnetHost);
+            // enet_host_flush(mEnetHost);
         }
 
         PacketType
@@ -143,7 +143,7 @@ namespace oni {
             assert(packetToPeers);
             enet_host_broadcast(mEnetHost, 0, packetToPeers);
 
-            enet_host_flush(mEnetHost);
+            // enet_host_flush(mEnetHost);
         }
 
         void

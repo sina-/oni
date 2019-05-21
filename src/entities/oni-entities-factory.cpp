@@ -48,9 +48,10 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity() {
+        EntityFactory::createEntity(entities::EntityType type) {
             auto id = mRegistryManager->create();
             assignSimMode(id, mSimMode);
+            createComponent<entities::EntityType>(id, type);
             return id;
         }
 
@@ -129,120 +130,6 @@ namespace oni {
                                                                      const math::vec2 &size,
                                                                      const component::Heading &heading,
                                                                      const std::string &textureID) {
-            auto &carConfig = createComponent<component::CarConfig>(entityID);
-            carConfig.cgToRear = size.x / 2;
-            carConfig.cgToFront = size.x / 2;
-            carConfig.halfWidth = size.y / 2;
-            assert(size.x - carConfig.cgToFront - carConfig.cgToRear < 0.00001f);
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-            h = heading;
-
-            auto &s = createComponent<component::Scale>(entityID);
-            s.x = size.x;
-            s.y = size.y;
-
-            auto &properties = createComponent<component::PhysicalProperties>(entityID);
-            properties.physicalCategory = component::PhysicalCategory::RACE_CAR;
-            properties.bodyType = component::BodyType::DYNAMIC;
-            properties.highPrecision = true;
-
-            // TODO: Does this make sense? Or should it be same as createComponent?
-            auto *body = createPhysicalBody(pos, size, heading.value, properties);
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &car = createComponent<component::Car>(entityID);
-            car.position.x = pos.x;
-            car.position.y = pos.y;
-            car.applyConfiguration(carConfig);
-
-            auto &shape = createComponent<component::Shape>(entityID);
-
-            auto &carLap = createComponent<gameplay::CarLapInfo>(entityID);
-            carLap.entityID = entityID;
-            carLap.lap = 0;
-            carLap.bestLapTimeS = 0;
-            carLap.lapTimeS = 0;
-
-            auto &soundTag = createComponent<component::SoundTag>(entityID);
-            soundTag = component::SoundTag::ENGINE_IDLE;
-
-            createComponent<component::TransformChildren>(entityID);
-            createComponent<component::EntityAttachment>(entityID);
-            createComponent<component::SmokeEmitterCD>(entityID);
-
-            assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_Dynamic>(entityID);
-            assignTag<component::Tag_Audible>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::VEHICLE>(common::EntityID entityID,
-                                                                    const component::WorldP3D &pos,
-                                                                    const math::vec2 &size,
-                                                                    const component::Heading &heading,
-                                                                    const std::string &textureID) {
-            auto &properties = createComponent<component::PhysicalProperties>(entityID);
-            properties.friction = 1.f;
-            properties.density = 0.1f;
-            properties.angularDamping = 2.f;
-            properties.linearDamping = 2.f;
-            properties.highPrecision = false;
-            properties.bodyType = component::BodyType::DYNAMIC;
-            properties.physicalCategory = component::PhysicalCategory::VEHICLE;
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-            h = heading;
-
-            auto &s = createComponent<component::Scale>(entityID);
-            s.x = size.x;
-            s.y = size.y;
-
-            auto *body = createPhysicalBody(pos, size, heading.value, properties);
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &shape = createComponent<component::Shape>(entityID);
-
-            assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_Dynamic>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::VEHICLE_GUN>(common::EntityID entityID,
-                                                                        const component::WorldP3D &pos,
-                                                                        const math::vec2 &size,
-                                                                        const component::Heading &heading,
-                                                                        const std::string &textureID) {
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-            h = heading;
-
-            auto &s = createComponent<component::Scale>(entityID);
-            s.x = size.x;
-            s.y = size.y;
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &shape = createComponent<component::Shape>(entityID);
-
-            createComponent<component::EntityAttachee>(entityID);
-            createComponent<component::TransformParent>(entityID);
-            createComponent<component::GunCoolDown>(entityID);
-
-            assignTag<component::Tag_Dynamic>(entityID);
-            assignTag<component::Tag_TextureShaded>(entityID);
         }
 
         template<>
@@ -281,31 +168,6 @@ namespace oni {
                                                                               const component::Heading &heading,
                                                                               const std::string &textureID) {
             _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(entityID, pos, size, heading, textureID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::WALL>(common::EntityID entityID,
-                                                                 const component::WorldP3D &pos,
-                                                                 const math::vec2 &size,
-                                                                 const component::Heading &heading,
-                                                                 const std::string &textureID) {
-            auto &properties = createComponent<component::PhysicalProperties>(entityID);
-            properties.highPrecision = false;
-            properties.bodyType = component::BodyType::STATIC;
-            properties.physicalCategory = component::PhysicalCategory::WALL;
-            auto *body = createPhysicalBody(pos, size, heading.value, properties);
-
-            auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSize(size);
-            math::localToWorldTranslation(pos, shape);
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            assignTag<component::Tag_Static>(entityID);
-            assignTag<component::Tag_TextureShaded>(entityID);
         }
 
         template<>
@@ -448,61 +310,6 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
-                                                                          const component::WorldP3D &pos,
-                                                                          const math::vec2 &size,
-                                                                          const component::Heading &heading,
-                                                                          const std::string &textureID,
-                                                                          const common::r32 &velocity) {
-            auto &properties = createComponent<component::PhysicalProperties>(entityID);
-            properties.friction = 1.f;
-            properties.density = 0.1f;
-            properties.angularDamping = 2.f;
-            properties.linearDamping = 0.1f;
-            properties.highPrecision = true;
-            properties.bodyType = component::BodyType::DYNAMIC;
-            properties.physicalCategory = component::PhysicalCategory::ROCKET;
-            properties.collisionWithinCategory = false;
-
-            auto *body = createPhysicalBody(pos, size, heading.value, properties);
-
-            body->ApplyForceToCenter(
-                    b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),
-                           static_cast<common::r32>(sin(heading.value) * velocity)),
-                    true);
-            body->ApplyAngularImpulse(1, true);
-
-            auto &shape = createComponent<component::Shape>(entityID);
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-            h = heading;
-
-            auto &s = createComponent<component::Scale>(entityID);
-            s.x = size.x;
-            s.y = size.y;
-
-            auto &trail = createComponent<component::Trail>(entityID);
-            trail.previousPos.push_back(pos);
-            trail.velocity.push_back(velocity);
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &soundTag = createComponent<component::SoundTag>(entityID);
-            soundTag = component::SoundTag::ROCKET;
-
-            auto &age = createComponent<component::Age>(entityID);
-            age.maxAge = 5;
-
-            assignTag<component::Tag_Dynamic>(entityID);
-            assignTag<component::Tag_TextureShaded>(entityID);
-            assignTag<component::Tag_Audible>(entityID);
-        }
-
-        template<>
-        void
         EntityFactory::_createEntity<entities::EntityType::TEXT>(common::EntityID entityID,
                                                                  const component::WorldP3D &pos,
                                                                  const std::string &text) {
@@ -557,48 +364,31 @@ namespace oni {
             assignTag<component::Tag_ColorShaded>(entityID);
         }
 
-        common::EntityID
-        EntityFactory::createEntity_SmokeCloud() {
-            auto id = createEntity();
-            createComponent<component::WorldP3D>(id);
-            createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
-            createComponent<component::Scale>(id);
-            createComponent<component::Heading>(id);
-            createComponent<component::Age>(id);
-            createComponent<component::Velocity>(id);
-            createComponent<entities::EntityType>(id, entities::EntityType::SMOKE);
-
-            assignTag<component::Tag_TextureShaded>(id);
-            assignTag<component::Tag_Dynamic>(id);
-
-            return id;
-        }
-
-        b2Body *
-        EntityFactory::createPhysicalBody(const component::WorldP3D &pos,
-                                          const math::vec2 &size,
-                                          common::r32 heading,
-                                          component::PhysicalProperties &properties) {
-            b2PolygonShape shape{};
+        void
+        EntityFactory::createPhysics(common::EntityID id,
+                                     const component::WorldP3D &pos,
+                                     const math::vec2 &size,
+                                     common::r32 heading) {
+            auto &props = mRegistryManager->get<component::PhysicalProperties>(id);
+            auto shape = b2PolygonShape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
             // NOTE: This is non-owning pointer. physicsWorld owns it.
             b2Body *body{};
 
             b2BodyDef bodyDef;
-            bodyDef.bullet = properties.highPrecision;
+            bodyDef.bullet = props.highPrecision;
             bodyDef.angle = heading;
-            bodyDef.linearDamping = properties.linearDamping;
-            bodyDef.angularDamping = properties.angularDamping;
+            bodyDef.linearDamping = props.linearDamping;
+            bodyDef.angularDamping = props.angularDamping;
 
             b2FixtureDef fixtureDef;
             // NOTE: Box2D will create a copy of the shape, so it is safe to pass a local ref.
             fixtureDef.shape = &shape;
-            fixtureDef.density = properties.density;
-            fixtureDef.friction = properties.friction;
+            fixtureDef.density = props.density;
+            fixtureDef.friction = props.friction;
 
-            switch (properties.bodyType) {
+            switch (props.bodyType) {
                 case component::BodyType::DYNAMIC : {
                     bodyDef.position.x = pos.x;
                     bodyDef.position.y = pos.y;
@@ -608,11 +398,11 @@ namespace oni {
                     b2FixtureDef collisionSensor;
                     collisionSensor.isSensor = true;
                     collisionSensor.shape = &shape;
-                    collisionSensor.density = properties.density;
-                    collisionSensor.friction = properties.friction;
+                    collisionSensor.density = props.density;
+                    collisionSensor.friction = props.friction;
 
-                    if (!properties.collisionWithinCategory) {
-                        collisionSensor.filter.groupIndex = -static_cast<common::i16>(properties.physicalCategory);
+                    if (!props.collisionWithinCategory) {
+                        collisionSensor.filter.groupIndex = -static_cast<common::i16>(props.physicalCategory);
                     }
 
                     body->CreateFixture(&fixtureDef);
@@ -620,10 +410,8 @@ namespace oni {
                     break;
                 }
                 case component::BodyType::STATIC: {
-                    // NOTE: for static entities position in world is the bottom left corner of the sprite. But
-                    // bodyDef.position is the center of gravity of the entity.
-                    bodyDef.position.x = pos.x + size.x / 2.0f;
-                    bodyDef.position.y = pos.y + size.y / 2.0f;
+                    bodyDef.position.x = pos.x;
+                    bodyDef.position.y = pos.y;
                     bodyDef.type = b2_staticBody;
                     body = mPhysicsWorld.CreateBody(&bodyDef);
                     body->CreateFixture(&shape, 0.f);
@@ -646,8 +434,7 @@ namespace oni {
                     break;
                 }
             }
-            properties.body = body;
-            return body;
+            props.body = body;
         }
 
         template<>
@@ -767,19 +554,37 @@ namespace oni {
                                    common::r32 x,
                                    common::r32 y,
                                    common::r32 z) {
-            auto &pos = mRegistryManager->get<component::WorldP3D>(id);
-            pos.x = x;
-            pos.y = y;
-            pos.z = z;
+            if (mRegistryManager->has<component::Tag_Static>(id)) {
+                auto &shape = mRegistryManager->get<component::Shape>(id);
+                shape.setZ(z);
+                math::localToWorldTranslation(x, y, shape);
+            } else {
+                auto &pos = mRegistryManager->get<component::WorldP3D>(id);
+                pos.x = x;
+                pos.y = y;
+                pos.z = z;
+            }
         }
 
         void
         EntityFactory::setScale(common::EntityID id,
                                 common::r32 x,
                                 common::r32 y) {
-            auto &scale = mRegistryManager->get<component::Scale>(id);
-            scale.x = x;
-            scale.y = y;
+            if (mRegistryManager->has<component::Tag_Static>(id)) {
+                auto &shape = mRegistryManager->get<component::Shape>(id);
+                shape.setSize(x, y);
+            } else {
+                auto &scale = mRegistryManager->get<component::Scale>(id);
+                scale.x = x;
+                scale.y = y;
+            }
+        }
+
+        void
+        EntityFactory::setHeading(common::EntityID id,
+                                  common::r32 heading) {
+            auto &h = mRegistryManager->get<component::Heading>(id);
+            h.value = heading;
         }
 
         void
@@ -803,6 +608,151 @@ namespace oni {
 
             mEntitiesToDelete.clear();
             mEntitiesToDeletePolicy.clear();
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_SmokeCloud() {
+            auto id = createEntity(entities::EntityType::SMOKE);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Age>(id);
+            createComponent<component::Velocity>(id);
+
+            assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_Dynamic>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_RaceCar() {
+            auto id = createEntity(entities::EntityType::RACE_CAR);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<component::SoundTag>(id, component::SoundTag::ENGINE_IDLE);
+            createComponent<component::TransformChildren>(id);
+            createComponent<component::EntityAttachment>(id);
+
+            createComponent<gameplay::CarLapInfo>(id, id);
+
+            auto &carConfig = createComponent<component::CarConfig>(id);
+            auto &car = createComponent<component::Car>(id);
+            car.applyConfiguration(carConfig);
+
+            auto &properties = createComponent<component::PhysicalProperties>(id);
+            properties.physicalCategory = component::PhysicalCategory::RACE_CAR;
+            properties.bodyType = component::BodyType::DYNAMIC;
+            properties.highPrecision = true;
+
+            assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_Dynamic>(id);
+            assignTag<component::Tag_Audible>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_VehicleGun() {
+            auto id = createEntity(entities::EntityType::VEHICLE_GUN);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<component::EntityAttachee>(id);
+            createComponent<component::TransformParent>(id);
+            createComponent<component::GunCoolDown>(id);
+
+            assignTag<component::Tag_Dynamic>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_Vehicle() {
+            auto id = createEntity(entities::EntityType::VEHICLE);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+
+            auto &properties = createComponent<component::PhysicalProperties>(id);
+            properties.friction = 1.f;
+            properties.density = 0.1f;
+            properties.angularDamping = 2.f;
+            properties.linearDamping = 2.f;
+            properties.highPrecision = false;
+            properties.bodyType = component::BodyType::DYNAMIC;
+            properties.physicalCategory = component::PhysicalCategory::VEHICLE;
+
+
+            assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_Dynamic>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_SimpleRocket() {
+            auto id = createEntity(entities::EntityType::SIMPLE_ROCKET);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<component::SoundTag>(id, component::SoundTag::ROCKET);
+            createComponent<component::Trail>(id);
+
+            auto &properties = createComponent<component::PhysicalProperties>(id);
+            properties.friction = 1.f;
+            properties.density = 0.1f;
+            properties.angularDamping = 2.f;
+            properties.linearDamping = 0.1f;
+            properties.highPrecision = true;
+            properties.bodyType = component::BodyType::DYNAMIC;
+            properties.physicalCategory = component::PhysicalCategory::ROCKET;
+            properties.collisionWithinCategory = false;
+
+            auto &age = createComponent<component::Age>(id);
+            age.maxAge = 5;
+
+            assignTag<component::Tag_Dynamic>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_Audible>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_Wall() {
+            auto id = createEntity(entities::EntityType::WALL);
+
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<component::Shape>(id);
+
+            auto &properties = createComponent<component::PhysicalProperties>(id);
+            properties.highPrecision = false;
+            properties.bodyType = component::BodyType::STATIC;
+            properties.physicalCategory = component::PhysicalCategory::WALL;
+
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+
+            return id;
         }
     }
 }

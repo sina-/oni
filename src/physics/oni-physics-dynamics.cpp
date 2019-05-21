@@ -149,6 +149,7 @@ namespace oni {
                     }
 
                     auto &car = carView.get<component::Car>(entity);
+                    auto &heading = carView.get<component::Heading>(entity);
                     const auto &carConfig = carView.get<component::CarConfig>(entity);
 
                     if (input->isPressed(GLFW_KEY_W) || input->isPressed(GLFW_KEY_UP)) {
@@ -165,8 +166,8 @@ namespace oni {
                         carInput[entity].right = 1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
-                        car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(car.heading)),
-                                                                 static_cast<common::r32>(sin(car.heading))};
+                        car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(heading.value)),
+                                                                 static_cast<common::r32>(sin(heading.value))};
                     }
                     if (input->isPressed(GLFW_KEY_SPACE)) {
                         if (car.accumulatedEBrake < 1.0f) {
@@ -191,21 +192,20 @@ namespace oni {
 
                     car.steerAngle = car.steer * carConfig.maxSteer;
 
-                    tickCar(car, carConfig, carInput[entity], tickTime);
-
                     auto &carPos = carView.get<component::WorldP3D>(entity);
-                    auto &heading = carView.get<component::Heading>(entity);
                     auto &scale = carView.get<component::Scale>(entity);
+
+                    const auto oldPos = carPos;
+                    const auto oldHeading = heading;
+                    tickCar(car, carPos, heading, carConfig, carInput[entity], tickTime);
 
                     auto velocity = car.velocityLocal.len();
                     auto distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
-                    if (std::abs(carPos.x - car.position.x) > common::EP ||
-                        std::abs(carPos.y - car.position.y) > common::EP ||
-                        std::abs(carPos.z - car.heading) > common::EP ||
-                        std::abs(car.distanceFromCamera - distanceFromCamera) > common::EP) {
-                        carPos.x = car.position.x;
-                        carPos.y = car.position.y;
-                        heading.value = static_cast<common::r32>(car.heading);
+                    if (!math::safeEqual(oldPos.x, carPos.x) ||
+                        !math::safeEqual(oldPos.y, carPos.y) ||
+                        !math::safeEqual(oldPos.y, carPos.y) ||
+                        !math::safeEqual(oldHeading.value, heading.value)) {
+
                         car.distanceFromCamera = distanceFromCamera;
 
                         updateTransforms(manager, entity, carPos, heading, scale);
@@ -226,13 +226,17 @@ namespace oni {
 
             /// Car collisions
             {
-                auto carPhysicsView = manager.createView<
+                auto view = manager.createView<
                         component::Tag_SimModeServer,
                         component::Car,
+                        component::Heading,
+                        component::WorldP3D,
                         component::PhysicalProperties>();
-                for (auto entity: carPhysicsView) {
-                    auto &props = carPhysicsView.get<component::PhysicalProperties>(entity);
-                    auto &car = carPhysicsView.get<component::Car>(entity);
+                for (auto entity: view) {
+                    auto &props = view.get<component::PhysicalProperties>(entity);
+                    auto &car = view.get<component::Car>(entity);
+                    auto &pos = view.get<component::WorldP3D>(entity);
+                    auto &heading = view.get<component::Heading>(entity);
                     // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
                     // just apply user input to box2d representation of physical body without syncing
                     // car dynamics with box2d physics, that way the next tick if the
@@ -246,9 +250,9 @@ namespace oni {
                         // carconfig?
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
                         props.body->ApplyForceToCenter(
-                                b2Vec2(static_cast<common::r32>(std::cos(car.heading) * 30 *
+                                b2Vec2(static_cast<common::r32>(std::cos(heading.value) * 30 *
                                                                 carInput[entity].throttle),
-                                       static_cast<common::r32>(std::sin(car.heading) * 30 *
+                                       static_cast<common::r32>(std::sin(heading.value) * 30 *
                                                                 carInput[entity].throttle)),
                                 true);
                         car.isColliding = false;
@@ -257,14 +261,15 @@ namespace oni {
                             car.velocity = math::vec2{props.body->GetLinearVelocity().x,
                                                       props.body->GetLinearVelocity().y};
                             car.angularVelocity = props.body->GetAngularVelocity();
-                            car.position = math::vec2{props.body->GetPosition().x, props.body->GetPosition().y};
-                            car.heading = props.body->GetAngle();
+                            pos.x = props.body->GetPosition().x;
+                            pos.y = props.body->GetPosition().y;
+                            heading.value = props.body->GetAngle();
                             car.isColliding = true;
                         } else {
                             props.body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
                             props.body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
-                            props.body->SetTransform(b2Vec2{car.position.x, car.position.y},
-                                                     static_cast<float32>(car.heading));
+                            props.body->SetTransform(b2Vec2{pos.x, pos.y},
+                                                     static_cast<float32>(heading.value));
                         }
                     }
                 }

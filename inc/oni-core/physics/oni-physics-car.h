@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/component/oni-component-geometry.h>
 
 /**
  * The idea is from https://github.com/sina-/carphysics2d
@@ -23,6 +24,8 @@ namespace oni {
 
         void
         tickCar(component::Car &car,
+                component::WorldP3D&,
+                component::Heading&,
                 const component::CarConfig &config,
                 const io::CarInput &inputs,
                 common::r64 dt);

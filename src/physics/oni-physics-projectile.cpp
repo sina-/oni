@@ -86,25 +86,32 @@ namespace oni {
                     auto carHalfY = static_cast<common::r32>(carConfig.halfWidth);
                     auto offset = sqrt(carHalfX * carHalfX + carHalfY * carHalfY);
 
-                    math::vec2 size{1.0f, 0.3f};
+                    auto size = math::vec2{1.0f, 0.3f};
                     auto projectileOffset = sqrt(
                             size.x * size.x / 4.f + size.y * size.y / 4.f);
-                    common::r32 fudge = 0.2f;
+                    auto fudge = 0.2f;
 
                     auto rocketPos = component::WorldP3D{};
                     rocketPos.x = pos.x + (offset + projectileOffset + fudge) * cos(heading.value);
                     rocketPos.y = pos.y + (offset + projectileOffset + fudge) * sin(heading.value);
                     rocketPos.z = pos.z;
 
-                    std::string textureID = "resources/images/bullet/2.png";
+                    auto id = entityFactory.createEntity_SimpleRocket();
+                    entityFactory.setWorldP3D(id, rocketPos.x, rocketPos.y, rocketPos.z);
+                    entityFactory.setScale(id, size.x, size.y);
+                    entityFactory.setTexture(id, "resources/images/bullet/2.png");
+                    entityFactory.setHeading(id, heading.value);
+                    entityFactory.createPhysics(id, rocketPos, size, heading.value);
 
-                    auto rocketEntity = entityFactory.createEntity<entities::EntityType::SIMPLE_ROCKET>(
-                            rocketPos,
-                            size,
-                            heading,
-                            textureID,
-                            velocity);
-                    entityFactory.tagForNetworkSync(rocketEntity);
+                    auto * body = entityFactory.getEntityManager().get<component::PhysicalProperties>(id).body;
+
+                    body->ApplyForceToCenter(
+                            b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),
+                                   static_cast<common::r32>(sin(heading.value) * velocity)),
+                            true);
+                    body->ApplyAngularImpulse(1, true);
+
+                    entityFactory.tagForNetworkSync(id); // TODO: WHY?
 /*
                     entityFactory.createEvent(ROCKET_LAUNCH, component::WorldP3D);
                     entityFactory.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);

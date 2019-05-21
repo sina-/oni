@@ -134,7 +134,6 @@ namespace oni {
         serialize(Archive &archive,
                   component::Car &data) {
             archive(
-                    data.heading,
                     data.velocityAbsolute,
                     data.angularVelocity,
                     data.steer,
@@ -148,7 +147,6 @@ namespace oni {
                     data.accumulatedEBrake,
                     data.slipAngleFront,
                     data.slipAngleRear,
-                    data.position,
                     data.velocity,
                     data.velocityLocal,
                     data.acceleration,

@@ -539,12 +539,12 @@ namespace oni {
                         }
                     }
 
-                    auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WALL>(
-                            wallPositionInWorld,
-                            wallSize,
-                            heading,
-                            wallTexturePath);
-                    mEntityFactory.tagForNetworkSync(entityID);
+                    auto id = mEntityFactory.createEntity_Wall();
+                    mEntityFactory.setTexture(id, wallTexturePath);
+                    mEntityFactory.setScale(id, wallSize.x, wallSize.y);
+                    mEntityFactory.setWorldP3D(id, wallPositionInWorld.x, wallPositionInWorld.y, wallPositionInWorld.z);
+
+                    mEntityFactory.tagForNetworkSync(id); // TODO: WHY?
                 }
             }
 

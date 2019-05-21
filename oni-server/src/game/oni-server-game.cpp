@@ -205,30 +205,28 @@ namespace oni {
             ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
-                auto pos = component::WorldP3D{-70.f, -30.f, vehicleZ};
-                math::vec2 size{2.5f, 1.1f};
-                auto heading = component::Heading{0.f};
-                std::string carTextureID = "resources/images/car/1/car.png";
+                auto heading = 0.f;
+                auto pos = component::WorldP3D{-70, -30, vehicleZ};
+                auto size = math::vec2{2.5f, 1.1f};
 
                 auto &manager = mEntityFactory->getEntityManager();
 
-                auto carEntity = mEntityFactory->createEntity<oni::entities::EntityType::RACE_CAR>(
-                        pos,
-                        size,
-                        heading,
-                        carTextureID);
+                auto carEntity = mEntityFactory->createEntity_RaceCar();
+                mEntityFactory->setWorldP3D(carEntity, pos.x, pos.y, pos.z);
+                mEntityFactory->setScale(carEntity, size.x, size.y);
+                mEntityFactory->setTexture(carEntity, "resources/images/car/1/car.png");
+                mEntityFactory->setHeading(carEntity, heading);
+                mEntityFactory->createPhysics(carEntity, pos, size, heading);
 
-                mEntityFactory->tagForNetworkSync(carEntity);
+                mEntityFactory->tagForNetworkSync(carEntity); // TODO: Why is this needed? I should be able to do this
+                // at the time of creating using entity policy of the factory
 
-                math::vec2 gunSize{2.f, 0.5f};
-                auto gunPos = component::WorldP3D{0.5f, 0.f, mZLayerManager->getZForEntity(
-                        oni::entities::EntityType::VEHICLE_GUN)};
-                std::string gunTextureID = "resources/images/minigun/1.png";
-                auto carGunEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_GUN>(
-                        gunPos,
-                        gunSize,
-                        heading,
-                        gunTextureID);
+                auto carGunEntity = mEntityFactory->createEntity_VehicleGun();
+                mEntityFactory->setWorldP3D(carGunEntity, 0.5f, 0.f, mZLayerManager->getZForEntity(
+                        oni::entities::EntityType::VEHICLE_GUN));
+                mEntityFactory->setScale(carGunEntity, 2.f, 0.5f);
+                mEntityFactory->setTexture(carGunEntity, "resources/images/minigun/1.png");
+                mEntityFactory->setHeading(carGunEntity, heading);
                 mEntityFactory->tagForNetworkSync(carGunEntity);
 
                 mEntityFactory->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
@@ -287,17 +285,20 @@ namespace oni {
             common::EntityID
             ServerGame::spawnTruck() {
                 auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::VEHICLE);
-                math::vec2 size{4.0f, 12.0f};
-                auto worldPos = component::WorldP3D{-20.0f, -30.0f, vehicleZ};
-                auto heading = component::Heading{0.f};
-                std::string textureID = "resources/images/car/2/truck.png";
+                auto size = math::vec2{4.0f, 12.0f};
+                auto pos = component::WorldP3D{-20.0f, -30.0f, vehicleZ};
+                auto heading = 0.f;
 
-                auto entityID = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE>(
-                        worldPos, size,
-                        heading,
-                        textureID);
-                mEntityFactory->tagForNetworkSync(entityID);
-                return entityID;
+                auto id = mEntityFactory->createEntity_Vehicle();
+
+                mEntityFactory->setWorldP3D(id, pos.x, pos.y, pos.z);
+                mEntityFactory->setScale(id, size.x, size.y);
+                mEntityFactory->setTexture(id, "resources/images/car/2/truck.png");
+                mEntityFactory->setHeading(id, heading);
+                mEntityFactory->createPhysics(id, pos, size, heading);
+
+                mEntityFactory->tagForNetworkSync(id); // TODO: WHY?
+                return id;
             }
         }
     }

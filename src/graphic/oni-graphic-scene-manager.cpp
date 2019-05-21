@@ -699,10 +699,10 @@ namespace oni {
                     for (auto &&carEntity: view) {
 
                         const auto car = view.get<component::Car>(carEntity);
+                        const auto &pos = view.get<component::WorldP3D>(carEntity);
                         // NOTE: Technically I should use slippingRear, but this gives better effect
                         if (car.slippingFront || true) {
                             const auto &carConfig = view.get<component::CarConfig>(carEntity);
-                            const auto &pos = view.get<component::WorldP3D>(carEntity);
                             const auto &heading = view.get<component::Heading>(carEntity);
                             const auto scale = component::Scale{}; // TODO: This is unused, think about how the parent scale
                             // affects children
@@ -735,7 +735,7 @@ namespace oni {
                             if (math::safeZero(emitter.currentCD)) {
                                 for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
                                     auto id = clientEntityFactory.createEntity_SmokeCloud();
-                                    clientEntityFactory.setWorldP3D(id, car.position.x, car.position.y, z);
+                                    clientEntityFactory.setWorldP3D(id, pos.x, pos.y, z);
                                     clientEntityFactory.setTexture(id, "resources/images/cloud/1.png");
                                     clientEntityFactory.setRandAge(id, 1, 3);
                                     clientEntityFactory.setRandHeading(id);

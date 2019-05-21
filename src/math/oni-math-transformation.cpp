@@ -15,8 +15,25 @@ namespace oni {
         void
         localToWorldTranslation(const component::WorldP3D &reference,
                                 vec3 &operand) {
-            operand.x += reference.x;
-            operand.y += reference.y;
+            localToWorldTranslation(reference.x, reference.y, operand);
+        }
+
+        void
+        localToWorldTranslation(common::r32 x,
+                                common::r32 y,
+                                vec3 &operand) {
+            operand.x += x;
+            operand.y += y;
+        }
+
+        void
+        localToWorldTranslation(common::r32 x,
+                                common::r32 y,
+                                component::Shape &shape) {
+            localToWorldTranslation(x, y, shape.vertexA);
+            localToWorldTranslation(x, y, shape.vertexB);
+            localToWorldTranslation(x, y, shape.vertexC);
+            localToWorldTranslation(x, y, shape.vertexD);
         }
 
         void

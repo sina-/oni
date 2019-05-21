@@ -38,7 +38,6 @@ namespace oni {
         };
 
         struct Car {
-            common::CarSimDouble heading{0.f}; // In radians
             common::CarSimDouble velocityAbsolute{0.f};
             common::CarSimDouble angularVelocity{0.f}; // Angular velocity in radians (rad/s)
             common::CarSimDouble steer{0.f}; // (-1.0..1.0)
@@ -54,8 +53,6 @@ namespace oni {
             common::CarSimDouble axleWeightRatioRear{};
             common::CarSimDouble maxVelocityAbsolute{};
 
-
-            math::vec2 position{0.f, 0.f};
             math::vec2 velocity{0.f, 0.f}; // m/s
             math::vec2 velocityLocal{0.f, 0.f}; // m/s
             math::vec2 acceleration{0.f, 0.f};

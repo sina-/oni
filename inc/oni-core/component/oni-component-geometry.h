@@ -115,11 +115,12 @@ namespace oni {
             }
 
             void
-            setSize(const math::vec2 &size) {
-                assert(size.x > 0);
-                assert(size.y > 0);
-                auto halfX = size.x / 2.f;
-                auto halfY = size.y / 2.f;
+            setSize(common::r32 x,
+                    common::r32 y) {
+                assert(x > 0);
+                assert(y > 0);
+                auto halfX = x / 2.f;
+                auto halfY = y / 2.f;
 
                 vertexA.x = -halfX;
                 vertexA.y = -halfY;
@@ -132,6 +133,11 @@ namespace oni {
 
                 vertexD.x = halfX;
                 vertexD.y = -halfY;
+            }
+
+            void
+            setSize(const math::vec2 &size) {
+                setSize(size.x, size.y);
             }
 
             void

@@ -8,12 +8,14 @@ namespace oni {
     namespace physics {
         void
         tickCar(component::Car &car,
+                component::WorldP3D &pos,
+                component::Heading &heading,
                 const component::CarConfig &config,
                 const io::CarInput &inputs,
                 common::r64 dt) {
             using common::CarSimDouble;
-            CarSimDouble sn = std::sin(car.heading);
-            CarSimDouble cs = std::cos(car.heading);
+            CarSimDouble sn = std::sin(heading.value);
+            CarSimDouble cs = std::cos(heading.value);
 
             car.velocityLocal.x = cs * car.velocity.x + sn * car.velocity.y;
             car.velocityLocal.y = cs * car.velocity.y - sn * car.velocity.x;
@@ -116,11 +118,10 @@ namespace oni {
             CarSimDouble angularAcceleration = angularTorque / car.inertia;
 
             car.angularVelocity += angularAcceleration * dt;
-            car.heading += car.angularVelocity * dt;
 
-            //  finally we can update position
-            car.position.x += car.velocity.x * dt;
-            car.position.y += car.velocity.y * dt;
+            heading.value += car.angularVelocity * dt;
+            pos.x += car.velocity.x * dt;
+            pos.y += car.velocity.y * dt;
         }
 
         common::CarSimDouble

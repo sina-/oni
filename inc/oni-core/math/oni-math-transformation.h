@@ -37,6 +37,16 @@ namespace oni {
                                 vec3 &operand);
 
         void
+        localToWorldTranslation(common::r32 x,
+                                common::r32 y,
+                                vec3 &operand);
+
+        void
+        localToWorldTranslation(common::r32 x,
+                                common::r32 y,
+                                component::Shape &);
+
+        void
         localToWorldTranslation(const component::WorldP3D &reference,
                                 component::Shape &shape);
 

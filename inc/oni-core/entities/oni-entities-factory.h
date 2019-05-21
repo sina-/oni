@@ -54,8 +54,7 @@ namespace oni {
             template<entities::EntityType entityType, class ...Args>
             common::EntityID
             createEntity(const Args &... args) {
-                auto id = createEntity();
-                createComponent<entities::EntityType>(id, entityType);
+                auto id = createEntity(entityType);
                 _createEntity<entityType>(id, args...);
                 return id;
             }
@@ -64,7 +63,8 @@ namespace oni {
             tagForRemoval(common::EntityID);
 
             void
-            tagForRemoval(common::EntityID, const entities::EntityOperationPolicy&);
+            tagForRemoval(common::EntityID,
+                          const entities::EntityOperationPolicy &);
 
             void
             flushEntityRemovals();
@@ -84,9 +84,26 @@ namespace oni {
                 mRegistryManager->clearDeletedEntitiesList();
             }
 
+        public:
             common::EntityID
             createEntity_SmokeCloud();
 
+            common::EntityID
+            createEntity_RaceCar();
+
+            common::EntityID
+            createEntity_VehicleGun();
+
+            common::EntityID
+            createEntity_Vehicle();
+
+            common::EntityID
+            createEntity_SimpleRocket();
+
+            common::EntityID
+            createEntity_Wall();
+
+        public:
             void
             setWorldP3D(common::EntityID,
                         common::r32 x,
@@ -103,21 +120,32 @@ namespace oni {
                      common::r32 y);
 
             void
-            setRandAge(common::EntityID id,
+            setRandAge(common::EntityID,
                        common::i32 lower,
                        common::i32 upper);
 
             void
-            setRandHeading(common::EntityID id);
+            setRandHeading(common::EntityID);
 
             void
-            setRandVelocity(common::EntityID id,
+            setHeading(common::EntityID,
+                       common::r32 heading);
+
+            void
+            setRandVelocity(common::EntityID,
                             common::i32 lower,
                             common::i32 upper);
 
+            void
+            createPhysics(
+                    common::EntityID,
+                    const component::WorldP3D &worldPos,
+                    const math::vec2 &size,
+                    const common::r32 heading);
+
         private:
             common::EntityID
-            createEntity();
+            createEntity(entities::EntityType);
 
             void
             assignSimMode(common::EntityID,
@@ -147,30 +175,6 @@ namespace oni {
 
             template<>
             void
-            _createEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                          const component::WorldP3D &pos,
-                                                          const math::vec2 &size,
-                                                          const component::Heading &heading,
-                                                          const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::VEHICLE>(common::EntityID entityID,
-                                                         const component::WorldP3D &pos,
-                                                         const math::vec2 &size,
-                                                         const component::Heading &heading,
-                                                         const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::VEHICLE_GUN>(common::EntityID,
-                                                             const component::WorldP3D &pos,
-                                                             const math::vec2 &size,
-                                                             const component::Heading &heading,
-                                                             const std::string &textureID);
-
-            template<>
-            void
             _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID,
                                                                     const component::WorldP3D &pos,
                                                                     const math::vec2 &size,
@@ -184,14 +188,6 @@ namespace oni {
                                                                    const math::vec2 &size,
                                                                    const component::Heading &heading,
                                                                    const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::WALL>(common::EntityID,
-                                                      const component::WorldP3D &pos,
-                                                      const math::vec2 &size,
-                                                      const component::Heading &heading,
-                                                      const std::string &textureID);
 
             template<>
             void
@@ -236,15 +232,6 @@ namespace oni {
 
             template<>
             void
-            _createEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
-                                                               const component::WorldP3D &pos,
-                                                               const math::vec2 &size,
-                                                               const component::Heading &heading,
-                                                               const std::string &textureID,
-                                                               const common::r32 &velocity);
-
-            template<>
-            void
             _createEntity<entities::EntityType::TEXT>(common::EntityID,
                                                       const component::WorldP3D &pos,
                                                       const std::string &text);
@@ -282,15 +269,6 @@ namespace oni {
             void
             _removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
                                                                const entities::EntityOperationPolicy &policy
-            );
-
-        private:
-            b2Body *
-            createPhysicalBody(
-                    const component::WorldP3D &worldPos,
-                    const math::vec2 &size,
-                    const common::r32 heading,
-                    component::PhysicalProperties &properties
             );
 
             void

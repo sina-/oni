@@ -130,7 +130,6 @@ namespace oni {
                        common::r64 tickTime) {
             auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, io::CarInput> carInput{};
-            std::vector<common::EntityID> entitiesToBeUpdated{};
 
             /// Input
             {
@@ -210,7 +209,7 @@ namespace oni {
                         car.distanceFromCamera = distanceFromCamera;
 
                         updateTransforms(manager, entity, carPos, heading, scale);
-                        entitiesToBeUpdated.push_back(entity);
+                        manager.tagForComponentSync(entity);
                     }
                 }
             }
@@ -287,6 +286,7 @@ namespace oni {
                                                                props,
                                                                pos);
                 }
+                entityFactory.flushEntityRemovals();
             }
 
             /// Sync placement with box2d
@@ -320,7 +320,7 @@ namespace oni {
                         pos.y = position.y;
                         heading.value = props.body->GetAngle();
                         updateTransforms(manager, entity, pos, heading, scale);
-                        entitiesToBeUpdated.push_back(entity);
+                        manager.tagForComponentSync(entity);
                     }
                 }
             }
@@ -360,13 +360,6 @@ namespace oni {
             /// Update placement
             {
                 updatePlacement(entityFactory, tickTime);
-            }
-
-            /// Tag to sync with client
-            {
-                for (auto &&entity : entitiesToBeUpdated) {
-                    manager.tagForComponentSync(entity);
-                }
             }
         }
 
@@ -411,7 +404,7 @@ namespace oni {
                 // sound effects, etc.
                 entityFactory.getEntityManager().enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
-                entityFactory.removeEntity(entityID);
+                entityFactory.tagForRemoval(entityID);
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
@@ -450,9 +443,9 @@ namespace oni {
         void
         Dynamics::updateAge(entities::EntityFactory &entityFactory,
                             common::r64 tickTime) {
+            auto &entityManager = entityFactory.getEntityManager();
             {
                 /// Client side
-                auto &entityManager = entityFactory.getEntityManager();
                 auto view = entityManager.createView<
                         component::Tag_SimModeClient,
                         component::Age>();
@@ -467,14 +460,24 @@ namespace oni {
 
                             entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
                         }
-                        entityFactory.removeEntity(entity);
+                        entityFactory.tagForRemoval(entity);
                     }
                 }
             }
-            /// Client and server
+            /// Server
             {
-
+                auto view = entityManager.createView<
+                        component::Tag_SimModeServer,
+                        component::Age>();
+                for (auto &&entity: view) {
+                    auto &age = view.get<component::Age>(entity);
+                    age.currentAge += tickTime;
+                    if (age.currentAge > age.maxAge) {
+                        entityFactory.tagForRemoval(entity);
+                    }
+                }
             }
+            entityFactory.flushEntityRemovals();
         }
 
         void

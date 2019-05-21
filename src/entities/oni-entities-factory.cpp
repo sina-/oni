@@ -493,6 +493,9 @@ namespace oni {
             auto &soundTag = createComponent<component::SoundTag>(entityID);
             soundTag = component::SoundTag::ROCKET;
 
+            auto &age = createComponent<component::Age>(entityID);
+            age.maxAge = 5;
+
             assignTag<component::Tag_Dynamic>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
             assignTag<component::Tag_Audible>(entityID);
@@ -777,6 +780,29 @@ namespace oni {
             auto &scale = mRegistryManager->get<component::Scale>(id);
             scale.x = x;
             scale.y = y;
+        }
+
+        void
+        EntityFactory::tagForRemoval(common::EntityID id) {
+            mEntitiesToDelete.push_back(id);
+            mEntitiesToDeletePolicy.push_back(mEntityOperationPolicy);
+        }
+
+        void
+        EntityFactory::tagForRemoval(common::EntityID id,
+                                     const entities::EntityOperationPolicy &policy) {
+            mEntitiesToDelete.push_back(id);
+            mEntitiesToDeletePolicy.push_back(policy);
+        }
+
+        void
+        EntityFactory::flushEntityRemovals() {
+            for (common::size i = 0; i < mEntitiesToDelete.size(); ++i) {
+                removeEntity(mEntitiesToDelete[i], mEntitiesToDeletePolicy[i]);
+            }
+
+            mEntitiesToDelete.clear();
+            mEntitiesToDeletePolicy.clear();
         }
     }
 }

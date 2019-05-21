@@ -61,11 +61,13 @@ namespace oni {
             }
 
             void
-            removeEntity(common::EntityID);
+            tagForRemoval(common::EntityID);
 
             void
-            removeEntity(common::EntityID,
-                         const entities::EntityOperationPolicy &);
+            tagForRemoval(common::EntityID, const entities::EntityOperationPolicy&);
+
+            void
+            flushEntityRemovals();
 
             void
             attach(common::EntityID parent,
@@ -125,6 +127,13 @@ namespace oni {
             void
             _createEntity(common::EntityID,
                           const Args &...) = delete;
+
+            void
+            removeEntity(common::EntityID);
+
+            void
+            removeEntity(common::EntityID,
+                         const entities::EntityOperationPolicy &);
 
             void
             _removeEntity(common::EntityID,
@@ -332,6 +341,9 @@ namespace oni {
             std::unique_ptr<math::Rand> mRand{};
             entities::SimMode mSimMode{entities::SimMode::CLIENT};
             entities::EntityOperationPolicy mEntityOperationPolicy{};
+
+            std::vector<common::EntityID> mEntitiesToDelete{};
+            std::vector<entities::EntityOperationPolicy> mEntitiesToDeletePolicy{};
         };
     }
 }

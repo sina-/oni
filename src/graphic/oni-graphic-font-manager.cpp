@@ -72,15 +72,17 @@ namespace oni {
 
         common::EntityID
         FontManager::createTextFromString(entities::EntityFactory &entityFactory,
-                                          const std::string &text,
-                                          const component::WorldP3D &position) {
+                                          std::string_view text,
+                                          const component::WorldP3D &pos) {
             auto &entityRegistry = entityFactory.getEntityManager();
-            auto entityID = entityFactory.createEntity<entities::EntityType::TEXT>(
-                    position, text);
-            auto &textComponent = entityRegistry.get<component::Text>(entityID);
+            auto id = entityFactory.createEntity_Text();
+            entityFactory.setWorldP3D(id, pos.x, pos.y, pos.z);
+            entityFactory.setText(id, text);
+
+            auto &textComponent = entityRegistry.get<component::Text>(id);
             assignGlyphs(textComponent);
 
-            return entityID;
+            return id;
         }
 
         void

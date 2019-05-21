@@ -389,10 +389,10 @@ namespace oni {
         SceneManager::renderStaticText(entities::EntityManager &manager,
                                        common::r32 viewWidth,
                                        common::r32 viewHeight) {
-            auto staticTextView = manager.createView<component::Text, component::Tag_Static, component::WorldP3D>();
-            for (const auto &entity: staticTextView) {
-                auto &text = staticTextView.get<component::Text>(entity);
-                auto &pos = staticTextView.get<component::WorldP3D>(entity);
+            auto view = manager.createView<component::Text, component::Tag_Static, component::WorldP3D>();
+            for (const auto &entity: view) {
+                auto &text = view.get<component::Text>(entity);
+                auto &pos = view.get<component::WorldP3D>(entity);
 
                 ++mRenderedSpritesPerFrame;
                 ++mRenderedTexturesPerFrame;
@@ -478,8 +478,11 @@ namespace oni {
                                          common::r32 viewWidth,
                                          common::r32 viewHeight) {
             auto view = manager.createView<
-                    component::Tag_ColorShaded, component::Shape,
-                    component::Appearance, component::Tag_Static>();
+                    component::Tag_ColorShaded,
+                    component::Tag_Static,
+                    component::Shape,
+                    component::Appearance,
+                    entities::EntityType>();
             for (const auto &entity: view) {
                 const auto &shape = view.get<component::Shape>(entity);
                 if (!math::intersects(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {

@@ -76,7 +76,7 @@ namespace oni {
                 oni::common::EntityID
                 genTexture(const oni::math::vec2 &size,
                            const component::WorldP3D &worldPos,
-                           const std::string &path);
+                           std::string_view path);
 
                 void
                 genChunkRoads(oni::common::i64 chunkX,

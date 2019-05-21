@@ -106,5 +106,11 @@ namespace oni {
         vec3::len() {
             return std::sqrt(x * x + y * y + z * z);
         }
+
+        vec3
+        operator/(const vec3 &left,
+                  common::r32 divisor) {
+            return math::vec3{left.x / divisor, left.y / divisor, left.z / divisor};
+        }
     }
 }

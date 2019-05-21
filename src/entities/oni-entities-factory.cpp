@@ -115,6 +115,7 @@ namespace oni {
                 case entities::EntityType::TEXT:
                 case entities::EntityType::SMOKE:
                 case entities::EntityType::COMPLEMENT:
+                case entities::EntityType::DEBUG_WORLD_CHUNK:
                 case entities::EntityType::WORLD_CHUNK: {
                     break;
                 }
@@ -163,97 +164,6 @@ namespace oni {
 
             assignTag<component::Tag_Static>(entityID);
             assignTag<component::Tag_TextureShaded>(entityID);
-        }
-
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID entityID,
-                                                                                  const component::WorldP3D &pos,
-                                                                                  const std::string &textureID,
-                                                                                  const common::r32 &halfSize,
-                                                                                  const bool &randomize) {
-            createComponent<component::Scale>(entityID, halfSize, halfSize);
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-
-//            auto &appearance = createComponent<component::Appearance>(entityID);
-//            appearance.color = {.5f, .5f, .5f, 1.f};
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &velocity = createComponent<component::Velocity>(entityID);
-
-            auto &age = createComponent<component::Age>(entityID);
-            age.currentAge = 0.f;
-
-            if (randomize) {
-                h.value = mRand->next_r32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->next_r32(1.f, 2.f);
-                age.maxAge = mRand->next_r32(0.2f, 1.f);
-            }
-
-            assignTag<component::Tag_Particle>(entityID);
-            assignTag<component::Tag_SplatOnDeath>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::TEXT>(common::EntityID entityID,
-                                                                 const component::WorldP3D &pos,
-                                                                 const std::string &text) {
-
-            auto &textComponent = createComponent<component::Text>(entityID);
-            textComponent.textContent = text;
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            assignTag<component::Tag_Static>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID entityID,
-                                                                        const component::WorldP3D &pos,
-                                                                        const math::vec2 &size,
-                                                                        const component::Heading &heading,
-                                                                        const std::string &textureID) {
-            auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSize(size);
-            math::localToWorldTranslation(pos, shape);
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            createComponent<level::Chunk>(entityID);
-
-            assignTag<component::Tag_Static>(entityID);
-            assignTag<component::Tag_TextureShaded>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID entityID,
-                                                                        const component::WorldP3D &pos,
-                                                                        const math::vec2 &size,
-                                                                        const component::Heading &heading,
-                                                                        const math::vec4 &color) {
-            auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSize(size);
-            math::localToWorldTranslation(pos, shape);
-
-            auto &appearance = createComponent<component::Appearance>(entityID);
-            appearance.color = color;
-
-            createComponent<level::Chunk>(entityID);
-
-            assignTag<component::Tag_Static>(entityID);
-            assignTag<component::Tag_ColorShaded>(entityID);
         }
 
         void
@@ -415,15 +325,19 @@ namespace oni {
 
         void
         EntityFactory::setRandAge(common::EntityID id,
-                                  common::i32 lower,
-                                  common::i32 upper) {
+                                  common::r32 lower,
+                                  common::r32 upper) {
             auto &age = mRegistryManager->get<component::Age>(id);
-            age.maxAge = mRand->next_i32(lower, upper);
+            age.maxAge = mRand->next_r32(lower, upper);
         }
 
         void
         EntityFactory::setRandHeading(common::EntityID id) {
             auto &heading = mRegistryManager->get<component::Heading>(id);
+            if (mRegistryManager->has<component::Tag_Static>(id)) {
+                // TODO: Implement
+                assert(false);
+            }
             heading.value = mRand->next_r32(0.f, common::FULL_CIRCLE_IN_RAD);
         }
 
@@ -441,7 +355,7 @@ namespace oni {
                                    common::r32 x,
                                    common::r32 y,
                                    common::r32 z) {
-            if (mRegistryManager->has<component::Tag_Static>(id)) {
+            if (mRegistryManager->has<component::Tag_Static>(id) && mRegistryManager->has<component::Shape>(id)) {
                 auto &shape = mRegistryManager->get<component::Shape>(id);
                 shape.setZ(z);
                 math::localToWorldTranslation(x, y, shape);
@@ -457,7 +371,7 @@ namespace oni {
         EntityFactory::setScale(common::EntityID id,
                                 common::r32 x,
                                 common::r32 y) {
-            if (mRegistryManager->has<component::Tag_Static>(id)) {
+            if (mRegistryManager->has<component::Tag_Static>(id) && mRegistryManager->has<component::Shape>(id)) {
                 auto &shape = mRegistryManager->get<component::Shape>(id);
                 shape.setSize(x, y);
             } else {
@@ -471,7 +385,19 @@ namespace oni {
         EntityFactory::setHeading(common::EntityID id,
                                   common::r32 heading) {
             auto &h = mRegistryManager->get<component::Heading>(id);
+            if (mRegistryManager->has<component::Tag_Static>(id)) {
+                // TODO: Implement
+                assert(false);
+            }
             h.value = heading;
+        }
+
+        void
+        EntityFactory::setText(common::EntityID id,
+                               std::string_view content) {
+            auto &text = mRegistryManager->get<component::Text>(id);
+            text.textContent = content;
+
         }
 
         void
@@ -691,6 +617,75 @@ namespace oni {
 
             assignTag<component::Tag_Particle>(id);
             return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_SimpleBlastParticle() {
+            auto id = createEntity(entities::EntityType::SIMPLE_BLAST_PARTICLE);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Velocity>(id);
+            createComponent<component::Age>(id);
+
+            assignTag<component::Tag_Particle>(id);
+            assignTag<component::Tag_SplatOnDeath>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_Text() {
+            auto id = createEntity(entities::EntityType::TEXT);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Text>(id);
+
+            assignTag<component::Tag_Static>(id);
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_WorldChunk() {
+            auto id = createEntity(entities::EntityType::WORLD_CHUNK);
+
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+            createComponent<level::Chunk>(id);
+
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_DebugWorldChunk() {
+            auto id = createEntity(entities::EntityType::DEBUG_WORLD_CHUNK);
+
+            createComponent<component::Shape>(id);
+            createComponent<component::Appearance>(id);
+            createComponent<level::Chunk>(id);
+
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_ColorShaded>(id);
+
+            return id;
+        }
+
+        void
+        EntityFactory::setApperance(common::EntityID id,
+                                    common::r32 red,
+                                    common::r32 green,
+                                    common::r32 blue,
+                                    common::r32 alpha) {
+            auto &apperance = mRegistryManager->get<component::Appearance>(id);
+            apperance.color.x = red;
+            apperance.color.y = green;
+            apperance.color.z = blue;
+            apperance.color.w = alpha;
         }
     }
 }

@@ -43,6 +43,10 @@ namespace oni {
             operator/(const vec3 &left,
                       const vec3 &right);
 
+            friend vec3
+            operator/(const vec3 &left,
+                      common::r32 divisor);
+
             vec3 &
             operator+=(const vec3 &other);
 

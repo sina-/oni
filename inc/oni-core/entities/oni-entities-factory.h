@@ -109,6 +109,18 @@ namespace oni {
             common::EntityID
             createEntity_SimpleParticle();
 
+            common::EntityID
+            createEntity_SimpleBlastParticle();
+
+            common::EntityID
+            createEntity_Text();
+
+            common::EntityID
+            createEntity_WorldChunk();
+
+            common::EntityID
+            createEntity_DebugWorldChunk();
+
         public:
             void
             setWorldP3D(common::EntityID,
@@ -126,9 +138,16 @@ namespace oni {
                      common::r32 y);
 
             void
+            setApperance(common::EntityID,
+                         common::r32 red,
+                         common::r32 green,
+                         common::r32 blue,
+                         common::r32 alpha);
+
+            void
             setRandAge(common::EntityID,
-                       common::i32 lower,
-                       common::i32 upper);
+                       common::r32 lower,
+                       common::r32 upper);
 
             void
             setRandHeading(common::EntityID);
@@ -148,6 +167,10 @@ namespace oni {
                     const component::WorldP3D &worldPos,
                     const math::vec2 &size,
                     const common::r32 heading);
+
+            void
+            setText(common::EntityID,
+                    std::string_view content);
 
         private:
             common::EntityID
@@ -194,36 +217,6 @@ namespace oni {
                                                                const math::vec2 &size,
                                                                const component::Heading &heading,
                                                                const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::SIMPLE_BLAST_PARTICLE>(common::EntityID,
-                                                                       const component::WorldP3D &worldPos,
-                                                                       const std::string &textureID,
-                                                                       const common::r32 &halfSize,
-                                                                       const bool &randomize);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::TEXT>(common::EntityID,
-                                                      const component::WorldP3D &pos,
-                                                      const std::string &text);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID,
-                                                             const component::WorldP3D &worldPos,
-                                                             const math::vec2 &size,
-                                                             const component::Heading &heading,
-                                                             const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::WORLD_CHUNK>(common::EntityID,
-                                                             const component::WorldP3D &worldPos,
-                                                             const math::vec2 &size,
-                                                             const component::Heading &heading,
-                                                             const math::vec4 &color);
 
         private:
             template<>

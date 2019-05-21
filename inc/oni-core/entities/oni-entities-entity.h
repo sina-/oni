@@ -27,6 +27,7 @@ namespace oni {
 
             TEXT,
             WORLD_CHUNK,
+            DEBUG_WORLD_CHUNK,
 
             SMOKE,
 

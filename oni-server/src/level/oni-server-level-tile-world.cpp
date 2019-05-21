@@ -567,7 +567,7 @@ namespace oni {
                 math::vec4 color{R, G, B, 0.1f};
                 math::vec2 size{static_cast<common::r32>(mChunkSizeX),
                                 static_cast<common::r32 >(mChunkSizeY)};
-                oni::level::ChunkIndex currentChunkIndex{chunkX, chunkY};
+                auto currentChunkIndex = oni::level::ChunkIndex{chunkX, chunkY};
                 auto worldPos = groundChunkIndexToPos(currentChunkIndex);
                 auto chunkEntityID = genSprite(color, size, worldPos);
 
@@ -589,26 +589,30 @@ namespace oni {
 
             common::EntityID
             TileWorld::genSprite(math::vec4 &color,
-                                 math::vec2 &tileSize,
+                                 math::vec2 &size,
                                  component::WorldP3D &worldPos) {
-                auto heading = component::Heading{0.f};
-                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(
-                        worldPos, tileSize,
-                        heading,
-                        color);
-                return entityID;
+                auto id = mEntityFactory.createEntity_DebugWorldChunk();
+                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexA << "\n";
+                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexC << "\n";
+                mEntityFactory.setScale(id, size.x, size.y);
+                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexA << "\n";
+                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexC << "\n";
+                mEntityFactory.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
+                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexA << "\n";
+                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexC << "\n";
+                mEntityFactory.setApperance(id, color.x, color.y, color.z, color.w);
+                return id;
             }
 
             common::EntityID
             TileWorld::genTexture(const math::vec2 &size,
                                   const component::WorldP3D &worldPos,
-                                  const std::string &path) {
-                auto heading = component::Heading{0.f};
-                auto entityID = mEntityFactory.createEntity<oni::entities::EntityType::WORLD_CHUNK>(
-                        worldPos, size,
-                        heading,
-                        path);
-                return entityID;
+                                  std::string_view path) {
+                auto id = mEntityFactory.createEntity_WorldChunk();
+                mEntityFactory.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
+                mEntityFactory.setScale(id, size.x, size.y);
+                mEntityFactory.setTexture(id, path);
+                return id;
             }
 
             void

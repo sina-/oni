@@ -40,8 +40,8 @@ namespace oni {
 
             common::EntityID
             createTextFromString(entities::EntityFactory &entityFactory,
-                                 const std::string &text,
-                                 const component::WorldP3D &position);
+                                 std::string_view text,
+                                 const component::WorldP3D &pos);
 
             void
             updateText(const std::string &textContent,

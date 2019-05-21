@@ -209,22 +209,10 @@ namespace oni {
                 return result;
             }
 
-            size_t
-            capacity() noexcept {
-                auto result = mRegistry->capacity();
-                return result;
-            }
-
             template<class Component>
             size_t
             size() noexcept {
                 auto result = mRegistry->size<Component>();
-                return result;
-            }
-
-            size_t
-            alive() noexcept {
-                auto result = mRegistry->alive();
                 return result;
             }
 
@@ -268,11 +256,6 @@ namespace oni {
                 }
                 return result;
             }
-
-/*            template<class Component>
-            const Component &get(EntityID entityID) noexcept {
-                return mRegistry->get<Component>(entityID);
-            }*/
 
             template<class Component>
             bool

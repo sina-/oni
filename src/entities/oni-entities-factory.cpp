@@ -51,6 +51,10 @@ namespace oni {
         EntityFactory::createEntity(entities::EntityType type) {
             auto id = mRegistryManager->create();
             assignSimMode(id, mSimMode);
+            if (mEntityOperationPolicy.track) {
+                assert(mSimMode == entities::SimMode::SERVER);
+                assignTag<component::Tag_RequiresNetworkSync>(id);
+            }
             createComponent<entities::EntityType>(id, type);
             return id;
         }
@@ -383,11 +387,6 @@ namespace oni {
             auto &attachee = mRegistryManager->get<component::EntityAttachee>(child);
             attachee.entityID = parent;
             attachee.entityType = parentType;
-        }
-
-        void
-        EntityFactory::tagForNetworkSync(common::EntityID entityID) {
-            assignTag<component::Tag_RequiresNetworkSync>(entityID);
         }
 
         void

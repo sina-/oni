@@ -543,8 +543,6 @@ namespace oni {
                     mEntityFactory.setTexture(id, wallTexturePath);
                     mEntityFactory.setScale(id, wallSize.x, wallSize.y);
                     mEntityFactory.setWorldP3D(id, wallPositionInWorld.x, wallPositionInWorld.y, wallPositionInWorld.z);
-
-                    mEntityFactory.tagForNetworkSync(id); // TODO: WHY?
                 }
             }
 
@@ -598,7 +596,6 @@ namespace oni {
                         worldPos, tileSize,
                         heading,
                         color);
-                mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }
 
@@ -611,7 +608,6 @@ namespace oni {
                         worldPos, size,
                         heading,
                         path);
-                mEntityFactory.tagForNetworkSync(entityID);
                 return entityID;
             }
 

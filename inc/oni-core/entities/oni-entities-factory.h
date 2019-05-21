@@ -75,9 +75,6 @@ namespace oni {
                    entities::EntityType parentType,
                    entities::EntityType childType);
 
-            void
-            tagForNetworkSync(common::EntityID);
-
             // TODO: Does it make sense to create a deleted entity event instead of keeping track of these entities?
             void
             clearDeletedEntitiesList() {

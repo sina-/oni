@@ -216,15 +216,11 @@ namespace oni {
                 mEntityFactory->setTexture(carEntity, "resources/images/car/1/car.png");
                 mEntityFactory->createPhysics(carEntity, pos, size, 0);
 
-                mEntityFactory->tagForNetworkSync(carEntity); // TODO: Why is this needed? I should be able to do this
-                // at the time of creating using entity policy of the factory
-
                 auto carGunEntity = mEntityFactory->createEntity_VehicleGun();
                 mEntityFactory->setWorldP3D(carGunEntity, 0.5f, 0.f, mZLayerManager->getZForEntity(
                         oni::entities::EntityType::VEHICLE_GUN));
                 mEntityFactory->setScale(carGunEntity, 2.f, 0.5f);
                 mEntityFactory->setTexture(carGunEntity, "resources/images/minigun/1.png");
-                mEntityFactory->tagForNetworkSync(carGunEntity);
 
                 mEntityFactory->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
                                        oni::entities::EntityType::VEHICLE_GUN);
@@ -259,8 +255,6 @@ namespace oni {
 
                     mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_FRONT);
-
-                    mEntityFactory->tagForNetworkSync(tireEntity); // TODO: ???
                 }
 
                 for (auto &&carTire: carTiresRear) {
@@ -272,8 +266,6 @@ namespace oni {
 
                     mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_REAR);
-
-                    mEntityFactory->tagForNetworkSync(tireEntity); // TODO: ???
                 }
 
                 return carEntity;
@@ -294,7 +286,6 @@ namespace oni {
                 mEntityFactory->setHeading(id, heading);
                 mEntityFactory->createPhysics(id, pos, size, heading);
 
-                mEntityFactory->tagForNetworkSync(id); // TODO: WHY?
                 return id;
             }
         }

@@ -110,8 +110,6 @@ namespace oni {
                                    static_cast<common::r32>(sin(heading.value) * velocity)),
                             true);
                     body->ApplyAngularImpulse(1, true);
-
-                    entityFactory.tagForNetworkSync(id); // TODO: WHY?
 /*
                     entityFactory.createEvent(ROCKET_LAUNCH, component::WorldP3D);
                     entityFactory.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);

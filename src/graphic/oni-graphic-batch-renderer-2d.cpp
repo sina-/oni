@@ -126,7 +126,7 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Size &size,
+        BatchRenderer2D::_submit(const component::Scale &scale,
                                  const component::WorldP3D &pos,
                                  const component::Appearance &appearance) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
@@ -136,7 +136,7 @@ namespace oni {
             buffer->position = pos.value;
             buffer->color = appearance.color;
             buffer->samplerID = -1;
-            buffer->halfSize = size.x;
+            buffer->halfSize = scale.x / 2.f;
             buffer++;
 
             // Update the mBuffer to point to the head.
@@ -146,7 +146,7 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Size &size,
+        BatchRenderer2D::_submit(const component::Scale &scale,
                                  const component::WorldP3D &pos,
                                  const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
@@ -158,7 +158,7 @@ namespace oni {
             buffer->position = pos.value;
             buffer->color = {};
             buffer->samplerID = samplerID;
-            buffer->halfSize = size.x;
+            buffer->halfSize = scale.x / 2.f;
             buffer++;
 
             // Update the mBuffer to point to the head.

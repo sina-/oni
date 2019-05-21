@@ -72,10 +72,10 @@ namespace oni {
                       const component::Appearance &);
 
             void
-            splat(entities::EntityFactory &entityFactory,
-                  const component::WorldP3D &worldPos,
-                  const component::Size &size,
-                  graphic::Brush brush);
+            splat(entities::EntityFactory &,
+                  const component::WorldP3D &,
+                  const component::Scale &,
+                  const graphic::Brush &);
 
             void
             lookAt(common::r32 x,
@@ -197,9 +197,9 @@ namespace oni {
             void
             updateCanvasTile(entities::EntityManager &entityManager,
                              common::EntityID entityID,
-                             const graphic::Brush &brush,
-                             const component::WorldP3D &worldPos,
-                             const component::Size &size);
+                             const graphic::Brush &,
+                             const component::WorldP3D &,
+                             const component::Scale &);
 
 
             const RaceInfoEntities &

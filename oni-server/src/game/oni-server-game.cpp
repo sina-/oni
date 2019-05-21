@@ -205,7 +205,6 @@ namespace oni {
             ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
-                auto heading = 0.f;
                 auto pos = component::WorldP3D{-70, -30, vehicleZ};
                 auto size = math::vec2{2.5f, 1.1f};
 
@@ -215,8 +214,7 @@ namespace oni {
                 mEntityFactory->setWorldP3D(carEntity, pos.x, pos.y, pos.z);
                 mEntityFactory->setScale(carEntity, size.x, size.y);
                 mEntityFactory->setTexture(carEntity, "resources/images/car/1/car.png");
-                mEntityFactory->setHeading(carEntity, heading);
-                mEntityFactory->createPhysics(carEntity, pos, size, heading);
+                mEntityFactory->createPhysics(carEntity, pos, size, 0);
 
                 mEntityFactory->tagForNetworkSync(carEntity); // TODO: Why is this needed? I should be able to do this
                 // at the time of creating using entity policy of the factory
@@ -226,14 +224,13 @@ namespace oni {
                         oni::entities::EntityType::VEHICLE_GUN));
                 mEntityFactory->setScale(carGunEntity, 2.f, 0.5f);
                 mEntityFactory->setTexture(carGunEntity, "resources/images/minigun/1.png");
-                mEntityFactory->setHeading(carGunEntity, heading);
                 mEntityFactory->tagForNetworkSync(carGunEntity);
 
                 mEntityFactory->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
                                        oni::entities::EntityType::VEHICLE_GUN);
 
                 auto &carConfig = manager.get<component::CarConfig>(carEntity);
-                std::string tireTextureID = "resources/images/car/1/car-tire.png";
+                auto tireTexturePath = std::string("resources/images/car/1/car-tire.png");
                 auto tireHeading = component::Heading{static_cast< common::r32>( math::toRadians(90.0f))};
                 math::vec2 tireSize{
                         static_cast<common::r32>(carConfig.wheelWidth),
@@ -254,29 +251,29 @@ namespace oni {
                 };
 
                 for (auto &&carTire: carTiresFront) {
-                    auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_FRONT>(
-                            tirePos,
-                            tireSize,
-                            tireHeading,
-                            tireTextureID);
-                    mEntityFactory->tagForNetworkSync(tireEntity);
+                    auto tireEntity = mEntityFactory->createEntity_VehicleTireFront();
+                    mEntityFactory->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
+                    mEntityFactory->setScale(tireEntity, tireSize.x, tireSize.y);
+                    mEntityFactory->setHeading(tireEntity, tireHeading.value);
+                    mEntityFactory->setTexture(tireEntity, tireTexturePath);
 
                     mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_FRONT);
+
+                    mEntityFactory->tagForNetworkSync(tireEntity); // TODO: ???
                 }
 
                 for (auto &&carTire: carTiresRear) {
-                    auto tirePos = component::WorldP3D{carTire.x, carTire.y, vehicleZ};
-                    auto tireEntity = mEntityFactory->createEntity<oni::entities::EntityType::VEHICLE_TIRE_REAR>(
-                            tirePos,
-                            tireSize,
-                            tireHeading,
-                            tireTextureID);
-                    mEntityFactory->tagForNetworkSync(tireEntity);
+                    auto tireEntity = mEntityFactory->createEntity_VehicleTireRear();
+                    mEntityFactory->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
+                    mEntityFactory->setScale(tireEntity, tireSize.x, tireSize.y);
+                    mEntityFactory->setHeading(tireEntity, tireHeading.value);
+                    mEntityFactory->setTexture(tireEntity, tireTexturePath);
 
                     mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_REAR);
+
+                    mEntityFactory->tagForNetworkSync(tireEntity); // TODO: ???
                 }
 
                 return carEntity;

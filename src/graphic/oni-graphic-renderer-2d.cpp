@@ -18,17 +18,17 @@ namespace oni {
         }
 
         void
-        Renderer2D::submit(const component::Size &size,
+        Renderer2D::submit(const component::Scale &scale,
                            const component::WorldP3D &pos,
                            const component::Appearance &color) {
-            _submit(size, pos, color);
+            _submit(scale, pos, color);
         }
 
         void
-        Renderer2D::submit(const component::Size &size,
+        Renderer2D::submit(const component::Scale &scale,
                            const component::WorldP3D &pos,
                            const component::Texture &texture) {
-            _submit(size, pos, texture);
+            _submit(scale, pos, texture);
         }
 
         void

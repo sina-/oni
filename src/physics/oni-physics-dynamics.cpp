@@ -460,7 +460,7 @@ namespace oni {
                     if (age.currentAge > age.maxAge) {
                         if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
                             auto &pos = entityManager.get<component::WorldP3D>(entity);
-                            auto &size = entityManager.get<component::Size>(entity);
+                            auto &size = entityManager.get<component::Scale>(entity);
                             auto &texture = entityManager.get<component::Texture>(entity);
 
                             entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);

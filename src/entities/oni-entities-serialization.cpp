@@ -59,13 +59,6 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Size &data) {
-            archive(data.value);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   component::Trail &data) {
             archive(data.previousPos, data.velocity);
         }
@@ -240,7 +233,6 @@ namespace oni {
                         component::Scale,
                         //component::SmokeEmitterCD,
                         component::Shape,
-                        component::Size,
                         component::Point,
                         component::Appearance,
                         component::Age,
@@ -290,7 +282,6 @@ namespace oni {
                         component::Scale,
                         //component::SmokeEmitterCD,
                         component::Shape,
-                        component::Size,
                         component::Point,
                         component::Appearance,
                         component::Age,

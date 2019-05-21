@@ -500,40 +500,40 @@ namespace oni {
             // Particles with color shading
             {
                 auto view = manager.createView<
-                        component::Size, component::Appearance, component::WorldP3D, component::Tag_Particle>();
+                        component::Scale, component::Appearance, component::WorldP3D, component::Tag_Particle>();
 
                 for (const auto &entity: view) {
                     const auto &pos = view.get<component::WorldP3D>(entity);
                     if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &size = view.get<component::Size>(entity);
+                    const auto &scale = view.get<component::Scale>(entity);
                     const auto &appearance = view.get<component::Appearance>(entity);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(size, pos, appearance);
+                    mParticleRenderer->submit(scale, pos, appearance);
                 }
             }
 
             // Particles with texture shading
             {
                 auto view = manager.createView<
-                        component::Size, component::Texture, component::WorldP3D, component::Tag_Particle>();
+                        component::Scale, component::Texture, component::WorldP3D, component::Tag_Particle>();
 
                 for (const auto &entity: view) {
                     const auto &pos = view.get<component::WorldP3D>(entity);
                     if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &size = view.get<component::Size>(entity);
+                    const auto &scale = view.get<component::Scale>(entity);
 
                     auto &texture = view.get<component::Texture>(entity);
                     prepareTexture(texture);
 
                     ++mRenderedParticlesPerFrame;
 
-                    mParticleRenderer->submit(size, pos, texture);
+                    mParticleRenderer->submit(scale, pos, texture);
                 }
             }
         }
@@ -580,7 +580,7 @@ namespace oni {
             /// Particle trails
             {
 #if 1
-                std::string textureID = "resources/images/smoke/1.png";
+                auto texturePath = std::string("resources/images/smoke/1.png");
                 common::r32 particleHalfSize = 0.35f;
                 common::r32 particleSize = particleHalfSize * 2;
                 common::r32 halfConeAngle = static_cast<common::r32>(math::toRadians(45)) / 2.f;
@@ -603,8 +603,10 @@ namespace oni {
                     //math::vec4 color{1.f, 1.f, 1.f, 1.f};
 
                     if (trail.previousPos.empty()) {
-                        auto trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                currentPos, textureID, particleHalfSize, false);
+                        auto trailEntity = clientEntityFactory.createEntity_SimpleParticle();
+                        clientEntityFactory.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
+                        clientEntityFactory.setTexture(trailEntity, texturePath);
+                        clientEntityFactory.setScale(trailEntity, particleSize, particleSize);
                         continue;
                     }
 
@@ -642,8 +644,11 @@ namespace oni {
                                     pos, color, false);
                         }
                         */
-                            trailEntity = clientEntityFactory.createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, textureID, particleHalfSize, false);
+                            auto trailEntity = clientEntityFactory.createEntity_SimpleParticle();
+                            clientEntityFactory.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
+                            clientEntityFactory.setTexture(trailEntity, texturePath);
+                            clientEntityFactory.setScale(trailEntity, particleSize, particleSize);
+
                             auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
                                     trailEntity);
                             // TODO: I don't use any other velocity than the first one, should I just not store the rest?
@@ -671,17 +676,21 @@ namespace oni {
 
             /// Entities that leave mark
             {
-                auto view = clientEntityFactory.getEntityManager().createView<component::Texture, component::Tag_LeavesMark, component::WorldP3D, component::Size>();
+                auto view = clientEntityFactory.getEntityManager().createView<
+                        component::Tag_LeavesMark,
+                        component::Texture,
+                        component::WorldP3D,
+                        component::Scale>();
                 for (auto &&entity: view) {
                     const auto &texture = view.get<component::Texture>(entity);
-                    const auto &size = view.get<component::Size>(entity);
+                    const auto &scale = view.get<component::Scale>(entity);
                     auto brush = graphic::Brush{};
                     // TODO: This is messy distinction between texture path and textureID!
                     brush.textureID = texture.path.c_str();
                     brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
-                    splat(clientEntityFactory, pos, size, brush);
+                    splat(clientEntityFactory, pos, scale, brush);
                 }
             }
 
@@ -751,11 +760,11 @@ namespace oni {
                 {
                     auto brush = graphic::Brush{};
                     brush.type = component::BrushType::SPRITE;
-                    auto size = component::Size{0.5f, 0.5f};
+                    auto scale = component::Scale{0.5f, 0.5f};
 
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
                         brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientEntityFactory, skidPosList[i], size, brush);
+                        splat(clientEntityFactory, skidPosList[i], scale, brush);
                     }
                 }
             }
@@ -783,8 +792,8 @@ namespace oni {
         void
         SceneManager::splat(entities::EntityFactory &entityFactory,
                             const component::WorldP3D &worldPos,
-                            const component::Size &size,
-                            graphic::Brush brush) {
+                            const component::Scale &scale,
+                            const graphic::Brush &brush) {
             auto &entityManager = entityFactory.getEntityManager();
 
             std::set<common::EntityID> tileEntities;
@@ -793,32 +802,32 @@ namespace oni {
             tileEntities.insert(entityID);
 
             auto lowerLeft = worldPos;
-            lowerLeft.x -= size.x / 2.f;
-            lowerLeft.y -= size.y / 2.f;
+            lowerLeft.x -= scale.x / 2.f;
+            lowerLeft.y -= scale.y / 2.f;
             auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
             tileEntities.insert(lowerLeftEntityID);
 
             auto topRight = worldPos;
-            topRight.x += size.x / 2.f;
-            topRight.y += size.y / 2.f;
+            topRight.x += scale.x / 2.f;
+            topRight.y += scale.y / 2.f;
 
             auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
             tileEntities.insert(topRightEntityID);
 
             auto topLeft = worldPos;
-            topLeft.x -= size.x / 2.f;
-            topLeft.y += size.y / 2.f;
+            topLeft.x -= scale.x / 2.f;
+            topLeft.y += scale.y / 2.f;
             auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
             tileEntities.insert(topLeftEntityID);
 
             auto lowerRight = worldPos;
-            lowerRight.x += size.x / 2.f;
-            lowerRight.y -= size.y / 2.f;
+            lowerRight.x += scale.x / 2.f;
+            lowerRight.y -= scale.y / 2.f;
             auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
             tileEntities.insert(lowerRightEntityID);
 
             for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(entityManager, tileEntity, brush, worldPos, size);
+                updateCanvasTile(entityManager, tileEntity, brush, worldPos, scale);
             }
         }
 
@@ -877,7 +886,7 @@ namespace oni {
                                        common::EntityID entityID,
                                        const graphic::Brush &brush,
                                        const component::WorldP3D &worldPos,
-                                       const component::Size &size) {
+                                       const component::Scale &scale) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
             // TODO: why the hell from Shape and not Placement?
             auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
@@ -889,8 +898,8 @@ namespace oni {
             component::Image image{};
             switch (brush.type) {
                 case component::BrushType::SPRITE: {
-                    image.width = static_cast<uint16>(size.x * mGameUnitToPixels);
-                    image.height = static_cast<uint16>(size.y * mGameUnitToPixels);
+                    image.width = static_cast<uint16>(scale.x * mGameUnitToPixels);
+                    image.height = static_cast<uint16>(scale.y * mGameUnitToPixels);
                     mTextureManager->fill(image, brush.color);
                     break;
                 }

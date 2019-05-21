@@ -25,11 +25,11 @@ namespace oni {
             Event_SplatOnDeath() = default;
 
             Event_SplatOnDeath(const component::WorldP3D &pos,
-                               const component::Size &size,
-                               const std::string &textureId) : pos(pos), size(size), textureID(textureId) {}
+                               const component::Scale &scale,
+                               const std::string &textureId) : pos(pos), scale(scale), textureID(textureId) {}
 
             component::WorldP3D pos{};
-            component::Size size{};
+            component::Scale scale{};
             std::string textureID{};
         };
 

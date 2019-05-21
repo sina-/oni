@@ -115,7 +115,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   game::Event_SplatOnDeath &data) {
-            archive(data.pos, data.size, data.textureID);
+            archive(data.pos, data.scale, data.textureID);
         }
     }
 

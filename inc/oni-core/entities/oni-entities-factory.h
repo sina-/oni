@@ -103,6 +103,15 @@ namespace oni {
             common::EntityID
             createEntity_Wall();
 
+            common::EntityID
+            createEntity_VehicleTireFront();
+
+            common::EntityID
+            createEntity_VehicleTireRear();
+
+            common::EntityID
+            createEntity_SimpleParticle();
+
         public:
             void
             setWorldP3D(common::EntityID,
@@ -175,22 +184,6 @@ namespace oni {
 
             template<>
             void
-            _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID,
-                                                                    const component::WorldP3D &pos,
-                                                                    const math::vec2 &size,
-                                                                    const component::Heading &heading,
-                                                                    const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::VEHICLE_TIRE_REAR>(common::EntityID,
-                                                                   const component::WorldP3D &pos,
-                                                                   const math::vec2 &size,
-                                                                   const component::Heading &heading,
-                                                                   const std::string &textureID);
-
-            template<>
-            void
             _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
                                                                const component::WorldP3D &worldPos,
                                                                const math::vec2 &size,
@@ -204,23 +197,6 @@ namespace oni {
                                                                const math::vec2 &size,
                                                                const component::Heading &heading,
                                                                const std::string &textureID);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                 const component::WorldP3D &worldPos,
-                                                                 const math::vec4 &color,
-                                                                 const common::r32 &halfSize,
-                    // TODO: Is there a way to avoid need for const &?
-                                                                 const bool &randomize);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID,
-                                                                 const component::WorldP3D &worldPos,
-                                                                 const std::string &textureID,
-                                                                 const common::r32 &halfSize,
-                                                                 const bool &randomize);
 
             template<>
             void

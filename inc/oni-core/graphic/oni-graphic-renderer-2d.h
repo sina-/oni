@@ -7,9 +7,9 @@ namespace oni {
     namespace component {
         class Appearance;
 
-        union Size;
-
         class Age;
+
+        union Scale;
 
         class Velocity;
 
@@ -47,12 +47,12 @@ namespace oni {
                    const component::Appearance &);
 
             void
-            submit(const component::Size &,
+            submit(const component::Scale &,
                    const component::WorldP3D &,
                    const component::Appearance &);
 
             void
-            submit(const component::Size &,
+            submit(const component::Scale &,
                    const component::WorldP3D &,
                    const component::Texture &);
 
@@ -79,12 +79,12 @@ namespace oni {
                     const component::Appearance &) = 0;
 
             virtual void
-            _submit(const component::Size &,
+            _submit(const component::Scale &,
                     const component::WorldP3D &,
                     const component::Appearance &) = 0;
 
             virtual void
-            _submit(const component::Size &,
+            _submit(const component::Scale &,
                     const component::WorldP3D &,
                     const component::Texture &) = 0;
 

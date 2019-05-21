@@ -125,53 +125,6 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_createEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                                     const component::WorldP3D &pos,
-                                                                     const math::vec2 &size,
-                                                                     const component::Heading &heading,
-                                                                     const std::string &textureID) {
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(common::EntityID entityID,
-                                                                               const component::WorldP3D &pos,
-                                                                               const math::vec2 &size,
-                                                                               const component::Heading &heading,
-                                                                               const std::string &textureID) {
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-            h = heading;
-
-            auto &s = createComponent<component::Scale>(entityID);
-            s.x = size.x;
-            s.y = size.y;
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &shape = createComponent<component::Shape>(entityID);
-
-            createComponent<component::EntityAttachee>(entityID);
-            createComponent<component::TransformParent>(entityID);
-
-            assignTag<component::Tag_Dynamic>(entityID);
-            assignTag<component::Tag_TextureShaded>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::VEHICLE_TIRE_REAR>(common::EntityID entityID,
-                                                                              const component::WorldP3D &pos,
-                                                                              const math::vec2 &size,
-                                                                              const component::Heading &heading,
-                                                                              const std::string &textureID) {
-            _createEntity<entities::EntityType::VEHICLE_TIRE_FRONT>(entityID, pos, size, heading, textureID);
-        }
-
-        template<>
-        void
         EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
                                                                           const component::WorldP3D &pos,
                                                                           const math::vec2 &size,
@@ -208,69 +161,6 @@ namespace oni {
             assignTag<component::Tag_TextureShaded>(entityID);
         }
 
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                            const component::WorldP3D &pos,
-                                                                            const math::vec4 &color,
-                                                                            const common::r32 &halfSize,
-                                                                            const bool &randomize) {
-            createComponent<component::Size>(entityID, halfSize, halfSize);
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-
-            auto &s = createComponent<component::Scale>(entityID);
-
-            auto &appearance = createComponent<component::Appearance>(entityID);
-            appearance.color = color;
-
-            auto &velocity = createComponent<component::Velocity>(entityID);
-
-            auto &age = createComponent<component::Age>(entityID);
-            age.currentAge = 0.f;
-
-            if (randomize) {
-                h.value = mRand->next_r32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->next_r32(1.f, 7.f);
-                age.maxAge = mRand->next_r32(0.2f, 1.f);
-            }
-
-            assignTag<component::Tag_Particle>(entityID);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_PARTICLE>(common::EntityID entityID,
-                                                                            const component::WorldP3D &pos,
-                                                                            const std::string &textureID,
-                                                                            const common::r32 &halfSize,
-                                                                            const bool &randomize) {
-            createComponent<component::Size>(entityID, halfSize, halfSize);
-
-            createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
-
-            auto &h = createComponent<component::Heading>(entityID);
-
-            auto &s = createComponent<component::Scale>(entityID);
-
-            auto &texture = createComponent<component::Texture>(entityID);
-            texture.path = textureID;
-
-            auto &velocity = createComponent<component::Velocity>(entityID);
-
-            auto &age = createComponent<component::Age>(entityID);
-            age.currentAge = 0.f;
-
-            if (randomize) {
-                h.value = mRand->next_r32(0, common::FULL_CIRCLE_IN_RAD);
-                velocity.currentVelocity = mRand->next_r32(1.f, 7.f);
-                age.maxAge = mRand->next_r32(0.2f, 1.f);
-            }
-
-            assignTag<component::Tag_Particle>(entityID);
-        }
 
         template<>
         void
@@ -279,13 +169,11 @@ namespace oni {
                                                                                   const std::string &textureID,
                                                                                   const common::r32 &halfSize,
                                                                                   const bool &randomize) {
-            createComponent<component::Size>(entityID, halfSize, halfSize);
+            createComponent<component::Scale>(entityID, halfSize, halfSize);
 
             createComponent<component::WorldP3D>(entityID, pos.x, pos.y, pos.z);
 
             auto &h = createComponent<component::Heading>(entityID);
-
-            auto &s = createComponent<component::Scale>(entityID);
 
 //            auto &appearance = createComponent<component::Appearance>(entityID);
 //            appearance.color = {.5f, .5f, .5f, 1.f};
@@ -752,6 +640,57 @@ namespace oni {
             assignTag<component::Tag_Static>(id);
             assignTag<component::Tag_TextureShaded>(id);
 
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_VehicleTireFront() {
+            auto id = createEntity(entities::EntityType::VEHICLE_TIRE_FRONT);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+
+            createComponent<component::EntityAttachee>(id);
+            createComponent<component::TransformParent>(id);
+
+            assignTag<component::Tag_Dynamic>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_VehicleTireRear() {
+            auto id = createEntity(entities::EntityType::VEHICLE_TIRE_REAR);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Shape>(id);
+
+            createComponent<component::EntityAttachee>(id);
+            createComponent<component::TransformParent>(id);
+
+            assignTag<component::Tag_Dynamic>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_SimpleParticle() {
+            auto id = createEntity(entities::EntityType::SIMPLE_PARTICLE);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Texture>(id);
+            createComponent<component::Velocity>(id);
+            createComponent<component::Age>(id);
+
+            assignTag<component::Tag_Particle>(id);
             return id;
         }
     }

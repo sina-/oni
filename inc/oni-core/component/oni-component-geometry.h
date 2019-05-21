@@ -63,14 +63,6 @@ namespace oni {
             common::r32 value{0.f};
         };
 
-        union Size {
-            math::vec2 value{};
-            struct {
-                common::r32 x;
-                common::r32 y;
-            };
-        };
-
         union Scale {
             math::vec3 value{1.f, 1.f, 1.f};
             struct {

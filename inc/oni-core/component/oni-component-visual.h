@@ -43,8 +43,8 @@ namespace oni {
             // GL_FLOAT         0x1406
             common::oniGLenum type{0x1401};
             std::string path{};
-            std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{1.f, 0.f},
-                                         math::vec2{1.f, 1.f}, math::vec2{0.f, 1.f}};
+            std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
+                                         math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
             TextureStatus status{TextureStatus::NEEDS_LOADING_USING_PATH};
         };
 
@@ -72,7 +72,7 @@ namespace oni {
 
         // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
         struct Appearance {
-            math::vec4 color{0.f, 0.f, 0.f, 0.f};
+            math::vec4 color{0.f, 0.f, 0.f, 1.f};
 
             PixelRGBA
             toRGBA() {

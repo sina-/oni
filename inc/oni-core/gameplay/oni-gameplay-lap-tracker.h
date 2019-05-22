@@ -46,8 +46,8 @@ namespace oni {
 
         private:
             entities::EntityManager &mEntityManager;
-            std::deque<component::Shape> mInitialCheckpoints{};
-            std::map<common::EntityID, std::deque<component::Shape>> mRemainingCheckpoints{};
+            std::deque<component::Rectangle> mInitialCheckpoints{};
+            std::map<common::EntityID, std::deque<component::Rectangle>> mRemainingCheckpoints{};
             std::map<common::EntityID, std::chrono::seconds> mBestLaps{};
             std::map<common::EntityID, utils::Timer> mTimers{};
 

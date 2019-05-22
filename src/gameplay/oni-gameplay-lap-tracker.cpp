@@ -14,10 +14,10 @@ namespace oni {
                                const math::ZLayerManager &zLayerManager)
                 : mEntityManager(entityManager), mZLayerManager(zLayerManager) {
 
-            auto checkpoint1 = component::Shape::fromPositionAndSize(math::vec3{70, -40}, math::vec2{20, 20});
-            auto checkpoint2 = component::Shape::fromPositionAndSize(math::vec3{70, 30}, math::vec2{20, 20});
-            auto checkpoint3 = component::Shape::fromPositionAndSize(math::vec3{-80, 30}, math::vec2{20, 20});
-            auto checkpoint4 = component::Shape::fromPositionAndSize(math::vec3{-80, -40}, math::vec2{20, 20});
+            auto checkpoint1 = component::Rectangle::fromPositionAndSize(70, -40, 20, 20);
+            auto checkpoint2 = component::Rectangle::fromPositionAndSize(70, 30, 20, 20);
+            auto checkpoint3 = component::Rectangle::fromPositionAndSize(-80, 30, 20, 20);
+            auto checkpoint4 = component::Rectangle::fromPositionAndSize(-80, -40, 20, 20);
 
             mInitialCheckpoints.push_back(checkpoint4);
             mInitialCheckpoints.push_back(checkpoint3);
@@ -31,7 +31,7 @@ namespace oni {
         LapTracker::tick() {
             std::vector<common::EntityID> entitiesToUpdate;
             {
-                auto carView = mEntityManager.createView<component::Shape, component::WorldP3D, component::Car>();
+                auto carView = mEntityManager.createView<component::Rectangle, component::WorldP3D, component::Car>();
                 for (auto &&entity: carView) {
 
                     // TODO: This is obsolete if registry is only modified from one thread. Then I can expose addNewPlayer()
@@ -44,7 +44,7 @@ namespace oni {
                     }
 
                     const auto &nextCheckpoint = mRemainingCheckpoints[entity].back();
-                    auto carShapeWorld = carView.get<component::Shape>(entity);
+                    auto carShapeWorld = carView.get<component::Rectangle>(entity);
                     auto entityPlacement = carView.get<component::WorldP3D>(entity);
                     math::localToWorldTranslation(entityPlacement, carShapeWorld);
 

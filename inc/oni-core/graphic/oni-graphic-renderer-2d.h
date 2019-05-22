@@ -17,8 +17,6 @@ namespace oni {
 
         class Text;
 
-        class Shape;
-
         union WorldP3D;
 
         class Heading;
@@ -43,21 +41,10 @@ namespace oni {
             begin();
 
             void
-            submit(const component::Shape &,
-                   const component::Appearance &);
-
-            void
-            submit(const component::Scale &,
-                   const component::WorldP3D &,
-                   const component::Appearance &);
-
-            void
-            submit(const component::Scale &,
-                   const component::WorldP3D &,
-                   const component::Texture &);
-
-            void
-            submit(const component::Shape &,
+            submit(const component::WorldP3D &,
+                   const component::Heading &,
+                   const component::Scale &,
+                   const component::Appearance &,
                    const component::Texture &);
 
             void
@@ -75,21 +62,10 @@ namespace oni {
             _begin() = 0;
 
             virtual void
-            _submit(const component::Shape &,
-                    const component::Appearance &) = 0;
-
-            virtual void
-            _submit(const component::Scale &,
-                    const component::WorldP3D &,
-                    const component::Appearance &) = 0;
-
-            virtual void
-            _submit(const component::Scale &,
-                    const component::WorldP3D &,
-                    const component::Texture &) = 0;
-
-            virtual void
-            _submit(const component::Shape &,
+            _submit(const component::WorldP3D &,
+                    const component::Heading &,
+                    const component::Scale &,
+                    const component::Appearance &,
                     const component::Texture &) = 0;
 
             virtual void

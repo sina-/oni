@@ -27,22 +27,12 @@ namespace oni {
         }
 
         void
-        localToWorldTranslation(common::r32 x,
-                                common::r32 y,
-                                component::Shape &shape) {
-            localToWorldTranslation(x, y, shape.vertexA);
-            localToWorldTranslation(x, y, shape.vertexB);
-            localToWorldTranslation(x, y, shape.vertexC);
-            localToWorldTranslation(x, y, shape.vertexD);
-        }
-
-        void
         localToWorldTranslation(const component::WorldP3D &reference,
-                                component::Shape &shape) {
-            localToWorldTranslation(reference, shape.vertexA);
-            localToWorldTranslation(reference, shape.vertexB);
-            localToWorldTranslation(reference, shape.vertexC);
-            localToWorldTranslation(reference, shape.vertexD);
+                                component::Rectangle &rec) {
+            localToWorldTranslation(reference, rec.A);
+            localToWorldTranslation(reference, rec.B);
+            localToWorldTranslation(reference, rec.C);
+            localToWorldTranslation(reference, rec.D);
         }
 
         void
@@ -60,13 +50,13 @@ namespace oni {
             localToTextureTranslation(ratio, operand);
         }
 
-        component::Shape
+        component::Rectangle
         shapeTransformation(const math::mat4 &transformation,
-                            const component::Shape &shape) {
-            return component::Shape{transformation * shape.vertexA,
-                                    transformation * shape.vertexB,
-                                    transformation * shape.vertexC,
-                                    transformation * shape.vertexD};
+                            const component::Rectangle &rec) {
+            return component::Rectangle{transformation * rec.A,
+                                        transformation * rec.B,
+                                        transformation * rec.C,
+                                        transformation * rec.D};
         }
 
         math::mat4
@@ -78,6 +68,13 @@ namespace oni {
             auto scaleMat = math::mat4::scale(scale.value);
             auto transformation = translationMat * rotationMat * scaleMat;
             return transformation;
+        }
+
+        component::WorldP3D
+        localToWorldTranslation(const math::mat4 &trans,
+                                const component::WorldP3D &operand) {
+            auto result = trans * operand.value;
+            return component::WorldP3D{result.x, result.y, result.z};
         }
     }
 }

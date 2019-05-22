@@ -31,8 +31,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Shape &data) {
-            archive(data.vertexA, data.vertexB, data.vertexC, data.vertexD);
+                  component::Rectangle &data) {
+            archive(data.A, data.B, data.C, data.D);
         }
 
         template<class Archive>
@@ -232,7 +232,7 @@ namespace oni {
                         component::Heading,
                         component::Scale,
                         //component::SmokeEmitterCD,
-                        component::Shape,
+                        component::Rectangle,
                         component::Point,
                         component::Appearance,
                         component::Age,
@@ -281,7 +281,7 @@ namespace oni {
                         component::Heading,
                         component::Scale,
                         //component::SmokeEmitterCD,
-                        component::Shape,
+                        component::Rectangle,
                         component::Point,
                         component::Appearance,
                         component::Age,

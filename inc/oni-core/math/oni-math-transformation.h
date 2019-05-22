@@ -19,9 +19,9 @@ namespace oni {
     }
 
     namespace math {
-        component::Shape
-        shapeTransformation(const math::mat4 &transformation,
-                            const component::Shape &shape);
+        component::Rectangle
+        shapeTransformation(const math::mat4 &,
+                            const component::Rectangle &);
 
         math::mat4
         createTransformation(const component::WorldP3D &position,
@@ -42,13 +42,12 @@ namespace oni {
                                 vec3 &operand);
 
         void
-        localToWorldTranslation(common::r32 x,
-                                common::r32 y,
-                                component::Shape &);
+        localToWorldTranslation(const component::WorldP3D &,
+                                component::Rectangle &);
 
-        void
-        localToWorldTranslation(const component::WorldP3D &reference,
-                                component::Shape &shape);
+        component::WorldP3D
+        localToWorldTranslation(const math::mat4 &trans,
+                                const component::WorldP3D &operand);
 
         void
         localToTextureTranslation(common::r32 ratio,

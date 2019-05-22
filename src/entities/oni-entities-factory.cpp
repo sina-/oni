@@ -130,40 +130,38 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
+        EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID id,
                                                                           const component::WorldP3D &pos,
                                                                           const math::vec2 &size,
                                                                           const component::Heading &heading,
                                                                           const math::vec4 &color) {
-            auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSize(size);
-            math::localToWorldTranslation(pos, shape);
+            createComponent<component::WorldP3D>(id, pos.x, pos.y, pos.z);
+            createComponent<component::Scale>(id, size.x, size.y);
+            createComponent<component::Heading>(id, heading.value);
 
-            auto &appearance = createComponent<component::Appearance>(entityID);
+            auto &appearance = createComponent<component::Appearance>(id);
             appearance.color = color;
 
-            assignTag<component::Tag_Static>(entityID);
-            assignTag<component::Tag_ColorShaded>(entityID);
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_ColorShaded>(id);
         }
 
         template<>
         void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID entityID,
+        EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID id,
                                                                           const component::WorldP3D &pos,
                                                                           const math::vec2 &size,
                                                                           const component::Heading &heading,
                                                                           const std::string &textureID) {
-            auto &shape = createComponent<component::Shape>(entityID);
-            shape.setZ(pos.z);
-            shape.setSize(size);
-            math::localToWorldTranslation(pos, shape);
+            createComponent<component::WorldP3D>(id, pos.x, pos.y, pos.z);
+            createComponent<component::Scale>(id, size.x, size.y);
+            createComponent<component::Heading>(id, heading.value);
 
-            auto &texture = createComponent<component::Texture>(entityID);
+            auto &texture = createComponent<component::Texture>(id);
             texture.path = textureID;
 
-            assignTag<component::Tag_Static>(entityID);
-            assignTag<component::Tag_TextureShaded>(entityID);
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_TextureShaded>(id);
         }
 
         void
@@ -334,10 +332,6 @@ namespace oni {
         void
         EntityFactory::setRandHeading(common::EntityID id) {
             auto &heading = mRegistryManager->get<component::Heading>(id);
-            if (mRegistryManager->has<component::Tag_Static>(id)) {
-                // TODO: Implement
-                assert(false);
-            }
             heading.value = mRand->next_r32(0.f, common::FULL_CIRCLE_IN_RAD);
         }
 
@@ -355,40 +349,25 @@ namespace oni {
                                    common::r32 x,
                                    common::r32 y,
                                    common::r32 z) {
-            if (mRegistryManager->has<component::Tag_Static>(id) && mRegistryManager->has<component::Shape>(id)) {
-                auto &shape = mRegistryManager->get<component::Shape>(id);
-                shape.setZ(z);
-                math::localToWorldTranslation(x, y, shape);
-            } else {
-                auto &pos = mRegistryManager->get<component::WorldP3D>(id);
-                pos.x = x;
-                pos.y = y;
-                pos.z = z;
-            }
+            auto &pos = mRegistryManager->get<component::WorldP3D>(id);
+            pos.x = x;
+            pos.y = y;
+            pos.z = z;
         }
 
         void
         EntityFactory::setScale(common::EntityID id,
                                 common::r32 x,
                                 common::r32 y) {
-            if (mRegistryManager->has<component::Tag_Static>(id) && mRegistryManager->has<component::Shape>(id)) {
-                auto &shape = mRegistryManager->get<component::Shape>(id);
-                shape.setSize(x, y);
-            } else {
-                auto &scale = mRegistryManager->get<component::Scale>(id);
-                scale.x = x;
-                scale.y = y;
-            }
+            auto &scale = mRegistryManager->get<component::Scale>(id);
+            scale.x = x;
+            scale.y = y;
         }
 
         void
         EntityFactory::setHeading(common::EntityID id,
                                   common::r32 heading) {
             auto &h = mRegistryManager->get<component::Heading>(id);
-            if (mRegistryManager->has<component::Tag_Static>(id)) {
-                // TODO: Implement
-                assert(false);
-            }
             h.value = heading;
         }
 
@@ -428,10 +407,9 @@ namespace oni {
             auto id = createEntity(entities::EntityType::SMOKE);
 
             createComponent<component::WorldP3D>(id);
-            createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
+            createComponent<component::Texture>(id);
             createComponent<component::Age>(id);
             createComponent<component::Velocity>(id);
 
@@ -449,7 +427,6 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
             createComponent<component::SoundTag>(id, component::SoundTag::ENGINE_IDLE);
             createComponent<component::TransformChildren>(id);
             createComponent<component::EntityAttachment>(id);
@@ -480,7 +457,6 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
             createComponent<component::EntityAttachee>(id);
             createComponent<component::TransformParent>(id);
             createComponent<component::GunCoolDown>(id);
@@ -499,7 +475,6 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
 
             auto &properties = createComponent<component::PhysicalProperties>(id);
             properties.friction = 1.f;
@@ -525,7 +500,6 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
             createComponent<component::SoundTag>(id, component::SoundTag::ROCKET);
             createComponent<component::Trail>(id);
 
@@ -553,9 +527,10 @@ namespace oni {
         EntityFactory::createEntity_Wall() {
             auto id = createEntity(entities::EntityType::WALL);
 
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
-            createComponent<component::Shape>(id);
 
             auto &properties = createComponent<component::PhysicalProperties>(id);
             properties.highPrecision = false;
@@ -576,7 +551,6 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
 
             createComponent<component::EntityAttachee>(id);
             createComponent<component::TransformParent>(id);
@@ -594,7 +568,6 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
 
             createComponent<component::EntityAttachee>(id);
             createComponent<component::TransformParent>(id);
@@ -609,13 +582,13 @@ namespace oni {
             auto id = createEntity(entities::EntityType::SIMPLE_PARTICLE);
 
             createComponent<component::WorldP3D>(id);
-            createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
             createComponent<component::Velocity>(id);
             createComponent<component::Age>(id);
 
-            assignTag<component::Tag_Particle>(id);
+            assignTag<component::Tag_TextureShaded>(id);
             return id;
         }
 
@@ -624,13 +597,13 @@ namespace oni {
             auto id = createEntity(entities::EntityType::SIMPLE_BLAST_PARTICLE);
 
             createComponent<component::WorldP3D>(id);
-            createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
             createComponent<component::Velocity>(id);
             createComponent<component::Age>(id);
 
-            assignTag<component::Tag_Particle>(id);
+            assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_SplatOnDeath>(id);
 
             return id;
@@ -651,8 +624,10 @@ namespace oni {
         EntityFactory::createEntity_WorldChunk() {
             auto id = createEntity(entities::EntityType::WORLD_CHUNK);
 
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::Shape>(id);
             createComponent<level::Chunk>(id);
 
             assignTag<component::Tag_Static>(id);
@@ -665,7 +640,9 @@ namespace oni {
         EntityFactory::createEntity_DebugWorldChunk() {
             auto id = createEntity(entities::EntityType::DEBUG_WORLD_CHUNK);
 
-            createComponent<component::Shape>(id);
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
             createComponent<component::Appearance>(id);
             createComponent<level::Chunk>(id);
 

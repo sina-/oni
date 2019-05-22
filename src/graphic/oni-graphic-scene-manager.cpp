@@ -51,22 +51,12 @@ namespace oni {
             // I am forcing the users to only depend on built-in shaders. I should think of a better way
             // to provide flexibility in type of shaders users can define and expect to just work by having buffer
             // structure and what not set up automatically. Asset system should take care of this.
-            mTextureShader = std::make_unique<graphic::Shader>("resources/shaders/texture.vert",
-                                                               "",
-                                                               "resources/shaders/texture.frag");
-            initializeTextureRenderer();
             // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
             // shader prior to render series of calls. Maybe shader should be built into the renderer.
-
-            mColorShader = std::make_unique<graphic::Shader>("resources/shaders/basic.vert",
-                                                             "",
-                                                             "resources/shaders/basic.frag");
-            initializeColorRenderer();
-
-            mParticleShader = std::make_unique<graphic::Shader>("resources/shaders/particle.vert",
-                                                                "resources/shaders/particle.geom",
-                                                                "resources/shaders/particle.frag");
-            initializeParticleRenderer();
+            mShader = std::make_unique<graphic::Shader>("resources/shaders/particle.vert",
+                                                        "resources/shaders/particle.geom",
+                                                        "resources/shaders/particle.frag");
+            initRenderer();
 
             mTextureManager = std::make_unique<TextureManager>();
 
@@ -82,37 +72,22 @@ namespace oni {
         SceneManager::~SceneManager() = default;
 
         void
-        SceneManager::initializeParticleRenderer() {
-            auto program = mParticleShader->getProgram();
+        SceneManager::initRenderer() {
+            auto program = mShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
-            auto colorIndex = glGetAttribLocation(program, "color");
-            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
+            auto headingIndex = glGetAttribLocation(program, "heading");
             auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
+            auto colorIndex = glGetAttribLocation(program, "color");
+            auto uvIndex = glGetAttribLocation(program, "uv");
+            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
 
-            if (positionIndex == -1 || colorIndex == -1 || samplerIDIndex == -1 || halfSizeIndex == -1) {
+            if (positionIndex == -1 || headingIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
+                samplerIDIndex == -1 || halfSizeIndex == -1) {
                 assert(false);
             }
 
-            common::oniGLsizei stride = sizeof(graphic::ParticleVertex);
-
-            graphic::BufferStructure position;
-            position.index = static_cast<common::oniGLuint>(positionIndex);
-            position.componentCount = 3;
-            position.componentType = GL_FLOAT;
-            position.normalized = GL_FALSE;
-            position.stride = stride;
-            position.offset = static_cast<const common::oniGLvoid *>(nullptr);
-
-            graphic::BufferStructure color;
-            color.index = static_cast<common::oniGLuint>(colorIndex);
-            color.componentCount = 4;
-            color.componentType = GL_FLOAT;
-            color.normalized = GL_TRUE;
-            color.stride = stride;
-            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ParticleVertex,
-                    color));
+            common::oniGLsizei stride = sizeof(graphic::Vertex);
 
             graphic::BufferStructure sampler;
             sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
@@ -120,48 +95,23 @@ namespace oni {
             sampler.componentType = GL_FLOAT;
             sampler.normalized = GL_FALSE;
             sampler.stride = stride;
-            sampler.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ParticleVertex,
-                    samplerID));
+            sampler.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
             graphic::BufferStructure halfSize;
             halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
-            halfSize.componentCount = 1;
+            halfSize.componentCount = 2;
             halfSize.componentType = GL_FLOAT;
             halfSize.normalized = GL_FALSE;
             halfSize.stride = stride;
-            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ParticleVertex,
-                    halfSize));
+            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, halfSize));
 
-            std::vector<graphic::BufferStructure> bufferStructures;
-            bufferStructures.push_back(position);
-            bufferStructures.push_back(color);
-            bufferStructures.push_back(sampler);
-            bufferStructures.push_back(halfSize);
-
-            mParticleRenderer = std::make_unique<BatchRenderer2D>(
-                    mMaxSpriteCount,
-                    // TODO: If there are more than this number of textures to render in a draw call, it will fail
-                    common::maxNumTextureSamplers,
-                    sizeof(graphic::ParticleVertex),
-                    bufferStructures,
-                    PrimitiveType::POINT
-            );
-        }
-
-        void
-        SceneManager::initializeColorRenderer() {
-            auto program = mColorShader->getProgram();
-
-            auto positionIndex = glGetAttribLocation(program, "position");
-            auto colorIndex = glGetAttribLocation(program, "color");
-
-            if (positionIndex == -1 || colorIndex == -1) {
-                throw std::runtime_error("Invalid attribute name.");
-            }
-
-            common::oniGLsizei stride = sizeof(graphic::ColoredVertex);
+            graphic::BufferStructure heading;
+            heading.index = static_cast<common::oniGLuint>(headingIndex);
+            heading.componentCount = 1;
+            heading.componentType = GL_FLOAT;
+            heading.normalized = GL_FALSE;
+            heading.stride = stride;
+            heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, heading));
 
             graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
@@ -169,7 +119,7 @@ namespace oni {
             position.componentType = GL_FLOAT;
             position.normalized = GL_FALSE;
             position.stride = stride;
-            position.offset = static_cast<const common::oniGLvoid *>(nullptr);
+            position.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, position));
 
             graphic::BufferStructure color;
             color.index = static_cast<common::oniGLuint>(colorIndex);
@@ -177,81 +127,36 @@ namespace oni {
             color.componentType = GL_FLOAT;
             color.normalized = GL_TRUE;
             color.stride = stride;
-            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::ColoredVertex,
-                    color));
-
-            std::vector<graphic::BufferStructure> bufferStructures;
-            bufferStructures.push_back(position);
-            bufferStructures.push_back(color);
-
-            mColorRenderer = std::make_unique<BatchRenderer2D>(
-                    mMaxSpriteCount,
-                    common::maxNumTextureSamplers,
-                    sizeof(graphic::ColoredVertex),
-                    bufferStructures,
-                    PrimitiveType::TRIANGLE
-            );
-        }
-
-        void
-        SceneManager::initializeTextureRenderer() {
-            auto program = mTextureShader->getProgram();
-
-            auto positionIndex = glGetAttribLocation(program, "position");
-            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
-            auto uvIndex = glGetAttribLocation(program, "uv");
-
-            if (positionIndex == -1 || samplerIDIndex == -1 || uvIndex == -1) {
-                throw std::runtime_error("Invalid attribute name.");
-            }
-
-            common::oniGLsizei stride = sizeof(graphic::TexturedVertex);
-
-            graphic::BufferStructure position;
-            position.index = static_cast<common::oniGLuint>(positionIndex);
-            position.componentCount = 3;
-            position.componentType = GL_FLOAT;
-            position.normalized = GL_FALSE;
-            position.stride = stride;
-            position.offset = static_cast<const common::oniGLvoid *>(nullptr);
-
-            graphic::BufferStructure sampler;
-            sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
-            sampler.componentCount = 1;
-            sampler.componentType = GL_FLOAT;
-            sampler.normalized = GL_FALSE;
-            sampler.stride = stride;
-            sampler.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::TexturedVertex,
-                    samplerID));
+            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, color));
 
             graphic::BufferStructure uv;
             uv.index = static_cast<common::oniGLuint>(uvIndex);
             uv.componentCount = 2;
             uv.componentType = GL_FLOAT;
-            uv.normalized = GL_FALSE;
+            uv.normalized = GL_TRUE;
             uv.stride = stride;
-            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(
-                    graphic::TexturedVertex,
-                    uv));
+            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, uv));
 
-            std::vector<graphic::BufferStructure> bufferStructure;
-            bufferStructure.push_back(position);
-            bufferStructure.push_back(sampler);
-            bufferStructure.push_back(uv);
+            std::vector<graphic::BufferStructure> bufferStructures;
+            bufferStructures.push_back(sampler);
+            bufferStructures.push_back(halfSize);
+            bufferStructures.push_back(heading);
+            bufferStructures.push_back(position);
+            bufferStructures.push_back(color);
+            bufferStructures.push_back(uv);
 
-            mTextureRenderer = std::make_unique<BatchRenderer2D>(
+            mRenderer = std::make_unique<BatchRenderer2D>(
                     mMaxSpriteCount,
                     // TODO: If there are more than this number of textures to render in a draw call, it will fail
                     common::maxNumTextureSamplers,
-                    sizeof(graphic::TexturedVertex),
-                    bufferStructure,
-                    PrimitiveType::TRIANGLE);
+                    sizeof(graphic::Vertex),
+                    bufferStructures,
+                    PrimitiveType::POINT
+            );
 
-            mTextureShader->enable();
-            mTextureShader->setUniformiv("samplers", mTextureRenderer->generateSamplerIDs());
-            mTextureShader->disable();
+            mShader->enable();
+            mShader->setUniformiv("samplers", mRenderer->generateSamplerIDs());
+            mShader->disable();
         }
 
         void
@@ -271,8 +176,8 @@ namespace oni {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
             if (setMVP) {
-                auto mvp = mProjectionMatrix * view;
-                shader.setUniformMat4("mvp", mvp);
+                auto mv = mProjectionMatrix * view;
+                shader.setUniformMat4("mv", mv);
             }
             renderer2D.begin();
         }
@@ -335,54 +240,37 @@ namespace oni {
             auto viewHeight = getViewHeight();
             auto &entityManager = entityFactory.getEntityManager();
 
-            /// Sprites - color
             {
-                begin(*mColorShader, *mColorRenderer, true, true, true);
-                renderColorSprites(entityManager, viewWidth, viewHeight);
-                end(*mColorShader, *mColorRenderer);
-            }
-
-            /// Sprites - texture
-            {
-                begin(*mTextureShader, *mTextureRenderer, true, true, true);
-                renderStaticText(entityManager, viewWidth, viewHeight);
-                renderStaticTextures(entityManager, viewWidth, viewHeight);
-                renderDynamicTextures(entityManager, viewWidth, viewHeight);
-                end(*mTextureShader, *mTextureRenderer);
+                begin(*mShader, *mRenderer, true, true, true);
+                _render(entityManager, viewWidth, viewHeight);
+                end(*mShader, *mRenderer);
             }
 
             /// UI
             {
                 // Render UI text with fixed camera
-                begin(*mTextureShader, *mTextureRenderer, false, false, true);
+                //begin(*mTextureShader, *mTextureRenderer, false, false, true);
                 // TODO: This should actually be split up from static text and entities part of UI should be tagged so
                 // renderStaticText(entityManager, viewWidth, viewHeight);
-                end(*mTextureShader, *mTextureRenderer);
-            }
-
-            /// Particles
-            {
-                begin(*mParticleShader, *mParticleRenderer, true, true, true);
-                renderParticles(entityManager, viewWidth, viewHeight);
-                end(*mParticleShader, *mParticleRenderer);
+                //end(*mTextureShader, *mTextureRenderer);
             }
         }
 
         void
-        SceneManager::renderRaw(const component::Shape &shape,
+        SceneManager::renderRaw(const component::WorldP3D pos,
                                 const component::Appearance &appearance) {
-            mColorRenderer->submit(shape, appearance);
+            //mColorRenderer->submit(pos, appearance);
             ++mRenderedSpritesPerFrame;
         }
 
         void
         SceneManager::beginColorRendering() {
-            begin(*mColorShader, *mColorRenderer, true, false, true);
+            begin(*mShader, *mRenderer, true, false, true);
         }
 
         void
         SceneManager::endColorRendering() {
-            end(*mColorShader, *mColorRenderer);
+            end(*mShader, *mRenderer);
         }
 
         void
@@ -397,150 +285,78 @@ namespace oni {
                 ++mRenderedSpritesPerFrame;
                 ++mRenderedTexturesPerFrame;
 
-                mTextureRenderer->submit(text, pos);
+                // mTextureRenderer->submit(text, pos);
             }
         }
 
         void
-        SceneManager::renderStaticTextures(entities::EntityManager &manager,
-                                           common::r32 viewWidth,
-                                           common::r32 viewHeight) {
-            auto staticTextureView = manager.createView<
-                    component::Tag_TextureShaded, component::Shape,
-                    component::Texture, component::Tag_Static>();
-            for (const auto &entity: staticTextureView) {
-                const auto &shape = staticTextureView.get<component::Shape>(entity);
-                if (!math::intersects(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                    continue;
-                }
-                auto &texture = staticTextureView.get<component::Texture>(entity);
-                prepareTexture(texture);
-
-                ++mRenderedSpritesPerFrame;
-                ++mRenderedTexturesPerFrame;
-
-                // TODO: submit will fail if we reach maximum number of sprites.
-                // I could also check the number of entities using the view and decide before hand at which point I
-                // flush the renderer and open up room for new sprites.
-
-                // TODO: For buffer data storage take a look at: https://www.khronos.org/opengl/wiki/Buffer_Object#Immutable_Storage
-                // Currently the renderer is limited to 32 samplers, I have to either use the reset method
-                // or look to alternatives of how to deal with many textures, one solution is to create a texture atlas
-                // by merging many textures to keep below the limit. Other solutions might be looking into other type
-                // of texture storage that can hold bigger number of textures.
-                mTextureRenderer->submit(shape, texture);
-            }
-        }
-
-        void
-        SceneManager::renderDynamicTextures(entities::EntityManager &manager,
-                                            common::r32 viewWidth,
-                                            common::r32 viewHeight) {
-            auto view = manager.createView<
-                    component::Tag_TextureShaded, component::Shape,
-                    component::Texture, component::WorldP3D, component::Heading, component::Scale, component::Tag_Dynamic>();
-            for (const auto &entity: view) {
-                const auto &shape = view.get<component::Shape>(entity);
-                const auto &pos = view.get<component::WorldP3D>(entity);
-                const auto &heading = view.get<component::Heading>(entity);
-                const auto &scale = view.get<component::Scale>(entity);
-
-                auto transformation = math::createTransformation(pos, heading, scale);
-
-                // TODO: I need to do this for physics anyway! Maybe I can store PlacementLocal and PlacementWorld
-                // separately for each entity and each time a physics system updates an entity it will automatically
-                // recalculate PlacementWorld for the entity and all its child entities.
-                // TODO: Instead of calling .has(), slow operation, split up dynamic entity rendering into two
-                // 1) Create a view with all of them that has TransformParent; 2) Create a view without parent
-                if (manager.has<component::TransformParent>(entity)) {
-                    const auto &transformParent = manager.get<component::TransformParent>(entity);
-                    // NOTE: Order matters. First transform by parent's transformation then child.
-                    transformation = transformParent.transform * transformation;
-                }
-
-                auto shapeTransformed = math::shapeTransformation(transformation, shape);
-                if (!math::intersects(shapeTransformed, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                    continue;
-                }
-
-                auto &texture = view.get<component::Texture>(entity);
-
-                prepareTexture(texture);
-                mTextureRenderer->submit(shapeTransformed, texture);
-
-                ++mRenderedSpritesPerFrame;
-                ++mRenderedTexturesPerFrame;
-            }
-        }
-
-        void
-        SceneManager::renderColorSprites(entities::EntityManager &manager,
-                                         common::r32 viewWidth,
-                                         common::r32 viewHeight) {
-            auto view = manager.createView<
-                    component::Tag_ColorShaded,
-                    component::Tag_Static,
-                    component::Shape,
-                    component::Appearance,
-                    entities::EntityType>();
-            for (const auto &entity: view) {
-                const auto &shape = view.get<component::Shape>(entity);
-                if (!math::intersects(shape, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                    continue;
-                }
-                const auto &appearance = view.get<component::Appearance>(entity);
-
-                ++mRenderedSpritesPerFrame;
-
-                mColorRenderer->submit(shape, appearance);
-            }
-        }
-
-        void
-        SceneManager::renderParticles(entities::EntityManager &manager,
-                                      common::r32 viewWidth,
-                                      common::r32 viewHeight) {
-            // Particles with color shading
+        SceneManager::_render(entities::EntityManager &manager,
+                              common::r32 viewWidth,
+                              common::r32 viewHeight) {
+            /// Color shading
             {
                 auto view = manager.createView<
-                        component::Scale, component::Appearance, component::WorldP3D, component::Tag_Particle>();
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Appearance,
+                        component::Tag_ColorShaded
+                                              >();
 
-                for (const auto &entity: view) {
-                    const auto &pos = view.get<component::WorldP3D>(entity);
-                    if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                for (auto &&id: view) {
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &pos = view.get<component::WorldP3D>(id);
+
+                    auto finalPos = pos;
+                    if (manager.has<component::TransformParent>(id)) {
+                        const auto &transformParent = manager.get<component::TransformParent>(id);
+                        finalPos.value = transformParent.transform * pos.value;
+                    }
+                    if (!math::intersects(finalPos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &scale = view.get<component::Scale>(entity);
-                    const auto &appearance = view.get<component::Appearance>(entity);
 
-                    ++mRenderedParticlesPerFrame;
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &appearance = view.get<component::Appearance>(id);
 
-                    mParticleRenderer->submit(scale, pos, appearance);
+                    mRenderer->submit(finalPos, heading, scale, appearance, component::Texture{});
+
+                    ++mRenderedSpritesPerFrame;
                 }
             }
 
-            // Particles with texture shading
+            /// Texture shading
             {
                 auto view = manager.createView<
-                        component::Scale, component::Texture, component::WorldP3D, component::Tag_Particle>();
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Texture,
+                        component::Tag_TextureShaded
+                                              >();
+                for (auto &&id: view) {
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &pos = view.get<component::WorldP3D>(id);
 
-                for (const auto &entity: view) {
-                    const auto &pos = view.get<component::WorldP3D>(entity);
-                    if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    auto finalPos = pos;
+                    if (manager.has<component::TransformParent>(id)) {
+                        const auto &transformParent = manager.get<component::TransformParent>(id);
+                        finalPos.value = transformParent.transform * pos.value;
+                    }
+                    if (!math::intersects(finalPos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
-                    const auto &scale = view.get<component::Scale>(entity);
 
-                    auto &texture = view.get<component::Texture>(entity);
+                    const auto &heading = view.get<component::Heading>(id);
+                    auto &texture = view.get<component::Texture>(id);
                     prepareTexture(texture);
 
-                    ++mRenderedParticlesPerFrame;
+                    mRenderer->submit(finalPos, heading, scale, component::Appearance{}, texture);
 
-                    mParticleRenderer->submit(scale, pos, texture);
+                    ++mRenderedTexturesPerFrame;
                 }
             }
         }
-
 
         void
         SceneManager::tick(const entities::EntityFactory &serverEntityFactory,
@@ -741,7 +557,7 @@ namespace oni {
                             // TODO: arbitrary number based on number of frames, think about better way of determining this
                             skidOpacity.push_back(10);
                         }
-                        if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f || true) {
+                        if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f && false) {
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
                             auto &emitter = getOrCreateEmitterCD(clientEntityFactory, carEntity);
                             if (math::safeZero(emitter.currentCD)) {
@@ -891,9 +707,10 @@ namespace oni {
                                        const component::WorldP3D &worldPos,
                                        const component::Scale &scale) {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
-            // TODO: why the hell from Shape and not Placement?
-            auto canvasTilePos = entityManager.get<component::Shape>(entityID).getPosition();
-            auto pos = component::WorldP3D{canvasTilePos.x, canvasTilePos.y, canvasTilePos.z};
+            auto canvasTilePos = entityManager.get<component::WorldP3D>(entityID);
+            auto canvasSize = entityManager.get<component::Scale>(entityID);
+            auto pos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f, canvasTilePos.y - canvasSize.y / 2.f,
+                                           canvasTilePos.z};
 
             auto brushTexturePos = worldPos;
             math::worldToTextureCoordinate(pos, mGameUnitToPixels, brushTexturePos);

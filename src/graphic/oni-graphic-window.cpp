@@ -1,6 +1,6 @@
 #include <oni-core/graphic/oni-graphic-window.h>
 
-#include <stdexcept>
+#include <cassert>
 
 #define GLEW_STATIC
 
@@ -23,8 +23,9 @@ namespace oni {
                 mMouseButton{GLFW_KEY_UNKNOWN}, mCursorX{0.0f}, mCursorY{0.0f},
                 mKeysPressed{}, mKeysReleased{} {
 
-            if (!glfwInit())
-                throw std::runtime_error("Failed to init GLFW!");
+            if (!glfwInit()) {
+                assert(false);
+            }
 
 /*            common::i32 monitorCount{};
             auto monitors = glfwGetMonitors(&monitorCount);
@@ -45,13 +46,14 @@ namespace oni {
 
             if (!mWindow) {
                 glfwTerminate();
-                throw std::runtime_error("Failed to create window!");
+                assert(false);
             }
 
             glfwMakeContextCurrent(mWindow);
 
-            if (glewInit() != GLEW_OK)
-                throw std::runtime_error("GLEW failed to initialize!");
+            if (glewInit() != GLEW_OK) {
+                assert(false);
+            }
 
             printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
@@ -113,7 +115,7 @@ namespace oni {
             if (type == GL_DEBUG_TYPE_ERROR) {
                 fprintf(stderr, "GL CALLBACK: type = 0x%x, severity = 0x%x, message = %s\n",
                         type, severity, message);
-                throw std::runtime_error("OpenGL error!");
+                assert(false);
             } else {
                 //fprintf(stderr, "GL CALLBACK: type = 0x%x, severity = 0x%x, source = 0x%x,message = %s\n",
                 //       type, severity, source, message);

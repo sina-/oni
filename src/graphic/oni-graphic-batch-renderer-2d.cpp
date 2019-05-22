@@ -75,137 +75,42 @@ namespace oni {
         }
 
         void
-        BatchRenderer2D::_submit(const component::Shape &position,
-                                 const component::Appearance &appearance) {
-            // Check if Buffer can handle the number of vertices.
-            // TODO: This seems to trigger even in none-debug mode
-            assert(mIndexCount + 6 < mMaxIndicesCount);
-
-            auto buffer = static_cast<graphic::ColoredVertex *>(mBuffer);
-
-            /** The vertices are absolute coordinates, there is no model matrix.
-             *    b    c
-             *    +----+
-             *    |    |
-             *    +----+
-             *    a    d
-             */
-
-            // a.
-            buffer->position = position.vertexA;
-            buffer->color = appearance.color;
-            buffer++;
-
-            // b.
-            buffer->position = position.vertexB;
-            buffer->color = appearance.color;
-            buffer++;
-
-            // c.
-            buffer->position = position.vertexC;
-            buffer->color = appearance.color;
-            buffer++;
-
-            // d.
-            buffer->position = position.vertexD;
-            buffer->color = appearance.color;
-            buffer++;
-
-            // Update the mBuffer to point to the head.
-            mBuffer = static_cast<void *>(buffer);
-
-            // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
-            // defined by 4 vertices only.
-            /**
-             *    1 +---+ 0
-             *      |  /|
-             *      |/  |
-             *    2 +---+ 3
-             **/
-            mIndexCount += 6;
-        }
-
-        void
-        BatchRenderer2D::_submit(const component::Scale &scale,
-                                 const component::WorldP3D &pos,
-                                 const component::Appearance &appearance) {
+        BatchRenderer2D::_submit(const component::WorldP3D &pos,
+                                 const component::Heading &heading,
+                                 const component::Scale &scale,
+                                 const component::Appearance &appearance,
+                                 const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
-            auto buffer = static_cast<graphic::ParticleVertex *>(mBuffer);
+            auto buffer = static_cast<graphic::Vertex *>(mBuffer);
+
+            common::i32 samplerID = -1;
+            if (texture.status == component::TextureStatus::READY) {
+                samplerID = getSamplerID(texture.textureID);
+            }
 
             buffer->position = pos.value;
+            buffer->heading = heading.value;
+            buffer->halfSize = math::vec2{scale.x / 2.f, scale.y / 2.f}; // TODO: Why not vec2 for Scale?
             buffer->color = appearance.color;
-            buffer->samplerID = -1;
-            buffer->halfSize = scale.x / 2.f;
+            buffer->uv[0] = texture.uv[0];
+            buffer->uv[1] = texture.uv[1];
+            buffer->uv[2] = texture.uv[2];
+            buffer->uv[3] = texture.uv[3];
+            buffer->samplerID = samplerID;
             buffer++;
 
             // Update the mBuffer to point to the head.
             mBuffer = static_cast<void *>(buffer);
 
             mIndexCount += 1;
-        }
-
-        void
-        BatchRenderer2D::_submit(const component::Scale &scale,
-                                 const component::WorldP3D &pos,
-                                 const component::Texture &texture) {
-            assert(mIndexCount + 1 < mMaxIndicesCount);
-
-            auto buffer = static_cast<graphic::ParticleVertex *>(mBuffer);
-
-            auto samplerID = getSamplerID(texture.textureID);
-
-            buffer->position = pos.value;
-            buffer->color = {};
-            buffer->samplerID = samplerID;
-            buffer->halfSize = scale.x / 2.f;
-            buffer++;
-
-            // Update the mBuffer to point to the head.
-            mBuffer = static_cast<void *>(buffer);
-
-            mIndexCount += 1;
-        }
-
-        void
-        BatchRenderer2D::_submit(const component::Shape &position,
-                                 const component::Texture &texture) {
-            // Check if Buffer can handle the number of vertices.
-            assert(mIndexCount + 6 < mMaxIndicesCount);
-
-            auto samplerID = getSamplerID(texture.textureID);
-
-            auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
-
-            buffer->position = position.vertexA;
-            buffer->uv = texture.uv[0];
-            buffer->samplerID = samplerID;
-            buffer++;
-
-            buffer->position = position.vertexB;
-            buffer->uv = texture.uv[1];
-            buffer->samplerID = samplerID;
-            buffer++;
-
-            buffer->position = position.vertexC;
-            buffer->uv = texture.uv[2];
-            buffer->samplerID = samplerID;
-            buffer++;
-
-            buffer->position = position.vertexD;
-            buffer->uv = texture.uv[3];
-            buffer->samplerID = samplerID;
-            buffer++;
-
-            mBuffer = static_cast<void *>(buffer);
-
-            mIndexCount += 6;
         }
 
         void
         BatchRenderer2D::_submit(const component::Text &text,
                                  const component::WorldP3D &pos) {
-            auto buffer = static_cast<graphic::TexturedVertex *>(mBuffer);
+            assert(false); // TODO: Need to re-implement this function
+            auto buffer = static_cast<graphic::Vertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
 
@@ -230,22 +135,22 @@ namespace oni {
                 auto v1 = text.uv[i].w;
 
                 buffer->position = math::vec3{x0, y0, z};
-                buffer->uv = math::vec2{u0, v0};
+                buffer->uv[0] = math::vec2{u0, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 
                 buffer->position = math::vec3{x0, y1, z};
-                buffer->uv = math::vec2{u0, v1};
+                buffer->uv[1] = math::vec2{u0, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
                 buffer->position = math::vec3{x1, y1, z};
-                buffer->uv = math::vec2{u1, v1};
+                buffer->uv[2] = math::vec2{u1, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
                 buffer->position = math::vec3{x1, y0, z};
-                buffer->uv = math::vec2{u1, v0};
+                buffer->uv[3] = math::vec2{u1, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 

@@ -68,8 +68,8 @@ namespace oni {
                  common::r64 tickTime);
 
             void
-            renderRaw(const component::Shape &,
-                      const component::Appearance &);
+            renderRaw(const component::WorldP3D pos,
+                      const component::Appearance &appearance);
 
             void
             splat(entities::EntityFactory &,
@@ -127,31 +127,15 @@ namespace oni {
             endColorRendering();
 
         private:
-
-            void
-            renderStaticTextures(entities::EntityManager &,
-                                 common::r32 viewWidth,
-                                 common::r32 viewHeight);
-
             void
             renderStaticText(entities::EntityManager &,
                              common::r32 viewWidth,
                              common::r32 viewHeight);
 
             void
-            renderDynamicTextures(entities::EntityManager &,
-                                  common::r32 viewWidth,
-                                  common::r32 viewHeight);
-
-            void
-            renderColorSprites(entities::EntityManager &,
-                               common::r32 viewWidth,
-                               common::r32 viewHeight);
-
-            void
-            renderParticles(entities::EntityManager &,
-                            common::r32 viewWidth,
-                            common::r32 viewHeight);
+            _render(entities::EntityManager &,
+                    common::r32 viewWidth,
+                    common::r32 viewHeight);
 
         private:
             struct RaceInfoEntities {
@@ -173,13 +157,7 @@ namespace oni {
                 Renderer2D &renderer2D);
 
             void
-            initializeTextureRenderer();
-
-            void
-            initializeColorRenderer();
-
-            void
-            initializeParticleRenderer();
+            initRenderer();
 
             void
             prepareTexture(component::Texture &texture);
@@ -216,12 +194,9 @@ namespace oni {
                                  common::EntityID);
 
         private:
-            std::unique_ptr<Shader> mColorShader{};
-            std::unique_ptr<Shader> mTextureShader{};
-            std::unique_ptr<Shader> mParticleShader{};
-            std::unique_ptr<BatchRenderer2D> mColorRenderer{};
-            std::unique_ptr<BatchRenderer2D> mTextureRenderer{};
-            std::unique_ptr<BatchRenderer2D> mParticleRenderer{};
+            std::unique_ptr<Shader> mShader{};
+            std::unique_ptr<BatchRenderer2D> mRenderer{};
+
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
             FontManager &mFontManager;

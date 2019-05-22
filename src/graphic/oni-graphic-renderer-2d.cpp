@@ -12,29 +12,12 @@ namespace oni {
         }
 
         void
-        Renderer2D::submit(const component::Shape &position,
-                           const component::Appearance &color) {
-            _submit(position, color);
-        }
-
-        void
-        Renderer2D::submit(const component::Scale &scale,
-                           const component::WorldP3D &pos,
-                           const component::Appearance &color) {
-            _submit(scale, pos, color);
-        }
-
-        void
-        Renderer2D::submit(const component::Scale &scale,
-                           const component::WorldP3D &pos,
+        Renderer2D::submit(const component::WorldP3D &pos,
+                           const component::Heading &heading,
+                           const component::Scale &scale,
+                           const component::Appearance &apperance,
                            const component::Texture &texture) {
-            _submit(scale, pos, texture);
-        }
-
-        void
-        Renderer2D::submit(const component::Shape &position,
-                           const component::Texture &texture) {
-            _submit(position, texture);
+            _submit(pos, heading, scale, apperance, texture);
         }
 
         void

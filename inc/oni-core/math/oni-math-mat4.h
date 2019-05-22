@@ -90,6 +90,9 @@ namespace oni {
             mat4 &
             operator*=(const mat4 &other);
 
+            friend std::ostream &
+            operator<<(std::ostream &stream,
+                       const mat4 &);
 
         };
     }

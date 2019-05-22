@@ -183,5 +183,15 @@ namespace oni {
         mat4::getPosition() {
             return vec3{columns[3].x, columns[3].y, columns[3].z};
         }
+
+        std::ostream &
+        operator<<(std::ostream &stream,
+                   const mat4 &other) {
+            stream << "|" << other.elements[0] << ", " << other.elements [1] << other.elements[2] << other.elements[3] << "|";
+            stream << "|" << other.elements[4] << ", " << other.elements [5] << other.elements[6] << other.elements[7] << "|";
+            stream << "|" << other.elements[8] << ", " << other.elements [9] << other.elements[10] << other.elements[11] << "|";
+            stream << "|" << other.elements[12] << ", " << other.elements [13] << other.elements[14] << other.elements[15] << "|";
+            return stream;
+        }
     }
 }

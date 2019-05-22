@@ -11,28 +11,13 @@
 
 namespace oni {
     namespace graphic {
-        // TODO: These are not components and shouldn't be here, move them to graphics package
         struct Vertex {
-            math::vec3 position{0.f, 0.f, 0.f};
-        };
-
-        struct ColoredVertex {
-            math::vec3 position{0.f, 0.f, 0.f};
-            math::vec4 color{0.f, 0.f, 0.f, 0.f};
-        };
-
-        struct TexturedVertex {
-            math::vec3 position{0.f, 0.f, 0.f};
-            common::oniGLint samplerID{0};
-            // TODO: use UNSIGNED_SHORT
-            math::vec2 uv{0.f, 0.f};
-        };
-
-        struct ParticleVertex {
-            math::vec3 position{0.f, 0.f, 0.f};
-            math::vec4 color{0.f, 0.f, 0.f, 0.f};
             common::oniGLint samplerID{-1};
-            common::r32 halfSize{2.f};
+            common::r32 heading{0.f};
+            math::vec2 halfSize{1.f};
+            math::vec3 position{0.f, 0.f, 0.f};
+            math::vec4 color{0.f, 0.f, 0.f, 0.f};
+            math::vec2 uv[4] = {math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
         };
 
         struct BufferStructure {

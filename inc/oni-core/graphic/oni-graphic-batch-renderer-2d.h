@@ -16,8 +16,6 @@ namespace oni {
     namespace component {
         struct Texture;
 
-        struct Shape;
-
         struct Text;
 
         struct Appearance;
@@ -49,21 +47,10 @@ namespace oni {
             _begin() override;
 
             void
-            _submit(const component::Shape &,
-                    const component::Appearance &) override;
-
-            void
-            _submit(const component::Scale &scale,
-                    const component::WorldP3D &pos,
-                    const component::Appearance &appearance) override;
-
-            void
-            _submit(const component::Scale &scale,
-                    const component::WorldP3D &pos,
-                    const component::Texture &texture) override;
-
-            void
-            _submit(const component::Shape &,
+            _submit(const component::WorldP3D &,
+                    const component::Heading &,
+                    const component::Scale &,
+                    const component::Appearance &,
                     const component::Texture &) override;
 
             void

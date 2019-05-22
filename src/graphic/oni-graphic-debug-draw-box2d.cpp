@@ -18,18 +18,10 @@ namespace oni {
                                     int32 vertexCount,
                                     const b2Color &color) {
             if (vertexCount == 4) {
-                auto currentVertex = *vertices;
-                auto a = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                currentVertex = *(++vertices);
-                auto b = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                currentVertex = *(++vertices);
-                auto c = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                currentVertex = *(++vertices);
-                auto d = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                auto shape = component::Shape{a, b, c, d};
 
                 auto appearance = component::Appearance{math::vec4{1.0f, 0.0f, 0.0f, 0.3f}};
-                mSceneManager->renderRaw(shape, appearance);
+                auto pos = component::WorldP3D{vertices->x, vertices->y, 1.f};
+                mSceneManager->renderRaw(pos, appearance);
             }
         }
 
@@ -38,18 +30,9 @@ namespace oni {
                                          int32 vertexCount,
                                          const b2Color &color) {
             if (vertexCount == 4) {
-                auto currentVertex = *vertices;
-                auto a = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                currentVertex = *(++vertices);
-                auto b = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                currentVertex = *(++vertices);
-                auto c = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                currentVertex = *(++vertices);
-                auto d = math::vec3{currentVertex.x, currentVertex.y, 1.0f};
-                auto shape = component::Shape{a, b, c, d};
-
+                auto pos = component::WorldP3D{vertices->x, vertices->y, 1.f};
                 auto appearance = component::Appearance{math::vec4{1.0f, 0.0f, 0.0f, 0.3f}};
-                mSceneManager->renderRaw(shape, appearance);
+                mSceneManager->renderRaw(pos, appearance);
             }
         }
 

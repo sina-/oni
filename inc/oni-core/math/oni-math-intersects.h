@@ -6,22 +6,22 @@
 
 namespace oni {
     namespace component {
-        struct Shape;
+        struct Rectangle;
         union WorldP3D;
         union Point;
     }
 
     namespace math {
         bool
-        intersects(const component::Shape &first,
-                   const component::Shape &second);
+        intersects(const component::Rectangle &first,
+                   const component::Rectangle &second);
 
         bool
-        intersects(const component::Shape &first,
+        intersects(const component::Rectangle &first,
                    const component::Point &second);
 
         bool
-        intersects(const component::Shape &first,
+        intersects(const component::Rectangle &first,
                    common::r32 x,
                    common::r32 y,
                    common::r32 lengthX,
@@ -29,6 +29,14 @@ namespace oni {
 
         bool
         intersects(const component::WorldP3D &first,
+                   common::r32 x,
+                   common::r32 y,
+                   common::r32 lengthX,
+                   common::r32 lengthY);
+
+        bool
+        intersects(const component::WorldP3D &,
+                   const component::Scale &,
                    common::r32 x,
                    common::r32 y,
                    common::r32 lengthX,

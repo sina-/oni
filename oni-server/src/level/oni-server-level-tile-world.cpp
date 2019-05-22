@@ -482,7 +482,7 @@ namespace oni {
                 wallEntities.reserve(wallCount);
 
                 common::r32 wallWidth = 0.5f;
-                auto heading = component::Heading{0.f}; // For static objects facing angle does not matter.
+                auto heading = 0.f;
 
                 for (size_t i = 0; i < wallCount; ++i) {
                     auto &wallPos = position[i];
@@ -501,6 +501,7 @@ namespace oni {
                             wallSize.x = wallWidth;
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
+                            heading = common::PI;
 
                             wallPositionInWorld.x = currentTileX + mTileSizeX - wallWidth;
                             wallPositionInWorld.y = currentTileY + wallWidth;
@@ -521,6 +522,7 @@ namespace oni {
                             wallSize.x = wallWidth;
                             wallSize.y = mTileSizeY - 2 * wallWidth;
                             wallTexturePath = "resources/images/wall/1/vertical.png";
+                            heading = common::PI;
 
                             wallPositionInWorld.x = currentTileX;
                             wallPositionInWorld.y = currentTileY + wallWidth;
@@ -542,6 +544,7 @@ namespace oni {
                     auto id = mEntityFactory.createEntity_Wall();
                     mEntityFactory.setTexture(id, wallTexturePath);
                     mEntityFactory.setScale(id, wallSize.x, wallSize.y);
+                    mEntityFactory.setHeading(id, heading);
                     mEntityFactory.setWorldP3D(id, wallPositionInWorld.x, wallPositionInWorld.y, wallPositionInWorld.z);
                 }
             }
@@ -592,14 +595,8 @@ namespace oni {
                                  math::vec2 &size,
                                  component::WorldP3D &worldPos) {
                 auto id = mEntityFactory.createEntity_DebugWorldChunk();
-                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexA << "\n";
-                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexC << "\n";
-                mEntityFactory.setScale(id, size.x, size.y);
-                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexA << "\n";
-                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexC << "\n";
                 mEntityFactory.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
-                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexA << "\n";
-                std::cout << mEntityFactory.getEntityManager().get<component::Shape>(id).vertexC << "\n";
+                mEntityFactory.setScale(id, size.x, size.y);
                 mEntityFactory.setApperance(id, color.x, color.y, color.z, color.w);
                 return id;
             }

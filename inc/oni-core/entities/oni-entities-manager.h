@@ -17,7 +17,6 @@
 
 namespace oni {
     namespace entities {
-        typedef common::EntityID EntityIDType;
 
         class EntityFactory;
 
@@ -25,105 +24,74 @@ namespace oni {
         public:
             friend EntityFactory;
 
-            EntityManager() {
-                mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();
-                mLoader = std::make_unique<entt::basic_continuous_loader<EntityIDType>>(*mRegistry);
-                mDispatcher = std::make_unique<entt::dispatcher>();
-                //mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
-            }
+            EntityManager();
 
-            ~EntityManager() = default;
+            ~EntityManager();
 
             EntityManager(const EntityManager &) = delete;
 
             EntityManager
             operator=(const EntityManager &) const = delete;
 
-            EntityIDType
-            createComplementTo(EntityIDType id) {
-                assert(mComplementaryEntities.find(id) == mComplementaryEntities.end());
-                auto result = create();
-                assign<entities::EntityType>(result, entities::EntityType::COMPLEMENT);
-                mComplementaryEntities[id] = result;
-                return result;
-            }
+            common::EntityID
+            createComplementTo(common::EntityID id);
 
-            EntityIDType
-            getComplementOf(EntityIDType id) {
-                assert(mComplementaryEntities.find(id) != mComplementaryEntities.end());
-                return mComplementaryEntities[id];
-            }
-
-            void
-            complement(EntityIDType a,
-                       EntityIDType b) {
-                mComplementaryEntities[a] = b;
-            }
+            common::EntityID
+            getComplementOf(common::EntityID id);
 
             bool
-            hasComplement(EntityIDType id) {
-                return mComplementaryEntities.find(id) != mComplementaryEntities.end();
-            }
+            hasComplement(common::EntityID id);
 
             size_t
-            size() noexcept {
-                auto result = mRegistry->size();
-                return result;
-            }
+            size() noexcept;
 
+            /*
             template<class Component>
             size_t
             size() noexcept {
                 auto result = mRegistry->size<Component>();
                 return result;
             }
+             */
 
             template<class... ViewComponents>
-            EntityView<EntityIDType, ViewComponents...>
+            EntityView<common::EntityID, ViewComponents...>
             createView() {
-                return EntityView<EntityIDType, ViewComponents...>(*mRegistry);
+                return EntityView<common::EntityID, ViewComponents...>(*mRegistry);
             }
 
             template<class... ViewComponents>
-            EntityView<EntityIDType, ViewComponents...>
+            EntityView<common::EntityID, ViewComponents...>
             createViewWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<EntityIDType, ViewComponents...>(*mRegistry, std::move(registryLock));
+                return EntityView<common::EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityIDType, GroupComponents...>
+            EntityGroup<common::EntityID, GroupComponents...>
             createGroup() {
-                return EntityGroup<EntityIDType, GroupComponents...>(*mRegistry);
+                return EntityGroup<common::EntityID, GroupComponents...>(*mRegistry);
             }
 
             template<class... GroupComponents>
-            EntityGroup<EntityIDType, GroupComponents...>
+            EntityGroup<common::EntityID, GroupComponents...>
             createGroupWithLock() {
                 std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<EntityIDType, GroupComponents...>(*mRegistry, std::move(registryLock));
+                return EntityView<common::EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
             }
 
             template<class Component>
             Component &
-            get(EntityIDType entityID) noexcept {
+            get(common::EntityID entityID) noexcept {
                 return mRegistry->get<Component>(entityID);
             }
 
-            EntityIDType
-            map(EntityIDType entityID) {
-                auto result = mLoader->map(entityID);
-                if (result == entt::null) {
-                    return 0;
-                }
-                return result;
-            }
+            common::EntityID
+            map(common::EntityID entityID);
 
             template<class Component>
             bool
-            has(EntityIDType entityID) noexcept {
-                assert(mRegistry->valid(entityID));
-
+            has(common::EntityID entityID) noexcept {
                 bool result{false};
                 result = mRegistry->has<Component>(entityID);
                 return result;
@@ -131,12 +99,9 @@ namespace oni {
 
             template<class Component, class... Args>
             void
-            replace(EntityIDType entityID,
+            replace(common::EntityID entityID,
                     Args &&... args) {
-                {
-                    //std::lock_guard<std::mutex> registryLock(mMutex);
-                    mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
-                }
+                mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
             }
 
             template<class Archive, class... ArchiveComponents, class... Type, class... Member>
@@ -238,19 +203,13 @@ namespace oni {
             }
 
             void
-            clearDeletedEntitiesList() {
-                mDeletedEntities.clear();
-            }
+            clearDeletedEntitiesList();
 
-            const std::vector<EntityIDType> &
-            getDeletedEntities() const {
-                return mDeletedEntities;
-            }
+            const std::vector<common::EntityID> &
+            getDeletedEntities() const;
 
             void
-            tagForComponentSync(EntityIDType entity) {
-                accommodate<component::Tag_OnlyComponentUpdate>(entity);
-            }
+            tagForComponentSync(common::EntityID entity);
 
             template<class Component, class Comparator>
             void
@@ -277,44 +236,34 @@ namespace oni {
             }
 
             void
-            dispatchEvents() {
-                mDispatcher->update();
-            }
+            dispatchEvents();
 
             template<class Component, class... Args>
             Component &
-            assign(EntityIDType entityID,
+            assign(common::EntityID entityID,
                    Args &&... args) {
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
         private:
-            EntityIDType
-            create() {
-                auto result = mRegistry->create();
-                return result;
-            }
+            common::EntityID
+            create();
 
             template<class Component>
             void
-            remove(EntityIDType entityID) {
+            remove(common::EntityID entityID) {
                 mRegistry->remove<Component>(entityID);
             }
 
             template<class Component, class... Args>
             void
-            accommodate(EntityIDType entityID,
+            accommodate(common::EntityID entityID,
                         Args &&... args) {
-                {
-                    //std::lock_guard<std::mutex> registryLock(mMutex);
-                    mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
-                }
+                mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
             }
 
             void
-            destroy(EntityIDType entityID) {
-                mRegistry->destroy(entityID);
-            }
+            destroy(common::EntityID entityID);
 
             template<class... Component>
             void
@@ -323,28 +272,24 @@ namespace oni {
             }
 
             void
-            destroyAndTrack(EntityIDType entityID) {
-                mRegistry->destroy(entityID);
-                mDeletedEntities.push_back(entityID);
-            }
+            destroyAndTrack(common::EntityID entityID);
 
             bool
-            valid(EntityIDType entityID) {
-                return mRegistry->valid(entityID);
-            }
+            valid(common::EntityID entityID);
 
         private:
-            std::unique_ptr<entt::basic_registry<EntityIDType>> mRegistry{};
-            std::unique_ptr<entt::basic_continuous_loader<EntityIDType>> mLoader{};
+            std::unique_ptr<entt::basic_registry<common::EntityID>> mRegistry{};
+            std::unique_ptr<entt::basic_continuous_loader<common::EntityID>> mLoader{};
             std::unique_ptr<entt::dispatcher> mDispatcher{};
             mutable std::mutex mMutex{};
-            //std::unique_lock<std::mutex> mLock{};
 
-            // NOTE: Entities that are complement of entities in other registry. Used for creating components on
-            // client side only that are specific for server side entities.
+            // NOTE: Entities which are complement of entities in another registry. Used for creating components on
+            // client side with matching entity from server side. For example a car that is emiting smoke would have
+            // an emitter component attached to the car entity of the server only on client side.
             std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
 
-            std::vector<EntityIDType> mDeletedEntities{};
+            std::vector<common::EntityID> mDeletedEntities{};
         };
+
     }
 }

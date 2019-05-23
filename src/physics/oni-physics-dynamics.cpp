@@ -14,7 +14,6 @@
 #include <oni-core/math/oni-math-transformation.h>
 #include <oni-core/physics/oni-physics-projectile.h>
 #include <oni-core/entities/oni-entities-factory.h>
-#include <oni-core/component/oni-component-hierarchy.h>
 #include <oni-core/game/oni-game-event.h>
 
 namespace oni {
@@ -208,7 +207,6 @@ namespace oni {
 
                         car.distanceFromCamera = distanceFromCamera;
 
-                        updateTransforms(manager, entity, carPos, heading, scale);
                         manager.tagForComponentSync(entity);
                     }
                 }
@@ -324,7 +322,6 @@ namespace oni {
                         pos.x = position.x;
                         pos.y = position.y;
                         heading.value = props.body->GetAngle();
-                        updateTransforms(manager, entity, pos, heading, scale);
                         manager.tagForComponentSync(entity);
                     }
                 }
@@ -347,6 +344,8 @@ namespace oni {
                             // There seems to be something wrong with the way tires are created in the beginning
                             heading = static_cast<oni::common::r32>(car.steerAngle +
                                                                     math::toRadians(90.0f));
+
+                            manager.tagForComponentSync(attachments.entities[i]);
                         }
                     }
                 }
@@ -415,34 +414,6 @@ namespace oni {
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
                 // and audio system.
             }
-        }
-
-        void
-        Dynamics::updateTransforms(entities::EntityManager &manager,
-                                   common::EntityID entity,
-                                   const component::WorldP3D &pos,
-                                   const component::Heading &heading,
-                                   const component::Scale &scale) {
-            if (manager.has<component::TransformChildren>(entity)) {
-                auto transformChildren = manager.get<component::TransformChildren>(entity);
-                for (auto child: transformChildren.children) {
-                    auto transformParent = manager.get<component::TransformParent>(child);
-                    // TODO: Not using scale, this transform structure is broken, have to remake it
-                    auto s = component::Scale{};
-                    transformParent.transform = math::createTransformation(pos, heading, s);
-
-                    updateTransformParent(manager, child, transformParent);
-                }
-            }
-        }
-
-        void
-        Dynamics::updateTransformParent(entities::EntityManager &manager,
-                                        common::EntityID entity,
-                                        const component::TransformParent &transformParent) {
-            // TODO: This function should recurse
-            manager.replace<component::TransformParent>(entity, transformParent);
-            manager.tagForComponentSync(entity);
         }
 
         void

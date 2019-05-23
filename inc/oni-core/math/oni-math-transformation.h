@@ -14,9 +14,6 @@ namespace oni {
         struct mat4;
     }
 
-    namespace component {
-        struct TransformParent;
-    }
 
     namespace math {
         component::Rectangle

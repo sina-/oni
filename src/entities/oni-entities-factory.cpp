@@ -3,7 +3,6 @@
 #include <Box2D/Box2D.h>
 
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-hierarchy.h>
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/level/oni-level-chunk.h>
@@ -285,9 +284,6 @@ namespace oni {
                               common::EntityID child,
                               entities::EntityType parentType,
                               entities::EntityType childType) {
-            auto &transformChildren = mRegistryManager->get<component::TransformChildren>(parent);
-            transformChildren.children.emplace_back(child);
-
             auto &attachment = mRegistryManager->get<component::EntityAttachment>(parent);
             attachment.entities.emplace_back(child);
             attachment.entityTypes.emplace_back(childType);
@@ -428,7 +424,6 @@ namespace oni {
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
             createComponent<component::SoundTag>(id, component::SoundTag::ENGINE_IDLE);
-            createComponent<component::TransformChildren>(id);
             createComponent<component::EntityAttachment>(id);
 
             createComponent<gameplay::CarLapInfo>(id, id);
@@ -458,7 +453,6 @@ namespace oni {
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
             createComponent<component::EntityAttachee>(id);
-            createComponent<component::TransformParent>(id);
             createComponent<component::GunCoolDown>(id);
 
             assignTag<component::Tag_Dynamic>(id);
@@ -553,7 +547,6 @@ namespace oni {
             createComponent<component::Texture>(id);
 
             createComponent<component::EntityAttachee>(id);
-            createComponent<component::TransformParent>(id);
 
             assignTag<component::Tag_Dynamic>(id);
             assignTag<component::Tag_TextureShaded>(id);
@@ -570,7 +563,6 @@ namespace oni {
             createComponent<component::Texture>(id);
 
             createComponent<component::EntityAttachee>(id);
-            createComponent<component::TransformParent>(id);
 
             assignTag<component::Tag_Dynamic>(id);
             assignTag<component::Tag_TextureShaded>(id);

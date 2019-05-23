@@ -15,7 +15,6 @@
 #include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-hierarchy.h>
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/math/oni-math-intersects.h>
 #include <oni-core/math/oni-math-rand.h>
@@ -304,22 +303,19 @@ namespace oni {
                                               >();
 
                 for (auto &&id: view) {
-                    const auto &scale = view.get<component::Scale>(id);
                     const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
 
-                    auto finalPos = pos;
-                    if (manager.has<component::TransformParent>(id)) {
-                        const auto &transformParent = manager.get<component::TransformParent>(id);
-                        finalPos.value = transformParent.transform * pos.value;
-                    }
-                    if (!math::intersects(finalPos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    auto result = applyParentTransforms(manager, id, pos, heading);
+
+                    if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
 
-                    const auto &heading = view.get<component::Heading>(id);
                     const auto &appearance = view.get<component::Appearance>(id);
 
-                    mRenderer->submit(finalPos, heading, scale, appearance, component::Texture{});
+                    mRenderer->submit(result.pos, result.heading, scale, appearance, component::Texture{});
 
                     ++mRenderedSpritesPerFrame;
                 }
@@ -335,23 +331,20 @@ namespace oni {
                         component::Tag_TextureShaded
                                               >();
                 for (auto &&id: view) {
-                    const auto &scale = view.get<component::Scale>(id);
                     const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
 
-                    auto finalPos = pos;
-                    if (manager.has<component::TransformParent>(id)) {
-                        const auto &transformParent = manager.get<component::TransformParent>(id);
-                        finalPos.value = transformParent.transform * pos.value;
-                    }
-                    if (!math::intersects(finalPos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    auto result = applyParentTransforms(manager, id, pos, heading);
+
+                    if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
 
-                    const auto &heading = view.get<component::Heading>(id);
                     auto &texture = view.get<component::Texture>(id);
                     prepareTexture(texture);
 
-                    mRenderer->submit(finalPos, heading, scale, component::Appearance{}, texture);
+                    mRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
@@ -880,6 +873,38 @@ namespace oni {
                                  const std::string &text) {
             auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
             return entityID;
+        }
+
+        SceneManager::WorldP3DAndHeading
+        SceneManager::applyParentTransforms(entities::EntityManager &manager,
+                                            common::EntityID child,
+                                            const component::WorldP3D &childPos,
+                                            const component::Heading &childHeading) {
+            auto transformation = math::mat4::identity();
+            auto result = WorldP3DAndHeading{childPos, childHeading};
+            auto numParents = common::size{};
+
+            while (manager.has<component::EntityAttachee>(child)) {
+                const auto &parent = manager.get<component::EntityAttachee>(child);
+                const auto &parentPos = manager.get<component::WorldP3D>(parent.entityID);
+                const auto &parentHeading = manager.get<component::Heading>(parent.entityID);
+
+                // TODO: Scaling is ignored because it is used to store the size of the object, so even non-scaled
+                // objects have scaling matrix larger than identity matrix, so if I use the parent scaling
+                // that will just "scale" the child by the size of parent, which is not what I want.
+                // Perhaps removing Size component was the wrong decision, and I should have a distinction
+                // between size and Scale. Renderer passes scale down to shader as a size anyway, it does NOT
+                // use it as a multiplier.
+                transformation *= math::createTransformation(parentPos, parentHeading, {});
+                result.pos.value = transformation * result.pos.value;
+                result.heading.value += parentHeading.value;
+
+                child = parent.entityID;
+                ++numParents;
+
+                assert(numParents < 20);
+            }
+            return result;
         }
     }
 }

@@ -10,7 +10,6 @@
 
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-hierarchy.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/component/oni-component-physic.h>
@@ -157,13 +156,6 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::TransformParent &data) {
-            archive(data.parent, data.transform);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   component::Tag_Static &) {}
 
         template<class Archive>
@@ -240,7 +232,6 @@ namespace oni {
                         component::Trail,
                         component::EntityAttachment,
                         component::EntityAttachee,
-                        component::TransformParent,
                         component::SoundTag,
 
                         entities::EntityType,
@@ -289,7 +280,6 @@ namespace oni {
                         component::Trail,
                         component::EntityAttachment,
                         component::EntityAttachee,
-                        component::TransformParent,
                         component::SoundTag,
 
                         entities::EntityType,

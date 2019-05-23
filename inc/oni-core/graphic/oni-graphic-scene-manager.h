@@ -144,6 +144,11 @@ namespace oni {
                 common::EntityID lapBestTimeEntity{0};
             };
 
+            struct WorldP3DAndHeading {
+                component::WorldP3D pos;
+                component::Heading heading;
+            };
+
         private:
             void
             begin(const Shader &shader,
@@ -192,6 +197,12 @@ namespace oni {
             component::SmokeEmitterCD &
             getOrCreateEmitterCD(entities::EntityFactory &,
                                  common::EntityID);
+
+            SceneManager::WorldP3DAndHeading
+            applyParentTransforms(entities::EntityManager &manager,
+                                  common::EntityID child,
+                                  const component::WorldP3D &pos,
+                                  const component::Heading &heading);
 
         private:
             std::unique_ptr<Shader> mShader{};

@@ -19,9 +19,6 @@ namespace oni {
 
         class ClientDataManager;
     }
-    namespace component {
-        struct TransformParent;
-    }
 
     namespace math {
         class Rand;
@@ -86,18 +83,6 @@ namespace oni {
             isColliding(b2Body *);
 
         private:
-            void
-            updateTransforms(entities::EntityManager &manager,
-                             common::EntityID entity,
-                             const oni::component::WorldP3D &pos,
-                             const component::Heading &heading,
-                             const component::Scale &scale);
-
-            void
-            updateTransformParent(entities::EntityManager &manager,
-                                  common::EntityID entity,
-                                  const component::TransformParent &transformParent);
-
             void
             updateAge(entities::EntityFactory &,
                       common::r64 tickTime);

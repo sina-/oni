@@ -1,7 +1,6 @@
 #include <oni-core/math/oni-math-transformation.h>
 
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/component/oni-component-hierarchy.h>
 
 namespace oni {
     namespace math {

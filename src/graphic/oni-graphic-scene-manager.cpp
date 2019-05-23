@@ -550,7 +550,7 @@ namespace oni {
                             // TODO: arbitrary number based on number of frames, think about better way of determining this
                             skidOpacity.push_back(10);
                         }
-                        if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f && false) {
+                        if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f or true) {
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
                             auto &emitter = getOrCreateEmitterCD(clientEntityFactory, carEntity);
                             if (math::safeZero(emitter.currentCD)) {
@@ -655,23 +655,19 @@ namespace oni {
             if (missing) {
                 auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
                 auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
-
-                auto worldPos = component::WorldP3D{tilePosX, tilePosY,
-                                                    mZLayerManager.getZForEntity(entities::EntityType::CANVAS)};
-                auto tileSize = math::vec2{static_cast<common::r32>(mCanvasTileSizeX),
-                                           static_cast<common::r32>(mCanvasTileSizeY)};
+                auto tilePosZ = mZLayerManager.getZForEntity(entities::EntityType::CANVAS);
 
                 auto heading = component::Heading{0.f};
-                std::string emptyTextureID;
 
                 // TODO: Should this be a canvas type?
-                auto entityID = entityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(
-                        worldPos,
-                        tileSize,
-                        heading,
-                        emptyTextureID);
+                auto id = entityFactory.createEntity_SimpleSpriteTextured();
+                entityFactory.setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
+                entityFactory.setScale(id,
+                                       static_cast<common::r32>(mCanvasTileSizeX),
+                                       static_cast<common::r32>(mCanvasTileSizeY));
+                entityFactory.setHeading(id, heading.value);
 
-                auto &texture = entityRegistry.get<component::Texture>(entityID);
+                auto &texture = entityRegistry.get<component::Texture>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP);
@@ -685,7 +681,7 @@ namespace oni {
                 mTextureManager->fill(texture.image, defaultColor);
                 mTextureManager->loadFromImage(texture);
 
-                mCanvasTileLookup.emplace(xy, entityID);
+                mCanvasTileLookup.emplace(xy, id);
             }
 
             auto entity = mCanvasTileLookup.at(xy);

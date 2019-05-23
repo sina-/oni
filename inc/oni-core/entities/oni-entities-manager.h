@@ -8,9 +8,11 @@
 #include <entt/entt.hpp>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/component/oni-component-tag.h>
 #include <oni-core/component/oni-component-visual.h>
+#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-view.h>
+#include <oni-core/entities/oni-entities-group.h>
 
 
 namespace oni {
@@ -22,146 +24,6 @@ namespace oni {
         class EntityManager {
         public:
             friend EntityFactory;
-
-            template<class Entity, class... Components>
-            class EntityView {
-            private:
-                friend EntityManager;
-
-                explicit EntityView(entt::basic_registry<EntityIDType> &registry) :
-                        mView(registry.view<Components...>()) {
-                }
-
-                EntityView(entt::basic_registry<EntityIDType> &registry,
-                           std::unique_lock<std::mutex> registryLock) :
-                        mView(registry.view<Components...>()),
-                        mRegistryLock(std::move(registryLock)) {
-                }
-
-            public:
-                EntityView(const EntityView &) = delete;
-
-                EntityView(const EntityView &&) = delete;
-
-                EntityView &
-                operator=(const Entity &) = delete;
-
-                ~EntityView() = default;
-
-                size_t
-                size() noexcept {
-                    return mView.size();
-                }
-
-                auto
-                begin() {
-                    return mView.begin();
-                }
-
-                auto
-                end() {
-                    return mView.end();
-                }
-
-                template<class Component>
-                Component &
-                get(EntityIDType entityID) noexcept {
-                    if constexpr(sizeof...(Components) == 1) {
-                        return mView.get(entityID);
-                    } else {
-                        return mView.template get<Component>(entityID);
-                    }
-                }
-
-                template<class Component>
-                const Component &
-                get(EntityIDType entityID) const noexcept {
-                    if constexpr(sizeof...(Components) == 1) {
-                        return mView.get(entityID);
-                    } else {
-                        return mView.template get<Component>(entityID);
-                    }
-                }
-
-            private:
-                entt::basic_view<Entity, Components...> mView{};
-                std::unique_lock<std::mutex> mRegistryLock{};
-            };
-
-            // TODO: Group like this is use-less. Each component that is used is kinda "owned" by the group and
-            // you can't have two groups that share components as it will assert :( I probably need just the
-            // partially-owning group where the shared component between groups is passed as template param and
-            // other components as function argument.
-            template<class Entity, class... Components>
-            class EntityGroup {
-            private:
-                friend EntityManager;
-
-                explicit EntityGroup(entt::basic_registry<EntityIDType> &registry) :
-                        mGroup(registry.group<Components...>()) {
-                }
-
-                EntityGroup(entt::basic_registry<EntityIDType> &registry,
-                            std::unique_lock<std::mutex> registryLock) :
-                        mGroup(registry.group<Components...>()),
-                        mRegistryLock(std::move(registryLock)) {
-                }
-
-            public:
-                EntityGroup(const EntityGroup &) = delete;
-
-                EntityGroup(const EntityGroup &&) = delete;
-
-                EntityGroup &
-                operator=(const Entity &) = delete;
-
-                ~EntityGroup() = default;
-
-                size_t
-                size() noexcept {
-                    return mGroup.size();
-                }
-
-                auto
-                begin() {
-                    return mGroup.begin();
-                }
-
-                auto
-                end() {
-                    return mGroup.end();
-                }
-
-                template<class Component>
-                Component &
-                get(EntityIDType entityID) noexcept {
-                    if constexpr(sizeof...(Components) == 1) {
-                        return mGroup.get(entityID);
-                    } else {
-                        return mGroup.template get<Component>(entityID);
-                    }
-                }
-
-                template<class Component>
-                const Component &
-                get(EntityIDType entityID) const noexcept {
-                    if constexpr(sizeof...(Components) == 1) {
-                        return mGroup.get(entityID);
-                    } else {
-                        return mGroup.template get<Component>(entityID);
-                    }
-                }
-
-                template<class Func>
-                void
-                apply(Func &func) {
-                    mGroup.each(func);
-                }
-
-            private:
-                entt::basic_group<Entity, entt::get_t<>, Components...> mGroup;
-                std::unique_lock<std::mutex> mRegistryLock{};
-            };
 
             EntityManager() {
                 mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();

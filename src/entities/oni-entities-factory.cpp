@@ -127,42 +127,6 @@ namespace oni {
             }
         }
 
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID id,
-                                                                          const component::WorldP3D &pos,
-                                                                          const math::vec2 &size,
-                                                                          const component::Heading &heading,
-                                                                          const math::vec4 &color) {
-            createComponent<component::WorldP3D>(id, pos.x, pos.y, pos.z);
-            createComponent<component::Scale>(id, size.x, size.y);
-            createComponent<component::Heading>(id, heading.value);
-
-            auto &appearance = createComponent<component::Appearance>(id);
-            appearance.color = color;
-
-            assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_ColorShaded>(id);
-        }
-
-        template<>
-        void
-        EntityFactory::_createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID id,
-                                                                          const component::WorldP3D &pos,
-                                                                          const math::vec2 &size,
-                                                                          const component::Heading &heading,
-                                                                          const std::string &textureID) {
-            createComponent<component::WorldP3D>(id, pos.x, pos.y, pos.z);
-            createComponent<component::Scale>(id, size.x, size.y);
-            createComponent<component::Heading>(id, heading.value);
-
-            auto &texture = createComponent<component::Texture>(id);
-            texture.path = textureID;
-
-            assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_TextureShaded>(id);
-        }
-
         void
         EntityFactory::createPhysics(common::EntityID id,
                                      const component::WorldP3D &pos,
@@ -373,6 +337,19 @@ namespace oni {
             auto &text = mRegistryManager->get<component::Text>(id);
             text.textContent = content;
 
+        }
+
+        void
+        EntityFactory::setApperance(common::EntityID id,
+                                    common::r32 red,
+                                    common::r32 green,
+                                    common::r32 blue,
+                                    common::r32 alpha) {
+            auto &apperance = mRegistryManager->get<component::Appearance>(id);
+            apperance.color.x = red;
+            apperance.color.y = green;
+            apperance.color.z = blue;
+            apperance.color.w = alpha;
         }
 
         void
@@ -644,17 +621,34 @@ namespace oni {
             return id;
         }
 
-        void
-        EntityFactory::setApperance(common::EntityID id,
-                                    common::r32 red,
-                                    common::r32 green,
-                                    common::r32 blue,
-                                    common::r32 alpha) {
-            auto &apperance = mRegistryManager->get<component::Appearance>(id);
-            apperance.color.x = red;
-            apperance.color.y = green;
-            apperance.color.z = blue;
-            apperance.color.w = alpha;
+        common::EntityID
+        EntityFactory::createEntity_SimpleSpriteColored() {
+            auto id = createEntity(entities::EntityType::SIMPLE_SPRITE);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Appearance>(id);
+
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_ColorShaded>(id);
+
+            return id;
+        }
+
+        common::EntityID
+        EntityFactory::createEntity_SimpleSpriteTextured() {
+            auto id = createEntity(entities::EntityType::SIMPLE_SPRITE);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Texture>(id);
+
+            assignTag<component::Tag_Static>(id);
+            assignTag<component::Tag_TextureShaded>(id);
+
+            return id;
         }
     }
 }

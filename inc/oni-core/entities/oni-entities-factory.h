@@ -51,14 +51,6 @@ namespace oni {
             EntityManager &
             getEntityManager() const;
 
-            template<entities::EntityType entityType, class ...Args>
-            common::EntityID
-            createEntity(const Args &... args) {
-                auto id = createEntity(entityType);
-                _createEntity<entityType>(id, args...);
-                return id;
-            }
-
             void
             tagForRemoval(common::EntityID);
 
@@ -84,6 +76,12 @@ namespace oni {
         public:
             common::EntityID
             createEntity_SmokeCloud();
+
+            common::EntityID
+            createEntity_SimpleSpriteColored();
+
+            common::EntityID
+            createEntity_SimpleSpriteTextured();
 
             common::EntityID
             createEntity_RaceCar();
@@ -180,11 +178,6 @@ namespace oni {
             assignSimMode(common::EntityID,
                           entities::SimMode);
 
-            template<entities::EntityType, class ...Args>
-            void
-            _createEntity(common::EntityID,
-                          const Args &...) = delete;
-
             void
             removeEntity(common::EntityID);
 
@@ -201,22 +194,6 @@ namespace oni {
             void
             _removeEntity(common::EntityID,
                           const entities::EntityOperationPolicy &policy) = delete;
-
-            template<>
-            void
-            _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                               const component::WorldP3D &worldPos,
-                                                               const math::vec2 &size,
-                                                               const component::Heading &heading,
-                                                               const math::vec4 &color);
-
-            template<>
-            void
-            _createEntity<entities::EntityType::SIMPLE_SPRITE>(common::EntityID,
-                                                               const component::WorldP3D &worldPos,
-                                                               const math::vec2 &size,
-                                                               const component::Heading &heading,
-                                                               const std::string &textureID);
 
         private:
             template<>

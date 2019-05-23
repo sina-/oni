@@ -21,7 +21,7 @@ namespace FMOD {
 
 namespace oni {
     namespace entities {
-        class EntityFactory;
+        class EntityManager;
     }
 
     namespace math {
@@ -33,7 +33,7 @@ namespace oni {
             AudioManager();
 
             void
-            tick(entities::EntityFactory &entityFactory,
+            tick(entities::EntityManager &,
                  const component::WorldP3D &playerPos);
 
             void

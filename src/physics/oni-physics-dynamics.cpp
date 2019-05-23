@@ -13,7 +13,6 @@
 #include <oni-core/physics/oni-physics-car.h>
 #include <oni-core/math/oni-math-transformation.h>
 #include <oni-core/physics/oni-physics-projectile.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/game/oni-game-event.h>
 
 namespace oni {
@@ -124,10 +123,9 @@ namespace oni {
         Dynamics::~Dynamics() = default;
 
         void
-        Dynamics::tick(entities::EntityFactory &entityFactory,
+        Dynamics::tick(entities::EntityManager &manager,
                        entities::ClientDataManager *clientData,
                        common::r64 tickTime) {
-            auto &manager = entityFactory.getEntityManager();
             std::map<common::EntityID, io::CarInput> carInput{};
 
             /// Input
@@ -284,12 +282,12 @@ namespace oni {
                     auto &props = view.get<component::PhysicalProperties>(entity);
                     auto &pos = view.get<component::WorldP3D>(entity);
 
-                    mCollisionHandlers[props.physicalCategory](entityFactory,
+                    mCollisionHandlers[props.physicalCategory](manager,
                                                                entity,
                                                                props,
                                                                pos);
                 }
-                entityFactory.flushEntityRemovals();
+                manager.flushEntityRemovals();
             }
 
             /// Sync placement with box2d
@@ -353,17 +351,17 @@ namespace oni {
 
             /// Update Projectiles
             {
-                mProjectile->tick(entityFactory, clientData, tickTime);
+                mProjectile->tick(manager, clientData, tickTime);
             }
 
             /// Update age
             {
-                updateAge(entityFactory, tickTime);
+                updateAge(manager, tickTime);
             }
 
             /// Update placement
             {
-                updatePlacement(entityFactory, tickTime);
+                updatePlacement(manager, tickTime);
             }
         }
 
@@ -386,7 +384,7 @@ namespace oni {
         }
 
         void
-        Dynamics::handleRocketCollision(entities::EntityFactory &entityFactory,
+        Dynamics::handleRocketCollision(entities::EntityManager &manager,
                                         common::EntityID entityID,
                                         component::PhysicalProperties &props,
                                         component::WorldP3D &pos) {
@@ -406,9 +404,9 @@ namespace oni {
 
                 // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
                 // sound effects, etc.
-                entityFactory.getEntityManager().enqueueEvent<game::Event_Collision>(worldPos, colliding);
+                manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
-                entityFactory.tagForRemoval(entityID);
+                manager.tagForRemoval(entityID);
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
@@ -417,52 +415,51 @@ namespace oni {
         }
 
         void
-        Dynamics::updateAge(entities::EntityFactory &entityFactory,
+        Dynamics::updateAge(entities::EntityManager &manager,
                             common::r64 tickTime) {
-            auto &entityManager = entityFactory.getEntityManager();
             {
                 /// Client side
-                auto view = entityManager.createView<
+                auto view = manager.createView<
                         component::Tag_SimModeClient,
                         component::Age>();
                 for (const auto &entity: view) {
                     auto &age = view.get<component::Age>(entity);
                     age.currentAge += tickTime;
                     if (age.currentAge > age.maxAge) {
-                        if (entityManager.has<component::Tag_SplatOnDeath>(entity)) {
-                            auto &pos = entityManager.get<component::WorldP3D>(entity);
-                            auto &size = entityManager.get<component::Scale>(entity);
-                            auto &texture = entityManager.get<component::Texture>(entity);
+                        if (manager.has<component::Tag_SplatOnDeath>(entity)) {
+                            auto &pos = manager.get<component::WorldP3D>(entity);
+                            auto &size = manager.get<component::Scale>(entity);
+                            auto &texture = manager.get<component::Texture>(entity);
 
-                            entityManager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
+                            manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
                         }
-                        entityFactory.tagForRemoval(entity);
+                        manager.tagForRemoval(entity);
                     }
                 }
             }
             /// Server
             {
-                auto view = entityManager.createView<
+                auto view = manager.createView<
                         component::Tag_SimModeServer,
                         component::Age>();
                 for (auto &&entity: view) {
                     auto &age = view.get<component::Age>(entity);
                     age.currentAge += tickTime;
                     if (age.currentAge > age.maxAge) {
-                        entityFactory.tagForRemoval(entity);
+                        manager.tagForRemoval(entity);
                     }
                 }
             }
-            entityFactory.flushEntityRemovals();
+            manager.flushEntityRemovals();
         }
 
         void
-        Dynamics::updatePlacement(entities::EntityFactory &entityFactory,
+        Dynamics::updatePlacement(entities::EntityManager &manager,
                                   common::r64 tickTime) {
             /// Update particle placement
             /// Client
             {
-                auto view = entityFactory.getEntityManager().createView<
+                auto view = manager.createView<
                         component::Tag_SimModeClient,
                         component::WorldP3D,
                         component::Velocity,
@@ -488,7 +485,7 @@ namespace oni {
         }
 
         void
-        Dynamics::handleCollision(entities::EntityFactory &,
+        Dynamics::handleCollision(entities::EntityManager &,
                                   common::EntityID,
                                   component::PhysicalProperties &,
                                   component::WorldP3D &) {
@@ -496,7 +493,7 @@ namespace oni {
         }
 
         void
-        Dynamics::handleRaceCarCollision(entities::EntityFactory &,
+        Dynamics::handleRaceCarCollision(entities::EntityManager &,
                                          common::EntityID,
                                          component::PhysicalProperties &,
                                          component::WorldP3D &) {
@@ -504,7 +501,7 @@ namespace oni {
         }
 
         void
-        Dynamics::handleVehicleCollision(entities::EntityFactory &,
+        Dynamics::handleVehicleCollision(entities::EntityManager &,
                                          common::EntityID,
                                          component::PhysicalProperties &,
                                          component::WorldP3D &) {

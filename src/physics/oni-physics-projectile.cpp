@@ -5,9 +5,9 @@
 
 #include <oni-core/entities/oni-entities-client-data-manager.h>
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/game/oni-game-event.h>
+#include <oni-core/component/oni-component-physic.h>
 
 namespace oni {
     namespace physics {
@@ -18,12 +18,12 @@ namespace oni {
         Projectile::~Projectile() = default;
 
         void
-        Projectile::tick(entities::EntityFactory &entityFactory,
+        Projectile::tick(entities::EntityManager &manager,
                          entities::ClientDataManager *clientData,
                          common::r64 tickTime) {
             /// Update cool-downs
             {
-                auto view = entityFactory.getEntityManager().createView<component::GunCoolDown>();
+                auto view = manager.createView<component::GunCoolDown>();
                 for (auto &&entity: view) {
                     auto &coolDown = view.get<component::GunCoolDown>(entity);
                     math::subAndZeroClip(coolDown.value, tickTime);
@@ -32,7 +32,7 @@ namespace oni {
 
             /// Spawn projectile
             {
-                auto carView = entityFactory.getEntityManager().createView<
+                auto carView = manager.createView<
                         component::WorldP3D,
                         component::Heading,
                         component::Car,
@@ -53,14 +53,14 @@ namespace oni {
                         const auto &carConfig = carView.get<component::CarConfig>(entity);
                         const auto &car = carView.get<component::Car>(entity);
                         const auto &attachments = carView.get<component::EntityAttachment>(entity);
-                        fireRocket(entityFactory, velocity, carPos, carHeading, carConfig, attachments);
+                        fireRocket(manager, velocity, carPos, carHeading, carConfig, attachments);
                     }
                 }
             }
         }
 
         void
-        Projectile::fireRocket(entities::EntityFactory &entityFactory,
+        Projectile::fireRocket(entities::EntityManager &manager,
                                const common::r32 velocity,
                                const component::WorldP3D &pos,
                                const component::Heading &heading,
@@ -68,7 +68,7 @@ namespace oni {
                                const component::EntityAttachment &attachments) {
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 if (attachments.entityTypes[i] == entities::EntityType::VEHICLE_GUN) {
-                    auto &gunCoolDown = entityFactory.getEntityManager().get<component::GunCoolDown>(
+                    auto &gunCoolDown = manager.get<component::GunCoolDown>(
                             attachments.entities[i]);
                     if (gunCoolDown.value > 0) {
                         continue;
@@ -96,14 +96,14 @@ namespace oni {
                     rocketPos.y = pos.y + (offset + projectileOffset + fudge) * sin(heading.value);
                     rocketPos.z = pos.z;
 
-                    auto id = entityFactory.createEntity_SimpleRocket();
-                    entityFactory.setWorldP3D(id, rocketPos.x, rocketPos.y, rocketPos.z);
-                    entityFactory.setScale(id, size.x, size.y);
-                    entityFactory.setTexture(id, "resources/images/bullet/2.png");
-                    entityFactory.setHeading(id, heading.value);
-                    entityFactory.createPhysics(id, rocketPos, size, heading.value);
+                    auto id = manager.createEntity_SimpleRocket();
+                    manager.setWorldP3D(id, rocketPos.x, rocketPos.y, rocketPos.z);
+                    manager.setScale(id, size.x, size.y);
+                    manager.setTexture(id, "resources/images/bullet/2.png");
+                    manager.setHeading(id, heading.value);
+                    manager.createPhysics(id, rocketPos, size, heading.value);
 
-                    auto * body = entityFactory.getEntityManager().get<component::PhysicalProperties>(id).body;
+                    auto * body = manager.get<component::PhysicalProperties>(id).body;
 
                     body->ApplyForceToCenter(
                             b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),
@@ -111,21 +111,21 @@ namespace oni {
                             true);
                     body->ApplyAngularImpulse(1, true);
 /*
-                    entityFactory.createEvent(ROCKET_LAUNCH, component::WorldP3D);
-                    entityFactory.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);
+                    manager.createEvent(ROCKET_LAUNCH, component::WorldP3D);
+                    manager.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);
 
-                    entityFactory.createEvent_RocketLaunch(component::WorldP3D);
-                    entityFactory.createEvent_Collision(ENTITY_A, ENTITY_B, component::WorldP3D);
+                    manager.createEvent_RocketLaunch(component::WorldP3D);
+                    manager.createEvent_Collision(ENTITY_A, ENTITY_B, component::WorldP3D);
 
-                    for(event: entityFactory.getEvent_RocketLaunch()){
+                    for(event: manager.getEvent_RocketLaunch()){
                         server.send(packet_RocketLaunch);
                     }
 
-                    for(event: entityFactory.getEvent_Collision()){
+                    for(event: manager.getEvent_Collision()){
                         server.send(packet_Collision);
                     }*/
 
-                    entityFactory.getEntityManager().enqueueEvent<game::Event_RocketLaunch>(rocketPos);
+                    manager.enqueueEvent<game::Event_RocketLaunch>(rocketPos);
                 }
             }
         }

@@ -7,7 +7,6 @@
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/physics/oni-physics-dynamics.h>
 #include <oni-core/network/oni-network-server.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/entities/oni-entities-client-data-manager.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-entity.h>
@@ -24,19 +23,19 @@ namespace oni {
             ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
                 mZLayerManager = std::make_unique<math::ZLayerManager>();
                 mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
-                mEntityFactory = std::make_unique<oni::entities::EntityFactory>(entities::SimMode::SERVER,
+                mEntityManager = std::make_unique<oni::entities::EntityManager>(entities::SimMode::SERVER,
                                                                                 *mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
 
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
-                mTileWorld = std::make_unique<server::level::TileWorld>(*mEntityFactory,
+                mTileWorld = std::make_unique<server::level::TileWorld>(*mEntityManager,
                                                                         *mDynamics->getPhysicsWorld(),
                                                                         *mZLayerManager);
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
-                mLapTracker = std::make_unique<gameplay::LapTracker>(mEntityFactory->getEntityManager(),
+                mLapTracker = std::make_unique<gameplay::LapTracker>(*mEntityManager,
                                                                      *mZLayerManager);
 
                 mServer = std::make_unique<network::Server>(&address, 16, 2);
@@ -51,13 +50,13 @@ namespace oni {
                 mServer->registerPostDisconnectHook(std::bind(&ServerGame::postDisconnectHook, this,
                                                               std::placeholders::_1));
 
-                mEntityFactory->getEntityManager().registerEventHandler<oni::game::Event_Collision, &network::Server::handleEvent_Collision>(
+                mEntityManager->registerEventHandler<oni::game::Event_Collision, &network::Server::handleEvent_Collision>(
                         mServer.get());
 
-                mEntityFactory->getEntityManager().registerEventHandler<oni::game::Event_SoundPlay, &network::Server::handleEvent_SoundPlay>(
+                mEntityManager->registerEventHandler<oni::game::Event_SoundPlay, &network::Server::handleEvent_SoundPlay>(
                         mServer.get());
 
-                mEntityFactory->getEntityManager().registerEventHandler<oni::game::Event_RocketLaunch, &network::Server::handleEvent_RocketLaunch>(
+                mEntityManager->registerEventHandler<oni::game::Event_RocketLaunch, &network::Server::handleEvent_RocketLaunch>(
                         mServer.get());
 
                 loadLevel();
@@ -97,7 +96,7 @@ namespace oni {
                 auto carEntity = spawnRaceCar();
 
                 mServer->sendCarEntityID(carEntity, clientID);
-                mServer->sendEntitiesAll(mEntityFactory->getEntityManager());
+                mServer->sendEntitiesAll(*mEntityManager);
 
                 mClientDataManager->addNewClient(clientID, carEntity);
             }
@@ -114,8 +113,8 @@ namespace oni {
             ServerGame::postDisconnectHook(const common::PeerID &peerID) {
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
-                mEntityFactory->tagForRemoval(clientCarEntityID);
-                mEntityFactory->flushEntityRemovals();
+                mEntityManager->tagForRemoval(clientCarEntityID);
+                mEntityManager->flushEntityRemovals();
                 mClientDataManager->deleteClient(peerID);
             }
 
@@ -128,13 +127,10 @@ namespace oni {
             ServerGame::_poll() {
                 mServer->poll();
 
-                mServer->sendComponentsUpdate(mEntityFactory->getEntityManager());
-                mServer->sendNewEntities(mEntityFactory->getEntityManager());
+                mServer->sendComponentsUpdate(*mEntityManager);
+                mServer->sendNewEntities(*mEntityManager);
 
-                {
-                    auto &entityManager = mEntityFactory->getEntityManager();
-                    mServer->broadcastDeletedEntities(entityManager);
-                }
+                mServer->broadcastDeletedEntities(*mEntityManager);
             }
 
             void
@@ -143,7 +139,7 @@ namespace oni {
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
                 {
-                    mDynamics->tick(*mEntityFactory, mClientDataManager.get(), tickTime);
+                    mDynamics->tick(*mEntityManager, mClientDataManager.get(), tickTime);
                 }
 
                 std::vector<component::WorldP2D> tickPositions{};
@@ -153,9 +149,8 @@ namespace oni {
                     // might not even be there anymore. It won't crash because registry will be locked, but then what is the
                     // point of multi threading? Maybe I should drop this whole multi-thread everything shenanigans and just do
                     // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
-                    auto &manager = mEntityFactory->getEntityManager();
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
-                        const auto &pos = manager.get<component::WorldP3D>(carEntity);
+                        const auto &pos = mEntityManager->get<component::WorldP3D>(carEntity);
                         tickPositions.push_back({pos.x, pos.y});
                     }
                 }
@@ -175,7 +170,7 @@ namespace oni {
 
             void
             ServerGame::_finish() {
-                mEntityFactory->getEntityManager().dispatchEvents();
+                mEntityManager->dispatchEvents();
                 mServer->flush(); // TODO: Can this happen on separate thread?
             }
 
@@ -208,24 +203,22 @@ namespace oni {
                 auto pos = component::WorldP3D{-0, -0, vehicleZ};
                 auto size = math::vec2{2.5f, 1.1f};
 
-                auto &manager = mEntityFactory->getEntityManager();
+                auto carEntity = mEntityManager->createEntity_RaceCar();
+                mEntityManager->setWorldP3D(carEntity, pos.x, pos.y, pos.z);
+                mEntityManager->setScale(carEntity, size.x, size.y);
+                mEntityManager->setTexture(carEntity, "resources/images/car/1/car.png");
+                mEntityManager->createPhysics(carEntity, pos, size, 0);
 
-                auto carEntity = mEntityFactory->createEntity_RaceCar();
-                mEntityFactory->setWorldP3D(carEntity, pos.x, pos.y, pos.z);
-                mEntityFactory->setScale(carEntity, size.x, size.y);
-                mEntityFactory->setTexture(carEntity, "resources/images/car/1/car.png");
-                mEntityFactory->createPhysics(carEntity, pos, size, 0);
-
-                auto carGunEntity = mEntityFactory->createEntity_VehicleGun();
-                mEntityFactory->setWorldP3D(carGunEntity, 0.5f, 0.f, mZLayerManager->getZForEntity(
+                auto carGunEntity = mEntityManager->createEntity_VehicleGun();
+                mEntityManager->setWorldP3D(carGunEntity, 0.5f, 0.f, mZLayerManager->getZForEntity(
                         oni::entities::EntityType::VEHICLE_GUN));
-                mEntityFactory->setScale(carGunEntity, 2.f, 0.5f);
-                mEntityFactory->setTexture(carGunEntity, "resources/images/minigun/1.png");
+                mEntityManager->setScale(carGunEntity, 2.f, 0.5f);
+                mEntityManager->setTexture(carGunEntity, "resources/images/minigun/1.png");
 
-                mEntityFactory->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
+                mEntityManager->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
                                        oni::entities::EntityType::VEHICLE_GUN);
 
-                auto &carConfig = manager.get<component::CarConfig>(carEntity);
+                auto &carConfig = mEntityManager->get<component::CarConfig>(carEntity);
                 auto tireTexturePath = std::string("resources/images/car/1/car-tire.png");
                 auto tireHeading = component::Heading{static_cast< common::r32>( math::toRadians(90.0f))};
                 math::vec2 tireSize{
@@ -247,24 +240,24 @@ namespace oni {
                 };
 
                 for (auto &&carTire: carTiresFront) {
-                    auto tireEntity = mEntityFactory->createEntity_VehicleTireFront();
-                    mEntityFactory->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
-                    mEntityFactory->setScale(tireEntity, tireSize.x, tireSize.y);
-                    mEntityFactory->setHeading(tireEntity, tireHeading.value);
-                    mEntityFactory->setTexture(tireEntity, tireTexturePath);
+                    auto tireEntity = mEntityManager->createEntity_VehicleTireFront();
+                    mEntityManager->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
+                    mEntityManager->setScale(tireEntity, tireSize.x, tireSize.y);
+                    mEntityManager->setHeading(tireEntity, tireHeading.value);
+                    mEntityManager->setTexture(tireEntity, tireTexturePath);
 
-                    mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
+                    mEntityManager->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_FRONT);
                 }
 
                 for (auto &&carTire: carTiresRear) {
-                    auto tireEntity = mEntityFactory->createEntity_VehicleTireRear();
-                    mEntityFactory->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
-                    mEntityFactory->setScale(tireEntity, tireSize.x, tireSize.y);
-                    mEntityFactory->setHeading(tireEntity, tireHeading.value);
-                    mEntityFactory->setTexture(tireEntity, tireTexturePath);
+                    auto tireEntity = mEntityManager->createEntity_VehicleTireRear();
+                    mEntityManager->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
+                    mEntityManager->setScale(tireEntity, tireSize.x, tireSize.y);
+                    mEntityManager->setHeading(tireEntity, tireHeading.value);
+                    mEntityManager->setTexture(tireEntity, tireTexturePath);
 
-                    mEntityFactory->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
+                    mEntityManager->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_REAR);
                 }
 
@@ -278,13 +271,13 @@ namespace oni {
                 auto pos = component::WorldP3D{-20.0f, -30.0f, vehicleZ};
                 auto heading = 0.f;
 
-                auto id = mEntityFactory->createEntity_Vehicle();
+                auto id = mEntityManager->createEntity_Vehicle();
 
-                mEntityFactory->setWorldP3D(id, pos.x, pos.y, pos.z);
-                mEntityFactory->setScale(id, size.x, size.y);
-                mEntityFactory->setTexture(id, "resources/images/car/2/truck.png");
-                mEntityFactory->setHeading(id, heading);
-                mEntityFactory->createPhysics(id, pos, size, heading);
+                mEntityManager->setWorldP3D(id, pos.x, pos.y, pos.z);
+                mEntityManager->setScale(id, size.x, size.y);
+                mEntityManager->setTexture(id, "resources/images/car/2/truck.png");
+                mEntityManager->setHeading(id, heading);
+                mEntityManager->createPhysics(id, pos, size, heading);
 
                 return id;
             }

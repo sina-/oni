@@ -15,8 +15,6 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
-        class EntityFactory;
-
         class ClientDataManager;
     }
 
@@ -32,13 +30,13 @@ namespace oni {
             ~Projectile();
 
             void
-            tick(entities::EntityFactory &,
+            tick(entities::EntityManager &,
                  entities::ClientDataManager *,
                  common::r64 tickTime);
 
         private:
             void
-            fireRocket(entities::EntityFactory &entityFactory,
+            fireRocket(entities::EntityManager &,
                        const common::r32 velocity,
                        const component::WorldP3D &pos,
                        const component::Heading &heading,

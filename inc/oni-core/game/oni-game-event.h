@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/component/oni-component-audio.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-entity.h>

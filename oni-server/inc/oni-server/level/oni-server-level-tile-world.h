@@ -15,8 +15,6 @@ class b2World;
 namespace oni {
     namespace entities {
         class EntityManager;
-
-        class EntityFactory;
     }
 
     namespace math {
@@ -34,7 +32,7 @@ namespace oni {
 
             class TileWorld {
             public:
-                TileWorld(oni::entities::EntityFactory &,
+                TileWorld(oni::entities::EntityManager &,
                           b2World &,
                           const oni::math::ZLayerManager &);
 
@@ -122,7 +120,7 @@ namespace oni {
                 getChunkSize() const;
 
             private:
-                oni::entities::EntityFactory &mEntityFactory;
+                oni::entities::EntityManager &mEntityManager;
                 b2World &mPhysicsWorld;
                 /**
                  * A tile is determined by its lower left coordinate in the world. This coordinate is

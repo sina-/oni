@@ -12,7 +12,6 @@
 #include <oni-core/physics/oni-physics-dynamics.h>
 #include <oni-core/math/oni-math-transformation.h>
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-gameplay.h>
@@ -234,14 +233,13 @@ namespace oni {
         }
 
         void
-        SceneManager::render(entities::EntityFactory &entityFactory) {
+        SceneManager::render(entities::EntityManager &manager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
-            auto &entityManager = entityFactory.getEntityManager();
 
             {
                 begin(*mShader, *mRenderer, true, true, true);
-                _render(entityManager, viewWidth, viewHeight);
+                _render(manager, viewWidth, viewHeight);
                 end(*mShader, *mRenderer);
             }
 
@@ -352,8 +350,8 @@ namespace oni {
         }
 
         void
-        SceneManager::tick(const entities::EntityFactory &serverEntityFactory,
-                           entities::EntityFactory &clientEntityFactory,
+        SceneManager::tick(const entities::EntityManager &serverManager,
+                           entities::EntityManager &clientManager,
                            common::r64 tickTime) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
@@ -382,7 +380,7 @@ namespace oni {
 
             /// Update Emitters
             {
-                auto view = clientEntityFactory.getEntityManager().createView<component::SmokeEmitterCD>();
+                auto view = clientManager.createView<component::SmokeEmitterCD>();
                 for (auto &&id: view) {
                     auto &emitter = view.get<component::SmokeEmitterCD>(id);
                     math::subAndZeroClip(emitter.currentCD, tickTime);
@@ -397,7 +395,7 @@ namespace oni {
                 common::r32 particleSize = particleHalfSize * 2;
                 common::r32 halfConeAngle = static_cast<common::r32>(math::toRadians(45)) / 2.f;
 
-                auto view = serverEntityFactory.getEntityManager().createView<
+                auto view = serverManager.createView<
                         component::Trail,
                         component::WorldP3D,
                         component::Heading>();
@@ -415,10 +413,10 @@ namespace oni {
                     //math::vec4 color{1.f, 1.f, 1.f, 1.f};
 
                     if (trail.previousPos.empty()) {
-                        auto trailEntity = clientEntityFactory.createEntity_SimpleParticle();
-                        clientEntityFactory.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
-                        clientEntityFactory.setTexture(trailEntity, texturePath);
-                        clientEntityFactory.setScale(trailEntity, particleSize, particleSize);
+                        auto trailEntity = clientManager.createEntity_SimpleParticle();
+                        clientManager.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
+                        clientManager.setTexture(trailEntity, texturePath);
+                        clientManager.setScale(trailEntity, particleSize, particleSize);
                         continue;
                     }
 
@@ -456,22 +454,22 @@ namespace oni {
                                     pos, color, false);
                         }
                         */
-                            auto trailEntity = clientEntityFactory.createEntity_SimpleParticle();
-                            clientEntityFactory.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
-                            clientEntityFactory.setTexture(trailEntity, texturePath);
-                            clientEntityFactory.setScale(trailEntity, particleSize, particleSize);
+                            auto trailEntity = clientManager.createEntity_SimpleParticle();
+                            clientManager.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
+                            clientManager.setTexture(trailEntity, texturePath);
+                            clientManager.setScale(trailEntity, particleSize, particleSize);
 
-                            auto &age = clientEntityFactory.getEntityManager().get<component::Age>(
+                            auto &age = clientManager.get<component::Age>(
                                     trailEntity);
                             // TODO: I don't use any other velocity than the first one, should I just not store the rest?
                             // or should I update this code to use all by iterating over trail.previousPos?
                             age.maxAge = 1.f - (distance - i) / trail.velocity[0];
 
-                            auto &velocity = clientEntityFactory.getEntityManager().get<component::Velocity>(
+                            auto &velocity = clientManager.get<component::Velocity>(
                                     trailEntity);
                             velocity.currentVelocity = mRand->next_r32(2.f, 10.f);
 
-                            auto &particleHeading = clientEntityFactory.getEntityManager().get<component::Heading>(
+                            auto &particleHeading = clientManager.get<component::Heading>(
                                     trailEntity);
                             particleHeading.value = mRand->next_r32(spawnMinAngle, spawnMaxAngle);
 
@@ -488,7 +486,7 @@ namespace oni {
 
             /// Entities that leave mark
             {
-                auto view = clientEntityFactory.getEntityManager().createView<
+                auto view = clientManager.createView<
                         component::Tag_LeavesMark,
                         component::Texture,
                         component::WorldP3D,
@@ -502,7 +500,7 @@ namespace oni {
                     brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
-                    splat(clientEntityFactory, pos, scale, brush);
+                    splat(clientManager, pos, scale, brush);
                 }
             }
 
@@ -511,7 +509,7 @@ namespace oni {
                 std::vector<component::WorldP3D> skidPosList{};
                 std::vector<common::u8> skidOpacity{};
                 {
-                    auto view = serverEntityFactory.getEntityManager().createView<
+                    auto view = serverManager.createView<
                             component::Car,
                             component::WorldP3D,
                             component::Heading,
@@ -552,16 +550,16 @@ namespace oni {
                         }
                         if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f or true) {
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
-                            auto &emitter = getOrCreateEmitterCD(clientEntityFactory, carEntity);
+                            auto &emitter = getOrCreateEmitterCD(clientManager, carEntity);
                             if (math::safeZero(emitter.currentCD)) {
                                 for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
-                                    auto id = clientEntityFactory.createEntity_SmokeCloud();
-                                    clientEntityFactory.setWorldP3D(id, pos.x, pos.y, z);
-                                    clientEntityFactory.setTexture(id, "resources/images/cloud/1.png");
-                                    clientEntityFactory.setRandAge(id, 1, 3);
-                                    clientEntityFactory.setRandHeading(id);
-                                    clientEntityFactory.setRandVelocity(id, 1, 2);
-                                    clientEntityFactory.setScale(id, 10, 10);
+                                    auto id = clientManager.createEntity_SmokeCloud();
+                                    clientManager.setWorldP3D(id, pos.x, pos.y, z);
+                                    clientManager.setTexture(id, "resources/images/cloud/1.png");
+                                    clientManager.setRandAge(id, 1, 3);
+                                    clientManager.setRandHeading(id);
+                                    clientManager.setRandVelocity(id, 1, 2);
+                                    clientManager.setScale(id, 10, 10);
                                 }
                                 emitter.currentCD = emitter.initialCD;
                             }
@@ -576,14 +574,14 @@ namespace oni {
 
                     for (size_t i = 0; i < skidPosList.size(); ++i) {
                         brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientEntityFactory, skidPosList[i], scale, brush);
+                        splat(clientManager, skidPosList[i], scale, brush);
                     }
                 }
             }
 
             /// Update Laps
             {
-                auto carLapView = serverEntityFactory.getEntityManager().createView<component::Car, gameplay::CarLapInfo>();
+                auto carLapView = serverManager.createView<component::Car, gameplay::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:
@@ -595,61 +593,58 @@ namespace oni {
                      */
                     const auto &carLap = carLapView.get<gameplay::CarLapInfo>(carEntity);
 
-                    const auto &carLapText = getOrCreateLapText(clientEntityFactory, carEntity, carLap);
-                    updateRaceInfo(clientEntityFactory.getEntityManager(), carLap, carLapText);
+                    const auto &carLapText = getOrCreateLapText(clientManager, carEntity, carLap);
+                    updateRaceInfo(clientManager, carLap, carLapText);
                 }
             }
         }
 
         void
-        SceneManager::splat(entities::EntityFactory &entityFactory,
+        SceneManager::splat(entities::EntityManager &manager,
                             const component::WorldP3D &worldPos,
                             const component::Scale &scale,
                             const graphic::Brush &brush) {
-            auto &entityManager = entityFactory.getEntityManager();
-
             std::set<common::EntityID> tileEntities;
 
-            auto entityID = getOrCreateCanvasTile(entityFactory, worldPos);
+            auto entityID = getOrCreateCanvasTile(manager, worldPos);
             tileEntities.insert(entityID);
 
             auto lowerLeft = worldPos;
             lowerLeft.x -= scale.x / 2.f;
             lowerLeft.y -= scale.y / 2.f;
-            auto lowerLeftEntityID = getOrCreateCanvasTile(entityFactory, lowerLeft);
+            auto lowerLeftEntityID = getOrCreateCanvasTile(manager, lowerLeft);
             tileEntities.insert(lowerLeftEntityID);
 
             auto topRight = worldPos;
             topRight.x += scale.x / 2.f;
             topRight.y += scale.y / 2.f;
 
-            auto topRightEntityID = getOrCreateCanvasTile(entityFactory, topRight);
+            auto topRightEntityID = getOrCreateCanvasTile(manager, topRight);
             tileEntities.insert(topRightEntityID);
 
             auto topLeft = worldPos;
             topLeft.x -= scale.x / 2.f;
             topLeft.y += scale.y / 2.f;
-            auto topLeftEntityID = getOrCreateCanvasTile(entityFactory, topLeft);
+            auto topLeftEntityID = getOrCreateCanvasTile(manager, topLeft);
             tileEntities.insert(topLeftEntityID);
 
             auto lowerRight = worldPos;
             lowerRight.x += scale.x / 2.f;
             lowerRight.y -= scale.y / 2.f;
-            auto lowerRightEntityID = getOrCreateCanvasTile(entityFactory, lowerRight);
+            auto lowerRightEntityID = getOrCreateCanvasTile(manager, lowerRight);
             tileEntities.insert(lowerRightEntityID);
 
             for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(entityManager, tileEntity, brush, worldPos, scale);
+                updateCanvasTile(manager, tileEntity, brush, worldPos, scale);
             }
         }
 
         common::EntityID
-        SceneManager::getOrCreateCanvasTile(entities::EntityFactory &entityFactory,
+        SceneManager::getOrCreateCanvasTile(entities::EntityManager &manager,
                                             const component::WorldP3D &pos) {
             auto x = math::findBin(pos.x, mCanvasTileSizeX);
             auto y = math::findBin(pos.y, mCanvasTileSizeY);
             auto xy = math::pack_i64(x, y);
-            auto &entityRegistry = entityFactory.getEntityManager();
 
             auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
             if (missing) {
@@ -660,14 +655,14 @@ namespace oni {
                 auto heading = component::Heading{0.f};
 
                 // TODO: Should this be a canvas type?
-                auto id = entityFactory.createEntity_SimpleSpriteTextured();
-                entityFactory.setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
-                entityFactory.setScale(id,
+                auto id = manager.createEntity_SimpleSpriteTextured();
+                manager.setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
+                manager.setScale(id,
                                        static_cast<common::r32>(mCanvasTileSizeX),
                                        static_cast<common::r32>(mCanvasTileSizeY));
-                entityFactory.setHeading(id, heading.value);
+                manager.setHeading(id, heading.value);
 
-                auto &texture = entityRegistry.get<component::Texture>(id);
+                auto &texture = manager.get<component::Texture>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP);
@@ -742,7 +737,7 @@ namespace oni {
         }
 
         const SceneManager::RaceInfoEntities &
-        SceneManager::getOrCreateLapText(entities::EntityFactory &entityFactory,
+        SceneManager::getOrCreateLapText(entities::EntityManager &manager,
                                          common::EntityID carEntityID,
                                          const gameplay::CarLapInfo &carLap) {
             auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
@@ -755,10 +750,10 @@ namespace oni {
                 auto bestTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f,
                                                              zLevel};
 
-                carLapText.lapEntity = createText(entityFactory, lapRenderPos, "Lap: " + std::to_string(carLap.lap));
-                carLapText.lapTimeEntity = createText(entityFactory, lapTimeRenderPos,
+                carLapText.lapEntity = createText(manager, lapRenderPos, "Lap: " + std::to_string(carLap.lap));
+                carLapText.lapTimeEntity = createText(manager, lapTimeRenderPos,
                                                       "Lap time: " + std::to_string(carLap.lapTimeS));
-                carLapText.lapBestTimeEntity = createText(entityFactory, bestTimeRenderPos,
+                carLapText.lapBestTimeEntity = createText(manager, bestTimeRenderPos,
                                                           "Best time: " + std::to_string(carLap.bestLapTimeS));
                 mLapInfoLookup[carEntityID] = carLapText;
             }
@@ -766,16 +761,16 @@ namespace oni {
         }
 
         component::SmokeEmitterCD &
-        SceneManager::getOrCreateEmitterCD(entities::EntityFactory &entityFactory,
+        SceneManager::getOrCreateEmitterCD(entities::EntityManager &manager,
                                            common::EntityID id) {
-            auto &manager = entityFactory.getEntityManager();
             if (manager.hasComplement(id)) {
                 auto complementID = manager.getComplementOf(id);
                 auto &emitter = manager.get<component::SmokeEmitterCD>(complementID);
                 return emitter;
             } else {
+                // TODO: This is a divergance from the way entities are created, not sure if I want to expose createComponent
                 auto complementID = manager.createComplementTo(id);
-                auto &emitter = manager.assign<component::SmokeEmitterCD>(complementID);
+                auto &emitter = manager.createComponent<component::SmokeEmitterCD>(complementID);
                 return emitter;
             }
         }
@@ -864,10 +859,10 @@ namespace oni {
         }
 
         common::EntityID
-        SceneManager::createText(entities::EntityFactory &entityFactory,
+        SceneManager::createText(entities::EntityManager &manager,
                                  const component::WorldP3D &worldPos,
                                  const std::string &text) {
-            auto entityID = mFontManager.createTextFromString(entityFactory, text, worldPos);
+            auto entityID = mFontManager.createTextFromString(manager, text, worldPos);
             return entityID;
         }
 

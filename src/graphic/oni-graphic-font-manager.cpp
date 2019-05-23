@@ -7,8 +7,8 @@
 
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 #include <oni-core/component/oni-component-tag.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/entities/oni-entities-manager.h>
 
 namespace oni {
     namespace graphic {
@@ -71,15 +71,14 @@ namespace oni {
         FontManager::getTextureID() const { return m_FTAtlas->id; }
 
         common::EntityID
-        FontManager::createTextFromString(entities::EntityFactory &entityFactory,
+        FontManager::createTextFromString(entities::EntityManager &manager,
                                           std::string_view text,
                                           const component::WorldP3D &pos) {
-            auto &entityRegistry = entityFactory.getEntityManager();
-            auto id = entityFactory.createEntity_Text();
-            entityFactory.setWorldP3D(id, pos.x, pos.y, pos.z);
-            entityFactory.setText(id, text);
+            auto id = manager.createEntity_Text();
+            manager.setWorldP3D(id, pos.x, pos.y, pos.z);
+            manager.setText(id, text);
 
-            auto &textComponent = entityRegistry.get<component::Text>(id);
+            auto &textComponent = manager.get<component::Text>(id);
             assignGlyphs(textComponent);
 
             return id;

@@ -14,17 +14,31 @@
 #include <oni-core/entities/oni-entities-view.h>
 #include <oni-core/entities/oni-entities-group.h>
 
+class b2World;
+
+class b2Body;
 
 namespace oni {
+    namespace math {
+        class Rand;
+
+        struct vec2;
+    }
+
+    namespace math {
+        class ZLayerManager;
+    }
+
+    namespace component {
+        union WorldP3D;
+    }
+
     namespace entities {
-
-        class EntityFactory;
-
         class EntityManager {
         public:
-            friend EntityFactory;
-
-            EntityManager();
+            EntityManager(entities::SimMode sMode,
+                          const math::ZLayerManager &,
+                          b2World &);
 
             ~EntityManager();
 
@@ -32,6 +46,114 @@ namespace oni {
 
             EntityManager
             operator=(const EntityManager &) const = delete;
+
+        public:
+            common::EntityID
+            createEntity_SmokeCloud();
+
+            common::EntityID
+            createEntity_SimpleSpriteColored();
+
+            common::EntityID
+            createEntity_SimpleSpriteTextured();
+
+            common::EntityID
+            createEntity_RaceCar();
+
+            common::EntityID
+            createEntity_VehicleGun();
+
+            common::EntityID
+            createEntity_Vehicle();
+
+            common::EntityID
+            createEntity_SimpleRocket();
+
+            common::EntityID
+            createEntity_Wall();
+
+            common::EntityID
+            createEntity_VehicleTireFront();
+
+            common::EntityID
+            createEntity_VehicleTireRear();
+
+            common::EntityID
+            createEntity_SimpleParticle();
+
+            common::EntityID
+            createEntity_SimpleBlastParticle();
+
+            common::EntityID
+            createEntity_Text();
+
+            common::EntityID
+            createEntity_WorldChunk();
+
+            common::EntityID
+            createEntity_DebugWorldChunk();
+
+        public:
+            void
+            setWorldP3D(common::EntityID,
+                        common::r32 x,
+                        common::r32 y,
+                        common::r32 z);
+
+            void
+            setTexture(common::EntityID,
+                       std::string_view path);
+
+            void
+            setScale(common::EntityID,
+                     common::r32 x,
+                     common::r32 y);
+
+            void
+            setApperance(common::EntityID,
+                         common::r32 red,
+                         common::r32 green,
+                         common::r32 blue,
+                         common::r32 alpha);
+
+            void
+            setRandAge(common::EntityID,
+                       common::r32 lower,
+                       common::r32 upper);
+
+            void
+            setRandHeading(common::EntityID);
+
+            void
+            setHeading(common::EntityID,
+                       common::r32 heading);
+
+            void
+            setRandVelocity(common::EntityID,
+                            common::i32 lower,
+                            common::i32 upper);
+
+            void
+            createPhysics(
+                    common::EntityID,
+                    const component::WorldP3D &worldPos,
+                    const math::vec2 &size,
+                    const common::r32 heading);
+
+            void
+            setText(common::EntityID,
+                    std::string_view content);
+
+        public:
+            void
+            tagForRemoval(common::EntityID);
+
+            void
+            tagForRemoval(common::EntityID,
+                          const entities::EntityOperationPolicy &);
+
+            void
+            flushEntityRemovals();
 
             common::EntityID
             createComplementTo(common::EntityID id);
@@ -42,6 +164,66 @@ namespace oni {
             bool
             hasComplement(common::EntityID id);
 
+            void
+            attach(common::EntityID parent,
+                   common::EntityID child,
+                   entities::EntityType parentType,
+                   entities::EntityType childType);
+
+        private:
+            common::EntityID
+            createEntity(entities::EntityType);
+
+            void
+            assignSimMode(common::EntityID,
+                          entities::SimMode);
+
+            template<class Tag>
+            void
+            assignTag(common::EntityID id) {
+                mRegistry->assign<Tag>(id);
+            }
+
+            void
+            removeEntity(common::EntityID);
+
+            void
+            removeEntity(common::EntityID,
+                         const entities::EntityOperationPolicy &);
+
+            void
+            _removeEntity(common::EntityID,
+                          entities::EntityType entityType,
+                          const entities::EntityOperationPolicy &policy);
+
+            template<entities::EntityType entityType>
+            void
+            _removeEntity(common::EntityID,
+                          const entities::EntityOperationPolicy &policy) = delete;
+
+        private:
+            template<>
+            void
+            _removeEntity<entities::EntityType::RACE_CAR>(common::EntityID,
+                                                          const entities::EntityOperationPolicy &policy
+            );
+
+            template<>
+            void
+            _removeEntity<entities::EntityType::WALL>(common::EntityID,
+                                                      const entities::EntityOperationPolicy &policy
+            );
+
+            template<>
+            void
+            _removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
+                                                               const entities::EntityOperationPolicy &policy
+            );
+
+            void
+            removePhysicalBody(common::EntityID);
+
+        public:
             size_t
             size() noexcept;
 
@@ -57,6 +239,12 @@ namespace oni {
             template<class... ViewComponents>
             EntityView<common::EntityID, ViewComponents...>
             createView() {
+                return EntityView<common::EntityID, ViewComponents...>(*mRegistry);
+            }
+
+            template<class... ViewComponents>
+            EntityView<common::EntityID, ViewComponents...>
+            createView() const {
                 return EntityView<common::EntityID, ViewComponents...>(*mRegistry);
             }
 
@@ -240,8 +428,9 @@ namespace oni {
 
             template<class Component, class... Args>
             Component &
-            assign(common::EntityID entityID,
-                   Args &&... args) {
+            createComponent(common::EntityID entityID,
+                            Args &&... args) {
+                static_assert(std::is_aggregate_v<Component> || std::is_enum_v<Component>);
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
@@ -253,6 +442,14 @@ namespace oni {
             void
             remove(common::EntityID entityID) {
                 mRegistry->remove<Component>(entityID);
+            }
+
+            template<class Component>
+            void
+            removeComponentSafe(common::EntityID entityID) {
+                if (mRegistry->has<Component>(entityID)) {
+                    mRegistry->remove<Component>(entityID);
+                }
             }
 
             template<class Component, class... Args>
@@ -289,7 +486,15 @@ namespace oni {
             std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
 
             std::vector<common::EntityID> mDeletedEntities{};
-        };
+        private:
+            b2World &mPhysicsWorld;
+            const math::ZLayerManager &mZLayerManager;
+            std::unique_ptr<math::Rand> mRand{};
+            entities::SimMode mSimMode{entities::SimMode::CLIENT};
+            entities::EntityOperationPolicy mEntityOperationPolicy{};
 
+            std::vector<common::EntityID> mEntitiesToDelete{};
+            std::vector<entities::EntityOperationPolicy> mEntitiesToDeletePolicy{};
+        };
     }
 }

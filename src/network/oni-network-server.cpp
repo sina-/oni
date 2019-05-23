@@ -3,7 +3,6 @@
 #include <enet/enet.h>
 
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 #include <oni-core/component/oni-component-audio.h>
 

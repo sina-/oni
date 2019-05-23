@@ -19,8 +19,6 @@ namespace oni {
 
     namespace entities {
         class EntityManager;
-
-        class EntityFactory;
     }
 
     namespace graphic {
@@ -39,7 +37,7 @@ namespace oni {
             operator=(FontManager &) = delete;
 
             common::EntityID
-            createTextFromString(entities::EntityFactory &entityFactory,
+            createTextFromString(entities::EntityManager &,
                                  std::string_view text,
                                  const component::WorldP3D &pos);
 

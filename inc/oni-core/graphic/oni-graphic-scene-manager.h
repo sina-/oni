@@ -21,8 +21,6 @@ namespace oni {
 
     namespace entities {
         class EntityManager;
-
-        class EntityFactory;
     }
 
     namespace component {
@@ -57,14 +55,14 @@ namespace oni {
             ~SceneManager();
 
             void
-            render(entities::EntityFactory &);
+            render(entities::EntityManager &);
 
             void
             renderPhysicsDebugData();
 
             void
-            tick(const entities::EntityFactory &server,
-                 entities::EntityFactory &client,
+            tick(const entities::EntityManager &server,
+                 entities::EntityManager &client,
                  common::r64 tickTime);
 
             void
@@ -72,7 +70,7 @@ namespace oni {
                       const component::Appearance &appearance);
 
             void
-            splat(entities::EntityFactory &,
+            splat(entities::EntityManager &,
                   const component::WorldP3D &,
                   const component::Scale &,
                   const graphic::Brush &);
@@ -168,7 +166,7 @@ namespace oni {
             prepareTexture(component::Texture &texture);
 
             common::EntityID
-            createText(entities::EntityFactory &entityFactory,
+            createText(entities::EntityManager &,
                        const component::WorldP3D &worldPos,
                        const std::string &text);
 
@@ -186,16 +184,16 @@ namespace oni {
 
 
             const RaceInfoEntities &
-            getOrCreateLapText(entities::EntityFactory &,
+            getOrCreateLapText(entities::EntityManager &,
                                common::EntityID carEntityID,
                                const gameplay::CarLapInfo &carLap);
 
             common::EntityID
-            getOrCreateCanvasTile(entities::EntityFactory &,
+            getOrCreateCanvasTile(entities::EntityManager &,
                                   const component::WorldP3D &pos);
 
             component::SmokeEmitterCD &
-            getOrCreateEmitterCD(entities::EntityFactory &,
+            getOrCreateEmitterCD(entities::EntityManager &,
                                  common::EntityID);
 
             SceneManager::WorldP3DAndHeading

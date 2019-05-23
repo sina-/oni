@@ -5,17 +5,16 @@
 #include <Box2D/Box2D.h>
 
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/level/oni-level-chunk.h>
 
 
 namespace oni {
     namespace server {
         namespace level {
-            TileWorld::TileWorld(oni::entities::EntityFactory &entityFactory,
+            TileWorld::TileWorld(oni::entities::EntityManager &manager,
                                  b2World &physicsWorld,
                                  const math::ZLayerManager &zLevel) :
-                    mEntityFactory{entityFactory},
+                    mEntityManager{manager},
                     mPhysicsWorld{physicsWorld},
                     mZLayerManager{zLevel},
                     mTileSizeX{10}, mTileSizeY{10},
@@ -178,7 +177,7 @@ namespace oni {
 
                     if (isInMap(southChunkID, mChunkLookup)) {
                         auto southChunkEntityID = mChunkLookup.at(southChunkID);
-                        const auto &southChunk = mEntityFactory.getEntityManager().get<oni::level::Chunk>(
+                        const auto &southChunk = mEntityManager.get<oni::level::Chunk>(
                                 southChunkEntityID);
 
                         edgeRoads.southBoarder.x = southChunk.edgeRoad.northBoarder.x;
@@ -188,7 +187,7 @@ namespace oni {
                     }
                     if (isInMap(northChunkID, mChunkLookup)) {
                         auto northChunkEntityID = mChunkLookup.at(northChunkID);
-                        const auto &northChunk = mEntityFactory.getEntityManager().get<oni::level::Chunk>(
+                        const auto &northChunk = mEntityManager.get<oni::level::Chunk>(
                                 northChunkEntityID);
 
                         edgeRoads.northBoarder = northChunk.edgeRoad.southBoarder;
@@ -214,7 +213,7 @@ namespace oni {
 
                     if (isInMap(eastChunkID, mChunkLookup)) {
                         auto eastChunkEntityID = mChunkLookup.at(eastChunkID);
-                        const auto &eastChunk = mEntityFactory.getEntityManager().get<oni::level::Chunk>(
+                        const auto &eastChunk = mEntityManager.get<oni::level::Chunk>(
                                 eastChunkEntityID);
 
                         edgeRoads.eastBoarder.x = mTilesPerChunkX - 1;
@@ -226,7 +225,7 @@ namespace oni {
 
                     if (isInMap(westChunkID, mChunkLookup)) {
                         auto westChunkEntityID = mChunkLookup.at(westChunkID);
-                        const auto &westChunk = mEntityFactory.getEntityManager().get<oni::level::Chunk>(
+                        const auto &westChunk = mEntityManager.get<oni::level::Chunk>(
                                 westChunkEntityID);
 
                         edgeRoads.westBoarder.x = 0;
@@ -335,8 +334,8 @@ namespace oni {
                 auto chunkID = math::pack_i64(chunkIndex.x, chunkIndex.y);
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
                 auto chunkEntityID = mChunkLookup[chunkID];
-                auto &chunk = mEntityFactory.getEntityManager().get<oni::level::Chunk>(chunkEntityID);
-                auto &chunkPos = mEntityFactory.getEntityManager().get<component::WorldP3D>(chunkEntityID);
+                auto &chunk = mEntityManager.get<oni::level::Chunk>(chunkEntityID);
+                auto &chunkPos = mEntityManager.get<component::WorldP3D>(chunkEntityID);
                 chunkPos = worldPos;
                 chunk.index = chunkID;
                 chunk.edgeRoad = edgeRoads;
@@ -541,11 +540,11 @@ namespace oni {
                         }
                     }
 
-                    auto id = mEntityFactory.createEntity_Wall();
-                    mEntityFactory.setTexture(id, wallTexturePath);
-                    mEntityFactory.setScale(id, wallSize.x, wallSize.y);
-                    mEntityFactory.setHeading(id, heading);
-                    mEntityFactory.setWorldP3D(id, wallPositionInWorld.x, wallPositionInWorld.y, wallPositionInWorld.z);
+                    auto id = mEntityManager.createEntity_Wall();
+                    mEntityManager.setTexture(id, wallTexturePath);
+                    mEntityManager.setScale(id, wallSize.x, wallSize.y);
+                    mEntityManager.setHeading(id, heading);
+                    mEntityManager.setWorldP3D(id, wallPositionInWorld.x, wallPositionInWorld.y, wallPositionInWorld.z);
                 }
             }
 
@@ -594,10 +593,10 @@ namespace oni {
             TileWorld::genSprite(math::vec4 &color,
                                  math::vec2 &size,
                                  component::WorldP3D &worldPos) {
-                auto id = mEntityFactory.createEntity_DebugWorldChunk();
-                mEntityFactory.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
-                mEntityFactory.setScale(id, size.x, size.y);
-                mEntityFactory.setApperance(id, color.x, color.y, color.z, color.w);
+                auto id = mEntityManager.createEntity_DebugWorldChunk();
+                mEntityManager.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
+                mEntityManager.setScale(id, size.x, size.y);
+                mEntityManager.setApperance(id, color.x, color.y, color.z, color.w);
                 return id;
             }
 
@@ -605,10 +604,10 @@ namespace oni {
             TileWorld::genTexture(const math::vec2 &size,
                                   const component::WorldP3D &worldPos,
                                   std::string_view path) {
-                auto id = mEntityFactory.createEntity_WorldChunk();
-                mEntityFactory.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
-                mEntityFactory.setScale(id, size.x, size.y);
-                mEntityFactory.setTexture(id, path);
+                auto id = mEntityManager.createEntity_WorldChunk();
+                mEntityManager.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
+                mEntityManager.setScale(id, size.x, size.y);
+                mEntityManager.setTexture(id, path);
                 return id;
             }
 

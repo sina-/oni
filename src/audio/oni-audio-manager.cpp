@@ -5,7 +5,7 @@
 #include <fmod.hpp>
 
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/entities/oni-entities-factory.h>
+#include <oni-core/entities/oni-entities-manager.h>
 
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
 #define VALID(MAP, ID) assert(MAP.find(id) != MAP.end())
@@ -61,7 +61,7 @@ namespace oni {
         }
 
         void
-        AudioManager::tick(entities::EntityFactory &entityFactory,
+        AudioManager::tick(entities::EntityManager &manager,
                            const component::WorldP3D &playerPos) {
             mPlayerPos = playerPos;
             auto result = mSystem->update();
@@ -69,7 +69,7 @@ namespace oni {
 
             // Engine
             {
-                auto view = entityFactory.getEntityManager().createView<component::Tag_Audible,
+                auto view = manager.createView<component::Tag_Audible,
                         component::WorldP3D, component::Car, component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &car = view.get<component::Car>(entity);
@@ -93,7 +93,7 @@ namespace oni {
             }
 
             {
-                auto view = entityFactory.getEntityManager().createView<component::Tag_Audible,
+                auto view = manager.createView<component::Tag_Audible,
                         component::WorldP3D, component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &pos = view.get<component::WorldP3D>(entity).value;

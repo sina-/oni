@@ -28,8 +28,8 @@ namespace oni {
 
         class LapTracker {
         public:
-            explicit LapTracker(entities::EntityManager &entityManager,
-                                const math::ZLayerManager &);
+            LapTracker(entities::EntityManager &,
+                       const math::ZLayerManager &);
 
             ~LapTracker();
 

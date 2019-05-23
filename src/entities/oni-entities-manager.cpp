@@ -1,23 +1,28 @@
-#include <oni-core/entities/oni-entities-factory.h>
+#include <oni-core/entities/oni-entities-manager.h>
 
-#include <Box2D/Box2D.h>
+#include <Box2D/Dynamics/b2Body.h>
+#include <Box2D/Dynamics/b2Fixture.h>
+#include <Box2D/Collision/Shapes/b2PolygonShape.h>
+#include <Box2D/Dynamics/b2World.h>
 
-#include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-audio.h>
 #include <oni-core/component/oni-component-gameplay.h>
-#include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/level/oni-level-chunk.h>
+#include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/math/oni-math-rand.h>
-#include <oni-core/math/oni-math-transformation.h>
 
 namespace oni {
     namespace entities {
-        EntityFactory::EntityFactory(
-                entities::SimMode sMode,
-                const math::ZLayerManager &zLayerManager,
-                b2World &physicsWorld) :
-                mZLayerManager(zLayerManager),
-                mPhysicsWorld(physicsWorld),
-                mSimMode(sMode) {
+        EntityManager::EntityManager(entities::SimMode sMode,
+                                     const math::ZLayerManager &zLayerManager,
+                                     b2World &physicsWorld) : mSimMode(sMode), mZLayerManager(zLayerManager),
+                                                              mPhysicsWorld(physicsWorld) {
+            mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();
+            mLoader = std::make_unique<entt::basic_continuous_loader<common::EntityID>>(*mRegistry);
+            mDispatcher = std::make_unique<entt::dispatcher>();
+            mRand = std::make_unique<math::Rand>(0);
+
             switch (sMode) {
                 case SimMode::CLIENT: {
                     mEntityOperationPolicy = entities::EntityOperationPolicy::client();
@@ -32,23 +37,127 @@ namespace oni {
                     break;
                 }
             }
-            mRand = std::make_unique<math::Rand>(0);
-            mRegistryManager = std::make_unique<entities::EntityManager>();
         }
 
-        EntityManager &
-        EntityFactory::getEntityManager() {
-            return *mRegistryManager;
+        EntityManager::~EntityManager() = default;
+
+        void
+        EntityManager::clearDeletedEntitiesList() {
+            mDeletedEntities.clear();
         }
 
-        EntityManager &
-        EntityFactory::getEntityManager() const {
-            return *mRegistryManager;
+        void
+        EntityManager::attach(common::EntityID parent,
+                              common::EntityID child,
+                              entities::EntityType parentType,
+                              entities::EntityType childType) {
+            auto &attachment = mRegistry->get<component::EntityAttachment>(parent);
+            attachment.entities.emplace_back(child);
+            attachment.entityTypes.emplace_back(childType);
+
+            auto &attachee = mRegistry->get<component::EntityAttachee>(child);
+            attachee.entityID = parent;
+            attachee.entityType = parentType;
         }
 
         common::EntityID
-        EntityFactory::createEntity(entities::EntityType type) {
-            auto id = mRegistryManager->create();
+        EntityManager::createComplementTo(common::EntityID id) {
+            assert(mComplementaryEntities.find(id) == mComplementaryEntities.end());
+            auto result = create();
+            createComponent<entities::EntityType>(result, entities::EntityType::COMPLEMENT);
+            mComplementaryEntities[id] = result;
+            return result;
+        }
+
+        common::EntityID
+        EntityManager::getComplementOf(common::EntityID id) {
+            assert(mComplementaryEntities.find(id) != mComplementaryEntities.end());
+            return mComplementaryEntities[id];
+        }
+
+        bool
+        EntityManager::hasComplement(common::EntityID id) {
+            return mComplementaryEntities.find(id) != mComplementaryEntities.end();
+        }
+
+        size_t
+        EntityManager::size() noexcept {
+            auto result = mRegistry->size();
+            return result;
+        }
+
+        common::EntityID
+        EntityManager::map(common::EntityID entityID) {
+            auto result = mLoader->map(entityID);
+            if (result == entt::null) {
+                return 0;
+            }
+            return result;
+        }
+
+        const std::vector<common::EntityID> &
+        EntityManager::getDeletedEntities() const {
+            return mDeletedEntities;
+        }
+
+        void
+        EntityManager::tagForComponentSync(common::EntityID entity) {
+            accommodate<component::Tag_OnlyComponentUpdate>(entity);
+        }
+
+        void
+        EntityManager::dispatchEvents() {
+            mDispatcher->update();
+        }
+
+        common::EntityID
+        EntityManager::create() {
+            auto result = mRegistry->create();
+            return result;
+        }
+
+        void
+        EntityManager::destroy(common::EntityID entityID) {
+            mRegistry->destroy(entityID);
+        }
+
+        void
+        EntityManager::destroyAndTrack(common::EntityID entityID) {
+            mRegistry->destroy(entityID);
+            mDeletedEntities.push_back(entityID);
+        }
+
+        bool
+        EntityManager::valid(common::EntityID entityID) {
+            return mRegistry->valid(entityID);
+        }
+
+        void
+        EntityManager::tagForRemoval(common::EntityID id) {
+            mEntitiesToDelete.push_back(id);
+            mEntitiesToDeletePolicy.push_back(mEntityOperationPolicy);
+        }
+
+        void
+        EntityManager::tagForRemoval(common::EntityID id,
+                                     const entities::EntityOperationPolicy &policy) {
+            mEntitiesToDelete.push_back(id);
+            mEntitiesToDeletePolicy.push_back(policy);
+        }
+
+        void
+        EntityManager::flushEntityRemovals() {
+            for (common::size i = 0; i < mEntitiesToDelete.size(); ++i) {
+                removeEntity(mEntitiesToDelete[i], mEntitiesToDeletePolicy[i]);
+            }
+
+            mEntitiesToDelete.clear();
+            mEntitiesToDeletePolicy.clear();
+        }
+
+        common::EntityID
+        EntityManager::createEntity(entities::EntityType type) {
+            auto id = mRegistry->create();
             assignSimMode(id, mSimMode);
             if (mEntityOperationPolicy.track) {
                 assert(mSimMode == entities::SimMode::SERVER);
@@ -59,29 +168,29 @@ namespace oni {
         }
 
         void
-        EntityFactory::removeEntity(common::EntityID id) {
+        EntityManager::removeEntity(common::EntityID id) {
             removeEntity(id, mEntityOperationPolicy);
         }
 
         void
-        EntityFactory::removeEntity(common::EntityID id,
+        EntityManager::removeEntity(common::EntityID id,
                                     const entities::EntityOperationPolicy &policy) {
-            if (policy.safe && !mRegistryManager->valid(id)) {
+            if (policy.safe && !valid(id)) {
                 return;
             }
 
-            auto entityType = mRegistryManager->get<entities::EntityType>(id);
+            auto entityType = mRegistry->get<entities::EntityType>(id);
             _removeEntity(id, entityType, policy);
 
             if (policy.track) {
-                mRegistryManager->destroyAndTrack(id);
+                destroyAndTrack(id);
             } else {
-                mRegistryManager->destroy(id);
+                destroy(id);
             }
         }
 
         void
-        EntityFactory::_removeEntity(common::EntityID entityID,
+        EntityManager::_removeEntity(common::EntityID entityID,
                                      entities::EntityType entityType,
                                      const entities::EntityOperationPolicy &policy) {
             // TODO: I hate this, for every new type and every change to old types I have to remember to add, or update,
@@ -128,11 +237,11 @@ namespace oni {
         }
 
         void
-        EntityFactory::createPhysics(common::EntityID id,
+        EntityManager::createPhysics(common::EntityID id,
                                      const component::WorldP3D &pos,
                                      const math::vec2 &size,
                                      common::r32 heading) {
-            auto &props = mRegistryManager->get<component::PhysicalProperties>(id);
+            auto &props = mRegistry->get<component::PhysicalProperties>(id);
             auto shape = b2PolygonShape{};
             shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
@@ -202,14 +311,14 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_removeEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
+        EntityManager::_removeEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
                                                                      const entities::EntityOperationPolicy &policy) {
             // TODO: When notifying clients of this, the texture in memory should be evicted.
 
 
             // TODO: For some reason this is the wrong list of entities, check valid() call returning false,
             //  on client side even though during serialization I tell entt to keep mapping these ids to client side ids
-            auto &attachments = mRegistryManager->get<component::EntityAttachment>(entityID);
+            auto &attachments = mRegistry->get<component::EntityAttachment>(entityID);
             for (common::size i = 0; i < attachments.entities.size(); ++i) {
                 auto attachmentType = attachments.entityTypes[i];
                 auto attachmentEntityID = attachments.entities[i];
@@ -221,44 +330,30 @@ namespace oni {
 
         template<>
         void
-        EntityFactory::_removeEntity<entities::EntityType::WALL>(common::EntityID entityID,
+        EntityManager::_removeEntity<entities::EntityType::WALL>(common::EntityID entityID,
                                                                  const entities::EntityOperationPolicy &policy) {
             removePhysicalBody(entityID);
         }
 
         template<>
         void
-        EntityFactory::_removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
+        EntityManager::_removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
                                                                           const entities::EntityOperationPolicy &policy) {
             removePhysicalBody(entityID);
         }
 
         void
-        EntityFactory::removePhysicalBody(common::EntityID entityID) {
+        EntityManager::removePhysicalBody(common::EntityID entityID) {
             // TODO: This is server side only at the moment, so deletion on client side would fail, if I add client
             // side prediction I can remove this check
-            if (mRegistryManager->has<component::PhysicalProperties>(entityID)) {
-                auto entityPhysicalProps = mRegistryManager->get<component::PhysicalProperties>(entityID);
+            if (mRegistry->has<component::PhysicalProperties>(entityID)) {
+                auto entityPhysicalProps = mRegistry->get<component::PhysicalProperties>(entityID);
                 mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
             }
         }
 
         void
-        EntityFactory::attach(common::EntityID parent,
-                              common::EntityID child,
-                              entities::EntityType parentType,
-                              entities::EntityType childType) {
-            auto &attachment = mRegistryManager->get<component::EntityAttachment>(parent);
-            attachment.entities.emplace_back(child);
-            attachment.entityTypes.emplace_back(childType);
-
-            auto &attachee = mRegistryManager->get<component::EntityAttachee>(child);
-            attachee.entityID = parent;
-            attachee.entityType = parentType;
-        }
-
-        void
-        EntityFactory::assignSimMode(common::EntityID id,
+        EntityManager::assignSimMode(common::EntityID id,
                                      entities::SimMode sMode) {
             switch (sMode) {
                 case SimMode::CLIENT: {
@@ -276,107 +371,84 @@ namespace oni {
         }
 
         void
-        EntityFactory::setTexture(common::EntityID id,
+        EntityManager::setTexture(common::EntityID id,
                                   std::string_view path) {
-            mRegistryManager->get<component::Texture>(id).path = path;
+            mRegistry->get<component::Texture>(id).path = path;
         }
 
         void
-        EntityFactory::setRandAge(common::EntityID id,
+        EntityManager::setRandAge(common::EntityID id,
                                   common::r32 lower,
                                   common::r32 upper) {
-            auto &age = mRegistryManager->get<component::Age>(id);
+            auto &age = mRegistry->get<component::Age>(id);
             age.maxAge = mRand->next_r32(lower, upper);
         }
 
         void
-        EntityFactory::setRandHeading(common::EntityID id) {
-            auto &heading = mRegistryManager->get<component::Heading>(id);
+        EntityManager::setRandHeading(common::EntityID id) {
+            auto &heading = mRegistry->get<component::Heading>(id);
             heading.value = mRand->next_r32(0.f, common::FULL_CIRCLE_IN_RAD);
         }
 
         void
-        EntityFactory::setRandVelocity(common::EntityID id,
+        EntityManager::setRandVelocity(common::EntityID id,
                                        common::i32 lower,
                                        common::i32 upper) {
-            auto &velocity = mRegistryManager->get<component::Velocity>(id);
+            auto &velocity = mRegistry->get<component::Velocity>(id);
             velocity.currentVelocity = mRand->next_r32(lower, upper);
             velocity.maxVelocity = velocity.currentVelocity;
         }
 
         void
-        EntityFactory::setWorldP3D(common::EntityID id,
+        EntityManager::setWorldP3D(common::EntityID id,
                                    common::r32 x,
                                    common::r32 y,
                                    common::r32 z) {
-            auto &pos = mRegistryManager->get<component::WorldP3D>(id);
+            auto &pos = mRegistry->get<component::WorldP3D>(id);
             pos.x = x;
             pos.y = y;
             pos.z = z;
         }
 
         void
-        EntityFactory::setScale(common::EntityID id,
+        EntityManager::setScale(common::EntityID id,
                                 common::r32 x,
                                 common::r32 y) {
-            auto &scale = mRegistryManager->get<component::Scale>(id);
+            auto &scale = mRegistry->get<component::Scale>(id);
             scale.x = x;
             scale.y = y;
         }
 
         void
-        EntityFactory::setHeading(common::EntityID id,
+        EntityManager::setHeading(common::EntityID id,
                                   common::r32 heading) {
-            auto &h = mRegistryManager->get<component::Heading>(id);
+            auto &h = mRegistry->get<component::Heading>(id);
             h.value = heading;
         }
 
         void
-        EntityFactory::setText(common::EntityID id,
+        EntityManager::setText(common::EntityID id,
                                std::string_view content) {
-            auto &text = mRegistryManager->get<component::Text>(id);
+            auto &text = mRegistry->get<component::Text>(id);
             text.textContent = content;
 
         }
 
         void
-        EntityFactory::setApperance(common::EntityID id,
+        EntityManager::setApperance(common::EntityID id,
                                     common::r32 red,
                                     common::r32 green,
                                     common::r32 blue,
                                     common::r32 alpha) {
-            auto &apperance = mRegistryManager->get<component::Appearance>(id);
+            auto &apperance = mRegistry->get<component::Appearance>(id);
             apperance.color.x = red;
             apperance.color.y = green;
             apperance.color.z = blue;
             apperance.color.w = alpha;
         }
 
-        void
-        EntityFactory::tagForRemoval(common::EntityID id) {
-            mEntitiesToDelete.push_back(id);
-            mEntitiesToDeletePolicy.push_back(mEntityOperationPolicy);
-        }
-
-        void
-        EntityFactory::tagForRemoval(common::EntityID id,
-                                     const entities::EntityOperationPolicy &policy) {
-            mEntitiesToDelete.push_back(id);
-            mEntitiesToDeletePolicy.push_back(policy);
-        }
-
-        void
-        EntityFactory::flushEntityRemovals() {
-            for (common::size i = 0; i < mEntitiesToDelete.size(); ++i) {
-                removeEntity(mEntitiesToDelete[i], mEntitiesToDeletePolicy[i]);
-            }
-
-            mEntitiesToDelete.clear();
-            mEntitiesToDeletePolicy.clear();
-        }
-
         common::EntityID
-        EntityFactory::createEntity_SmokeCloud() {
+        EntityManager::createEntity_SmokeCloud() {
             auto id = createEntity(entities::EntityType::SMOKE);
 
             createComponent<component::WorldP3D>(id);
@@ -393,7 +465,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_RaceCar() {
+        EntityManager::createEntity_RaceCar() {
             auto id = createEntity(entities::EntityType::RACE_CAR);
 
             createComponent<component::WorldP3D>(id);
@@ -422,7 +494,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_VehicleGun() {
+        EntityManager::createEntity_VehicleGun() {
             auto id = createEntity(entities::EntityType::VEHICLE_GUN);
 
             createComponent<component::WorldP3D>(id);
@@ -439,7 +511,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_Vehicle() {
+        EntityManager::createEntity_Vehicle() {
             auto id = createEntity(entities::EntityType::VEHICLE);
 
             createComponent<component::WorldP3D>(id);
@@ -464,7 +536,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_SimpleRocket() {
+        EntityManager::createEntity_SimpleRocket() {
             auto id = createEntity(entities::EntityType::SIMPLE_ROCKET);
 
             createComponent<component::WorldP3D>(id);
@@ -495,7 +567,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_Wall() {
+        EntityManager::createEntity_Wall() {
             auto id = createEntity(entities::EntityType::WALL);
 
             createComponent<component::WorldP3D>(id);
@@ -515,7 +587,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_VehicleTireFront() {
+        EntityManager::createEntity_VehicleTireFront() {
             auto id = createEntity(entities::EntityType::VEHICLE_TIRE_FRONT);
 
             createComponent<component::WorldP3D>(id);
@@ -531,7 +603,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_VehicleTireRear() {
+        EntityManager::createEntity_VehicleTireRear() {
             auto id = createEntity(entities::EntityType::VEHICLE_TIRE_REAR);
 
             createComponent<component::WorldP3D>(id);
@@ -547,7 +619,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_SimpleParticle() {
+        EntityManager::createEntity_SimpleParticle() {
             auto id = createEntity(entities::EntityType::SIMPLE_PARTICLE);
 
             createComponent<component::WorldP3D>(id);
@@ -562,7 +634,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_SimpleBlastParticle() {
+        EntityManager::createEntity_SimpleBlastParticle() {
             auto id = createEntity(entities::EntityType::SIMPLE_BLAST_PARTICLE);
 
             createComponent<component::WorldP3D>(id);
@@ -579,7 +651,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_Text() {
+        EntityManager::createEntity_Text() {
             auto id = createEntity(entities::EntityType::TEXT);
 
             createComponent<component::WorldP3D>(id);
@@ -590,7 +662,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_WorldChunk() {
+        EntityManager::createEntity_WorldChunk() {
             auto id = createEntity(entities::EntityType::WORLD_CHUNK);
 
             createComponent<component::WorldP3D>(id);
@@ -606,7 +678,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_DebugWorldChunk() {
+        EntityManager::createEntity_DebugWorldChunk() {
             auto id = createEntity(entities::EntityType::DEBUG_WORLD_CHUNK);
 
             createComponent<component::WorldP3D>(id);
@@ -622,7 +694,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_SimpleSpriteColored() {
+        EntityManager::createEntity_SimpleSpriteColored() {
             auto id = createEntity(entities::EntityType::SIMPLE_SPRITE);
 
             createComponent<component::WorldP3D>(id);
@@ -637,7 +709,7 @@ namespace oni {
         }
 
         common::EntityID
-        EntityFactory::createEntity_SimpleSpriteTextured() {
+        EntityManager::createEntity_SimpleSpriteTextured() {
             auto id = createEntity(entities::EntityType::SIMPLE_SPRITE);
 
             createComponent<component::WorldP3D>(id);

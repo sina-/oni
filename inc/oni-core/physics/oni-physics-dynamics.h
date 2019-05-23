@@ -15,8 +15,6 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
-        class EntityFactory;
-
         class ClientDataManager;
     }
 
@@ -50,31 +48,31 @@ namespace oni {
             getPhysicsWorld();
 
             void
-            tick(entities::EntityFactory &entityFactory,
+            tick(entities::EntityManager &,
                  entities::ClientDataManager *clientData,
                  common::r64 tickTime);
 
         private:
             void
-            handleRocketCollision(entities::EntityFactory &,
+            handleRocketCollision(entities::EntityManager &,
                                   common::EntityID,
                                   component::PhysicalProperties &,
                                   component::WorldP3D &pos);
 
             void
-            handleVehicleCollision(entities::EntityFactory &,
+            handleVehicleCollision(entities::EntityManager &,
                                    common::EntityID,
                                    component::PhysicalProperties &,
                                    component::WorldP3D &);
 
             void
-            handleRaceCarCollision(entities::EntityFactory &,
+            handleRaceCarCollision(entities::EntityManager &,
                                    common::EntityID,
                                    component::PhysicalProperties &,
                                    component::WorldP3D &);
 
             void
-            handleCollision(entities::EntityFactory &,
+            handleCollision(entities::EntityManager &,
                             common::EntityID,
                             component::PhysicalProperties &,
                             component::WorldP3D &);
@@ -84,11 +82,11 @@ namespace oni {
 
         private:
             void
-            updateAge(entities::EntityFactory &,
+            updateAge(entities::EntityManager &,
                       common::r64 tickTime);
 
             void
-            updatePlacement(entities::EntityFactory &,
+            updatePlacement(entities::EntityManager &,
                             common::r64 tickTime);
 
 
@@ -98,7 +96,7 @@ namespace oni {
             std::unique_ptr<CollisionHandler> mCollisionHandler{};
 
             std::map<component::PhysicalCategory,
-                    std::function<void(entities::EntityFactory &,
+                    std::function<void(entities::EntityManager &,
                                        common::EntityID,
                                        component::PhysicalProperties &,
                                        component::WorldP3D &

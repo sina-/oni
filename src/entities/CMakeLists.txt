@@ -21,9 +21,4 @@ target_link_libraries(oni-core-entities
         oni-core-math
         PRIVATE
         ${BOX2D_LIBRARY}
-        oni-core-physics
-        )
-
-add_dependencies(oni-core-entities
-        oni-core-physics
         )

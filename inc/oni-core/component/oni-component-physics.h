@@ -112,6 +112,14 @@ namespace oni {
             common::duration maxAge{1.f};
         };
 
+        union Force {
+            struct {
+                common::r32 x{0};
+                common::r32 y{0};
+            };
+            math::vec2 value;
+        };
+
         struct PhysicalProperties {
             common::r32 linearDamping{2.f};
             common::r32 angularDamping{2.f};
@@ -122,9 +130,6 @@ namespace oni {
             bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other
             PhysicalCategory physicalCategory{PhysicalCategory::UNKNOWN};
             BodyType bodyType{BodyType::UNKNOWN};
-            // TODO: Not super happy about keeping a raw pointer to an object! But as long as I use naked Box2D
-            // I don't think there is a better way.
-            b2Body *body{nullptr};
         };
     }
 }

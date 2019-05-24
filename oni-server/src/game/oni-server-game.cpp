@@ -22,7 +22,7 @@ namespace oni {
         namespace game {
             ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
                 mZLayerManager = std::make_unique<math::ZLayerManager>();
-                mDynamics = std::make_unique<physics::Dynamics>(getTickFrequency());
+                mDynamics = std::make_unique<physics::Dynamics>();
                 mEntityManager = std::make_unique<oni::entities::EntityManager>(entities::SimMode::SERVER,
                                                                                 *mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());

@@ -9,7 +9,7 @@
 #include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 
 namespace oni {
     namespace graphic {

@@ -8,7 +8,7 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/entities/oni-entities-entity.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-geometry.h>
 
 namespace FMOD {

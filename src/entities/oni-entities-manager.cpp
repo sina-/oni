@@ -5,7 +5,7 @@
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 #include <Box2D/Dynamics/b2World.h>
 
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/level/oni-level-chunk.h>
@@ -179,60 +179,28 @@ namespace oni {
                 return;
             }
 
-            auto entityType = mRegistry->get<entities::EntityType>(id);
-            _removeEntity(id, entityType, policy);
+            if (mRegistry->has<component::EntityAttachment>(id)) {
+                for (auto &&childID: mRegistry->get<component::EntityAttachment>(id).entities) {
+                    removeEntity(childID, policy);
+                }
+            }
+
+            if (mRegistry->has<component::PhysicalProperties>(id)) {
+                removePhysicalBody(id);
+            }
+
+            if (mRegistry->has<component::Texture>(id)) {
+                // TODO: Clean up the texture in video-memory or tag it stale or something if I end up having a asset manager
+            }
+
+            if (mRegistry->has<component::SoundTag>(id)) {
+                // TODO: Same as texture, audio system needs to free the resource or let its resource manager at least know about this
+            }
 
             if (policy.track) {
                 destroyAndTrack(id);
             } else {
                 destroy(id);
-            }
-        }
-
-        void
-        EntityManager::_removeEntity(common::EntityID entityID,
-                                     entities::EntityType entityType,
-                                     const entities::EntityOperationPolicy &policy) {
-            // TODO: I hate this, for every new type and every change to old types I have to remember to add, or update,
-            // the deletion procedure. Technically dtor would be the right solution, then I can remove all this code
-            // and only depend on registry->destroy() method calling the dtor.
-            switch (entityType) {
-                case entities::EntityType::RACE_CAR: {
-                    _removeEntity<entities::EntityType::RACE_CAR>(entityID, policy);
-                    break;
-                }
-                case entities::EntityType::WALL: {
-                    _removeEntity<entities::EntityType::WALL>(entityID, policy);
-                    break;
-                }
-                case entities::EntityType::SIMPLE_ROCKET: {
-                    _removeEntity<entities::EntityType::SIMPLE_ROCKET>(entityID, policy);
-                    break;
-                }
-                case entities::EntityType::VEHICLE_GUN:
-                case entities::EntityType::VEHICLE_TIRE_FRONT:
-                case entities::EntityType::VEHICLE_TIRE_REAR:
-                case entities::EntityType::ROAD:
-                case entities::EntityType::VEHICLE:
-                case entities::EntityType::BACKGROUND:
-                case entities::EntityType::CANVAS:
-                case entities::EntityType::UI:
-                case entities::EntityType::SIMPLE_SPRITE:
-                case entities::EntityType::SIMPLE_PARTICLE:
-                case entities::EntityType::SIMPLE_BLAST_PARTICLE:
-                case entities::EntityType::TEXT:
-                case entities::EntityType::SMOKE:
-                case entities::EntityType::COMPLEMENT:
-                case entities::EntityType::DEBUG_WORLD_CHUNK:
-                case entities::EntityType::WORLD_CHUNK: {
-                    break;
-                }
-                case entities::EntityType::LAST:
-                case entities::EntityType::UNKNOWN:
-                default: {
-                    assert(false);
-                    break;
-                }
             }
         }
 
@@ -306,50 +274,14 @@ namespace oni {
                     break;
                 }
             }
-            props.body = body;
-        }
-
-        template<>
-        void
-        EntityManager::_removeEntity<entities::EntityType::RACE_CAR>(common::EntityID entityID,
-                                                                     const entities::EntityOperationPolicy &policy) {
-            // TODO: When notifying clients of this, the texture in memory should be evicted.
-
-
-            // TODO: For some reason this is the wrong list of entities, check valid() call returning false,
-            //  on client side even though during serialization I tell entt to keep mapping these ids to client side ids
-            auto &attachments = mRegistry->get<component::EntityAttachment>(entityID);
-            for (common::size i = 0; i < attachments.entities.size(); ++i) {
-                auto attachmentType = attachments.entityTypes[i];
-                auto attachmentEntityID = attachments.entities[i];
-                removeEntity(attachmentEntityID, policy);
-            }
-
-            removePhysicalBody(entityID);
-        }
-
-        template<>
-        void
-        EntityManager::_removeEntity<entities::EntityType::WALL>(common::EntityID entityID,
-                                                                 const entities::EntityOperationPolicy &policy) {
-            removePhysicalBody(entityID);
-        }
-
-        template<>
-        void
-        EntityManager::_removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID entityID,
-                                                                          const entities::EntityOperationPolicy &policy) {
-            removePhysicalBody(entityID);
+            mEntityBodyMap[id] = body;
         }
 
         void
-        EntityManager::removePhysicalBody(common::EntityID entityID) {
-            // TODO: This is server side only at the moment, so deletion on client side would fail, if I add client
-            // side prediction I can remove this check
-            if (mRegistry->has<component::PhysicalProperties>(entityID)) {
-                auto entityPhysicalProps = mRegistry->get<component::PhysicalProperties>(entityID);
-                mPhysicsWorld.DestroyBody(entityPhysicalProps.body);
-            }
+        EntityManager::removePhysicalBody(common::EntityID id) {
+            auto *body = mEntityBodyMap[id];
+            assert(body);
+            mPhysicsWorld.DestroyBody(body);
         }
 
         void
@@ -445,6 +377,13 @@ namespace oni {
             apperance.color.y = green;
             apperance.color.z = blue;
             apperance.color.w = alpha;
+        }
+
+        b2Body *
+        EntityManager::getEntityBody(common::EntityID id) {
+            auto result = mEntityBodyMap[id];
+            assert(result);
+            return result;
         }
 
         common::EntityID

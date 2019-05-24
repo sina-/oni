@@ -5,7 +5,7 @@
 
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/math/oni-math-rand.h>
@@ -72,8 +72,7 @@ namespace oni {
             }*/
         };
 
-        Dynamics::Dynamics(common::r32 tickFreq)
-                : mTickFrequency(tickFreq) {
+        Dynamics::Dynamics() {
             b2Vec2 gravity(0.0f, 0.0f);
             mCollisionHandler = std::make_unique<CollisionHandler>();
             mPhysicsWorld = std::make_unique<b2World>(gravity);
@@ -216,7 +215,7 @@ namespace oni {
                 // One way to hide it is to provide a function in physics library that creates physical entities
                 // for a given entity id an maintains an internal mapping between them without leaking the
                 // implementation to outside.
-                mPhysicsWorld->Step(mTickFrequency, 6, 2);
+                mPhysicsWorld->Step(tickTime, 6, 2);
             }
 
 
@@ -228,11 +227,12 @@ namespace oni {
                         component::Heading,
                         component::WorldP3D,
                         component::PhysicalProperties>();
-                for (auto entity: view) {
-                    auto &props = view.get<component::PhysicalProperties>(entity);
-                    auto &car = view.get<component::Car>(entity);
-                    auto &pos = view.get<component::WorldP3D>(entity);
-                    auto &heading = view.get<component::Heading>(entity);
+                for (auto &&id: view) {
+                    auto &props = view.get<component::PhysicalProperties>(id);
+                    auto &car = view.get<component::Car>(id);
+                    auto &pos = view.get<component::WorldP3D>(id);
+                    auto &heading = view.get<component::Heading>(id);
+                    auto *body = manager.getEntityBody(id);
                     // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
                     // just apply user input to box2d representation of physical body without syncing
                     // car dynamics with box2d physics, that way the next tick if the
@@ -245,27 +245,27 @@ namespace oni {
                         // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
                         // carconfig?
                         // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
-                        props.body->ApplyForceToCenter(
+                        body->ApplyForceToCenter(
                                 b2Vec2(static_cast<common::r32>(std::cos(heading.value) * 30 *
-                                                                carInput[entity].throttle),
+                                                                carInput[id].throttle),
                                        static_cast<common::r32>(std::sin(heading.value) * 30 *
-                                                                carInput[entity].throttle)),
+                                                                carInput[id].throttle)),
                                 true);
                         car.isColliding = false;
                     } else {
-                        if (isColliding(props.body)) {
-                            car.velocity = math::vec2{props.body->GetLinearVelocity().x,
-                                                      props.body->GetLinearVelocity().y};
-                            car.angularVelocity = props.body->GetAngularVelocity();
-                            pos.x = props.body->GetPosition().x;
-                            pos.y = props.body->GetPosition().y;
-                            heading.value = props.body->GetAngle();
+                        if (isColliding(body)) {
+                            car.velocity = math::vec2{body->GetLinearVelocity().x,
+                                                      body->GetLinearVelocity().y};
+                            car.angularVelocity = body->GetAngularVelocity();
+                            pos.x = body->GetPosition().x;
+                            pos.y = body->GetPosition().y;
+                            heading.value = body->GetAngle();
                             car.isColliding = true;
                         } else {
-                            props.body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
-                            props.body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
-                            props.body->SetTransform(b2Vec2{pos.x, pos.y},
-                                                     static_cast<float32>(heading.value));
+                            body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
+                            body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
+                            body->SetTransform(b2Vec2{pos.x, pos.y},
+                                               static_cast<float32>(heading.value));
                         }
                     }
                 }
@@ -278,12 +278,12 @@ namespace oni {
                         component::Tag_Dynamic,
                         component::WorldP3D,
                         component::PhysicalProperties>();
-                for (auto entity: view) {
-                    auto &props = view.get<component::PhysicalProperties>(entity);
-                    auto &pos = view.get<component::WorldP3D>(entity);
+                for (auto &&id: view) {
+                    auto &props = view.get<component::PhysicalProperties>(id);
+                    auto &pos = view.get<component::WorldP3D>(id);
 
                     mCollisionHandlers[props.physicalCategory](manager,
-                                                               entity,
+                                                               id,
                                                                props,
                                                                pos);
                 }
@@ -300,27 +300,28 @@ namespace oni {
                         component::Scale,
                         component::PhysicalProperties>();
 
-                for (auto entity: view) {
-                    auto &props = view.get<component::PhysicalProperties>(entity);
-                    auto &position = props.body->GetPosition();
-                    auto &pos = view.get<component::WorldP3D>(entity);
-                    auto &heading = view.get<component::Heading>(entity);
-                    auto &scale = view.get<component::Scale>(entity);
+                for (auto &&id: view) {
+                    auto *body = manager.getEntityBody(id);
+                    auto &props = view.get<component::PhysicalProperties>(id);
+                    auto &position = body->GetPosition();
+                    auto &pos = view.get<component::WorldP3D>(id);
+                    auto &heading = view.get<component::Heading>(id);
+                    auto &scale = view.get<component::Scale>(id);
 
                     if (std::abs(pos.x - position.x) > common::EP ||
                         std::abs(pos.y - position.y) > common::EP ||
-                        std::abs(heading.value - props.body->GetAngle()) > common::EP) {
-                        if (manager.has<component::Trail>(entity)) {
-                            auto &trail = manager.get<component::Trail>(entity);
+                        std::abs(heading.value - body->GetAngle()) > common::EP) {
+                        if (manager.has<component::Trail>(id)) {
+                            auto &trail = manager.get<component::Trail>(id);
                             trail.previousPos.push_back(pos);
-                            trail.velocity.push_back(props.body->GetLinearVelocity().Length());
+                            trail.velocity.push_back(body->GetLinearVelocity().Length());
                             assert(trail.previousPos.size() == trail.velocity.size());
                         }
 
                         pos.x = position.x;
                         pos.y = position.y;
-                        heading.value = props.body->GetAngle();
-                        manager.tagForComponentSync(entity);
+                        heading.value = body->GetAngle();
+                        manager.tagForComponentSync(id);
                     }
                 }
             }
@@ -331,9 +332,9 @@ namespace oni {
                         component::Tag_SimModeServer,
                         component::EntityAttachment,
                         component::Car>();
-                for (auto &&entity : view) {
-                    const auto &attachments = view.get<component::EntityAttachment>(entity);
-                    const auto &car = view.get<component::Car>(entity);
+                for (auto &&id : view) {
+                    const auto &attachments = view.get<component::EntityAttachment>(id);
+                    const auto &car = view.get<component::Car>(id);
                     for (common::size i = 0; i < attachments.entities.size(); ++i) {
                         if (attachments.entityTypes[i] == entities::EntityType::VEHICLE_TIRE_FRONT) {
                             auto &heading = manager.get<component::Heading>(attachments.entities[i]).value;
@@ -385,16 +386,17 @@ namespace oni {
 
         void
         Dynamics::handleRocketCollision(entities::EntityManager &manager,
-                                        common::EntityID entityID,
+                                        common::EntityID id,
                                         component::PhysicalProperties &props,
                                         component::WorldP3D &pos) {
 
-            if (isColliding(props.body)) {
+            auto *body = manager.getEntityBody(id);
+            if (isColliding(body)) {
                 // TODO: Proper Z level!
                 common::r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
                 auto worldPos = component::WorldP3D{};
-                worldPos.x = props.body->GetPosition().x;
-                worldPos.y = props.body->GetPosition().y;
+                worldPos.x = body->GetPosition().x;
+                worldPos.y = body->GetPosition().y;
                 worldPos.z = particleZ;
 
                 auto colliding = game::CollidingEntity{};
@@ -406,7 +408,7 @@ namespace oni {
                 // sound effects, etc.
                 manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
-                manager.tagForRemoval(entityID);
+                manager.tagForRemoval(id);
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,

@@ -144,6 +144,9 @@ namespace oni {
             setText(common::EntityID,
                     std::string_view content);
 
+            b2Body*
+            getEntityBody(common::EntityID);
+
         public:
             void
             tagForRemoval(common::EntityID);
@@ -190,35 +193,6 @@ namespace oni {
             void
             removeEntity(common::EntityID,
                          const entities::EntityOperationPolicy &);
-
-            void
-            _removeEntity(common::EntityID,
-                          entities::EntityType entityType,
-                          const entities::EntityOperationPolicy &policy);
-
-            template<entities::EntityType entityType>
-            void
-            _removeEntity(common::EntityID,
-                          const entities::EntityOperationPolicy &policy) = delete;
-
-        private:
-            template<>
-            void
-            _removeEntity<entities::EntityType::RACE_CAR>(common::EntityID,
-                                                          const entities::EntityOperationPolicy &policy
-            );
-
-            template<>
-            void
-            _removeEntity<entities::EntityType::WALL>(common::EntityID,
-                                                      const entities::EntityOperationPolicy &policy
-            );
-
-            template<>
-            void
-            _removeEntity<entities::EntityType::SIMPLE_ROCKET>(common::EntityID,
-                                                               const entities::EntityOperationPolicy &policy
-            );
 
             void
             removePhysicalBody(common::EntityID);
@@ -490,6 +464,9 @@ namespace oni {
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};
+
+            std::unordered_map<common::EntityID, b2Body *> mEntityBodyMap{};
+
             entities::SimMode mSimMode{entities::SimMode::CLIENT};
             entities::EntityOperationPolicy mEntityOperationPolicy{};
 

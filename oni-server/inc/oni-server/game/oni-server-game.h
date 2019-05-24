@@ -5,7 +5,7 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/game/oni-game.h>
 #include <oni-core/network/oni-network-peer.h>
 

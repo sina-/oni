@@ -3,7 +3,7 @@
 #include <map>
 
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/level/oni-level-wall.h>
 #include <oni-core/math/oni-math-z-layer-manager.h>

@@ -7,7 +7,7 @@
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/game/oni-game-event.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 
 namespace oni {
     namespace physics {
@@ -103,7 +103,7 @@ namespace oni {
                     manager.setHeading(id, heading.value);
                     manager.createPhysics(id, rocketPos, size, heading.value);
 
-                    auto * body = manager.get<component::PhysicalProperties>(id).body;
+                    auto * body = manager.getEntityBody(id);
 
                     body->ApplyForceToCenter(
                             b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),

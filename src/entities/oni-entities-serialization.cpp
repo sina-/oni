@@ -12,7 +12,7 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/component/oni-component-gameplay.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 
 

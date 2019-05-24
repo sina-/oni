@@ -5,7 +5,7 @@
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/math/oni-math-transformation.h>
 #include <oni-core/math/oni-math-intersects.h>
-#include <oni-core/component/oni-component-physic.h>
+#include <oni-core/component/oni-component-physics.h>
 
 namespace oni {
     namespace gameplay {

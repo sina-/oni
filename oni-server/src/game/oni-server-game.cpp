@@ -4,17 +4,17 @@
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/common/oni-common-const.h>
-#include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
-#include <oni-core/physics/oni-physics-dynamics.h>
-#include <oni-core/network/oni-network-server.h>
 #include <oni-core/entities/oni-entities-client-data-manager.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/entities/oni-entities-serialization.h>
+#include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/math/oni-math-transformation.h>
-// TODO: Compile fails if this is not here even though this file doesn't need it :( I had this issue in the past hmm...
-#include <oni-core/math/oni-math-rand.h>
 #include <oni-core/math/oni-math-z-layer-manager.h>
+#include <oni-core/network/oni-network-server.h>
+#include <oni-core/physics/oni-physics-dynamics.h>
+
+#include <oni-server/level/oni-server-level-tile-world.h>
 
 
 namespace oni {
@@ -66,7 +66,7 @@ namespace oni {
 
             void
             ServerGame::loadLevel() {
-                mTruckEntity = spawnTruck();
+                spawnTruck();
 
                 mTileWorld->genDemoRaceCourse();
 

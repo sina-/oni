@@ -3,13 +3,8 @@
 #include <memory>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-visual.h>
-#include <oni-core/component/oni-component-physics.h>
 #include <oni-core/game/oni-game.h>
 #include <oni-core/network/oni-network-peer.h>
-
-#include <oni-server/level/oni-server-level-tile-world.h>
 
 
 namespace oni {
@@ -36,6 +31,10 @@ namespace oni {
     }
 
     namespace server {
+        namespace level {
+            class TileWorld;
+        }
+
         namespace game {
             using EntityID = oni::common::EntityID;
 
@@ -119,12 +118,7 @@ namespace oni {
                 network::Address mServerAddress{};
                 std::unique_ptr<oni::network::Server> mServer{};
 
-                EntityID mTruckEntity{};
-                EntityID mBoxEntity{};
-
                 std::unique_ptr<oni::entities::ClientDataManager> mClientDataManager{};
-
-                oni::component::CarConfig mCarConfigDefault{};
             };
         }
     }

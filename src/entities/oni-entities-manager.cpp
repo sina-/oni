@@ -101,8 +101,8 @@ namespace oni {
         }
 
         void
-        EntityManager::tagForComponentSync(common::EntityID entity) {
-            accommodate<component::Tag_OnlyComponentUpdate>(entity);
+        EntityManager::markForNetSync(common::EntityID entity) {
+            accommodate<component::Tag_NetworkSyncComponent>(entity);
         }
 
         void
@@ -161,7 +161,7 @@ namespace oni {
             assignSimMode(id, mSimMode);
             if (mEntityOperationPolicy.track) {
                 assert(mSimMode == entities::SimMode::SERVER);
-                assignTag<component::Tag_RequiresNetworkSync>(id);
+                assignTag<component::Tag_NetworkSyncEntity>(id);
             }
             createComponent<entities::EntityType>(id, type);
             return id;

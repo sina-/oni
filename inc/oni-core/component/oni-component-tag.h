@@ -25,9 +25,6 @@ namespace oni {
         struct Tag_SplatOnDeath {
         };
 
-        struct Tag_Particle {
-        };
-
         /// Sim
         struct Tag_SimModeServer {
         };
@@ -36,10 +33,10 @@ namespace oni {
         };
 
         /// Network
-        struct Tag_RequiresNetworkSync {
+        struct Tag_NetworkSyncEntity {
         };
 
-        struct Tag_OnlyComponentUpdate {
+        struct Tag_NetworkSyncComponent {
         };
     }
 }

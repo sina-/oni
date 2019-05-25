@@ -78,7 +78,7 @@ namespace oni {
                     carLap.lapTimeS = static_cast<common::u32>(currentTime.count());
 
                     std::cout << "Laps completed: " << carLap.lap << "\n";
-                    mEntityManager.tagForComponentSync(entity);
+                    mEntityManager.markForNetSync(entity);
 
                     resetPlayerCheckpoints(entity);
                 }

@@ -136,30 +136,30 @@ namespace oni {
                         component::Scale,
                         component::Car,
                         component::CarConfig>();
-                for (auto &&entity: carView) {
-                    auto input = clientData->getClientInput(entity);
+                for (auto &&id: carView) {
+                    auto input = clientData->getClientInput(id);
                     // NOTE: This could happen just at the moment when a client joins, an entity is created by the
                     // client data structures are not initialized.
                     if (!input) {
                         continue;
                     }
 
-                    auto &car = carView.get<component::Car>(entity);
-                    auto &heading = carView.get<component::Heading>(entity);
-                    const auto &carConfig = carView.get<component::CarConfig>(entity);
+                    auto &car = carView.get<component::Car>(id);
+                    auto &heading = carView.get<component::Heading>(id);
+                    const auto &carConfig = carView.get<component::CarConfig>(id);
 
                     if (input->isPressed(GLFW_KEY_W) || input->isPressed(GLFW_KEY_UP)) {
                         // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
-                        carInput[entity].throttle = 1.0f;
+                        carInput[id].throttle = 1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_A) || input->isPressed(GLFW_KEY_LEFT)) {
-                        carInput[entity].left = 1.0f;
+                        carInput[id].left = 1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_S) || input->isPressed(GLFW_KEY_DOWN)) {
-                        carInput[entity].throttle = -1.0f;
+                        carInput[id].throttle = -1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_D) || input->isPressed(GLFW_KEY_RIGHT)) {
-                        carInput[entity].right = 1.0f;
+                        carInput[id].right = 1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
                         car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(heading.value)),
@@ -169,12 +169,12 @@ namespace oni {
                         if (car.accumulatedEBrake < 1.0f) {
                             car.accumulatedEBrake += 0.01f;
                         }
-                        carInput[entity].eBrake = static_cast<common::r32>(car.accumulatedEBrake);
+                        carInput[id].eBrake = static_cast<common::r32>(car.accumulatedEBrake);
                     } else {
                         car.accumulatedEBrake = 0.0f;
                     }
 
-                    auto steerInput = carInput[entity].left - carInput[entity].right;
+                    auto steerInput = carInput[id].left - carInput[id].right;
                     if (car.smoothSteer) {
                         car.steer = applySmoothSteer(car, steerInput, tickTime);
                     } else {
@@ -188,12 +188,12 @@ namespace oni {
 
                     car.steerAngle = car.steer * carConfig.maxSteer;
 
-                    auto &carPos = carView.get<component::WorldP3D>(entity);
-                    auto &scale = carView.get<component::Scale>(entity);
+                    auto &carPos = carView.get<component::WorldP3D>(id);
+                    auto &scale = carView.get<component::Scale>(id);
 
                     const auto oldPos = carPos;
                     const auto oldHeading = heading;
-                    tickCar(car, carPos, heading, carConfig, carInput[entity], tickTime);
+                    tickCar(car, carPos, heading, carConfig, carInput[id], tickTime);
 
                     auto velocity = car.velocityLocal.len();
                     auto distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
@@ -204,7 +204,7 @@ namespace oni {
 
                         car.distanceFromCamera = distanceFromCamera;
 
-                        manager.tagForComponentSync(entity);
+                        manager.markForNetSync(id);
                     }
                 }
             }
@@ -321,7 +321,7 @@ namespace oni {
                         pos.x = position.x;
                         pos.y = position.y;
                         heading.value = body->GetAngle();
-                        manager.tagForComponentSync(id);
+                        manager.markForNetSync(id);
                     }
                 }
             }
@@ -344,7 +344,7 @@ namespace oni {
                             heading = static_cast<oni::common::r32>(car.steerAngle +
                                                                     math::toRadians(90.0f));
 
-                            manager.tagForComponentSync(attachments.entities[i]);
+                            manager.markForNetSync(attachments.entities[i]);
                         }
                     }
                 }
@@ -424,18 +424,18 @@ namespace oni {
                 auto view = manager.createView<
                         component::Tag_SimModeClient,
                         component::Age>();
-                for (const auto &entity: view) {
-                    auto &age = view.get<component::Age>(entity);
+                for (auto &&id: view) {
+                    auto &age = view.get<component::Age>(id);
                     age.currentAge += tickTime;
                     if (age.currentAge > age.maxAge) {
-                        if (manager.has<component::Tag_SplatOnDeath>(entity)) {
-                            auto &pos = manager.get<component::WorldP3D>(entity);
-                            auto &size = manager.get<component::Scale>(entity);
-                            auto &texture = manager.get<component::Texture>(entity);
+                        if (manager.has<component::Tag_SplatOnDeath>(id)) {
+                            auto &pos = manager.get<component::WorldP3D>(id);
+                            auto &size = manager.get<component::Scale>(id);
+                            auto &texture = manager.get<component::Texture>(id);
 
                             manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
                         }
-                        manager.markForDeletion(entity);
+                        manager.markForDeletion(id);
                     }
                 }
             }
@@ -444,11 +444,12 @@ namespace oni {
                 auto view = manager.createView<
                         component::Tag_SimModeServer,
                         component::Age>();
-                for (auto &&entity: view) {
-                    auto &age = view.get<component::Age>(entity);
+                for (auto &&id: view) {
+                    auto &age = view.get<component::Age>(id);
                     age.currentAge += tickTime;
+                    manager.markForNetSync(id);
                     if (age.currentAge > age.maxAge) {
-                        manager.markForDeletion(entity);
+                        manager.markForDeletion(id);
                     }
                 }
             }
@@ -467,11 +468,11 @@ namespace oni {
                         component::Velocity,
                         component::Heading,
                         component::Age>();
-                for (const auto &entity: view) {
-                    auto &pos = view.get<component::WorldP3D>(entity);
-                    const auto &velocity = view.get<component::Velocity>(entity);
-                    const auto &age = view.get<component::Age>(entity);
-                    const auto &heading = view.get<component::Heading>(entity).value;
+                for (auto &&id: view) {
+                    auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &velocity = view.get<component::Velocity>(id);
+                    const auto &age = view.get<component::Age>(id);
+                    const auto &heading = view.get<component::Heading>(id).value;
 
                     auto currentVelocity =
                             5 * (velocity.currentVelocity * tickTime) - math::pow(age.currentAge, 10) * 0.5f;

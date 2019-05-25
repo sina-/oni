@@ -302,12 +302,12 @@ namespace oni {
                     case entities::SnapshotType::ONLY_COMPONENTS: {
                         // TODO: Rather not have this class know about specific components!
                         {
-                            auto view = mRegistry->view<component::Tag_OnlyComponentUpdate>();
+                            auto view = mRegistry->view<component::Tag_NetworkSyncComponent>();
                             if (!view.empty()) {
                                 mRegistry->snapshot().template component<ArchiveComponents...>(archive,
                                                                                                view.begin(),
                                                                                                view.end());
-                                mRegistry->reset<component::Tag_OnlyComponentUpdate>();
+                                mRegistry->reset<component::Tag_NetworkSyncComponent>();
                             }
                         }
                         {
@@ -327,13 +327,13 @@ namespace oni {
                     }
                     case entities::SnapshotType::ONLY_NEW_ENTITIES: {
                         {
-                            auto view = mRegistry->view<component::Tag_RequiresNetworkSync>();
+                            auto view = mRegistry->view<component::Tag_NetworkSyncEntity>();
                             if (!view.empty()) {
                                 mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
                                         archive,
                                         view.begin(),
                                         view.end());
-                                mRegistry->reset<component::Tag_RequiresNetworkSync>();
+                                mRegistry->reset<component::Tag_NetworkSyncEntity>();
                             }
                         }
                         {
@@ -371,7 +371,7 @@ namespace oni {
             getDeletedEntities() const;
 
             void
-            tagForComponentSync(common::EntityID entity);
+            markForNetSync(common::EntityID entity);
 
             template<class Component, class Comparator>
             void

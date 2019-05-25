@@ -287,7 +287,7 @@ namespace oni {
                                                                props,
                                                                pos);
                 }
-                manager.flushEntityRemovals();
+                manager.flushDeletions();
             }
 
             /// Sync placement with box2d
@@ -408,7 +408,7 @@ namespace oni {
                 // sound effects, etc.
                 manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
-                manager.tagForRemoval(id);
+                manager.markForDeletion(id);
                 // TODO: I'm leaking memory here, data in b2world is left behind :(
                 // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
                 // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
@@ -435,7 +435,7 @@ namespace oni {
 
                             manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
                         }
-                        manager.tagForRemoval(entity);
+                        manager.markForDeletion(entity);
                     }
                 }
             }
@@ -448,11 +448,11 @@ namespace oni {
                     auto &age = view.get<component::Age>(entity);
                     age.currentAge += tickTime;
                     if (age.currentAge > age.maxAge) {
-                        manager.tagForRemoval(entity);
+                        manager.markForDeletion(entity);
                     }
                 }
             }
-            manager.flushEntityRemovals();
+            manager.flushDeletions();
         }
 
         void

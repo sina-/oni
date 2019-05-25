@@ -133,20 +133,20 @@ namespace oni {
         }
 
         void
-        EntityManager::tagForRemoval(common::EntityID id) {
+        EntityManager::markForDeletion(common::EntityID id) {
             mEntitiesToDelete.push_back(id);
             mEntitiesToDeletePolicy.push_back(mEntityOperationPolicy);
         }
 
         void
-        EntityManager::tagForRemoval(common::EntityID id,
-                                     const entities::EntityOperationPolicy &policy) {
+        EntityManager::markForDeletion(common::EntityID id,
+                                       const entities::EntityOperationPolicy &policy) {
             mEntitiesToDelete.push_back(id);
             mEntitiesToDeletePolicy.push_back(policy);
         }
 
         void
-        EntityManager::flushEntityRemovals() {
+        EntityManager::flushDeletions() {
             for (common::size i = 0; i < mEntitiesToDelete.size(); ++i) {
                 removeEntity(mEntitiesToDelete[i], mEntitiesToDeletePolicy[i]);
             }

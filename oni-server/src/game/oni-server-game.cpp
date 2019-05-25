@@ -113,8 +113,8 @@ namespace oni {
             ServerGame::postDisconnectHook(const common::PeerID &peerID) {
                 auto clientCarEntityID = mClientDataManager->getEntityID(peerID);
 
-                mEntityManager->tagForRemoval(clientCarEntityID);
-                mEntityManager->flushEntityRemovals();
+                mEntityManager->markForDeletion(clientCarEntityID);
+                mEntityManager->flushDeletions();
                 mClientDataManager->deleteClient(peerID);
             }
 

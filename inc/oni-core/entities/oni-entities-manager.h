@@ -149,14 +149,14 @@ namespace oni {
 
         public:
             void
-            tagForRemoval(common::EntityID);
+            markForDeletion(common::EntityID);
 
             void
-            tagForRemoval(common::EntityID,
-                          const entities::EntityOperationPolicy &);
+            markForDeletion(common::EntityID id,
+                            const entities::EntityOperationPolicy &policy);
 
             void
-            flushEntityRemovals();
+            flushDeletions();
 
             common::EntityID
             createComplementTo(common::EntityID id);

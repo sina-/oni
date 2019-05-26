@@ -27,9 +27,11 @@ namespace oni {
             } else {
                 mEnetHost = enet_host_create(nullptr, peerCount, channelLimit, incomingBandwidth, outgoingBandwidth);
             }
-
             assert(mEnetHost);
 
+            // TODO: Compressor doesnt seem to reduce the bit-rate :/
+//            result = enet_host_compress_with_range_coder(mEnetHost);
+//            assert(result >= 0);
         }
 
         Peer::~Peer() {
@@ -40,6 +42,13 @@ namespace oni {
         void
         Peer::flush() {
             enet_host_flush(mEnetHost);
+
+            auto elapsed = mUploadTimer.elapsedInSeconds();
+            if (elapsed >= 1.0f) {
+                mUploadBPS = mTotalUpload / elapsed;
+                mTotalUpload = 0;
+                mUploadTimer.restart();
+            }
         }
 
         void
@@ -70,6 +79,8 @@ namespace oni {
                             return;
                         }
 
+                        mTotalDownload += event.packet->dataLength;
+
                         auto data = event.packet->data;
                         auto header = getHeader(data);
                         auto dataHeadless = event.packet->dataLength - 1;
@@ -96,11 +107,18 @@ namespace oni {
                     }
                 }
             }
+
+            auto elapsed = mDownloadTimer.elapsedInSeconds();
+            if (elapsed >= 1.0f) {
+                mDownloadBPS = mTotalDownload / elapsed;
+                mTotalDownload = 0;
+                mDownloadTimer.restart();
+            }
         }
 
         void
         Peer::send(const common::u8 *data,
-                   size_t size,
+                   common::size size,
                    ENetPeer *peer) {
             ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE |
                                                                         ENET_PACKET_FLAG_NO_ALLOCATE);
@@ -108,7 +126,7 @@ namespace oni {
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);
 
-            // enet_host_flush(mEnetHost);
+            mTotalUpload += size;
         }
 
         void
@@ -122,7 +140,7 @@ namespace oni {
             auto success = enet_peer_send(peer, 0, packetToServer);
             assert(success == 0);
 
-            // enet_host_flush(mEnetHost);
+            mTotalUpload += data.size();
         }
 
         PacketType
@@ -143,22 +161,14 @@ namespace oni {
             assert(packetToPeers);
             enet_host_broadcast(mEnetHost, 0, packetToPeers);
 
-            // enet_host_flush(mEnetHost);
-        }
-
-        void
-        Peer::queueForBroadcast(PacketType type,
-                                std::string &data) {
-            data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
-            ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
-            assert(packetToPeers);
-            enet_host_broadcast(mEnetHost, 0, packetToPeers);
+            mTotalUpload += data.size();
         }
 
         void
         Peer::registerPacketHandler(PacketType type,
-                                    std::function<void(const common::PeerID &,
-                                                       const std::string &)> &&handler) {
+                                    std::function<
+                                            void(const common::PeerID &,
+                                                 const std::string &)> &&handler) {
             assert(mPacketHandlers.find(type) == mPacketHandlers.end());
             mPacketHandlers[type] = std::move(handler);
         }
@@ -171,6 +181,16 @@ namespace oni {
         common::PeerID
         Peer::getPeerID(const ENetPeer &peer) const {
             return std::to_string(peer.connectID);
+        }
+
+        common::r32
+        Peer::getDownloadKBPS() const {
+            return mDownloadBPS / (1000 * 1);
+        }
+
+        common::r32
+        Peer::getUploadKBPS() const {
+            return mUploadBPS / (1000 * 1);
         }
     }
 }

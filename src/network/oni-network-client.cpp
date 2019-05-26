@@ -57,7 +57,7 @@ namespace oni {
         void
         Client::handle(ENetPeer *peer,
                        enet_uint8 *data,
-                       size_t size,
+                       common::size size,
                        PacketType header) {
             auto peerID = getPeerID(*peer);
             assert(mPacketHandlers.find(header) != mPacketHandlers.end());

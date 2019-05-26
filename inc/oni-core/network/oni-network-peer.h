@@ -7,6 +7,7 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/network/oni-network-packet.h>
 #include <oni-core/network/oni-network-packet-type.h>
+#include <oni-core/util/oni-util-timer.h>
 
 struct _ENetAddress;
 typedef struct _ENetAddress ENetAddress;
@@ -51,17 +52,24 @@ namespace oni {
 
             void
             registerPacketHandler(PacketType type,
-                                  std::function<void(const common::PeerID &,
-                                                     const std::string &)> &&handler);
+                                  std::function<
+                                          void(const common::PeerID &,
+                                               const std::string &)> &&handler);
 
             void
             registerPostDisconnectHook(std::function<void(const common::PeerID &)> &&handler);
+
+            common::r32
+            getDownloadKBPS() const;
+
+            common::r32
+            getUploadKBPS() const;
 
         protected:
             virtual void
             handle(ENetPeer *peer,
                    common::u8 *data,
-                   size_t size,
+                   common::size size,
                    PacketType header) = 0;
 
             common::PeerID
@@ -78,16 +86,12 @@ namespace oni {
 
             void
             send(const common::u8 *data,
-                 size_t size,
+                 common::size size,
                  ENetPeer *peer);
 
             void
             broadcast(PacketType type,
                       std::string &data);
-
-            void
-            queueForBroadcast(PacketType type,
-                              std::string &data);
 
             virtual void
             postConnectHook(const ENetEvent *event) = 0;
@@ -98,9 +102,21 @@ namespace oni {
         protected:
             ENetHost *mEnetHost{};
             std::map<common::PeerID, ENetPeer *> mPeers{};
-            std::map<PacketType, std::function<void(common::PeerID,
-                                                    const std::string &)>> mPacketHandlers{};
+            std::map<
+                    PacketType, std::function<
+                            void(common::PeerID,
+                                 const std::string &)>> mPacketHandlers{};
             std::function<void(const common::PeerID &)> mPostDisconnectHook{};
+
+        private:
+            common::u64 mTotalDownload{}; // Number of bytes received
+            common::u64 mTotalUpload{}; // Number of bytes sent
+
+            utils::Timer mDownloadTimer{};
+            utils::Timer mUploadTimer{};
+
+            common::r32 mDownloadBPS{};
+            common::r32 mUploadBPS{};
         };
     }
 }

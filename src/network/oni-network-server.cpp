@@ -33,7 +33,7 @@ namespace oni {
         void
         Server::handle(ENetPeer *peer,
                        enet_uint8 *data,
-                       size_t size,
+                       common::size size,
                        PacketType header) {
             auto peerID = getPeerID(*peer);
             assert(mPacketHandlers.find(header) != mPacketHandlers.end() || header == PacketType::PING ||
@@ -126,7 +126,7 @@ namespace oni {
             auto data = oni::entities::serialize(event);
             auto packetType = oni::network::PacketType::EVENT_COLLISION;
 
-            queueForBroadcast(packetType, data);
+            broadcast(packetType, data);
         }
 
         void
@@ -134,7 +134,7 @@ namespace oni {
             auto data = oni::entities::serialize(event);
             auto packetType = oni::network::PacketType::EVENT_SOUND_PLAY;
 
-            queueForBroadcast(packetType, data);
+            broadcast(packetType, data);
         }
 
         void
@@ -142,7 +142,7 @@ namespace oni {
             auto data = oni::entities::serialize(event);
             auto packetType = oni::network::PacketType::EVENT_ROCKET_LAUNCH;
 
-            queueForBroadcast(packetType, data);
+            broadcast(packetType, data);
         }
     }
 }

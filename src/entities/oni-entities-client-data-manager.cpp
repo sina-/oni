@@ -43,8 +43,11 @@ namespace oni {
 
         void
         ClientDataManager::deleteClient(const common::PeerID &clientID) {
-            mCarEntityToInput.erase(mClientToCarEntity.at(clientID));
-            mClientToCarEntity.erase(clientID);
+            auto carID = mClientToCarEntity[clientID];
+            if (carID) {
+                mCarEntityToInput.erase(carID);
+                mClientToCarEntity.erase(clientID);
+            }
 
             if (auto it = std::find_if(mClients.begin(), mClients.end(),
                                        [&](const common::PeerID &peerID) { return (peerID == clientID); });
@@ -58,7 +61,10 @@ namespace oni {
         void
         ClientDataManager::setClientInput(const common::PeerID &clientID,
                                           const io::Input &input) {
-            mCarEntityToInput[mClientToCarEntity.at(clientID)] = input;
+            auto carID = mClientToCarEntity[clientID];
+            if (carID) {
+                mCarEntityToInput[carID] = input;
+            }
         }
 
         CarEntities

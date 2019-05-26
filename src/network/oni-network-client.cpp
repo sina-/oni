@@ -112,6 +112,9 @@ namespace oni {
 
         void
         Client::sendInput(const io::Input *input) {
+            if (!input->hasData()) {
+                return;
+            }
             auto type = PacketType::CLIENT_INPUT;
             auto data = entities::serialize<io::Input>(*input);
 

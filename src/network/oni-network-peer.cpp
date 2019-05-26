@@ -116,10 +116,25 @@ namespace oni {
             }
         }
 
+        PacketType
+        Peer::getHeader(const common::u8 *data) const {
+            if (!data) {
+                return PacketType::UNKNOWN;
+            }
+
+            auto header = static_cast<PacketType>(*data);
+            return header;
+        }
+
+
         void
         Peer::send(const common::u8 *data,
                    common::size size,
                    ENetPeer *peer) {
+            if (size < 1 || !data) {
+                return;
+            }
+
             ENetPacket *packetToServer = enet_packet_create(data, size, ENET_PACKET_FLAG_RELIABLE |
                                                                         ENET_PACKET_FLAG_NO_ALLOCATE);
             assert(packetToServer);
@@ -133,6 +148,10 @@ namespace oni {
         Peer::send(PacketType type,
                    std::string &data,
                    ENetPeer *peer) {
+            if (data.empty() && type != PacketType::SETUP_SESSION) {
+                return;
+            }
+
             data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
 
             ENetPacket *packetToServer = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
@@ -143,19 +162,14 @@ namespace oni {
             mTotalUpload += data.size();
         }
 
-        PacketType
-        Peer::getHeader(const common::u8 *data) const {
-            if (!data) {
-                return PacketType::UNKNOWN;
-            }
-
-            auto header = static_cast<PacketType>(*data);
-            return header;
-        }
-
         void
         Peer::broadcast(PacketType type,
                         std::string &data) {
+            // TODO: Might want to whitelist some packet types that have empty payload
+            if (data.size() <= 1) {
+                return;
+            }
+
             data.insert(0, 1, static_cast<std::underlying_type<PacketType>::type>(type));
             ENetPacket *packetToPeers = enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE);
             assert(packetToPeers);

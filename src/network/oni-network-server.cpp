@@ -73,9 +73,7 @@ namespace oni {
             std::string data = entities::serialize(manager, entities::SnapshotType::ENTIRE_REGISTRY);
             auto type = PacketType::REGISTRY_REPLACE_ALL_ENTITIES;
 
-            if (data.size() > 1) {
-                broadcast(type, data);
-            }
+            broadcast(type, data);
         }
 
         void
@@ -84,9 +82,7 @@ namespace oni {
             std::string data = entities::serialize(manager, entities::SnapshotType::ONLY_COMPONENTS);
             auto type = PacketType::REGISTRY_ONLY_COMPONENT_UPDATE;
 
-            if (data.size() > 1) {
-                broadcast(type, data);
-            }
+            broadcast(type, data);
         }
 
         void
@@ -95,9 +91,7 @@ namespace oni {
             std::string data = entities::serialize(manager, entities::SnapshotType::ONLY_NEW_ENTITIES);
             auto type = PacketType::REGISTRY_ADD_NEW_ENTITIES;
 
-            if (data.size() > 1) {
-                broadcast(type, data);
-            }
+            broadcast(type, data);
         }
 
         void
@@ -106,9 +100,7 @@ namespace oni {
             auto data = entities::serialize(manager.getDeletedEntities());
             manager.clearDeletedEntitiesList();
 
-            if (data.size() > 1) {
-                broadcast(type, data);
-            }
+            broadcast(type, data);
         }
 
         void

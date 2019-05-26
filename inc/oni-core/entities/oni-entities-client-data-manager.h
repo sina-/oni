@@ -45,9 +45,6 @@ namespace oni {
             common::EntityID
             getEntityID(const common::PeerID &clientID) const;
 
-            common::PeerID
-            getPeerID(const common::EntityID &entityID) const;
-
             std::unique_lock<std::mutex>
             scopedLock();
 

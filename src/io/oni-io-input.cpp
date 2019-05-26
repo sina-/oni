@@ -60,5 +60,10 @@ namespace oni {
             mKeysPressed.clear();
             mKeysReleased.clear();
         }
+
+        bool
+        Input::hasData() const {
+            return !mKeysPressed.empty() || !mKeysReleased.empty();
+        }
     }
 }

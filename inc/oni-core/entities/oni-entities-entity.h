@@ -48,8 +48,8 @@ namespace oni {
         };
 
         struct DeletedEntity {
+            common::EntityID id;
             entities::EntityType type;
-            common::EntityID entity;
         };
 
         struct EntityOperationPolicy {

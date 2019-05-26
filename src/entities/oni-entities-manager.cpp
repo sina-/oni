@@ -95,7 +95,7 @@ namespace oni {
             return result;
         }
 
-        const std::vector<common::EntityID> &
+        const std::vector<entities::DeletedEntity> &
         EntityManager::getDeletedEntities() const {
             return mDeletedEntities;
         }
@@ -122,9 +122,10 @@ namespace oni {
         }
 
         void
-        EntityManager::destroyAndTrack(common::EntityID entityID) {
-            mRegistry->destroy(entityID);
-            mDeletedEntities.push_back(entityID);
+        EntityManager::destroyAndTrack(common::EntityID id) {
+            auto type = mRegistry->get<entities::EntityType>(id);
+            mDeletedEntities.push_back({id, type});
+            mRegistry->destroy(id);
         }
 
         bool

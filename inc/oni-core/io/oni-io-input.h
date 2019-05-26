@@ -35,9 +35,12 @@ namespace oni {
             void
             reset();
 
+            bool
+            hasData() const;
+
         private:
-            std::vector<io::oniKeyPress> mKeysPressed;
-            std::vector<io::oniKeyPress> mKeysReleased;
+            std::vector<io::oniKeyPress> mKeysPressed{};
+            std::vector<io::oniKeyPress> mKeysReleased{};
         };
     }
 }

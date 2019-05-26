@@ -122,6 +122,13 @@ namespace oni {
     namespace entities {
         class EntityManager;
 
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  DeletedEntity &data) {
+            archive(data.id, data.type);
+        }
+
         std::string
         serialize(entities::EntityManager &manager,
                   entities::SnapshotType snapshotType);

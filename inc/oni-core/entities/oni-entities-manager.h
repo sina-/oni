@@ -367,7 +367,7 @@ namespace oni {
             void
             clearDeletedEntitiesList();
 
-            const std::vector<common::EntityID> &
+            const std::vector<entities::DeletedEntity> &
             getDeletedEntities() const;
 
             void
@@ -459,7 +459,7 @@ namespace oni {
             // an emitter component attached to the car entity of the server only on client side.
             std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
 
-            std::vector<common::EntityID> mDeletedEntities{};
+            std::vector<entities::DeletedEntity> mDeletedEntities{};
         private:
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;

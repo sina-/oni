@@ -90,11 +90,5 @@ namespace oni {
             }
             return &mCarEntityToInput.at(entityID);
         }
-
-        common::PeerID
-        ClientDataManager::getPeerID(const common::EntityID &entityID) const {
-            assert(mCarEntityToClient.find(entityID) != mCarEntityToClient.end());
-            return mCarEntityToClient.at(entityID);
-        }
     }
 }

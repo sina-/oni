@@ -129,9 +129,9 @@ namespace oni {
                        common::r32 heading);
 
             void
-            setRandVelocity(common::EntityID,
-                            common::i32 lower,
-                            common::i32 upper);
+            setRandVelocity(common::EntityID id,
+                            common::u32 lower,
+                            common::u32 upper);
 
             void
             createPhysics(

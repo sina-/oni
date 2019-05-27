@@ -21,7 +21,7 @@ namespace oni {
             mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();
             mLoader = std::make_unique<entt::basic_continuous_loader<common::EntityID>>(*mRegistry);
             mDispatcher = std::make_unique<entt::dispatcher>();
-            mRand = std::make_unique<math::Rand>(0);
+            mRand = std::make_unique<math::Rand>(0, 0);
 
             switch (sMode) {
                 case SimMode::CLIENT: {
@@ -325,10 +325,10 @@ namespace oni {
 
         void
         EntityManager::setRandVelocity(common::EntityID id,
-                                       common::i32 lower,
-                                       common::i32 upper) {
+                                       common::u32 lower,
+                                       common::u32 upper) {
             auto &velocity = mRegistry->get<component::Velocity>(id);
-            velocity.currentVelocity = mRand->next_r32(lower, upper);
+            velocity.currentVelocity = mRand->next(lower, upper);
             velocity.maxVelocity = velocity.currentVelocity;
         }
 

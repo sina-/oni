@@ -58,9 +58,6 @@ namespace oni {
             render(entities::EntityManager &);
 
             void
-            renderPhysicsDebugData();
-
-            void
             tick(const entities::EntityManager &server,
                  entities::EntityManager &client,
                  common::r64 tickTime);
@@ -87,21 +84,6 @@ namespace oni {
             void
             zoom(common::r32 distance);
 
-            const graphic::Camera &
-            getCamera() const;
-
-            const math::mat4 &
-            getProjectionMatrix() const;
-
-            const math::mat4 &
-            getViewMatrix() const;
-
-            common::r32
-            getViewWidth() const;
-
-            common::r32
-            getViewHeight() const;
-
             common::u16
             getSpritesPerFrame() const;
 
@@ -113,6 +95,9 @@ namespace oni {
 
             void
             resetCounters();
+
+            void
+            renderPhysicsDebugData();
 
             // TODO: This is awful and inconsistent with the API of this class where I should only expose render().
             // Instead of exposing the internals, I can batch the render objects in DebugDrawBox2D and then
@@ -201,6 +186,12 @@ namespace oni {
                                   common::EntityID child,
                                   const component::WorldP3D &pos,
                                   const component::Heading &heading);
+
+            common::r32
+            getViewWidth() const;
+
+            common::r32
+            getViewHeight() const;
 
         private:
             std::unique_ptr<Shader> mShader{};

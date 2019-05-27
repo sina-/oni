@@ -1,47 +1,80 @@
-#include <random>
-
 #include <oni-core/common/oni-common-typedef.h>
+
 
 namespace oni {
     namespace math {
         class Rand {
         public:
-            Rand(common::u32 seed);
+            Rand(common::u64 seed_a,
+                 common::u64 seed_b);
 
-            common::i8
-            next_i8(common::i8 lowerBound,
-                    common::i8 upperBound);
+            template<class T>
+            T
+            next(T lowerBoundInclusive,
+                 T upperBoundExclusive) {
+                static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>);
+                assert(upperBoundExclusive > lowerBoundInclusive);
+                auto n = _next();
+                auto d = upperBoundExclusive - lowerBoundInclusive;
+                auto result = lowerBoundInclusive + (n % d);
+                return result;
+            }
 
-            common::u8
-            next_u8(common::u8 lowerBound,
-                    common::u8 upperBound);
-
-            common::i16
-            next_i16(common::i16 lowerBound,
-                     common::i16 upperBound);
-
-            common::u16
-            next_u16(common::u16 lowerBound,
-                     common::u16 upperBound);
-
-            common::i32
-            next_i32(common::i32 lowerBound,
-                     common::i32 upperBound);
-
-            common::u32
-            next_u32(common::u32 lowerBound,
-                     common::u32 upperBound);
+            template<class T>
+            T
+            next() {
+                static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>);
+                auto n = _next();
+                auto d = std::numeric_limits<T>::max();
+                auto result = n % d;
+                return result;
+            }
 
             common::r32
-            next_r32(common::r32 lowerBound,
-                     common::r32 upperBound);
+            next_r32(common::r32 lowerBoundInclusive,
+                     common::r32 upperBoundExclusive);
 
             common::r64
-            nextNormal_r64(common::r64 mean,
-                           common::r64 stddev);
+            next_r64(common::r64 lowerBoundInclusive,
+                     common::r64 upperBoundExclusive);
+
+            common::r32
+            next_r32_norm(common::r32 mean,
+                          common::r32 stddev);
+
+            common::r64
+            next_r64_norm(common::r64 mean,
+                          common::r64 stddev);
 
         private:
-            std::mt19937 mEngine{};
+            // NOTE: Taken from http://xoshiro.di.unimi.it/xoshiro128plus.c
+            inline common::u64
+            rotl(const common::u64 x,
+                 int k) {
+                return (x << k) | (x >> (64 - k));
+            }
+
+            common::u64
+            _next() {
+                const common::u64 s0 = mSeed[0];
+                common::u64 s1 = mSeed[1];
+                const common::u64 result = s0 + s1;
+
+                s1 ^= s0;
+                mSeed[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
+                mSeed[1] = rotl(s1, 37); // c
+
+                return result;
+            }
+
+        private:
+            common::u64 mSeed[2]{};
+
+        private:
+            common::r64 mZ1_r64{0};
+            common::r32 mZ1_r32{0};
+            bool mGenerate_r32{false};
+            bool mGenerate_r64{false};
         };
     }
 }

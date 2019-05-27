@@ -148,7 +148,7 @@ namespace oni {
         Peer::send(PacketType type,
                    std::string &data,
                    ENetPeer *peer) {
-            if (data.empty() && type != PacketType::SETUP_SESSION) {
+            if (data.empty() && type != PacketType::SETUP_SESSION && type != PacketType::PING) {
                 return;
             }
 

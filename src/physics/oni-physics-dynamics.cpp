@@ -77,7 +77,7 @@ namespace oni {
             mCollisionHandler = std::make_unique<CollisionHandler>();
             mPhysicsWorld = std::make_unique<b2World>(gravity);
             mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
-            mRand = std::make_unique<math::Rand>(0);
+            mRand = std::make_unique<math::Rand>(0, 0);
 
             mCollisionHandlers[component::PhysicalCategory::ROCKET] =
                     std::bind(&Dynamics::handleRocketCollision, this,
@@ -308,9 +308,9 @@ namespace oni {
                     auto &heading = view.get<component::Heading>(id);
                     auto &scale = view.get<component::Scale>(id);
 
-                    if (std::abs(pos.x - position.x) > common::EP ||
-                        std::abs(pos.y - position.y) > common::EP ||
-                        std::abs(heading.value - body->GetAngle()) > common::EP) {
+                    if (std::abs(pos.x - position.x) > common::EP32 ||
+                        std::abs(pos.y - position.y) > common::EP32 ||
+                        std::abs(heading.value - body->GetAngle()) > common::EP32) {
                         if (manager.has<component::Trail>(id)) {
                             auto &trail = manager.get<component::Trail>(id);
                             trail.previousPos.push_back(pos);

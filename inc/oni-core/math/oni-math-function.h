@@ -72,7 +72,7 @@ namespace oni {
         template<class T>
         inline void
         zeroClip(T &val) {
-            if (val <= common::EP) {
+            if (val <= common::EP32) {
                 val = 0;
             }
         }
@@ -164,33 +164,33 @@ namespace oni {
         bool
         safeEqual(T x,
                   T y) {
-            return abs(x - y) <= common::EP;
+            return abs(x - y) <= common::EP32;
         }
 
         template<class T>
         bool
         safeZero(T x) {
-            return abs(x) <= common::EP;
+            return abs(x) <= common::EP32;
         }
 
         template<class T>
         bool
         safeLess(T x,
                  T y) {
-            return x - y <= common::EP;
+            return x - y <= common::EP32;
         }
 
         template<class T>
         bool
         safeGreater(T x,
                     T y) {
-            return x - y >= common::EP;
+            return x - y >= common::EP32;
         }
 
         template<class T>
         bool
         safePos(T x) {
-            return x >= common::EP;
+            return x >= common::EP32;
         }
 
         template<class T>

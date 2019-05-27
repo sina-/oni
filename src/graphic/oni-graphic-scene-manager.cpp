@@ -58,7 +58,7 @@ namespace oni {
 
             mTextureManager = std::make_unique<TextureManager>();
 
-            mRand = std::make_unique<math::Rand>(0);
+            mRand = std::make_unique<math::Rand>(0, 0);
 
             mDebugDrawBox2D = std::make_unique<DebugDrawBox2D>(this);
             mDebugDrawBox2D->AppendFlags(b2Draw::e_shapeBit);
@@ -437,8 +437,7 @@ namespace oni {
 
                     auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
 
-                    common::EntityID trailEntity;
-                    for (auto numParticles = 0; numParticles < mRand->next_u8(1, 2); ++numParticles) {
+                    for (auto numParticles = 0; numParticles < mRand->next(1u, 2u); ++numParticles) {
                         auto pos = component::WorldP3D{x, y, currentPos.z};
                         for (common::r32 i = 0.f; i <= distance; i += particleSize) {
 /*                        if(i == 0){
@@ -552,11 +551,11 @@ namespace oni {
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
                             auto &emitter = getOrCreateEmitterCD(clientManager, carEntity);
                             if (math::safeZero(emitter.currentCD)) {
-                                for (common::i32 i = 0; i < mRand->next_i32(2, 3); ++i) {
+                                for (common::i32 i = 0; i < mRand->next(2u, 3u); ++i) {
                                     auto id = clientManager.createEntity_SmokeCloud();
                                     clientManager.setWorldP3D(id, pos.x, pos.y, z);
                                     clientManager.setTexture(id, "resources/images/cloud/1.png");
-                                    clientManager.setRandAge(id, 1, 3);
+                                    clientManager.setRandAge(id, 1.f, 3.f);
                                     clientManager.setRandHeading(id);
                                     clientManager.setRandVelocity(id, 1, 2);
                                     clientManager.setScale(id, 10, 10);
@@ -665,9 +664,9 @@ namespace oni {
                 auto &texture = manager.get<component::Texture>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                              common::EP);
+                                                              common::EP32);
                 auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                               common::EP);
+                                                               common::EP32);
 
                 texture.image.width = widthInPixels;
                 texture.image.height = heightInPixels;
@@ -790,11 +789,6 @@ namespace oni {
             mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
         }
 
-        const graphic::Camera &
-        SceneManager::getCamera() const {
-            return mCamera;
-        }
-
         void
         SceneManager::zoom(common::r32 distance) {
             mCamera.z = 1 / distance;
@@ -814,16 +808,6 @@ namespace oni {
             mCamera.x = x;
             mCamera.y = y;
             mCamera.z = 1 / distance;
-        }
-
-        const math::mat4 &
-        SceneManager::getProjectionMatrix() const {
-            return mProjectionMatrix;
-        }
-
-        const math::mat4 &
-        SceneManager::getViewMatrix() const {
-            return mViewMatrix;
         }
 
         common::u16

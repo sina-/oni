@@ -314,13 +314,13 @@ namespace oni {
                                   common::r32 lower,
                                   common::r32 upper) {
             auto &age = mRegistry->get<component::Age>(id);
-            age.maxAge = mRand->next_r32(lower, upper);
+            age.maxAge = mRand->next(lower, upper);
         }
 
         void
         EntityManager::setRandHeading(common::EntityID id) {
             auto &heading = mRegistry->get<component::Heading>(id);
-            heading.value = mRand->next_r32(0.f, common::FULL_CIRCLE_IN_RAD);
+            heading.value = mRand->next(0.f, common::FULL_CIRCLE_IN_RAD);
         }
 
         void

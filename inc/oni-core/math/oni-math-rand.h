@@ -31,46 +31,37 @@ namespace oni {
             }
 
             common::r32
-            next_r32(common::r32 lowerBoundInclusive,
-                     common::r32 upperBoundExclusive);
+            next(common::r32 lowerBoundInclusive,
+                 common::r32 upperBoundExclusive);
 
             common::r64
-            next_r64(common::r64 lowerBoundInclusive,
-                     common::r64 upperBoundExclusive);
+            next(common::r64 lowerBoundInclusive,
+                 common::r64 upperBoundExclusive);
 
             common::r32
-            next_r32_norm(common::r32 mean,
-                          common::r32 stddev);
+            next_norm(common::r32 mean,
+                      common::r32 stddev);
 
             common::r64
-            next_r64_norm(common::r64 mean,
-                          common::r64 stddev);
+            next_norm(common::r64 mean,
+                      common::r64 stddev);
 
         private:
-            // NOTE: Taken from http://xoshiro.di.unimi.it/xoshiro128plus.c
-            inline common::u64
-            rotl(const common::u64 x,
-                 int k) {
-                return (x << k) | (x >> (64 - k));
-            }
+            common::u64
+            rotl(common::u64 x,
+                 common::u32 k);
 
             common::u64
-            _next() {
-                const common::u64 s0 = mSeed[0];
-                common::u64 s1 = mSeed[1];
-                const common::u64 result = s0 + s1;
+            _next();
 
-                s1 ^= s0;
-                mSeed[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16); // a, b
-                mSeed[1] = rotl(s1, 37); // c
+            common::r32
+            _next_r32();
 
-                return result;
-            }
+            common::r64
+            _next_r64();
 
         private:
             common::u64 mSeed[2]{};
-
-        private:
             common::r64 mZ1_r64{0};
             common::r32 mZ1_r32{0};
             bool mGenerate_r32{false};

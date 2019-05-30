@@ -20,12 +20,12 @@ target_include_directories(oni-core-graphic
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/freetype-gl/include>
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/freeimage/Source>
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/freetype2/include>
-        $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/ant-tweak-bar/include>
+        $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/anttweakbar/include>
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glew/include>
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glfw/include>
         )
 
-find_library(ANT_TWEAK_BAR AntTweakBar PATHS ${oni_SOURCE_DIR}/lib/ant-tweak-bar/bin NO_DEFAULT_PATH)
+find_library(ANT_TWEAK_BAR AntTweakBar PATHS ${oni_SOURCE_DIR}/lib/anttweakbar/lib NO_DEFAULT_PATH)
 find_library(FREETYPE_GL freetype-gl PATHS ${oni_SOURCE_DIR}/lib/freetype-gl/bin NO_DEFAULT_PATH)
 find_library(FREETYPE_LIBRARY freetype PATHS ${oni_SOURCE_DIR}/lib/freetype2/build-cmake NO_DEFAULT_PATH)
 find_library(FREEIMAGE_LIBRARY freeimage PATHS ${oni_SOURCE_DIR}/lib/freeimage NO_DEFAULT_PATH)

@@ -14,29 +14,31 @@ namespace oni {
                  T upperBoundExclusive) {
                 static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>);
                 assert(upperBoundExclusive > lowerBoundInclusive);
-                auto n = _next();
+                auto n = next_u64();
                 auto d = upperBoundExclusive - lowerBoundInclusive;
                 auto result = lowerBoundInclusive + (n % d);
                 return result;
             }
 
-            template<class T>
-            T
-            next() {
-                static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>);
-                auto n = _next();
-                auto d = std::numeric_limits<T>::max();
-                auto result = n % d;
-                return result;
-            }
+            common::u32
+            next_u32();
+
+            common::u64
+            next_u64();
+
+            common::u8
+            next_u8();
+
+            common::u16
+            next_u16();
 
             common::r32
-            next(common::r32 lowerBoundInclusive,
-                 common::r32 upperBoundExclusive);
+            next_r32(common::r32 lowerBoundInclusive,
+                     common::r32 upperBoundExclusive);
 
             common::r64
-            next(common::r64 lowerBoundInclusive,
-                 common::r64 upperBoundExclusive);
+            next_r64(common::r64 lowerBoundInclusive,
+                     common::r64 upperBoundExclusive);
 
             common::r32
             next_norm(common::r32 mean,
@@ -47,12 +49,13 @@ namespace oni {
                       common::r64 stddev);
 
         private:
-            common::u64
-            rotl(common::u64 x,
-                 common::u32 k);
+            static common::u32
+            rotl_u32(common::u32 x,
+                     common::i32 k);
 
-            common::u64
-            _next();
+            static common::u64
+            rotl_64(common::u64 x,
+                    common::u32 k);
 
             common::r32
             _next_r32();
@@ -61,7 +64,19 @@ namespace oni {
             _next_r64();
 
         private:
-            common::u64 mSeed[2]{};
+            union _r32 {
+                common::u32 _int{};
+                common::r32 _float;
+            };
+
+            union _r64 {
+                common::u64 _int{};
+                common::r64 _float;
+            };
+
+        private:
+            common::u64 mSeed_u64[2]{};
+            common::u64 mSeed_u32[4]{};
             common::r64 mZ1_r64{0};
             common::r32 mZ1_r32{0};
             bool mGenerate_r32{false};

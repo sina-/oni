@@ -466,11 +466,11 @@ namespace oni {
 
                             auto &velocity = clientManager.get<component::Velocity>(
                                     trailEntity);
-                            velocity.currentVelocity = mRand->next(2.f, 10.f);
+                            velocity.currentVelocity = mRand->next_r32(2.f, 10.f);
 
                             auto &particleHeading = clientManager.get<component::Heading>(
                                     trailEntity);
-                            particleHeading.value = mRand->next(spawnMinAngle, spawnMaxAngle);
+                            particleHeading.value = mRand->next_r32(spawnMinAngle, spawnMaxAngle);
 
                             pos.x += particleSize * std::sin(alpha);
                             pos.y += particleSize * std::cos(alpha);

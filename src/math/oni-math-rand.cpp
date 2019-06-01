@@ -82,7 +82,7 @@ namespace oni {
         }
 
         common::r32
-        Rand::_next_r32() {
+        Rand::next_r32() {
             common::u32 exponent = 128 - 1;
             exponent <<= 23u;
 
@@ -103,7 +103,7 @@ namespace oni {
         }
 
         common::r64
-        Rand::_next_r64() {
+        Rand::next_r64() {
             common::u64 exponent = 1024 - 1;
             exponent <<= 52u;
 
@@ -119,7 +119,7 @@ namespace oni {
                        common::r32 upperBoundExclusive) {
             assert(upperBoundExclusive > lowerBoundInclusive);
             auto d = upperBoundExclusive - lowerBoundInclusive;
-            auto result = _next_r32();
+            auto result = next_r32();
             result *= d;
             return lowerBoundInclusive + result;
         }
@@ -129,7 +129,7 @@ namespace oni {
                        common::r64 upperBoundExclusive) {
             assert(upperBoundExclusive > lowerBoundInclusive);
             auto d = upperBoundExclusive - lowerBoundInclusive;
-            auto result = _next_r64();
+            auto result = next_r64();
             result *= d;
             return lowerBoundInclusive + result;
         }
@@ -143,8 +143,8 @@ namespace oni {
                 return mZ1_r32 * stddev + mean;
             }
 
-            common::r32 u1 = _next_r32();
-            common::r32 u2 = _next_r32();
+            common::r32 u1 = next_r32();
+            common::r32 u2 = next_r32();
 
             common::r32 z0 = std::sqrt(-2.0 * log(u1)) * std::cos(common::TWO_PI * u2);
             mZ1_r32 = std::sqrt(-2.0 * std::log(u1)) * std::sin(common::TWO_PI * u2);
@@ -160,8 +160,8 @@ namespace oni {
                 return mZ1_r64 * stddev + mean;
             }
 
-            common::r64 u1 = _next_r64();
-            common::r64 u2 = _next_r64();
+            common::r64 u1 = next_r64();
+            common::r64 u2 = next_r64();
 
             common::r64 z0 = std::sqrt(-2.0 * std::log(u1)) * std::cos(common::TWO_PI * u2);
             mZ1_r64 = std::sqrt(-2.0 * std::log(u1)) * std::sin(common::TWO_PI * u2);

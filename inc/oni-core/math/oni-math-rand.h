@@ -33,6 +33,12 @@ namespace oni {
             next_u16();
 
             common::r32
+            next_r32();
+
+            common::r64
+            next_r64();
+
+            common::r32
             next_r32(common::r32 lowerBoundInclusive,
                      common::r32 upperBoundExclusive);
 
@@ -56,12 +62,6 @@ namespace oni {
             static common::u64
             rotl_64(common::u64 x,
                     common::u32 k);
-
-            common::r32
-            _next_r32();
-
-            common::r64
-            _next_r64();
 
         private:
             union _r32 {

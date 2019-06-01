@@ -22,7 +22,9 @@ namespace oni {
 
         enum class ChannelGroup : common::u8 {
             MUSIC,
-            EFFECT
+            EFFECT,
+
+            SIZE
         };
     }
 }

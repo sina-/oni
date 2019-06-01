@@ -48,14 +48,14 @@ namespace oni {
             ERRCHECK(result);
             auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
             effectsGroup->setVolume(1.f);
-            mChannelGroups[component::ChannelGroup::EFFECT] = std::move(effectsGroup);
+            mChannelGroups[(common::size) component::ChannelGroup::EFFECT] = std::move(effectsGroup);
             group = nullptr;
 
             result = system->createChannelGroup("musicChannel", &group);
             ERRCHECK(result);
             auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
             musicGroup->setVolume(1.f);
-            mChannelGroups[component::ChannelGroup::MUSIC] = std::move(musicGroup);
+            mChannelGroups[(common::size) component::ChannelGroup::MUSIC] = std::move(musicGroup);
             group = nullptr;
 
             mEngineIdleSound = component::SoundID{"resources/audio/car/car-2/idle-low-slow.wav"};
@@ -74,6 +74,10 @@ namespace oni {
             loadSound(shotSound);
 
             preLoadCollisionSoundEffects();
+
+            for (common::u32 i = 0; i < mChannelGroups.size(); ++i) {
+                assert(mChannelGroups[i]);
+            }
         }
 
         void
@@ -97,7 +101,8 @@ namespace oni {
                     math::vec3 velocity{car.velocity.x, car.velocity.y, 0.f};
 
                     // TODO: Using soundTag find the correct sound to play.
-                    auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity, component::ChannelGroup::EFFECT);
+                    auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity,
+                                                                      component::ChannelGroup::EFFECT);
                     auto distance = (pos.value - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
                         auto pitch = static_cast< common::r32>(car.rpm) / 2000;
@@ -124,7 +129,8 @@ namespace oni {
                     if (soundTag != component::SoundTag::ROCKET) {
                         continue;
                     }
-                    auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity, component::ChannelGroup::EFFECT);
+                    auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity,
+                                                                      component::ChannelGroup::EFFECT);
                     auto distance = (pos - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
 
@@ -208,7 +214,7 @@ namespace oni {
         AudioManager::createChannel(const component::SoundID &id,
                                     component::ChannelGroup channelGroup) {
             VALID(mSounds, id);
-            auto *group = mChannelGroups[channelGroup].get();
+            auto *group = mChannelGroups[(common::size) channelGroup].get();
             assert(group);
             FMOD::Channel *channel{nullptr};
             auto paused = true;
@@ -269,6 +275,9 @@ namespace oni {
         AudioManager::getOrCreateLooping3DChannel(const component::SoundID &soundID,
                                                   common::EntityID entityID,
                                                   component::ChannelGroup channelGroup) {
+            // TODO: This is crazy lot of work to create a new std string every tick
+            // I can probably just bit shift into an int after I have the asset manager setup so that assets are
+            // identified by enums rather than strings.
             auto id = createNewID(soundID, entityID);
             if (mLooping3DChannels.find(id) == mLooping3DChannels.end()) {
                 EntityChannel entityChannel;
@@ -358,7 +367,7 @@ namespace oni {
         void
         AudioManager::setChannelGroupVolume(component::ChannelGroup channelGroup,
                                             common::r32 volume) {
-            auto *group = mChannelGroups[channelGroup].get();
+            auto *group = mChannelGroups[(common::size) channelGroup].get();
             assert(group);
             group->setVolume(volume);
         }

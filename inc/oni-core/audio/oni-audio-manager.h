@@ -141,7 +141,10 @@ namespace oni {
         private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
             std::unordered_map<component::SoundID, std::unique_ptr<FMOD::Sound, FMODDeleter>, AudioManager::SoundIDHash, AudioManager::SoundIDCompare> mSounds;
-            std::unordered_map<component::ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroups;
+
+            std::array<
+                    std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>,
+                    static_cast<std::underlying_type<component::ChannelGroup>::type>(component::ChannelGroup::SIZE)> mChannelGroups;
             std::map<SoundEntityID, EntityChannel> mLooping3DChannels;
 
             std::unordered_map<common::u16p, component::SoundID> mCollisionEffects;

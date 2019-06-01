@@ -42,6 +42,22 @@ namespace oni {
             setVolume(backgroundSoundID, 0.2f);
             //playSound(backgroundSoundID);*/
 
+
+            FMOD::ChannelGroup *group{nullptr};
+            result = system->createChannelGroup("effectsChannel", &group);
+            ERRCHECK(result);
+            auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
+            effectsGroup->setVolume(1.f);
+            mChannelGroups[component::ChannelGroup::EFFECT] = std::move(effectsGroup);
+            group = nullptr;
+
+            result = system->createChannelGroup("musicChannel", &group);
+            ERRCHECK(result);
+            auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
+            musicGroup->setVolume(1.f);
+            mChannelGroups[component::ChannelGroup::MUSIC] = std::move(musicGroup);
+            group = nullptr;
+
             mEngineIdleSound = component::SoundID{"resources/audio/car/car-2/idle-low-slow.wav"};
             loadSound(mEngineIdleSound);
 
@@ -67,10 +83,13 @@ namespace oni {
             auto result = mSystem->update();
             ERRCHECK(result);
 
-            // Engine
+            /// Engine
             {
-                auto view = manager.createView<component::Tag_Audible,
-                        component::WorldP3D, component::Car, component::SoundTag>();
+                auto view = manager.createView<
+                        component::Tag_Audible,
+                        component::WorldP3D,
+                        component::Car,
+                        component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &car = view.get<component::Car>(entity);
                     auto &pos = view.get<component::WorldP3D>(entity);
@@ -78,7 +97,7 @@ namespace oni {
                     math::vec3 velocity{car.velocity.x, car.velocity.y, 0.f};
 
                     // TODO: Using soundTag find the correct sound to play.
-                    auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity);
+                    auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity, component::ChannelGroup::EFFECT);
                     auto distance = (pos.value - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
                         auto pitch = static_cast< common::r32>(car.rpm) / 2000;
@@ -92,8 +111,10 @@ namespace oni {
                 }
             }
 
+            /// ROCKET
             {
-                auto view = manager.createView<component::Tag_Audible,
+                auto view = manager.createView<
+                        component::Tag_Audible,
                         component::WorldP3D, component::SoundTag>();
                 for (auto &&entity : view) {
                     auto &pos = view.get<component::WorldP3D>(entity).value;
@@ -103,7 +124,7 @@ namespace oni {
                     if (soundTag != component::SoundTag::ROCKET) {
                         continue;
                     }
-                    auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity);
+                    auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity, component::ChannelGroup::EFFECT);
                     auto distance = (pos - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
 
@@ -123,13 +144,11 @@ namespace oni {
                                                entities::EntityType B,
                                                const component::WorldP3D &pos) {
             auto soundID = createCollisionEffectID(A, B);
-            assert(mCollisionEffects.find(soundID) != mCollisionEffects.end());
             auto distance = mPlayerPos.value - pos.value;
-            // TODO: use ChannelGroup and use the volume from it
-            common::r32 volume = 0.1f;
             common::r32 pitch = 1.f;
-            playOneShot(mCollisionEffects[soundID], distance, volume, pitch);
-            playOneShot(mCollisionEffects[soundID], distance, volume, pitch);
+            auto sound = mCollisionEffects[soundID];
+            assert(!sound.value.empty());
+            playOneShot(sound, component::ChannelGroup::EFFECT, distance, pitch);
         }
 
         common::u16p
@@ -186,11 +205,14 @@ namespace oni {
         }
 
         FMOD::Channel *
-        AudioManager::createChannel(const component::SoundID &id) {
+        AudioManager::createChannel(const component::SoundID &id,
+                                    component::ChannelGroup channelGroup) {
             VALID(mSounds, id);
-
+            auto *group = mChannelGroups[channelGroup].get();
+            assert(group);
             FMOD::Channel *channel{nullptr};
-            auto result = mSystem->playSound(mSounds[id].get(), nullptr, true, &channel);
+            auto paused = true;
+            auto result = mSystem->playSound(mSounds[id].get(), group, paused, &channel);
             ERRCHECK(result);
 
             return channel;
@@ -198,16 +220,14 @@ namespace oni {
 
         void
         AudioManager::playOneShot(const component::SoundID &id,
+                                  const component::ChannelGroup channelGroup,
                                   const math::vec3 &distance,
-                                  common::r32 volume,
-                                  common::r32 pitch) {
+                                  const common::r32 pitch) {
             VALID(mSounds, id);
-            auto channel = createChannel(id);
+            auto *channel = createChannel(id, channelGroup);
 
             auto result = channel->setMode(FMOD_3D);
             ERRCHECK(result);
-
-            setVolume(*channel, volume);
 
             setPitch(*channel, pitch);
 
@@ -247,14 +267,13 @@ namespace oni {
 
         AudioManager::EntityChannel &
         AudioManager::getOrCreateLooping3DChannel(const component::SoundID &soundID,
-                                                  common::EntityID entityID) {
+                                                  common::EntityID entityID,
+                                                  component::ChannelGroup channelGroup) {
             auto id = createNewID(soundID, entityID);
             if (mLooping3DChannels.find(id) == mLooping3DChannels.end()) {
                 EntityChannel entityChannel;
                 entityChannel.entityID = entityID;
-                entityChannel.channel = createChannel(soundID);
-                // TODO: This should not be happening, assign channel group and set volume on the group
-                entityChannel.channel->setVolume(0.1f);
+                entityChannel.channel = createChannel(soundID, channelGroup);
                 entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
 
                 mLooping3DChannels[id] = entityChannel;
@@ -304,6 +323,12 @@ namespace oni {
         }
 
         void
+        AudioManager::FMODDeleter::operator()(FMOD::ChannelGroup *channel) const {
+            channel->stop();
+            channel->release();
+        }
+
+        void
         AudioManager::set3DPos(FMOD::Channel &channel,
                                const math::vec3 &pos,
                                const math::vec3 &velocity) {
@@ -328,6 +353,14 @@ namespace oni {
                                 common::r32 volume) {
             auto result = channel.setVolume(volume);
             ERRCHECK(result);
+        }
+
+        void
+        AudioManager::setChannelGroupVolume(component::ChannelGroup channelGroup,
+                                            common::r32 volume) {
+            auto *group = mChannelGroups[channelGroup].get();
+            assert(group);
+            group->setVolume(volume);
         }
     }
 }

@@ -17,6 +17,8 @@ namespace FMOD {
     class System;
 
     class Channel;
+
+    class ChannelGroup;
 }
 
 namespace oni {
@@ -46,9 +48,13 @@ namespace oni {
 
             void
             playOneShot(const component::SoundID &id,
+                        component::ChannelGroup channelGroup,
                         const math::vec3 &distance,
-                        common::r32 volume,
                         common::r32 pitch);
+
+            void
+            setChannelGroupVolume(component::ChannelGroup,
+                                  common::r32 volume);
 
         private:
             class FMODDeleter {
@@ -58,6 +64,9 @@ namespace oni {
 
                 void
                 operator()(FMOD::System *sys) const;
+
+                void
+                operator()(FMOD::ChannelGroup *channel) const;
             };
 
             using SoundEntityID = std::string;
@@ -84,23 +93,25 @@ namespace oni {
             };
 
         private:
-            common::u16p
+            static common::u16p
             createCollisionEffectID(entities::EntityType,
                                     entities::EntityType);
 
             FMOD::Channel *
-            createChannel(const component::SoundID &);
+            createChannel(const component::SoundID &,
+                          component::ChannelGroup);
 
             void
             loadSound(const component::SoundID &);
 
-            SoundEntityID
+            static SoundEntityID
             createNewID(const component::SoundID &soundID,
                         common::EntityID entityID);
 
-            EntityChannel &
+            AudioManager::EntityChannel &
             getOrCreateLooping3DChannel(const component::SoundID &soundID,
-                                        common::EntityID entityID);
+                                        common::EntityID entityID,
+                                        component::ChannelGroup);
 
             void
             preLoadCollisionSoundEffects();
@@ -130,7 +141,7 @@ namespace oni {
         private:
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
             std::unordered_map<component::SoundID, std::unique_ptr<FMOD::Sound, FMODDeleter>, AudioManager::SoundIDHash, AudioManager::SoundIDCompare> mSounds;
-
+            std::unordered_map<component::ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroups;
             std::map<SoundEntityID, EntityChannel> mLooping3DChannels;
 
             std::unordered_map<common::u16p, component::SoundID> mCollisionEffects;

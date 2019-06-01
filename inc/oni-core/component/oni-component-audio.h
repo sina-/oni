@@ -19,5 +19,10 @@ namespace oni {
         struct SoundID {
             std::string value;
         };
+
+        enum class ChannelGroup : common::u8 {
+            MUSIC,
+            EFFECT
+        };
     }
 }

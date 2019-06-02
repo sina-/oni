@@ -232,7 +232,7 @@ namespace oni {
                         component::Trail,
                         component::EntityAttachment,
                         component::EntityAttachee,
-                        component::SoundTag,
+                        component::Sound,
 
                         entities::EntityType,
                         gameplay::CarLapInfo,
@@ -280,7 +280,7 @@ namespace oni {
                         component::Trail,
                         component::EntityAttachment,
                         component::EntityAttachee,
-                        component::SoundTag,
+                        component::Sound,
 
                         entities::EntityType,
                         gameplay::CarLapInfo,

@@ -10,6 +10,7 @@
 #include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/asset/oni-asset-manager.h>
 
 namespace FMOD {
     class Sound;
@@ -22,6 +23,9 @@ namespace FMOD {
 }
 
 namespace oni {
+    namespace asset {
+        class AssetManager;
+    }
     namespace entities {
         class EntityManager;
     }
@@ -32,7 +36,7 @@ namespace oni {
     namespace audio {
         class AudioManager {
         public:
-            AudioManager();
+            explicit AudioManager(asset::AssetManager &);
 
             void
             tick(entities::EntityManager &,
@@ -47,10 +51,8 @@ namespace oni {
             kill(common::EntityID);
 
             void
-            playOneShot(const component::SoundID &id,
-                        component::ChannelGroup channelGroup,
-                        const math::vec3 &distance,
-                        common::r32 pitch);
+            playOneShot(const component::Sound &,
+                        const math::vec3 &distance);
 
             void
             setChannelGroupVolume(component::ChannelGroup,
@@ -69,52 +71,36 @@ namespace oni {
                 operator()(FMOD::ChannelGroup *channel) const;
             };
 
-            using SoundEntityID = std::string;
+            using CollisionSoundTag = common::u16p;
+            using EntitySoundTag = common::u32p;
 
             struct EntityChannel {
                 common::EntityID entityID{0};
                 FMOD::Channel *channel{nullptr};
             };
 
-            struct SoundIDHash {
-                std::size_t
-                operator()(const component::SoundID &soundID) const noexcept {
-                    std::hash<std::string> func{};
-                    return func(soundID.value);
-                }
-            };
-
-            struct SoundIDCompare {
-                bool
-                operator()(const component::SoundID &left,
-                           const component::SoundID &right) const {
-                    return left.value == right.value;
-                }
-            };
-
         private:
-            static common::u16p
+            void
+            preLoadSounds();
+
+            static CollisionSoundTag
             createCollisionEffectID(entities::EntityType,
                                     entities::EntityType);
 
             FMOD::Channel *
-            createChannel(const component::SoundID &,
-                          component::ChannelGroup);
+            createChannel(const component::Sound &);
 
             void
-            loadSound(const component::SoundID &);
+            loadSound(component::SoundTag,
+                      std::string_view);
 
-            static SoundEntityID
-            createNewID(const component::SoundID &soundID,
-                        common::EntityID entityID);
+            static EntitySoundTag
+            createEntitySoundID(component::SoundTag,
+                                common::EntityID);
 
             AudioManager::EntityChannel &
-            getOrCreateLooping3DChannel(const component::SoundID &soundID,
-                                        common::EntityID entityID,
-                                        component::ChannelGroup);
-
-            void
-            preLoadCollisionSoundEffects();
+            getOrCreateLooping3DChannel(const component::Sound &,
+                                        common::EntityID);
 
             void
             setPitch(FMOD::Channel &,
@@ -139,24 +125,18 @@ namespace oni {
                       common::r32 volume);
 
         private:
+            asset::AssetManager &mAssetManager;
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
-            std::unordered_map<component::SoundID, std::unique_ptr<FMOD::Sound, FMODDeleter>, AudioManager::SoundIDHash, AudioManager::SoundIDCompare> mSounds;
 
-            std::array<
-                    std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>,
-                    static_cast<std::underlying_type<component::ChannelGroup>::type>(component::ChannelGroup::SIZE)> mChannelGroups;
-            std::map<SoundEntityID, EntityChannel> mLooping3DChannels;
-
-            std::unordered_map<common::u16p, component::SoundID> mCollisionEffects;
+            std::unordered_map<component::ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroups;
+            std::unordered_map<component::SoundTag, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
+            std::unordered_map<AudioManager::EntitySoundTag, EntityChannel> mLoopingChannels;
+            std::unordered_map<AudioManager::CollisionSoundTag, component::SoundTag> mCollisionEffects;
 
             component::WorldP3D mPlayerPos{};
 
             common::r32 mMaxAudibleDistance{0.f};
             common::i32 mMaxNumberOfChannels{0};
-
-        private:
-            component::SoundID mEngineIdleSound;
-            component::SoundID mRocketSound;
         };
     }
 }

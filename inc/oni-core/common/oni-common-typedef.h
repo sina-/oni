@@ -24,6 +24,8 @@ namespace oni {
 
         typedef u32 u16p;
 
+        typedef u64 u32p;
+
         typedef u32 EntityID;
 
         typedef std::string PeerID;

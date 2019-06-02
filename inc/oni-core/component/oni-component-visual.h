@@ -48,6 +48,13 @@ namespace oni {
             TextureStatus status{TextureStatus::NEEDS_LOADING_USING_PATH};
         };
 
+        enum class TextureTag : common::u32 {
+            UNKNOWN,
+
+            LAST
+        };
+
+
         struct Text {
             common::EntityID entityID{0};
             common::r32 xScaling{1.f};

@@ -11,14 +11,14 @@
 namespace oni {
     namespace math {
         inline common::r64
-        toRadians(common::r64 degrees) {
+        toRadians(common::r64 degrees) noexcept {
             return degrees * (common::PI / 180.0f);
         }
 
         template<class T>
         inline T
         max(const T &x,
-            const T &y) {
+            const T &y) noexcept {
             if (x > y) {
                 return x;
             }
@@ -28,7 +28,7 @@ namespace oni {
         template<class T>
         inline T
         min(const T &x,
-            const T &y) {
+            const T &y) noexcept {
             if (x < y) {
                 return x;
             }
@@ -39,7 +39,7 @@ namespace oni {
         inline void
         clip(T &n,
              const T &lower,
-             const T &upper) {
+             const T &upper) noexcept {
             n = max(lower, min(n, upper));
         }
 
@@ -47,14 +47,14 @@ namespace oni {
         inline T
         clip(const T &n,
              const T &lower,
-             const T &upper) {
+             const T &upper) noexcept {
             return max(lower, min(n, upper));
         }
 
         template<class T>
         inline void
         clipUpper(T &val,
-                  const T &upper) {
+                  const T &upper) noexcept {
             if (val > upper) {
                 val = upper;
             }
@@ -63,7 +63,7 @@ namespace oni {
         template<class T>
         inline void
         clipLower(T &val,
-                  const T &lower) {
+                  const T &lower) noexcept {
             if (val < lower) {
                 val = lower;
             }
@@ -71,7 +71,7 @@ namespace oni {
 
         template<class T>
         inline void
-        zeroClip(T &val) {
+        zeroClip(T &val) noexcept {
             if (val <= common::EP32) {
                 val = 0;
             }
@@ -79,13 +79,14 @@ namespace oni {
 
         template<class T>
         inline common::i32
-        sign(T n) {
+        sign(T n) noexcept {
             return (T(0) < n) - (T(0) > n);
         }
 
         inline common::i64
         findBin(const common::r64 position,
                 const common::u16 binSize) {
+            assert(binSize);
             auto result = std::floor(position / binSize);
             auto truncated = static_cast<common::i64>(result);
             return truncated;
@@ -93,13 +94,13 @@ namespace oni {
 
         inline common::r32
         binPos(const common::i64 index,
-               const common::u16 binSize) {
+               const common::u16 binSize) noexcept {
             return binSize * index;
         }
 
         inline common::i64p
         pack_i64(const common::i64 x,
-                 const common::i64 y) {
+                 const common::i64 y) noexcept {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -116,9 +117,18 @@ namespace oni {
             return result;
         }
 
+        inline common::u32p
+        pack_u32(const common::u32 x,
+                 const common::u32 y) noexcept {
+            auto _x = static_cast<common::u64>(x) << 32;
+            auto _y = static_cast<common::u64>(y);
+            auto result = _x | _y;
+            return result;
+        }
+
         inline common::u16p
         pack_u16(common::u16 x,
-                 common::u16 y) {
+                 common::u16 y) noexcept {
             return x << 16 | y;
         }
 
@@ -126,7 +136,7 @@ namespace oni {
         inline T
         lerp(T x,
              T y,
-             T t) {
+             T t) noexcept {
             return (1 - t) * x + t * y;
         }
 
@@ -161,50 +171,56 @@ namespace oni {
         }
 
         template<class T>
-        bool
+        inline bool
         safeEqual(T x,
-                  T y) {
+                  T y) noexcept {
             return abs(x - y) <= common::EP32;
         }
 
         template<class T>
-        bool
-        safeZero(T x) {
+        inline bool
+        safeZero(T x) noexcept {
             return abs(x) <= common::EP32;
         }
 
         template<class T>
-        bool
+        inline bool
         safeLess(T x,
-                 T y) {
+                 T y) noexcept {
             return x - y <= common::EP32;
         }
 
         template<class T>
-        bool
+        inline bool
         safeGreater(T x,
-                    T y) {
+                    T y) noexcept {
             return x - y >= common::EP32;
         }
 
         template<class T>
-        bool
-        safePos(T x) {
+        inline bool
+        safePos(T x) noexcept {
             return x >= common::EP32;
         }
 
         template<class T>
-        bool
-        safeNeg(T x) {
+        inline bool
+        safeNeg(T x) noexcept {
             return x < 0;
         }
 
         template<class T>
-        void
+        inline void
         subAndZeroClip(T &x,
-                       const T y) {
+                       const T y) noexcept {
             x -= y;
             zeroClip(x);
+        }
+
+        template<class T>
+        constexpr std::underlying_type_t<T>
+        enumCast(T value) noexcept {
+            return static_cast<std::underlying_type_t<T>>(value);
         }
     }
 }

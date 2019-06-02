@@ -69,16 +69,15 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  SoundID &soundID) {
-            assert(!soundID.value.empty());
-            archive(soundID.value);
+                  WorldP3D &pos) {
+            archive(pos.value);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  WorldP3D &pos) {
-            archive(pos.value);
+                  Sound &data) {
+            archive(data.group, data.tag, data.pitch);
         }
     }
 
@@ -108,7 +107,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   game::Event_SoundPlay &data) {
-            archive(data.pos, data.soundID);
+            archive(data.pos, data.tag);
         }
 
         template<class Archive>

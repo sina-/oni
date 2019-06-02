@@ -8,31 +8,28 @@
 #include <oni-core/entities/oni-entities-manager.h>
 
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
-#define VALID(MAP, ID) assert(MAP.find(id) != MAP.end())
 
 namespace oni {
     namespace audio {
-        AudioManager::AudioManager() {
+        AudioManager::AudioManager(asset::AssetManager &assetManager) : mAssetManager(assetManager) {
             mMaxAudibleDistance = 150.f;
+            mMaxNumberOfChannels = 1024;
 
             FMOD::System *system{nullptr};
-
             auto result = FMOD::System_Create(&system);
             ERRCHECK(result);
             mSystem = std::unique_ptr<FMOD::System, FMODDeleter>(system, FMODDeleter());
 
             common::u32 version;
-            result = system->getVersion(&version);
+            result = mSystem->getVersion(&version);
             ERRCHECK(result);
 
             assert(version >= FMOD_VERSION);
 
-            mMaxNumberOfChannels = 1024;
-
-            result = system->init(mMaxNumberOfChannels, FMOD_INIT_NORMAL, nullptr);
+            result = mSystem->init(mMaxNumberOfChannels, FMOD_INIT_NORMAL, nullptr);
             ERRCHECK(result);
 
-            result = system->update();
+            result = mSystem->update();
             ERRCHECK(result);
 
 /*            component::SoundID backgroundSoundID = "resources/audio/beat.wav";
@@ -42,42 +39,22 @@ namespace oni {
             setVolume(backgroundSoundID, 0.2f);
             //playSound(backgroundSoundID);*/
 
-
             FMOD::ChannelGroup *group{nullptr};
-            result = system->createChannelGroup("effectsChannel", &group);
+            result = mSystem->createChannelGroup("effectsChannel", &group);
             ERRCHECK(result);
             auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
             effectsGroup->setVolume(1.f);
-            mChannelGroups[(common::size) component::ChannelGroup::EFFECT] = std::move(effectsGroup);
+            mChannelGroups[component::ChannelGroup::EFFECT] = std::move(effectsGroup);
             group = nullptr;
 
-            result = system->createChannelGroup("musicChannel", &group);
+            result = mSystem->createChannelGroup("musicChannel", &group);
             ERRCHECK(result);
             auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
             musicGroup->setVolume(1.f);
-            mChannelGroups[(common::size) component::ChannelGroup::MUSIC] = std::move(musicGroup);
+            mChannelGroups[component::ChannelGroup::MUSIC] = std::move(musicGroup);
             group = nullptr;
 
-            mEngineIdleSound = component::SoundID{"resources/audio/car/car-2/idle-low-slow.wav"};
-            loadSound(mEngineIdleSound);
-
-/*            component::SoundID rocketFastSoundID = "resources/audio/rocket/1-fast.wav";
-            loadSound(rocketFastSoundID);
-
-            component::SoundID rocketSlowSoundID = "resources/audio/rocket/1-slow.wav";
-            loadSound(rocketSlowSoundID);*/
-
-            mRocketSound = component::SoundID{"resources/audio/rocket/2-idle-fast.wav"};
-            loadSound(mRocketSound);
-
-            auto shotSound = component::SoundID{"resources/audio/rocket/1-shot.wav"};
-            loadSound(shotSound);
-
-            preLoadCollisionSoundEffects();
-
-            for (common::u32 i = 0; i < mChannelGroups.size(); ++i) {
-                assert(mChannelGroups[i]);
-            }
+            preLoadSounds();
         }
 
         void
@@ -87,56 +64,39 @@ namespace oni {
             auto result = mSystem->update();
             ERRCHECK(result);
 
-            /// Engine
+            /// Engine pitch
+            {
+                auto view = manager.createView<
+                        component::Tag_Audible,
+                        component::Car,
+                        component::Sound>();
+                for (auto &&entity : view) {
+                    auto &car = view.get<component::Car>(entity);
+                    auto &sound = view.get<component::Sound>(entity);
+
+                    // TODO: This needs to go into client side entity manager as a complementary entity
+                    sound.pitch = static_cast< common::r32>(car.rpm) / 2000;
+                }
+            }
+
+            /// Play and Pause
             {
                 auto view = manager.createView<
                         component::Tag_Audible,
                         component::WorldP3D,
-                        component::Car,
-                        component::SoundTag>();
-                for (auto &&entity : view) {
-                    auto &car = view.get<component::Car>(entity);
-                    auto &pos = view.get<component::WorldP3D>(entity);
-                    auto &soundTag = view.get<component::SoundTag>(entity);
-                    math::vec3 velocity{car.velocity.x, car.velocity.y, 0.f};
-
-                    // TODO: Using soundTag find the correct sound to play.
-                    auto &entityChannel = getOrCreateLooping3DChannel(mEngineIdleSound, entity,
-                                                                      component::ChannelGroup::EFFECT);
-                    auto distance = (pos.value - mPlayerPos.value).len();
-                    if (distance < mMaxAudibleDistance) {
-                        auto pitch = static_cast< common::r32>(car.rpm) / 2000;
-                        setPitch(*entityChannel.channel, pitch);
-                        set3DPos(*entityChannel.channel, pos.value - mPlayerPos.value, velocity);
-
-                        unPause(*entityChannel.channel);
-                    } else {
-                        pause(*entityChannel.channel);
-                    }
-                }
-            }
-
-            /// ROCKET
-            {
-                auto view = manager.createView<
-                        component::Tag_Audible,
-                        component::WorldP3D, component::SoundTag>();
+                        component::Sound>();
                 for (auto &&entity : view) {
                     auto &pos = view.get<component::WorldP3D>(entity).value;
-                    auto &soundTag = view.get<component::SoundTag>(entity);
+                    auto &sound = view.get<component::Sound>(entity);
 
-                    // TODO: Using soundTag find the correct sound to play.
-                    if (soundTag != component::SoundTag::ROCKET) {
-                        continue;
-                    }
-                    auto &entityChannel = getOrCreateLooping3DChannel(mRocketSound, entity,
-                                                                      component::ChannelGroup::EFFECT);
+                    auto &entityChannel = getOrCreateLooping3DChannel(sound, entity);
                     auto distance = (pos - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
 
                         // TODO: Does it matter if this is accurate?
                         math::vec3 vel{1.f, 0.f, 0.f};
                         set3DPos(*entityChannel.channel, pos - mPlayerPos.value, vel);
+                        setPitch(*entityChannel.channel, sound.pitch);
                         unPause(*entityChannel.channel);
                     } else {
                         pause(*entityChannel.channel);
@@ -149,20 +109,20 @@ namespace oni {
         AudioManager::playCollisionSoundEffect(entities::EntityType A,
                                                entities::EntityType B,
                                                const component::WorldP3D &pos) {
-            auto soundID = createCollisionEffectID(A, B);
+            auto collisionTag = createCollisionEffectID(A, B);
             auto distance = mPlayerPos.value - pos.value;
-            common::r32 pitch = 1.f;
-            auto sound = mCollisionEffects[soundID];
-            assert(!sound.value.empty());
-            playOneShot(sound, component::ChannelGroup::EFFECT, distance, pitch);
+            auto soundTag = mCollisionEffects[collisionTag];
+            assert(soundTag);
+            auto sound = component::Sound{soundTag, component::ChannelGroup::EFFECT, 1.f};
+            playOneShot(sound, distance);
         }
 
-        common::u16p
+        AudioManager::CollisionSoundTag
         AudioManager::createCollisionEffectID(entities::EntityType A,
                                               entities::EntityType B) {
             static_assert(sizeof(A) == sizeof(common::u16), "Hashing will fail due to size mismatch");
-            auto x = static_cast<common::u16 >(A);
-            auto y = static_cast<common::u16 >(B);
+            auto x = math::enumCast(A);
+            auto y = math::enumCast(B);
 
             if (x > y) {
                 std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
@@ -173,26 +133,31 @@ namespace oni {
         }
 
         void
-        AudioManager::preLoadCollisionSoundEffects() {
-            auto rocketWithUnknown = component::SoundID{"resources/audio/collision/rocket-with-unknown.wav"};
-            loadSound(rocketWithUnknown);
-            for (auto i = static_cast<common::u16 >(entities::EntityType::UNKNOWN);
-                 i < static_cast<common::u16>(entities::EntityType::LAST);
+        AudioManager::preLoadSounds() {
+            for (auto i = math::enumCast(component::SoundTag::UNKNOWN) + 1;
+                 i < math::enumCast(component::SoundTag::LAST);
+                 ++i) {
+                auto tag = static_cast<component::SoundTag>(i);
+                auto path = mAssetManager.getAssetFilePath(tag);
+                loadSound(tag, path);
+            }
+
+            for (auto i = math::enumCast(entities::EntityType::UNKNOWN);
+                 i < math::enumCast(entities::EntityType::LAST);
                  ++i) {
                 auto id = createCollisionEffectID(entities::EntityType::SIMPLE_ROCKET,
                                                   static_cast<entities::EntityType>(i));
-                mCollisionEffects[id] = rocketWithUnknown;
+                mCollisionEffects[id] = component::SoundTag::COLLISION_ROCKET_UNKNOWN;
             }
         }
 
-
         void
         AudioManager::kill(common::EntityID entityID) {
-            for (auto it = mLooping3DChannels.begin(); it != mLooping3DChannels.end();) {
+            for (auto it = mLoopingChannels.begin(); it != mLoopingChannels.end();) {
                 if (it->second.entityID == entityID) {
                     auto result = it->second.channel->stop();
                     ERRCHECK(result);
-                    it = mLooping3DChannels.erase(it);
+                    it = mLoopingChannels.erase(it);
                 } else {
                     ++it;
                 }
@@ -200,42 +165,42 @@ namespace oni {
         }
 
         void
-        AudioManager::loadSound(const component::SoundID &id) {
+        AudioManager::loadSound(component::SoundTag tag,
+                                std::string_view filePath) {
             FMOD::Sound *sound{};
-            auto result = mSystem->createSound(id.value.data(), FMOD_DEFAULT, nullptr, &sound);
+            auto result = mSystem->createSound(filePath.data(), FMOD_DEFAULT, nullptr, &sound);
             ERRCHECK(result);
             assert(sound);
 
             std::unique_ptr<FMOD::Sound, FMODDeleter> value(sound);
-            mSounds.insert({id, std::move(value)});
+            mSounds.insert({tag, std::move(value)});
         }
 
         FMOD::Channel *
-        AudioManager::createChannel(const component::SoundID &id,
-                                    component::ChannelGroup channelGroup) {
-            VALID(mSounds, id);
-            auto *group = mChannelGroups[(common::size) channelGroup].get();
+        AudioManager::createChannel(const component::Sound &sound) {
+            assert(mChannelGroups[sound.group]);
+            auto *group = mChannelGroups[sound.group].get();
             assert(group);
+            assert(mSounds[sound.tag]);
+
             FMOD::Channel *channel{nullptr};
             auto paused = true;
-            auto result = mSystem->playSound(mSounds[id].get(), group, paused, &channel);
+            auto result = mSystem->playSound(mSounds[sound.tag].get(), group, paused, &channel);
             ERRCHECK(result);
 
             return channel;
         }
 
         void
-        AudioManager::playOneShot(const component::SoundID &id,
-                                  const component::ChannelGroup channelGroup,
-                                  const math::vec3 &distance,
-                                  const common::r32 pitch) {
-            VALID(mSounds, id);
-            auto *channel = createChannel(id, channelGroup);
+        AudioManager::playOneShot(const component::Sound &sound,
+                                  const math::vec3 &distance) {
+            auto *channel = createChannel(sound);
+            assert(channel);
 
             auto result = channel->setMode(FMOD_3D);
             ERRCHECK(result);
 
-            setPitch(*channel, pitch);
+            setPitch(*channel, sound.pitch);
 
             // TODO: Does this matter?
             math::vec3 velocity{1.f, 1.f, 0.f};
@@ -265,29 +230,26 @@ namespace oni {
             return FMOD_OK;
         }
 
-        AudioManager::SoundEntityID
-        AudioManager::createNewID(const component::SoundID &soundID,
-                                  common::EntityID entityID) {
-            return std::string(soundID.value) + std::to_string(entityID);
+        AudioManager::EntitySoundTag
+        AudioManager::createEntitySoundID(component::SoundTag tag,
+                                          common::EntityID id) {
+            auto result = math::pack_u32(math::enumCast(tag), id);
+            return result;
         }
 
         AudioManager::EntityChannel &
-        AudioManager::getOrCreateLooping3DChannel(const component::SoundID &soundID,
-                                                  common::EntityID entityID,
-                                                  component::ChannelGroup channelGroup) {
-            // TODO: This is crazy lot of work to create a new std string every tick
-            // I can probably just bit shift into an int after I have the asset manager setup so that assets are
-            // identified by enums rather than strings.
-            auto id = createNewID(soundID, entityID);
-            if (mLooping3DChannels.find(id) == mLooping3DChannels.end()) {
+        AudioManager::getOrCreateLooping3DChannel(const component::Sound &sound,
+                                                  common::EntityID entityID) {
+            auto id = createEntitySoundID(sound.tag, entityID);
+            if (mLoopingChannels.find(id) == mLoopingChannels.end()) {
                 EntityChannel entityChannel;
                 entityChannel.entityID = entityID;
-                entityChannel.channel = createChannel(soundID, channelGroup);
+                entityChannel.channel = createChannel(sound);
                 entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
 
-                mLooping3DChannels[id] = entityChannel;
+                mLoopingChannels[id] = entityChannel;
             }
-            return mLooping3DChannels[id];
+            return mLoopingChannels[id];
         }
 
         void
@@ -367,7 +329,8 @@ namespace oni {
         void
         AudioManager::setChannelGroupVolume(component::ChannelGroup channelGroup,
                                             common::r32 volume) {
-            auto *group = mChannelGroups[(common::size) channelGroup].get();
+            assert(mChannelGroups[channelGroup]);
+            auto *group = mChannelGroups[channelGroup].get();
             assert(group);
             group->setVolume(volume);
         }

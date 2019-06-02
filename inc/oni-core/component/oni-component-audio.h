@@ -12,19 +12,30 @@ namespace oni {
         };
 
         enum class SoundTag : common::u32 {
-            ROCKET,
-            ENGINE_IDLE,
-        };
+            UNKNOWN,
 
-        struct SoundID {
-            std::string value;
+            ROCKET_LAUNCH,
+            ROCKET_BURN,
+            ENGINE_IDLE,
+
+            COLLISION_ROCKET_UNKNOWN,
+
+            LAST
         };
 
         enum class ChannelGroup : common::u8 {
+            UNKNOWN,
+
             MUSIC,
             EFFECT,
 
-            SIZE
+            LAST
+        };
+
+        struct Sound {
+            SoundTag tag = SoundTag::UNKNOWN;
+            ChannelGroup group = ChannelGroup::UNKNOWN;
+            common::r32 pitch = 1.f;
         };
     }
 }

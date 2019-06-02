@@ -412,7 +412,7 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::SoundTag>(id, component::SoundTag::ENGINE_IDLE);
+            createComponent<component::Sound>(id, component::SoundTag::ENGINE_IDLE, component::ChannelGroup::EFFECT);
             createComponent<component::EntityAttachment>(id);
 
             createComponent<gameplay::CarLapInfo>(id, id);
@@ -483,7 +483,7 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Texture>(id);
-            createComponent<component::SoundTag>(id, component::SoundTag::ROCKET);
+            createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
             createComponent<component::Trail>(id);
 
             auto &properties = createComponent<component::PhysicalProperties>(id);

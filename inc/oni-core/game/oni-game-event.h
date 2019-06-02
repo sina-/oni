@@ -56,10 +56,10 @@ namespace oni {
             Event_SoundPlay() = default;
 
             Event_SoundPlay(const component::WorldP3D &pos,
-                            const component::SoundID &soundId) : pos(pos), soundID(soundId) {}
+                            const component::SoundTag &soundTag) : pos(pos), tag(soundTag) {}
 
             component::WorldP3D pos{};
-            component::SoundID soundID{};
+            component::SoundTag tag{};
         };
     }
 }

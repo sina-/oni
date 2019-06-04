@@ -144,7 +144,7 @@ namespace oni {
             setText(common::EntityID,
                     std::string_view content);
 
-            b2Body*
+            b2Body *
             getEntityBody(common::EntityID);
 
         public:
@@ -157,6 +157,9 @@ namespace oni {
 
             void
             flushDeletions();
+
+            void
+            accommodateWithComplements(EntityManager &);
 
             common::EntityID
             createComplementTo(common::EntityID id);
@@ -172,30 +175,6 @@ namespace oni {
                    common::EntityID child,
                    entities::EntityType parentType,
                    entities::EntityType childType);
-
-        private:
-            common::EntityID
-            createEntity(entities::EntityType);
-
-            void
-            assignSimMode(common::EntityID,
-                          entities::SimMode);
-
-            template<class Tag>
-            void
-            assignTag(common::EntityID id) {
-                mRegistry->assign<Tag>(id);
-            }
-
-            void
-            removeEntity(common::EntityID);
-
-            void
-            removeEntity(common::EntityID,
-                         const entities::EntityOperationPolicy &);
-
-            void
-            removePhysicalBody(common::EntityID);
 
         public:
             size_t
@@ -410,6 +389,29 @@ namespace oni {
 
         private:
             common::EntityID
+            createEntity(entities::EntityType);
+
+            void
+            assignSimMode(common::EntityID,
+                          entities::SimMode);
+
+            template<class Tag>
+            void
+            assignTag(common::EntityID id) {
+                mRegistry->assign<Tag>(id);
+            }
+
+            void
+            removeEntity(common::EntityID);
+
+            void
+            removeEntity(common::EntityID,
+                         const entities::EntityOperationPolicy &);
+
+            void
+            removePhysicalBody(common::EntityID);
+
+            common::EntityID
             create();
 
             template<class Component>
@@ -459,7 +461,6 @@ namespace oni {
             // an emitter component attached to the car entity of the server only on client side.
             std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
 
-            std::vector<entities::DeletedEntity> mDeletedEntities{};
         private:
             b2World &mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
@@ -472,6 +473,7 @@ namespace oni {
 
             std::vector<common::EntityID> mEntitiesToDelete{};
             std::vector<entities::EntityOperationPolicy> mEntitiesToDeletePolicy{};
+            std::vector<entities::DeletedEntity> mDeletedEntities{};
         };
     }
 }

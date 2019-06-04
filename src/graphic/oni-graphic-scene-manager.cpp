@@ -549,8 +549,12 @@ namespace oni {
                         }
                         if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f or true) {
                             auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
-                            auto &emitter = getOrCreateEmitterCD(clientManager, carEntity);
-                            if (math::safeZero(emitter.currentCD)) {
+                            // TODO: I could hide the fact that SmokeEmitterCD component is attached to a complementary
+                            // entity on client side by specializing the get<component> function for certain types
+                            // and do the call to getComplementOf() call inside that function hmmm... :thinking:
+                            auto cId = clientManager.getComplementOf(carEntity);
+                            auto &emitter = clientManager.get<component::SmokeEmitterCD>(cId);
+                            if (math::almost_Zero(emitter.currentCD)) {
                                 for (common::i32 i = 0; i < mRand->next(2u, 3u); ++i) {
                                     auto id = clientManager.createEntity_SmokeCloud();
                                     clientManager.setWorldP3D(id, pos.x, pos.y, z);
@@ -657,8 +661,8 @@ namespace oni {
                 auto id = manager.createEntity_SimpleSpriteTextured();
                 manager.setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
                 manager.setScale(id,
-                                       static_cast<common::r32>(mCanvasTileSizeX),
-                                       static_cast<common::r32>(mCanvasTileSizeY));
+                                 static_cast<common::r32>(mCanvasTileSizeX),
+                                 static_cast<common::r32>(mCanvasTileSizeY));
                 manager.setHeading(id, heading.value);
 
                 auto &texture = manager.get<component::Texture>(id);
@@ -757,21 +761,6 @@ namespace oni {
                 mLapInfoLookup[carEntityID] = carLapText;
             }
             return mLapInfoLookup.at(carEntityID);
-        }
-
-        component::SmokeEmitterCD &
-        SceneManager::getOrCreateEmitterCD(entities::EntityManager &manager,
-                                           common::EntityID id) {
-            if (manager.hasComplement(id)) {
-                auto complementID = manager.getComplementOf(id);
-                auto &emitter = manager.get<component::SmokeEmitterCD>(complementID);
-                return emitter;
-            } else {
-                // TODO: This is a divergance from the way entities are created, not sure if I want to expose createComponent
-                auto complementID = manager.createComplementTo(id);
-                auto &emitter = manager.createComponent<component::SmokeEmitterCD>(complementID);
-                return emitter;
-            }
         }
 
         void

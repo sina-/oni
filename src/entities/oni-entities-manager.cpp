@@ -11,6 +11,7 @@
 #include <oni-core/level/oni-level-chunk.h>
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/math/oni-math-rand.h>
+#include <oni-core/component/oni-component-type.h>
 
 namespace oni {
     namespace entities {
@@ -60,24 +61,51 @@ namespace oni {
             attachee.entityType = parentType;
         }
 
+        void
+        EntityManager::accommodateWithComplements(EntityManager &referenceRegistry) {
+            auto view = referenceRegistry.createView<component::ComplementaryComponents>();
+            for (auto &&id: view) {
+                if (!hasComplement(id)) {
+                    auto cId = createComplementTo(id);
+                    auto types = view.get<component::ComplementaryComponents>(id).types;
+                    for (auto &&type: types) {
+                        // TODO: Maybe there is a better way to identify components? In effect I'm looking for
+                        // auto generated compile time component id
+                        switch (type) {
+                            case component::ComponentType::SMOKE_EMITTER_CD: {
+                                createComponent<component::SmokeEmitterCD>(cId);
+                                break;
+                            }
+                            case component::ComponentType::UNKNOWN:
+                            case component::ComponentType::LAST:
+                            default: {
+                                assert(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         common::EntityID
         EntityManager::createComplementTo(common::EntityID id) {
-            assert(mComplementaryEntities.find(id) == mComplementaryEntities.end());
-            auto result = create();
-            createComponent<entities::EntityType>(result, entities::EntityType::COMPLEMENT);
-            mComplementaryEntities[id] = result;
-            return result;
+            assert(!mComplementaryEntities[id]);
+            auto cId = create();
+            createComponent<entities::EntityType>(cId, entities::EntityType::COMPLEMENT);
+            mComplementaryEntities[id] = cId;
+            return cId;
         }
 
         common::EntityID
         EntityManager::getComplementOf(common::EntityID id) {
-            assert(mComplementaryEntities.find(id) != mComplementaryEntities.end());
-            return mComplementaryEntities[id];
+            auto result = mComplementaryEntities[id];
+            assert(result);
+            return result;
         }
 
         bool
         EntityManager::hasComplement(common::EntityID id) {
-            return mComplementaryEntities.find(id) != mComplementaryEntities.end();
+            return mComplementaryEntities[id] != 0;
         }
 
         size_t
@@ -425,6 +453,9 @@ namespace oni {
             properties.physicalCategory = component::PhysicalCategory::RACE_CAR;
             properties.bodyType = component::BodyType::DYNAMIC;
             properties.highPrecision = true;
+
+            auto &cc = createComponent<component::ComplementaryComponents>(id);
+            cc.types.emplace_back(component::ComponentType::SMOKE_EMITTER_CD);
 
             assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Dynamic>(id);

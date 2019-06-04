@@ -172,40 +172,40 @@ namespace oni {
 
         template<class T>
         inline bool
-        safeEqual(T x,
-                  T y) noexcept {
+        almost_Equal(T x,
+                     T y) noexcept {
             return abs(x - y) <= common::EP32;
         }
 
         template<class T>
         inline bool
-        safeZero(T x) noexcept {
+        almost_Zero(T x) noexcept {
             return abs(x) <= common::EP32;
         }
 
         template<class T>
         inline bool
-        safeLess(T x,
+        almost_Less(T x,
                  T y) noexcept {
             return x - y <= common::EP32;
         }
 
         template<class T>
         inline bool
-        safeGreater(T x,
+        almost_Greater(T x,
                     T y) noexcept {
             return x - y >= common::EP32;
         }
 
         template<class T>
         inline bool
-        safePos(T x) noexcept {
+        almost_Positive(T x) noexcept {
             return x >= common::EP32;
         }
 
         template<class T>
         inline bool
-        safeNeg(T x) noexcept {
+        almost_Negative(T x) noexcept {
             return x < 0;
         }
 

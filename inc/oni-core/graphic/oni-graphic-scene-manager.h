@@ -177,10 +177,6 @@ namespace oni {
             getOrCreateCanvasTile(entities::EntityManager &,
                                   const component::WorldP3D &pos);
 
-            static component::SmokeEmitterCD &
-            getOrCreateEmitterCD(entities::EntityManager &,
-                                 common::EntityID);
-
             SceneManager::WorldP3DAndHeading
             applyParentTransforms(entities::EntityManager &manager,
                                   common::EntityID child,

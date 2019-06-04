@@ -14,6 +14,7 @@
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
+#include <oni-core/component/oni-component-type.h>
 
 
 namespace oni {
@@ -32,6 +33,13 @@ namespace oni {
         serialize(Archive &archive,
                   component::Rectangle &data) {
             archive(data.A, data.B, data.C, data.D);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  component::ComplementaryComponents &data) {
+            archive(data.types);
         }
 
         template<class Archive>
@@ -243,6 +251,7 @@ namespace oni {
                         // find a solution to this shit.
                         //components::PhysicalProperties,
 
+                        component::ComplementaryComponents,
                         component::Tag_Dynamic,
                         component::Tag_Static,
                         component::Tag_TextureShaded,
@@ -287,6 +296,7 @@ namespace oni {
 
                         //components::PhysicalProperties,
 
+                        component::ComplementaryComponents,
                         component::Tag_Dynamic,
                         component::Tag_Static,
                         component::Tag_TextureShaded,

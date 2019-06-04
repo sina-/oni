@@ -197,10 +197,10 @@ namespace oni {
 
                     auto velocity = car.velocityLocal.len();
                     auto distanceFromCamera = 1 + velocity * 2 / car.maxVelocityAbsolute;
-                    if (!math::safeEqual(oldPos.x, carPos.x) ||
-                        !math::safeEqual(oldPos.y, carPos.y) ||
-                        !math::safeEqual(oldPos.y, carPos.y) ||
-                        !math::safeEqual(oldHeading.value, heading.value)) {
+                    if (!math::almost_Equal(oldPos.x, carPos.x) ||
+                        !math::almost_Equal(oldPos.y, carPos.y) ||
+                        !math::almost_Equal(oldPos.y, carPos.y) ||
+                        !math::almost_Equal(oldHeading.value, heading.value)) {
 
                         car.distanceFromCamera = distanceFromCamera;
 

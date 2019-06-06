@@ -187,7 +187,6 @@ namespace oni {
         SceneManager::prepareTexture(entities::EntityManager &manager,
                                      common::EntityID id,
                                      component::TextureTag tag) {
-            auto path = mAssetManager.getAssetFilePath(tag);
             auto &texture = manager.get<component::Texture>(id);
             texture = mTextureManager->loadOrGetTexture(tag, false);
         }
@@ -276,14 +275,11 @@ namespace oni {
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::TextureTag,
-                        entities::EntityType,
                         component::Tag_TextureShaded>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
-                    auto type = view.get<entities::EntityType>(id);
 
                     auto result = applyParentTransforms(serverManager, id, pos, heading);
 

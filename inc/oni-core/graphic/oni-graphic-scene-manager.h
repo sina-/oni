@@ -18,6 +18,9 @@ namespace oni {
 
         class ZLayerManager;
     }
+    namespace asset {
+        class AssetManager;
+    }
 
     namespace entities {
         class EntityManager;
@@ -46,6 +49,7 @@ namespace oni {
         public:
             // TODO: Getting quite big, I can split it into, SceneRenderer, SceneUpdater, and SceneManager
             SceneManager(const graphic::ScreenBounds &,
+                         asset::AssetManager &,
                          FontManager &,
                          math::ZLayerManager &,
                          b2World &,
@@ -55,7 +59,8 @@ namespace oni {
             ~SceneManager();
 
             void
-            render(entities::EntityManager &);
+            render(entities::EntityManager &serverManager,
+                   entities::EntityManager &clientManager);
 
             void
             tick(const entities::EntityManager &server,
@@ -83,6 +88,11 @@ namespace oni {
 
             void
             zoom(common::r32 distance);
+
+            void
+            prepareTexture(entities::EntityManager &,
+                           common::EntityID,
+                           component::TextureTag);
 
             common::u16
             getSpritesPerFrame() const;
@@ -116,9 +126,15 @@ namespace oni {
                              common::r32 viewHeight);
 
             void
-            _render(entities::EntityManager &,
+            _render(entities::EntityManager &serverManager,
+                    entities::EntityManager &clientManager,
                     common::r32 viewWidth,
                     common::r32 viewHeight);
+
+            void
+            _renderColor(entities::EntityManager&,
+                         common::r32 viewWidth,
+                         common::r32 viewHeight);
 
         private:
             struct RaceInfoEntities {
@@ -140,15 +156,12 @@ namespace oni {
                   bool scale,
                   bool setMVP);
 
-            void
+            static void
             end(const Shader &shader,
                 Renderer2D &renderer2D);
 
             void
             initRenderer();
-
-            void
-            prepareTexture(component::Texture &texture);
 
             common::EntityID
             createText(entities::EntityManager &,
@@ -177,8 +190,8 @@ namespace oni {
             getOrCreateCanvasTile(entities::EntityManager &,
                                   const component::WorldP3D &pos);
 
-            SceneManager::WorldP3DAndHeading
-            applyParentTransforms(entities::EntityManager &manager,
+            static SceneManager::WorldP3DAndHeading
+            applyParentTransforms(const entities::EntityManager &manager,
                                   common::EntityID child,
                                   const component::WorldP3D &pos,
                                   const component::Heading &heading);
@@ -195,7 +208,8 @@ namespace oni {
 
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
-            FontManager &mFontManager;
+            asset::AssetManager &mAssetManager;
+            graphic::FontManager &mFontManager;
             b2World &mPhysicsWorld;
 
             std::unique_ptr<math::Rand> mRand{};

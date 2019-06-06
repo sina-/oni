@@ -6,13 +6,13 @@
 #include <FreeImage.h>
 #include <GL/glew.h>
 
+#include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/graphic/oni-graphic-font-manager.h>
 
 
 namespace oni {
     namespace graphic {
-
-        TextureManager::TextureManager() = default;
+        TextureManager::TextureManager(asset::AssetManager &assetManager) : mAssetManager(assetManager) {}
 
         TextureManager::~TextureManager() = default;
 
@@ -25,13 +25,13 @@ namespace oni {
         }
 
         const component::Texture &
-        TextureManager::loadOrGetTexture(const char *path) {
-            if (isTextureLoaded(path)) {
-                return mTextureMap[path];
+        TextureManager::loadOrGetTexture(component::TextureTag tag,
+                                         bool loadBits) {
+            assert(tag != component::TextureTag::UNKNOWN);
+            if (isTextureLoaded(tag)) {
+                return mTextureMap[tag];
             }
-            assert(path);
-
-            const auto &image = loadOrGetImage(path);
+            const auto &image = loadOrGetImage(tag);
 
             common::oniGLuint textureID = 0;
             glGenTextures(1, &textureID);
@@ -50,33 +50,43 @@ namespace oni {
 
             unbind();
 
-            std::array<math::vec2, 4> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
+            auto &texture = mTextureMap[tag];
+            texture.image = image;
+            texture.textureID = textureID;
+            texture.format = format;
+            texture.type = type;
+            texture.uv = {math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
 
-            auto texture = component::Texture{image, textureID, format, type, path, uv,
-                                              component::TextureStatus::READY};
-            mTextureMap[path] = texture;
+            // TODO: This is clunky design, these bits are already copied, have to think about a way to
+            // split between texture data that is generated and data that is loaded from the file, for the
+            // ones loaded from the file I don't need to keep a copy in the memory as I just have them in video memory
+            // but for generated ones I keep them in the memory as I often need to blit onto it, like Canvas tiles.
+            if (!loadBits) {
+                texture.image.data.clear();
+            }
 
-            return mTextureMap[path];
+            return texture;
         }
 
         const component::Image &
-        TextureManager::loadOrGetImage(const char *path) {
-            assert(path);
-
-            if (isImageLoaded(path)) {
-                return mImageMap[path];
+        TextureManager::loadOrGetImage(component::TextureTag tag) {
+            assert(tag != component::TextureTag::UNKNOWN);
+            if (isImageLoaded(tag)) {
+                return mImageMap[tag];
             }
 
             FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
             FIBITMAP *dib = nullptr;
 
-            fif = FreeImage_GetFileType(path, 0);
+            auto path = mAssetManager.getAssetFilePath(tag);
+
+            fif = FreeImage_GetFileType(path.data(), 0);
             if (fif == FIF_UNKNOWN)
-                fif = FreeImage_GetFIFFromFilename(path);
+                fif = FreeImage_GetFIFFromFilename(path.data());
             assert(fif != FIF_UNKNOWN);
 
             if (FreeImage_FIFSupportsReading(fif))
-                dib = FreeImage_Load(fif, path);
+                dib = FreeImage_Load(fif, path.data());
             assert(dib);
 
             auto colorType = FreeImage_GetColorType(dib);
@@ -92,9 +102,10 @@ namespace oni {
             auto bits = FreeImage_GetBits(dib);
             assert(bits);
 
-            auto image = component::Image{};
+            auto &image = mImageMap[tag];
             image.height = height;
             image.width = width;
+            image.path = path;
             image.data.resize(width * height * mElementsInRGBA, 0);
 
             for (auto i = 0; i < image.data.size(); ++i) {
@@ -103,8 +114,7 @@ namespace oni {
 
             FreeImage_Unload(dib);
 
-            mImageMap[path] = std::move(image);
-            return mImageMap[path];
+            return image;
         }
 
         void
@@ -308,13 +318,13 @@ namespace oni {
 
 
         bool
-        TextureManager::isTextureLoaded(const char *path) const {
-            return mTextureMap.find(path) != mTextureMap.end();
+        TextureManager::isTextureLoaded(component::TextureTag tag) const {
+            return mTextureMap.find(tag) != mTextureMap.end();
         }
 
         bool
-        TextureManager::isImageLoaded(const char *path) const {
-            return mImageMap.find(path) != mImageMap.end();
+        TextureManager::isImageLoaded(component::TextureTag tag) const {
+            return mImageMap.find(tag) != mImageMap.end();
         }
 
         void
@@ -352,11 +362,7 @@ namespace oni {
             texture.textureID = textureID;
             texture.format = format;
             texture.type = type;
-            // TODO: The path is empty, might be useful to generate a unique path for procgen textures. Maybe with the
-            // seed.
-            texture.path = "";
             texture.uv = uv;
-            texture.status = component::TextureStatus::READY;
         }
 
         size_t

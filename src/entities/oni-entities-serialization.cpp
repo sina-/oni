@@ -206,14 +206,6 @@ namespace oni {
                   component::Age &data) {
             archive(data.currentAge, data.maxAge);
         }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
-                  component::Texture &data) {
-            archive(data.image, data.textureID, data.format, data.type, data.path,
-                    data.uv, data.status);
-        }
     }
 
     namespace entities {
@@ -236,7 +228,7 @@ namespace oni {
                         component::Point,
                         component::Appearance,
                         component::Age,
-                        component::Texture,
+                        component::TextureTag,
                         component::Trail,
                         component::EntityAttachment,
                         component::EntityAttachee,
@@ -285,7 +277,7 @@ namespace oni {
                         component::Point,
                         component::Appearance,
                         component::Age,
-                        component::Texture,
+                        component::TextureTag,
                         component::Trail,
                         component::EntityAttachment,
                         component::EntityAttachee,

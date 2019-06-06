@@ -77,7 +77,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   Sound &data) {
-            archive(data.group, data.tag, data.pitch);
+            archive(data.group, data.tag);
         }
     }
 
@@ -114,7 +114,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   game::Event_SplatOnDeath &data) {
-            archive(data.pos, data.scale, data.textureID);
+            archive(data.pos, data.scale, data.tag);
         }
     }
 

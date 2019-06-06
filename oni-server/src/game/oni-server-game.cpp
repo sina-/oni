@@ -206,20 +206,17 @@ namespace oni {
                 auto carEntity = mEntityManager->createEntity_RaceCar();
                 mEntityManager->setWorldP3D(carEntity, pos.x, pos.y, pos.z);
                 mEntityManager->setScale(carEntity, size.x, size.y);
-                mEntityManager->setTexture(carEntity, "resources/images/car/1/car.png");
                 mEntityManager->createPhysics(carEntity, pos, size, 0);
 
                 auto carGunEntity = mEntityManager->createEntity_VehicleGun();
                 mEntityManager->setWorldP3D(carGunEntity, 0.5f, 0.f, mZLayerManager->getZForEntity(
                         oni::entities::EntityType::VEHICLE_GUN));
                 mEntityManager->setScale(carGunEntity, 2.f, 0.5f);
-                mEntityManager->setTexture(carGunEntity, "resources/images/minigun/1.png");
 
                 mEntityManager->attach(carEntity, carGunEntity, oni::entities::EntityType::RACE_CAR,
                                        oni::entities::EntityType::VEHICLE_GUN);
 
                 auto &carConfig = mEntityManager->get<component::CarConfig>(carEntity);
-                auto tireTexturePath = std::string("resources/images/car/1/car-tire.png");
                 auto tireHeading = component::Heading{static_cast< common::r32>( math::toRadians(90.0f))};
                 math::vec2 tireSize{
                         static_cast<common::r32>(carConfig.wheelWidth),
@@ -244,7 +241,6 @@ namespace oni {
                     mEntityManager->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
                     mEntityManager->setScale(tireEntity, tireSize.x, tireSize.y);
                     mEntityManager->setHeading(tireEntity, tireHeading.value);
-                    mEntityManager->setTexture(tireEntity, tireTexturePath);
 
                     mEntityManager->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_FRONT);
@@ -255,7 +251,6 @@ namespace oni {
                     mEntityManager->setWorldP3D(tireEntity, carTire.x, carTire.y, vehicleZ);
                     mEntityManager->setScale(tireEntity, tireSize.x, tireSize.y);
                     mEntityManager->setHeading(tireEntity, tireHeading.value);
-                    mEntityManager->setTexture(tireEntity, tireTexturePath);
 
                     mEntityManager->attach(carEntity, tireEntity, oni::entities::EntityType::RACE_CAR,
                                            oni::entities::EntityType::VEHICLE_TIRE_REAR);
@@ -275,7 +270,6 @@ namespace oni {
 
                 mEntityManager->setWorldP3D(id, pos.x, pos.y, pos.z);
                 mEntityManager->setScale(id, size.x, size.y);
-                mEntityManager->setTexture(id, "resources/images/car/2/truck.png");
                 mEntityManager->setHeading(id, heading);
                 mEntityManager->createPhysics(id, pos, size, heading);
 

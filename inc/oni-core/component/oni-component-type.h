@@ -8,7 +8,10 @@ namespace oni {
     namespace component {
         enum class ComponentType : common::u16 {
             UNKNOWN,
+
             SMOKE_EMITTER_CD,
+            SOUND_PITCH,
+            TEXTURE,
 
             LAST
         };

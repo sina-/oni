@@ -85,7 +85,7 @@ namespace oni {
             auto buffer = static_cast<graphic::Vertex *>(mBuffer);
 
             common::i32 samplerID = -1;
-            if (texture.status == component::TextureStatus::READY) {
+            if (!texture.image.path.empty()) {
                 samplerID = getSamplerID(texture.textureID);
             }
 

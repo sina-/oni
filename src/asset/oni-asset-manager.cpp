@@ -7,30 +7,28 @@ namespace oni {
         AssetManager::AssetManager() {
         }
 
-        std::string_view
+        const std::string &
         AssetManager::getAssetFilePath(component::SoundTag tag) {
-            auto result = mSoundAssetPath[tag];
-            assert(!result.empty());
+            const auto &result = mSoundAssetPath[tag];
             return result;
         }
 
-        std::string_view
+        const std::string &
         AssetManager::getAssetFilePath(component::TextureTag tag) {
-            auto result = mTextureAssetPath[tag];
-            assert(!result.empty());
+            const auto &result = mTextureAssetPath[tag];
             return result;
         }
 
         void
         AssetManager::setAssetFilePath(component::SoundTag tag,
                                        std::string_view path) {
-            mSoundAssetPath[tag] = path;
+            mSoundAssetPath.emplace(tag, path);
         }
 
         void
         AssetManager::setAssetFilePath(component::TextureTag tag,
                                        std::string_view path) {
-            mTextureAssetPath[tag] = path;
+            mTextureAssetPath.emplace(tag, path);
         }
     }
 }

@@ -99,7 +99,6 @@ namespace oni {
                     auto id = manager.createEntity_SimpleRocket();
                     manager.setWorldP3D(id, rocketPos.x, rocketPos.y, rocketPos.z);
                     manager.setScale(id, size.x, size.y);
-                    manager.setTexture(id, "resources/images/bullet/2.png");
                     manager.setHeading(id, heading.value);
                     manager.createPhysics(id, rocketPos, size, heading.value);
 

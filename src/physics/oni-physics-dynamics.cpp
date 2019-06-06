@@ -431,9 +431,9 @@ namespace oni {
                         if (manager.has<component::Tag_SplatOnDeath>(id)) {
                             auto &pos = manager.get<component::WorldP3D>(id);
                             auto &size = manager.get<component::Scale>(id);
-                            auto &texture = manager.get<component::Texture>(id);
+                            auto &tag = manager.get<component::TextureTag>(id);
 
-                            manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, texture.path);
+                            manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, tag);
                         }
                         manager.markForDeletion(id);
                     }

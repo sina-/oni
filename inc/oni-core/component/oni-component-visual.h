@@ -19,19 +19,33 @@ namespace oni {
             std::vector<common::r32> velocity{};
         };
 
-        enum class TextureStatus : common::u8 {
-            INVALID = 0,
-            READY = 1,
-            NEEDS_LOADING_USING_PATH = 2,
-            NEEDS_LOADING_USING_DATA = 3,
-            NEEDS_RELOADING_USING_PATH = 4,
-            NEEDS_RELOADING_USING_DATA = 5,
-        };
-
         struct Image {
             common::u16 width{};
             common::u16 height{};
             std::vector<common::u8> data{};
+            std::string path{};
+        };
+
+        enum class TextureTag : common::u32 {
+            UNKNOWN,
+
+            BACKGROUND_CHUNK,
+            BACKGROUND_WHITE,
+            CANVAS,
+
+            RACE_CAR,
+            TRUCK,
+            TIRE,
+            VEHICLE_GUN,
+            SMOKE,
+            CLOUD,
+            ROCKET,
+            ROAD,
+            WALL_VERTICAL,
+            WALL_HORIZONTAL,
+            EXPLOSION,
+
+            LAST
         };
 
         struct Texture {
@@ -42,18 +56,9 @@ namespace oni {
             // GL_UNSIGNED_BYTE 0x1401
             // GL_FLOAT         0x1406
             common::oniGLenum type{0x1401};
-            std::string path{};
             std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
                                          math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
-            TextureStatus status{TextureStatus::NEEDS_LOADING_USING_PATH};
         };
-
-        enum class TextureTag : common::u32 {
-            UNKNOWN,
-
-            LAST
-        };
-
 
         struct Text {
             common::EntityID entityID{0};

@@ -58,6 +58,9 @@ namespace oni {
             createEntity_SimpleSpriteTextured();
 
             common::EntityID
+            createEntity_CanvasTile();
+
+            common::EntityID
             createEntity_RaceCar();
 
             common::EntityID
@@ -101,8 +104,12 @@ namespace oni {
                         common::r32 z);
 
             void
-            setTexture(common::EntityID,
-                       std::string_view path);
+            setTexturePath(common::EntityID id,
+                           std::string_view path);
+
+            void
+            setTextureTag(common::EntityID,
+                          component::TextureTag);
 
             void
             setScale(common::EntityID,
@@ -227,12 +234,18 @@ namespace oni {
                 return mRegistry->get<Component>(entityID);
             }
 
+            template<class Component>
+            const Component &
+            get(common::EntityID entityID) const noexcept {
+                return mRegistry->get<Component>(entityID);
+            }
+
             common::EntityID
             map(common::EntityID entityID);
 
             template<class Component>
             bool
-            has(common::EntityID entityID) noexcept {
+            has(common::EntityID entityID) const noexcept {
                 bool result{false};
                 result = mRegistry->has<Component>(entityID);
                 return result;

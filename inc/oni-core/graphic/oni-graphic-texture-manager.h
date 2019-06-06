@@ -7,13 +7,16 @@
 #include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
+    namespace asset {
+        class AssetManager;
+    }
     namespace graphic {
 
         class FontManager;
 
         class TextureManager {
         public:
-            TextureManager();
+            explicit TextureManager(asset::AssetManager &);
 
             ~TextureManager();
 
@@ -51,10 +54,11 @@ namespace oni {
                                   component::Image &image);
 
             const component::Image &
-            loadOrGetImage(const char *path);
+            loadOrGetImage(component::TextureTag tag);
 
             const component::Texture &
-            loadOrGetTexture(const char *path);
+            loadOrGetTexture(component::TextureTag tag,
+                             bool loadBits);
 
             void
             loadFromImage(component::Texture &);
@@ -74,10 +78,10 @@ namespace oni {
 
         private:
             bool
-            isTextureLoaded(const char *path) const;
+            isTextureLoaded(component::TextureTag) const;
 
             bool
-            isImageLoaded(const char *path) const;
+            isImageLoaded(component::TextureTag) const;
 
             static void
             bind(common::oniGLuint textureID);
@@ -85,9 +89,10 @@ namespace oni {
         private:
 
         private:
-            std::unordered_map<std::string, component::Texture> mTextureMap{};
-            std::unordered_map<std::string, component::Image> mImageMap{};
+            std::unordered_map<component::TextureTag, component::Texture> mTextureMap{};
+            std::unordered_map<component::TextureTag, component::Image> mImageMap{};
             const common::u8 mElementsInRGBA{4};
+            asset::AssetManager &mAssetManager;
         };
     }
 }

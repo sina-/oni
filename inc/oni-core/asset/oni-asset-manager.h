@@ -20,15 +20,15 @@ namespace oni {
             setAssetFilePath(component::TextureTag,
                              std::string_view);
 
-            std::string_view
+            const std::string&
             getAssetFilePath(component::SoundTag);
 
-            std::string_view
+            const std::string&
             getAssetFilePath(component::TextureTag);
 
         private:
-            std::unordered_map<component::SoundTag, std::string_view> mSoundAssetPath;
-            std::unordered_map<component::TextureTag, std::string_view> mTextureAssetPath;
+            std::unordered_map<component::SoundTag, std::string> mSoundAssetPath;
+            std::unordered_map<component::TextureTag, std::string> mTextureAssetPath;
         };
     }
 }

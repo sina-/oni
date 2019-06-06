@@ -27,11 +27,11 @@ namespace oni {
 
             Event_SplatOnDeath(const component::WorldP3D &pos,
                                const component::Scale &scale,
-                               const std::string &textureId) : pos(pos), scale(scale), textureID(textureId) {}
+                               const component::TextureTag &tag) : pos(pos), scale(scale), tag(tag) {}
 
             component::WorldP3D pos{};
             component::Scale scale{};
-            std::string textureID{};
+            component::TextureTag tag{};
         };
 
         struct Event_RocketLaunch {

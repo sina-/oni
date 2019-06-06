@@ -482,6 +482,7 @@ namespace oni {
 
                 common::r32 wallWidth = 0.5f;
                 auto heading = 0.f;
+                auto textureTag = component::TextureTag::WALL_VERTICAL;
 
                 for (size_t i = 0; i < wallCount; ++i) {
                     auto &wallPos = position[i];
@@ -499,7 +500,6 @@ namespace oni {
                         case oni::level::WallTilePosition::RIGHT: {
                             wallSize.x = wallWidth;
                             wallSize.y = mTileSizeY - 2 * wallWidth;
-                            wallTexturePath = "resources/images/wall/1/vertical.png";
                             heading = common::PI;
 
                             wallPositionInWorld.x = currentTileX + mTileSizeX - wallWidth;
@@ -510,7 +510,7 @@ namespace oni {
                         case oni::level::WallTilePosition::TOP: {
                             wallSize.x = mTileSizeX - 2 * wallWidth;
                             wallSize.y = wallWidth;
-                            wallTexturePath = "resources/images/wall/1/horizontal.png";
+                            textureTag = component::TextureTag::WALL_HORIZONTAL;
 
                             wallPositionInWorld.x = currentTileX + wallWidth;
                             wallPositionInWorld.y = currentTileY + mTileSizeY - wallWidth;
@@ -520,7 +520,6 @@ namespace oni {
                         case oni::level::WallTilePosition::LEFT: {
                             wallSize.x = wallWidth;
                             wallSize.y = mTileSizeY - 2 * wallWidth;
-                            wallTexturePath = "resources/images/wall/1/vertical.png";
                             heading = common::PI;
 
                             wallPositionInWorld.x = currentTileX;
@@ -531,7 +530,7 @@ namespace oni {
                         case oni::level::WallTilePosition::BOTTOM: {
                             wallSize.x = mTileSizeX - 2 * wallWidth;
                             wallSize.y = wallWidth;
-                            wallTexturePath = "resources/images/wall/1/horizontal.png";
+                            textureTag = component::TextureTag::WALL_HORIZONTAL;
 
                             wallPositionInWorld.x = currentTileX + wallWidth;
                             wallPositionInWorld.y = currentTileY;
@@ -541,7 +540,6 @@ namespace oni {
                     }
 
                     auto id = mEntityManager.createEntity_Wall();
-                    mEntityManager.setTexture(id, wallTexturePath);
                     mEntityManager.setScale(id, wallSize.x, wallSize.y);
                     mEntityManager.setHeading(id, heading);
                     mEntityManager.setWorldP3D(id, wallPositionInWorld.x, wallPositionInWorld.y, wallPositionInWorld.z);
@@ -607,7 +605,7 @@ namespace oni {
                 auto id = mEntityManager.createEntity_WorldChunk();
                 mEntityManager.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
                 mEntityManager.setScale(id, size.x, size.y);
-                mEntityManager.setTexture(id, path);
+                mEntityManager.setTextureTag(id, component::TextureTag::ROAD);
                 return id;
             }
 

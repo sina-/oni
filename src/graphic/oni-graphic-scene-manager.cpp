@@ -4,26 +4,28 @@
 
 #include <GL/glew.h>
 
-#include <oni-core/graphic/oni-graphic-shader.h>
-#include <oni-core/graphic/oni-graphic-batch-renderer-2d.h>
-#include <oni-core/graphic/oni-graphic-texture-manager.h>
-#include <oni-core/graphic/oni-graphic-font-manager.h>
-#include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>
-#include <oni-core/physics/oni-physics-dynamics.h>
-#include <oni-core/math/oni-math-transformation.h>
-#include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/common/oni-common-const.h>
+#include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-gameplay.h>
+#include <oni-core/common/oni-common-const.h>
+#include <oni-core/entities/oni-entities-manager.h>
+#include <oni-core/graphic/oni-graphic-brush.h>
+#include <oni-core/graphic/oni-graphic-batch-renderer-2d.h>
+#include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>
+#include <oni-core/graphic/oni-graphic-font-manager.h>
+#include <oni-core/graphic/oni-graphic-shader.h>
+#include <oni-core/graphic/oni-graphic-texture-manager.h>
+#include <oni-core/math/oni-math-transformation.h>
 #include <oni-core/math/oni-math-intersects.h>
 #include <oni-core/math/oni-math-rand.h>
 #include <oni-core/math/oni-math-z-layer-manager.h>
-#include <oni-core/graphic/oni-graphic-brush.h>
+#include <oni-core/physics/oni-physics-dynamics.h>
 
 
 namespace oni {
     namespace graphic {
         SceneManager::SceneManager(const graphic::ScreenBounds &screenBounds,
+                                   asset::AssetManager &assetManager,
                                    FontManager &fontManager,
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
@@ -34,6 +36,7 @@ namespace oni {
                 mHalfCanvasTileSizeY{mCanvasTileSizeY / 2.f},
                 // 64k vertices
                 mMaxSpriteCount(64 * 1000), mScreenBounds(screenBounds),
+                mAssetManager(assetManager),
                 mFontManager(fontManager),
                 mPhysicsWorld(physicsWorld),
                 mGameUnitToPixels(gameUnitToPixels),
@@ -56,7 +59,7 @@ namespace oni {
                                                         "resources/shaders/particle.frag");
             initRenderer();
 
-            mTextureManager = std::make_unique<TextureManager>();
+            mTextureManager = std::make_unique<TextureManager>(mAssetManager);
 
             mRand = std::make_unique<math::Rand>(0, 0);
 
@@ -181,40 +184,12 @@ namespace oni {
         }
 
         void
-        SceneManager::prepareTexture(component::Texture &texture) {
-            // TODO: With current network registry sync code every time an entity gets component sync this texture
-            // status is reverted back to what it was on server, which might be okay, but something to keep in mind
-            // if it becomes a perf bottle-neck.
-            switch (texture.status) {
-                case component::TextureStatus::INVALID : {
-                    assert(false);
-                }
-                case component::TextureStatus::READY: {
-                    break;
-                }
-                case component::TextureStatus::NEEDS_LOADING_USING_PATH: {
-                    const auto &loadedTexture = mTextureManager->loadOrGetTexture(texture.path.c_str());
-                    texture = loadedTexture;
-                    break;
-                }
-                case component::TextureStatus::NEEDS_LOADING_USING_DATA: {
-                    assert(texture.image.width);
-                    assert(texture.image.height);
-
-                    mTextureManager->loadFromImage(texture);
-                    break;
-                }
-                case component::TextureStatus::NEEDS_RELOADING_USING_PATH: {
-                    break;
-                }
-                case component::TextureStatus::NEEDS_RELOADING_USING_DATA: {
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
-            }
+        SceneManager::prepareTexture(entities::EntityManager &manager,
+                                     common::EntityID id,
+                                     component::TextureTag tag) {
+            auto path = mAssetManager.getAssetFilePath(tag);
+            auto &texture = manager.get<component::Texture>(id);
+            texture = mTextureManager->loadOrGetTexture(tag, false);
         }
 
         void
@@ -233,13 +208,14 @@ namespace oni {
         }
 
         void
-        SceneManager::render(entities::EntityManager &manager) {
+        SceneManager::render(entities::EntityManager &serverManager,
+                             entities::EntityManager &clientManager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
             {
                 begin(*mShader, *mRenderer, true, true, true);
-                _render(manager, viewWidth, viewHeight);
+                _render(serverManager, clientManager, viewWidth, viewHeight);
                 end(*mShader, *mRenderer);
             }
 
@@ -287,65 +263,99 @@ namespace oni {
         }
 
         void
-        SceneManager::_render(entities::EntityManager &manager,
+        SceneManager::_render(entities::EntityManager &serverManager,
+                              entities::EntityManager &clientManager,
                               common::r32 viewWidth,
                               common::r32 viewHeight) {
-            /// Color shading
+            _renderColor(serverManager, viewWidth, viewHeight);
+            _renderColor(clientManager, viewWidth, viewHeight);
+
+            /// Texture shading - server
             {
-                auto view = manager.createView<
+                auto view = serverManager.createView<
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::Appearance,
-                        component::Tag_ColorShaded
-                                              >();
-
+                        component::TextureTag,
+                        entities::EntityType,
+                        component::Tag_TextureShaded>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
+                    auto type = view.get<entities::EntityType>(id);
 
-                    auto result = applyParentTransforms(manager, id, pos, heading);
+                    auto result = applyParentTransforms(serverManager, id, pos, heading);
 
                     if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
 
-                    const auto &appearance = view.get<component::Appearance>(id);
-
-                    mRenderer->submit(result.pos, result.heading, scale, appearance, component::Texture{});
-
-                    ++mRenderedSpritesPerFrame;
-                }
-            }
-
-            /// Texture shading
-            {
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Texture,
-                        component::Tag_TextureShaded
-                                              >();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-
-                    auto result = applyParentTransforms(manager, id, pos, heading);
-
-                    if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                        continue;
-                    }
-
-                    auto &texture = view.get<component::Texture>(id);
-                    prepareTexture(texture);
-
+                    auto cId = clientManager.getComplementOf(id);
+                    assert(cId);
+                    const auto &texture = clientManager.get<component::Texture>(cId);
+                    assert(!texture.image.path.empty());
                     mRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
+            }
+
+            /// Texture shading - client
+            {
+                auto view = clientManager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Texture,
+                        component::Tag_TextureShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+
+                    auto result = applyParentTransforms(clientManager, id, pos, heading);
+
+                    if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        continue;
+                    }
+
+                    const auto &texture = view.get<component::Texture>(id);
+                    assert(!texture.image.path.empty());
+                    mRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
+
+                    ++mRenderedTexturesPerFrame;
+                }
+            }
+        }
+
+        void
+        SceneManager::_renderColor(entities::EntityManager &manager,
+                                   common::r32 viewWidth,
+                                   common::r32 viewHeight) {
+            auto view = manager.createView<
+                    component::WorldP3D,
+                    component::Heading,
+                    component::Scale,
+                    component::Appearance,
+                    component::Tag_ColorShaded>();
+
+            for (auto &&id: view) {
+                const auto &pos = view.get<component::WorldP3D>(id);
+                const auto &heading = view.get<component::Heading>(id);
+                const auto &scale = view.get<component::Scale>(id);
+
+                auto result = applyParentTransforms(manager, id, pos, heading);
+
+                if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                    continue;
+                }
+
+                const auto &appearance = view.get<component::Appearance>(id);
+
+                mRenderer->submit(result.pos, result.heading, scale, appearance, component::Texture{});
+
+                ++mRenderedSpritesPerFrame;
             }
         }
 
@@ -390,7 +400,6 @@ namespace oni {
             /// Particle trails
             {
 #if 1
-                auto texturePath = std::string("resources/images/smoke/1.png");
                 common::r32 particleHalfSize = 0.35f;
                 common::r32 particleSize = particleHalfSize * 2;
                 common::r32 halfConeAngle = static_cast<common::r32>(math::toRadians(45)) / 2.f;
@@ -415,8 +424,9 @@ namespace oni {
                     if (trail.previousPos.empty()) {
                         auto trailEntity = clientManager.createEntity_SimpleParticle();
                         clientManager.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
-                        clientManager.setTexture(trailEntity, texturePath);
                         clientManager.setScale(trailEntity, particleSize, particleSize);
+                        prepareTexture(clientManager, trailEntity,
+                                       clientManager.get<component::TextureTag>(trailEntity));
                         continue;
                     }
 
@@ -455,8 +465,9 @@ namespace oni {
                         */
                             auto trailEntity = clientManager.createEntity_SimpleParticle();
                             clientManager.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
-                            clientManager.setTexture(trailEntity, texturePath);
                             clientManager.setScale(trailEntity, particleSize, particleSize);
+                            prepareTexture(clientManager, trailEntity,
+                                           clientManager.get<component::TextureTag>(trailEntity));
 
                             auto &age = clientManager.get<component::Age>(
                                     trailEntity);
@@ -487,15 +498,14 @@ namespace oni {
             {
                 auto view = clientManager.createView<
                         component::Tag_LeavesMark,
-                        component::Texture,
+                        component::TextureTag,
                         component::WorldP3D,
                         component::Scale>();
                 for (auto &&entity: view) {
-                    const auto &texture = view.get<component::Texture>(entity);
                     const auto &scale = view.get<component::Scale>(entity);
+                    const auto &tag = view.get<component::TextureTag>(entity);
                     auto brush = graphic::Brush{};
-                    // TODO: This is messy distinction between texture path and textureID!
-                    brush.textureID = texture.path.c_str();
+                    brush.tag = tag;
                     brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(entity);
@@ -503,7 +513,7 @@ namespace oni {
                 }
             }
 
-            /// Update Skid lines.
+            /// Update Skid lines
             {
                 std::vector<component::WorldP3D> skidPosList{};
                 std::vector<common::u8> skidOpacity{};
@@ -548,7 +558,7 @@ namespace oni {
                             skidOpacity.push_back(10);
                         }
                         if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f or true) {
-                            auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE);
+                            auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE_CLOUD);
                             // TODO: I could hide the fact that SmokeEmitterCD component is attached to a complementary
                             // entity on client side by specializing the get<component> function for certain types
                             // and do the call to getComplementOf() call inside that function hmmm... :thinking:
@@ -558,7 +568,9 @@ namespace oni {
                                 for (common::i32 i = 0; i < mRand->next(2u, 3u); ++i) {
                                     auto id = clientManager.createEntity_SmokeCloud();
                                     clientManager.setWorldP3D(id, pos.x, pos.y, z);
-                                    clientManager.setTexture(id, "resources/images/cloud/1.png");
+                                    prepareTexture(clientManager, id,
+                                                   clientManager.get<component::TextureTag>(id));
+
                                     clientManager.setRandAge(id, 1.f, 3.f);
                                     clientManager.setRandHeading(id);
                                     clientManager.setRandVelocity(id, 1, 2);
@@ -657,8 +669,7 @@ namespace oni {
 
                 auto heading = component::Heading{0.f};
 
-                // TODO: Should this be a canvas type?
-                auto id = manager.createEntity_SimpleSpriteTextured();
+                auto id = manager.createEntity_CanvasTile();
                 manager.setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
                 manager.setScale(id,
                                  static_cast<common::r32>(mCanvasTileSizeX),
@@ -674,6 +685,7 @@ namespace oni {
 
                 texture.image.width = widthInPixels;
                 texture.image.height = heightInPixels;
+                texture.image.path = "generated_by_getOrCreateCanvasTile";
 
                 auto defaultColor = component::PixelRGBA{};
                 mTextureManager->fill(texture.image, defaultColor);
@@ -682,7 +694,7 @@ namespace oni {
                 mCanvasTileLookup.emplace(xy, id);
             }
 
-            auto entity = mCanvasTileLookup.at(xy);
+            auto entity = mCanvasTileLookup[xy];
             assert(entity);
             return entity;
         }
@@ -716,7 +728,7 @@ namespace oni {
                     // something along the lines of take the updated texture data and point to where the offsets point
                     // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
                     // at all what I intended
-                    image = mTextureManager->loadOrGetImage(brush.textureID);
+                    image = mTextureManager->loadOrGetImage(brush.tag);
                     break;
                 }
                 default: {
@@ -840,7 +852,7 @@ namespace oni {
         }
 
         SceneManager::WorldP3DAndHeading
-        SceneManager::applyParentTransforms(entities::EntityManager &manager,
+        SceneManager::applyParentTransforms(const entities::EntityManager &manager,
                                             common::EntityID child,
                                             const component::WorldP3D &childPos,
                                             const component::Heading &childHeading) {

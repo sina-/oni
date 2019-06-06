@@ -35,7 +35,10 @@ namespace oni {
         struct Sound {
             SoundTag tag = SoundTag::UNKNOWN;
             ChannelGroup group = ChannelGroup::UNKNOWN;
-            common::r32 pitch = 1.f;
+        };
+
+        struct SoundPitch {
+            common::r32 value = 1.f;
         };
     }
 }

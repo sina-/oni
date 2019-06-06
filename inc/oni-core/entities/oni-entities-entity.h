@@ -29,7 +29,7 @@ namespace oni {
             WORLD_CHUNK,
             DEBUG_WORLD_CHUNK,
 
-            SMOKE,
+            SMOKE_CLOUD,
 
             COMPLEMENT,
 

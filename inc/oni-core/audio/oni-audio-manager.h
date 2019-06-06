@@ -39,7 +39,8 @@ namespace oni {
             explicit AudioManager(asset::AssetManager &);
 
             void
-            tick(entities::EntityManager &,
+            tick(entities::EntityManager &serverManager,
+                 entities::EntityManager &clientManager,
                  const component::WorldP3D &playerPos);
 
             void
@@ -52,6 +53,7 @@ namespace oni {
 
             void
             playOneShot(const component::Sound &,
+                        const component::SoundPitch &,
                         const math::vec3 &distance);
 
             void

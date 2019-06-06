@@ -8,7 +8,7 @@ namespace oni {
             component::BrushType type{component::BrushType::UNKNOWN};
             union {
                 component::PixelRGBA color{};
-                const char *textureID;
+                component::TextureTag tag;
             };
         };
     }

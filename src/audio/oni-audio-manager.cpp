@@ -58,7 +58,8 @@ namespace oni {
         }
 
         void
-        AudioManager::tick(entities::EntityManager &manager,
+        AudioManager::tick(entities::EntityManager &serverManager,
+                           entities::EntityManager &clientManager,
                            const component::WorldP3D &playerPos) {
             mPlayerPos = playerPos;
             auto result = mSystem->update();
@@ -66,37 +67,69 @@ namespace oni {
 
             /// Engine pitch
             {
-                auto view = manager.createView<
+                auto view = serverManager.createView<
                         component::Tag_Audible,
                         component::Car,
                         component::Sound>();
-                for (auto &&entity : view) {
-                    auto &car = view.get<component::Car>(entity);
-                    auto &sound = view.get<component::Sound>(entity);
+                for (auto &&id : view) {
+                    auto &car = view.get<component::Car>(id);
+                    auto &sound = view.get<component::Sound>(id);
 
-                    // TODO: This needs to go into client side entity manager as a complementary entity
-                    sound.pitch = static_cast< common::r32>(car.rpm) / 2000;
+                    auto cId = clientManager.getComplementOf(id);
+                    auto &pitch = clientManager.get<component::SoundPitch>(cId);
+                    pitch.value = static_cast< common::r32>(car.rpm) / 2000;
                 }
             }
 
-            /// Play and Pause
+            /// Play and Pause - server entities
             {
-                auto view = manager.createView<
+                auto view = serverManager.createView<
                         component::Tag_Audible,
                         component::WorldP3D,
                         component::Sound>();
-                for (auto &&entity : view) {
-                    auto &pos = view.get<component::WorldP3D>(entity).value;
-                    auto &sound = view.get<component::Sound>(entity);
+                for (auto &&id : view) {
+                    auto &pos = view.get<component::WorldP3D>(id).value;
+                    auto &sound = view.get<component::Sound>(id);
 
-                    auto &entityChannel = getOrCreateLooping3DChannel(sound, entity);
+                    auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
                     auto distance = (pos - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
+                        if (auto cId = clientManager.getComplementOf(id)) {
+                            if (clientManager.has<component::SoundPitch>(cId)) {
+                                auto &pitch = clientManager.get<component::SoundPitch>(cId);
+                                setPitch(*entityChannel.channel, pitch.value);
+                            }
+                        }
 
-                        // TODO: Does it matter if this is accurate?
-                        math::vec3 vel{1.f, 0.f, 0.f};
-                        set3DPos(*entityChannel.channel, pos - mPlayerPos.value, vel);
-                        setPitch(*entityChannel.channel, sound.pitch);
+                        auto v = math::vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
+                        set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
+                        unPause(*entityChannel.channel);
+                    } else {
+                        pause(*entityChannel.channel);
+                    }
+                }
+            }
+
+            /// Play and Pause - client entities
+            {
+                auto view = clientManager.createView<
+                        component::Tag_Audible,
+                        component::WorldP3D,
+                        component::Sound>();
+                for (auto &&id : view) {
+                    auto &pos = view.get<component::WorldP3D>(id).value;
+                    auto &sound = view.get<component::Sound>(id);
+
+                    auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
+                    auto distance = (pos - mPlayerPos.value).len();
+                    if (distance < mMaxAudibleDistance) {
+                        if (clientManager.has<component::SoundPitch>(id)) {
+                            auto &pitch = clientManager.get<component::SoundPitch>(id);
+                            setPitch(*entityChannel.channel, pitch.value);
+                        }
+
+                        auto v = math::vec3{1.f, 0.f, 0.f};
+                        set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
                         unPause(*entityChannel.channel);
                     } else {
                         pause(*entityChannel.channel);
@@ -113,8 +146,9 @@ namespace oni {
             auto distance = mPlayerPos.value - pos.value;
             auto soundTag = mCollisionEffects[collisionTag];
             assert(soundTag);
-            auto sound = component::Sound{soundTag, component::ChannelGroup::EFFECT, 1.f};
-            playOneShot(sound, distance);
+            auto sound = component::Sound{soundTag, component::ChannelGroup::EFFECT};
+            auto pitch = component::SoundPitch{1.f};
+            playOneShot(sound, pitch, distance);
         }
 
         AudioManager::CollisionSoundTag
@@ -134,6 +168,8 @@ namespace oni {
 
         void
         AudioManager::preLoadSounds() {
+            // TODO: The sound must have been loaded using the asset packet instead of just going through all the
+            // sound types and shotgun loading all
             for (auto i = math::enumCast(component::SoundTag::UNKNOWN) + 1;
                  i < math::enumCast(component::SoundTag::LAST);
                  ++i) {
@@ -193,6 +229,7 @@ namespace oni {
 
         void
         AudioManager::playOneShot(const component::Sound &sound,
+                                  const component::SoundPitch &pitch,
                                   const math::vec3 &distance) {
             auto *channel = createChannel(sound);
             assert(channel);
@@ -200,7 +237,7 @@ namespace oni {
             auto result = channel->setMode(FMOD_3D);
             ERRCHECK(result);
 
-            setPitch(*channel, sound.pitch);
+            setPitch(*channel, pitch.value);
 
             // TODO: Does this matter?
             math::vec3 velocity{1.f, 1.f, 0.f};

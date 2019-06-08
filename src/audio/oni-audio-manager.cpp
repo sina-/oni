@@ -15,7 +15,7 @@ namespace oni {
             mMaxAudibleDistance = 150.f;
             mMaxNumberOfChannels = 1024;
 
-            FMOD::System *system{nullptr};
+            FMOD::System *system;
             auto result = FMOD::System_Create(&system);
             ERRCHECK(result);
             mSystem = std::unique_ptr<FMOD::System, FMODDeleter>(system, FMODDeleter());
@@ -32,28 +32,7 @@ namespace oni {
             result = mSystem->update();
             ERRCHECK(result);
 
-/*            component::SoundID backgroundSoundID = "resources/audio/beat.wav";
-            loadSound(backgroundSoundID);
-            attachControls(backgroundSoundID);
-            setLoop(backgroundSoundID, true);
-            setVolume(backgroundSoundID, 0.2f);
-            //playSound(backgroundSoundID);*/
-
-            FMOD::ChannelGroup *group{nullptr};
-            result = mSystem->createChannelGroup("effectsChannel", &group);
-            ERRCHECK(result);
-            auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
-            effectsGroup->setVolume(1.f);
-            mChannelGroups[component::ChannelGroup::EFFECT] = std::move(effectsGroup);
-            group = nullptr;
-
-            result = mSystem->createChannelGroup("musicChannel", &group);
-            ERRCHECK(result);
-            auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
-            musicGroup->setVolume(1.f);
-            mChannelGroups[component::ChannelGroup::MUSIC] = std::move(musicGroup);
-            group = nullptr;
-
+            loadChannels();
             preLoadSounds();
         }
 
@@ -167,6 +146,30 @@ namespace oni {
         }
 
         void
+        AudioManager::loadChannels() {
+            FMOD::ChannelGroup *group{nullptr};
+            auto result = mSystem->createChannelGroup("effectsChannel", &group);
+            ERRCHECK(result);
+            auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
+            effectsGroup->setVolume(1.f);
+            mChannelGroup[component::ChannelGroup::EFFECT] = std::move(effectsGroup);
+            group = nullptr;
+
+            result = mSystem->createChannelGroup("musicChannel", &group);
+            ERRCHECK(result);
+            auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
+            musicGroup->setVolume(1.f);
+            mChannelGroup[component::ChannelGroup::MUSIC] = std::move(musicGroup);
+            group = nullptr;
+
+            for (auto i = math::enumCast(component::ChannelGroup::UNKNOWN) + 1;
+                 i < math::enumCast(component::ChannelGroup::LAST); ++i) {
+                auto channelGroup = static_cast<component::ChannelGroup>(i);
+                setChannelGroupVolume(channelGroup, 1.f);
+            }
+        }
+
+        void
         AudioManager::preLoadSounds() {
             // TODO: The sound must have been loaded using the asset packet instead of just going through all the
             // sound types and shotgun loading all
@@ -214,8 +217,8 @@ namespace oni {
 
         FMOD::Channel *
         AudioManager::createChannel(const component::Sound &sound) {
-            assert(mChannelGroups[sound.group]);
-            auto *group = mChannelGroups[sound.group].get();
+            assert(mChannelGroup[sound.group]);
+            auto *group = mChannelGroup[sound.group].get();
             assert(group);
             assert(mSounds[sound.tag]);
 
@@ -225,6 +228,14 @@ namespace oni {
             ERRCHECK(result);
 
             return channel;
+        }
+
+        FMOD::ChannelGroup *
+        AudioManager::getChannelGroup(component::ChannelGroup channelGroup) {
+            assert(mChannelGroup[channelGroup]);
+            auto *group = mChannelGroup[channelGroup].get();
+            assert(group);
+            return group;
         }
 
         void
@@ -356,20 +367,33 @@ namespace oni {
             ERRCHECK(result);
         }
 
-        void
-        AudioManager::setVolume(FMOD::Channel &channel,
-                                common::r32 volume) {
-            auto result = channel.setVolume(volume);
-            ERRCHECK(result);
+        common::r32
+        AudioManager::getChannelGroupVolume(component::ChannelGroup channelGroup) {
+            auto result = mChannelVolume[channelGroup];
+            return result;
         }
 
         void
         AudioManager::setChannelGroupVolume(component::ChannelGroup channelGroup,
                                             common::r32 volume) {
-            assert(mChannelGroups[channelGroup]);
-            auto *group = mChannelGroups[channelGroup].get();
-            assert(group);
-            group->setVolume(volume);
+            auto effectiveVolume = volume * mMasterVolume;
+            auto *group = getChannelGroup(channelGroup);
+            auto result = group->setVolume(effectiveVolume);
+            ERRCHECK(result);
+            mChannelVolume[channelGroup] = volume;
+        }
+
+        void
+        AudioManager::setMasterVolume(common::r32 volume) {
+            assert(math::almost_Positive(volume) || math::almost_Zero(volume));
+            assert(math::almost_Less(volume, 1.f));
+            mMasterVolume = volume;
+
+            for (auto i = math::enumCast(component::ChannelGroup::UNKNOWN) + 1;
+                 i < math::enumCast(component::ChannelGroup::LAST); ++i) {
+                auto channelGroup = static_cast<component::ChannelGroup>(i);
+                setChannelGroupVolume(channelGroup, volume);
+            }
         }
     }
 }

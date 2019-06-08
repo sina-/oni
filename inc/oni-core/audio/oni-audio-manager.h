@@ -60,6 +60,12 @@ namespace oni {
             setChannelGroupVolume(component::ChannelGroup,
                                   common::r32 volume);
 
+            common::r32
+            getChannelGroupVolume(component::ChannelGroup);
+
+            void
+            setMasterVolume(common::r32 volume);
+
         private:
             class FMODDeleter {
             public:
@@ -92,9 +98,15 @@ namespace oni {
             FMOD::Channel *
             createChannel(const component::Sound &);
 
+            FMOD::ChannelGroup *
+            getChannelGroup(component::ChannelGroup);
+
             void
             loadSound(component::SoundTag,
                       std::string_view);
+
+            void
+            loadChannels();
 
             static EntitySoundTag
             createEntitySoundID(component::SoundTag,
@@ -122,18 +134,17 @@ namespace oni {
             void
             pause(FMOD::Channel &);
 
-            void
-            setVolume(FMOD::Channel &,
-                      common::r32 volume);
-
         private:
             asset::AssetManager &mAssetManager;
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
 
-            std::unordered_map<component::ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroups;
+            std::unordered_map<component::ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroup;
             std::unordered_map<component::SoundTag, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
             std::unordered_map<AudioManager::EntitySoundTag, EntityChannel> mLoopingChannels;
             std::unordered_map<AudioManager::CollisionSoundTag, component::SoundTag> mCollisionEffects;
+            std::unordered_map<component::ChannelGroup, common::r32> mChannelVolume;
+
+            common::r32 mMasterVolume{1.f};
 
             component::WorldP3D mPlayerPos{};
 

@@ -186,14 +186,14 @@ namespace oni {
         template<class T>
         inline bool
         almost_Less(T x,
-                 T y) noexcept {
+                    T y) noexcept {
             return x - y <= common::EP32;
         }
 
         template<class T>
         inline bool
         almost_Greater(T x,
-                    T y) noexcept {
+                       T y) noexcept {
             return x - y >= common::EP32;
         }
 

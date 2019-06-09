@@ -101,6 +101,7 @@ namespace oni {
                     manager.setScale(id, size.x, size.y);
                     manager.setHeading(id, heading.value);
                     manager.setTrailTextureTag(id, component::TextureTag::SMOKE);
+                    manager.setAfterMarkTextureTag(id, component::TextureTag::SMOKE);
                     manager.createPhysics(id, rocketPos, size, heading.value);
 
                     auto *body = manager.getEntityBody(id);

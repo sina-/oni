@@ -15,6 +15,7 @@ namespace oni {
         static constexpr u64 u64Max = std::numeric_limits<u64>::max();
         static constexpr u32 maxNumTextureSamplers{32};
         static constexpr r32 PI = 3.14159265358979323846f;
+        static constexpr r32 HALF_PI = 3.14159265358979323846f / 2.f;
         static constexpr r32 TWO_PI = PI * 2;
         static constexpr r32 FULL_CIRCLE_IN_RAD = TWO_PI;
     }

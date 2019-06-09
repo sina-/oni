@@ -132,12 +132,21 @@ namespace oni {
             setRandHeading(common::EntityID);
 
             void
+            setRandHeading(common::EntityID,
+                           common::r32 lower,
+                           common::r32 upper);
+
+            void
             setHeading(common::EntityID,
                        common::r32 heading);
 
             void
             setTrailTextureTag(common::EntityID,
                                component::TextureTag);
+
+            void
+            setAfterMarkTextureTag(common::EntityID,
+                                   component::TextureTag);
 
             void
             setRandVelocity(common::EntityID id,

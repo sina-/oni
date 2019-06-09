@@ -360,8 +360,15 @@ namespace oni {
 
         void
         EntityManager::setRandHeading(common::EntityID id) {
+            setRandHeading(id, 0.f, common::FULL_CIRCLE_IN_RAD);
+        }
+
+        void
+        EntityManager::setRandHeading(common::EntityID id,
+                                      common::r32 lower,
+                                      common::r32 upper) {
             auto &heading = mRegistry->get<component::Heading>(id);
-            heading.value = mRand->next_r32(0.f, common::FULL_CIRCLE_IN_RAD);
+            heading.value = mRand->next_r32(lower, upper);
         }
 
         void
@@ -403,8 +410,15 @@ namespace oni {
         void
         EntityManager::setTrailTextureTag(common::EntityID id,
                                           component::TextureTag tag) {
-            auto &tt = mRegistry->get<component::Trail>(id);
+            auto &tt = mRegistry->get<component::ParticleTrail>(id);
             tt.textureTag = tag;
+        }
+
+        void
+        EntityManager::setAfterMarkTextureTag(common::EntityID id,
+                                              component::TextureTag tag) {
+            auto &am = mRegistry->get<component::AfterMark>(id);
+            am.textureTag = tag;
         }
 
         void
@@ -549,7 +563,8 @@ namespace oni {
             createComponent<component::Scale>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::ROCKET);
             createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
-            createComponent<component::Trail>(id);
+            createComponent<component::ParticleTrail>(id);
+            createComponent<component::AfterMark>(id);
 
             auto &properties = createComponent<component::PhysicalProperties>(id);
             properties.friction = 1.f;

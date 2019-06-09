@@ -25,6 +25,8 @@ namespace oni {
             SIMPLE_BLAST_PARTICLE,
             SIMPLE_ROCKET,
 
+            TRAIL_PARTICLE,
+
             TEXT,
             WORLD_CHUNK,
             DEBUG_WORLD_CHUNK,

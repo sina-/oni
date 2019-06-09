@@ -19,9 +19,6 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
-        struct Tag_LeavesMark {
-        };
-
         struct Tag_SplatOnDeath {
         };
 

@@ -70,7 +70,11 @@ namespace oni {
             std::vector<math::vec4> uv{};
         };
 
-        struct Trail {
+        struct ParticleTrail {
+            TextureTag textureTag = TextureTag::UNKNOWN;
+        };
+
+        struct AfterMark {
             TextureTag textureTag = TextureTag::UNKNOWN;
         };
 

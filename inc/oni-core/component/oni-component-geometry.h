@@ -85,7 +85,7 @@ namespace oni {
         };
 
         struct Heading {
-            common::r32 value{0.f};
+            common::r32 value{0.f}; // radians
         };
 
         union Scale {

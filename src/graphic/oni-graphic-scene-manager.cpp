@@ -397,12 +397,12 @@ namespace oni {
             {
                 auto view = serverManager.createView<
                         component::WorldP3D,
-                        component::Trail,
+                        component::ParticleTrail,
                         component::Heading>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
-                    const auto &trail = view.get<component::Trail>(id);
+                    const auto &trail = view.get<component::ParticleTrail>(id);
 
                     if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
@@ -410,30 +410,53 @@ namespace oni {
                     common::r32 particleHalfSize = 0.35f;
                     common::r32 particleSize = particleHalfSize * 2;
 
-                    auto trailEntity = clientManager.createEntity_SimpleParticle();
-                    clientManager.setWorldP3D(trailEntity, pos.x, pos.y, pos.z);
-                    clientManager.setScale(trailEntity, particleSize, particleSize);
-                    clientManager.setTextureTag(trailEntity, trail.textureTag);
-                    prepareTexture(clientManager, trailEntity,
-                                   clientManager.get<component::TextureTag>(trailEntity));
+                    for (common::u8 i = 0; i < mRand->next<common::u8>(4, 8); ++i) {
+                        auto trailEntity = clientManager.createEntity_SimpleParticle();
+                        clientManager.setWorldP3D(trailEntity, pos.x, pos.y, pos.z);
+                        clientManager.setScale(trailEntity, particleSize, particleSize);
+                        clientManager.setTextureTag(trailEntity, trail.textureTag);
+                        clientManager.setRandHeading(trailEntity, heading.value - common::HALF_PI,
+                                                     heading.value + common::HALF_PI);
+                        clientManager.setRandVelocity(trailEntity, 1, 5);
 
-                    auto &age = clientManager.get<component::Age>(trailEntity);
-                    age.maxAge = 1.f;
+                        auto &age = clientManager.get<component::Age>(trailEntity);
+                        age.maxAge = mRand->next_r32(1.f, 2.f);
+
+                        prepareTexture(clientManager, trailEntity,
+                                       clientManager.get<component::TextureTag>(trailEntity));
+                    }
                 }
             }
 
-            /// Entities that leave mark
+            /// Entities that leave mark -- server
             {
-                auto view = clientManager.createView<
-                        component::Tag_LeavesMark,
-                        component::TextureTag,
+                auto view = serverManager.createView<
+                        component::AfterMark,
                         component::WorldP3D,
                         component::Scale>();
                 for (auto &&id: view) {
                     const auto &scale = view.get<component::Scale>(id);
-                    const auto &tag = view.get<component::TextureTag>(id);
+                    const auto &mark = view.get<component::AfterMark>(id);
                     auto brush = graphic::Brush{};
-                    brush.tag = tag;
+                    brush.tag = mark.textureTag;
+                    brush.type = component::BrushType::TEXTURE;
+
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    splat(clientManager, pos, scale, brush);
+                }
+            }
+
+            /// Entities that leave mark -- client
+            {
+                auto view = clientManager.createView<
+                        component::AfterMark,
+                        component::WorldP3D,
+                        component::Scale>();
+                for (auto &&id: view) {
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &mark = view.get<component::AfterMark>(id);
+                    auto brush = graphic::Brush{};
+                    brush.tag = mark.textureTag;
                     brush.type = component::BrushType::TEXTURE;
 
                     const auto &pos = view.get<component::WorldP3D>(id);

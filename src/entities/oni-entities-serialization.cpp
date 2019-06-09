@@ -66,7 +66,14 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Trail &data) {
+                  component::ParticleTrail &data) {
+            archive(data.textureTag);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
+                  component::AfterMark &data) {
             archive(data.textureTag);
         }
 
@@ -229,7 +236,8 @@ namespace oni {
                         component::Appearance,
                         component::Age,
                         component::TextureTag,
-                        component::Trail,
+                        component::ParticleTrail,
+                        component::AfterMark,
                         component::EntityAttachment,
                         component::EntityAttachee,
                         component::Sound,
@@ -278,7 +286,8 @@ namespace oni {
                         component::Appearance,
                         component::Age,
                         component::TextureTag,
-                        component::Trail,
+                        component::ParticleTrail,
+                        component::AfterMark,
                         component::EntityAttachment,
                         component::EntityAttachee,
                         component::Sound,

@@ -509,90 +509,10 @@ namespace oni {
                 }
             }
 
-            /// Update Skid lines
-            {
-                std::vector<component::WorldP3D> skidPosList{};
-                std::vector<common::u8> skidOpacity{};
-                {
-                    auto view = serverManager.createView<
-                            component::Car,
-                            component::WorldP3D,
-                            component::Heading,
-                            component::Scale,
-                            component::CarConfig>();
-                    for (auto &&carEntity: view) {
-
-                        const auto car = view.get<component::Car>(carEntity);
-                        const auto &pos = view.get<component::WorldP3D>(carEntity);
-                        // NOTE: Technically I should use slippingRear, but this gives better effect
-                        if (car.slippingFront || true) {
-                            const auto &carConfig = view.get<component::CarConfig>(carEntity);
-                            const auto &heading = view.get<component::Heading>(carEntity);
-                            const auto scale = component::Scale{}; // TODO: This is unused, think about how the parent scale
-                            // affects children
-
-                            // TODO: This is game logic, maybe tire placement should be saved as part of CarConfig?
-                            // same logic is hard-coded when spawningCar server side.
-                            math::vec3 skidPosRL{static_cast<common::r32>(-carConfig.cgToRearAxle),
-                                                 static_cast<common::r32>(carConfig.wheelWidth +
-                                                                          carConfig.halfWidth / 2),
-                                    // NOTE: This z-value is unused.
-                                                 0.f};
-                            math::vec3 skidPosRR{static_cast<common::r32>(-carConfig.cgToRearAxle),
-                                                 static_cast<common::r32>(-carConfig.wheelWidth -
-                                                                          carConfig.halfWidth / 2),
-                                                 0.f};
-                            auto transform = math::createTransformation(pos, heading, scale);
-                            auto posRL = transform * skidPosRL;
-                            auto posRR = transform * skidPosRR;
-                            skidPosList.push_back(component::WorldP3D{posRL.x, posRL.y, posRL.z});
-                            skidPosList.push_back(component::WorldP3D{posRR.x, posRR.y, posRR.z});
-
-//                            auto alpha = static_cast<common::u8>((car.velocityAbsolute / car.maxVelocityAbsolute) *
-//                                                                    255);
-                            // TODO: arbitrary number based on number of frames, think about better way of determining this
-                            skidOpacity.push_back(10);
-                        }
-                        if (car.slippingFront && math::abs(car.slipAngleFront) > 1.f or true) {
-                            auto z = mZLayerManager.getZForEntity(entities::EntityType::SMOKE_CLOUD);
-                            // TODO: I could hide the fact that SmokeEmitterCD component is attached to a complementary
-                            // entity on client side by specializing the get<component> function for certain types
-                            // and do the call to getComplementOf() call inside that function hmmm... :thinking:
-                            auto cId = clientManager.getComplementOf(carEntity);
-                            auto &emitter = clientManager.get<component::SmokeEmitterCD>(cId);
-                            if (math::almost_Zero(emitter.currentCD)) {
-                                for (common::i32 i = 0; i < mRand->next(2u, 3u); ++i) {
-                                    auto id = clientManager.createEntity_SmokeCloud();
-                                    clientManager.setWorldP3D(id, pos.x, pos.y, z);
-                                    prepareTexture(clientManager, id,
-                                                   clientManager.get<component::TextureTag>(id));
-
-                                    clientManager.setRandAge(id, 1.f, 3.f);
-                                    clientManager.setRandHeading(id);
-                                    clientManager.setRandVelocity(id, 1, 2);
-                                    clientManager.setScale(id, 10, 10);
-                                }
-                                emitter.currentCD = emitter.initialCD;
-                            }
-                        }
-                    }
-                }
-
-                {
-                    auto brush = graphic::Brush{};
-                    brush.type = component::BrushType::SPRITE;
-                    auto scale = component::Scale{0.5f, 0.5f};
-
-                    for (size_t i = 0; i < skidPosList.size(); ++i) {
-                        brush.color = component::PixelRGBA{0, 0, 0, skidOpacity[i / 2]};
-                        splat(clientManager, skidPosList[i], scale, brush);
-                    }
-                }
-            }
-
             /// Update Laps
             {
-                auto carLapView = serverManager.createView<component::Car, gameplay::CarLapInfo>();
+                auto carLapView = serverManager.createView<
+                        gameplay::CarLapInfo>();
                 for (auto &&carEntity: carLapView) {
                     // TODO: This will render all player laps on top of each other. I should render the data in rows
                     // instead. Something like:

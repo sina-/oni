@@ -311,12 +311,6 @@ namespace oni {
                     if (std::abs(pos.x - position.x) > common::EP32 ||
                         std::abs(pos.y - position.y) > common::EP32 ||
                         std::abs(heading.value - body->GetAngle()) > common::EP32) {
-                        if (manager.has<component::Trail>(id)) {
-                            auto &trail = manager.get<component::Trail>(id);
-                            trail.previousPos.push_back(pos);
-                            trail.velocity.push_back(body->GetLinearVelocity().Length());
-                            assert(trail.previousPos.size() == trail.velocity.size());
-                        }
 
                         pos.x = position.x;
                         pos.y = position.y;

@@ -362,7 +362,7 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
-/*
+#if 0
             math::vec4 red{1, 0, 0, 0.25};
             math::vec4 green{0, 1, 0, 0.25};
             math::vec4 blue{0, 0, 1, 1};
@@ -382,7 +382,7 @@ namespace oni {
                 clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
                 add = false;
             }
-*/
+#endif
 
             /// Update Emitters
             {
@@ -395,99 +395,31 @@ namespace oni {
 
             /// Particle trails
             {
-#if 1
-                common::r32 particleHalfSize = 0.35f;
-                common::r32 particleSize = particleHalfSize * 2;
-                common::r32 halfConeAngle = static_cast<common::r32>(math::toRadians(45)) / 2.f;
-
                 auto view = serverManager.createView<
-                        component::Trail,
                         component::WorldP3D,
+                        component::Trail,
                         component::Heading>();
-                for (auto &&entity: view) {
-                    const auto &worldPos = view.get<component::WorldP3D>(entity);
-                    const auto &heading = view.get<component::Heading>(entity);
-                    const auto &currentPos = worldPos;
-                    const auto &trail = view.get<component::Trail>(entity);
-                    common::r32 projectileHeading = heading.value;
-                    common::r32 spawnMinAngle = projectileHeading + common::PI - halfConeAngle;
-                    common::r32 spawnMaxAngle = projectileHeading + common::PI + halfConeAngle;
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &trail = view.get<component::Trail>(id);
 
-                    assert(trail.previousPos.size() == trail.velocity.size());
-
-                    //math::vec4 color{1.f, 1.f, 1.f, 1.f};
-
-                    if (trail.previousPos.empty()) {
-                        auto trailEntity = clientManager.createEntity_SimpleParticle();
-                        clientManager.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
-                        clientManager.setScale(trailEntity, particleSize, particleSize);
-                        prepareTexture(clientManager, trailEntity,
-                                       clientManager.get<component::TextureTag>(trailEntity));
+                    if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                         continue;
                     }
+                    common::r32 particleHalfSize = 0.35f;
+                    common::r32 particleSize = particleHalfSize * 2;
 
-                    const auto &previousPos = trail.previousPos[0];
+                    auto trailEntity = clientManager.createEntity_SimpleParticle();
+                    clientManager.setWorldP3D(trailEntity, pos.x, pos.y, pos.z);
+                    clientManager.setScale(trailEntity, particleSize, particleSize);
+                    clientManager.setTextureTag(trailEntity, trail.textureTag);
+                    prepareTexture(clientManager, trailEntity,
+                                   clientManager.get<component::TextureTag>(trailEntity));
 
-                    if (!math::intersects(currentPos, mCamera.x, mCamera.y, viewWidth, viewHeight) &&
-                        !math::intersects(previousPos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                        continue;
-                    }
-
-                    common::r32 dX = currentPos.x - previousPos.x;
-                    common::r32 dY = currentPos.y - previousPos.y;
-
-                    common::r32 distance = std::sqrt(dX * dX + dY * dY);
-
-                    auto x = previousPos.x;
-                    auto y = previousPos.y;
-
-                    auto alpha = std::atan2(dX, dY); // Between line crossing previousPos and currentPos and X-axis
-
-                    for (auto numParticles = 0; numParticles < mRand->next(1u, 2u); ++numParticles) {
-                        auto pos = component::WorldP3D{x, y, currentPos.z};
-                        for (common::r32 i = 0.f; i <= distance; i += particleSize) {
-/*                        if(i == 0){
-                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, math::vec4{0.f, 1.f, 0.f, 1.f}, false);
-                        }
-                        else if (i >= distance ){
-                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, math::vec4{1.f, 0.f, 0.f, 1.f}, false);
-                        }
-                        else{
-                            trailEntity = mInternalEntityFactory->createEntity<entities::EntityType::SIMPLE_PARTICLE>(
-                                    pos, color, false);
-                        }
-                        */
-                            auto trailEntity = clientManager.createEntity_SimpleParticle();
-                            clientManager.setWorldP3D(trailEntity, currentPos.x, currentPos.y, currentPos.z);
-                            clientManager.setScale(trailEntity, particleSize, particleSize);
-                            prepareTexture(clientManager, trailEntity,
-                                           clientManager.get<component::TextureTag>(trailEntity));
-
-                            auto &age = clientManager.get<component::Age>(
-                                    trailEntity);
-                            // TODO: I don't use any other velocity than the first one, should I just not store the rest?
-                            // or should I update this code to use all by iterating over trail.previousPos?
-                            age.maxAge = 1.f - (distance - i) / trail.velocity[0];
-
-                            auto &velocity = clientManager.get<component::Velocity>(
-                                    trailEntity);
-                            velocity.currentVelocity = mRand->next_r32(2.f, 10.f);
-
-                            auto &particleHeading = clientManager.get<component::Heading>(
-                                    trailEntity);
-                            particleHeading.value = mRand->next_r32(spawnMinAngle, spawnMaxAngle);
-
-                            pos.x += particleSize * std::sin(alpha);
-                            pos.y += particleSize * std::cos(alpha);
-                        }
-                    }
-
-//                    math::vec4 colorBlue{0.f, 0.f, 1.f, 1.f};
-//                    math::vec4 colorRed{1.f, 0.f, 0.f, 1.f};
+                    auto &age = clientManager.get<component::Age>(trailEntity);
+                    age.maxAge = 1.f;
                 }
-#endif
             }
 
             /// Entities that leave mark
@@ -497,14 +429,14 @@ namespace oni {
                         component::TextureTag,
                         component::WorldP3D,
                         component::Scale>();
-                for (auto &&entity: view) {
-                    const auto &scale = view.get<component::Scale>(entity);
-                    const auto &tag = view.get<component::TextureTag>(entity);
+                for (auto &&id: view) {
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &tag = view.get<component::TextureTag>(id);
                     auto brush = graphic::Brush{};
                     brush.tag = tag;
                     brush.type = component::BrushType::TEXTURE;
 
-                    const auto &pos = view.get<component::WorldP3D>(entity);
+                    const auto &pos = view.get<component::WorldP3D>(id);
                     splat(clientManager, pos, scale, brush);
                 }
             }

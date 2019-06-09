@@ -100,15 +100,16 @@ namespace oni {
                     manager.setWorldP3D(id, rocketPos.x, rocketPos.y, rocketPos.z);
                     manager.setScale(id, size.x, size.y);
                     manager.setHeading(id, heading.value);
+                    manager.setTrailTextureTag(id, component::TextureTag::SMOKE);
                     manager.createPhysics(id, rocketPos, size, heading.value);
 
-                    auto * body = manager.getEntityBody(id);
+                    auto *body = manager.getEntityBody(id);
 
                     body->ApplyForceToCenter(
                             b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),
                                    static_cast<common::r32>(sin(heading.value) * velocity)),
                             true);
-                    body->ApplyAngularImpulse(1, true);
+                    //body->ApplyAngularImpulse(1, true);
 /*
                     manager.createEvent(ROCKET_LAUNCH, component::WorldP3D);
                     manager.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);

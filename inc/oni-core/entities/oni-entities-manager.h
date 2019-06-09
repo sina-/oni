@@ -136,6 +136,10 @@ namespace oni {
                        common::r32 heading);
 
             void
+            setTrailTextureTag(common::EntityID,
+                               component::TextureTag);
+
+            void
             setRandVelocity(common::EntityID id,
                             common::u32 lower,
                             common::u32 upper);
@@ -302,19 +306,6 @@ namespace oni {
                                 mRegistry->reset<component::Tag_NetworkSyncComponent>();
                             }
                         }
-                        {
-                            // TODO: This component tracks all the changes server side so that if there are changes
-                            // between network updates those changes won't be lost. This could happen to any other
-                            // component that is updated faster than network poll rate. I need a generic solution
-                            // to this problem. Maybe I should have a global tick id and every tick id has a set
-                            // of components that has been updated, so that each client can be sync'd with all
-                            // those changes
-                            auto view = createView<component::Trail>();
-                            for (auto &&entity: view) {
-                                view.get<component::Trail>(entity).velocity.clear();
-                                view.get<component::Trail>(entity).previousPos.clear();
-                            }
-                        }
                         break;
                     }
                     case entities::SnapshotType::ONLY_NEW_ENTITIES: {
@@ -326,13 +317,6 @@ namespace oni {
                                         view.begin(),
                                         view.end());
                                 mRegistry->reset<component::Tag_NetworkSyncEntity>();
-                            }
-                        }
-                        {
-                            auto view = createView<component::Trail>();
-                            for (auto &&entity: view) {
-                                view.get<component::Trail>(entity).velocity.clear();
-                                view.get<component::Trail>(entity).previousPos.clear();
                             }
                         }
                         break;

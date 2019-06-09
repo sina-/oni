@@ -67,7 +67,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   component::Trail &data) {
-            archive(data.previousPos, data.velocity);
+            archive(data.textureTag);
         }
 
         template<class Archive>

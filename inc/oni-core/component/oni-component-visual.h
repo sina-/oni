@@ -14,11 +14,6 @@
 
 namespace oni {
     namespace component {
-        struct Trail {
-            std::vector<component::WorldP3D> previousPos{};
-            std::vector<common::r32> velocity{};
-        };
-
         struct Image {
             common::u16 width{};
             common::u16 height{};
@@ -73,6 +68,10 @@ namespace oni {
             std::vector<common::r32> advanceX{};
             std::vector<common::r32> advanceY{};
             std::vector<math::vec4> uv{};
+        };
+
+        struct Trail {
+            TextureTag textureTag = TextureTag::UNKNOWN;
         };
 
         struct PixelRGBA {

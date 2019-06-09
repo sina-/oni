@@ -401,6 +401,13 @@ namespace oni {
         }
 
         void
+        EntityManager::setTrailTextureTag(common::EntityID id,
+                                          component::TextureTag tag) {
+            auto &tt = mRegistry->get<component::Trail>(id);
+            tt.textureTag = tag;
+        }
+
+        void
         EntityManager::setText(common::EntityID id,
                                std::string_view content) {
             auto &text = mRegistry->get<component::Text>(id);
@@ -439,11 +446,10 @@ namespace oni {
             createComponent<component::Age>(id);
             createComponent<component::Velocity>(id);
 
-            if(mSimMode == entities::SimMode::SERVER){
+            if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
                 cc.types.emplace_back(component::ComponentType::TEXTURE);
-            }
-            else {
+            } else {
                 createComponent<component::Texture>(id);
             }
 
@@ -638,11 +644,10 @@ namespace oni {
             createComponent<component::Velocity>(id);
             createComponent<component::Age>(id);
 
-            if(mSimMode == entities::SimMode::SERVER){
+            if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
                 cc.types.emplace_back(component::ComponentType::TEXTURE);
-            }
-            else {
+            } else {
                 createComponent<component::Texture>(id);
             }
 
@@ -661,11 +666,10 @@ namespace oni {
             createComponent<component::Velocity>(id);
             createComponent<component::Age>(id);
 
-            if(mSimMode == entities::SimMode::SERVER){
+            if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
                 cc.types.emplace_back(component::ComponentType::TEXTURE);
-            }
-            else {
+            } else {
                 createComponent<component::Texture>(id);
             }
 
@@ -696,11 +700,10 @@ namespace oni {
             createComponent<component::TextureTag>(id, component::TextureTag::BACKGROUND_CHUNK);
             createComponent<level::Chunk>(id);
 
-            if(mSimMode == entities::SimMode::SERVER){
+            if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
                 cc.types.emplace_back(component::ComponentType::TEXTURE);
-            }
-            else {
+            } else {
                 createComponent<component::Texture>(id);
             }
 
@@ -750,11 +753,10 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::BACKGROUND_WHITE);
 
-            if(mSimMode == entities::SimMode::SERVER){
+            if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
                 cc.types.emplace_back(component::ComponentType::TEXTURE);
-            }
-            else {
+            } else {
                 createComponent<component::Texture>(id);
             }
 
@@ -773,11 +775,10 @@ namespace oni {
             createComponent<component::Heading>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::CANVAS);
 
-            if(mSimMode == entities::SimMode::SERVER){
+            if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
                 cc.types.emplace_back(component::ComponentType::TEXTURE);
-            }
-            else {
+            } else {
                 createComponent<component::Texture>(id);
             }
 

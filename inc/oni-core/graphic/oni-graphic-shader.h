@@ -14,9 +14,9 @@ namespace oni {
     namespace graphic {
         class Shader {
         public:
-            Shader(const std::string &vertPath,
-                   const std::string &geomPath,
-                   const std::string &fragPath);
+            Shader(std::string_view vertPath,
+                   std::string_view geomPath,
+                   std::string_view fragPath);
 
             ~Shader();
 

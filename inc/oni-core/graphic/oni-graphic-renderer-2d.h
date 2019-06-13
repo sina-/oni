@@ -1,9 +1,9 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/math/oni-math-mat4.h>
 
 namespace oni {
-
     namespace component {
         class Appearance;
 
@@ -22,6 +22,10 @@ namespace oni {
         class Heading;
     }
 
+    namespace math {
+        class mat4;
+    }
+
     namespace graphic {
         enum class PrimitiveType : common::u8 {
             POINT = 0,
@@ -38,7 +42,9 @@ namespace oni {
 
         public:
             void
-            begin();
+            begin(const math::mat4 &model,
+                  const math::mat4 &view,
+                  const math::mat4 &proj);
 
             void
             submit(const component::WorldP3D &,
@@ -57,9 +63,11 @@ namespace oni {
             void
             end();
 
-        private:
+        protected:
             virtual void
-            _begin() = 0;
+            _begin(const math::mat4 &model,
+                   const math::mat4 &view,
+                   const math::mat4 &proj) = 0;
 
             virtual void
             _submit(const component::WorldP3D &,

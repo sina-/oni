@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <oni-core/common/oni-common-typedefs-graphic.h>
+#include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 
 namespace oni {
     namespace buffer {

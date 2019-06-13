@@ -5,9 +5,9 @@
 
 namespace oni {
     namespace graphic {
-        Shader::Shader(const std::string &vertPath,
-                       const std::string &geomPath,
-                       const std::string &fragPath) :
+        Shader::Shader(std::string_view vertPath,
+                       std::string_view geomPath,
+                       std::string_view fragPath) :
                 mVertPath(vertPath), mGeomPath(geomPath), mFragPath(fragPath) {
             auto program = glCreateProgram();
 

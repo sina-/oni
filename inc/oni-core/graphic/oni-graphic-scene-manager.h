@@ -31,9 +31,7 @@ namespace oni {
     }
 
     namespace graphic {
-        class Shader;
-
-        class BatchRenderer2D;
+        class Tessellation_Renderer_OpenGL;
 
         class Renderer2D;
 
@@ -132,7 +130,7 @@ namespace oni {
                     common::r32 viewHeight);
 
             void
-            _renderColor(entities::EntityManager&,
+            _renderColor(entities::EntityManager &,
                          common::r32 viewWidth,
                          common::r32 viewHeight);
 
@@ -150,15 +148,13 @@ namespace oni {
 
         private:
             void
-            begin(const Shader &shader,
-                  Renderer2D &renderer2D,
+            begin(Renderer2D &renderer2D,
                   bool translate,
                   bool scale,
-                  bool setMVP);
+                  bool project);
 
             static void
-            end(const Shader &shader,
-                Renderer2D &renderer2D);
+            end(Renderer2D &renderer2D);
 
             void
             initRenderer();
@@ -203,8 +199,7 @@ namespace oni {
             getViewHeight() const;
 
         private:
-            std::unique_ptr<Shader> mShader{};
-            std::unique_ptr<BatchRenderer2D> mRenderer{};
+            std::unique_ptr<Tessellation_Renderer_OpenGL> mTessellationRenderer{};
 
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};

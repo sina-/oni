@@ -11,7 +11,7 @@
 
 namespace oni {
     namespace graphic {
-        struct Vertex {
+        struct TessellationVertex {
             common::oniGLint samplerID{-1};
             common::r32 heading{0.f};
             math::vec2 halfSize{1.f};

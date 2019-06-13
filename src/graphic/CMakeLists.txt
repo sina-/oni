@@ -1,6 +1,15 @@
 subdirs(${oni_SOURCE_DIR}/src/graphic/buffer)
 
-add_library(oni-core-graphic oni-graphic-window.cpp oni-graphic-shader.cpp oni-graphic-batch-renderer-2d.cpp oni-graphic-font-manager.cpp oni-graphic-renderer-2d.cpp oni-graphic-scene-manager.cpp oni-graphic-debug-draw-box2d.cpp oni-graphic-texture-manager.cpp)
+add_library(oni-core-graphic
+        oni-graphic-window.cpp
+        oni-graphic-shader.cpp
+        oni-graphic-tessellation-renderer-opengl.cpp
+        oni-graphic-font-manager.cpp
+        oni-graphic-renderer-2d.cpp
+        oni-graphic-scene-manager.cpp
+        oni-graphic-debug-draw-box2d.cpp
+        oni-graphic-texture-manager.cpp
+        oni-graphic-renderer-opengl.cpp)
 
 target_compile_features(oni-core-graphic
         PUBLIC

@@ -7,8 +7,10 @@ namespace oni {
         Renderer2D::~Renderer2D() = default;
 
         void
-        Renderer2D::begin() {
-            _begin();
+        Renderer2D::begin(const math::mat4 &model,
+                          const math::mat4 &view,
+                          const math::mat4 &proj) {
+            _begin(model, view, proj);
         }
 
         void

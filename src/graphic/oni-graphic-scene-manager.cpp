@@ -10,7 +10,7 @@
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/graphic/oni-graphic-brush.h>
-#include <oni-core/graphic/oni-graphic-batch-renderer-2d.h>
+#include <oni-core/graphic/oni-graphic-tessellation-renderer-opengl.h>
 #include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>
 #include <oni-core/graphic/oni-graphic-font-manager.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
@@ -48,15 +48,6 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
-            // I am forcing the users to only depend on built-in shaders. I should think of a better way
-            // to provide flexibility in type of shaders users can define and expect to just work by having buffer
-            // structure and what not set up automatically. Asset system should take care of this.
-            // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
-            // shader prior to render series of calls. Maybe shader should be built into the renderer.
-            mShader = std::make_unique<graphic::Shader>("resources/shaders/particle.vert",
-                                                        "resources/shaders/particle.geom",
-                                                        "resources/shaders/particle.frag");
             initRenderer();
 
             mTextureManager = std::make_unique<TextureManager>(mAssetManager);
@@ -74,101 +65,17 @@ namespace oni {
 
         void
         SceneManager::initRenderer() {
-            auto program = mShader->getProgram();
-
-            auto positionIndex = glGetAttribLocation(program, "position");
-            auto headingIndex = glGetAttribLocation(program, "heading");
-            auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
-            auto colorIndex = glGetAttribLocation(program, "color");
-            auto uvIndex = glGetAttribLocation(program, "uv");
-            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
-
-            if (positionIndex == -1 || headingIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
-                samplerIDIndex == -1 || halfSizeIndex == -1) {
-                assert(false);
-            }
-
-            common::oniGLsizei stride = sizeof(graphic::Vertex);
-
-            graphic::BufferStructure sampler;
-            sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
-            sampler.componentCount = 1;
-            sampler.componentType = GL_FLOAT;
-            sampler.normalized = GL_FALSE;
-            sampler.stride = stride;
-            sampler.offset = static_cast<const common::oniGLvoid *>(nullptr);
-
-            graphic::BufferStructure halfSize;
-            halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
-            halfSize.componentCount = 2;
-            halfSize.componentType = GL_FLOAT;
-            halfSize.normalized = GL_FALSE;
-            halfSize.stride = stride;
-            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, halfSize));
-
-            graphic::BufferStructure heading;
-            heading.index = static_cast<common::oniGLuint>(headingIndex);
-            heading.componentCount = 1;
-            heading.componentType = GL_FLOAT;
-            heading.normalized = GL_FALSE;
-            heading.stride = stride;
-            heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, heading));
-
-            graphic::BufferStructure position;
-            position.index = static_cast<common::oniGLuint>(positionIndex);
-            position.componentCount = 3;
-            position.componentType = GL_FLOAT;
-            position.normalized = GL_FALSE;
-            position.stride = stride;
-            position.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, position));
-
-            graphic::BufferStructure color;
-            color.index = static_cast<common::oniGLuint>(colorIndex);
-            color.componentCount = 4;
-            color.componentType = GL_FLOAT;
-            color.normalized = GL_TRUE;
-            color.stride = stride;
-            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, color));
-
-            graphic::BufferStructure uv;
-            uv.index = static_cast<common::oniGLuint>(uvIndex);
-            uv.componentCount = 2;
-            uv.componentType = GL_FLOAT;
-            uv.normalized = GL_TRUE;
-            uv.stride = stride;
-            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::Vertex, uv));
-
-            std::vector<graphic::BufferStructure> bufferStructures;
-            bufferStructures.push_back(sampler);
-            bufferStructures.push_back(halfSize);
-            bufferStructures.push_back(heading);
-            bufferStructures.push_back(position);
-            bufferStructures.push_back(color);
-            bufferStructures.push_back(uv);
-
-            mRenderer = std::make_unique<BatchRenderer2D>(
-                    mMaxSpriteCount,
-                    // TODO: If there are more than this number of textures to render in a draw call, it will fail
-                    common::maxNumTextureSamplers,
-                    sizeof(graphic::Vertex),
-                    bufferStructures,
-                    PrimitiveType::POINT
-            );
-
-            mShader->enable();
-            mShader->setUniformiv("samplers", mRenderer->generateSamplerIDs());
-            mShader->disable();
+            mTessellationRenderer = std::make_unique<Tessellation_Renderer_OpenGL>(mMaxSpriteCount);
         }
 
         void
-        SceneManager::begin(const Shader &shader,
-                            Renderer2D &renderer2D,
+        SceneManager::begin(Renderer2D &renderer2D,
                             bool translate,
                             bool scale,
-                            bool setMVP) {
-            shader.enable();
-
+                            bool project) {
+            auto model = math::mat4::identity();
             auto view = math::mat4::identity();
+            auto proj = math::mat4::identity();
             if (scale) {
                 view = view * math::mat4::scale(math::vec3{mCamera.z, mCamera.z, 1.0f});
             }
@@ -176,11 +83,10 @@ namespace oni {
             if (translate) {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
-            if (setMVP) {
-                auto mv = mProjectionMatrix * view;
-                shader.setUniformMat4("mv", mv);
+            if (project) {
+                proj = mProjectionMatrix;
             }
-            renderer2D.begin();
+            renderer2D.begin(model, view, proj);
         }
 
         void
@@ -192,11 +98,9 @@ namespace oni {
         }
 
         void
-        SceneManager::end(const Shader &shader,
-                          Renderer2D &renderer2D) {
+        SceneManager::end(Renderer2D &renderer2D) {
             renderer2D.end();
             renderer2D.flush();
-            shader.disable();
         }
 
         void
@@ -213,9 +117,9 @@ namespace oni {
             auto viewHeight = getViewHeight();
 
             {
-                begin(*mShader, *mRenderer, true, true, true);
+                begin(*mTessellationRenderer, true, true, true);
                 _render(serverManager, clientManager, viewWidth, viewHeight);
-                end(*mShader, *mRenderer);
+                end(*mTessellationRenderer);
             }
 
             /// UI
@@ -237,12 +141,12 @@ namespace oni {
 
         void
         SceneManager::beginColorRendering() {
-            begin(*mShader, *mRenderer, true, false, true);
+            begin(*mTessellationRenderer, true, false, true);
         }
 
         void
         SceneManager::endColorRendering() {
-            end(*mShader, *mRenderer);
+            end(*mTessellationRenderer);
         }
 
         void
@@ -266,8 +170,11 @@ namespace oni {
                               entities::EntityManager &clientManager,
                               common::r32 viewWidth,
                               common::r32 viewHeight) {
-            _renderColor(serverManager, viewWidth, viewHeight);
-            _renderColor(clientManager, viewWidth, viewHeight);
+            /// Color shading
+            {
+                _renderColor(serverManager, viewWidth, viewHeight);
+                _renderColor(clientManager, viewWidth, viewHeight);
+            }
 
             /// Texture shading - server
             {
@@ -291,7 +198,7 @@ namespace oni {
                     assert(cId);
                     const auto &texture = clientManager.get<component::Texture>(cId);
                     assert(!texture.image.path.empty());
-                    mRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
+                    mTessellationRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
@@ -318,7 +225,7 @@ namespace oni {
 
                     const auto &texture = view.get<component::Texture>(id);
                     assert(!texture.image.path.empty());
-                    mRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
+                    mTessellationRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
@@ -349,7 +256,7 @@ namespace oni {
 
                 const auto &appearance = view.get<component::Appearance>(id);
 
-                mRenderer->submit(result.pos, result.heading, scale, appearance, component::Texture{});
+                mTessellationRenderer->submit(result.pos, result.heading, scale, appearance, component::Texture{});
 
                 ++mRenderedSpritesPerFrame;
             }

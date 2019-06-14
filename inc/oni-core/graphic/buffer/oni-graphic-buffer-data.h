@@ -20,6 +20,14 @@ namespace oni {
             math::vec2 uv[4] = {math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
         };
 
+        struct StripVertex {
+            math::vec4 center{0.f, 0.f, 0.f, 0.f};
+            common::r32 texoff{0.f};
+            math::vec3 bc{};
+            //math::vec4 color{0.f, 0.f, 0.f, 0.f};
+            //common::oniGLint samplerID{-1};
+        };
+
         struct BufferStructure {
             common::oniGLuint index{0};
             common::oniGLint componentCount{0};

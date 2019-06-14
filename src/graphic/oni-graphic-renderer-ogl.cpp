@@ -1,4 +1,4 @@
-#include <oni-core/graphic/oni-graphic-renderer-opengl.h>
+#include <oni-core/graphic/oni-graphic-renderer-ogl.h>
 
 #include <algorithm>
 #include <cassert>
@@ -78,6 +78,10 @@ namespace oni {
                 }
                 case PrimitiveType::TRIANGLE: {
                     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+                    break;
+                }
+                case PrimitiveType::TRIANGLE_STRIP: {
+                    glDrawArrays(GL_TRIANGLE_STRIP, 0, indexCount);
                     break;
                 }
                 default: {

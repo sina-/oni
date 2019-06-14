@@ -54,6 +54,16 @@ namespace oni {
             };
         };
 
+        union WorldP4D {
+            math::vec4 value{};
+            struct {
+                common::r32 x;
+                common::r32 y;
+                common::r32 z;
+                common::r32 w;
+            };
+        };
+
         union WorldP2D {
             math::vec2 value{};
             struct {

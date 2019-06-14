@@ -31,7 +31,9 @@ namespace oni {
     }
 
     namespace graphic {
-        class Tessellation_Renderer_OpenGL;
+        class Renderer_OpenGL_Tessellation;
+
+        class Renderer_OpenGL_Strip;
 
         class Renderer2D;
 
@@ -124,15 +126,21 @@ namespace oni {
                              common::r32 viewHeight);
 
             void
-            _render(entities::EntityManager &serverManager,
-                    entities::EntityManager &clientManager,
-                    common::r32 viewWidth,
-                    common::r32 viewHeight);
+            renderTessellation(entities::EntityManager &serverManager,
+                               entities::EntityManager &clientManager,
+                               common::r32 viewWidth,
+                               common::r32 viewHeight);
 
             void
-            _renderColor(entities::EntityManager &,
-                         common::r32 viewWidth,
-                         common::r32 viewHeight);
+            renderStrip(entities::EntityManager &serverManager,
+                        entities::EntityManager &clientManager,
+                        common::r32 viewWidth,
+                        common::r32 viewHeight);
+
+            void
+            renderTessellationColor(entities::EntityManager &,
+                                    common::r32 viewWidth,
+                                    common::r32 viewHeight);
 
         private:
             struct RaceInfoEntities {
@@ -199,7 +207,8 @@ namespace oni {
             getViewHeight() const;
 
         private:
-            std::unique_ptr<Tessellation_Renderer_OpenGL> mTessellationRenderer{};
+            std::unique_ptr<Renderer_OpenGL_Tessellation> mRendererTessellation{};
+            std::unique_ptr<Renderer_OpenGL_Strip> mRendererStrip{};
 
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};

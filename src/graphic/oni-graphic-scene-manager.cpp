@@ -10,7 +10,8 @@
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/graphic/oni-graphic-brush.h>
-#include <oni-core/graphic/oni-graphic-tessellation-renderer-opengl.h>
+#include <oni-core/graphic/oni-graphic-renderer-ogl-tessellation.h>
+#include <oni-core/graphic/oni-graphic-renderer-ogl-strip.h>
 #include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>
 #include <oni-core/graphic/oni-graphic-font-manager.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
@@ -35,7 +36,8 @@ namespace oni {
                 mHalfCanvasTileSizeX{mCanvasTileSizeX / 2.f},
                 mHalfCanvasTileSizeY{mCanvasTileSizeY / 2.f},
                 // 64k vertices
-                mMaxSpriteCount(64 * 1000), mScreenBounds(screenBounds),
+                mMaxSpriteCount(64 * 1000),
+                mScreenBounds(screenBounds),
                 mAssetManager(assetManager),
                 mFontManager(fontManager),
                 mPhysicsWorld(physicsWorld),
@@ -65,7 +67,8 @@ namespace oni {
 
         void
         SceneManager::initRenderer() {
-            mTessellationRenderer = std::make_unique<Tessellation_Renderer_OpenGL>(mMaxSpriteCount);
+            mRendererTessellation = std::make_unique<Renderer_OpenGL_Tessellation>(mMaxSpriteCount);
+            mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
         }
 
         void
@@ -100,7 +103,6 @@ namespace oni {
         void
         SceneManager::end(Renderer2D &renderer2D) {
             renderer2D.end();
-            renderer2D.flush();
         }
 
         void
@@ -116,10 +118,14 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
+            /// Sprites
             {
-                begin(*mTessellationRenderer, true, true, true);
-                _render(serverManager, clientManager, viewWidth, viewHeight);
-                end(*mTessellationRenderer);
+                renderTessellation(serverManager, clientManager, viewWidth, viewHeight);
+            }
+
+            /// Trails
+            {
+                renderStrip(serverManager, clientManager, viewWidth, viewHeight);
             }
 
             /// UI
@@ -141,12 +147,12 @@ namespace oni {
 
         void
         SceneManager::beginColorRendering() {
-            begin(*mTessellationRenderer, true, false, true);
+            begin(*mRendererTessellation, true, false, true);
         }
 
         void
         SceneManager::endColorRendering() {
-            end(*mTessellationRenderer);
+            end(*mRendererTessellation);
         }
 
         void
@@ -166,14 +172,16 @@ namespace oni {
         }
 
         void
-        SceneManager::_render(entities::EntityManager &serverManager,
-                              entities::EntityManager &clientManager,
-                              common::r32 viewWidth,
-                              common::r32 viewHeight) {
+        SceneManager::renderTessellation(entities::EntityManager &serverManager,
+                                         entities::EntityManager &clientManager,
+                                         common::r32 viewWidth,
+                                         common::r32 viewHeight) {
+            begin(*mRendererTessellation, true, true, true);
+
             /// Color shading
             {
-                _renderColor(serverManager, viewWidth, viewHeight);
-                _renderColor(clientManager, viewWidth, viewHeight);
+                renderTessellationColor(serverManager, viewWidth, viewHeight);
+                renderTessellationColor(clientManager, viewWidth, viewHeight);
             }
 
             /// Texture shading - server
@@ -198,7 +206,7 @@ namespace oni {
                     assert(cId);
                     const auto &texture = clientManager.get<component::Texture>(cId);
                     assert(!texture.image.path.empty());
-                    mTessellationRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
+                    mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
@@ -225,17 +233,37 @@ namespace oni {
 
                     const auto &texture = view.get<component::Texture>(id);
                     assert(!texture.image.path.empty());
-                    mTessellationRenderer->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
+                    mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
             }
+
+            end(*mRendererTessellation);
         }
 
         void
-        SceneManager::_renderColor(entities::EntityManager &manager,
-                                   common::r32 viewWidth,
-                                   common::r32 viewHeight) {
+        SceneManager::renderStrip(entities::EntityManager &serverManager,
+                                  entities::EntityManager &clientManager,
+                                  common::r32 viewWidth,
+                                  common::r32 viewHeight) {
+            begin(*mRendererStrip, true, true, true);
+            {
+                auto color = component::Appearance{1, 1, 1, 1};
+                common::r32 y = 0;
+                for (int i = -50; i <= 50; i += 1) {
+                    y = std::cos(i / common::PI);
+                    mRendererStrip->submit({(float)i, y, 1, 1}, color, {});
+                    mRendererStrip->submit({(float)i, y, 1, -1}, color, {});
+                }
+            }
+            end(*mRendererStrip);
+        }
+
+        void
+        SceneManager::renderTessellationColor(entities::EntityManager &manager,
+                                              common::r32 viewWidth,
+                                              common::r32 viewHeight) {
             auto view = manager.createView<
                     component::WorldP3D,
                     component::Heading,
@@ -256,7 +284,7 @@ namespace oni {
 
                 const auto &appearance = view.get<component::Appearance>(id);
 
-                mTessellationRenderer->submit(result.pos, result.heading, scale, appearance, component::Texture{});
+                mRendererTessellation->submit(result.pos, result.heading, scale, appearance, component::Texture{});
 
                 ++mRenderedSpritesPerFrame;
             }

@@ -28,10 +28,14 @@ namespace oni {
 
     namespace graphic {
         enum class PrimitiveType : common::u8 {
-            POINT = 0,
-            LINE = 1,
-            TRIANGLE = 2,
-            UNKNOWN = 3
+            UNKNOWN,
+
+            POINT,
+            LINE,
+            TRIANGLE,
+            TRIANGLE_STRIP,
+
+            LAST
         };
 
         class Renderer2D {
@@ -47,20 +51,6 @@ namespace oni {
                   const math::mat4 &proj);
 
             void
-            submit(const component::WorldP3D &,
-                   const component::Heading &,
-                   const component::Scale &,
-                   const component::Appearance &,
-                   const component::Texture &);
-
-            void
-            submit(const component::Text &,
-                   const component::WorldP3D &);
-
-            void
-            flush();
-
-            void
             end();
 
         protected:
@@ -70,21 +60,13 @@ namespace oni {
                    const math::mat4 &proj) = 0;
 
             virtual void
-            _submit(const component::WorldP3D &,
-                    const component::Heading &,
-                    const component::Scale &,
-                    const component::Appearance &,
-                    const component::Texture &) = 0;
-
-            virtual void
-            _submit(const component::Text &,
-                    const component::WorldP3D &) = 0;
-
-            virtual void
             _flush() = 0;
 
             virtual void
             _end() = 0;
+
+        private:
+            bool mBegun{false};
         };
     }
 }

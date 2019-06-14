@@ -1,4 +1,4 @@
-#include <oni-core/graphic/oni-graphic-tessellation-renderer-opengl.h>
+#include <oni-core/graphic/oni-graphic-renderer-ogl-tessellation.h>
 
 #include <numeric>
 #include <cassert>
@@ -16,16 +16,14 @@
 
 namespace oni {
     namespace graphic {
-        Tessellation_Renderer_OpenGL::Tessellation_Renderer_OpenGL(common::oniGLsizei maxSpriteCount) :
+        Renderer_OpenGL_Tessellation::Renderer_OpenGL_Tessellation(common::oniGLsizei maxSpriteCount) :
                 Renderer_OpenGL(PrimitiveType::POINT),
                 mMaxPrimitiveCount{maxSpriteCount} {
-
             mVertexSize = sizeof(graphic::TessellationVertex);
             mMaxIndicesCount = mMaxPrimitiveCount;
             mPrimitiveSize = mVertexSize * 1;
 
-            auto maxUIntSize = std::numeric_limits<common::i32>::max();
-            assert(mMaxIndicesCount < maxUIntSize);
+            assert(mMaxIndicesCount < std::numeric_limits<common::i32>::max());
 
             common::oniGLsizei maxBufferSize{mPrimitiveSize * mMaxPrimitiveCount};
 
@@ -133,16 +131,15 @@ namespace oni {
             mShader->disable();
         }
 
-        Tessellation_Renderer_OpenGL::~Tessellation_Renderer_OpenGL() = default;
+        Renderer_OpenGL_Tessellation::~Renderer_OpenGL_Tessellation() = default;
 
         void
-        Tessellation_Renderer_OpenGL::_submit(const component::WorldP3D &pos,
-                                              const component::Heading &heading,
-                                              const component::Scale &scale,
-                                              const component::Appearance &appearance,
-                                              const component::Texture &texture) {
+        Renderer_OpenGL_Tessellation::submit(const component::WorldP3D &pos,
+                                             const component::Heading &heading,
+                                             const component::Scale &scale,
+                                             const component::Appearance &appearance,
+                                             const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
-
             auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
             common::i32 samplerID = -1;
@@ -167,9 +164,10 @@ namespace oni {
             mIndexCount += 1;
         }
 
+        // TODO: Move this into a font renderer
         void
-        Tessellation_Renderer_OpenGL::_submit(const component::Text &text,
-                                              const component::WorldP3D &pos) {
+        Renderer_OpenGL_Tessellation::submit(const component::Text &text,
+                                             const component::WorldP3D &pos) {
             assert(false); // TODO: Need to re-implement this function
             auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
@@ -223,7 +221,7 @@ namespace oni {
         }
 
         void
-        Tessellation_Renderer_OpenGL::enableShader(const math::mat4 &model,
+        Renderer_OpenGL_Tessellation::enableShader(const math::mat4 &model,
                                                    const math::mat4 &view,
                                                    const math::mat4 &proj) {
             mShader->enable();
@@ -232,51 +230,51 @@ namespace oni {
         }
 
         void
-        Tessellation_Renderer_OpenGL::disableShader() {
+        Renderer_OpenGL_Tessellation::disableShader() {
             mShader->disable();
         }
 
         void
-        Tessellation_Renderer_OpenGL::bindVertexArray() {
+        Renderer_OpenGL_Tessellation::bindVertexArray() {
             mVertexArray->bindVAO();
         }
 
         void
-        Tessellation_Renderer_OpenGL::unbindVertexArray() {
+        Renderer_OpenGL_Tessellation::unbindVertexArray() {
             mVertexArray->unbindVAO();
         }
 
         void
-        Tessellation_Renderer_OpenGL::bindVertexBuffer() {
+        Renderer_OpenGL_Tessellation::bindVertexBuffer() {
             mVertexArray->bindVBO();
         }
 
         void
-        Tessellation_Renderer_OpenGL::unbindVertexBuffer() {
+        Renderer_OpenGL_Tessellation::unbindVertexBuffer() {
             mVertexArray->unbindVBO();
         }
 
         void
-        Tessellation_Renderer_OpenGL::bindIndexBuffer() {
-            if (mIndexBuffer.get()) {
+        Renderer_OpenGL_Tessellation::bindIndexBuffer() {
+            if (mIndexBuffer) {
                 mIndexBuffer->bind();
             }
         }
 
         void
-        Tessellation_Renderer_OpenGL::unbindIndexBuffer() {
-            if (mIndexBuffer.get()) {
+        Renderer_OpenGL_Tessellation::unbindIndexBuffer() {
+            if (mIndexBuffer) {
                 mIndexBuffer->unbind();
             }
         }
 
         common::oniGLsizei
-        Tessellation_Renderer_OpenGL::getIndexCount() {
+        Renderer_OpenGL_Tessellation::getIndexCount() {
             return mIndexCount;
         }
 
         void
-        Tessellation_Renderer_OpenGL::resetIndexCount() {
+        Renderer_OpenGL_Tessellation::resetIndexCount() {
             mIndexCount = 0;
         }
     }

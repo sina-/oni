@@ -60,12 +60,14 @@ namespace oni {
 
         void
         Renderer_OpenGL::_flush() {
+            auto indexCount = getIndexCount();
+            if (indexCount < 1) {
+                return;
+            }
             TextureManager::bindRange(0, mTextures);
 
             bindVertexArray();
             bindIndexBuffer();
-
-            auto indexCount = getIndexCount();
 
             switch (mPrimitiveType) {
                 case PrimitiveType::POINT: {
@@ -81,7 +83,11 @@ namespace oni {
                     break;
                 }
                 case PrimitiveType::TRIANGLE_STRIP: {
-                    glDrawArrays(GL_TRIANGLE_STRIP, 0, indexCount);
+                    // NOTE: This buffer uses last two and next two vertices to decide on the direction,
+                    // so I have to always draw 4 items less other wise I will access out of bounds in the shader
+                    if (indexCount > 4) {
+                        glDrawArrays(GL_TRIANGLE_STRIP, 0, indexCount - 4);
+                    }
                     break;
                 }
                 default: {

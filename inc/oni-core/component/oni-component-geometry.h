@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <vector>
 
 #include <oni-core/common/oni-common-typedef.h>
@@ -84,13 +85,13 @@ namespace oni {
                     return;
                 }
                 if (pos.size() + 1 > size) {
-                    pos.erase(pos.begin());
+                    pos.pop_front();
                 }
                 pos.push_back(p);
             }
 
             common::u16 size{1};
-            std::vector<WorldP3D> pos{};
+            std::deque<WorldP3D> pos{};
         };
 
         union OriginP2D {

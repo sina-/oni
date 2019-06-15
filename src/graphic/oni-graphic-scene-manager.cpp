@@ -259,14 +259,6 @@ namespace oni {
                     }
                     end(*mRendererStrip);
                 }
-
-//                auto color = component::Appearance{1, 1, 1, 1};
-//                common::r32 y = 0;
-//                for (int i = -50; i <= 50; i += 1) {
-//                    y = std::cos(i / common::PI);
-//                    mRendererStrip->submit({(float) i, y, 1, 1}, color, {});
-//                    mRendererStrip->submit({(float) i, y, 1, -1}, color, {});
-//                }
             }
         }
 

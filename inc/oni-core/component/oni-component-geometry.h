@@ -77,6 +77,22 @@ namespace oni {
             }
         };
 
+        struct WorldP3D_History {
+            void
+            add(const WorldP3D &p) {
+                if (!pos.empty() && (pos.back().value - p.value).len() < 1.0f) {
+                    return;
+                }
+                if (pos.size() + 1 > size) {
+                    pos.erase(pos.begin());
+                }
+                pos.push_back(p);
+            }
+
+            common::u16 size{1};
+            std::vector<WorldP3D> pos{};
+        };
+
         union OriginP2D {
             math::vec2 value{};
             struct {

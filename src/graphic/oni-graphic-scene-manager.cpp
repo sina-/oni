@@ -247,17 +247,27 @@ namespace oni {
                                   entities::EntityManager &clientManager,
                                   common::r32 viewWidth,
                                   common::r32 viewHeight) {
-            begin(*mRendererStrip, true, true, true);
             {
-                auto color = component::Appearance{1, 1, 1, 1};
-                common::r32 y = 0;
-                for (int i = -50; i <= 50; i += 1) {
-                    y = std::cos(i / common::PI);
-                    mRendererStrip->submit({(float)i, y, 1, 1}, color, {});
-                    mRendererStrip->submit({(float)i, y, 1, -1}, color, {});
+                auto view = serverManager.createView<
+                        component::WorldP3D_History>();
+                for (auto &&id: view) {
+                    begin(*mRendererStrip, true, true, true);
+                    const auto &ph = view.get<component::WorldP3D_History>(id).pos;
+                    for (auto &&p: ph) {
+                        mRendererStrip->submit({p.x, p.y, 1, 1}, {1, 1, 1}, {});
+                        mRendererStrip->submit({p.x, p.y, 1, -1}, {1, 1, 1}, {});
+                    }
+                    end(*mRendererStrip);
                 }
+
+//                auto color = component::Appearance{1, 1, 1, 1};
+//                common::r32 y = 0;
+//                for (int i = -50; i <= 50; i += 1) {
+//                    y = std::cos(i / common::PI);
+//                    mRendererStrip->submit({(float) i, y, 1, 1}, color, {});
+//                    mRendererStrip->submit({(float) i, y, 1, -1}, color, {});
+//                }
             }
-            end(*mRendererStrip);
         }
 
         void

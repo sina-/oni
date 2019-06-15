@@ -59,6 +59,13 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
+                  component::WorldP3D_History &data) {
+            archive(data.pos);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
                   component::WorldP2D &data) {
             archive(data.value);
         }
@@ -227,6 +234,7 @@ namespace oni {
                         component::Car,
                         component::CarConfig,
                         component::WorldP3D,
+                        component::WorldP3D_History,
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
@@ -277,6 +285,7 @@ namespace oni {
                         component::Car,
                         component::CarConfig,
                         component::WorldP3D,
+                        component::WorldP3D_History,
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,

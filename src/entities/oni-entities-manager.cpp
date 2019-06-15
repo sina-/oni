@@ -484,6 +484,9 @@ namespace oni {
             createComponent<component::Sound>(id, component::SoundTag::ENGINE_IDLE, component::ChannelGroup::EFFECT);
             createComponent<component::EntityAttachment>(id);
 
+            auto &ph = createComponent<component::WorldP3D_History>(id);
+            ph.size = 20;
+
             createComponent<gameplay::CarLapInfo>(id, id);
 
             auto &carConfig = createComponent<component::CarConfig>(id);
@@ -565,6 +568,8 @@ namespace oni {
             createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
             createComponent<component::ParticleTrail>(id);
             createComponent<component::AfterMark>(id);
+            auto &ph = createComponent<component::WorldP3D_History>(id);
+            ph.size = 10;
 
             auto &properties = createComponent<component::PhysicalProperties>(id);
             properties.friction = 1.f;

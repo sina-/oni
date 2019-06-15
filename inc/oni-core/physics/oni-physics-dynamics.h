@@ -70,15 +70,15 @@ namespace oni {
                             component::PhysicalProperties &,
                             component::WorldP3D &);
 
-            bool
+            static bool
             isColliding(b2Body *);
 
         private:
-            void
+            static void
             updateAge(entities::EntityManager &,
                       common::r64 tickTime);
 
-            void
+            static void
             updatePlacement(entities::EntityManager &,
                             common::r64 tickTime);
 

@@ -118,14 +118,14 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
-            /// Sprites
-            {
-                renderTessellation(serverManager, clientManager, viewWidth, viewHeight);
-            }
-
             /// Trails
             {
                 renderStrip(serverManager, clientManager, viewWidth, viewHeight);
+            }
+
+            /// Sprites
+            {
+                renderTessellation(serverManager, clientManager, viewWidth, viewHeight);
             }
 
             /// UI
@@ -176,69 +176,87 @@ namespace oni {
                                          entities::EntityManager &clientManager,
                                          common::r32 viewWidth,
                                          common::r32 viewHeight) {
+            /// Sort client
+            {
+                clientManager.sort<component::WorldP3D>([](const auto &lhs,
+                                                           const auto &rhs) {
+                    return lhs.z < rhs.z;
+                });
+            }
+            /// Sort server
+            {
+                serverManager.sort<component::WorldP3D>([](const auto &lhs,
+                                                           const auto &rhs) {
+                    return lhs.z < rhs.z;
+                });
+            }
+
             begin(*mRendererTessellation, true, true, true);
-
-            /// Color shading
             {
-                renderTessellationColor(serverManager, viewWidth, viewHeight);
-                renderTessellationColor(clientManager, viewWidth, viewHeight);
-            }
+                /// Color shading
+                {
+                    renderTessellationColor(serverManager, viewWidth, viewHeight);
+                    renderTessellationColor(clientManager, viewWidth, viewHeight);
+                }
 
-            /// Texture shading - server
-            {
-                auto view = serverManager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Tag_TextureShaded>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
+                /// Texture shading - server
+                {
+                    auto view = serverManager.createView<
+                            component::WorldP3D,
+                            component::Heading,
+                            component::Scale,
+                            component::Tag_TextureShaded>();
+                    for (auto &&id: view) {
+                        const auto &pos = view.get<component::WorldP3D>(id);
+                        const auto &heading = view.get<component::Heading>(id);
+                        const auto &scale = view.get<component::Scale>(id);
 
-                    auto result = applyParentTransforms(serverManager, id, pos, heading);
+                        auto result = applyParentTransforms(serverManager, id, pos, heading);
 
-                    if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                        continue;
+                        if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                            continue;
+                        }
+
+                        auto cId = clientManager.getComplementOf(id);
+                        assert(cId);
+                        const auto &texture = clientManager.get<component::Texture>(cId);
+                        assert(!texture.image.path.empty());
+                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{},
+                                                      texture);
+
+                        ++mRenderedTexturesPerFrame;
                     }
+                }
 
-                    auto cId = clientManager.getComplementOf(id);
-                    assert(cId);
-                    const auto &texture = clientManager.get<component::Texture>(cId);
-                    assert(!texture.image.path.empty());
-                    mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
+                /// Texture shading - client
+                {
+                    auto view = clientManager.createView<
+                            component::WorldP3D,
+                            component::Heading,
+                            component::Scale,
+                            component::Texture,
+                            component::Tag_TextureShaded>();
+                    view.each<component::WorldP3D>([this, viewWidth, viewHeight, &clientManager](
+                            common::EntityID id,
+                            component::WorldP3D &pos,
+                            component::Heading heading,
+                            component::Scale scale,
+                            component::Texture texture,
+                            component::Tag_TextureShaded) {
+                        auto result = applyParentTransforms(clientManager, id, pos, heading);
 
-                    ++mRenderedTexturesPerFrame;
+                        if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                            return;
+                        }
+
+                        assert(!texture.image.path.empty());
+                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{},
+                                                      texture);
+
+                        ++mRenderedTexturesPerFrame;
+                    });
                 }
             }
-
-            /// Texture shading - client
-            {
-                auto view = clientManager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Texture,
-                        component::Tag_TextureShaded>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-
-                    auto result = applyParentTransforms(clientManager, id, pos, heading);
-
-                    if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                        continue;
-                    }
-
-                    const auto &texture = view.get<component::Texture>(id);
-                    assert(!texture.image.path.empty());
-                    mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{}, texture);
-
-                    ++mRenderedTexturesPerFrame;
-                }
-            }
-
             end(*mRendererTessellation);
         }
 
@@ -254,8 +272,8 @@ namespace oni {
                     begin(*mRendererStrip, true, true, true);
                     const auto &ph = view.get<component::WorldP3D_History>(id).pos;
                     for (auto &&p: ph) {
-                        mRendererStrip->submit({p.x, p.y, 1, 1}, {1, 1, 1}, {});
-                        mRendererStrip->submit({p.x, p.y, 1, -1}, {1, 1, 1}, {});
+                        mRendererStrip->submit({p.x, p.y, p.z, 1}, {1, 1, 1}, {});
+                        mRendererStrip->submit({p.x, p.y, p.z, -1}, {1, 1, 1}, {});
                     }
                     end(*mRendererStrip);
                 }

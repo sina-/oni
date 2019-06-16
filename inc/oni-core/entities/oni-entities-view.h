@@ -70,6 +70,12 @@ namespace oni {
                 }
             }
 
+            template<typename Comp, typename Func>
+            inline void
+            each(Func func) const {
+                mView.template each<Comp>(std::move(func));
+            };
+
         private:
             entt::basic_view<Entity, Components...> mView{};
             std::unique_lock<std::mutex> mRegistryLock{};

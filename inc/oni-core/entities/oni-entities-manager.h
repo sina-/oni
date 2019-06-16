@@ -393,6 +393,9 @@ namespace oni {
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
+            void
+            printEntityType(common::EntityID id);
+
         private:
             common::EntityID
             createEntity(entities::EntityType);

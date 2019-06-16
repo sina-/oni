@@ -241,6 +241,101 @@ namespace oni {
         }
 
         void
+        EntityManager::printEntityType(common::EntityID id) {
+            const auto &t = mRegistry->get<entities::EntityType>(id);
+            auto name = std::string();
+            switch (t) {
+                case entities::EntityType::BACKGROUND: {
+                    name = "background";
+                    break;
+                }
+                case entities::EntityType::ROAD: {
+                    name = "road";
+                    break;
+                }
+                case entities::EntityType::WALL: {
+                    name = "wall";
+                    break;
+                }
+                case entities::EntityType::RACE_CAR: {
+                    name = "race_car";
+                    break;
+                }
+                case entities::EntityType::VEHICLE: {
+                    name = "vehicle";
+                    break;
+                }
+                case entities::EntityType::VEHICLE_GUN: {
+                    name = "vehicle_gun";
+                    break;
+                }
+                case entities::EntityType::VEHICLE_TIRE_REAR: {
+                    name = "vehicle_tire_rear";
+                    break;
+                }
+                case entities::EntityType::VEHICLE_TIRE_FRONT: {
+                    name = "vehicle_tire_front";
+                    break;
+                }
+                case entities::EntityType::UI: {
+                    name = "ui";
+                    break;
+                }
+                case entities::EntityType::CANVAS: {
+                    name = "canvas";
+                    break;
+                }
+                case entities::EntityType::SIMPLE_SPRITE: {
+                    name = "simple_sprite";
+                    break;
+                }
+                case entities::EntityType::SIMPLE_PARTICLE: {
+                    name = "simple_particle";
+                    break;
+                }
+                case entities::EntityType::SIMPLE_BLAST_PARTICLE: {
+                    name = "simple_blast_particle";
+                    break;
+                }
+                case entities::EntityType::SIMPLE_ROCKET: {
+                    name = "simple_rocket";
+                    break;
+                }
+                case entities::EntityType::TRAIL_PARTICLE: {
+                    name = "trail_particle";
+                    break;
+                }
+                case entities::EntityType::TEXT: {
+                    name = "text";
+                    break;
+                }
+                case entities::EntityType::WORLD_CHUNK: {
+                    name = "world_chunk";
+                    break;
+                }
+                case entities::EntityType::DEBUG_WORLD_CHUNK: {
+                    name = "debug_world_chunk";
+                    break;
+                }
+                case entities::EntityType::SMOKE_CLOUD: {
+                    name = "smoke_cloud";
+                    break;
+                }
+                case entities::EntityType::COMPLEMENT: {
+                    name = "complement";
+                    break;
+                }
+                case entities::EntityType::UNKNOWN:
+                case entities::EntityType::LAST:
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            std::cout << name << '\n';
+        }
+
+        void
         EntityManager::createPhysics(common::EntityID id,
                                      const component::WorldP3D &pos,
                                      const math::vec2 &size,

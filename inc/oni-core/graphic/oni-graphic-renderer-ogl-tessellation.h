@@ -65,7 +65,9 @@ namespace oni {
             void
             enableShader(const math::mat4 &model,
                          const math::mat4 &view,
-                         const math::mat4 &proj) override;
+                         const math::mat4 &proj,
+                         const math::vec2 &screenSize,
+                         common::r32 zoom) override;
 
             void
             disableShader() override;

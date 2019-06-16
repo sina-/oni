@@ -223,7 +223,9 @@ namespace oni {
         void
         Renderer_OpenGL_Tessellation::enableShader(const math::mat4 &model,
                                                    const math::mat4 &view,
-                                                   const math::mat4 &proj) {
+                                                   const math::mat4 &proj,
+                                                   const math::vec2 &screenSize,
+                                                   common::r32 zoom) {
             mShader->enable();
             mShader->setUniformMat4("view", view);
             mShader->setUniformMat4("proj", proj);

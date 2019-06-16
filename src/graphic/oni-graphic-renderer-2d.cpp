@@ -9,10 +9,12 @@ namespace oni {
         void
         Renderer2D::begin(const math::mat4 &model,
                           const math::mat4 &view,
-                          const math::mat4 &proj) {
+                          const math::mat4 &proj,
+                          const math::vec2 &screenSize,
+                          common::r32 zoom) {
             assert(!mBegun);
             mBegun = true;
-            _begin(model, view, proj);
+            _begin(model, view, proj, screenSize, zoom);
         }
 
         void

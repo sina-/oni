@@ -89,7 +89,7 @@ namespace oni {
             if (project) {
                 proj = mProjectionMatrix;
             }
-            renderer2D.begin(model, view, proj);
+            renderer2D.begin(model, view, proj, math::vec2{getViewWidth(), getViewHeight()}, mCamera.z);
         }
 
         void

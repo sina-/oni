@@ -18,11 +18,16 @@ namespace oni {
                    const component::Appearance &appearance,
                    const component::Texture &texture);
 
+            void
+            setStripeSize(common::r32);
+
         protected:
             void
             enableShader(const math::mat4 &model,
                          const math::mat4 &view,
-                         const math::mat4 &proj) override;
+                         const math::mat4 &proj,
+                         const math::vec2 &screenSize,
+                         common::r32 zoom) override;
 
             void
             disableShader() override;
@@ -58,6 +63,8 @@ namespace oni {
             common::oniGLsizei mPrimitiveSize{0};
 
             common::oniGLsizei mIndexCount{0};
+
+            common::r32 mStripeSize{0.4f};
 
             std::unique_ptr<Shader> mShader{};
 

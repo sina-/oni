@@ -157,10 +157,14 @@ namespace oni {
         void
         Renderer_OpenGL_Strip::enableShader(const math::mat4 &model,
                                             const math::mat4 &view,
-                                            const math::mat4 &proj) {
+                                            const math::mat4 &proj,
+                                            const math::vec2 &screenSize,
+                                            common::r32 zoom) {
             mShader->enable();
             mShader->setUniformMat4("view", view);
             mShader->setUniformMat4("proj", proj);
+            mShader->setUniform2f("screenSize", screenSize);
+            mShader->setUniform1f("width", mStripeSize * zoom);
         }
 
         void
@@ -213,6 +217,11 @@ namespace oni {
         void
         Renderer_OpenGL_Strip::resetIndexCount() {
             mIndexCount = 0;
+        }
+
+        void
+        Renderer_OpenGL_Strip::setStripeSize(common::r32 size) {
+            mStripeSize = size;
         }
     }
 }

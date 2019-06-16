@@ -48,7 +48,9 @@ namespace oni {
             void
             begin(const math::mat4 &model,
                   const math::mat4 &view,
-                  const math::mat4 &proj);
+                  const math::mat4 &proj,
+                  const math::vec2 &screenSize,
+                  common::r32 zoom);
 
             void
             end();
@@ -57,7 +59,9 @@ namespace oni {
             virtual void
             _begin(const math::mat4 &model,
                    const math::mat4 &view,
-                   const math::mat4 &proj) = 0;
+                   const math::mat4 &proj,
+                   const math::vec2 &screenSize,
+                   common::r32 zoom) = 0;
 
             virtual void
             _flush() = 0;

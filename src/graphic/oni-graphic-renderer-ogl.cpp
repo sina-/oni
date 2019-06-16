@@ -40,8 +40,10 @@ namespace oni {
         void
         Renderer_OpenGL::_begin(const math::mat4 &model,
                                 const math::mat4 &view,
-                                const math::mat4 &proj) {
-            enableShader(model, view, proj);
+                                const math::mat4 &proj,
+                                const math::vec2 &screenSize,
+                                common::r32 zoom) {
+            enableShader(model, view, proj, screenSize, zoom);
 
             mNextSamplerID = 0;
             mSamplers.clear();

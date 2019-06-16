@@ -204,7 +204,10 @@ namespace oni {
 
         common::oniGLsizei
         Renderer_OpenGL_Strip::getIndexCount() {
-            return mIndexCount;
+            // NOTE: Buffer structure uses last and next vertices to decide on the direction,
+            // so I have to always draw 4 items, that is 4 * stride-- 1 * last + 1 * next + 1 * current + 1 * (texoff + bc)--, less
+            // other-wise I will access out of bounds in the shader.
+            return mIndexCount - 4;
         }
 
         void

@@ -25,6 +25,17 @@ namespace oni {
             assert(mKeysReleased.size() < 50);
         }
 
+        void
+        Input::reset() {
+            mScrollDirectionX.clear();
+            mScrollDirectionY.clear();
+        }
+
+        bool
+        Input::hasData() const {
+            return !mKeysPressed.empty() || !mKeysReleased.empty();
+        }
+
         bool
         Input::isPressed(io::oniKeyPress key) const {
             return std::find(mKeysPressed.begin(), mKeysPressed.end(), key) != mKeysPressed.end();
@@ -56,14 +67,41 @@ namespace oni {
         }
 
         void
-        Input::reset() {
-            mKeysPressed.clear();
-            mKeysReleased.clear();
+        Input::addScrollDirectionX(io::ScrollDirection sd) {
+            mScrollDirectionX.push_back(sd);
         }
 
-        bool
-        Input::hasData() const {
-            return !mKeysPressed.empty() || !mKeysReleased.empty();
+        void
+        Input::addScrollDirectionY(io::ScrollDirection sd) {
+            mScrollDirectionY.push_back(sd);
         }
+
+        const std::vector<io::ScrollDirection> &
+        Input::getScrollDirectionX() const {
+            return mScrollDirectionX;
+        }
+
+        const std::vector<io::ScrollDirection> &
+        Input::getScrollDirectionY() const {
+            return mScrollDirectionY;
+        }
+
+        void
+        Input::setMouseButton(common::i32 button) { mMouseButton = button; }
+
+        const common::i32 &
+        Input::getMouseButton() const { return mMouseButton; }
+
+        void
+        Input::setCursorX(oni::common::r64 x) { mCursorX = x; }
+
+        const oni::common::r64 &
+        Input::getCursorX() const { return mCursorX; }
+
+        void
+        Input::setCursorY(oni::common::r64 y) { mCursorY = y; }
+
+        const oni::common::r64 &
+        Input::getCursorY() const { return mCursorY; }
     }
 }

@@ -9,19 +9,20 @@
 #include <AntTweakBar.h>
 
 #include <oni-core/common/oni-common-define.h>
+#include <oni-core/io/oni-io-input.h>
+#include <oni-core/math/oni-math-function.h>
 
 namespace oni {
     namespace graphic {
 
-        Window::Window(std::string &&title,
+        Window::Window(io::Input &input,
+                       std::string &&title,
                        common::i32 gameWidth,
                        common::i32 gameHeight) :
+                mInput(input),
                 mTitle{std::move(title)},
                 mGameWidth{gameWidth},
-                mGameHeight{gameHeight},
-                mWindow{nullptr},
-                mMouseButton{GLFW_KEY_UNKNOWN}, mCursorX{0.0f}, mCursorY{0.0f},
-                mKeysPressed{}, mKeysReleased{} {
+                mGameHeight{gameHeight} {
 
             if (!glfwInit()) {
                 assert(false);
@@ -80,6 +81,7 @@ namespace oni {
             glfwSetWindowSizeCallback(mWindow, windowResizeCallback);
             glfwSetKeyCallback(mWindow, keyCallback);
             glfwSetMouseButtonCallback(mWindow, mouseCallback);
+            glfwSetScrollCallback(mWindow, scrollCallback);
             glfwSetCursorPosCallback(mWindow, cursorPosCallback);
             // This will disable v-sync.
             glfwSwapInterval(0.0);
@@ -126,15 +128,6 @@ namespace oni {
         void
         Window::tick(io::Input &input) {
             glfwPollEvents();
-
-            for (auto key: mKeysPressed) {
-                input.setPressed(key);
-            }
-            for (auto key: mKeysReleased) {
-                input.setReleased(key);
-            }
-            mKeysPressed.clear();
-            mKeysReleased.clear();
         }
 
         bool
@@ -185,9 +178,23 @@ namespace oni {
             TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);
             if (action == GLFW_PRESS)
-                thiz->setMouseButton(button);
+                thiz->mInput.setMouseButton(button);
             if (action == GLFW_RELEASE)
-                thiz->setMouseButton(GLFW_KEY_UNKNOWN);
+                thiz->mInput.setMouseButton(GLFW_KEY_UNKNOWN);
+        }
+
+        void
+        Window::scrollCallback(GLFWwindow *window,
+                               common::r64 xOffset,
+                               common::r64 yOffset) {
+            constexpr auto SENSITIVITY = 0.01;
+            auto thiz = getThisFromGLFWWindow(window);
+            if (math::almost_Greater(yOffset, SENSITIVITY)) {
+                thiz->mInput.addScrollDirectionY(io::ScrollDirection::UP);
+            }
+            if (math::almost_Less(yOffset, -SENSITIVITY)) {
+                thiz->mInput.addScrollDirectionY(io::ScrollDirection::DOWN);
+            }
         }
 
         void
@@ -196,8 +203,8 @@ namespace oni {
                                   double y) {
             TwEventMousePosGLFW(x, y);
             auto thiz = getThisFromGLFWWindow(window);
-            thiz->setCursorX(x);
-            thiz->setCursorY(y);
+            thiz->mInput.setCursorX(x);
+            thiz->mInput.setCursorY(y);
         }
 
         void
@@ -210,5 +217,28 @@ namespace oni {
             return reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
         }
 
+        void
+        Window::addKeyPressed(common::i32 key) { mInput.setPressed(key); }
+
+        void
+        Window::addKeyReleased(common::i32 key) { mInput.setReleased(key); }
+
+        common::i32
+        Window::getGameHeight() { return mGameHeight; }
+
+        common::i32
+        Window::getGameWidth() { return mGameWidth; }
+
+        const common::i32 &
+        Window::getHeight() const { return mHeight; }
+
+        void
+        Window::setHeight(common::i32 height) { mHeight = height; }
+
+        const common::i32 &
+        Window::getWidth() const { return mWidth; }
+
+        void
+        Window::setWidth(common::i32 width) { mWidth = width; }
     }
 }

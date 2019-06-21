@@ -6,6 +6,13 @@
 
 namespace oni {
     namespace io {
+        enum class ScrollDirection {
+            UNKNOWN,
+            UP,
+            DOWN,
+            LAST
+        };
+
         class Input {
         public:
             Input();
@@ -20,6 +27,12 @@ namespace oni {
             update(io::oniKeyPress keyPressed,
                    io::oniKeyPress keyReleased);
 
+            void
+            reset();
+
+            bool
+            hasData() const;
+
             bool
             isPressed(io::oniKeyPress key) const;
 
@@ -33,14 +46,45 @@ namespace oni {
             setReleased(io::oniKeyPress key);
 
             void
-            reset();
+            addScrollDirectionX(io::ScrollDirection);
 
-            bool
-            hasData() const;
+            void
+            addScrollDirectionY(io::ScrollDirection);
+
+            const std::vector<io::ScrollDirection> &
+            getScrollDirectionX() const;
+
+            const std::vector<io::ScrollDirection> &
+            getScrollDirectionY() const;
+
+            void
+            setMouseButton(common::i32 button);
+
+            void
+            setCursorY(oni::common::r64 y);
+
+            void
+            setCursorX(oni::common::r64 x);
+
+            const common::i32 &
+            getMouseButton() const;
+
+            const oni::common::r64 &
+            getCursorX() const;
+
+            const oni::common::r64 &
+            getCursorY() const;
 
         private:
             std::vector<io::oniKeyPress> mKeysPressed{};
             std::vector<io::oniKeyPress> mKeysReleased{};
+
+            std::vector<io::ScrollDirection> mScrollDirectionX{};
+            std::vector<io::ScrollDirection> mScrollDirectionY{};
+
+            common::i32 mMouseButton{};
+            common::r64 mCursorX{};
+            common::r64 mCursorY{};
         };
     }
 }

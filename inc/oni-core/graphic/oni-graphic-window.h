@@ -1,37 +1,21 @@
 #pragma once
 
-#include <oni-core/io/oni-io-input.h>
+#include <string>
+
 #include <oni-core/common/oni-common-typedefs-graphic.h>
+#include <oni-core/common/oni-common-typedef.h>
 
 class GLFWwindow;
 
 namespace oni {
+    namespace io {
+        class Input;
+    }
     namespace graphic {
-
-
-        /*
-         * Creates a windows of given name and size. Currently handles:
-         *  - Resize
-         *  - Key, or button, -press
-         *  - Mouse position
-         *  by registering a call-back that is called on such events.
-         */
         class Window {
-            std::string mTitle{};
-            common::i32 mWidth{};
-            common::i32 mHeight{};
-            common::i32 mGameWidth{};
-            common::i32 mGameHeight{};
-            GLFWwindow *mWindow{};
-            common::i32 mMouseButton{};
-            common::r64 mCursorX{};
-            common::r64 mCursorY{};
-            std::vector<common::i32> mKeysPressed{};
-            std::vector<common::i32> mKeysReleased{};
-
-
         public:
-            Window(std::string &&name,
+            Window(io::Input &,
+                   std::string &&name,
                    common::i32 gameWidth,
                    common::i32 gameHeight);
 
@@ -42,7 +26,7 @@ namespace oni {
             Window &
             operator=(const Window &) = delete;
 
-            void
+            static void
             tick(io::Input &input);
 
             void
@@ -54,47 +38,30 @@ namespace oni {
             void
             clear() const;
 
-            void
-            setWidth(common::i32 width) { mWidth = width; }
+            const common::i32 &
+            getWidth() const;
 
             const common::i32 &
-            getWidth() const { return mWidth; }
-
-            void
-            setHeight(common::i32 height) { mHeight = height; }
-
-            const common::i32 &
-            getHeight() const { return mHeight; }
+            getHeight() const;
 
             common::i32
-            getGameWidth() { return mGameWidth; }
+            getGameWidth();
 
             common::i32
-            getGameHeight() { return mGameHeight; }
+            getGameHeight();
+
+        private:
+            void
+            addKeyPressed(common::i32 key);
 
             void
-            addKeyPressed(common::i32 key) { mKeysPressed.push_back(key); }
+            addKeyReleased(common::i32 key);
 
             void
-            addKeyReleased(common::i32 key) { mKeysReleased.push_back(key); }
+            setHeight(common::i32 height);
 
             void
-            setMouseButton(common::i32 button) { mMouseButton = button; }
-
-            const common::i32 &
-            getMouseButton() const { return mMouseButton; }
-
-            void
-            setCursorX(oni::common::r64 x) { mCursorX = x; }
-
-            const oni::common::r64 &
-            getCursorX() const { return mCursorX; }
-
-            void
-            setCursorY(oni::common::r64 y) { mCursorY = y; }
-
-            const oni::common::r64 &
-            getCursorY() const { return mCursorY; }
+            setWidth(common::i32 width);
 
             static Window *
             getThisFromGLFWWindow(GLFWwindow *window);
@@ -118,11 +85,15 @@ namespace oni {
                           common::i32 mods);
 
             static void
+            scrollCallback(GLFWwindow *window,
+                           common::r64 xOffset,
+                           common::r64 yOffset);
+
+            static void
             cursorPosCallback(GLFWwindow *window,
                               oni::common::r64 x,
                               oni::common::r64 y);
 
-        private:
             static void
             messageCallback(common::oniGLenum source,
                             common::oniGLenum type,
@@ -132,6 +103,15 @@ namespace oni {
                             const common::oniGLchar *message,
                             const void *userParam);
 
+        private:
+            io::Input &mInput;
+
+            std::string mTitle{};
+            common::i32 mWidth{};
+            common::i32 mHeight{};
+            common::i32 mGameWidth{};
+            common::i32 mGameHeight{};
+            GLFWwindow *mWindow{};
         };
     }
 }

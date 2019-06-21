@@ -268,7 +268,8 @@ namespace oni {
                             body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
                             body->SetTransform(b2Vec2{pos.x, pos.y},
                                                static_cast<float32>(heading.value));
-                            view.get<component::WorldP3D_History>(id).add(pos);
+                            auto &hist = view.get<component::WorldP3D_History>(id);
+                            hist.add(pos);
                         }
                     }
                 }

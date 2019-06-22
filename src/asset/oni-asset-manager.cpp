@@ -20,14 +20,14 @@ namespace oni {
         }
 
         void
-        AssetManager::setAssetFilePath(component::SoundTag tag,
-                                       std::string_view path) {
+        AssetManager::setPath(component::SoundTag tag,
+                              std::string_view path) {
             mSoundAssetPath.emplace(tag, path);
         }
 
         void
-        AssetManager::setAssetFilePath(component::TextureTag tag,
-                                       std::string_view path) {
+        AssetManager::setPath(component::TextureTag tag,
+                              std::string_view path) {
             mTextureAssetPath.emplace(tag, path);
         }
     }

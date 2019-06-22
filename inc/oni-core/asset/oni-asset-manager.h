@@ -13,12 +13,12 @@ namespace oni {
             AssetManager();
 
             void
-            setAssetFilePath(component::SoundTag,
-                             std::string_view);
+            setPath(component::SoundTag,
+                    std::string_view);
 
             void
-            setAssetFilePath(component::TextureTag,
-                             std::string_view);
+            setPath(component::TextureTag,
+                    std::string_view);
 
             const std::string&
             getAssetFilePath(component::SoundTag);

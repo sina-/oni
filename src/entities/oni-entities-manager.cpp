@@ -662,7 +662,6 @@ namespace oni {
             createComponent<component::TextureTag>(id, component::TextureTag::ROCKET);
             createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
             createComponent<component::ParticleTrail>(id);
-            createComponent<component::AfterMark>(id);
             auto &ph = createComponent<component::WorldP3D_History>(id);
             ph.size = 10;
 

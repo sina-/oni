@@ -248,8 +248,8 @@ namespace oni {
                             const component::Scale &scale,
                             const component::Texture &texture,
                             const component::Tag_TextureShaded &) {
-                        auto result = applyParentTransforms(clientManager, id, pos, heading);
 
+                        auto result = applyParentTransforms(clientManager, id, pos, heading);
                         if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
                             return;
                         }

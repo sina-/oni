@@ -281,13 +281,16 @@ namespace oni {
                     begin(*mRendererStrip, true, true, true);
 
                     const auto &ph = view.get<component::WorldP3D_History>(id).pos;
+                    auto count = 0;
                     for (auto &&p: ph) {
 #if DEBUG_Z
                         serverManager.printEntityType(id);
                         printf("%f\n", p.z);
 #endif
-                        mRendererStrip->submit(p, 1, {1, 1, 1, 1}, {});
-                        mRendererStrip->submit(p, -1, {1, 1, 1, 1}, {});
+                        auto alpha = common::r32(count) / ph.size();
+                        mRendererStrip->submit(p, 1, {1, 1, 1, alpha}, {});
+                        mRendererStrip->submit(p, -1, {1, 1, 1, alpha}, {});
+                        ++count;
                     }
 
                     end(*mRendererStrip);
@@ -335,28 +338,6 @@ namespace oni {
                            common::r64 tickTime) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
-
-#if 0
-            math::vec4 red{1, 0, 0, 0.25};
-            math::vec4 green{0, 1, 0, 0.25};
-            math::vec4 blue{0, 0, 1, 1};
-
-            math::vec3 redPos{0, 0, 1};
-            math::vec3 greenPos{5, 5, 0.1f};
-            math::vec3 bluePos{0, 5, 0.0f};
-
-            static bool add = true;
-            if (add) {
-                math::vec2 size{10, 10};
-                common::r32 heading = 0;
-                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(redPos, size, heading, red);
-
-                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(greenPos, size, heading, green);
-
-                clientEntityFactory.createEntity<entities::EntityType::SIMPLE_SPRITE>(bluePos, size, heading, blue);
-                add = false;
-            }
-#endif
 
             /// Update Emitters
             {

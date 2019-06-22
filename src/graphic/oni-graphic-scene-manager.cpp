@@ -222,7 +222,7 @@ namespace oni {
                         assert(cId);
                         const auto &texture = clientManager.get<component::Texture>(cId);
                         assert(!texture.image.path.empty());
-#ifdef DEBUG_Z
+#if DEBUG_Z
                         serverManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
@@ -255,7 +255,7 @@ namespace oni {
                         }
 
                         assert(!texture.image.path.empty());
-#ifdef DEBUG_Z
+#if DEBUG_Z
                         clientManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
@@ -282,7 +282,7 @@ namespace oni {
 
                     const auto &ph = view.get<component::WorldP3D_History>(id).pos;
                     for (auto &&p: ph) {
-#ifdef DEBUG_Z
+#if DEBUG_Z
                         serverManager.printEntityType(id);
                         printf("%f\n", p.z);
 #endif
@@ -319,7 +319,7 @@ namespace oni {
 
                 const auto &appearance = view.get<component::Appearance>(id);
 
-#ifdef DEBUG_Z
+#if DEBUG_Z
                 manager.printEntityType(id);
                 printf("%f\n", result.pos.z);
 #endif

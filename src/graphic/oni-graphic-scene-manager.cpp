@@ -238,11 +238,11 @@ namespace oni {
                             component::Tag_TextureShaded>();
                     view.each<component::WorldP3D>([this, viewWidth, viewHeight, &clientManager](
                             common::EntityID id,
-                            component::WorldP3D &pos,
-                            component::Heading heading,
-                            component::Scale scale,
-                            component::Texture texture,
-                            component::Tag_TextureShaded) {
+                            const component::WorldP3D &pos,
+                            const component::Heading &heading,
+                            const component::Scale &scale,
+                            const component::Texture &texture,
+                            const component::Tag_TextureShaded &) {
                         auto result = applyParentTransforms(clientManager, id, pos, heading);
 
                         if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {

@@ -70,6 +70,12 @@ namespace oni {
                 }
             }
 
+            template<typename Func>
+            inline void
+            each(Func func) const {
+                mView.template each(std::move(func));
+            };
+
             template<typename Comp, typename Func>
             inline void
             each(Func func) const {

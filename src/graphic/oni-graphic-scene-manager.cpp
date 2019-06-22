@@ -270,11 +270,13 @@ namespace oni {
                         component::WorldP3D_History>();
                 for (auto &&id: view) {
                     begin(*mRendererStrip, true, true, true);
+
                     const auto &ph = view.get<component::WorldP3D_History>(id).pos;
                     for (auto &&p: ph) {
                         mRendererStrip->submit({p.x, p.y, p.z, 1}, {1, 1, 1}, {});
                         mRendererStrip->submit({p.x, p.y, p.z, -1}, {1, 1, 1}, {});
                     }
+
                     end(*mRendererStrip);
                 }
             }

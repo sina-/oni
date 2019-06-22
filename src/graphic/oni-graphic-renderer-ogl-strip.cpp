@@ -70,7 +70,8 @@ namespace oni {
             texoff.componentType = GL_FLOAT;
             texoff.normalized = GL_FALSE;
             texoff.stride = stride;
-            texoff.offset = reinterpret_cast<const common::oniGLvoid *>(stride * 2 + 4);
+            texoff.offset = reinterpret_cast<const common::oniGLvoid *>(stride * 2 +
+                                                                        offsetof(graphic::StripVertex, texoff));
 
             graphic::BufferStructure bc;
             bc.index = static_cast<common::oniGLuint>(bc_I);
@@ -78,7 +79,7 @@ namespace oni {
             bc.componentType = GL_FLOAT;
             bc.normalized = GL_FALSE;
             bc.stride = stride;
-            bc.offset = reinterpret_cast<const common::oniGLvoid *>(stride * 2 + 5);
+            bc.offset = reinterpret_cast<const common::oniGLvoid *>(stride * 2 + offsetof(graphic::StripVertex, bc));
 
             graphic::BufferStructure next;
             next.index = static_cast<common::oniGLuint>(next_I);
@@ -145,9 +146,9 @@ namespace oni {
             }
 
             buffer->center = pos.value;
-            buffer->texoff = 0.1f;
-            buffer->bc = {1, 1, 1};
-            buffer++;
+            buffer->texoff = 0.8f;
+            buffer->bc = {1.f, 1.f, 1.f};
+            ++buffer;
 
             mBuffer = static_cast<void *>(buffer);
 

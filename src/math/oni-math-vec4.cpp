@@ -1,5 +1,7 @@
 #include <oni-core/math/oni-math-vec4.h>
 
+#include <oni-core/math/oni-math-vec3.h>
+
 namespace oni {
     namespace math {
         vec4 &
@@ -9,6 +11,11 @@ namespace oni {
             z += other.z;
             w += other.w;
             return *this;
+        }
+
+        vec3
+        vec4::xyz() const {
+            return {x, y, z};
         }
 
         vec4 &

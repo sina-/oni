@@ -561,10 +561,10 @@ namespace oni {
             TileWorld::genChunkGroundSprite(common::i64 chunkX,
                                             common::i64 chunkY) {
                 auto chunkID = math::pack_i64(chunkX, chunkY);
-                auto R = (std::rand() % 255) / 255.0f;
-                auto G = (std::rand() % 255) / 255.0f;
-                auto B = (std::rand() % 255) / 255.0f;
-                math::vec4 color{R, G, B, 0.1f};
+                auto R = (std::rand() % 180) / 255.0f;
+                auto G = (std::rand() % 180) / 255.0f;
+                auto B = (std::rand() % 180) / 255.0f;
+                math::vec4 color{R, G, B, 1.0f};
                 math::vec2 size{static_cast<common::r32>(mChunkSizeX),
                                 static_cast<common::r32 >(mChunkSizeY)};
                 auto currentChunkIndex = oni::level::ChunkIndex{chunkX, chunkY};

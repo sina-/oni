@@ -22,6 +22,7 @@
 #include <oni-core/math/oni-math-z-layer-manager.h>
 #include <oni-core/physics/oni-physics-dynamics.h>
 
+#define DEBUG_Z 0
 
 namespace oni {
     namespace graphic {
@@ -118,14 +119,14 @@ namespace oni {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
-            /// Trails
-            {
-                renderStrip(serverManager, clientManager, viewWidth, viewHeight);
-            }
-
             /// Sprites
             {
                 renderTessellation(serverManager, clientManager, viewWidth, viewHeight);
+            }
+
+            /// Trails
+            {
+                renderStrip(serverManager, clientManager, viewWidth, viewHeight);
             }
 
             /// UI
@@ -221,6 +222,10 @@ namespace oni {
                         assert(cId);
                         const auto &texture = clientManager.get<component::Texture>(cId);
                         assert(!texture.image.path.empty());
+#ifdef DEBUG_Z
+                        serverManager.printEntityType(id);
+                        printf("%f\n", result.pos.z);
+#endif
                         mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{},
                                                       texture);
 
@@ -250,6 +255,10 @@ namespace oni {
                         }
 
                         assert(!texture.image.path.empty());
+#ifdef DEBUG_Z
+                        clientManager.printEntityType(id);
+                        printf("%f\n", result.pos.z);
+#endif
                         mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{},
                                                       texture);
 
@@ -273,8 +282,12 @@ namespace oni {
 
                     const auto &ph = view.get<component::WorldP3D_History>(id).pos;
                     for (auto &&p: ph) {
-                        mRendererStrip->submit({p.x, p.y, p.z, 1}, {1, 1, 1}, {});
-                        mRendererStrip->submit({p.x, p.y, p.z, -1}, {1, 1, 1}, {});
+#ifdef DEBUG_Z
+                        serverManager.printEntityType(id);
+                        printf("%f\n", p.z);
+#endif
+                        mRendererStrip->submit(p, 1, {1, 1, 1, 1}, {});
+                        mRendererStrip->submit(p, -1, {1, 1, 1, 1}, {});
                     }
 
                     end(*mRendererStrip);
@@ -306,6 +319,10 @@ namespace oni {
 
                 const auto &appearance = view.get<component::Appearance>(id);
 
+#ifdef DEBUG_Z
+                manager.printEntityType(id);
+                printf("%f\n", result.pos.z);
+#endif
                 mRendererTessellation->submit(result.pos, result.heading, scale, appearance, component::Texture{});
 
                 ++mRenderedSpritesPerFrame;

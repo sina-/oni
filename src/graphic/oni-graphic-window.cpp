@@ -56,6 +56,10 @@ namespace oni {
                 assert(false);
             }
 
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback(&messageCallback, nullptr);
+
             printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
             /*
@@ -88,14 +92,15 @@ namespace oni {
 
             glEnable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
-            glDepthMask(GL_TRUE);
             glDepthFunc(GL_LEQUAL);
+            glDepthMask(GL_TRUE);
             glDepthRange(0.f, 1.f);
+
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            glEnable(GL_DEBUG_OUTPUT);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            glDebugMessageCallback(&messageCallback, nullptr);
+            glViewport(0, 0, mWidth, mHeight);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClearDepth(1.f);
         }
 
         Window::~Window() {
@@ -137,8 +142,6 @@ namespace oni {
 
         void
         Window::clear() const {
-            glClearColor(0.2f, 0.2f, 0.2f, 0.2f);
-            glClearDepth(1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 

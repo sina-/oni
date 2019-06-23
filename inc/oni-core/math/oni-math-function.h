@@ -70,11 +70,13 @@ namespace oni {
         }
 
         template<class T>
-        inline void
+        inline bool
         zeroClip(T &val) noexcept {
             if (val <= common::EP32) {
                 val = 0;
+                return true;
             }
+            return false;
         }
 
         template<class T>
@@ -210,11 +212,11 @@ namespace oni {
         }
 
         template<class T>
-        inline void
+        inline bool
         subAndZeroClip(T &x,
                        const T y) noexcept {
             x -= y;
-            zeroClip(x);
+            return zeroClip(x);
         }
 
         template<class T>

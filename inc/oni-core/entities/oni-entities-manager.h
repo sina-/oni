@@ -200,15 +200,6 @@ namespace oni {
             size_t
             size() noexcept;
 
-            /*
-            template<class Component>
-            size_t
-            size() noexcept {
-                auto result = mRegistry->size<Component>();
-                return result;
-            }
-             */
-
             template<class... ViewComponents>
             EntityView<common::EntityID, ViewComponents...>
             createView() {
@@ -393,6 +384,20 @@ namespace oni {
                 return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
             }
 
+            template<class Component>
+            void
+            removeComponent(common::EntityID entityID) {
+                mRegistry->remove<Component>(entityID);
+            }
+
+            template<class Component>
+            void
+            removeComponentSafe(common::EntityID entityID) {
+                if (mRegistry->has<Component>(entityID)) {
+                    mRegistry->remove<Component>(entityID);
+                }
+            }
+
             void
             printEntityType(common::EntityID id);
 
@@ -422,20 +427,6 @@ namespace oni {
 
             common::EntityID
             create();
-
-            template<class Component>
-            void
-            remove(common::EntityID entityID) {
-                mRegistry->remove<Component>(entityID);
-            }
-
-            template<class Component>
-            void
-            removeComponentSafe(common::EntityID entityID) {
-                if (mRegistry->has<Component>(entityID)) {
-                    mRegistry->remove<Component>(entityID);
-                }
-            }
 
             template<class Component, class... Args>
             void

@@ -210,6 +210,32 @@ namespace oni {
                 }
             }
 
+            /// Update jet force - server
+            {
+                auto emptyFuel = std::vector<common::EntityID>();
+                auto view = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::JetForce,
+                        component::Heading,
+                        component::PhysicalProperties>();
+                for (auto &&id: view) {
+                    auto *body = manager.getEntityBody(id);
+                    auto &heading = view.get<component::Heading>(id);
+                    auto &jet = view.get<component::JetForce>(id);
+                    if (!math::subAndZeroClip(jet.fuze, common::r32(tickTime))) {
+                        body->ApplyForceToCenter(
+                                b2Vec2(cos(heading.value) * jet.force,
+                                       sin(heading.value) * jet.force),
+                                true);
+                    } else {
+                        emptyFuel.push_back(id);
+                    }
+                }
+                for (auto &&id: emptyFuel) {
+                    manager.removeComponent<component::JetForce>(id);
+                }
+            }
+
             /// Update box2d world
             {
                 // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
@@ -219,8 +245,7 @@ namespace oni {
                 mPhysicsWorld->Step(tickTime, 6, 2);
             }
 
-
-            /// Car collisions
+            /// Car collisions and box2d sync
             {
                 auto view = manager.createView<
                         component::Tag_SimModeServer,
@@ -307,20 +332,20 @@ namespace oni {
                 for (auto &&id: view) {
                     auto *body = manager.getEntityBody(id);
                     auto &props = view.get<component::PhysicalProperties>(id);
-                    auto &position = body->GetPosition();
-                    auto &pos = view.get<component::WorldP3D>(id);
+                    auto &bPos = body->GetPosition();
+                    auto &ePos = view.get<component::WorldP3D>(id);
                     auto &heading = view.get<component::Heading>(id);
                     auto &scale = view.get<component::Scale>(id);
 
-                    if (!math::almost_Equal(pos.x, position.x) ||
-                        !math::almost_Equal(pos.y, position.y) ||
+                    if (!math::almost_Equal(ePos.x, bPos.x) ||
+                        !math::almost_Equal(ePos.y, bPos.y) ||
                         !math::almost_Equal(heading.value, body->GetAngle())) {
 
-                        pos.x = position.x;
-                        pos.y = position.y;
+                        ePos.x = bPos.x;
+                        ePos.y = bPos.y;
 
                         if (manager.has<component::WorldP3D_History>(id)) {
-                            manager.get<component::WorldP3D_History>(id).add(pos);
+                            manager.get<component::WorldP3D_History>(id).add(ePos);
                         }
 
                         heading.value = body->GetAngle();

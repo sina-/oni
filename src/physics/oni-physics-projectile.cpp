@@ -32,28 +32,27 @@ namespace oni {
 
             /// Spawn projectile
             {
-                auto carView = manager.createView<
+                auto view = manager.createView<
+                        component::Tag_SimModeServer,
                         component::WorldP3D,
                         component::Heading,
                         component::Car,
                         component::CarConfig,
                         component::EntityAttachment>();
 
-                common::r32 velocity{200.f};
-
-                for (auto &&entity: carView) {
+                for (auto &&entity: view) {
                     auto *input = clientData->getClientInput(entity);
                     if (!input) {
                         continue;
                     }
 
                     if (input->isPressed(GLFW_KEY_F)) {
-                        const auto &carPos = carView.get<component::WorldP3D>(entity);
-                        const auto &carHeading = carView.get<component::Heading>(entity);
-                        const auto &carConfig = carView.get<component::CarConfig>(entity);
-                        const auto &car = carView.get<component::Car>(entity);
-                        const auto &attachments = carView.get<component::EntityAttachment>(entity);
-                        fireRocket(manager, velocity, carPos, carHeading, carConfig, attachments);
+                        const auto &carPos = view.get<component::WorldP3D>(entity);
+                        const auto &carHeading = view.get<component::Heading>(entity);
+                        const auto &carConfig = view.get<component::CarConfig>(entity);
+                        const auto &car = view.get<component::Car>(entity);
+                        const auto &attachments = view.get<component::EntityAttachment>(entity);
+                        fireRocket(manager, car, carPos, carHeading, carConfig, attachments);
                     }
                 }
             }
@@ -61,7 +60,7 @@ namespace oni {
 
         void
         Projectile::fireRocket(entities::EntityManager &manager,
-                               const common::r32 velocity,
+                               const component::Car &car,
                                const component::WorldP3D &pos,
                                const component::Heading &heading,
                                const component::CarConfig &carConfig,
@@ -104,26 +103,8 @@ namespace oni {
                     manager.createPhysics(id, rocketPos, size, heading.value);
 
                     auto *body = manager.getEntityBody(id);
-
-                    body->ApplyForceToCenter(
-                            b2Vec2(static_cast<common::r32>(cos(heading.value) * velocity),
-                                   static_cast<common::r32>(sin(heading.value) * velocity)),
-                            true);
-                    //body->ApplyAngularImpulse(1, true);
-/*
-                    manager.createEvent(ROCKET_LAUNCH, component::WorldP3D);
-                    manager.createEvent(COLLISION, ENTITY_A, ENTITY_B, component::WorldP3D);
-
-                    manager.createEvent_RocketLaunch(component::WorldP3D);
-                    manager.createEvent_Collision(ENTITY_A, ENTITY_B, component::WorldP3D);
-
-                    for(event: manager.getEvent_RocketLaunch()){
-                        server.send(packet_RocketLaunch);
-                    }
-
-                    for(event: manager.getEvent_Collision()){
-                        server.send(packet_Collision);
-                    }*/
+                    body->SetLinearVelocity({car.velocity.x, car.velocity.y});
+                    body->SetAngularVelocity(common::r32(car.angularVelocity));
 
                     manager.enqueueEvent<game::Event_RocketLaunch>(rocketPos);
                 }

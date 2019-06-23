@@ -678,6 +678,10 @@ namespace oni {
             auto &age = createComponent<component::Age>(id);
             age.maxAge = 5;
 
+            auto &jet = createComponent<component::JetForce>(id);
+            jet.fuze = 3.f;
+            jet.force = 3.f;
+
             auto &cc = createComponent<component::ComplementaryComponents>(id);
             cc.types.emplace_back(component::ComponentType::TEXTURE);
 

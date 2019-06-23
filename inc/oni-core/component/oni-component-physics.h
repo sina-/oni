@@ -120,6 +120,11 @@ namespace oni {
             math::vec2 value;
         };
 
+        struct JetForce {
+            common::r32 fuze{0}; // How long, in seconds, it takes for the fuel to burn
+            common::r32 force{0};
+        };
+
         struct PhysicalProperties {
             common::r32 linearDamping{2.f};
             common::r32 angularDamping{2.f};

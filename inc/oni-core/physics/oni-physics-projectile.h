@@ -3,6 +3,7 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-gameplay.h>
+#include <oni-core/component/oni-component-physics.h>
 
 class b2World;
 
@@ -36,8 +37,8 @@ namespace oni {
 
         private:
             void
-            fireRocket(entities::EntityManager &,
-                       const common::r32 velocity,
+            fireRocket(entities::EntityManager &manager,
+                       const oni::component::Car &car,
                        const component::WorldP3D &pos,
                        const component::Heading &heading,
                        const component::CarConfig &carConfig,

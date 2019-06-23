@@ -525,16 +525,16 @@ namespace oni {
         }
 
         void
-        EntityManager::setApperance(common::EntityID id,
-                                    common::r32 red,
-                                    common::r32 green,
-                                    common::r32 blue,
-                                    common::r32 alpha) {
-            auto &apperance = mRegistry->get<component::Appearance>(id);
-            apperance.color.x = red;
-            apperance.color.y = green;
-            apperance.color.z = blue;
-            apperance.color.w = alpha;
+        EntityManager::setColor(common::EntityID id,
+                                common::r32 red,
+                                common::r32 green,
+                                common::r32 blue,
+                                common::r32 alpha) {
+            auto &color = mRegistry->get<component::Color>(id);
+            color.set_r(red);
+            color.set_g(green);
+            color.set_b(blue);
+            color.set_a(alpha);
         }
 
         b2Body *
@@ -838,7 +838,7 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::Appearance>(id);
+            createComponent<component::Color>(id);
             createComponent<level::Chunk>(id);
 
             assignTag<component::Tag_Static>(id);
@@ -854,7 +854,7 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::Appearance>(id);
+            createComponent<component::Color>(id);
 
             assignTag<component::Tag_Static>(id);
             assignTag<component::Tag_ColorShaded>(id);

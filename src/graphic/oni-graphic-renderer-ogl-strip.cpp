@@ -135,7 +135,7 @@ namespace oni {
         void
         Renderer_OpenGL_Strip::submit(const component::WorldP3D &pos,
                                       const common::r32 offset,
-                                      const component::Appearance &appearance,
+                                      const component::Color &color,
                                       const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
@@ -147,8 +147,8 @@ namespace oni {
             }
 
             buffer->center = math::vec4{pos.x, pos.y, pos.z, offset};
-            buffer->texoff = appearance.color.w;
-            buffer->bc = appearance.color.xyz();
+            buffer->texoff = color.a();
+            buffer->bc = color.rgb();
             ++buffer;
 
             mBuffer = static_cast<void *>(buffer);

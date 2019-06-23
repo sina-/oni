@@ -78,24 +78,135 @@ namespace oni {
             TextureTag textureTag = TextureTag::UNKNOWN;
         };
 
-        struct PixelRGBA {
-            common::u8 red{0};
-            common::u8 blue{0};
-            common::u8 green{0};
-            common::u8 alpha{0};
-        };
-
-        // TODO: Switch to integer color. Kinda low prio as most of the time I'll use textured sprites.
-        struct Appearance {
-            math::vec4 color{0.f, 0.f, 0.f, 1.f};
-
-            PixelRGBA
-            toRGBA() {
-                return PixelRGBA{static_cast<common::u8>(color.x * 255),
-                                 static_cast<common::u8>(color.y * 255),
-                                 static_cast<common::u8>(color.z * 255),
-                                 static_cast<common::u8>(color.w * 255)};
+        struct Color {
+            common::u8
+            r() const {
+                return value >> 24u;
             }
+
+            common::u8
+            g() const {
+                return (value << 8u) >> 24u;
+            }
+
+            common::u8
+            b() const {
+                return (value << 16u) >> 24u;
+            }
+
+            common::u8
+            a() const {
+                return (value << 24u) >> 24u;
+            }
+
+            inline math::vec3
+            rgb() const {
+                return math::vec3{r() / 255.f, g() / 255.f, b() / 255.f};
+            }
+
+            inline math::vec4
+            rgba() const {
+                return math::vec4{r() / 255.f, g() / 255.f, b() / 255.f, a() / 255.f};
+            }
+
+            void
+            set_r(common::u8 r) {
+                value &= ~rMask;
+                value |= (common::u32(r) << 24u);
+            }
+
+            void
+            set_r(common::r32 r) {
+                value &= ~rMask;
+                value |= (common::u32(r * 255) << 24u);
+            }
+
+            void
+            set_G(common::u8 g) {
+                value &= ~gMask;
+                value |= (common::u32(g) << 16u);
+            }
+
+            void
+            set_g(common::r32 g) {
+                value &= ~gMask;
+                value |= (common::u32(g * 255) << 16u);
+            }
+
+            void
+            set_b(common::u8 b) {
+                value &= ~bMask;
+                value |= (common::u32(b) << 8u);
+            }
+
+            void
+            set_b(common::r32 b) {
+                value &= ~bMask;
+                value |= (common::u32(b * 255) << 8u);
+            }
+
+            void
+            set_a(common::u8 a) {
+                value &= ~aMask;
+                value |= (common::u32(a));
+            }
+
+            void
+            set_a(common::r32 a) {
+                value &= ~aMask;
+                value |= (common::u32(a * 255));
+            }
+
+            void
+            set_rgb(common::r32 _r,
+                    common::r32 _g,
+                    common::r32 _b) {
+                value &= ~rMask;
+                value &= ~bMask;
+                value &= ~gMask;
+                set_r(_r);
+                set_g(_g);
+                set_b(_b);
+            }
+
+            void
+            set_rgb(common::u8 _r,
+                    common::u8 _g,
+                    common::u8 _b) {
+                value &= ~rMask;
+                value &= ~bMask;
+                value &= ~gMask;
+                set_r(_r);
+                set_g(_g);
+                set_b(_b);
+            }
+
+            void
+            set_rgba(common::r32 _r,
+                     common::r32 _g,
+                     common::r32 _b,
+                     common::r32 _a) {
+                value = 0;
+                set_rgb(_r, _g, _b);
+                set_a(_a);
+            }
+
+            void
+            set_rgba(common::u8 _r,
+                     common::u8 _g,
+                     common::u8 _b,
+                     common::u8 _a) {
+                value = 0;
+                set_rgb(_r, _g, _b);
+                set_a(_a);
+            }
+
+            common::u32 value{0};
+
+            static constexpr common::u32 rMask{0xff000000};
+            static constexpr common::u32 gMask{0x00ff0000};
+            static constexpr common::u32 bMask{0x0000ff00};
+            static constexpr common::u32 aMask{0x000000ff};
         };
 
         enum class BrushType : common::u8 {

@@ -117,11 +117,11 @@ namespace oni {
                      common::r32 y);
 
             void
-            setApperance(common::EntityID,
-                         common::r32 red,
-                         common::r32 green,
-                         common::r32 blue,
-                         common::r32 alpha);
+            setColor(common::EntityID,
+                     common::r32 red,
+                     common::r32 green,
+                     common::r32 blue,
+                     common::r32 alpha);
 
             void
             setRandAge(common::EntityID,

@@ -16,7 +16,7 @@ namespace oni {
             void
             submit(const component::WorldP3D &,
                    const common::r32 offset,
-                   const component::Appearance &appearance,
+                   const component::Color &color,
                    const component::Texture &texture);
 
             void

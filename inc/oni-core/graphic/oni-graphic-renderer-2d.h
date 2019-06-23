@@ -5,7 +5,7 @@
 
 namespace oni {
     namespace component {
-        class Appearance;
+        class Color;
 
         class Age;
 

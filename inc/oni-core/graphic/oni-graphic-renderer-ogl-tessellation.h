@@ -9,7 +9,7 @@ namespace oni {
 
         struct Text;
 
-        struct Appearance;
+        struct Color;
     }
 
     namespace graphic {
@@ -30,7 +30,7 @@ namespace oni {
             submit(const component::WorldP3D &,
                    const component::Heading &,
                    const component::Scale &,
-                   const component::Appearance &,
+                   const component::Color &,
                    const component::Texture &);
 
             void

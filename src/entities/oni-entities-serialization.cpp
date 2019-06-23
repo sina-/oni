@@ -204,8 +204,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Appearance &data) {
-            archive(data.color);
+                  component::Color &data) {
+            archive(data.value);
         }
 
         template<class Archive>
@@ -242,7 +242,7 @@ namespace oni {
                         //component::SmokeEmitterCD,
                         component::Rectangle,
                         component::Point,
-                        component::Appearance,
+                        component::Color,
                         component::Age,
                         component::TextureTag,
                         component::ParticleTrail,
@@ -293,7 +293,7 @@ namespace oni {
                         //component::SmokeEmitterCD,
                         component::Rectangle,
                         component::Point,
-                        component::Appearance,
+                        component::Color,
                         component::Age,
                         component::TextureTag,
                         component::ParticleTrail,

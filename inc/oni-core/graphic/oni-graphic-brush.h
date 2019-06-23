@@ -7,7 +7,7 @@ namespace oni {
         struct Brush {
             component::BrushType type{component::BrushType::UNKNOWN};
             union {
-                component::PixelRGBA color{};
+                component::Color color{};
                 component::TextureTag tag;
             };
         };

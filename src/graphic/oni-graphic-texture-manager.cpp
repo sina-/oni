@@ -119,7 +119,7 @@ namespace oni {
 
         void
         TextureManager::fill(component::Image &image,
-                             const component::PixelRGBA &pixel) {
+                             const component::Color &pixel) {
             assert(image.width);
             assert(image.height);
 
@@ -130,10 +130,10 @@ namespace oni {
 
             for (common::u32 y = 0; y < image.height; ++y) {
                 for (common::u32 x = 0; x < image.width; ++x) {
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = pixel.blue;
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = pixel.green;
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = pixel.red;
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_ALPHA] = pixel.alpha;
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = pixel.b();
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = pixel.g();
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = pixel.r();
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_ALPHA] = pixel.a();
                 }
             }
         }

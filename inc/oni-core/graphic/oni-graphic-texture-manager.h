@@ -67,7 +67,7 @@ namespace oni {
             // data generations of all types
             void
             fill(component::Image &,
-                 const component::PixelRGBA &pixel);
+                 const component::Color &pixel);
 
             // TODO: This function doesnt fit in the current design
             static common::oniGLuint

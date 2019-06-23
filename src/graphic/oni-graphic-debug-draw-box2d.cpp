@@ -16,23 +16,24 @@ namespace oni {
         void
         DebugDrawBox2D::DrawPolygon(const b2Vec2 *vertices,
                                     int32 vertexCount,
-                                    const b2Color &color) {
+                                    const b2Color &c) {
             if (vertexCount == 4) {
-
-                auto appearance = component::Appearance{math::vec4{1.0f, 0.0f, 0.0f, 0.3f}};
+                auto color = component::Color{};
+                color.set_rgba(c.r, c.g, c.b, c.a);
                 auto pos = component::WorldP3D{vertices->x, vertices->y, 1.f};
-                mSceneManager->renderRaw(pos, appearance);
+                mSceneManager->renderRaw(pos, color);
             }
         }
 
         void
         DebugDrawBox2D::DrawSolidPolygon(const b2Vec2 *vertices,
                                          int32 vertexCount,
-                                         const b2Color &color) {
+                                         const b2Color &c) {
             if (vertexCount == 4) {
                 auto pos = component::WorldP3D{vertices->x, vertices->y, 1.f};
-                auto appearance = component::Appearance{math::vec4{1.0f, 0.0f, 0.0f, 0.3f}};
-                mSceneManager->renderRaw(pos, appearance);
+                auto color = component::Color{};
+                color.set_rgba(c.r, c.g, c.b, c.a);
+                mSceneManager->renderRaw(pos, color);
             }
         }
 

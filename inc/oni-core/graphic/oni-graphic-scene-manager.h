@@ -69,7 +69,7 @@ namespace oni {
 
             void
             renderRaw(const component::WorldP3D pos,
-                      const component::Appearance &appearance);
+                      const component::Color &color);
 
             void
             splat(entities::EntityManager &,

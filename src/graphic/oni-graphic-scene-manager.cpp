@@ -141,8 +141,8 @@ namespace oni {
 
         void
         SceneManager::renderRaw(const component::WorldP3D pos,
-                                const component::Appearance &appearance) {
-            //mColorRenderer->submit(pos, appearance);
+                                const component::Color &color) {
+            //mColorRenderer->submit(pos, color);
             ++mRenderedSpritesPerFrame;
         }
 
@@ -226,7 +226,7 @@ namespace oni {
                         serverManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
-                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{},
+                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Color{},
                                                       texture);
 
                         ++mRenderedTexturesPerFrame;
@@ -259,7 +259,7 @@ namespace oni {
                         clientManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
-                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Appearance{},
+                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Color{},
                                                       texture);
 
                         ++mRenderedTexturesPerFrame;
@@ -288,8 +288,10 @@ namespace oni {
                         printf("%f\n", p.z);
 #endif
                         auto alpha = common::r32(count) / ph.size();
-                        mRendererStrip->submit(p, 1, {1, 1, 1, alpha}, {});
-                        mRendererStrip->submit(p, -1, {1, 1, 1, alpha}, {});
+                        auto color = component::Color{};
+                        color.set_rgba(1, 1, 1, alpha);
+                        mRendererStrip->submit(p, 1, color, {});
+                        mRendererStrip->submit(p, -1, color, {});
                         ++count;
                     }
 
@@ -306,7 +308,7 @@ namespace oni {
                     component::WorldP3D,
                     component::Heading,
                     component::Scale,
-                    component::Appearance,
+                    component::Color,
                     component::Tag_ColorShaded>();
 
             for (auto &&id: view) {
@@ -320,13 +322,13 @@ namespace oni {
                     continue;
                 }
 
-                const auto &appearance = view.get<component::Appearance>(id);
+                const auto &color = view.get<component::Color>(id);
 
 #if DEBUG_Z
                 manager.printEntityType(id);
                 printf("%f\n", result.pos.z);
 #endif
-                mRendererTessellation->submit(result.pos, result.heading, scale, appearance, component::Texture{});
+                mRendererTessellation->submit(result.pos, result.heading, scale, color, component::Texture{});
 
                 ++mRenderedSpritesPerFrame;
             }
@@ -513,7 +515,7 @@ namespace oni {
                 texture.image.height = heightInPixels;
                 texture.image.path = "generated_by_getOrCreateCanvasTile";
 
-                auto defaultColor = component::PixelRGBA{};
+                auto defaultColor = component::Color{};
                 mTextureManager->fill(texture.image, defaultColor);
                 mTextureManager->loadFromImage(texture);
 

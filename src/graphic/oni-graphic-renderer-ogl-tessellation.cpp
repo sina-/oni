@@ -137,7 +137,7 @@ namespace oni {
         Renderer_OpenGL_Tessellation::submit(const component::WorldP3D &pos,
                                              const component::Heading &heading,
                                              const component::Scale &scale,
-                                             const component::Appearance &appearance,
+                                             const component::Color &color,
                                              const component::Texture &texture) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
             auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
@@ -150,7 +150,7 @@ namespace oni {
             buffer->position = pos.value;
             buffer->heading = heading.value;
             buffer->halfSize = math::vec2{scale.x / 2.f, scale.y / 2.f}; // TODO: Why not vec2 for Scale?
-            buffer->color = appearance.color;
+            buffer->color = color.rgba();
             buffer->uv[0] = texture.uv[0];
             buffer->uv[1] = texture.uv[1];
             buffer->uv[2] = texture.uv[2];

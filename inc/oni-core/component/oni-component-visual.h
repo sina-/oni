@@ -84,14 +84,34 @@ namespace oni {
                 return value >> 24u;
             }
 
+            common::r32
+            r_r32() const {
+                return r() / 255.f;
+            }
+
             common::u8
             g() const {
                 return (value << 8u) >> 24u;
             }
 
+            common::r32
+            g_r32() const {
+                return g() / 255.f;
+            }
+
             common::u8
             b() const {
                 return (value << 16u) >> 24u;
+            }
+
+            common::r32
+            b_r32() const {
+                return b() / 255.f;
+            }
+
+            common::r32
+            a_r32() const {
+                return a() / 255.f;
             }
 
             common::u8

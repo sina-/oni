@@ -147,7 +147,7 @@ namespace oni {
             }
 
             buffer->center = math::vec4{pos.x, pos.y, pos.z, offset};
-            buffer->texoff = color.a();
+            buffer->texoff = color.a_r32();
             buffer->bc = color.rgb();
             ++buffer;
 

@@ -11,7 +11,7 @@ add_library(oni-core-graphic
         oni-graphic-renderer-ogl.cpp
         oni-graphic-renderer-ogl-tessellation.cpp
         oni-graphic-renderer-ogl-strip.cpp
-        )
+        oni-graphic-smooth-brush.cpp)
 
 target_compile_features(oni-core-graphic
         PUBLIC

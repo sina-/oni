@@ -14,15 +14,12 @@
 
 namespace oni {
     namespace graphic {
-
         Window::Window(io::Input &input,
                        std::string &&title,
                        common::i32 gameWidth,
                        common::i32 gameHeight) :
                 mInput(input),
-                mTitle{std::move(title)},
-                mGameWidth{gameWidth},
-                mGameHeight{gameHeight} {
+                mTitle{std::move(title)} {
 
             if (!glfwInit()) {
                 assert(false);
@@ -180,10 +177,12 @@ namespace oni {
             UNUSED(mods);
             TwEventMouseButtonGLFW(button, action);
             auto thiz = getThisFromGLFWWindow(window);
-            if (action == GLFW_PRESS)
+            if (action == GLFW_PRESS) {
                 thiz->mInput.setMouseButton(button);
-            if (action == GLFW_RELEASE)
+            }
+            if (action == GLFW_RELEASE) {
                 thiz->mInput.setMouseButton(GLFW_KEY_UNKNOWN);
+            }
         }
 
         void
@@ -208,6 +207,7 @@ namespace oni {
             auto thiz = getThisFromGLFWWindow(window);
             thiz->mInput.setCursorX(x);
             thiz->mInput.setCursorY(y);
+            graphic::testDraw(&thiz->mBrushTrail, x, thiz->mHeight - y);
         }
 
         void
@@ -225,12 +225,6 @@ namespace oni {
 
         void
         Window::addKeyReleased(common::i32 key) { mInput.setReleased(key); }
-
-        common::i32
-        Window::getGameHeight() { return mGameHeight; }
-
-        common::i32
-        Window::getGameWidth() { return mGameWidth; }
 
         const common::i32 &
         Window::getHeight() const { return mHeight; }

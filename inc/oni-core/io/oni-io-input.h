@@ -82,7 +82,7 @@ namespace oni {
             std::vector<io::ScrollDirection> mScrollDirectionX{};
             std::vector<io::ScrollDirection> mScrollDirectionY{};
 
-            common::i32 mMouseButton{};
+            common::i32 mMouseButton{-1};
             common::r64 mCursorX{};
             common::r64 mCursorY{};
         };

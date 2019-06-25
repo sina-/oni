@@ -39,7 +39,7 @@ namespace oni {
              * @param height in local texture coordinates
              * @param bits data to overwrite the texture with, must match the given region
              */
-            void
+            static void
             updateSubTexture(const component::Texture &texture,
                              common::oniGLint xOffset,
                              common::oniGLint yOffset,

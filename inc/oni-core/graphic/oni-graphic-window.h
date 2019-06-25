@@ -4,6 +4,7 @@
 
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/graphic/oni-graphic-smooth-brush.h>
 
 class GLFWwindow;
 
@@ -43,12 +44,6 @@ namespace oni {
 
             const common::i32 &
             getHeight() const;
-
-            common::i32
-            getGameWidth();
-
-            common::i32
-            getGameHeight();
 
         private:
             void
@@ -109,9 +104,9 @@ namespace oni {
             std::string mTitle{};
             common::i32 mWidth{};
             common::i32 mHeight{};
-            common::i32 mGameWidth{};
-            common::i32 mGameHeight{};
             GLFWwindow *mWindow{};
+
+            graphic::BrushTrail mBrushTrail{};
         };
     }
 }

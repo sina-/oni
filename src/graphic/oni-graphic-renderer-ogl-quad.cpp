@@ -1,41 +1,30 @@
-#include <oni-core/graphic/oni-graphic-renderer-ogl-tessellation.h>
-
-#include <numeric>
-#include <cassert>
+#include <oni-core/graphic/oni-graphic-renderer-ogl-quad.h>
 
 #include <GL/glew.h>
 
-#include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/graphic/buffer/oni-graphic-buffer.h>
+#include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 #include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
-#include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
-#include <oni-core/graphic/oni-graphic-texture-manager.h>
-
+#include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
     namespace graphic {
-        Renderer_OpenGL_Tessellation::Renderer_OpenGL_Tessellation(common::oniGLsizei maxSpriteCount) :
-                Renderer_OpenGL(PrimitiveType::POINTS),
-                mMaxPrimitiveCount{maxSpriteCount} {
-            mMaxIndicesCount = mMaxPrimitiveCount;
-            common::oniGLsizei vertexSize = sizeof(graphic::TessellationVertex);
-            common::oniGLsizei primitiveSize = vertexSize * 1;
+        Renderer_OpenGL_Quad::Renderer_OpenGL_Quad(common::oniGLsizei maxPrimitiveCount) :
+                Renderer_OpenGL(PrimitiveType::TRIANGLES), mMaxPrimitiveCount(maxPrimitiveCount) {
+            mMaxIndicesCount = mMaxPrimitiveCount * 6;
+
+            common::oniGLsizei vertexSize = sizeof(graphic::QuadVertex);
+            common::oniGLsizei primitiveSize = vertexSize * 4;
 
             assert(mMaxIndicesCount < std::numeric_limits<common::i32>::max());
 
             common::oniGLsizei maxBufferSize{primitiveSize * mMaxPrimitiveCount};
 
-            auto vertShader = std::string_view("resources/shaders/tessellation.vert");
-            auto geomShader = std::string_view("resources/shaders/tessellation.geom");
-            auto fragShader = std::string_view("resources/shaders/tessellation.frag");
-            // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
-            // I am forcing the users to only depend on built-in shaders. I should think of a better way
-            // to provide flexibility in type of shaders users can define and expect to just work by having buffer
-            // structure and what not set up automatically. Asset system should take care of this.
-            // TODO: As it is now, BatchRenderer is coupled with the Shader. It requires the user to setup the
-            // shader prior to render series of calls. Maybe shader should be built into the renderer.
+            auto vertShader = std::string_view("resources/shaders/quad.vert");
+            auto geomShader = std::string_view("");
+            auto fragShader = std::string_view("resources/shaders/quad.frag");
             mShader = std::make_unique<graphic::Shader>(vertShader,
                                                         geomShader,
                                                         fragShader);
@@ -129,114 +118,90 @@ namespace oni {
             mShader->disable();
         }
 
-        Renderer_OpenGL_Tessellation::~Renderer_OpenGL_Tessellation() = default;
+        Renderer_OpenGL_Quad::~Renderer_OpenGL_Quad() = default;
 
         void
-        Renderer_OpenGL_Tessellation::submit(const component::WorldP3D &pos,
-                                             const component::Heading &heading,
-                                             const component::Scale &scale,
-                                             const component::Color &color,
-                                             const component::Texture &texture) {
-            assert(mIndexCount + 1 < mMaxIndicesCount);
-            auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
+        Renderer_OpenGL_Quad::submit(const component::WorldP3D *pos,
+                                     const component::Scale &scale,
+                                     const component::Color &color,
+                                     const component::Texture &texture) {
+            assert(mIndexCount + 6 < mMaxIndicesCount);
+
+            auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
             common::i32 samplerID = -1;
             if (!texture.image.path.empty()) {
                 samplerID = getSamplerID(texture.textureID);
             }
+            auto c = color.rgba();
 
-            buffer->position = pos.value;
-            buffer->heading = heading.value;
-            buffer->halfSize = math::vec2{scale.x / 2.f, scale.y / 2.f}; // TODO: Why not vec2 for Scale?
-            buffer->color = color.rgba();
-            buffer->uv[0] = texture.uv[0];
-            buffer->uv[1] = texture.uv[1];
-            buffer->uv[2] = texture.uv[2];
-            buffer->uv[3] = texture.uv[3];
+            // a.
+            buffer->pos = pos->value;
+            buffer->color = c;
+            buffer->uv = texture.uv[0];
             buffer->samplerID = samplerID;
-            buffer++;
+
+            ++buffer;
+            ++pos;
+
+            // b.
+            buffer->pos = pos->value;
+            buffer->color = c;
+            buffer->uv = texture.uv[1];
+            buffer->samplerID = samplerID;
+
+            ++buffer;
+            ++pos;
+
+            // c.
+            buffer->pos = pos->value;
+            buffer->color = c;
+            buffer->uv = texture.uv[2];
+            buffer->samplerID = samplerID;
+
+            ++buffer;
+            ++pos;
+
+            // d.
+            buffer->pos = pos->value;
+            buffer->color = c;
+            buffer->uv = texture.uv[0];
+            buffer->samplerID = samplerID;
+
+            ++buffer;
 
             // Update the mBuffer to point to the head.
             mBuffer = static_cast<void *>(buffer);
 
-            mIndexCount += 1;
-        }
-
-        // TODO: Move this into a font renderer
-        void
-        Renderer_OpenGL_Tessellation::submit(const component::Text &text,
-                                             const component::WorldP3D &pos) {
-            assert(false); // TODO: Need to re-implement this function
-            auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
-
-            auto samplerID = getSamplerID(text.textureID);
-
-            auto advance = 0.0f;
-
-            auto scaleX = text.xScaling;
-            auto scaleY = text.yScaling;
-
-            common::r32 z = 1.f;
-
-            for (common::u32 i = 0; i < text.textContent.size(); i++) {
-                assert(mIndexCount + 6 < mMaxIndicesCount);
-
-                auto x0 = pos.x + text.offsetX[i] / scaleX + advance;
-                auto y0 = pos.y + text.offsetY[i] / scaleY;
-                auto x1 = x0 + text.width[i] / scaleX;
-                auto y1 = y0 - text.height[i] / scaleY;
-
-                auto u0 = text.uv[i].x;
-                auto v0 = text.uv[i].y;
-                auto u1 = text.uv[i].z;
-                auto v1 = text.uv[i].w;
-
-                buffer->position = math::vec3{x0, y0, z};
-                buffer->uv[0] = math::vec2{u0, v0};
-                buffer->samplerID = samplerID;
-                buffer++;
-
-                buffer->position = math::vec3{x0, y1, z};
-                buffer->uv[1] = math::vec2{u0, v1};
-                buffer->samplerID = samplerID;
-                buffer++;
-
-                buffer->position = math::vec3{x1, y1, z};
-                buffer->uv[2] = math::vec2{u1, v1};
-                buffer->samplerID = samplerID;
-                buffer++;
-
-                buffer->position = math::vec3{x1, y0, z};
-                buffer->uv[3] = math::vec2{u1, v0};
-                buffer->samplerID = samplerID;
-                buffer++;
-
-                advance += text.advanceX[i] / scaleX;
-                mIndexCount += 6;
-            }
-
-            mBuffer = static_cast<void *>(buffer);
+            // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
+            // defined by 4 vertices only.
+            /**
+             *    1 +---+ 0
+             *      |  /|
+             *      |/  |
+             *    2 +---+ 3
+             **/
+            mIndexCount += 6;
         }
 
         void
-        Renderer_OpenGL_Tessellation::enableShader(const math::mat4 &model,
-                                                   const math::mat4 &view,
-                                                   const math::mat4 &proj,
-                                                   const math::vec2 &screenSize,
-                                                   common::r32 zoom) {
+        Renderer_OpenGL_Quad::enableShader(const math::mat4 &model,
+                                           const math::mat4 &view,
+                                           const math::mat4 &proj,
+                                           const math::vec2 &screenSize,
+                                           common::r32 zoom) {
             mShader->enable();
             mShader->setUniformMat4("view", view);
             mShader->setUniformMat4("proj", proj);
         }
 
-
         common::oniGLsizei
-        Renderer_OpenGL_Tessellation::getIndexCount() {
+        Renderer_OpenGL_Quad::getIndexCount() {
             return mIndexCount;
         }
 
         void
-        Renderer_OpenGL_Tessellation::resetIndexCount() {
+        Renderer_OpenGL_Quad::resetIndexCount() {
             mIndexCount = 0;
         }
     }

@@ -35,7 +35,7 @@ namespace oni {
 
         class Renderer_OpenGL_Strip;
 
-        class Renderer2D;
+        class Renderer;
 
         class TextureManager;
 
@@ -156,13 +156,13 @@ namespace oni {
 
         private:
             void
-            begin(Renderer2D &renderer2D,
+            begin(Renderer &renderer2D,
                   bool translate,
                   bool scale,
                   bool project);
 
             static void
-            end(Renderer2D &renderer2D);
+            end(Renderer &renderer2D);
 
             void
             initRenderer();

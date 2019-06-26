@@ -7,11 +7,11 @@ add_library(oni-core-graphic
         oni-graphic-font-manager.cpp
         oni-graphic-texture-manager.cpp
         oni-graphic-scene-manager.cpp
-        oni-graphic-renderer-2d.cpp
+        oni-graphic-renderer.cpp
         oni-graphic-renderer-ogl.cpp
         oni-graphic-renderer-ogl-tessellation.cpp
         oni-graphic-renderer-ogl-strip.cpp
-        oni-graphic-smooth-brush.cpp)
+        oni-graphic-smooth-brush.cpp oni-graphic-renderer-ogl-quad.cpp)
 
 target_compile_features(oni-core-graphic
         PUBLIC

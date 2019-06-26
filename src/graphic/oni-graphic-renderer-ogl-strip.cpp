@@ -169,45 +169,6 @@ namespace oni {
             mShader->setUniform1f("width", mStripeSize * zoom);
         }
 
-        void
-        Renderer_OpenGL_Strip::disableShader() {
-            mShader->disable();
-        }
-
-        void
-        Renderer_OpenGL_Strip::bindVertexArray() {
-            mVertexArray->bindVAO();
-        }
-
-        void
-        Renderer_OpenGL_Strip::unbindVertexArray() {
-            mVertexArray->unbindVAO();
-        }
-
-        void
-        Renderer_OpenGL_Strip::bindVertexBuffer() {
-            mVertexArray->bindVBO();
-        }
-
-        void
-        Renderer_OpenGL_Strip::unbindVertexBuffer() {
-            mVertexArray->unbindVBO();
-        }
-
-        void
-        Renderer_OpenGL_Strip::bindIndexBuffer() {
-            if (mIndexBuffer) {
-                mIndexBuffer->bind();
-            }
-        }
-
-        void
-        Renderer_OpenGL_Strip::unbindIndexBuffer() {
-            if (mIndexBuffer) {
-                mIndexBuffer->unbind();
-            }
-        }
-
         common::oniGLsizei
         Renderer_OpenGL_Strip::getIndexCount() {
             // NOTE: Buffer structure uses last and next vertices to decide on the direction,

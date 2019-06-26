@@ -1,13 +1,13 @@
-#include <oni-core/graphic/oni-graphic-renderer-2d.h>
+#include <oni-core/graphic/oni-graphic-renderer.h>
 
 namespace oni {
     namespace graphic {
-        Renderer2D::Renderer2D() = default;
+        Renderer::Renderer() = default;
 
-        Renderer2D::~Renderer2D() = default;
+        Renderer::~Renderer() = default;
 
         void
-        Renderer2D::begin(const math::mat4 &model,
+        Renderer::begin(const math::mat4 &model,
                           const math::mat4 &view,
                           const math::mat4 &proj,
                           const math::vec2 &screenSize,
@@ -18,7 +18,7 @@ namespace oni {
         }
 
         void
-        Renderer2D::end() {
+        Renderer::end() {
             assert(mBegun);
             _end();
             _flush();

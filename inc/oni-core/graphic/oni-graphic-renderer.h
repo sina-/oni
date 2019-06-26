@@ -30,19 +30,19 @@ namespace oni {
         enum class PrimitiveType : common::u8 {
             UNKNOWN,
 
-            POINT,
-            LINE,
-            TRIANGLE,
+            POINTS,
+            LINES,
+            TRIANGLES,
             TRIANGLE_STRIP,
 
             LAST
         };
 
-        class Renderer2D {
+        class Renderer {
         protected:
-            Renderer2D();
+            Renderer();
 
-            virtual ~Renderer2D();
+            virtual ~Renderer();
 
         public:
             void

@@ -17,7 +17,10 @@ namespace oni {
             math::vec2 halfSize{1.f};
             math::vec3 position{0.f, 0.f, 0.f};
             math::vec4 color{0.f, 0.f, 0.f, 0.f};
-            math::vec2 uv[4] = {math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
+            math::vec2 uv[4]{{0, 0},
+                             {0, 1},
+                             {1, 1},
+                             {1, 0}};
         };
 
         struct StripVertex {
@@ -26,6 +29,13 @@ namespace oni {
             math::vec3 bc{};
             //math::vec4 color{0.f, 0.f, 0.f, 0.f};
             //common::oniGLint samplerID{-1};
+        };
+
+        struct QuadVertex {
+            common::oniGLint samplerID{-1};
+            math::vec4 color{0.f, 0.f, 0.f, 0.f};
+            math::vec2 uv{};
+            math::vec3 pos{};
         };
 
         struct BufferStructure {

@@ -38,24 +38,6 @@ namespace oni {
                    const component::WorldP3D &);
 
         protected:
-            void
-            bindVertexArray() override;
-
-            void
-            bindIndexBuffer() override;
-
-            void
-            unbindVertexArray() override;
-
-            void
-            bindVertexBuffer() override;
-
-            void
-            unbindVertexBuffer() override;
-
-            void
-            unbindIndexBuffer() override;
-
             common::oniGLsizei
             getIndexCount() override;
 
@@ -69,23 +51,12 @@ namespace oni {
                          const math::vec2 &screenSize,
                          common::r32 zoom) override;
 
-            void
-            disableShader() override;
-
-
         private:
             common::oniGLsizei mMaxPrimitiveCount{0};
-            common::oniGLsizei mVertexSize{0};
             common::oniGLsizei mMaxIndicesCount{0};
-            common::oniGLsizei mPrimitiveSize{0};
 
             // Actual number of indices used.
             common::oniGLsizei mIndexCount{0};
-
-            std::unique_ptr<Shader> mShader{};
-
-            std::unique_ptr<buffer::VertexArray> mVertexArray{nullptr};
-            std::unique_ptr<buffer::IndexBuffer> mIndexBuffer{nullptr};
         };
 
     }

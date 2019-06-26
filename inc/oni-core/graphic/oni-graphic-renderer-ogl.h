@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <oni-core/common/oni-common-typedefs-graphic.h>
-#include <oni-core/graphic/oni-graphic-renderer-2d.h>
+#include <oni-core/graphic/oni-graphic-renderer.h>
 
 
 namespace oni {
@@ -15,7 +15,9 @@ namespace oni {
     }
 
     namespace graphic {
-        class Renderer_OpenGL : public Renderer2D {
+        class Shader;
+
+        class Renderer_OpenGL : public Renderer {
         public:
             explicit Renderer_OpenGL(PrimitiveType);
 
@@ -44,7 +46,7 @@ namespace oni {
                          common::r32 zoom) = 0;
 
             virtual void
-            disableShader() = 0;
+            disableShader();
 
             // TODO: checkout texture arrays.
             /**
@@ -57,22 +59,22 @@ namespace oni {
             getSamplerID(common::oniGLuint textureID);
 
             virtual void
-            bindVertexArray() = 0;
+            bindVertexArray();
 
             virtual void
-            unbindVertexArray() = 0;
+            unbindVertexArray();
 
             virtual void
-            bindVertexBuffer() = 0;
+            bindVertexBuffer();
 
             virtual void
-            unbindVertexBuffer() = 0;
+            unbindVertexBuffer();
 
             virtual void
-            bindIndexBuffer() = 0;
+            bindIndexBuffer();
 
             virtual void
-            unbindIndexBuffer() = 0;
+            unbindIndexBuffer();
 
             virtual common::oniGLsizei
             getIndexCount() = 0;
@@ -85,6 +87,10 @@ namespace oni {
 
             // TODO: Arbitrary number, query the graphics card for it
             common::oniGLint mMaxNumTextureSamplers{32};
+
+            std::unique_ptr<Shader> mShader{};
+            std::unique_ptr<buffer::VertexArray> mVertexArray{nullptr};
+            std::unique_ptr<buffer::IndexBuffer> mIndexBuffer{nullptr};
 
         private:
             PrimitiveType mPrimitiveType{PrimitiveType::UNKNOWN};

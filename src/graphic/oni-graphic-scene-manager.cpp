@@ -73,7 +73,7 @@ namespace oni {
         }
 
         void
-        SceneManager::begin(Renderer2D &renderer2D,
+        SceneManager::begin(Renderer &renderer2D,
                             bool translate,
                             bool scale,
                             bool project) {
@@ -102,7 +102,7 @@ namespace oni {
         }
 
         void
-        SceneManager::end(Renderer2D &renderer2D) {
+        SceneManager::end(Renderer &renderer2D) {
             renderer2D.end();
         }
 

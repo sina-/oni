@@ -8,6 +8,7 @@
 #include <oni-core/graphic/buffer/oni-graphic-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
+#include <oni-core/graphic/oni-graphic-shader.h>
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 
 
@@ -72,15 +73,15 @@ namespace oni {
             bindIndexBuffer();
 
             switch (mPrimitiveType) {
-                case PrimitiveType::POINT: {
+                case PrimitiveType::POINTS: {
                     glDrawArrays(GL_POINTS, 0, indexCount);
                     break;
                 }
-                case PrimitiveType::LINE: {
+                case PrimitiveType::LINES: {
                     glDrawArrays(GL_LINES, 0, indexCount);
                     break;
                 }
-                case PrimitiveType::TRIANGLE: {
+                case PrimitiveType::TRIANGLES: {
                     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
                     break;
                 }
@@ -101,6 +102,45 @@ namespace oni {
             resetIndexCount();
 
             disableShader();
+        }
+
+        void
+        Renderer_OpenGL::disableShader() {
+            mShader->disable();
+        }
+
+        void
+        Renderer_OpenGL::bindVertexArray() {
+            mVertexArray->bindVAO();
+        }
+
+        void
+        Renderer_OpenGL::unbindVertexArray() {
+            mVertexArray->unbindVAO();
+        }
+
+        void
+        Renderer_OpenGL::bindVertexBuffer() {
+            mVertexArray->bindVBO();
+        }
+
+        void
+        Renderer_OpenGL::unbindVertexBuffer() {
+            mVertexArray->unbindVBO();
+        }
+
+        void
+        Renderer_OpenGL::bindIndexBuffer() {
+            if (mIndexBuffer) {
+                mIndexBuffer->bind();
+            }
+        }
+
+        void
+        Renderer_OpenGL::unbindIndexBuffer() {
+            if (mIndexBuffer) {
+                mIndexBuffer->unbind();
+            }
         }
     }
 }

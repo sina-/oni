@@ -103,9 +103,32 @@ namespace oni {
         };
 
         struct Velocity {
-            common::r32 currentVelocity{0.f};
-            common::r32 maxVelocity{0.f};
+            common::r32 current{0.f};
+            common::r32 max{0.f};
         };
+
+        struct Acceleration {
+            common::r32 current{0.f};
+            common::r32 max{0.f};
+        };
+
+
+        union Velocity2D {
+            struct {
+                common::r32 x{0};
+                common::r32 y{0};
+            };
+            math::vec2 value;
+        };
+
+        union Acceleration2D {
+            struct {
+                common::r32 x{0};
+                common::r32 y{0};
+            };
+            math::vec2 value;
+        };
+
 
         struct Age {
             common::duration currentAge{0.f};

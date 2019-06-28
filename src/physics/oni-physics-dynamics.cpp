@@ -502,7 +502,7 @@ namespace oni {
                     const auto &heading = view.get<component::Heading>(id).value;
 
                     auto currentVelocity =
-                            5 * (velocity.currentVelocity * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
+                            5 * (velocity.current * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
 
                     math::zeroClip(currentVelocity);
 

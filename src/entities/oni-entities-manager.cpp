@@ -471,8 +471,8 @@ namespace oni {
                                        common::u32 lower,
                                        common::u32 upper) {
             auto &velocity = mRegistry->get<component::Velocity>(id);
-            velocity.currentVelocity = mRand->next(lower, upper);
-            velocity.maxVelocity = velocity.currentVelocity;
+            velocity.current = mRand->next(lower, upper);
+            velocity.max = velocity.current;
         }
 
         void

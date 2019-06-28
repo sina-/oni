@@ -24,43 +24,32 @@ namespace oni {
         void
         addSegment(BrushTrail *f) {
             float delx, dely;
-            float wid, *fptr;
+            float wid;
             float px, py, nx, ny;
 
-            wid = 0.04 - f->vel;
+            wid = 0.04 - f->velocity.current;
             wid = wid * 1.5;
             if (wid < 0.00001)
                 wid = 10.00001;
-            delx = f->angx * wid;
-            dely = f->angy * wid;
+            delx = f->heading.x * wid;
+            dely = f->heading.y * wid;
 
-            px = f->lastx;
-            py = f->lasty;
-            nx = f->curx;
-            ny = f->cury;
+            px = f->last.x;
+            py = f->last.y;
+            nx = f->current.x;
+            ny = f->current.y;
 
-            fptr = f->polyverts + 8 * f->nsegs;
-            ///
-            fptr[0] = px + f->lastdelx;
-            fptr[1] = py + f->lastdely;
+            auto a = component::WorldP2D{px + f->lastDelta.x, py + f->lastDelta.y};
+            f->vertices.push_back(a);
 
-            fptr += 2;
-            fptr[0] = px - f->lastdelx;
-            fptr[1] = py - f->lastdely;
+            auto b = component::WorldP2D{px - f->lastDelta.x, py - f->lastDelta.y};
+            f->vertices.push_back(b);
 
-            fptr += 2;
-            fptr[0] = nx - delx;
-            fptr[1] = ny - dely;
+            auto c = component::WorldP2D{nx - delx, ny - dely};
+            f->vertices.push_back(c);
 
-            fptr += 2;
-            fptr[0] = nx + delx;
-            fptr[1] = ny + dely;
-            ///
-
-            f->nsegs++;
-            if (f->nsegs >= MAXPOLYS) {
-                assert(false);
-            }
+            auto d = component::WorldP2D{nx + delx, ny + dely};
+            f->vertices.push_back(d);
 
 //            ///
 //            glBegin(GL_LINE_LOOP);
@@ -81,23 +70,23 @@ namespace oni {
 //            glEnd();
 //            ///
 
-            f->lastdelx = delx;
-            f->lastdely = dely;
+            f->lastDelta.x = delx;
+            f->lastDelta.y = dely;
         }
-
 
         void
         filtersetpos(BrushTrail *f,
                      float x,
                      float y) {
-            f->curx = x;
-            f->cury = y;
-            f->lastx = x;
-            f->lasty = y;
-            f->velx = 0.0;
-            f->vely = 0.0;
-            f->accx = 0.0;
-            f->accy = 0.0;
+            f->current.x = x;
+            f->current.y = y;
+            f->last.x = x;
+            f->last.y = y;
+            f->velocity2d.x = 0.0;
+            f->velocity2d.y = 0.0;
+            f->acceleration2d.x = 0.0;
+            f->acceleration2d.y = 0.0;
+            f->acceleration.current = 0.0;
         }
 
         int
@@ -114,76 +103,78 @@ namespace oni {
             drag = 0.6;//flerp(0.00, 0.5, curdrag * curdrag);
 
             /* calculate force and acceleration */
-            fx = mx - f->curx;
-            fy = my - f->cury;
-            f->acc = sqrt(fx * fx + fy * fy);
-            if (f->acc < 0.000001) {
+            fx = mx - f->current.x;
+            fy = my - f->current.y;
+            f->acceleration.current = sqrt(fx * fx + fy * fy);
+            if (f->acceleration.current < 0.000001) {
                 return 0;
             }
-            f->accx = fx / mass;
-            f->accy = fy / mass;
+            f->acceleration2d.x = fx / mass;
+            f->acceleration2d.y = fy / mass;
 
             /* calculate new velocity */
-            f->velx += f->accx;
-            f->vely += f->accy;
-            f->vel = sqrt(f->velx * f->velx + f->vely * f->vely);
-            f->angx = -f->vely;
-            f->angy = f->velx;
-            if (f->vel < 0.000001) {
+            f->velocity2d.x += f->acceleration2d.x;
+            f->velocity2d.y += f->acceleration2d.y;
+
+            f->velocity.current = sqrt(f->velocity2d.x * f->velocity2d.x + f->velocity2d.y * f->velocity2d.y);
+            f->heading.x = -f->velocity2d.y;
+            f->heading.y = f->velocity2d.x;
+            if (f->velocity.current < 0.000001) {
                 return 0;
             }
 
             /* calculate angle of drawing tool */
-            f->angx /= f->vel;
-            f->angy /= f->vel;
+            f->heading.x /= f->velocity.current;
+            f->heading.y /= f->velocity.current;
 //            if (f->fixedangle) {
 //                f->angx = 0.6;
 //                f->angy = 0.2;
 //            }
 
             /* apply drag */
-            f->velx = f->velx * (1.0 - drag);
-            f->vely = f->vely * (1.0 - drag);
+            f->velocity2d.x = f->velocity2d.x * (1.0 - drag);
+            f->velocity2d.y = f->velocity2d.y * (1.0 - drag);
 
             /* update position */
-            f->lastx = f->curx;
-            f->lasty = f->cury;
+            f->last.x = f->current.x;
+            f->last.y = f->current.y;
 
-            f->curx += f->velx;
-            f->cury += f->vely;
+            f->current.x += f->velocity2d.x;
+            f->current.y += f->velocity2d.y;
             return 1;
         }
 
         void
         render(BrushTrail *f) {
-            auto fptr = f->polyverts;
-            glShadeModel(GL_FLAT);
-            glBegin(GL_TRIANGLES);
-            for (int i = 0; i < f->nsegs; ++i) {
-                /// a
-                glVertex2fv(fptr);
+           glBegin(GL_TRIANGLES);
+            for (common::size i = 0; i + 4 < f->vertices.size(); ) {
+                // a
+                glVertex2f(f->vertices[i].x, f->vertices[i].y);
 
-                fptr += 2;
-                /// b
-                glVertex2fv(fptr);
+                // b
+                ++i;
+                glVertex2f(f->vertices[i].x, f->vertices[i].y);
 
-                fptr += 2;
-                /// c
-                glVertex2fv(fptr);
+                // c
+                ++i;
+                glVertex2f(f->vertices[i].x, f->vertices[i].y);
 
-                fptr -= 4;
-                /// a
-                glVertex2fv(fptr);
+                // a
+                --i;
+                --i;
+                glVertex2f(f->vertices[i].x, f->vertices[i].y);
 
-                fptr += 4;
-                /// c
-                glVertex2fv(fptr);
+                // c
+                ++i;
+                ++i;
+                glVertex2f(f->vertices[i].x, f->vertices[i].y);
 
-                fptr += 2;
-                /// d
-                glVertex2fv(fptr);
+                // d
+                ++i;
+                glVertex2f(f->vertices[i].x, f->vertices[i].y);
 
-                fptr += 2;
+                ++i;
+
             }
             glEnd();
         }

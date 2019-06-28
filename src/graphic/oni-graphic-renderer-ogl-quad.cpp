@@ -32,14 +32,12 @@ namespace oni {
             auto program = mShader->getProgram();
 
             auto positionIndex = glGetAttribLocation(program, "position");
-            auto headingIndex = glGetAttribLocation(program, "heading");
-            auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
             auto colorIndex = glGetAttribLocation(program, "color");
             auto uvIndex = glGetAttribLocation(program, "uv");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
 
-            if (positionIndex == -1 || headingIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
-                samplerIDIndex == -1 || halfSizeIndex == -1) {
+            if (positionIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
+                samplerIDIndex == -1) {
                 assert(false);
             }
 
@@ -51,32 +49,13 @@ namespace oni {
             sampler.stride = vertexSize;
             sampler.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
-            graphic::BufferStructure halfSize;
-            halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
-            halfSize.componentCount = 2;
-            halfSize.componentType = GL_FLOAT;
-            halfSize.normalized = GL_FALSE;
-            halfSize.stride = vertexSize;
-            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
-                                                                                   halfSize));
-
-            graphic::BufferStructure heading;
-            heading.index = static_cast<common::oniGLuint>(headingIndex);
-            heading.componentCount = 1;
-            heading.componentType = GL_FLOAT;
-            heading.normalized = GL_FALSE;
-            heading.stride = vertexSize;
-            heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
-                                                                                  heading));
-
             graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
             position.componentCount = 3;
             position.componentType = GL_FLOAT;
             position.normalized = GL_FALSE;
             position.stride = vertexSize;
-            position.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
-                                                                                   position));
+            position.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, pos));
 
             graphic::BufferStructure color;
             color.index = static_cast<common::oniGLuint>(colorIndex);
@@ -84,7 +63,7 @@ namespace oni {
             color.componentType = GL_FLOAT;
             color.normalized = GL_TRUE;
             color.stride = vertexSize;
-            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, color));
+            color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, color));
 
             graphic::BufferStructure uv;
             uv.index = static_cast<common::oniGLuint>(uvIndex);
@@ -92,12 +71,10 @@ namespace oni {
             uv.componentType = GL_FLOAT;
             uv.normalized = GL_TRUE;
             uv.stride = vertexSize;
-            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, uv));
+            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, uv));
 
             std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(sampler);
-            bufferStructures.push_back(halfSize);
-            bufferStructures.push_back(heading);
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
             bufferStructures.push_back(uv);

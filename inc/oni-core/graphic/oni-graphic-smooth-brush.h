@@ -1,29 +1,33 @@
 #pragma once
 
+#include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-physics.h>
+
 namespace oni {
     namespace graphic {
-#define MAXPOLYS    (4 * 2 * 10000)
         struct BrushTrail {
-            float curx, cury;
-            float velx, vely, vel;
-            float accx, accy, acc;
-            float angx, angy;
-            float mass, drag;
-            float lastx, lasty;
-            float lastdelx, lastdely;
-            float polyverts[MAXPOLYS];
-            int nsegs = 0;
+            common::r32 mass{1};
+            component::Heading2D heading{};
+            component::WorldP2D last{};
+            component::WorldP2D lastDelta{};
+            component::WorldP2D current{};
+            component::Velocity2D velocity2d{};
+            component::Velocity velocity{};
+            component::Acceleration acceleration{};
+            component::Acceleration2D acceleration2d{};
+            std::vector<component::WorldP2D> vertices;
         };
 
         void
         testDraw(BrushTrail *f,
-                 float x,
-                 float y);
+                 common::r32 x,
+                 common::r32 y);
 
         void
         filtersetpos(BrushTrail *f,
-                     float x,
-                     float y);
+                     common::r32 x,
+                     common::r32 y);
     }
 }
 

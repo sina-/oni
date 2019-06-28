@@ -12,6 +12,7 @@
 #include <oni-core/graphic/oni-graphic-brush.h>
 #include <oni-core/graphic/oni-graphic-renderer-ogl-tessellation.h>
 #include <oni-core/graphic/oni-graphic-renderer-ogl-strip.h>
+#include <oni-core/graphic/oni-graphic-renderer-ogl-quad.h>
 #include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>
 #include <oni-core/graphic/oni-graphic-font-manager.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
@@ -70,6 +71,7 @@ namespace oni {
         SceneManager::initRenderer() {
             mRendererTessellation = std::make_unique<Renderer_OpenGL_Tessellation>(mMaxSpriteCount);
             mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
+            mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
         }
 
         void
@@ -298,6 +300,14 @@ namespace oni {
                     end(*mRendererStrip);
                 }
             }
+        }
+
+        void
+        SceneManager::renderQuad(entities::EntityManager &serverManager,
+                                 entities::EntityManager &clientManager,
+                                 common::r32 viewWidth,
+                                 common::r32 viewHeight) {
+
         }
 
         void

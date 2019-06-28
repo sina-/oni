@@ -35,6 +35,8 @@ namespace oni {
 
         class Renderer_OpenGL_Strip;
 
+        class Renderer_OpenGL_Quad;
+
         class Renderer;
 
         class TextureManager;
@@ -138,6 +140,12 @@ namespace oni {
                         common::r32 viewHeight);
 
             void
+            renderQuad(entities::EntityManager &serverManager,
+                       entities::EntityManager &clientManager,
+                       common::r32 viewWidth,
+                       common::r32 viewHeight);
+
+            void
             renderTessellationColor(entities::EntityManager &,
                                     common::r32 viewWidth,
                                     common::r32 viewHeight);
@@ -209,6 +217,7 @@ namespace oni {
         private:
             std::unique_ptr<Renderer_OpenGL_Tessellation> mRendererTessellation{};
             std::unique_ptr<Renderer_OpenGL_Strip> mRendererStrip{};
+            std::unique_ptr<Renderer_OpenGL_Quad> mRendererQuad{};
 
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};

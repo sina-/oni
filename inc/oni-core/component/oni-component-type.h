@@ -12,6 +12,7 @@ namespace oni {
             SMOKE_EMITTER_CD,
             SOUND_PITCH,
             TEXTURE,
+            BRUSH_TRAIL,
 
             LAST
         };

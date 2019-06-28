@@ -29,6 +29,7 @@ namespace oni {
         Input::reset() {
             mScrollDirectionX.clear();
             mScrollDirectionY.clear();
+            mCursorPos.clear();
         }
 
         bool
@@ -93,15 +94,14 @@ namespace oni {
         Input::getMouseButton() const { return mMouseButton; }
 
         void
-        Input::setCursorX(oni::common::r64 x) { mCursorX = x; }
+        Input::addCursor(oni::common::r64 x,
+                         oni::common::r64 y) {
+            mCursorPos.push_back({oni::common::r32(x), oni::common::r32(y)});
+        }
 
-        const oni::common::r64 &
-        Input::getCursorX() const { return mCursorX; }
-
-        void
-        Input::setCursorY(oni::common::r64 y) { mCursorY = y; }
-
-        const oni::common::r64 &
-        Input::getCursorY() const { return mCursorY; }
+        const std::vector<component::WorldP2D> &
+        Input::getCursor() const {
+            return mCursorPos;
+        }
     }
 }

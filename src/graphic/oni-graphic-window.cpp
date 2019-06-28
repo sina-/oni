@@ -205,9 +205,7 @@ namespace oni {
                                   double y) {
             TwEventMousePosGLFW(x, y);
             auto thiz = getThisFromGLFWWindow(window);
-            thiz->mInput.setCursorX(x);
-            thiz->mInput.setCursorY(y);
-            graphic::testDraw(&thiz->mBrushTrail, x, thiz->mHeight - y);
+            thiz->mInput.addCursor(x, thiz->mHeight - y);
         }
 
         void

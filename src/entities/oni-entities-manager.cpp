@@ -84,6 +84,10 @@ namespace oni {
                                 createComponent<component::Texture>(cId);
                                 break;
                             }
+                            case component::ComponentType::BRUSH_TRAIL: {
+                               createComponent<component::BrushTrail>(cId);
+                               break;
+                            }
                             case component::ComponentType::UNKNOWN:
                             case component::ComponentType::LAST:
                             default: {
@@ -597,6 +601,7 @@ namespace oni {
             cc.types.emplace_back(component::ComponentType::SMOKE_EMITTER_CD);
             cc.types.emplace_back(component::ComponentType::SOUND_PITCH);
             cc.types.emplace_back(component::ComponentType::TEXTURE);
+            cc.types.emplace_back(component::ComponentType::BRUSH_TRAIL);
 
             assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Dynamic>(id);

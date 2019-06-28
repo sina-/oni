@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <oni-core/io/oni-io-input-data.h>
+#include <oni-core/component/oni-component-geometry.h>
 
 namespace oni {
     namespace io {
@@ -61,19 +62,14 @@ namespace oni {
             setMouseButton(common::i32 button);
 
             void
-            setCursorY(oni::common::r64 y);
+            addCursor(oni::common::r64 x,
+                      oni::common::r64 y);
 
-            void
-            setCursorX(oni::common::r64 x);
+            const std::vector<component::WorldP2D>&
+            getCursor() const;
 
             const common::i32 &
             getMouseButton() const;
-
-            const oni::common::r64 &
-            getCursorX() const;
-
-            const oni::common::r64 &
-            getCursorY() const;
 
         private:
             std::vector<io::oniKeyPress> mKeysPressed{};
@@ -83,8 +79,7 @@ namespace oni {
             std::vector<io::ScrollDirection> mScrollDirectionY{};
 
             common::i32 mMouseButton{-1};
-            common::r64 mCursorX{};
-            common::r64 mCursorY{};
+            std::vector<component::WorldP2D> mCursorPos{};
         };
     }
 }

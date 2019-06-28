@@ -172,9 +172,6 @@ namespace oni {
             static void
             end(Renderer &renderer2D);
 
-            void
-            initRenderer();
-
             common::EntityID
             createText(entities::EntityManager &,
                        const component::WorldP3D &worldPos,

@@ -387,11 +387,6 @@ namespace oni {
             {
                 updateAge(manager, tickTime);
             }
-
-            /// Update placement
-            {
-                updatePlacement(manager, tickTime);
-            }
         }
 
         b2World *
@@ -485,11 +480,12 @@ namespace oni {
         }
 
         void
-        Dynamics::updatePlacement(entities::EntityManager &manager,
-                                  common::r64 tickTime) {
+        Dynamics::updatePosition(const entities::EntityManager &server,
+                                 entities::EntityManager &client,
+                                 common::r64 tickTime) {
             /// Update particle placement - client
             {
-                auto view = manager.createView<
+                auto view = client.createView<
                         component::Tag_SimModeClient,
                         component::WorldP3D,
                         component::Velocity,
@@ -513,6 +509,134 @@ namespace oni {
                     pos.y += y;
                 }
             }
+            // TODO: How does this compare to WorldP3D_History component and how it is used? I need to pick one.
+            /// Brush trails - client
+            {
+                auto view = server.createView<
+                        component::WorldP3D,
+                        component::Car>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto cId = client.getComplementOf(id);
+                    auto &brushTrail = client.get<component::BrushTrail>(cId);
+
+                    if (!brushTrail.initialized) {
+                        brushTrail.current.x = pos.x;
+                        brushTrail.current.y = pos.y;
+                        brushTrail.last.x = pos.x;
+                        brushTrail.last.y = pos.y;
+                        brushTrail.velocity2d.x = 0.0;
+                        brushTrail.velocity2d.y = 0.0;
+                        brushTrail.acceleration2d.x = 0.0;
+                        brushTrail.acceleration2d.y = 0.0;
+                        brushTrail.acceleration.current = 0.0;
+                        brushTrail.initialized = true;
+                    }
+
+                    constexpr auto threshold = 5.f;
+                    if (math::abs(brushTrail.last.x - pos.x) < threshold &&
+                        math::abs(brushTrail.last.y - pos.y) < threshold) {
+                        break;
+                    }
+
+                    auto curMass = 2.5f;
+                    auto curDrag = 0.25f;
+                    if (updateBrush(brushTrail, curMass, curDrag, pos.x, pos.y)) {
+                        addBrushSegment(brushTrail);
+                    }
+                }
+            }
+        }
+
+        bool
+        Dynamics::updateBrush(component::BrushTrail &trail,
+                              common::r32 curMass,
+                              common::r32 curDrag,
+                              common::r32 x,
+                              common::r32 y) {
+            /* calculate mass and drag */
+            auto mass = 1.f;//math::lerp(1.0, 160.0, curmass);
+            auto drag = 0.6f;//math::lerp(0.00, 0.5, curdrag * curdrag);
+
+            /* calculate force and acceleration */
+            auto forceX = x - trail.current.x;
+            auto forceY = y - trail.current.y;
+            trail.acceleration.current = sqrt(forceX * forceX + forceY * forceY);
+            if (trail.acceleration.current < 0.000001) {
+                return false;
+            }
+            trail.acceleration2d.x = forceX / mass;
+            trail.acceleration2d.y = forceY / mass;
+
+            /* calculate new velocity */
+            trail.velocity2d.x += trail.acceleration2d.x;
+            trail.velocity2d.y += trail.acceleration2d.y;
+
+            trail.velocity.current = sqrt(
+                    trail.velocity2d.x * trail.velocity2d.x + trail.velocity2d.y * trail.velocity2d.y);
+            trail.heading.x = -trail.velocity2d.y;
+            trail.heading.y = trail.velocity2d.x;
+            if (trail.velocity.current < 0.000001) {
+                return false;
+            }
+
+            /* calculate angle of drawing tool */
+            trail.heading.x /= trail.velocity.current;
+            trail.heading.y /= trail.velocity.current;
+//            if (f.fixedangle) {
+//                f.angx = 0.6;
+//                f.angy = 0.2;
+//            }
+
+            /* apply drag */
+            trail.velocity2d.x = trail.velocity2d.x * (1.0 - drag);
+            trail.velocity2d.y = trail.velocity2d.y * (1.0 - drag);
+
+            /* update position */
+            trail.last.x = trail.current.x;
+            trail.last.y = trail.current.y;
+
+            trail.current.x += trail.velocity2d.x;
+            trail.current.y += trail.velocity2d.y;
+            return true;
+        }
+
+        void
+        Dynamics::addBrushSegment(component::BrushTrail &trail) {
+            common::r32 delX;
+            common::r32 delY;
+            common::r32 width;
+            common::r32 previousX;
+            common::r32 previousY;
+
+            width = 0.04 - trail.velocity.current;
+            width = width * 1.5;
+            if (width < 0.0001) {
+                // TODO: Get it from the brush
+                width = 1.00001;
+            }
+            delX = trail.heading.x * width;
+            delY = trail.heading.y * width;
+
+            previousX = trail.last.x;
+            previousY = trail.last.y;
+
+            // TODO: ZZZZZZZZZ
+            constexpr common::r32 z = 1.f;
+            auto a = component::WorldP3D{previousX + trail.lastDelta.x, previousY + trail.lastDelta.y, z};
+            trail.vertices.push_back(a);
+
+            auto b = component::WorldP3D{previousX - trail.lastDelta.x, previousY - trail.lastDelta.y, z};
+            trail.vertices.push_back(b);
+
+            auto c = component::WorldP3D{trail.current.x - delX, trail.current.y - delY, z};
+            trail.vertices.push_back(c);
+
+            auto d = component::WorldP3D{trail.current.x + delX, trail.current.y + delY, z};
+            trail.vertices.push_back(d);
+
+            trail.lastDelta.x = delX;
+            trail.lastDelta.y = delY;
         }
 
         void

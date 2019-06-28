@@ -52,7 +52,9 @@ namespace oni {
 
             mModelMatrix = math::mat4::identity();
 
-            initRenderer();
+            mRendererTessellation = std::make_unique<Renderer_OpenGL_Tessellation>(mMaxSpriteCount);
+            mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
+            mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
 
             mTextureManager = std::make_unique<TextureManager>(mAssetManager);
 
@@ -66,13 +68,6 @@ namespace oni {
         }
 
         SceneManager::~SceneManager() = default;
-
-        void
-        SceneManager::initRenderer() {
-            mRendererTessellation = std::make_unique<Renderer_OpenGL_Tessellation>(mMaxSpriteCount);
-            mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
-            mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
-        }
 
         void
         SceneManager::begin(Renderer &renderer2D,
@@ -138,6 +133,20 @@ namespace oni {
                 // TODO: This should actually be split up from static text and entities part of UI should be tagged so
                 // renderStaticText(entityManager, viewWidth, viewHeight);
                 //end(*mTextureShader, *mTextureRenderer);
+            }
+
+            /// Test draw brush trail
+            {
+                begin(*mRendererQuad, true, true, true);
+                auto view = clientManager.createView<component::BrushTrail>();
+                for (auto &&id: view) {
+                    const auto &trail = view.get<component::BrushTrail>(id);
+                    for (common::size i = 0; i + 4 < trail.vertices.size();) {
+                        mRendererQuad->submit(&trail.vertices[i], {}, component::Color::WHITE(), {});
+                        i += 4;
+                    }
+                }
+                end(*mRendererQuad);
             }
         }
 
@@ -546,7 +555,8 @@ namespace oni {
             auto &canvasTexture = entityManager.get<component::Texture>(entityID);
             auto canvasTilePos = entityManager.get<component::WorldP3D>(entityID);
             auto canvasSize = entityManager.get<component::Scale>(entityID);
-            auto pos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f, canvasTilePos.y - canvasSize.y / 2.f,
+            auto pos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f,
+                                           canvasTilePos.y - canvasSize.y / 2.f,
                                            canvasTilePos.z};
 
             auto brushTexturePos = worldPos;
@@ -597,7 +607,8 @@ namespace oni {
             if (!exists) {
                 auto zLevel = mZLayerManager.getZForEntity(entities::EntityType::UI);
                 RaceInfoEntities carLapText{0};
-                auto lapRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f, zLevel};
+                auto lapRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f,
+                                                        zLevel};
                 auto lapTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f,
                                                             zLevel};
                 auto bestTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f,

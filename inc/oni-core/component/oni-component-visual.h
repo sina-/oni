@@ -11,6 +11,7 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-physics.h>
 
 namespace oni {
     namespace component {
@@ -221,6 +222,22 @@ namespace oni {
                 set_a(_a);
             }
 
+            static constexpr
+            Color
+            WHITE() {
+                auto color = Color{};
+                color.value = (255u << 24u) | (255u << 16u) | (255u << 8u) | (255u);
+                return color;
+            }
+
+            static constexpr
+            Color
+            BLACK() {
+                auto color = Color{};
+                color.value = (0u << 24u) | (0u << 16u) | (0u << 8u) | (255u);
+                return color;
+            }
+
             common::u32 value{0};
 
             static constexpr common::u32 rMask{0xff000000};
@@ -241,6 +258,20 @@ namespace oni {
         struct SmokeEmitterCD {
             common::r64 currentCD{0.f};
             common::r64 initialCD{0.2f};
+        };
+
+        struct BrushTrail {
+            bool initialized{false};
+            common::r32 mass{1};
+            component::Heading2D heading{};
+            component::WorldP2D last{};
+            component::WorldP2D lastDelta{};
+            component::WorldP2D current{};
+            component::Velocity2D velocity2d{};
+            component::Velocity velocity{};
+            component::Acceleration acceleration{};
+            component::Acceleration2D acceleration2d{};
+            std::vector<component::WorldP3D> vertices;
         };
     }
 }

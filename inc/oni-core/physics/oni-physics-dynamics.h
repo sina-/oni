@@ -22,6 +22,10 @@ namespace oni {
         class Rand;
     }
 
+    namespace component {
+        struct BrushTrail;
+    }
+
     namespace physics {
         class Projectile;
 
@@ -37,6 +41,13 @@ namespace oni {
             tick(entities::EntityManager &,
                  entities::ClientDataManager *clientData,
                  common::r64 tickTime);
+
+            // TODO: Part of the mess that serperation of server and client managers causes is that I can't
+            // just call this function from tick()
+            static void
+            updatePosition(const entities::EntityManager &server,
+                           entities::EntityManager &client,
+                           common::r64 tickTime);
 
         public:
             // TODO: Not very happy about this exposure, but it is really the simplest solution right now and only
@@ -78,9 +89,15 @@ namespace oni {
             updateAge(entities::EntityManager &,
                       common::r64 tickTime);
 
+            static bool
+            updateBrush(component::BrushTrail &,
+                        common::r32 curMass,
+                        common::r32 curDrag,
+                        common::r32 x,
+                        common::r32 y);
+
             static void
-            updatePlacement(entities::EntityManager &,
-                            common::r64 tickTime);
+            addBrushSegment(component::BrushTrail &);
 
 
         private:

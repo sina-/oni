@@ -689,6 +689,7 @@ namespace oni {
 
             auto &cc = createComponent<component::ComplementaryComponents>(id);
             cc.types.emplace_back(component::ComponentType::TEXTURE);
+            cc.types.emplace_back(component::ComponentType::BRUSH_TRAIL);
 
             assignTag<component::Tag_Dynamic>(id);
             assignTag<component::Tag_TextureShaded>(id);

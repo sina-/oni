@@ -262,7 +262,8 @@ namespace oni {
 
         struct BrushTrail {
             bool initialized{false};
-            common::r32 mass{1};
+            common::r32 mass{1.f};
+            common::r32 width{1.f};
             component::Heading2D heading{};
             component::WorldP2D last{};
             component::WorldP2D lastDelta{};

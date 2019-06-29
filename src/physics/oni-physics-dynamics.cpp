@@ -513,11 +513,17 @@ namespace oni {
             /// Brush trails - client
             {
                 auto view = server.createView<
-                        component::WorldP3D,
-                        component::Car>();
+                        component::WorldP3D>
+                        ();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto cId = client.getComplementOf(id);
+                    if (!cId) {
+                        continue;
+                    }
+                    if(!client.has<component::BrushTrail>(cId)){
+                        continue;
+                    }
                     auto &brushTrail = client.get<component::BrushTrail>(cId);
 
                     if (!brushTrail.initialized) {
@@ -533,7 +539,7 @@ namespace oni {
                         brushTrail.initialized = true;
                     }
 
-                    constexpr auto threshold = 5.f;
+                    constexpr auto threshold = 0.4f;
                     if (math::abs(brushTrail.last.x - pos.x) < threshold &&
                         math::abs(brushTrail.last.y - pos.y) < threshold) {
                         break;
@@ -609,14 +615,13 @@ namespace oni {
             common::r32 previousX;
             common::r32 previousY;
 
-            width = 0.04 - trail.velocity.current;
-            width = width * 1.5;
-            if (width < 0.0001) {
-                // TODO: Get it from the brush
-                width = 1.00001;
-            }
-            delX = trail.heading.x * width;
-            delY = trail.heading.y * width;
+//            width = 0.04 - trail.velocity.current;
+//            width = width * 1.5;
+//            if (width < 0.0001) {
+//                width = 1.00001;
+//            }
+            delX = trail.heading.x * trail.width;
+            delY = trail.heading.y * trail.width;
 
             previousX = trail.last.x;
             previousY = trail.last.y;

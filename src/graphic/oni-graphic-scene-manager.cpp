@@ -139,10 +139,12 @@ namespace oni {
             {
                 begin(*mRendererQuad, true, true, true);
                 auto view = clientManager.createView<component::BrushTrail>();
+                auto scale = component::Scale{};
+                auto texture = component::Texture{};
                 for (auto &&id: view) {
                     const auto &trail = view.get<component::BrushTrail>(id);
                     for (common::size i = 0; i + 4 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], {}, component::Color::WHITE(), {});
+                        mRendererQuad->submit(&trail.vertices[i], scale, component::Color::WHITE(), texture);
                         i += 4;
                     }
                 }

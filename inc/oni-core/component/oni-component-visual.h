@@ -132,49 +132,49 @@ namespace oni {
 
             void
             set_r(common::u8 r) {
-                value &= ~rMask;
+                value &= ~common::R_MASK;
                 value |= (common::u32(r) << 24u);
             }
 
             void
             set_r(common::r32 r) {
-                value &= ~rMask;
+                value &= ~common::R_MASK;
                 value |= (common::u32(r * 255) << 24u);
             }
 
             void
             set_G(common::u8 g) {
-                value &= ~gMask;
+                value &= ~common::G_MASK;
                 value |= (common::u32(g) << 16u);
             }
 
             void
             set_g(common::r32 g) {
-                value &= ~gMask;
+                value &= ~common::G_MASK;
                 value |= (common::u32(g * 255) << 16u);
             }
 
             void
             set_b(common::u8 b) {
-                value &= ~bMask;
+                value &= ~common::B_MASK;
                 value |= (common::u32(b) << 8u);
             }
 
             void
             set_b(common::r32 b) {
-                value &= ~bMask;
+                value &= ~common::B_MASK;
                 value |= (common::u32(b * 255) << 8u);
             }
 
             void
             set_a(common::u8 a) {
-                value &= ~aMask;
+                value &= ~common::A_MASK;
                 value |= (common::u32(a));
             }
 
             void
             set_a(common::r32 a) {
-                value &= ~aMask;
+                value &= ~common::A_MASK;
                 value |= (common::u32(a * 255));
             }
 
@@ -182,9 +182,9 @@ namespace oni {
             set_rgb(common::r32 _r,
                     common::r32 _g,
                     common::r32 _b) {
-                value &= ~rMask;
-                value &= ~bMask;
-                value &= ~gMask;
+                value &= ~common::R_MASK;
+                value &= ~common::B_MASK;
+                value &= ~common::G_MASK;
                 set_r(_r);
                 set_g(_g);
                 set_b(_b);
@@ -194,9 +194,9 @@ namespace oni {
             set_rgb(common::u8 _r,
                     common::u8 _g,
                     common::u8 _b) {
-                value &= ~rMask;
-                value &= ~bMask;
-                value &= ~gMask;
+                value &= ~common::R_MASK;
+                value &= ~common::G_MASK;
+                value &= ~common::B_MASK;
                 set_r(_r);
                 set_g(_g);
                 set_b(_b);
@@ -239,11 +239,6 @@ namespace oni {
             }
 
             common::u32 value{0};
-
-            static constexpr common::u32 rMask{0xff000000};
-            static constexpr common::u32 gMask{0x00ff0000};
-            static constexpr common::u32 bMask{0x0000ff00};
-            static constexpr common::u32 aMask{0x000000ff};
         };
 
         enum class BrushType : common::u8 {
@@ -263,7 +258,7 @@ namespace oni {
         struct BrushTrail {
             bool initialized{false};
             common::r32 mass{1.f};
-            common::r32 width{1.f};
+            common::r32 width{0.5f};
             component::Heading2D heading{};
             component::WorldP2D last{};
             component::WorldP2D lastDelta{};

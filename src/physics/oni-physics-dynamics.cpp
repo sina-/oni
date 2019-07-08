@@ -147,19 +147,20 @@ namespace oni {
                     auto &car = carView.get<component::Car>(id);
                     auto &heading = carView.get<component::Heading>(id);
                     const auto &carConfig = carView.get<component::CarConfig>(id);
+                    constexpr common::r32 steeringSensitivity = 0.9f;
 
                     if (input->isPressed(GLFW_KEY_W) || input->isPressed(GLFW_KEY_UP)) {
                         // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
                         carInput[id].throttle = 1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_A) || input->isPressed(GLFW_KEY_LEFT)) {
-                        carInput[id].left = 1.0f;
+                        carInput[id].left = steeringSensitivity;
                     }
                     if (input->isPressed(GLFW_KEY_S) || input->isPressed(GLFW_KEY_DOWN)) {
                         carInput[id].throttle = -1.0f;
                     }
                     if (input->isPressed(GLFW_KEY_D) || input->isPressed(GLFW_KEY_RIGHT)) {
-                        carInput[id].right = 1.0f;
+                        carInput[id].right = steeringSensitivity;
                     }
                     if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
                         car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(heading.value)),

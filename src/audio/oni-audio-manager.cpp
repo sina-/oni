@@ -206,6 +206,10 @@ namespace oni {
         void
         AudioManager::loadSound(component::SoundTag tag,
                                 std::string_view filePath) {
+//            if (mSounds[tag]) {
+//                return;
+//            }
+
             FMOD::Sound *sound{};
             auto result = mSystem->createSound(filePath.data(), FMOD_DEFAULT, nullptr, &sound);
             ERRCHECK(result);

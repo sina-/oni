@@ -18,5 +18,10 @@ namespace oni {
         static constexpr r32 HALF_PI = 3.14159265358979323846f / 2.f;
         static constexpr r32 TWO_PI = PI * 2;
         static constexpr r32 FULL_CIRCLE_IN_RAD = TWO_PI;
+        static constexpr common::u32 R_MASK = 0xff000000;
+        static constexpr common::u32 G_MASK = 0x00ff0000;
+        static constexpr common::u32 B_MASK = 0x0000ff00;
+        static constexpr common::u32 A_MASK = 0x000000ff;
+
     }
 }

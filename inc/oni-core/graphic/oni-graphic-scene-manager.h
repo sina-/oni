@@ -41,8 +41,6 @@ namespace oni {
 
         class TextureManager;
 
-        class FontManager;
-
         class DebugDrawBox2D;
 
         struct Brush;
@@ -52,10 +50,9 @@ namespace oni {
             // TODO: Getting quite big, I can split it into, SceneRenderer, SceneUpdater, and SceneManager
             SceneManager(const graphic::ScreenBounds &,
                          asset::AssetManager &,
-                         FontManager &,
                          math::ZLayerManager &,
                          b2World &,
-                         common::r32
+                         common::r32 gameUnitToPixel
             );
 
             ~SceneManager();
@@ -64,10 +61,14 @@ namespace oni {
             render(entities::EntityManager &serverManager,
                    entities::EntityManager &clientManager);
 
+            static void
+            updateSmokeEmitter(entities::EntityManager &,
+                               common::r64 tickTime);
+
             void
-            tick(entities::EntityManager &server,
-                 entities::EntityManager &client,
-                 common::r64 tickTime);
+            updateAfterMark(entities::EntityManager &serverManager,
+                            entities::EntityManager &clientManager,
+                            common::r64 tickTime);
 
             void
             renderRaw(const component::WorldP3D pos,
@@ -91,6 +92,13 @@ namespace oni {
             void
             zoom(common::r32 distance);
 
+            bool
+            isVisible(const component::WorldP3D &);
+
+            bool
+            isVisible(const component::WorldP3D &,
+                      const component::Scale &);
+
             void
             prepareTexture(entities::EntityManager &,
                            common::EntityID,
@@ -104,6 +112,9 @@ namespace oni {
 
             common::u16
             getTexturesPerFrame() const;
+
+            const graphic::ScreenBounds &
+            getScreenBounds() const;
 
             void
             resetCounters();
@@ -151,12 +162,6 @@ namespace oni {
                                     common::r32 viewHeight);
 
         private:
-            struct RaceInfoEntities {
-                common::EntityID lapEntity{0};
-                common::EntityID lapTimeEntity{0};
-                common::EntityID lapBestTimeEntity{0};
-            };
-
             struct WorldP3DAndHeading {
                 component::WorldP3D pos;
                 component::Heading heading;
@@ -172,20 +177,6 @@ namespace oni {
             static void
             end(Renderer &renderer2D);
 
-            common::EntityID
-            createText(entities::EntityManager &,
-                       const component::WorldP3D &worldPos,
-                       const std::string &text);
-
-            void
-            updateRaceInfo(entities::EntityManager &,
-                           const gameplay::CarLapInfo &carLap,
-                           const RaceInfoEntities &carLapTextEntities);
-
-            void
-            updateSmokeEmitter(entities::EntityManager &,
-                               common::r64 tickTime);
-
             void
             updateCanvasTile(entities::EntityManager &entityManager,
                              common::EntityID entityID,
@@ -193,11 +184,6 @@ namespace oni {
                              const component::WorldP3D &,
                              const component::Scale &);
 
-
-            const RaceInfoEntities &
-            getOrCreateLapText(entities::EntityManager &,
-                               common::EntityID carEntityID,
-                               const gameplay::CarLapInfo &carLap);
 
             common::EntityID
             getOrCreateCanvasTile(entities::EntityManager &,
@@ -223,7 +209,6 @@ namespace oni {
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
             asset::AssetManager &mAssetManager;
-            graphic::FontManager &mFontManager;
             b2World &mPhysicsWorld;
 
             std::unique_ptr<math::Rand> mRand{};
@@ -233,7 +218,6 @@ namespace oni {
             math::mat4 mProjectionMatrix{};
 
             std::map<common::u64, common::EntityID> mCanvasTileLookup{};
-            std::map<common::EntityID, RaceInfoEntities> mLapInfoLookup{};
 
             const common::u16 mCanvasTileSizeX{0};
             const common::u16 mCanvasTileSizeY{0};

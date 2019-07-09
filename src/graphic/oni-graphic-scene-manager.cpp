@@ -14,7 +14,6 @@
 #include <oni-core/graphic/oni-graphic-renderer-ogl-strip.h>
 #include <oni-core/graphic/oni-graphic-renderer-ogl-quad.h>
 #include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>
-#include <oni-core/graphic/oni-graphic-font-manager.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 #include <oni-core/math/oni-math-transformation.h>
@@ -29,7 +28,6 @@ namespace oni {
     namespace graphic {
         SceneManager::SceneManager(const graphic::ScreenBounds &screenBounds,
                                    asset::AssetManager &assetManager,
-                                   FontManager &fontManager,
                                    math::ZLayerManager &zLayerManager,
                                    b2World &physicsWorld,
                                    common::r32 gameUnitToPixels) :
@@ -41,7 +39,6 @@ namespace oni {
                 mMaxSpriteCount(64 * 1000),
                 mScreenBounds(screenBounds),
                 mAssetManager(assetManager),
-                mFontManager(fontManager),
                 mPhysicsWorld(physicsWorld),
                 mGameUnitToPixels(gameUnitToPixels),
                 mZLayerManager(zLayerManager) {
@@ -141,10 +138,12 @@ namespace oni {
                 auto view = serverManager.createView<component::BrushTrail>();
                 auto scale = component::Scale{};
                 auto texture = component::Texture{};
+                auto color = component::Color::WHITE();
+                color.set_a(0.1f);
                 for (auto &&id: view) {
                     const auto &trail = view.get<component::BrushTrail>(id);
                     for (common::size i = 0; i + 4 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], scale, component::Color::WHITE(), texture);
+                        mRendererQuad->submit(&trail.vertices[i], scale, color, texture);
                         i += 4;
                     }
                 }
@@ -213,6 +212,8 @@ namespace oni {
                     renderTessellationColor(clientManager, viewWidth, viewHeight);
                 }
 
+                // TODO: This is duplicate code for server and client! in fact this function should only receive
+                // entity manager only!
                 /// Texture shading - server
                 {
                     auto view = serverManager.createView<
@@ -228,7 +229,7 @@ namespace oni {
 
                         auto result = applyParentTransforms(serverManager, id, pos, heading);
 
-                        if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        if (!isVisible(result.pos, scale)) {
                             continue;
                         }
 
@@ -262,7 +263,7 @@ namespace oni {
                             const component::Tag_TextureShaded &) {
 
                         auto result = applyParentTransforms(clientManager, id, pos, heading);
-                        if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                        if (!isVisible(result.pos, scale)) {
                             return;
                         }
 
@@ -338,7 +339,7 @@ namespace oni {
 
                 auto result = applyParentTransforms(manager, id, pos, heading);
 
-                if (!math::intersects(result.pos, scale, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
+                if (!isVisible(result.pos, scale)) {
                     continue;
                 }
 
@@ -351,111 +352,6 @@ namespace oni {
                 mRendererTessellation->submit(result.pos, result.heading, scale, color, component::Texture{});
 
                 ++mRenderedSpritesPerFrame;
-            }
-        }
-
-        void
-        SceneManager::tick(entities::EntityManager &serverManager,
-                           entities::EntityManager &clientManager,
-                           common::r64 tickTime) {
-            auto viewWidth = getViewWidth();
-            auto viewHeight = getViewHeight();
-
-            /// Update Emitters
-            {
-                updateSmokeEmitter(serverManager, tickTime);
-                updateSmokeEmitter(clientManager, tickTime);
-            }
-
-            /// Particle trails
-            {
-                auto view = serverManager.createView<
-                        component::WorldP3D,
-                        component::ParticleTrail,
-                        component::Heading>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &trail = view.get<component::ParticleTrail>(id);
-
-                    if (!math::intersects(pos, mCamera.x, mCamera.y, viewWidth, viewHeight)) {
-                        continue;
-                    }
-                    common::r32 particleHalfSize = 0.35f;
-                    common::r32 particleSize = particleHalfSize * 2;
-
-                    for (common::u8 i = 0; i < mRand->next<common::u8>(4, 8); ++i) {
-                        auto trailEntity = clientManager.createEntity_SimpleParticle();
-                        clientManager.setWorldP3D(trailEntity, pos.x, pos.y, pos.z);
-                        clientManager.setScale(trailEntity, particleSize, particleSize);
-                        clientManager.setTextureTag(trailEntity, trail.textureTag);
-                        clientManager.setRandHeading(trailEntity, heading.value - common::HALF_PI,
-                                                     heading.value + common::HALF_PI);
-                        clientManager.setRandVelocity(trailEntity, 1, 5);
-
-                        auto &age = clientManager.get<component::Age>(trailEntity);
-                        age.maxAge = mRand->next_r32(1.f, 2.f);
-
-                        prepareTexture(clientManager, trailEntity,
-                                       clientManager.get<component::TextureTag>(trailEntity));
-                    }
-                }
-            }
-
-            /// Entities that leave mark -- server
-            {
-                auto view = serverManager.createView<
-                        component::AfterMark,
-                        component::WorldP3D,
-                        component::Scale>();
-                for (auto &&id: view) {
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &mark = view.get<component::AfterMark>(id);
-                    auto brush = graphic::Brush{};
-                    brush.tag = mark.textureTag;
-                    brush.type = component::BrushType::TEXTURE;
-
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    splat(clientManager, pos, scale, brush);
-                }
-            }
-
-            /// Entities that leave mark -- client
-            {
-                auto view = clientManager.createView<
-                        component::AfterMark,
-                        component::WorldP3D,
-                        component::Scale>();
-                for (auto &&id: view) {
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &mark = view.get<component::AfterMark>(id);
-                    auto brush = graphic::Brush{};
-                    brush.tag = mark.textureTag;
-                    brush.type = component::BrushType::TEXTURE;
-
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    splat(clientManager, pos, scale, brush);
-                }
-            }
-
-            /// Update Laps
-            {
-                auto carLapView = serverManager.createView<
-                        gameplay::CarLapInfo>();
-                for (auto &&carEntity: carLapView) {
-                    // TODO: This will render all player laps on top of each other. I should render the data in rows
-                    // instead. Something like:
-                    /**
-                     * Player Name: lap, lap time, best time
-                     *
-                     * Player 1: 4, 1:12, :1:50
-                     * Player 2: 5, 0:02, :1:50
-                     */
-                    const auto &carLap = carLapView.get<gameplay::CarLapInfo>(carEntity);
-
-                    const auto &carLapText = getOrCreateLapText(clientManager, carEntity, carLap);
-                    updateRaceInfo(clientManager, carLap, carLapText);
-                }
             }
         }
 
@@ -547,10 +443,33 @@ namespace oni {
         void
         SceneManager::updateSmokeEmitter(entities::EntityManager &manager,
                                          common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::CLIENT ||
+                   manager.getSimMode() == entities::SimMode::CLIENT_SIDE_SERVER);
+
             auto view = manager.createView<component::SmokeEmitterCD>();
             for (auto &&id: view) {
                 auto &emitter = view.get<component::SmokeEmitterCD>(id);
                 math::subAndZeroClip(emitter.currentCD, tickTime);
+            }
+        }
+
+        void
+        SceneManager::updateAfterMark(entities::EntityManager &manager,
+                                      entities::EntityManager &clientManager,
+                                      common::r64 tickTime) {
+            auto view = manager.createView<
+                    component::AfterMark,
+                    component::WorldP3D,
+                    component::Scale>();
+            for (auto &&id: view) {
+                const auto &scale = view.get<component::Scale>(id);
+                const auto &mark = view.get<component::AfterMark>(id);
+                auto brush = graphic::Brush{};
+                brush.tag = mark.textureTag;
+                brush.type = component::BrushType::TEXTURE;
+
+                const auto &pos = view.get<component::WorldP3D>(id);
+                splat(clientManager, pos, scale, brush);
             }
         }
 
@@ -607,49 +526,20 @@ namespace oni {
                                                    image);
         }
 
-        const SceneManager::RaceInfoEntities &
-        SceneManager::getOrCreateLapText(entities::EntityManager &manager,
-                                         common::EntityID carEntityID,
-                                         const gameplay::CarLapInfo &carLap) {
-            auto exists = mLapInfoLookup.find(carEntityID) != mLapInfoLookup.end();
-            if (!exists) {
-                auto zLevel = mZLayerManager.getZForEntity(entities::EntityType::UI);
-                RaceInfoEntities carLapText{0};
-                auto lapRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 0.5f,
-                                                        zLevel};
-                auto lapTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.0f,
-                                                            zLevel};
-                auto bestTimeRenderPos = component::WorldP3D{mScreenBounds.xMax - 3.5f, mScreenBounds.yMax - 1.5f,
-                                                             zLevel};
-
-                carLapText.lapEntity = createText(manager, lapRenderPos, "Lap: " + std::to_string(carLap.lap));
-                carLapText.lapTimeEntity = createText(manager, lapTimeRenderPos,
-                                                      "Lap time: " + std::to_string(carLap.lapTimeS));
-                carLapText.lapBestTimeEntity = createText(manager, bestTimeRenderPos,
-                                                          "Best time: " + std::to_string(carLap.bestLapTimeS));
-                mLapInfoLookup[carEntityID] = carLapText;
-            }
-            return mLapInfoLookup.at(carEntityID);
-        }
-
-        void
-        SceneManager::updateRaceInfo(entities::EntityManager &entityManager,
-                                     const gameplay::CarLapInfo &carLap,
-                                     const SceneManager::RaceInfoEntities &carLapTextEntities) {
-            // TODO: This is updated every tick, which is unnecessary. Lap information is rarely updated.
-            auto &lapText = entityManager.get<component::Text>(carLapTextEntities.lapEntity);
-            mFontManager.updateText("Lap: " + std::to_string(carLap.lap), lapText);
-
-            auto &lapTimeText = entityManager.get<component::Text>(carLapTextEntities.lapTimeEntity);
-            mFontManager.updateText("Lap time: " + std::to_string(carLap.lapTimeS) + "s", lapTimeText);
-
-            auto &bestTimeText = entityManager.get<component::Text>(carLapTextEntities.lapBestTimeEntity);
-            mFontManager.updateText("Best time: " + std::to_string(carLap.bestLapTimeS) + "s", bestTimeText);
-        }
-
         void
         SceneManager::zoom(common::r32 distance) {
             mCamera.z = 1 / distance;
+        }
+
+        bool
+        SceneManager::isVisible(const component::WorldP3D &pos) {
+            return math::intersects(pos, mCamera.x, mCamera.y, getViewWidth(), getViewHeight());
+        }
+
+        bool
+        SceneManager::isVisible(const component::WorldP3D &pos,
+                                const component::Scale &scale) {
+            return math::intersects(pos, scale, mCamera.x, mCamera.y, getViewWidth(), getViewHeight());
         }
 
         void
@@ -693,19 +583,16 @@ namespace oni {
             return (mScreenBounds.yMax - mScreenBounds.yMin) * (1.0f / mCamera.z);
         }
 
+        const graphic::ScreenBounds &
+        SceneManager::getScreenBounds() const {
+            return mScreenBounds;
+        }
+
         void
         SceneManager::resetCounters() {
             mRenderedSpritesPerFrame = 0;
             mRenderedParticlesPerFrame = 0;
             mRenderedTexturesPerFrame = 0;
-        }
-
-        common::EntityID
-        SceneManager::createText(entities::EntityManager &manager,
-                                 const component::WorldP3D &worldPos,
-                                 const std::string &text) {
-            auto entityID = mFontManager.createTextFromString(manager, text, worldPos);
-            return entityID;
         }
 
         SceneManager::WorldP3DAndHeading

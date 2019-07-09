@@ -22,13 +22,6 @@ namespace oni {
         struct Tag_SplatOnDeath {
         };
 
-        /// Sim
-        struct Tag_SimServerSideOnly {
-        };
-
-        struct Tag_SimClientSideOnly {
-        };
-
         /// Network
         struct Tag_NetworkSyncEntity {
         };

@@ -187,8 +187,8 @@ namespace oni {
 
         common::EntityID
         EntityManager::createEntity(entities::EntityType type) {
+            assert(mSimMode == entities::SimMode::SERVER || mSimMode == entities::SimMode::CLIENT);
             auto id = mRegistry->create();
-            assignSimMode(id, mSimMode);
             if (mEntityOperationPolicy.track) {
                 assert(mSimMode == entities::SimMode::SERVER);
                 assignTag<component::Tag_NetworkSyncEntity>(id);
@@ -199,6 +199,7 @@ namespace oni {
 
         void
         EntityManager::removeEntity(common::EntityID id) {
+            assert(mSimMode == entities::SimMode::SERVER || mSimMode == entities::SimMode::CLIENT);
             removeEntity(id, mEntityOperationPolicy);
         }
 
@@ -407,24 +408,6 @@ namespace oni {
             auto *body = mEntityBodyMap[id];
             assert(body);
             mPhysicsWorld.DestroyBody(body);
-        }
-
-        void
-        EntityManager::assignSimMode(common::EntityID id,
-                                     entities::SimMode sMode) {
-            switch (sMode) {
-                case SimMode::CLIENT: {
-                    createComponent<component::Tag_SimClientSideOnly>(id);
-                    break;
-                }
-                case SimMode::SERVER: {
-                    createComponent<component::Tag_SimServerSideOnly>(id);
-                    break;
-                }
-                default: {
-                    assert(false);
-                }
-            }
         }
 
         void

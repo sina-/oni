@@ -130,7 +130,7 @@ namespace oni {
             /// Input
             {
                 auto carView = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
@@ -215,7 +215,7 @@ namespace oni {
             {
                 auto emptyFuel = std::vector<common::EntityID>();
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::JetForce,
                         component::Heading,
                         component::PhysicalProperties>();
@@ -249,7 +249,7 @@ namespace oni {
             /// Car collisions and box2d sync
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::Car,
                         component::Heading,
                         component::WorldP3D,
@@ -304,7 +304,7 @@ namespace oni {
             /// General collision
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::Tag_Dynamic,
                         component::WorldP3D,
                         component::PhysicalProperties>();
@@ -323,7 +323,7 @@ namespace oni {
             /// Sync placement with box2d
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::Tag_Dynamic,
                         component::WorldP3D,
                         component::Heading,
@@ -358,7 +358,7 @@ namespace oni {
             /// Update tires
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::EntityAttachment,
                         component::Car>();
                 for (auto &&id : view) {
@@ -414,44 +414,12 @@ namespace oni {
         }
 
         void
-        Dynamics::handleRocketCollision(entities::EntityManager &manager,
-                                        common::EntityID id,
-                                        component::PhysicalProperties &props,
-                                        component::WorldP3D &pos) {
-
-            auto *body = manager.getEntityBody(id);
-            if (isColliding(body)) {
-                // TODO: Proper Z level!
-                common::r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
-                auto worldPos = component::WorldP3D{};
-                worldPos.x = body->GetPosition().x;
-                worldPos.y = body->GetPosition().y;
-                worldPos.z = particleZ;
-
-                auto colliding = game::CollidingEntity{};
-                colliding.entityA = entities::EntityType::SIMPLE_ROCKET;
-                // TODO: use the proper type for the other entity instead of UNKNOWN
-                colliding.entityB = entities::EntityType::UNKNOWN;
-
-                // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
-                // sound effects, etc.
-                manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
-
-                manager.markForDeletion(id);
-                // TODO: I'm leaking memory here, data in b2world is left behind :(
-                // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
-                // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
-                // and audio system.
-            }
-        }
-
-        void
         Dynamics::updateAge(entities::EntityManager &manager,
                             common::r64 tickTime) {
             {
                 /// Client side
                 auto view = manager.createView<
-                        component::Tag_SimModeClient,
+                        component::Tag_SimClientSideOnly,
                         component::Age>();
                 for (auto &&id: view) {
                     auto &age = view.get<component::Age>(id);
@@ -471,7 +439,7 @@ namespace oni {
             /// Server
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::Age>();
                 for (auto &&id: view) {
                     auto &age = view.get<component::Age>(id);
@@ -491,7 +459,7 @@ namespace oni {
             /// Update particle placement - client
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeClient,
+                        component::Tag_SimClientSideOnly,
                         component::WorldP3D,
                         component::Velocity,
                         component::Heading,
@@ -517,6 +485,22 @@ namespace oni {
             // TODO: How does this compare to WorldP3D_History component and how it is used? I need to pick one.
             /// Brush trails
             {
+                // TODO: There is an assumption here that BrushTrail is only created on client side as it is a
+                // complementary component, therefore when server reaches this code it will not tick anything, but
+                // on client side when server entities are ticked this loop will hit. I don't like this, way too much
+                // implicit logic.
+                // This is also closely related to the Tag_SimServerSideOnly and Tag_SimClientSideOnly. There should not
+                // be such a concept! Systems should care only about logic, not where they are called from. If a system
+                // only applies to client side, then let the users of the engine define them on their side.
+                // Any one should be able to call a system with any registry and let it update the entities as expected.
+                // Server side systems are available to any user of the engine, if they call the system with their
+                // server side entities and get wrong results that is users fault.
+                // One sign for systems that should be defined by the clients are the functions that require client
+                // side entity manager and server side entity manager! Engine systems should only require one entity
+                // manager and those are primarily server entity manager, but the logic should not be in anyway,
+                // at least implicitly, require server side entity manager, but allow clients to call them and
+                // if they call it with the wrong manager, such as client side server entities, they will get
+                // wrong results.
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::BrushTrail>
@@ -643,6 +627,39 @@ namespace oni {
             trail.lastDelta.x = delX;
             trail.lastDelta.y = delY;
         }
+
+        void
+        Dynamics::handleRocketCollision(entities::EntityManager &manager,
+                                        common::EntityID id,
+                                        component::PhysicalProperties &props,
+                                        component::WorldP3D &pos) {
+
+            auto *body = manager.getEntityBody(id);
+            if (isColliding(body)) {
+                // TODO: Proper Z level!
+                common::r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
+                auto worldPos = component::WorldP3D{};
+                worldPos.x = body->GetPosition().x;
+                worldPos.y = body->GetPosition().y;
+                worldPos.z = particleZ;
+
+                auto colliding = game::CollidingEntity{};
+                colliding.entityA = entities::EntityType::SIMPLE_ROCKET;
+                // TODO: use the proper type for the other entity instead of UNKNOWN
+                colliding.entityB = entities::EntityType::UNKNOWN;
+
+                // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
+                // sound effects, etc.
+                manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
+
+                manager.markForDeletion(id);
+                // TODO: I'm leaking memory here, data in b2world is left behind :(
+                // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
+                // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
+                // and audio system.
+            }
+        }
+
 
         void
         Dynamics::handleCollision(entities::EntityManager &,

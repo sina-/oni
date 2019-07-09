@@ -24,7 +24,7 @@ namespace oni {
             /// Update cool-downs
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::GunCoolDown>();
                 for (auto &&entity: view) {
                     auto &coolDown = view.get<component::GunCoolDown>(entity);
@@ -35,7 +35,7 @@ namespace oni {
             /// Spawn projectile
             {
                 auto view = manager.createView<
-                        component::Tag_SimModeServer,
+                        component::Tag_SimServerSideOnly,
                         component::WorldP3D,
                         component::Heading,
                         component::Car,

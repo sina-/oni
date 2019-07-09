@@ -409,11 +409,11 @@ namespace oni {
                                      entities::SimMode sMode) {
             switch (sMode) {
                 case SimMode::CLIENT: {
-                    createComponent<component::Tag_SimModeClient>(id);
+                    createComponent<component::Tag_SimClientSideOnly>(id);
                     break;
                 }
                 case SimMode::SERVER: {
-                    createComponent<component::Tag_SimModeServer>(id);
+                    createComponent<component::Tag_SimServerSideOnly>(id);
                     break;
                 }
                 default: {

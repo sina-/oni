@@ -23,10 +23,10 @@ namespace oni {
         };
 
         /// Sim
-        struct Tag_SimModeServer {
+        struct Tag_SimServerSideOnly {
         };
 
-        struct Tag_SimModeClient {
+        struct Tag_SimClientSideOnly {
         };
 
         /// Network

@@ -37,8 +37,7 @@ namespace oni {
         }
 
         void
-        AudioManager::tick(entities::EntityManager &serverManager,
-                           entities::EntityManager &clientManager,
+        AudioManager::tick(entities::EntityManager &manager,
                            const component::WorldP3D &playerPos) {
             mPlayerPos = playerPos;
             auto result = mSystem->update();
@@ -46,23 +45,23 @@ namespace oni {
 
             /// Engine pitch
             {
-                auto view = serverManager.createView<
+                auto view = manager.createView<
                         component::Tag_Audible,
                         component::Car,
-                        component::Sound>();
+                        component::Sound,
+                        component::SoundPitch>();
                 for (auto &&id : view) {
                     auto &car = view.get<component::Car>(id);
                     auto &sound = view.get<component::Sound>(id);
 
-                    auto cId = clientManager.getComplementOf(id);
-                    auto &pitch = clientManager.get<component::SoundPitch>(cId);
+                    auto &pitch = view.get<component::SoundPitch>(id);
                     pitch.value = static_cast< common::r32>(car.rpm) / 2000;
                 }
             }
 
             /// Play and Pause - server entities
             {
-                auto view = serverManager.createView<
+                auto view = manager.createView<
                         component::Tag_Audible,
                         component::WorldP3D,
                         component::Sound>();
@@ -73,41 +72,12 @@ namespace oni {
                     auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
                     auto distance = (pos - mPlayerPos.value).len();
                     if (distance < mMaxAudibleDistance) {
-                        if (auto cId = clientManager.getComplementOf(id)) {
-                            if (clientManager.has<component::SoundPitch>(cId)) {
-                                auto &pitch = clientManager.get<component::SoundPitch>(cId);
-                                setPitch(*entityChannel.channel, pitch.value);
-                            }
-                        }
-
-                        auto v = math::vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
-                        set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
-                        unPause(*entityChannel.channel);
-                    } else {
-                        pause(*entityChannel.channel);
-                    }
-                }
-            }
-
-            /// Play and Pause - client entities
-            {
-                auto view = clientManager.createView<
-                        component::Tag_Audible,
-                        component::WorldP3D,
-                        component::Sound>();
-                for (auto &&id : view) {
-                    auto &pos = view.get<component::WorldP3D>(id).value;
-                    auto &sound = view.get<component::Sound>(id);
-
-                    auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
-                    auto distance = (pos - mPlayerPos.value).len();
-                    if (distance < mMaxAudibleDistance) {
-                        if (clientManager.has<component::SoundPitch>(id)) {
-                            auto &pitch = clientManager.get<component::SoundPitch>(id);
+                        if (manager.has<component::SoundPitch>(id)) {
+                            auto &pitch = manager.get<component::SoundPitch>(id);
                             setPitch(*entityChannel.channel, pitch.value);
                         }
 
-                        auto v = math::vec3{1.f, 0.f, 0.f};
+                        auto v = math::vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
                         set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
                         unPause(*entityChannel.channel);
                     } else {

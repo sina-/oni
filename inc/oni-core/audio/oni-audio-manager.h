@@ -39,8 +39,7 @@ namespace oni {
             explicit AudioManager(asset::AssetManager &);
 
             void
-            tick(entities::EntityManager &serverManager,
-                 entities::EntityManager &clientManager,
+            tick(entities::EntityManager &,
                  const component::WorldP3D &playerPos);
 
             void

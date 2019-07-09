@@ -138,7 +138,7 @@ namespace oni {
             /// Test draw brush trail
             {
                 begin(*mRendererQuad, true, true, true);
-                auto view = clientManager.createView<component::BrushTrail>();
+                auto view = serverManager.createView<component::BrushTrail>();
                 auto scale = component::Scale{};
                 auto texture = component::Texture{};
                 for (auto &&id: view) {
@@ -219,6 +219,7 @@ namespace oni {
                             component::WorldP3D,
                             component::Heading,
                             component::Scale,
+                            component::Texture,
                             component::Tag_TextureShaded>();
                     for (auto &&id: view) {
                         const auto &pos = view.get<component::WorldP3D>(id);
@@ -231,9 +232,7 @@ namespace oni {
                             continue;
                         }
 
-                        auto cId = clientManager.getComplementOf(id);
-                        assert(cId);
-                        const auto &texture = clientManager.get<component::Texture>(cId);
+                        const auto &texture = serverManager.get<component::Texture>(id);
                         assert(!texture.image.path.empty());
 #if DEBUG_Z
                         serverManager.printEntityType(id);
@@ -356,7 +355,7 @@ namespace oni {
         }
 
         void
-        SceneManager::tick(const entities::EntityManager &serverManager,
+        SceneManager::tick(entities::EntityManager &serverManager,
                            entities::EntityManager &clientManager,
                            common::r64 tickTime) {
             auto viewWidth = getViewWidth();
@@ -364,11 +363,8 @@ namespace oni {
 
             /// Update Emitters
             {
-                auto view = clientManager.createView<component::SmokeEmitterCD>();
-                for (auto &&id: view) {
-                    auto &emitter = view.get<component::SmokeEmitterCD>(id);
-                    math::subAndZeroClip(emitter.currentCD, tickTime);
-                }
+                updateSmokeEmitter(serverManager, tickTime);
+                updateSmokeEmitter(clientManager, tickTime);
             }
 
             /// Particle trails
@@ -546,6 +542,16 @@ namespace oni {
             auto entity = mCanvasTileLookup[xy];
             assert(entity);
             return entity;
+        }
+
+        void
+        SceneManager::updateSmokeEmitter(entities::EntityManager &manager,
+                                         common::r64 tickTime) {
+            auto view = manager.createView<component::SmokeEmitterCD>();
+            for (auto &&id: view) {
+                auto &emitter = view.get<component::SmokeEmitterCD>(id);
+                math::subAndZeroClip(emitter.currentCD, tickTime);
+            }
         }
 
         void

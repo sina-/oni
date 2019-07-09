@@ -42,13 +42,6 @@ namespace oni {
                  entities::ClientDataManager *clientData,
                  common::r64 tickTime);
 
-            // TODO: Part of the mess that serperation of server and client managers causes is that I can't
-            // just call this function from tick()
-            static void
-            updatePosition(const entities::EntityManager &server,
-                           entities::EntityManager &client,
-                           common::r64 tickTime);
-
         public:
             // TODO: Not very happy about this exposure, but it is really the simplest solution right now and only
             // EntityManager uses it for creating components in b2World when creating entities.
@@ -88,6 +81,10 @@ namespace oni {
             static void
             updateAge(entities::EntityManager &,
                       common::r64 tickTime);
+
+            static void
+            updatePosition(entities::EntityManager &manager,
+                           common::r64 tickTime);
 
             static bool
             updateBrush(component::BrushTrail &,

@@ -62,61 +62,46 @@ namespace oni {
         }
 
         void
-        EntityManager::accommodateWithComplements(EntityManager &referenceRegistry) {
-            auto view = referenceRegistry.createView<component::ComplementaryComponents>();
+        EntityManager::accommodateWithComplements() {
+            auto view = createView<component::ComplementaryComponents>();
             for (auto &&id: view) {
-                if (!hasComplement(id)) {
-                    auto cId = createComplementTo(id);
-                    auto types = view.get<component::ComplementaryComponents>(id).types;
-                    for (auto &&type: types) {
-                        // TODO: Maybe there is a better way to identify components? In effect I'm looking for
-                        // auto generated compile time component id
-                        switch (type) {
-                            case component::ComponentType::SMOKE_EMITTER_CD: {
-                                createComponent<component::SmokeEmitterCD>(cId);
-                                break;
+                auto types = view.get<component::ComplementaryComponents>(id).types;
+                for (auto &&type: types) {
+                    // TODO: Maybe there is a better way to identify components? In effect I'm looking for
+                    // auto generated compile time component id
+                    switch (type) {
+                        case component::ComponentType::SMOKE_EMITTER_CD: {
+                            if (!has<component::SmokeEmitterCD>(id)) {
+                                createComponent<component::SmokeEmitterCD>(id);
                             }
-                            case component::ComponentType::SOUND_PITCH: {
-                                createComponent<component::SoundPitch>(cId);
-                                break;
+                            break;
+                        }
+                        case component::ComponentType::SOUND_PITCH: {
+                            if (!has<component::SoundPitch>(id)) {
+                                createComponent<component::SoundPitch>(id);
                             }
-                            case component::ComponentType::TEXTURE: {
-                                createComponent<component::Texture>(cId);
-                                break;
+                            break;
+                        }
+                        case component::ComponentType::TEXTURE: {
+                            if (!has<component::Texture>(id)) {
+                                createComponent<component::Texture>(id);
                             }
-                            case component::ComponentType::BRUSH_TRAIL: {
-                               createComponent<component::BrushTrail>(cId);
-                               break;
+                            break;
+                        }
+                        case component::ComponentType::BRUSH_TRAIL: {
+                            if (!has<component::BrushTrail>(id)) {
+                                createComponent<component::BrushTrail>(id);
                             }
-                            case component::ComponentType::UNKNOWN:
-                            case component::ComponentType::LAST:
-                            default: {
-                                assert(false);
-                            }
+                            break;
+                        }
+                        case component::ComponentType::UNKNOWN:
+                        case component::ComponentType::LAST:
+                        default: {
+                            assert(false);
                         }
                     }
                 }
             }
-        }
-
-        common::EntityID
-        EntityManager::createComplementTo(common::EntityID id) {
-            assert(!mComplementaryEntities[id]);
-            auto cId = create();
-            createComponent<entities::EntityType>(cId, entities::EntityType::COMPLEMENT);
-            mComplementaryEntities[id] = cId;
-            return cId;
-        }
-
-        common::EntityID
-        EntityManager::getComplementOf(common::EntityID id) {
-            auto result = mComplementaryEntities[id];
-            return result;
-        }
-
-        bool
-        EntityManager::hasComplement(common::EntityID id) {
-            return mComplementaryEntities[id] != 0;
         }
 
         size_t

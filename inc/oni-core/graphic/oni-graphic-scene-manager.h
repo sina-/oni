@@ -65,7 +65,7 @@ namespace oni {
                    entities::EntityManager &clientManager);
 
             void
-            tick(const entities::EntityManager &server,
+            tick(entities::EntityManager &server,
                  entities::EntityManager &client,
                  common::r64 tickTime);
 
@@ -181,6 +181,10 @@ namespace oni {
             updateRaceInfo(entities::EntityManager &,
                            const gameplay::CarLapInfo &carLap,
                            const RaceInfoEntities &carLapTextEntities);
+
+            void
+            updateSmokeEmitter(entities::EntityManager &,
+                               common::r64 tickTime);
 
             void
             updateCanvasTile(entities::EntityManager &entityManager,

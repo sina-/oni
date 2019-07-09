@@ -379,7 +379,7 @@ namespace oni {
                 }
             }
 
-            /// Update Projectiles
+            /// Update projectiles
             {
                 mProjectile->tick(manager, clientData, tickTime);
             }
@@ -387,6 +387,11 @@ namespace oni {
             /// Update age
             {
                 updateAge(manager, tickTime);
+            }
+
+            /// Update position
+            {
+                updatePosition(manager, tickTime);
             }
         }
 
@@ -481,12 +486,11 @@ namespace oni {
         }
 
         void
-        Dynamics::updatePosition(const entities::EntityManager &server,
-                                 entities::EntityManager &client,
+        Dynamics::updatePosition(entities::EntityManager &manager,
                                  common::r64 tickTime) {
             /// Update particle placement - client
             {
-                auto view = client.createView<
+                auto view = manager.createView<
                         component::Tag_SimModeClient,
                         component::WorldP3D,
                         component::Velocity,
@@ -511,21 +515,15 @@ namespace oni {
                 }
             }
             // TODO: How does this compare to WorldP3D_History component and how it is used? I need to pick one.
-            /// Brush trails - client
+            /// Brush trails
             {
-                auto view = server.createView<
-                        component::WorldP3D>
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::BrushTrail>
                         ();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto cId = client.getComplementOf(id);
-                    if (!cId) {
-                        continue;
-                    }
-                    if(!client.has<component::BrushTrail>(cId)){
-                        continue;
-                    }
-                    auto &brushTrail = client.get<component::BrushTrail>(cId);
+                    auto &brushTrail = view.get<component::BrushTrail>(id);
 
                     if (!brushTrail.initialized) {
                         brushTrail.current.x = pos.x;
@@ -538,16 +536,17 @@ namespace oni {
                         brushTrail.acceleration2d.y = 0.0;
                         brushTrail.acceleration.current = 0.0;
                         brushTrail.initialized = true;
+                        continue;
                     }
 
                     constexpr auto threshold = 0.4f;
                     if (math::abs(brushTrail.last.x - pos.x) < threshold &&
                         math::abs(brushTrail.last.y - pos.y) < threshold) {
-                        break;
+                        continue;
                     }
 
-                    auto curMass = 2.5f;
-                    auto curDrag = 0.25f;
+                    constexpr auto curMass = 2.5f;
+                    constexpr auto curDrag = 0.25f;
                     if (updateBrush(brushTrail, curMass, curDrag, pos.x, pos.y)) {
                         addBrushSegment(brushTrail);
                     }

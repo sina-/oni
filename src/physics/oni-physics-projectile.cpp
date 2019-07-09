@@ -23,7 +23,9 @@ namespace oni {
                          common::r64 tickTime) {
             /// Update cool-downs
             {
-                auto view = manager.createView<component::GunCoolDown>();
+                auto view = manager.createView<
+                        component::Tag_SimModeServer,
+                        component::GunCoolDown>();
                 for (auto &&entity: view) {
                     auto &coolDown = view.get<component::GunCoolDown>(entity);
                     math::subAndZeroClip(coolDown.value, tickTime);

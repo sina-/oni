@@ -179,16 +179,7 @@ namespace oni {
             flushDeletions();
 
             void
-            accommodateWithComplements(EntityManager &);
-
-            common::EntityID
-            createComplementTo(common::EntityID id);
-
-            common::EntityID
-            getComplementOf(common::EntityID id);
-
-            bool
-            hasComplement(common::EntityID id);
+            accommodateWithComplements();
 
             void
             attach(common::EntityID parent,

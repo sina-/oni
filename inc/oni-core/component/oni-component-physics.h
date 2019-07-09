@@ -43,7 +43,6 @@ namespace oni {
             common::CarSimDouble steer{0.f}; // (-1.0..1.0)
             common::CarSimDouble steerAngle{0.f}; // (-maxSteer..maxSteer)
             common::CarSimDouble rpm{0.f};
-            common::CarSimDouble accumulatedEBrake{0.f};
             common::CarSimDouble slipAngleFront{0.f};
             common::CarSimDouble slipAngleRear{0.f};
 

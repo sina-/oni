@@ -12,8 +12,8 @@
 #include <oni-core/graphic/oni-graphic-window.h>
 #include <oni-core/physics/oni-physics-car.h>
 #include <oni-core/math/oni-math-transformation.h>
-#include <oni-core/physics/oni-physics-projectile.h>
 #include <oni-core/game/oni-game-event.h>
+#include <oni-core/component/oni-component-gameplay.h>
 
 namespace oni {
     namespace physics {
@@ -76,7 +76,6 @@ namespace oni {
             b2Vec2 gravity(0.0f, 0.0f);
             mCollisionHandler = std::make_unique<CollisionHandler>();
             mPhysicsWorld = std::make_unique<b2World>(gravity);
-            mProjectile = std::make_unique<Projectile>(mPhysicsWorld.get());
             mRand = std::make_unique<math::Rand>(0, 0);
 
             mCollisionHandlers[component::PhysicalCategory::ROCKET] =
@@ -122,60 +121,65 @@ namespace oni {
         Dynamics::~Dynamics() = default;
 
         void
-        Dynamics::tick(entities::EntityManager &manager,
-                       entities::ClientDataManager *clientData,
-                       common::r64 tickTime) {
-            std::map<common::EntityID, io::CarInput> carInput{};
+        Dynamics::processInput(entities::EntityManager &manager,
+                               entities::ClientDataManager &clientData,
+                               std::unordered_map<common::EntityID, io::CarInput> &result) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
 
-            /// Input
+            auto carView = manager.createView<
+                    component::Heading,
+                    component::Car,
+                    component::CarConfig>();
+            for (auto &&id: carView) {
+                auto input = clientData.getClientInput(id);
+                auto &car = carView.get<component::Car>(id);
+                auto &heading = carView.get<component::Heading>(id);
+                const auto &carConfig = carView.get<component::CarConfig>(id);
+                constexpr common::r32 steeringSensitivity = 0.9f;
+
+                if (input->isPressed(GLFW_KEY_W) || input->isPressed(GLFW_KEY_UP)) {
+                    // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
+                    result[id].throttle = 1.0f;
+                }
+                if (input->isPressed(GLFW_KEY_A) || input->isPressed(GLFW_KEY_LEFT)) {
+                    result[id].left = steeringSensitivity;
+                }
+                if (input->isPressed(GLFW_KEY_S) || input->isPressed(GLFW_KEY_DOWN)) {
+                    result[id].throttle = -1.0f;
+                }
+                if (input->isPressed(GLFW_KEY_D) || input->isPressed(GLFW_KEY_RIGHT)) {
+                    result[id].right = steeringSensitivity;
+                }
+                if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
+                    car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(heading.value)),
+                                                             static_cast<common::r32>(sin(heading.value))};
+                }
+                if (input->isPressed(GLFW_KEY_SPACE)) {
+                    result[id].eBrake = 1.f;
+                }
+            }
+        }
+
+        void
+        Dynamics::updateCars(entities::EntityManager &manager,
+                             UserInputMap &input,
+                             common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
+
+            /// Update car
             {
                 auto carView = manager.createView<
-                        component::Tag_SimServerSideOnly,
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
                         component::Car,
                         component::CarConfig>();
                 for (auto &&id: carView) {
-                    auto input = clientData->getClientInput(id);
-                    // NOTE: This could happen just at the moment when a client joins, an entity is created by the
-                    // client data structures are not initialized.
-                    if (!input) {
-                        continue;
-                    }
-
                     auto &car = carView.get<component::Car>(id);
                     auto &heading = carView.get<component::Heading>(id);
                     const auto &carConfig = carView.get<component::CarConfig>(id);
-                    constexpr common::r32 steeringSensitivity = 0.9f;
 
-                    if (input->isPressed(GLFW_KEY_W) || input->isPressed(GLFW_KEY_UP)) {
-                        // TODO: When using game-pad, this value will vary between (0.0f...1.0f)
-                        carInput[id].throttle = 1.0f;
-                    }
-                    if (input->isPressed(GLFW_KEY_A) || input->isPressed(GLFW_KEY_LEFT)) {
-                        carInput[id].left = steeringSensitivity;
-                    }
-                    if (input->isPressed(GLFW_KEY_S) || input->isPressed(GLFW_KEY_DOWN)) {
-                        carInput[id].throttle = -1.0f;
-                    }
-                    if (input->isPressed(GLFW_KEY_D) || input->isPressed(GLFW_KEY_RIGHT)) {
-                        carInput[id].right = steeringSensitivity;
-                    }
-                    if (input->isPressed(GLFW_KEY_LEFT_SHIFT)) {
-                        car.velocity = car.velocity + math::vec2{static_cast<common::r32>(cos(heading.value)),
-                                                                 static_cast<common::r32>(sin(heading.value))};
-                    }
-                    if (input->isPressed(GLFW_KEY_SPACE)) {
-                        if (car.accumulatedEBrake < 1.0f) {
-                            car.accumulatedEBrake += 0.01f;
-                        }
-                        carInput[id].eBrake = static_cast<common::r32>(car.accumulatedEBrake);
-                    } else {
-                        car.accumulatedEBrake = 0.0f;
-                    }
-
-                    auto steerInput = carInput[id].left - carInput[id].right;
+                    auto steerInput = input[id].left - input[id].right;
                     if (car.smoothSteer) {
                         car.steer = applySmoothSteer(car, steerInput, tickTime);
                     } else {
@@ -194,7 +198,7 @@ namespace oni {
 
                     const auto oldPos = carPos;
                     const auto oldHeading = heading;
-                    tickCar(car, carPos, heading, carConfig, carInput[id], tickTime);
+                    tickCar(car, carPos, heading, carConfig, input[id], tickTime);
 
                     // TODO: This is probably not needed, client should be able to figure this out.
                     auto velocity = car.velocityLocal.len();
@@ -211,154 +215,9 @@ namespace oni {
                 }
             }
 
-            /// Update jet force - server
-            {
-                auto emptyFuel = std::vector<common::EntityID>();
-                auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
-                        component::JetForce,
-                        component::Heading,
-                        component::PhysicalProperties>();
-                for (auto &&id: view) {
-                    auto *body = manager.getEntityBody(id);
-                    auto &heading = view.get<component::Heading>(id);
-                    auto &jet = view.get<component::JetForce>(id);
-                    if (!math::subAndZeroClip(jet.fuze, common::r32(tickTime))) {
-                        body->ApplyForceToCenter(
-                                b2Vec2(cos(heading.value) * jet.force,
-                                       sin(heading.value) * jet.force),
-                                true);
-                    } else {
-                        emptyFuel.push_back(id);
-                    }
-                }
-                for (auto &&id: emptyFuel) {
-                    manager.removeComponent<component::JetForce>(id);
-                }
-            }
-
-            /// Update box2d world
-            {
-                // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
-                // One way to hide it is to provide a function in physics library that creates physical entities
-                // for a given entity id an maintains an internal mapping between them without leaking the
-                // implementation to outside.
-                mPhysicsWorld->Step(tickTime, 6, 2);
-            }
-
-            /// Car collisions and box2d sync
-            {
-                auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
-                        component::Car,
-                        component::Heading,
-                        component::WorldP3D,
-                        component::WorldP3D_History,
-                        component::PhysicalProperties>();
-                for (auto &&id: view) {
-                    auto &props = view.get<component::PhysicalProperties>(id);
-                    auto &car = view.get<component::Car>(id);
-                    auto &pos = view.get<component::WorldP3D>(id);
-                    auto &heading = view.get<component::Heading>(id);
-                    auto *body = manager.getEntityBody(id);
-                    // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
-                    // just apply user input to box2d representation of physical body without syncing
-                    // car dynamics with box2d physics, that way the next tick if the
-                    // car was heading out of collision it will start sliding out and things will run smoothly according
-                    // to car dynamics calculation. If the car is still heading against other objects, it will be
-                    // stuck as it was and I will skip dynamics and just sync it to  position and orientation
-                    // from box2d. This greatly improves game feeling when there are collisions and
-                    // solves lot of stickiness issues.
-                    if (car.isColliding) {
-                        // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
-                        // carconfig?
-                        // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
-                        body->ApplyForceToCenter(
-                                b2Vec2(static_cast<common::r32>(std::cos(heading.value) * 30 *
-                                                                carInput[id].throttle),
-                                       static_cast<common::r32>(std::sin(heading.value) * 30 *
-                                                                carInput[id].throttle)),
-                                true);
-                        car.isColliding = false;
-                    } else {
-                        if (isColliding(body)) {
-                            car.velocity = math::vec2{body->GetLinearVelocity().x,
-                                                      body->GetLinearVelocity().y};
-                            car.angularVelocity = body->GetAngularVelocity();
-                            pos.x = body->GetPosition().x;
-                            pos.y = body->GetPosition().y;
-                            heading.value = body->GetAngle();
-                            car.isColliding = true;
-                        } else {
-                            body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
-                            body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
-                            body->SetTransform(b2Vec2{pos.x, pos.y},
-                                               static_cast<float32>(heading.value));
-                            auto &hist = view.get<component::WorldP3D_History>(id);
-                            hist.add(pos);
-                        }
-                    }
-                }
-            }
-
-            /// General collision
-            {
-                auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
-                        component::Tag_Dynamic,
-                        component::WorldP3D,
-                        component::PhysicalProperties>();
-                for (auto &&id: view) {
-                    auto &props = view.get<component::PhysicalProperties>(id);
-                    auto &pos = view.get<component::WorldP3D>(id);
-
-                    mCollisionHandlers[props.physicalCategory](manager,
-                                                               id,
-                                                               props,
-                                                               pos);
-                }
-                manager.flushDeletions();
-            }
-
-            /// Sync placement with box2d
-            {
-                auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
-                        component::Tag_Dynamic,
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::PhysicalProperties>();
-
-                for (auto &&id: view) {
-                    auto *body = manager.getEntityBody(id);
-                    auto &props = view.get<component::PhysicalProperties>(id);
-                    auto &bPos = body->GetPosition();
-                    auto &ePos = view.get<component::WorldP3D>(id);
-                    auto &heading = view.get<component::Heading>(id);
-                    auto &scale = view.get<component::Scale>(id);
-
-                    if (!math::almost_Equal(ePos.x, bPos.x) ||
-                        !math::almost_Equal(ePos.y, bPos.y) ||
-                        !math::almost_Equal(heading.value, body->GetAngle())) {
-
-                        ePos.x = bPos.x;
-                        ePos.y = bPos.y;
-
-                        if (manager.has<component::WorldP3D_History>(id)) {
-                            manager.get<component::WorldP3D_History>(id).add(ePos);
-                        }
-
-                        heading.value = body->GetAngle();
-                        manager.markForNetSync(id);
-                    }
-                }
-            }
-
             /// Update tires
             {
                 auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
                         component::EntityAttachment,
                         component::Car>();
                 for (auto &&id : view) {
@@ -378,20 +237,157 @@ namespace oni {
                     }
                 }
             }
+        }
 
-            /// Update projectiles
-            {
-                mProjectile->tick(manager, clientData, tickTime);
+        void
+        Dynamics::updateJetForce(entities::EntityManager &manager,
+                                 common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
+
+            auto emptyFuel = std::vector<common::EntityID>();
+            auto view = manager.createView<
+                    component::JetForce,
+                    component::Heading,
+                    component::PhysicalProperties>();
+            for (auto &&id: view) {
+                auto *body = manager.getEntityBody(id);
+                auto &heading = view.get<component::Heading>(id);
+                auto &jet = view.get<component::JetForce>(id);
+                if (!math::subAndZeroClip(jet.fuze, common::r32(tickTime))) {
+                    body->ApplyForceToCenter(
+                            b2Vec2(cos(heading.value) * jet.force,
+                                   sin(heading.value) * jet.force),
+                            true);
+                } else {
+                    emptyFuel.push_back(id);
+                }
             }
-
-            /// Update age
-            {
-                updateAge(manager, tickTime);
+            for (auto &&id: emptyFuel) {
+                manager.removeComponent<component::JetForce>(id);
             }
+        }
 
-            /// Update position
-            {
-                updatePosition(manager, tickTime);
+        void
+        Dynamics::updatePhysWorld(common::r64 tickTime) {
+            // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
+            // One way to hide it is to provide a function in physics library that creates physical entities
+            // for a given entity id an maintains an internal mapping between them without leaking the
+            // implementation to outside.
+            mPhysicsWorld->Step(tickTime, 6, 2);
+        }
+
+        void
+        Dynamics::updateCarCollision(entities::EntityManager &manager,
+                                     UserInputMap &input,
+                                     common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
+
+            auto view = manager.createView<
+                    component::Car,
+                    component::Heading,
+                    component::WorldP3D,
+                    component::WorldP3D_History,
+                    component::PhysicalProperties>();
+            for (auto &&id: view) {
+                auto &props = view.get<component::PhysicalProperties>(id);
+                auto &car = view.get<component::Car>(id);
+                auto &pos = view.get<component::WorldP3D>(id);
+                auto &heading = view.get<component::Heading>(id);
+                auto *body = manager.getEntityBody(id);
+                // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
+                // just apply user input to box2d representation of physical body without syncing
+                // car dynamics with box2d physics, that way the next tick if the
+                // car was heading out of collision it will start sliding out and things will run smoothly according
+                // to car dynamics calculation. If the car is still heading against other objects, it will be
+                // stuck as it was and I will skip dynamics and just sync it to  position and orientation
+                // from box2d. This greatly improves game feeling when there are collisions and
+                // solves lot of stickiness issues.
+                if (car.isColliding) {
+                    // TODO: Right now 30 is just an arbitrary multiplier, maybe it should be based on some value in
+                    // carconfig?
+                    // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
+                    body->ApplyForceToCenter(
+                            b2Vec2(static_cast<common::r32>(std::cos(heading.value) * 30 *
+                                                            input[id].throttle),
+                                   static_cast<common::r32>(std::sin(heading.value) * 30 *
+                                                            input[id].throttle)),
+                            true);
+                    car.isColliding = false;
+                } else {
+                    if (isColliding(body)) {
+                        car.velocity = math::vec2{body->GetLinearVelocity().x,
+                                                  body->GetLinearVelocity().y};
+                        car.angularVelocity = body->GetAngularVelocity();
+                        pos.x = body->GetPosition().x;
+                        pos.y = body->GetPosition().y;
+                        heading.value = body->GetAngle();
+                        car.isColliding = true;
+                    } else {
+                        body->SetLinearVelocity(b2Vec2{car.velocity.x, car.velocity.y});
+                        body->SetAngularVelocity(static_cast<float32>(car.angularVelocity));
+                        body->SetTransform(b2Vec2{pos.x, pos.y},
+                                           static_cast<float32>(heading.value));
+                        auto &hist = view.get<component::WorldP3D_History>(id);
+                        hist.add(pos);
+                    }
+                }
+            }
+        }
+
+        void
+        Dynamics::updateCollision(entities::EntityManager &manager,
+                                  common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
+
+            auto view = manager.createView<
+                    component::Tag_Dynamic,
+                    component::WorldP3D,
+                    component::PhysicalProperties>();
+            for (auto &&id: view) {
+                auto &props = view.get<component::PhysicalProperties>(id);
+                auto &pos = view.get<component::WorldP3D>(id);
+
+                mCollisionHandlers[props.physicalCategory](manager,
+                                                           id,
+                                                           props,
+                                                           pos);
+            }
+            manager.flushDeletions();
+        }
+
+        void
+        Dynamics::syncPosWithPhysWorld(entities::EntityManager &manager) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
+
+            auto view = manager.createView<
+                    component::Tag_Dynamic,
+                    component::WorldP3D,
+                    component::Heading,
+                    component::Scale,
+                    component::PhysicalProperties>();
+
+            for (auto &&id: view) {
+                auto *body = manager.getEntityBody(id);
+                auto &props = view.get<component::PhysicalProperties>(id);
+                auto &bPos = body->GetPosition();
+                auto &ePos = view.get<component::WorldP3D>(id);
+                auto &heading = view.get<component::Heading>(id);
+                auto &scale = view.get<component::Scale>(id);
+
+                if (!math::almost_Equal(ePos.x, bPos.x) ||
+                    !math::almost_Equal(ePos.y, bPos.y) ||
+                    !math::almost_Equal(heading.value, body->GetAngle())) {
+
+                    ePos.x = bPos.x;
+                    ePos.y = bPos.y;
+
+                    if (manager.has<component::WorldP3D_History>(id)) {
+                        manager.get<component::WorldP3D_History>(id).add(ePos);
+                    }
+
+                    heading.value = body->GetAngle();
+                    manager.markForNetSync(id);
+                }
             }
         }
 
@@ -416,216 +412,43 @@ namespace oni {
         void
         Dynamics::updateAge(entities::EntityManager &manager,
                             common::r64 tickTime) {
-            {
-                /// Client side
-                auto view = manager.createView<
-                        component::Tag_SimClientSideOnly,
-                        component::Age>();
-                for (auto &&id: view) {
-                    auto &age = view.get<component::Age>(id);
-                    age.currentAge += tickTime;
-                    if (age.currentAge > age.maxAge) {
-                        if (manager.has<component::Tag_SplatOnDeath>(id)) {
-                            auto &pos = manager.get<component::WorldP3D>(id);
-                            auto &size = manager.get<component::Scale>(id);
-                            auto &tag = manager.get<component::TextureTag>(id);
+            assert(manager.getSimMode() == entities::SimMode::CLIENT ||
+                   manager.getSimMode() == entities::SimMode::SERVER);
 
-                            manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, tag);
-                        }
-                        manager.markForDeletion(id);
+            auto view = manager.createView<
+                    component::Age>();
+            for (auto &&id: view) {
+                auto &age = view.get<component::Age>(id);
+                age.currentAge += tickTime;
+                if (age.currentAge > age.maxAge) {
+                    if (manager.has<component::Tag_SplatOnDeath>(id)) {
+                        auto &pos = manager.get<component::WorldP3D>(id);
+                        auto &size = manager.get<component::Scale>(id);
+                        auto &tag = manager.get<component::TextureTag>(id);
+
+                        manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, tag);
                     }
-                }
-            }
-            /// Server
-            {
-                auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
-                        component::Age>();
-                for (auto &&id: view) {
-                    auto &age = view.get<component::Age>(id);
-                    age.currentAge += tickTime;
-                    manager.markForNetSync(id);
-                    if (age.currentAge > age.maxAge) {
-                        manager.markForDeletion(id);
-                    }
+                    manager.markForDeletion(id);
                 }
             }
             manager.flushDeletions();
         }
 
         void
-        Dynamics::updatePosition(entities::EntityManager &manager,
-                                 common::r64 tickTime) {
-            /// Update particle placement - client
+        Dynamics::updateCooldDowns(entities::EntityManager &manager,
+                                   common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
+
+            /// Update cool-downs
             {
+                // NOTE: This is not communicated to the clients so there are is no need for net-sync
                 auto view = manager.createView<
-                        component::Tag_SimClientSideOnly,
-                        component::WorldP3D,
-                        component::Velocity,
-                        component::Heading,
-                        component::Age>();
-                for (auto &&id: view) {
-                    auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &velocity = view.get<component::Velocity>(id);
-                    const auto &age = view.get<component::Age>(id);
-                    const auto &heading = view.get<component::Heading>(id).value;
-
-                    auto currentVelocity =
-                            5 * (velocity.current * tickTime) - math::pow(age.currentAge, 10) * 0.5f;
-
-                    math::zeroClip(currentVelocity);
-
-                    common::r32 x = std::cos(heading) * currentVelocity;
-                    common::r32 y = std::sin(heading) * currentVelocity;
-
-                    pos.x += x;
-                    pos.y += y;
+                        component::GunCoolDown>();
+                for (auto &&entity: view) {
+                    auto &coolDown = view.get<component::GunCoolDown>(entity);
+                    math::subAndZeroClip(coolDown.value, tickTime);
                 }
             }
-            // TODO: How does this compare to WorldP3D_History component and how it is used? I need to pick one.
-            /// Brush trails
-            {
-                // TODO: There is an assumption here that BrushTrail is only created on client side as it is a
-                // complementary component, therefore when server reaches this code it will not tick anything, but
-                // on client side when server entities are ticked this loop will hit. I don't like this, way too much
-                // implicit logic.
-                // This is also closely related to the Tag_SimServerSideOnly and Tag_SimClientSideOnly. There should not
-                // be such a concept! Systems should care only about logic, not where they are called from. If a system
-                // only applies to client side, then let the users of the engine define them on their side.
-                // Any one should be able to call a system with any registry and let it update the entities as expected.
-                // Server side systems are available to any user of the engine, if they call the system with their
-                // server side entities and get wrong results that is users fault.
-                // One sign for systems that should be defined by the clients are the functions that require client
-                // side entity manager and server side entity manager! Engine systems should only require one entity
-                // manager and those are primarily server entity manager, but the logic should not be in anyway,
-                // at least implicitly, require server side entity manager, but allow clients to call them and
-                // if they call it with the wrong manager, such as client side server entities, they will get
-                // wrong results.
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::BrushTrail>
-                        ();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    auto &brushTrail = view.get<component::BrushTrail>(id);
-
-                    if (!brushTrail.initialized) {
-                        brushTrail.current.x = pos.x;
-                        brushTrail.current.y = pos.y;
-                        brushTrail.last.x = pos.x;
-                        brushTrail.last.y = pos.y;
-                        brushTrail.velocity2d.x = 0.0;
-                        brushTrail.velocity2d.y = 0.0;
-                        brushTrail.acceleration2d.x = 0.0;
-                        brushTrail.acceleration2d.y = 0.0;
-                        brushTrail.acceleration.current = 0.0;
-                        brushTrail.initialized = true;
-                        continue;
-                    }
-
-                    constexpr auto threshold = 0.4f;
-                    if (math::abs(brushTrail.last.x - pos.x) < threshold &&
-                        math::abs(brushTrail.last.y - pos.y) < threshold) {
-                        continue;
-                    }
-
-                    constexpr auto curMass = 2.5f;
-                    constexpr auto curDrag = 0.25f;
-                    if (updateBrush(brushTrail, curMass, curDrag, pos.x, pos.y)) {
-                        addBrushSegment(brushTrail);
-                    }
-                }
-            }
-        }
-
-        bool
-        Dynamics::updateBrush(component::BrushTrail &trail,
-                              common::r32 curMass,
-                              common::r32 curDrag,
-                              common::r32 x,
-                              common::r32 y) {
-            /* calculate mass and drag */
-            auto mass = 1.f;//math::lerp(1.0, 160.0, curmass);
-            auto drag = 0.6f;//math::lerp(0.00, 0.5, curdrag * curdrag);
-
-            /* calculate force and acceleration */
-            auto forceX = x - trail.current.x;
-            auto forceY = y - trail.current.y;
-            trail.acceleration.current = sqrt(forceX * forceX + forceY * forceY);
-            if (trail.acceleration.current < 0.000001) {
-                return false;
-            }
-            trail.acceleration2d.x = forceX / mass;
-            trail.acceleration2d.y = forceY / mass;
-
-            /* calculate new velocity */
-            trail.velocity2d.x += trail.acceleration2d.x;
-            trail.velocity2d.y += trail.acceleration2d.y;
-
-            trail.velocity.current = sqrt(
-                    trail.velocity2d.x * trail.velocity2d.x + trail.velocity2d.y * trail.velocity2d.y);
-            trail.heading.x = -trail.velocity2d.y;
-            trail.heading.y = trail.velocity2d.x;
-            if (trail.velocity.current < 0.000001) {
-                return false;
-            }
-
-            /* calculate angle of drawing tool */
-            trail.heading.x /= trail.velocity.current;
-            trail.heading.y /= trail.velocity.current;
-//            if (f.fixedangle) {
-//                f.angx = 0.6;
-//                f.angy = 0.2;
-//            }
-
-            /* apply drag */
-            trail.velocity2d.x = trail.velocity2d.x * (1.0 - drag);
-            trail.velocity2d.y = trail.velocity2d.y * (1.0 - drag);
-
-            /* update position */
-            trail.last.x = trail.current.x;
-            trail.last.y = trail.current.y;
-
-            trail.current.x += trail.velocity2d.x;
-            trail.current.y += trail.velocity2d.y;
-            return true;
-        }
-
-        void
-        Dynamics::addBrushSegment(component::BrushTrail &trail) {
-            common::r32 delX;
-            common::r32 delY;
-            common::r32 width;
-            common::r32 previousX;
-            common::r32 previousY;
-
-//            width = 0.04 - trail.velocity.current;
-//            width = width * 1.5;
-//            if (width < 0.0001) {
-//                width = 1.00001;
-//            }
-            delX = trail.heading.x * trail.width;
-            delY = trail.heading.y * trail.width;
-
-            previousX = trail.last.x;
-            previousY = trail.last.y;
-
-            // TODO: ZZZZZZZZZ
-            constexpr common::r32 z = 1.f;
-            auto a = component::WorldP3D{previousX + trail.lastDelta.x, previousY + trail.lastDelta.y, z};
-            trail.vertices.push_back(a);
-
-            auto b = component::WorldP3D{previousX - trail.lastDelta.x, previousY - trail.lastDelta.y, z};
-            trail.vertices.push_back(b);
-
-            auto c = component::WorldP3D{trail.current.x - delX, trail.current.y - delY, z};
-            trail.vertices.push_back(c);
-
-            auto d = component::WorldP3D{trail.current.x + delX, trail.current.y + delY, z};
-            trail.vertices.push_back(d);
-
-            trail.lastDelta.x = delX;
-            trail.lastDelta.y = delY;
         }
 
         void

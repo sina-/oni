@@ -27,9 +27,9 @@ namespace oni {
     }
 
     namespace physics {
-        class Projectile;
-
         class CollisionHandler;
+
+        using UserInputMap = std::unordered_map<common::EntityID, io::CarInput>;
 
         class Dynamics {
         public:
@@ -37,10 +37,42 @@ namespace oni {
 
             ~Dynamics();
 
+            static void
+            processInput(entities::EntityManager &,
+                         entities::ClientDataManager &,
+                         std::unordered_map<common::EntityID, io::CarInput> &result);
+
+            static void
+            updateCars(entities::EntityManager &,
+                       UserInputMap &input,
+                       common::r64 tickTime);
+
+            static void
+            updateJetForce(entities::EntityManager &,
+                           common::r64 tickTime);
+
             void
-            tick(entities::EntityManager &,
-                 entities::ClientDataManager *clientData,
-                 common::r64 tickTime);
+            updatePhysWorld(common::r64 tickTime);
+
+            static void
+            updateCarCollision(entities::EntityManager &,
+                               UserInputMap &input,
+                               common::r64 tickTime);
+
+            void
+            updateCollision(entities::EntityManager &,
+                            common::r64 tickTime);
+
+            static void
+            syncPosWithPhysWorld(entities::EntityManager &);
+
+            static void
+            updateAge(entities::EntityManager &,
+                      common::r64 tickTime);
+
+            static void
+            updateCooldDowns(entities::EntityManager &,
+                             common::r64 tickTime);
 
         public:
             // TODO: Not very happy about this exposure, but it is really the simplest solution right now and only
@@ -78,28 +110,9 @@ namespace oni {
             isColliding(b2Body *);
 
         private:
-            static void
-            updateAge(entities::EntityManager &,
-                      common::r64 tickTime);
-
-            static void
-            updatePosition(entities::EntityManager &manager,
-                           common::r64 tickTime);
-
-            static bool
-            updateBrush(component::BrushTrail &,
-                        common::r32 curMass,
-                        common::r32 curDrag,
-                        common::r32 x,
-                        common::r32 y);
-
-            static void
-            addBrushSegment(component::BrushTrail &);
-
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};
-            std::unique_ptr<Projectile> mProjectile{};
             std::unique_ptr<CollisionHandler> mCollisionHandler{};
 
             std::map<

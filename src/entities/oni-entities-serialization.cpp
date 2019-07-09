@@ -159,7 +159,6 @@ namespace oni {
                     data.axleWeightRatioRear,
                     data.rpm,
                     data.maxVelocityAbsolute,
-                    data.accumulatedEBrake,
                     data.slipAngleFront,
                     data.slipAngleRear,
                     data.velocity,

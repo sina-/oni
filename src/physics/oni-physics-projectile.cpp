@@ -18,24 +18,13 @@ namespace oni {
         Projectile::~Projectile() = default;
 
         void
-        Projectile::tick(entities::EntityManager &manager,
-                         entities::ClientDataManager *clientData,
-                         common::r64 tickTime) {
-            /// Update cool-downs
-            {
-                auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
-                        component::GunCoolDown>();
-                for (auto &&entity: view) {
-                    auto &coolDown = view.get<component::GunCoolDown>(entity);
-                    math::subAndZeroClip(coolDown.value, tickTime);
-                }
-            }
-
+        Projectile::spawnProjectiles(entities::EntityManager &manager,
+                                     entities::ClientDataManager *clientData,
+                                     common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::SERVER);
             /// Spawn projectile
             {
                 auto view = manager.createView<
-                        component::Tag_SimServerSideOnly,
                         component::WorldP3D,
                         component::Heading,
                         component::Car,

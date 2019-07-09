@@ -31,9 +31,9 @@ namespace oni {
             ~Projectile();
 
             void
-            tick(entities::EntityManager &,
-                 entities::ClientDataManager *,
-                 common::r64 tickTime);
+            spawnProjectiles(entities::EntityManager &,
+                             entities::ClientDataManager *,
+                             common::r64 tickTime);
 
         private:
             void

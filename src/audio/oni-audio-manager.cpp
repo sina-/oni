@@ -59,7 +59,7 @@ namespace oni {
                 }
             }
 
-            /// Play and Pause - server entities
+            /// Play and Pause
             {
                 auto view = manager.createView<
                         component::Tag_Audible,

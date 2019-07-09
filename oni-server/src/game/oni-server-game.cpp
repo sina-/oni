@@ -13,6 +13,7 @@
 #include <oni-core/math/oni-math-z-layer-manager.h>
 #include <oni-core/network/oni-network-server.h>
 #include <oni-core/physics/oni-physics-dynamics.h>
+#include <oni-core/physics/oni-physics-projectile.h>
 
 #include <oni-server/level/oni-server-level-tile-world.h>
 
@@ -23,6 +24,7 @@ namespace oni {
             ServerGame::ServerGame(const network::Address &address) : Game(), mServerAddress(address) {
                 mZLayerManager = std::make_unique<math::ZLayerManager>();
                 mDynamics = std::make_unique<physics::Dynamics>();
+                mProjectile = std::make_unique<physics::Projectile>(mDynamics->getPhysicsWorld());
                 mEntityManager = std::make_unique<oni::entities::EntityManager>(entities::SimMode::SERVER,
                                                                                 *mZLayerManager,
                                                                                 *mDynamics->getPhysicsWorld());
@@ -139,7 +141,18 @@ namespace oni {
                 //std::this_thread::sleep_for(std::chrono::milliseconds(std::rand() % 4));
 
                 {
-                    mDynamics->tick(*mEntityManager, mClientDataManager.get(), tickTime);
+                    auto input = physics::UserInputMap();
+                    mDynamics->processInput(*mEntityManager, *mClientDataManager, input);
+                    mDynamics->updateCars(*mEntityManager, input, tickTime);
+                    mDynamics->updateJetForce(*mEntityManager, tickTime);
+                    mDynamics->updatePhysWorld(tickTime);
+                    mDynamics->updateCarCollision(*mEntityManager, input, tickTime);
+                    mDynamics->updateCollision(*mEntityManager, tickTime);
+                    mDynamics->syncPosWithPhysWorld(*mEntityManager);
+                    mDynamics->updateAge(*mEntityManager, tickTime);
+                    mDynamics->updateCooldDowns(*mEntityManager, tickTime);
+                    // TODO: use input
+                    mProjectile->spawnProjectiles(*mEntityManager, mClientDataManager.get(), tickTime);
                 }
 
                 std::vector<component::WorldP2D> tickPositions{};

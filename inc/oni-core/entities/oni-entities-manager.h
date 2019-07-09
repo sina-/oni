@@ -167,6 +167,9 @@ namespace oni {
             b2Body *
             getEntityBody(common::EntityID);
 
+            entities::SimMode
+            getSimMode();
+
         public:
             void
             markForDeletion(common::EntityID);

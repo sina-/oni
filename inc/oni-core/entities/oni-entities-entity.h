@@ -39,8 +39,13 @@ namespace oni {
         };
 
         enum class SimMode : common::u8 {
+            UNKNOWN,
+
             CLIENT,
             SERVER,
+            CLIENT_SIDE_SERVER,
+
+            LAST
         };
 
         enum class SnapshotType {
@@ -70,6 +75,14 @@ namespace oni {
             server() {
                 auto policy = EntityOperationPolicy{};
                 policy.track = true;
+                return policy;
+            }
+
+            inline static EntityOperationPolicy
+            clientServer() {
+                auto policy = EntityOperationPolicy{};
+                policy.track = false;
+                policy.safe = false;
                 return policy;
             }
         };

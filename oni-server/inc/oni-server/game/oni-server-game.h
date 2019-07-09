@@ -28,6 +28,7 @@ namespace oni {
 
     namespace physics {
         class Dynamics;
+        class Projectile;
     }
 
     namespace server {
@@ -112,6 +113,7 @@ namespace oni {
 
                 std::unique_ptr<oni::math::ZLayerManager> mZLayerManager{};
                 std::unique_ptr<oni::physics::Dynamics> mDynamics{};
+                std::unique_ptr<physics::Projectile> mProjectile{};
                 std::unique_ptr<oni::server::level::TileWorld> mTileWorld{};
                 std::unique_ptr<oni::gameplay::LapTracker> mLapTracker{};
 

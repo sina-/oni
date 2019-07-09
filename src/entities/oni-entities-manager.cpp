@@ -33,6 +33,10 @@ namespace oni {
                     mEntityOperationPolicy = entities::EntityOperationPolicy::server();
                     break;
                 }
+                case SimMode::CLIENT_SIDE_SERVER: {
+                    mEntityOperationPolicy = entities::EntityOperationPolicy::clientServer();
+                    break;
+                }
                 default: {
                     assert(false);
                     break;
@@ -126,6 +130,7 @@ namespace oni {
 
         void
         EntityManager::markForNetSync(common::EntityID entity) {
+            assert(mSimMode == entities::SimMode::SERVER);
             accommodate<component::Tag_NetworkSyncComponent>(entity);
         }
 
@@ -531,6 +536,11 @@ namespace oni {
             auto result = mEntityBodyMap[id];
             assert(result);
             return result;
+        }
+
+        entities::SimMode
+        EntityManager::getSimMode() {
+            return mSimMode;
         }
 
         common::EntityID

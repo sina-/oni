@@ -32,11 +32,13 @@ namespace oni {
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it
                 // physics class part of which is dynamics.
+                // TODO: Every system receives the entity manager for each tick function, TileWorld should be no exception
                 mTileWorld = std::make_unique<server::level::TileWorld>(*mEntityManager,
                                                                         *mDynamics->getPhysicsWorld(),
                                                                         *mZLayerManager);
 
                 mClientDataManager = std::make_unique<oni::entities::ClientDataManager>();
+                // TODO: Do not pass the entity manager here, let the tick function receive one.
                 mLapTracker = std::make_unique<gameplay::LapTracker>(*mEntityManager,
                                                                      *mZLayerManager);
 
@@ -155,7 +157,6 @@ namespace oni {
                     mProjectile->spawnProjectiles(*mEntityManager, mClientDataManager.get(), tickTime);
                 }
 
-                std::vector<component::WorldP2D> tickPositions{};
                 {
                     // TODO: This is just awful :( so many locks. Accessing entities from registry without a view, which
                     // is slow and by the time the positions are passed to other systems, such as TileWorld, the entities
@@ -164,15 +165,13 @@ namespace oni {
                     // things in sequence but have a pool of workers that can do parallel shit on demand for heavy lifting.
                     for (const auto &carEntity: mClientDataManager->getCarEntities()) {
                         const auto &pos = mEntityManager->get<component::WorldP3D>(carEntity);
-                        tickPositions.push_back({pos.x, pos.y});
+                        mTileWorld->tick(pos);
                     }
                 }
 
-                for (const auto &pos: tickPositions) {
-                    mTileWorld->tick(pos);
+                {
+                    mLapTracker->tick();
                 }
-
-                mLapTracker->tick();
             }
 
             void

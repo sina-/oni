@@ -39,7 +39,7 @@ namespace oni {
                 ~TileWorld();
 
                 void
-                tick(const component::WorldP2D &position);
+                tick(const component::WorldP3D &position);
 
                 void
                 genDemoRaceCourse();
@@ -47,10 +47,10 @@ namespace oni {
             private:
 
                 void
-                tickChunk(const component::WorldP2D &position);
+                tickChunk(const component::WorldP3D &position);
 
                 oni::level::ChunkIndex
-                groundChunkPosToIndex(const component::WorldP2D &position) const;
+                groundChunkPosToIndex(const component::WorldP3D &position) const;
 
                 component::WorldP3D
                 groundChunkIndexToPos(const oni::level::ChunkIndex &chunkIndex) const;

@@ -27,8 +27,6 @@ namespace oni {
     }
 
     namespace physics {
-        class CollisionHandler;
-
         using UserInputMap = std::unordered_map<common::EntityID, io::CarInput>;
 
         class Dynamics {
@@ -113,7 +111,7 @@ namespace oni {
 
         private:
             std::unique_ptr<b2World> mPhysicsWorld{};
-            std::unique_ptr<CollisionHandler> mCollisionHandler{};
+            //std::unique_ptr<CollisionHandler> mCollisionHandler{};
 
             std::map<
                     component::PhysicalCategory,

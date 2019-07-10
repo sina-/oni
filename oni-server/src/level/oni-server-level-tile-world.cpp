@@ -81,13 +81,13 @@ namespace oni {
             }
 
             void
-            TileWorld::tick(const component::WorldP2D &position) {
-                tickChunk(position);
+            TileWorld::tick(const component::WorldP3D &pos) {
+                tickChunk(pos);
             }
 
             void
-            TileWorld::tickChunk(const component::WorldP2D &position) {
-                auto chunkIndex = groundChunkPosToIndex(position);
+            TileWorld::tickChunk(const component::WorldP3D &pos) {
+                auto chunkIndex = groundChunkPosToIndex(pos);
 
                 // NOTE: We always create and fill chunks in the current location and 8 adjacent chunks.
                 // 1--2--3
@@ -450,10 +450,10 @@ namespace oni {
             }
 
             oni::level::ChunkIndex
-            TileWorld::groundChunkPosToIndex(const component::WorldP2D &position) const {
-                auto x = floor(position.x / mChunkSizeX);
+            TileWorld::groundChunkPosToIndex(const component::WorldP3D &pos) const {
+                auto x = floor(pos.x / mChunkSizeX);
                 auto xIndex = static_cast<common::i64>(x);
-                auto y = floor(position.y / mChunkSizeY);
+                auto y = floor(pos.y / mChunkSizeY);
                 auto yIndex = static_cast<common::i64>(y);
                 return oni::level::ChunkIndex{xIndex, yIndex};
             }
@@ -471,9 +471,9 @@ namespace oni {
             }
 
             void
-            TileWorld::createWall(const std::vector<oni::level::WallTilePosition> &position,
+            TileWorld::createWall(const std::vector<oni::level::WallTilePosition> &pos,
                                   const std::vector<oni::level::TileIndex> &indices) {
-                assert(position.size() == indices.size());
+                assert(pos.size() == indices.size());
 
                 size_t wallCount = indices.size();
 
@@ -485,7 +485,7 @@ namespace oni {
                 auto textureTag = component::TextureTag::WALL_VERTICAL;
 
                 for (size_t i = 0; i < wallCount; ++i) {
-                    auto &wallPos = position[i];
+                    auto &wallPos = pos[i];
                     auto &xTileIndex = indices[i].x;
                     auto &yTileIndex = indices[i].y;
 

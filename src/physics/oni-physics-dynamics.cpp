@@ -17,6 +17,7 @@
 
 namespace oni {
     namespace physics {
+#if 0
         class CollisionHandler : public b2ContactListener {
         public:
             void
@@ -71,10 +72,11 @@ namespace oni {
                 std::cout << "PostSolve\n";
             }*/
         };
+#endif
 
         Dynamics::Dynamics() {
-            b2Vec2 gravity(0.0f, 0.0f);
-            mCollisionHandler = std::make_unique<CollisionHandler>();
+            auto gravity = b2Vec2(0.0f, 0.0f);
+            ///mCollisionHandler = std::make_unique<CollisionHandler>();
             mPhysicsWorld = std::make_unique<b2World>(gravity);
             mRand = std::make_unique<math::Rand>(0, 0);
 

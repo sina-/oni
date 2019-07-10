@@ -67,6 +67,23 @@ namespace oni {
         SceneManager::~SceneManager() = default;
 
         void
+        SceneManager::renderRaw(const component::WorldP3D pos,
+                                const component::Color &color) {
+            //mColorRenderer->submit(pos, color);
+            ++mRenderedSpritesPerFrame;
+        }
+
+        void
+        SceneManager::beginColorRendering() {
+            begin(*mRendererTessellation, true, false, true);
+        }
+
+        void
+        SceneManager::endColorRendering() {
+            end(*mRendererTessellation);
+        }
+
+        void
         SceneManager::begin(Renderer &renderer2D,
                             bool translate,
                             bool scale,
@@ -108,19 +125,18 @@ namespace oni {
         }
 
         void
-        SceneManager::render(entities::EntityManager &serverManager,
-                             entities::EntityManager &clientManager) {
+        SceneManager::render(entities::EntityManager &manager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
             /// Sprites
             {
-                renderTessellation(serverManager, clientManager, viewWidth, viewHeight);
+                renderTessellation(manager, viewWidth, viewHeight);
             }
 
             /// Trails
             {
-                renderStrip(serverManager, clientManager, viewWidth, viewHeight);
+                renderStrip(manager, viewWidth, viewHeight);
             }
 
             /// UI
@@ -132,40 +148,10 @@ namespace oni {
                 //end(*mTextureShader, *mTextureRenderer);
             }
 
-            /// Test draw brush trail
+            /// Quads
             {
-                begin(*mRendererQuad, true, true, true);
-                auto view = serverManager.createView<component::BrushTrail>();
-                auto scale = component::Scale{};
-                auto texture = component::Texture{};
-                auto color = component::Color::WHITE();
-                color.set_a(0.1f);
-                for (auto &&id: view) {
-                    const auto &trail = view.get<component::BrushTrail>(id);
-                    for (common::size i = 0; i + 4 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], scale, color, texture);
-                        i += 4;
-                    }
-                }
-                end(*mRendererQuad);
+                renderQuad(manager, viewWidth, viewHeight);
             }
-        }
-
-        void
-        SceneManager::renderRaw(const component::WorldP3D pos,
-                                const component::Color &color) {
-            //mColorRenderer->submit(pos, color);
-            ++mRenderedSpritesPerFrame;
-        }
-
-        void
-        SceneManager::beginColorRendering() {
-            begin(*mRendererTessellation, true, false, true);
-        }
-
-        void
-        SceneManager::endColorRendering() {
-            end(*mRendererTessellation);
         }
 
         void
@@ -185,140 +171,71 @@ namespace oni {
         }
 
         void
-        SceneManager::renderTessellation(entities::EntityManager &serverManager,
-                                         entities::EntityManager &clientManager,
+        SceneManager::renderTessellation(entities::EntityManager &manager,
                                          common::r32 viewWidth,
                                          common::r32 viewHeight) {
-            /// Sort client
-            {
-                clientManager.sort<component::WorldP3D>([](const auto &lhs,
-                                                           const auto &rhs) {
-                    return lhs.z < rhs.z;
-                });
-            }
-            /// Sort server
-            {
-                serverManager.sort<component::WorldP3D>([](const auto &lhs,
-                                                           const auto &rhs) {
-                    return lhs.z < rhs.z;
-                });
-            }
+            manager.sort<component::WorldP3D>([](const auto &lhs,
+                                                 const auto &rhs) {
+                return lhs.z < rhs.z;
+            });
 
             begin(*mRendererTessellation, true, true, true);
-            {
-                /// Color shading
-                {
-                    renderTessellationColor(serverManager, viewWidth, viewHeight);
-                    renderTessellationColor(clientManager, viewWidth, viewHeight);
-                }
 
-                // TODO: This is duplicate code for server and client! in fact this function should only receive
-                // entity manager only!
-                /// Texture shading - server
-                {
-                    auto view = serverManager.createView<
-                            component::WorldP3D,
-                            component::Heading,
-                            component::Scale,
-                            component::Texture,
-                            component::Tag_TextureShaded>();
-                    for (auto &&id: view) {
-                        const auto &pos = view.get<component::WorldP3D>(id);
-                        const auto &heading = view.get<component::Heading>(id);
-                        const auto &scale = view.get<component::Scale>(id);
+            renderTessellationColor(manager, viewWidth, viewHeight);
+            renderTessellationTexture(manager, viewWidth, viewHeight);
 
-                        auto result = applyParentTransforms(serverManager, id, pos, heading);
-
-                        if (!isVisible(result.pos, scale)) {
-                            continue;
-                        }
-
-                        const auto &texture = serverManager.get<component::Texture>(id);
-                        assert(!texture.image.path.empty());
-#if DEBUG_Z
-                        serverManager.printEntityType(id);
-                        printf("%f\n", result.pos.z);
-#endif
-                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Color{},
-                                                      texture);
-
-                        ++mRenderedTexturesPerFrame;
-                    }
-                }
-
-                /// Texture shading - client
-                {
-                    auto view = clientManager.createView<
-                            component::WorldP3D,
-                            component::Heading,
-                            component::Scale,
-                            component::Texture,
-                            component::Tag_TextureShaded>();
-                    view.each<component::WorldP3D>([this, viewWidth, viewHeight, &clientManager](
-                            common::EntityID id,
-                            const component::WorldP3D &pos,
-                            const component::Heading &heading,
-                            const component::Scale &scale,
-                            const component::Texture &texture,
-                            const component::Tag_TextureShaded &) {
-
-                        auto result = applyParentTransforms(clientManager, id, pos, heading);
-                        if (!isVisible(result.pos, scale)) {
-                            return;
-                        }
-
-                        assert(!texture.image.path.empty());
-#if DEBUG_Z
-                        clientManager.printEntityType(id);
-                        printf("%f\n", result.pos.z);
-#endif
-                        mRendererTessellation->submit(result.pos, result.heading, scale, component::Color{},
-                                                      texture);
-
-                        ++mRenderedTexturesPerFrame;
-                    });
-                }
-            }
             end(*mRendererTessellation);
         }
 
         void
-        SceneManager::renderStrip(entities::EntityManager &serverManager,
-                                  entities::EntityManager &clientManager,
+        SceneManager::renderStrip(entities::EntityManager &manager,
                                   common::r32 viewWidth,
                                   common::r32 viewHeight) {
-            {
-                auto view = serverManager.createView<
-                        component::WorldP3D_History>();
-                for (auto &&id: view) {
-                    begin(*mRendererStrip, true, true, true);
+            auto view = manager.createView<
+                    component::WorldP3D_History>();
+            for (auto &&id: view) {
+                begin(*mRendererStrip, true, true, true);
 
-                    const auto &ph = view.get<component::WorldP3D_History>(id).pos;
-                    auto count = 0;
-                    for (auto &&p: ph) {
+                const auto &ph = view.get<component::WorldP3D_History>(id).pos;
+                auto count = 0;
+                for (auto &&p: ph) {
 #if DEBUG_Z
-                        serverManager.printEntityType(id);
-                        printf("%f\n", p.z);
+                    serverManager.printEntityType(id);
+                    printf("%f\n", p.z);
 #endif
-                        auto alpha = common::r32(count) / ph.size();
-                        auto color = component::Color{};
-                        color.set_rgba(1, 1, 1, alpha);
-                        mRendererStrip->submit(p, 1, color, {});
-                        mRendererStrip->submit(p, -1, color, {});
-                        ++count;
-                    }
-
-                    end(*mRendererStrip);
+                    auto alpha = common::r32(count) / ph.size();
+                    auto color = component::Color{};
+                    color.set_rgba(1, 1, 1, alpha);
+                    mRendererStrip->submit(p, 1, color, {});
+                    mRendererStrip->submit(p, -1, color, {});
+                    ++count;
                 }
+
+                end(*mRendererStrip);
             }
         }
 
         void
-        SceneManager::renderQuad(entities::EntityManager &serverManager,
-                                 entities::EntityManager &clientManager,
+        SceneManager::renderQuad(entities::EntityManager &manager,
                                  common::r32 viewWidth,
                                  common::r32 viewHeight) {
-
+            /// Test draw brush trail
+            {
+                begin(*mRendererQuad, true, true, true);
+                auto view = manager.createView<component::BrushTrail>();
+                auto scale = component::Scale{};
+                auto texture = component::Texture{};
+                auto color = component::Color::WHITE();
+                color.set_a(0.1f);
+                for (auto &&id: view) {
+                    const auto &trail = view.get<component::BrushTrail>(id);
+                    for (common::size i = 0; i + 4 < trail.vertices.size();) {
+                        mRendererQuad->submit(&trail.vertices[i], scale, color, texture);
+                        i += 4;
+                    }
+                }
+                end(*mRendererQuad);
+            }
         }
 
         void
@@ -352,6 +269,40 @@ namespace oni {
                 mRendererTessellation->submit(result.pos, result.heading, scale, color, component::Texture{});
 
                 ++mRenderedSpritesPerFrame;
+            }
+        }
+
+        void
+        SceneManager::renderTessellationTexture(entities::EntityManager &manager,
+                                                common::r32 viewWidth,
+                                                common::r32 viewHeight) {
+            auto view = manager.createView<
+                    component::WorldP3D,
+                    component::Heading,
+                    component::Scale,
+                    component::Texture,
+                    component::Tag_TextureShaded>();
+            for (auto &&id: view) {
+                const auto &pos = view.get<component::WorldP3D>(id);
+                const auto &heading = view.get<component::Heading>(id);
+                const auto &scale = view.get<component::Scale>(id);
+
+                auto result = applyParentTransforms(manager, id, pos, heading);
+
+                if (!isVisible(result.pos, scale)) {
+                    continue;
+                }
+
+                const auto &texture = manager.get<component::Texture>(id);
+                assert(!texture.image.path.empty());
+#if DEBUG_Z
+                serverManager.printEntityType(id);
+                        printf("%f\n", result.pos.z);
+#endif
+                mRendererTessellation->submit(result.pos, result.heading, scale, component::Color{},
+                                              texture);
+
+                ++mRenderedTexturesPerFrame;
             }
         }
 

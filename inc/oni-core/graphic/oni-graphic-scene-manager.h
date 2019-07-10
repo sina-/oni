@@ -58,8 +58,7 @@ namespace oni {
             ~SceneManager();
 
             void
-            render(entities::EntityManager &serverManager,
-                   entities::EntityManager &clientManager);
+            render(entities::EntityManager &);
 
             static void
             updateSmokeEmitter(entities::EntityManager &,
@@ -140,19 +139,16 @@ namespace oni {
 
             void
             renderTessellation(entities::EntityManager &serverManager,
-                               entities::EntityManager &clientManager,
                                common::r32 viewWidth,
                                common::r32 viewHeight);
 
             void
-            renderStrip(entities::EntityManager &serverManager,
-                        entities::EntityManager &clientManager,
+            renderStrip(entities::EntityManager &,
                         common::r32 viewWidth,
                         common::r32 viewHeight);
 
             void
-            renderQuad(entities::EntityManager &serverManager,
-                       entities::EntityManager &clientManager,
+            renderQuad(entities::EntityManager &,
                        common::r32 viewWidth,
                        common::r32 viewHeight);
 
@@ -160,6 +156,12 @@ namespace oni {
             renderTessellationColor(entities::EntityManager &,
                                     common::r32 viewWidth,
                                     common::r32 viewHeight);
+
+            void
+            renderTessellationTexture(entities::EntityManager &,
+                                      common::r32 viewWidth,
+                                      common::r32 viewHeight);
+
 
         private:
             struct WorldP3DAndHeading {

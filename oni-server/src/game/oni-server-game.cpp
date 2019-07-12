@@ -99,8 +99,8 @@ namespace oni {
                                                   const std::string &data) {
                 auto carEntity = spawnRaceCar();
 
-                mServer->sendCarEntityID(carEntity, clientID);
                 mServer->sendEntitiesAll(*mEntityManager);
+                mServer->sendCarEntityID(carEntity, clientID);
 
                 mClientDataManager->addNewClient(clientID, carEntity);
             }

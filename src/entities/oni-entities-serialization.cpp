@@ -75,7 +75,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   component::ParticleTrail &data) {
-            archive(data.textureTag);
+            archive(data.textureTag, data.size);
         }
 
         template<class Archive>

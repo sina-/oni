@@ -102,7 +102,7 @@ namespace oni {
                             // genChunkTexture(i, j);
                             // genChunkTiles(i, j);
                             // genChunkRoads(i, j);
-                            genChunkGroundSprite(i, j);
+                            // genChunkGroundSprite(i, j);
                         }
                     }
                 }
@@ -346,7 +346,7 @@ namespace oni {
                                    const oni::level::RoadTileIndex &roadTileIndex,
                                    const std::string &texturePath) {
                 auto worldPos = roadTileIndexToPos(chunkIndex, roadTileIndex);
-                auto roadEntityID = genTexture(getTileSize(), worldPos, texturePath);
+                auto roadEntityID = genTexture(getTileSize(), worldPos, component::TextureTag::ROAD);
                 auto roadID = math::pack_i64(roadTileIndex.x, roadTileIndex.y);
                 mRoadLookup.emplace(roadID, roadEntityID);
             }
@@ -552,7 +552,7 @@ namespace oni {
                 auto chunkIndex = oni::level::ChunkIndex{chunkX, chunkY};
                 auto worldPos = groundChunkIndexToPos(chunkIndex);
 
-                auto chunkEntityID = genTexture(getChunkSize(), worldPos, mRaceTrack1);
+                auto chunkEntityID = genTexture(getChunkSize(), worldPos, component::TextureTag::BACKGROUND_CHUNK);
                 auto packed = math::pack_i64(chunkX, chunkY);
                 mChunkLookup.emplace(packed, chunkEntityID);
             }
@@ -601,17 +601,16 @@ namespace oni {
             common::EntityID
             TileWorld::genTexture(const math::vec2 &size,
                                   const component::WorldP3D &worldPos,
-                                  std::string_view path) {
+                                  const component::TextureTag textureTag) {
                 auto id = mEntityManager.createEntity_WorldChunk();
                 mEntityManager.setWorldP3D(id, worldPos.x, worldPos.y, worldPos.z);
                 mEntityManager.setScale(id, size.x, size.y);
-                mEntityManager.setTextureTag(id, component::TextureTag::ROAD);
+                mEntityManager.setTextureTag(id, textureTag);
                 return id;
             }
 
             void
             TileWorld::genDemoRaceCourse() {
-                return;
                 for (int i = -2; i <= 2; ++i) {
                     for (int j = -2; j <= 2; ++j) {
                         genChunkGroundTexture(i, j);

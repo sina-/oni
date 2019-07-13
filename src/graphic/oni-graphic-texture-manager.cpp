@@ -91,13 +91,16 @@ namespace oni {
 
             auto colorType = FreeImage_GetColorType(dib);
             // NOTE: This is the only type supported
-            assert(colorType == FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA);
+            assert(colorType == FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA || colorType == FREE_IMAGE_COLOR_TYPE::FIC_RGB);
 
             auto width = static_cast<common::oniGLsizei>(FreeImage_GetWidth(dib));
             auto height = static_cast<common::oniGLsizei >(FreeImage_GetHeight(dib));
 
             assert(width);
             assert(height);
+
+            auto result = FreeImage_PreMultiplyWithAlpha(dib);
+            assert(result);
 
             auto bits = FreeImage_GetBits(dib);
             assert(bits);
@@ -130,9 +133,12 @@ namespace oni {
 
             for (common::u32 y = 0; y < image.height; ++y) {
                 for (common::u32 x = 0; x < image.width; ++x) {
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = pixel.b();
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = pixel.g();
-                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = pixel.r();
+                    auto r = common::u8(pixel.r_r32() * pixel.a_r32());
+                    auto g = common::u8(pixel.g_r32() * pixel.a_r32());
+                    auto b = common::u8(pixel.b_r32() * pixel.a_r32());
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = r;
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = g;
+                    image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = b;
                     image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_ALPHA] = pixel.a();
                 }
             }
@@ -267,16 +273,17 @@ namespace oni {
                     math::clip(blendB, 0.f, 1.f);
                     math::clip(blendA, 0.f, 1.f);
 
-                    subImage[p + r] = (common::u8) (blendR * 255);
-                    subImage[p + g] = (common::u8) (blendG * 255);
-                    subImage[p + b] = (common::u8) (blendB * 255);
+                    // NOTE: Pre-multiplied alpha
+                    subImage[p + r] = (common::u8) (blendR * blendA * 255);
+                    subImage[p + g] = (common::u8) (blendG * blendA * 255);
+                    subImage[p + b] = (common::u8) (blendB * blendA * 255);
                     subImage[p + a] = (common::u8) (blendA * 255);
 
                     // NOTE: Store the blend for future
-                    texture.image.data[m + r] = (common::u8) (blendR * 255);
-                    texture.image.data[m + g] = (common::u8) (blendG * 255);
-                    texture.image.data[m + b] = (common::u8) (blendB * 255);
-                    texture.image.data[m + a] = (common::u8) (blendA * 255);
+                    texture.image.data[m + r] = subImage[p + r];
+                    texture.image.data[m + g] = subImage[p + g];
+                    texture.image.data[m + b] = subImage[p + b];
+                    texture.image.data[m + a] = subImage[p + a];
                 }
             }
 

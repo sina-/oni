@@ -644,7 +644,8 @@ namespace oni {
             createComponent<component::Scale>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::ROCKET);
             createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
-            createComponent<component::ParticleTrail>(id);
+            auto &pt = createComponent<component::ParticleTrail>(id);
+            pt.size = 3.f;
             auto &ph = createComponent<component::WorldP3D_History>(id);
             ph.size = 10;
 

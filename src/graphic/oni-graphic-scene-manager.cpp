@@ -224,9 +224,13 @@ namespace oni {
                 begin(*mRendererQuad, true, true, true);
                 auto view = manager.createView<component::BrushTrail>();
                 auto scale = component::Scale{};
-                auto texture = component::Texture{};
-                auto color = component::Color::WHITE();
-                color.set_a(0.1f);
+                //auto texture = component::Texture{};
+                auto texture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
+                auto color = component::Color::BLACK();
+//                color.set_a(0.5f);
+//                color.set_r(0.4f);
+//                color.set_g(0.4f);
+//                color.set_b(0.4f);
                 for (auto &&id: view) {
                     const auto &trail = view.get<component::BrushTrail>(id);
                     for (common::size i = 0; i + 4 < trail.vertices.size();) {

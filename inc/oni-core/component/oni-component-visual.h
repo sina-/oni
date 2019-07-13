@@ -36,6 +36,7 @@ namespace oni {
             SMOKE,
             CLOUD,
             ROCKET,
+            ROCKET_TRAIL,
             ROAD,
             WALL_VERTICAL,
             WALL_HORIZONTAL,
@@ -73,6 +74,7 @@ namespace oni {
 
         struct ParticleTrail {
             TextureTag textureTag = TextureTag::UNKNOWN;
+            common::r32 size = 0.1f;
         };
 
         struct AfterMark {
@@ -258,7 +260,7 @@ namespace oni {
         struct BrushTrail {
             bool initialized{false};
             common::r32 mass{1.f};
-            common::r32 width{0.5f};
+            common::r32 width{0.4f};
             component::Heading2D heading{};
             component::WorldP2D last{};
             component::WorldP2D lastDelta{};

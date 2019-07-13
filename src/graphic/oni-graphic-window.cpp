@@ -93,10 +93,11 @@ namespace oni {
             glDepthMask(GL_TRUE);
             glDepthRange(0.f, 1.f);
 
-            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            // NOTE: All rgb values are pre-multiplied by the alpha
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
             glViewport(0, 0, mWidth, mHeight);
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
             glClearDepth(1.f);
         }
 

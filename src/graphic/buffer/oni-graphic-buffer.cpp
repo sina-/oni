@@ -7,7 +7,7 @@
 #include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 
 namespace oni {
-    namespace buffer {
+    namespace graphic {
         Buffer::Buffer(const std::vector<common::oniGLfloat> &data,
                        common::oniGLsizeiptr dataSize,
                        common::oniGLenum usage) {

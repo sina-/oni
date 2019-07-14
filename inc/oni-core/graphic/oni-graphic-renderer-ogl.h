@@ -4,16 +4,14 @@
 #include <vector>
 
 #include <oni-core/common/oni-common-typedefs-graphic.h>
+#include <oni-core/graphic/buffer/oni-graphic-frame-buffer.h>
+#include <oni-core/graphic/buffer/oni-graphic-buffer.h>
+#include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
+#include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
 #include <oni-core/graphic/oni-graphic-renderer.h>
 
 
 namespace oni {
-    namespace buffer {
-        class IndexBuffer;
-
-        class VertexArray;
-    }
-
     namespace graphic {
         class Shader;
 
@@ -76,6 +74,15 @@ namespace oni {
             virtual void
             unbindIndexBuffer();
 
+            virtual void
+            bindFrameBuffer();
+
+            virtual void
+            unbindFrameBuffer();
+
+            virtual void
+            attachFrameBuffer();
+
             virtual common::oniGLsizei
             getIndexCount() = 0;
 
@@ -89,8 +96,9 @@ namespace oni {
             common::oniGLint mMaxNumTextureSamplers{32};
 
             std::unique_ptr<Shader> mShader{};
-            std::unique_ptr<buffer::VertexArray> mVertexArray{nullptr};
-            std::unique_ptr<buffer::IndexBuffer> mIndexBuffer{nullptr};
+            std::unique_ptr<VertexArray> mVertexArray{nullptr};
+            std::unique_ptr<IndexBuffer> mIndexBuffer{nullptr};
+            std::unique_ptr<FrameBuffer> mFrameBuffer{nullptr};
 
         private:
             PrimitiveType mPrimitiveType{PrimitiveType::UNKNOWN};

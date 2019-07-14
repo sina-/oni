@@ -5,7 +5,7 @@
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 
 namespace oni {
-    namespace buffer {
+    namespace graphic {
         class IndexBuffer {
         public:
             explicit IndexBuffer(common::oniGLuint count,

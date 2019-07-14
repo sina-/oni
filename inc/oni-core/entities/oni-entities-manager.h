@@ -38,7 +38,7 @@ namespace oni {
         public:
             EntityManager(entities::SimMode sMode,
                           const math::ZLayerManager &,
-                          b2World &);
+                          b2World *);
 
             ~EntityManager();
 
@@ -395,6 +395,14 @@ namespace oni {
             void
             printEntityType(common::EntityID id);
 
+            bool
+            valid(common::EntityID entityID);
+
+            static auto
+            nullEntity() {
+                return entt::null;
+            }
+
         private:
             common::EntityID
             createEntity(entities::EntityType);
@@ -441,9 +449,6 @@ namespace oni {
             void
             destroyAndTrack(common::EntityID entityID);
 
-            bool
-            valid(common::EntityID entityID);
-
         private:
             std::unique_ptr<entt::basic_registry<common::EntityID>> mRegistry{};
             std::unique_ptr<entt::basic_continuous_loader<common::EntityID>> mLoader{};
@@ -456,7 +461,7 @@ namespace oni {
             std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
 
         private:
-            b2World &mPhysicsWorld;
+            b2World *mPhysicsWorld;
             const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};
 

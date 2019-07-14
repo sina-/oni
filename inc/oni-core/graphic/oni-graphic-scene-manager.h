@@ -60,13 +60,15 @@ namespace oni {
             void
             render(entities::EntityManager &);
 
+            void
+            renderInternal();
+
             static void
             updateSmokeEmitter(entities::EntityManager &,
                                common::r64 tickTime);
 
             void
-            updateAfterMark(entities::EntityManager &serverManager,
-                            entities::EntityManager &clientManager,
+            updateAfterMark(entities::EntityManager &,
                             common::r64 tickTime);
 
             void
@@ -74,8 +76,7 @@ namespace oni {
                       const component::Color &color);
 
             void
-            splat(entities::EntityManager &,
-                  const component::WorldP3D &,
+            splat(const component::WorldP3D &,
                   const component::Scale &,
                   const graphic::Brush &);
 
@@ -180,16 +181,14 @@ namespace oni {
             end(Renderer &renderer2D);
 
             void
-            updateCanvasTile(entities::EntityManager &entityManager,
-                             common::EntityID entityID,
+            updateCanvasTile(common::EntityID entityID,
                              const graphic::Brush &,
                              const component::WorldP3D &,
                              const component::Scale &);
 
 
             common::EntityID
-            getOrCreateCanvasTile(entities::EntityManager &,
-                                  const component::WorldP3D &pos);
+            getOrCreateCanvasTile(const component::WorldP3D &pos);
 
             static SceneManager::WorldP3DAndHeading
             applyParentTransforms(const entities::EntityManager &manager,
@@ -210,6 +209,7 @@ namespace oni {
 
             std::unique_ptr<TextureManager> mTextureManager{};
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
+            std::unique_ptr<entities::EntityManager> mSceneEntityManager{};
             asset::AssetManager &mAssetManager;
             b2World &mPhysicsWorld;
 

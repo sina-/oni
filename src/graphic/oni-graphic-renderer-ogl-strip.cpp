@@ -114,10 +114,10 @@ namespace oni {
             //bufferStructures.push_back(color);
             //bufferStructures.push_back(samplerID);
 
-            mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructures, maxBufferSize);
+            mVertexArray = std::make_unique<VertexArray>(bufferStructures, maxBufferSize);
 
             if (mMaxIndicesCount > mMaxPrimitiveCount) {
-                mIndexBuffer = std::make_unique<buffer::IndexBuffer>(mMaxIndicesCount);
+                mIndexBuffer = std::make_unique<IndexBuffer>(mMaxIndicesCount);
             }
 
             std::vector<GLint> samplers;

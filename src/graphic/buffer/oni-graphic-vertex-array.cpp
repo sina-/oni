@@ -6,11 +6,11 @@
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
 
 namespace oni {
-    namespace buffer {
+    namespace graphic {
         VertexArray::VertexArray(
                 const std::vector<graphic::BufferStructure> &bufferStructure,
                 common::oniGLsizei maxBufferSize) : mMaxBufferSize{maxBufferSize} {
-            mVertexBuffers = std::make_unique<buffer::Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
+            mVertexBuffers = std::make_unique<Buffer>(std::vector<common::oniGLfloat>(), mMaxBufferSize,
                                                               GL_STATIC_DRAW);
             mBufferStructure = bufferStructure;
             glGenVertexArrays(1, &mArrayID);

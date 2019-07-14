@@ -6,7 +6,7 @@
 #include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 
 namespace oni {
-    namespace buffer {
+    namespace graphic {
 
         class Buffer;
 

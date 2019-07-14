@@ -5,9 +5,6 @@
 
 #include <GL/glew.h>
 
-#include <oni-core/graphic/buffer/oni-graphic-buffer.h>
-#include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
-#include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 
@@ -67,7 +64,11 @@ namespace oni {
             if (indexCount < 0) {
                 return;
             }
+            bindFrameBuffer();
+
             TextureManager::bindRange(0, mTextures);
+
+            attachFrameBuffer();
 
             bindVertexArray();
             bindIndexBuffer();
@@ -94,6 +95,7 @@ namespace oni {
                 }
             }
 
+            unbindFrameBuffer();
             unbindIndexBuffer();
             unbindVertexArray();
 
@@ -141,6 +143,24 @@ namespace oni {
             if (mIndexBuffer) {
                 mIndexBuffer->unbind();
             }
+        }
+
+        void
+        Renderer_OpenGL::bindFrameBuffer() {
+            if (mFrameBuffer) {
+                mFrameBuffer->bind();
+            }
+        }
+
+        void
+        Renderer_OpenGL::unbindFrameBuffer() {
+            if (mFrameBuffer) {
+                mFrameBuffer->unbind();
+            }
+        }
+
+        void
+        Renderer_OpenGL::attachFrameBuffer() {
         }
     }
 }

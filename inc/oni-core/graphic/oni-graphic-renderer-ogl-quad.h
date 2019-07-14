@@ -23,6 +23,9 @@ namespace oni {
                    const component::Color &,
                    const component::Texture &);
 
+            void
+            setFrameBufferTexture(common::oniGLint textureID);
+
         protected:
             void
             enableShader(const math::mat4 &model,
@@ -37,12 +40,17 @@ namespace oni {
             void
             resetIndexCount() override;
 
+            void
+            attachFrameBuffer() override;
+
         private:
             common::oniGLsizei mMaxPrimitiveCount{0};
             common::oniGLsizei mMaxIndicesCount{0};
 
             // Actual number of indices used.
             common::oniGLsizei mIndexCount{0};
+
+            common::oniGLuint mFBOTextureID{0};
         };
     }
 }

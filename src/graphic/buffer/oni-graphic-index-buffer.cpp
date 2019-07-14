@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 
 namespace oni {
-    namespace buffer {
+    namespace graphic {
         IndexBuffer::IndexBuffer(common::oniGLuint count,
                                  common::oniGLsizei size) : mBufferID{0},
                                                             mCount{count},

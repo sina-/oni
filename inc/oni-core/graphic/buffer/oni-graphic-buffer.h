@@ -6,7 +6,7 @@
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 
 namespace oni {
-    namespace buffer {
+    namespace graphic {
 
         /*
          * Great tutorial on OpenGL buffers: https://open.gl/drawing

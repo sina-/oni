@@ -50,6 +50,11 @@ namespace oni {
                 return mView.end();
             }
 
+            auto
+            empty() {
+                return mView.empty();
+            }
+
             template<class Component>
             Component &
             get(common::EntityID entityID) noexcept {

@@ -27,7 +27,7 @@ namespace oni {
                 mProjectile = std::make_unique<physics::Projectile>(mDynamics->getPhysicsWorld());
                 mEntityManager = std::make_unique<oni::entities::EntityManager>(entities::SimMode::SERVER,
                                                                                 *mZLayerManager,
-                                                                                *mDynamics->getPhysicsWorld());
+                                                                                mDynamics->getPhysicsWorld());
 
                 // TODO: Passing reference to unique_ptr and also exposing the b2World into the other classes!
                 // Maybe I can expose subset of functionality I need from Dynamics class, maybe even better to call it

@@ -1,4 +1,4 @@
-add_library(oni-core-buffer oni-graphic-buffer.cpp oni-graphic-index-buffer.cpp oni-graphic-vertex-array.cpp)
+add_library(oni-core-buffer oni-graphic-buffer.cpp oni-graphic-index-buffer.cpp oni-graphic-vertex-array.cpp oni-graphic-frame-buffer.cpp)
 
 target_compile_features(oni-core-buffer
         PUBLIC

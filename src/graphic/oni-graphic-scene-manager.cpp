@@ -55,6 +55,9 @@ namespace oni {
 
             mTextureManager = std::make_unique<TextureManager>(mAssetManager);
 
+            mSceneEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, zLayerManager,
+                                                                            nullptr);
+
             mRand = std::make_unique<math::Rand>(0, 0);
 
             mDebugDrawBox2D = std::make_unique<DebugDrawBox2D>(this);
@@ -136,7 +139,7 @@ namespace oni {
 
             /// Trails
             {
-                renderStrip(manager, viewWidth, viewHeight);
+                // renderStrip(manager, viewWidth, viewHeight);
             }
 
             /// UI
@@ -152,6 +155,11 @@ namespace oni {
             {
                 renderQuad(manager, viewWidth, viewHeight);
             }
+        }
+
+        void
+        SceneManager::renderInternal() {
+            render(*mSceneEntityManager);
         }
 
         void
@@ -221,8 +229,12 @@ namespace oni {
                                  common::r32 viewHeight) {
             /// Test draw brush trail
             {
-                begin(*mRendererQuad, true, true, true);
                 auto view = manager.createView<component::BrushTrail>();
+                if (view.empty()) {
+                    return;
+                }
+
+                begin(*mRendererQuad, true, true, true);
                 auto scale = component::Scale{};
                 //auto texture = component::Texture{};
                 auto texture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
@@ -231,6 +243,13 @@ namespace oni {
 //                color.set_r(0.4f);
 //                color.set_g(0.4f);
 //                color.set_b(0.4f);
+
+                if (mCanvasTileLookup.empty()) {
+                    return;
+                }
+                auto canvasEntityID = *mCanvasTileLookup.begin();
+                auto canvasTextureID = mSceneEntityManager->get<component::Texture>(canvasEntityID.second).textureID;
+                mRendererQuad->setFrameBufferTexture(canvasTextureID);
                 for (auto &&id: view) {
                     const auto &trail = view.get<component::BrushTrail>(id);
                     for (common::size i = 0; i + 4 < trail.vertices.size();) {
@@ -311,68 +330,67 @@ namespace oni {
         }
 
         void
-        SceneManager::splat(entities::EntityManager &manager,
-                            const component::WorldP3D &worldPos,
+        SceneManager::splat(const component::WorldP3D &worldPos,
                             const component::Scale &scale,
                             const graphic::Brush &brush) {
             std::set<common::EntityID> tileEntities;
 
-            auto entityID = getOrCreateCanvasTile(manager, worldPos);
+            auto entityID = getOrCreateCanvasTile(worldPos);
             tileEntities.insert(entityID);
 
             auto lowerLeft = worldPos;
             lowerLeft.x -= scale.x / 2.f;
             lowerLeft.y -= scale.y / 2.f;
-            auto lowerLeftEntityID = getOrCreateCanvasTile(manager, lowerLeft);
+            auto lowerLeftEntityID = getOrCreateCanvasTile(lowerLeft);
             tileEntities.insert(lowerLeftEntityID);
 
             auto topRight = worldPos;
             topRight.x += scale.x / 2.f;
             topRight.y += scale.y / 2.f;
 
-            auto topRightEntityID = getOrCreateCanvasTile(manager, topRight);
+            auto topRightEntityID = getOrCreateCanvasTile(topRight);
             tileEntities.insert(topRightEntityID);
 
             auto topLeft = worldPos;
             topLeft.x -= scale.x / 2.f;
             topLeft.y += scale.y / 2.f;
-            auto topLeftEntityID = getOrCreateCanvasTile(manager, topLeft);
+            auto topLeftEntityID = getOrCreateCanvasTile(topLeft);
             tileEntities.insert(topLeftEntityID);
 
             auto lowerRight = worldPos;
             lowerRight.x += scale.x / 2.f;
             lowerRight.y -= scale.y / 2.f;
-            auto lowerRightEntityID = getOrCreateCanvasTile(manager, lowerRight);
+            auto lowerRightEntityID = getOrCreateCanvasTile(lowerRight);
             tileEntities.insert(lowerRightEntityID);
 
             for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(manager, tileEntity, brush, worldPos, scale);
+                updateCanvasTile(tileEntity, brush, worldPos, scale);
             }
         }
 
         common::EntityID
-        SceneManager::getOrCreateCanvasTile(entities::EntityManager &manager,
-                                            const component::WorldP3D &pos) {
+        SceneManager::getOrCreateCanvasTile(const component::WorldP3D &pos) {
             auto x = math::findBin(pos.x, mCanvasTileSizeX);
             auto y = math::findBin(pos.y, mCanvasTileSizeY);
             auto xy = math::pack_i64(x, y);
 
             auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
             if (missing) {
+                auto id = mSceneEntityManager->createEntity_CanvasTile();
+
                 auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
                 auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
                 auto tilePosZ = mZLayerManager.getZForEntity(entities::EntityType::CANVAS);
 
                 auto heading = component::Heading{0.f};
 
-                auto id = manager.createEntity_CanvasTile();
-                manager.setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
-                manager.setScale(id,
-                                 static_cast<common::r32>(mCanvasTileSizeX),
-                                 static_cast<common::r32>(mCanvasTileSizeY));
-                manager.setHeading(id, heading.value);
+                mSceneEntityManager->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
+                mSceneEntityManager->setScale(id,
+                                              static_cast<common::r32>(mCanvasTileSizeX),
+                                              static_cast<common::r32>(mCanvasTileSizeY));
+                mSceneEntityManager->setHeading(id, heading.value);
 
-                auto &texture = manager.get<component::Texture>(id);
+                auto &texture = mSceneEntityManager->get<component::Texture>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP32);
@@ -391,7 +409,7 @@ namespace oni {
             }
 
             auto entity = mCanvasTileLookup[xy];
-            assert(entity);
+            assert(mSceneEntityManager->valid(entity));
             return entity;
         }
 
@@ -410,7 +428,6 @@ namespace oni {
 
         void
         SceneManager::updateAfterMark(entities::EntityManager &manager,
-                                      entities::EntityManager &clientManager,
                                       common::r64 tickTime) {
             auto view = manager.createView<
                     component::AfterMark,
@@ -424,19 +441,18 @@ namespace oni {
                 brush.type = component::BrushType::TEXTURE;
 
                 const auto &pos = view.get<component::WorldP3D>(id);
-                splat(clientManager, pos, scale, brush);
+                splat(pos, scale, brush);
             }
         }
 
         void
-        SceneManager::updateCanvasTile(entities::EntityManager &entityManager,
-                                       common::EntityID entityID,
+        SceneManager::updateCanvasTile(common::EntityID entityID,
                                        const graphic::Brush &brush,
                                        const component::WorldP3D &worldPos,
                                        const component::Scale &scale) {
-            auto &canvasTexture = entityManager.get<component::Texture>(entityID);
-            auto canvasTilePos = entityManager.get<component::WorldP3D>(entityID);
-            auto canvasSize = entityManager.get<component::Scale>(entityID);
+            auto &canvasTexture = mSceneEntityManager->get<component::Texture>(entityID);
+            auto canvasTilePos = mSceneEntityManager->get<component::WorldP3D>(entityID);
+            auto canvasSize = mSceneEntityManager->get<component::Scale>(entityID);
             auto pos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f,
                                            canvasTilePos.y - canvasSize.y / 2.f,
                                            canvasTilePos.z};

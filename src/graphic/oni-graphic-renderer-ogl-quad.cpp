@@ -4,6 +4,7 @@
 
 #include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 #include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
+#include <oni-core/graphic/buffer/oni-graphic-frame-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
 #include <oni-core/graphic/oni-graphic-shader.h>
 #include <oni-core/component/oni-component-geometry.h>
@@ -79,16 +80,18 @@ namespace oni {
             bufferStructures.push_back(color);
             bufferStructures.push_back(uv);
 
-            mVertexArray = std::make_unique<buffer::VertexArray>(bufferStructures, maxBufferSize);
+            mVertexArray = std::make_unique<VertexArray>(bufferStructures, maxBufferSize);
 
             if (mMaxIndicesCount > mMaxPrimitiveCount) {
-                mIndexBuffer = std::make_unique<buffer::IndexBuffer>(mMaxIndicesCount);
+                mIndexBuffer = std::make_unique<IndexBuffer>(mMaxIndicesCount);
             }
 
             std::vector<GLint> samplers;
             for (common::i8 i = 0; i < mMaxNumTextureSamplers; ++i) {
                 samplers.push_back(i);
             }
+
+            mFrameBuffer = std::make_unique<FrameBuffer>();
 
             mShader->enable();
             mShader->setUniformiv("samplers", samplers);
@@ -180,6 +183,19 @@ namespace oni {
         void
         Renderer_OpenGL_Quad::resetIndexCount() {
             mIndexCount = 0;
+        }
+
+        void
+        Renderer_OpenGL_Quad::setFrameBufferTexture(common::oniGLint textureID) {
+            mFBOTextureID = textureID;
+        }
+
+        void
+        Renderer_OpenGL_Quad::attachFrameBuffer() {
+            mFrameBuffer->attach(mFBOTextureID);
+
+            auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            assert(status == GL_FRAMEBUFFER_COMPLETE);
         }
     }
 }

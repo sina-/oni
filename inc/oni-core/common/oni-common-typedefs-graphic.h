@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 
 namespace oni {
     namespace common {

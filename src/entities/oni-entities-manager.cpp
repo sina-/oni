@@ -17,7 +17,7 @@ namespace oni {
     namespace entities {
         EntityManager::EntityManager(entities::SimMode sMode,
                                      const math::ZLayerManager &zLayerManager,
-                                     b2World &physicsWorld) : mSimMode(sMode), mZLayerManager(zLayerManager),
+                                     b2World *physicsWorld) : mSimMode(sMode), mZLayerManager(zLayerManager),
                                                               mPhysicsWorld(physicsWorld) {
             mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();
             mLoader = std::make_unique<entt::basic_continuous_loader<common::EntityID>>(*mRegistry);
@@ -359,7 +359,7 @@ namespace oni {
                     bodyDef.position.x = pos.x;
                     bodyDef.position.y = pos.y;
                     bodyDef.type = b2_dynamicBody;
-                    body = mPhysicsWorld.CreateBody(&bodyDef);
+                    body = mPhysicsWorld->CreateBody(&bodyDef);
 
                     b2FixtureDef collisionSensor;
                     collisionSensor.isSensor = true;
@@ -379,7 +379,7 @@ namespace oni {
                     bodyDef.position.x = pos.x;
                     bodyDef.position.y = pos.y;
                     bodyDef.type = b2_staticBody;
-                    body = mPhysicsWorld.CreateBody(&bodyDef);
+                    body = mPhysicsWorld->CreateBody(&bodyDef);
                     body->CreateFixture(&shape, 0.f);
                     break;
                 }
@@ -387,7 +387,7 @@ namespace oni {
                     bodyDef.position.x = pos.x;
                     bodyDef.position.y = pos.y;
                     bodyDef.type = b2_kinematicBody;
-                    body = mPhysicsWorld.CreateBody(&bodyDef);
+                    body = mPhysicsWorld->CreateBody(&bodyDef);
                     body->CreateFixture(&fixtureDef);
                     break;
                 }
@@ -407,7 +407,7 @@ namespace oni {
         EntityManager::removePhysicalBody(common::EntityID id) {
             auto *body = mEntityBodyMap[id];
             assert(body);
-            mPhysicsWorld.DestroyBody(body);
+            mPhysicsWorld->DestroyBody(body);
         }
 
         void

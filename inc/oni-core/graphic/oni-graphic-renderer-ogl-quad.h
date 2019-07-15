@@ -26,7 +26,7 @@ namespace oni {
             getFrameBufferTextureID();
 
             void
-            attachFBOToTexture(common::oniGLuint textureID);
+            clearFBO();
 
         protected:
             void

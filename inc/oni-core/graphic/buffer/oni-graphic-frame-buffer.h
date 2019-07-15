@@ -22,6 +22,9 @@ namespace oni {
             void
             attach(common::oniGLuint textureID);
 
+            void
+            clearBuffer();
+
         private:
             static void checkFBO();
 

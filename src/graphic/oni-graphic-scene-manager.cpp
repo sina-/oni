@@ -257,6 +257,7 @@ namespace oni {
                 brush.textureID = mRendererQuad->getFrameBufferTextureID();
                 brush.type = component::BrushType::TEXTURE_ID;
                 splat(pos, scale, brush);
+                mRendererQuad->clearFBO();
 #if 0
                 {
                         begin(*mRendererTessellation, true, true, true);

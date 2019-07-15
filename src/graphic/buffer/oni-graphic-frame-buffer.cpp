@@ -33,6 +33,19 @@ namespace oni {
         }
 
         void
+        FrameBuffer::clearBuffer() {
+            common::oniGLuint color[4] = {0, 0, 0, 0};
+#if 0
+            // TODO: This is OGL 4.0+
+            glClearTexImage(mTextureID, 0, GL_BGRA, GL_UNSIGNED_BYTE, &color);
+#else
+            bind();
+            glClearBufferuiv(GL_COLOR, 0, color);
+            unbind();
+#endif
+        }
+
+        void
         FrameBuffer::bind() {
             glBindFramebuffer(GL_FRAMEBUFFER, mBufferID);
         }

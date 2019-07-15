@@ -190,8 +190,8 @@ namespace oni {
         }
 
         void
-        Renderer_OpenGL_Quad::attachFBOToTexture(common::oniGLuint textureID) {
-            mFrameBuffer->attach(textureID);
+        Renderer_OpenGL_Quad::clearFBO() {
+            mFrameBuffer->clearBuffer();
         }
     }
 }

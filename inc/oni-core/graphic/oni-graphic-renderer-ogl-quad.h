@@ -19,12 +19,14 @@ namespace oni {
 
             void
             submit(const component::WorldP3D *,
-                   const component::Scale &,
                    const component::Color &,
                    const component::Texture &);
 
+            common::oniGLuint
+            getFrameBufferTextureID();
+
             void
-            setFrameBufferTexture(common::oniGLint textureID);
+            attachFBOToTexture(common::oniGLuint textureID);
 
         protected:
             void
@@ -40,17 +42,12 @@ namespace oni {
             void
             resetIndexCount() override;
 
-            void
-            attachFrameBuffer() override;
-
         private:
             common::oniGLsizei mMaxPrimitiveCount{0};
             common::oniGLsizei mMaxIndicesCount{0};
 
             // Actual number of indices used.
             common::oniGLsizei mIndexCount{0};
-
-            common::oniGLuint mFBOTextureID{0};
         };
     }
 }

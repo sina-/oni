@@ -24,10 +24,21 @@ namespace oni {
             }
         }
 
+        void
+        TextureManager::loadFromTextureID(component::Image &image,
+                                          common::oniGLuint textureID) {
+            common::oniGLenum type = GL_UNSIGNED_BYTE;
+            common::oniGLenum format = GL_BGRA;
+            glBindTexture(GL_TEXTURE_2D, textureID);
+            glGetTextureImage(textureID, 0, format, type, image.data.size(), image.data.data());
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
         const component::Texture &
         TextureManager::loadOrGetTexture(component::TextureTag tag,
                                          bool loadBits) {
             assert(tag != component::TextureTag::UNKNOWN);
+            assert(tag != component::TextureTag::LAST);
             if (isTextureLoaded(tag)) {
                 return mTextureMap[tag];
             }
@@ -126,8 +137,6 @@ namespace oni {
             assert(image.width);
             assert(image.height);
 
-            image.width = image.width;
-            image.height = image.height;
             image.data.resize(static_cast<common::u32>(mElementsInRGBA * image.width * image.height), 0);
             common::u16 stride = image.width * mElementsInRGBA;
 
@@ -313,8 +322,8 @@ namespace oni {
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
             glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, fontManager.getAtlasData());
 

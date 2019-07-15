@@ -234,30 +234,40 @@ namespace oni {
                     return;
                 }
 
-                begin(*mRendererQuad, true, true, true);
-                auto scale = component::Scale{};
-                //auto texture = component::Texture{};
+                auto pos = component::WorldP3D{0, 0, 1};
+                auto color = component::Color::WHITE();
+                auto scale = component::Scale{2, 2, 2};
                 auto texture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
-                auto color = component::Color::BLACK();
-//                color.set_a(0.5f);
-//                color.set_r(0.4f);
-//                color.set_g(0.4f);
-//                color.set_b(0.4f);
-
-                if (mCanvasTileLookup.empty()) {
-                    return;
-                }
-                auto canvasEntityID = *mCanvasTileLookup.begin();
-                auto canvasTextureID = mSceneEntityManager->get<component::Texture>(canvasEntityID.second).textureID;
-                mRendererQuad->setFrameBufferTexture(canvasTextureID);
                 for (auto &&id: view) {
-                    const auto &trail = view.get<component::BrushTrail>(id);
-                    for (common::size i = 0; i + 4 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], scale, color, texture);
+                    auto &trail = view.get<component::BrushTrail>(id);
+                    if (trail.vertices.empty()) {
+                        continue;
+                    }
+
+                    begin(*mRendererQuad, false, true, true);
+                    for (common::size i = 0; i + 3 < trail.vertices.size();) {
+                        mRendererQuad->submit(&trail.vertices[i], color, texture);
                         i += 4;
                     }
+                    end(*mRendererQuad);
+                    trail.vertices.clear();
                 }
-                end(*mRendererQuad);
+
+                auto brush = Brush{};
+                brush.textureID = mRendererQuad->getFrameBufferTextureID();
+                brush.type = component::BrushType::TEXTURE_ID;
+                splat(pos, scale, brush);
+#if 0
+                {
+                        begin(*mRendererTessellation, true, true, true);
+                        auto texture = component::Texture{};
+                        texture.textureID = textureID;
+                        texture.image.path = "WHAT";
+                        mRendererTessellation->submit({0, 0, 1}, {}, {50, 50, 1}, component::Color{},
+                                                      texture);
+                        end(*mRendererTessellation);
+                    }
+#endif
             }
         }
 
@@ -438,7 +448,7 @@ namespace oni {
                 const auto &mark = view.get<component::AfterMark>(id);
                 auto brush = graphic::Brush{};
                 brush.tag = mark.textureTag;
-                brush.type = component::BrushType::TEXTURE;
+                brush.type = component::BrushType::TEXTURE_TAG;
 
                 const auto &pos = view.get<component::WorldP3D>(id);
                 splat(pos, scale, brush);
@@ -468,13 +478,22 @@ namespace oni {
                     mTextureManager->fill(image, brush.color);
                     break;
                 }
-                case component::BrushType::TEXTURE: {
+                case component::BrushType::TEXTURE_TAG: {
                     // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
                     // as long as down the line I can call sub texture update with the texture data only,
                     // something along the lines of take the updated texture data and point to where the offsets point
                     // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
                     // at all what I intended
                     image = mTextureManager->loadOrGetImage(brush.tag);
+                    break;
+                }
+                case component::BrushType::TEXTURE_ID: {
+                    auto x = 400;
+                    auto y = 400;
+                    image.data.resize(x * y * 4);
+                    image.width = x;
+                    image.height = y;
+                    mTextureManager->loadFromTextureID(image, brush.textureID);
                     break;
                 }
                 default: {

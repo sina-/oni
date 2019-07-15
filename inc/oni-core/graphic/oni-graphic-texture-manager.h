@@ -60,7 +60,11 @@ namespace oni {
             loadOrGetTexture(component::TextureTag tag,
                              bool loadBits);
 
-            void
+            static void
+            loadFromTextureID(component::Image &,
+                              common::oniGLuint textureID);
+
+            static void
             loadFromImage(component::Texture &);
 
             // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random

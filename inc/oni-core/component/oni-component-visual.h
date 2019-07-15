@@ -247,7 +247,9 @@ namespace oni {
             UNKNOWN,
 
             SPRITE,
-            TEXTURE,
+            TEXTURE_TAG,
+            TEXTURE_ID,
+
 
             LAST
         };

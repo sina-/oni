@@ -80,9 +80,6 @@ namespace oni {
             virtual void
             unbindFrameBuffer();
 
-            virtual void
-            attachFrameBuffer();
-
             virtual common::oniGLsizei
             getIndexCount() = 0;
 

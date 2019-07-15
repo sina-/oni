@@ -16,11 +16,18 @@ namespace oni {
             static void
             unbind();
 
-            static void
-            attach(common::oniGLint);
+            common::oniGLuint
+            getFrameBufferTextureID();
+
+            void
+            attach(common::oniGLuint textureID);
+
+        private:
+            static void checkFBO();
 
         private:
             common::oniGLuint mBufferID{};
+            common::oniGLuint mTextureID{};
         };
     }
 }

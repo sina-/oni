@@ -68,8 +68,6 @@ namespace oni {
 
             TextureManager::bindRange(0, mTextures);
 
-            attachFrameBuffer();
-
             bindVertexArray();
             bindIndexBuffer();
 
@@ -157,10 +155,6 @@ namespace oni {
             if (mFrameBuffer) {
                 mFrameBuffer->unbind();
             }
-        }
-
-        void
-        Renderer_OpenGL::attachFrameBuffer() {
         }
     }
 }

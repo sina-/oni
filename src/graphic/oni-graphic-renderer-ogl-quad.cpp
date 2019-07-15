@@ -102,7 +102,6 @@ namespace oni {
 
         void
         Renderer_OpenGL_Quad::submit(const component::WorldP3D *pos,
-                                     const component::Scale &scale,
                                      const component::Color &color,
                                      const component::Texture &texture) {
             assert(mIndexCount + 6 < mMaxIndicesCount);
@@ -185,17 +184,14 @@ namespace oni {
             mIndexCount = 0;
         }
 
-        void
-        Renderer_OpenGL_Quad::setFrameBufferTexture(common::oniGLint textureID) {
-            mFBOTextureID = textureID;
+        common::oniGLuint
+        Renderer_OpenGL_Quad::getFrameBufferTextureID() {
+            return mFrameBuffer->getFrameBufferTextureID();
         }
 
         void
-        Renderer_OpenGL_Quad::attachFrameBuffer() {
-            mFrameBuffer->attach(mFBOTextureID);
-
-            auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            assert(status == GL_FRAMEBUFFER_COMPLETE);
+        Renderer_OpenGL_Quad::attachFBOToTexture(common::oniGLuint textureID) {
+            mFrameBuffer->attach(textureID);
         }
     }
 }

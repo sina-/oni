@@ -9,6 +9,7 @@ namespace oni {
             union {
                 component::Color color{};
                 component::TextureTag tag;
+                common::oniGLuint textureID;
             };
         };
     }

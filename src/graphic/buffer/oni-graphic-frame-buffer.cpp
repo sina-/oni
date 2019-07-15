@@ -15,7 +15,7 @@ namespace oni {
                 glBindTexture(GL_TEXTURE_2D, mTextureID);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 400, 400, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 160, 90, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
 

@@ -173,6 +173,7 @@ namespace oni {
             assert(texture.image.width >= width);
             assert(texture.image.height >= height);
 
+            // TODO: Do I need ot bind the texture? Seems to be working :/
             glTextureSubImage2D(texture.textureID, 0, xOffset, yOffset, width, height, texture.format, texture.type,
                                 bits.data());
         }

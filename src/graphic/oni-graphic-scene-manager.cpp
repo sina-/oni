@@ -227,16 +227,16 @@ namespace oni {
         SceneManager::renderQuad(entities::EntityManager &manager,
                                  common::r32 viewWidth,
                                  common::r32 viewHeight) {
+
             /// Test draw brush trail
             {
-                auto view = manager.createView<component::BrushTrail>();
+                auto view = manager.createView<
+                        component::BrushTrail,
+                        component::WorldP3D>();
                 if (view.empty()) {
                     return;
                 }
 
-                auto pos = component::WorldP3D{0, 0, 1};
-                auto color = component::Color::WHITE();
-                auto scale = component::Scale{2, 2, 2};
                 auto texture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
                 for (auto &&id: view) {
                     auto &trail = view.get<component::BrushTrail>(id);
@@ -244,31 +244,49 @@ namespace oni {
                         continue;
                     }
 
-                    begin(*mRendererQuad, false, true, true);
+                    glViewport(0, 0, 160, 90);
+                    begin(*mRendererQuad, true, false, true);
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], color, texture);
+                        mRendererQuad->submit(&trail.vertices[i], {}, texture);
                         i += 4;
                     }
                     end(*mRendererQuad);
+                    glViewport(0, 0, 1600, 900);
+
+                    {
+#if 1
+                        {
+                            auto brush = Brush{};
+                            brush.textureID = mRendererQuad->getFrameBufferTextureID();
+                            brush.type = component::BrushType::TEXTURE_ID;
+                            auto pos = view.get<component::WorldP3D>(id);
+                            auto scale = component::Scale{100, 100, 1};
+                            splat(pos, scale, brush);
+                            mRendererQuad->clearFBO();
+
+                        }
+#else
+                        {
+                            begin(*mRendererTessellation, true, true, true);
+                            auto pos = component::WorldP3D{0, 0, 0.4f};
+                            auto heading = component::Heading{};
+                            auto scale = component::Scale{10, 10, 1};
+                            auto color = component::Color::WHITE();
+                            //auto texture2 = mTextureManager->loadOrGetTexture(component::TextureTag::TRUCK, false);
+                            auto FBOTexture = component::Texture{};
+                            FBOTexture.textureID = mRendererQuad->getFrameBufferTextureID();
+                            FBOTexture.image.path = "WHAT";
+
+                            mRendererTessellation->submit(pos, heading, scale, color, FBOTexture);
+                            end(*mRendererTessellation);
+                        }
+
+#endif
+                    }
+
                     trail.vertices.clear();
                 }
 
-                auto brush = Brush{};
-                brush.textureID = mRendererQuad->getFrameBufferTextureID();
-                brush.type = component::BrushType::TEXTURE_ID;
-                splat(pos, scale, brush);
-                mRendererQuad->clearFBO();
-#if 0
-                {
-                        begin(*mRendererTessellation, true, true, true);
-                        auto texture = component::Texture{};
-                        texture.textureID = textureID;
-                        texture.image.path = "WHAT";
-                        mRendererTessellation->submit({0, 0, 1}, {}, {50, 50, 1}, component::Color{},
-                                                      texture);
-                        end(*mRendererTessellation);
-                    }
-#endif
             }
         }
 
@@ -276,6 +294,7 @@ namespace oni {
         SceneManager::renderTessellationColor(entities::EntityManager &manager,
                                               common::r32 viewWidth,
                                               common::r32 viewHeight) {
+            auto texture = component::Texture{};
             auto view = manager.createView<
                     component::WorldP3D,
                     component::Heading,
@@ -300,7 +319,7 @@ namespace oni {
                 manager.printEntityType(id);
                 printf("%f\n", result.pos.z);
 #endif
-                mRendererTessellation->submit(result.pos, result.heading, scale, color, component::Texture{});
+                mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
 
                 ++mRenderedSpritesPerFrame;
             }
@@ -310,6 +329,7 @@ namespace oni {
         SceneManager::renderTessellationTexture(entities::EntityManager &manager,
                                                 common::r32 viewWidth,
                                                 common::r32 viewHeight) {
+            auto color = component::Color{};
             auto view = manager.createView<
                     component::WorldP3D,
                     component::Heading,
@@ -333,8 +353,7 @@ namespace oni {
                 serverManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
-                mRendererTessellation->submit(result.pos, result.heading, scale, component::Color{},
-                                              texture);
+                mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
 
                 ++mRenderedTexturesPerFrame;
             }
@@ -489,8 +508,8 @@ namespace oni {
                     break;
                 }
                 case component::BrushType::TEXTURE_ID: {
-                    auto x = 400;
-                    auto y = 400;
+                    auto x = 160;
+                    auto y = 90;
                     image.data.resize(x * y * 4);
                     image.width = x;
                     image.height = y;

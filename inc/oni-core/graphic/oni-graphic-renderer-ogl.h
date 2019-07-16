@@ -30,7 +30,7 @@ namespace oni {
                    common::r32 zoom) override;
 
             void
-            _flush() override;
+            _flush(component::Texture *renderTarget) override;
 
             void
             _end() override;
@@ -79,6 +79,9 @@ namespace oni {
 
             virtual void
             unbindFrameBuffer();
+
+            virtual void
+            attachFrameBuffer(component::Texture &renderTarget);
 
             virtual common::oniGLsizei
             getIndexCount() = 0;

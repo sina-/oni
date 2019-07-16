@@ -83,7 +83,7 @@ namespace oni {
 
         void
         SceneManager::endColorRendering() {
-            end(*mRendererTessellation);
+            end(*mRendererTessellation, nullptr);
         }
 
         void
@@ -116,8 +116,9 @@ namespace oni {
         }
 
         void
-        SceneManager::end(Renderer &renderer2D) {
-            renderer2D.end();
+        SceneManager::end(Renderer &renderer2D,
+                          component::Texture *renderTarget) {
+            renderer2D.end(renderTarget);
         }
 
         void
@@ -192,7 +193,7 @@ namespace oni {
             renderTessellationColor(manager, viewWidth, viewHeight);
             renderTessellationTexture(manager, viewWidth, viewHeight);
 
-            end(*mRendererTessellation);
+            end(*mRendererTessellation, nullptr);
         }
 
         void
@@ -219,7 +220,7 @@ namespace oni {
                     ++count;
                 }
 
-                end(*mRendererStrip);
+                end(*mRendererStrip, nullptr);
             }
         }
 
@@ -237,24 +238,31 @@ namespace oni {
                     return;
                 }
 
-                auto texture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
+                auto rocketTrailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
                 for (auto &&id: view) {
                     auto &trail = view.get<component::BrushTrail>(id);
                     if (trail.vertices.empty()) {
                         continue;
                     }
 
-                    glViewport(0, 0, 160, 90);
+                    static auto texture = component::Texture{};
+                    texture.image.width = 160 * 2;
+                    texture.image.height = 90 * 2;
+                    texture.image.path = "WHAT";
+                    mTextureManager->createTexture(texture);
+
+                    // TODO: This should be handled by renderer
+                    glViewport(0, 0, texture.image.width, texture.image.height);
                     begin(*mRendererQuad, true, false, true);
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], {}, texture);
+                        mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
                         i += 4;
                     }
-                    end(*mRendererQuad);
+                    end(*mRendererQuad, &texture);
                     glViewport(0, 0, 1600, 900);
 
                     {
-#if 1
+#if 0
                         {
                             auto brush = Brush{};
                             brush.textureID = mRendererQuad->getFrameBufferTextureID();
@@ -272,13 +280,9 @@ namespace oni {
                             auto heading = component::Heading{};
                             auto scale = component::Scale{10, 10, 1};
                             auto color = component::Color::WHITE();
-                            //auto texture2 = mTextureManager->loadOrGetTexture(component::TextureTag::TRUCK, false);
-                            auto FBOTexture = component::Texture{};
-                            FBOTexture.textureID = mRendererQuad->getFrameBufferTextureID();
-                            FBOTexture.image.path = "WHAT";
 
-                            mRendererTessellation->submit(pos, heading, scale, color, FBOTexture);
-                            end(*mRendererTessellation);
+                            mRendererTessellation->submit(pos, heading, scale, color, texture);
+                            end(*mRendererTessellation, nullptr);
                         }
 
 #endif
@@ -362,7 +366,7 @@ namespace oni {
         void
         SceneManager::splat(const component::WorldP3D &worldPos,
                             const component::Scale &scale,
-                            const graphic::Brush &brush) {
+                            Brush &brush) {
             std::set<common::EntityID> tileEntities;
 
             auto entityID = getOrCreateCanvasTile(worldPos);
@@ -477,7 +481,7 @@ namespace oni {
 
         void
         SceneManager::updateCanvasTile(common::EntityID entityID,
-                                       const graphic::Brush &brush,
+                                       Brush &brush,
                                        const component::WorldP3D &worldPos,
                                        const component::Scale &scale) {
             auto &canvasTexture = mSceneEntityManager->get<component::Texture>(entityID);
@@ -507,13 +511,13 @@ namespace oni {
                     image = mTextureManager->loadOrGetImage(brush.tag);
                     break;
                 }
-                case component::BrushType::TEXTURE_ID: {
-                    auto x = 160;
-                    auto y = 90;
+                case component::BrushType::TEXTURE: {
+                    auto x = 160 * 2 * 2;
+                    auto y = 90 * 2 * 2;
                     image.data.resize(x * y * 4);
                     image.width = x;
                     image.height = y;
-                    mTextureManager->loadFromTextureID(image, brush.textureID);
+                    mTextureManager->loadFromTextureID(brush.texture);
                     break;
                 }
                 default: {

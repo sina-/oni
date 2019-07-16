@@ -2,24 +2,12 @@
 
 #include <GL/glew.h>
 #include <cassert>
+#include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
     namespace graphic {
         FrameBuffer::FrameBuffer() {
             glGenFramebuffers(1, &mBufferID);
-            {
-                glGenTextures(1, &mTextureID);
-
-                assert(mTextureID);
-
-                glBindTexture(GL_TEXTURE_2D, mTextureID);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 160, 90, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
-                glBindTexture(GL_TEXTURE_2D, 0);
-            }
-
-            attach(mTextureID);
         }
 
         FrameBuffer::~FrameBuffer() {
@@ -48,6 +36,7 @@ namespace oni {
         void
         FrameBuffer::bind() {
             glBindFramebuffer(GL_FRAMEBUFFER, mBufferID);
+
         }
 
         void
@@ -55,17 +44,14 @@ namespace oni {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        common::oniGLuint
-        FrameBuffer::getFrameBufferTextureID() {
-            return mTextureID;
-        }
-
         void
-        FrameBuffer::attach(common::oniGLuint textureID) {
-            bind();
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
-            checkFBO();
-            unbind();
+        FrameBuffer::attach(component::Texture &renderTarget) {
+            auto textureID = renderTarget.textureID;
+            if (mTextureID != textureID) {
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+                checkFBO();
+                mTextureID = textureID;
+            }
         }
     }
 }

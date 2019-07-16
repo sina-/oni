@@ -25,13 +25,41 @@ namespace oni {
         }
 
         void
-        TextureManager::loadFromTextureID(component::Image &image,
-                                          common::oniGLuint textureID) {
-            common::oniGLenum type = GL_UNSIGNED_BYTE;
-            common::oniGLenum format = GL_BGRA;
-            glBindTexture(GL_TEXTURE_2D, textureID);
-            glGetTextureImage(textureID, 0, format, type, image.data.size(), image.data.data());
+        TextureManager::loadFromTextureID(component::Texture &texture) {
+            auto numTextureElements = 4;
+            auto textureSize = common::size(texture.image.height * texture.image.width * numTextureElements);
+            assert(textureSize);
+            texture.image.data.resize(textureSize);
+            glBindTexture(GL_TEXTURE_2D, texture.textureID);
+            glGetTextureImage(texture.textureID, 0, texture.format, texture.type, textureSize,
+                              texture.image.data.data());
             glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
+        void
+        TextureManager::createTexture(component::Texture &texture) {
+            glGenTextures(1, &texture.textureID);
+
+            assert(texture.textureID);
+
+            common::oniGLenum format = GL_BGRA;
+            common::oniGLenum type = GL_UNSIGNED_BYTE;
+
+            bind(texture.textureID);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            assert(texture.image.width);
+            assert(texture.image.height);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.image.width, texture.image.height, 0, format, type,
+                         texture.image.data.data());
+
+            texture.format = format;
+            texture.type = type;
+            texture.uv = {math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
+            unbind();
         }
 
         const component::Texture &
@@ -42,31 +70,13 @@ namespace oni {
             if (isTextureLoaded(tag)) {
                 return mTextureMap[tag];
             }
+
             const auto &image = loadOrGetImage(tag);
-
-            common::oniGLuint textureID = 0;
-            glGenTextures(1, &textureID);
-
-            assert(textureID);
-
-            common::oniGLenum format = GL_BGRA;
-            common::oniGLenum type = GL_UNSIGNED_BYTE;
-
-            bind(textureID);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, format, type, image.data.data());
-
-            unbind();
 
             auto &texture = mTextureMap[tag];
             texture.image = image;
-            texture.textureID = textureID;
-            texture.format = format;
-            texture.type = type;
-            texture.uv = {math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
+
+            createTexture(texture);
 
             // TODO: This is clunky design, these bits are already copied, have to think about a way to
             // split between texture data that is generated and data that is loaded from the file, for the

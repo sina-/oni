@@ -22,12 +22,6 @@ namespace oni {
                    const component::Color &,
                    const component::Texture &);
 
-            common::oniGLuint
-            getFrameBufferTextureID();
-
-            void
-            clearFBO();
-
         protected:
             void
             enableShader(const math::mat4 &model,

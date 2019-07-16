@@ -53,7 +53,7 @@ namespace oni {
                   common::r32 zoom);
 
             void
-            end();
+            end(component::Texture *renderTarget);
 
         protected:
             virtual void
@@ -64,7 +64,7 @@ namespace oni {
                    common::r32 zoom) = 0;
 
             virtual void
-            _flush() = 0;
+            _flush(component::Texture *renderTarget) = 0;
 
             virtual void
             _end() = 0;

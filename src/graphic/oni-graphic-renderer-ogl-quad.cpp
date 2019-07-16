@@ -91,8 +91,6 @@ namespace oni {
                 samplers.push_back(i);
             }
 
-            mFrameBuffer = std::make_unique<FrameBuffer>();
-
             mShader->enable();
             mShader->setUniformiv("samplers", samplers);
             mShader->disable();
@@ -182,16 +180,6 @@ namespace oni {
         void
         Renderer_OpenGL_Quad::resetIndexCount() {
             mIndexCount = 0;
-        }
-
-        common::oniGLuint
-        Renderer_OpenGL_Quad::getFrameBufferTextureID() {
-            return mFrameBuffer->getFrameBufferTextureID();
-        }
-
-        void
-        Renderer_OpenGL_Quad::clearFBO() {
-            mFrameBuffer->clearBuffer();
         }
     }
 }

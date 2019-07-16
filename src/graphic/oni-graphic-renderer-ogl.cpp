@@ -11,7 +11,9 @@
 
 namespace oni {
     namespace graphic {
-        Renderer_OpenGL::Renderer_OpenGL(PrimitiveType primitiveType) : mPrimitiveType(primitiveType) {}
+        Renderer_OpenGL::Renderer_OpenGL(PrimitiveType primitiveType) : mPrimitiveType(primitiveType) {
+            mFrameBuffer = std::make_unique<FrameBuffer>();
+        }
 
         Renderer_OpenGL::~Renderer_OpenGL() = default;
 
@@ -59,12 +61,15 @@ namespace oni {
         }
 
         void
-        Renderer_OpenGL::_flush() {
+        Renderer_OpenGL::_flush(component::Texture *renderTarget) {
             auto indexCount = getIndexCount();
             if (indexCount < 0) {
                 return;
             }
-            bindFrameBuffer();
+            if (renderTarget) {
+                bindFrameBuffer();
+                attachFrameBuffer(*renderTarget);
+            }
 
             TextureManager::bindRange(0, mTextures);
 
@@ -93,7 +98,10 @@ namespace oni {
                 }
             }
 
-            unbindFrameBuffer();
+            if (renderTarget) {
+                TextureManager::loadFromTextureID(*renderTarget);
+                unbindFrameBuffer();
+            }
             unbindIndexBuffer();
             unbindVertexArray();
 
@@ -145,16 +153,18 @@ namespace oni {
 
         void
         Renderer_OpenGL::bindFrameBuffer() {
-            if (mFrameBuffer) {
-                mFrameBuffer->bind();
-            }
+            mFrameBuffer->bind();
         }
 
         void
         Renderer_OpenGL::unbindFrameBuffer() {
-            if (mFrameBuffer) {
-                mFrameBuffer->unbind();
-            }
+            mFrameBuffer->unbind();
+            // TODO: Clear the FBO here?
+        }
+
+        void
+        Renderer_OpenGL::attachFrameBuffer(component::Texture &renderTarget) {
+            mFrameBuffer->attach(renderTarget);
         }
     }
 }

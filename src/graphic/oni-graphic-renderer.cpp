@@ -18,10 +18,10 @@ namespace oni {
         }
 
         void
-        Renderer::end() {
+        Renderer::end(component::Texture *renderTarget) {
             assert(mBegun);
             _end();
-            _flush();
+            _flush(renderTarget);
             mBegun = false;
         }
     }

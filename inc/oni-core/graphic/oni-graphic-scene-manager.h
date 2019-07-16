@@ -76,9 +76,9 @@ namespace oni {
                       const component::Color &color);
 
             void
-            splat(const component::WorldP3D &,
-                  const component::Scale &,
-                  const graphic::Brush &);
+            splat(const component::WorldP3D &worldPos,
+                  const component::Scale &scale,
+                  Brush &brush);
 
             void
             lookAt(common::r32 x,
@@ -178,13 +178,14 @@ namespace oni {
                   bool project);
 
             static void
-            end(Renderer &renderer2D);
+            end(Renderer &renderer2D,
+                component::Texture *renderTarget);
 
             void
             updateCanvasTile(common::EntityID entityID,
-                             const graphic::Brush &,
-                             const component::WorldP3D &,
-                             const component::Scale &);
+                             Brush &brush,
+                             const component::WorldP3D &worldPos,
+                             const component::Scale &scale);
 
 
             common::EntityID

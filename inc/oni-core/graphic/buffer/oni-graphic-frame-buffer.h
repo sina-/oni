@@ -3,7 +3,11 @@
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 
 namespace oni {
+    namespace component {
+        struct Texture;
+    }
     namespace graphic {
+
         class FrameBuffer {
         public:
             FrameBuffer();
@@ -16,17 +20,15 @@ namespace oni {
             static void
             unbind();
 
-            common::oniGLuint
-            getFrameBufferTextureID();
-
             void
-            attach(common::oniGLuint textureID);
+            attach(component::Texture &renderTarget);
 
             void
             clearBuffer();
 
         private:
-            static void checkFBO();
+            static void
+            checkFBO();
 
         private:
             common::oniGLuint mBufferID{};

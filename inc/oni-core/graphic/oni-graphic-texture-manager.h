@@ -61,8 +61,10 @@ namespace oni {
                              bool loadBits);
 
             static void
-            loadFromTextureID(component::Image &,
-                              common::oniGLuint textureID);
+            createTexture(component::Texture&);
+
+            static void
+            loadFromTextureID(component::Texture &);
 
             static void
             loadFromImage(component::Texture &);

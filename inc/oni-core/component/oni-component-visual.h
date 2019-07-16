@@ -248,7 +248,7 @@ namespace oni {
 
             SPRITE,
             TEXTURE_TAG,
-            TEXTURE_ID,
+            TEXTURE,
 
 
             LAST

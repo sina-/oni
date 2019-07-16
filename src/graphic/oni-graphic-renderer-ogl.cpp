@@ -158,8 +158,7 @@ namespace oni {
 
         void
         Renderer_OpenGL::unbindFrameBuffer() {
-            mFrameBuffer->unbind();
-            // TODO: Clear the FBO here?
+            mFrameBuffer->unbindAndClear();
         }
 
         void

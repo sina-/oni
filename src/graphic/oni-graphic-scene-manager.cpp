@@ -249,7 +249,9 @@ namespace oni {
                     texture.image.width = 160 * 2;
                     texture.image.height = 90 * 2;
                     texture.image.path = "WHAT";
-                    mTextureManager->createTexture(texture);
+                    if(!texture.textureID){
+                        mTextureManager->createTexture(texture);
+                    }
 
                     // TODO: This should be handled by renderer
                     glViewport(0, 0, texture.image.width, texture.image.height);
@@ -262,15 +264,15 @@ namespace oni {
                     glViewport(0, 0, 1600, 900);
 
                     {
-#if 0
+#if 1
                         {
                             auto brush = Brush{};
-                            brush.textureID = mRendererQuad->getFrameBufferTextureID();
-                            brush.type = component::BrushType::TEXTURE_ID;
+                            brush.type = component::BrushType::TEXTURE;
+                            // TODO: Opps copies the whole thing!
+                            brush.texture = texture;
                             auto pos = view.get<component::WorldP3D>(id);
                             auto scale = component::Scale{100, 100, 1};
                             splat(pos, scale, brush);
-                            mRendererQuad->clearFBO();
 
                         }
 #else
@@ -512,12 +514,8 @@ namespace oni {
                     break;
                 }
                 case component::BrushType::TEXTURE: {
-                    auto x = 160 * 2 * 2;
-                    auto y = 90 * 2 * 2;
-                    image.data.resize(x * y * 4);
-                    image.width = x;
-                    image.height = y;
-                    mTextureManager->loadFromTextureID(brush.texture);
+                    // TODO: Oops another fucking copy
+                    image = brush.texture.image;
                     break;
                 }
                 default: {

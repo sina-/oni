@@ -175,11 +175,21 @@ namespace oni {
             begin(Renderer &renderer2D,
                   bool translate,
                   bool scale,
+                  bool project,
+                  component::Texture *renderTarget);
+
+            void
+            begin(Renderer &renderer2D,
+                  bool translate,
+                  bool scale,
                   bool project);
 
+            void
+            begin(Renderer &renderer2D,
+                  component::Texture *renderTarget);
+
             static void
-            end(Renderer &renderer2D,
-                component::Texture *renderTarget);
+            end(Renderer &renderer2D);
 
             void
             updateCanvasTile(common::EntityID entityID,

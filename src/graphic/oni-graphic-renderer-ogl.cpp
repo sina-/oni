@@ -165,5 +165,16 @@ namespace oni {
         Renderer_OpenGL::attachFrameBuffer(component::Texture &renderTarget) {
             mFrameBuffer->attach(renderTarget);
         }
+
+        void
+        Renderer_OpenGL::setViewportSize(const Renderer::WindowSize &size) {
+            glViewport(0, 0, size.width, size.height);
+        }
+
+        Renderer::WindowSize
+        Renderer_OpenGL::getViewportSize() {
+            // TODO: Only Window knows the correct value, have to figure out a better design for this.
+            return {1600, 900};
+        }
     }
 }

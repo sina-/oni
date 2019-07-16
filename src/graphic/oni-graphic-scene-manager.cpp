@@ -83,14 +83,15 @@ namespace oni {
 
         void
         SceneManager::endColorRendering() {
-            end(*mRendererTessellation, nullptr);
+            end(*mRendererTessellation);
         }
 
         void
         SceneManager::begin(Renderer &renderer2D,
                             bool translate,
                             bool scale,
-                            bool project) {
+                            bool project,
+                            component::Texture *renderTarget) {
             auto model = math::mat4::identity();
             auto view = math::mat4::identity();
             auto proj = math::mat4::identity();
@@ -104,7 +105,21 @@ namespace oni {
             if (project) {
                 proj = mProjectionMatrix;
             }
-            renderer2D.begin(model, view, proj, math::vec2{getViewWidth(), getViewHeight()}, mCamera.z);
+            renderer2D.begin(model, view, proj, {getViewWidth(), getViewHeight()}, mCamera.z, renderTarget);
+        }
+
+        void
+        SceneManager::begin(Renderer &renderer2D,
+                            bool translate,
+                            bool scale,
+                            bool project) {
+            begin(renderer2D, translate, scale, project, nullptr);
+        }
+
+        void
+        SceneManager::begin(Renderer &renderer2D,
+                            component::Texture *renderTarget) {
+            begin(renderer2D, true, false, true, renderTarget);
         }
 
         void
@@ -116,9 +131,8 @@ namespace oni {
         }
 
         void
-        SceneManager::end(Renderer &renderer2D,
-                          component::Texture *renderTarget) {
-            renderer2D.end(renderTarget);
+        SceneManager::end(Renderer &renderer2D) {
+            renderer2D.end();
         }
 
         void
@@ -193,7 +207,7 @@ namespace oni {
             renderTessellationColor(manager, viewWidth, viewHeight);
             renderTessellationTexture(manager, viewWidth, viewHeight);
 
-            end(*mRendererTessellation, nullptr);
+            end(*mRendererTessellation);
         }
 
         void
@@ -220,7 +234,7 @@ namespace oni {
                     ++count;
                 }
 
-                end(*mRendererStrip, nullptr);
+                end(*mRendererStrip);
             }
         }
 
@@ -249,19 +263,16 @@ namespace oni {
                     texture.image.width = 160 * 2;
                     texture.image.height = 90 * 2;
                     texture.image.path = "WHAT";
-                    if(!texture.textureID){
+                    if (!texture.textureID) {
                         mTextureManager->createTexture(texture);
                     }
 
-                    // TODO: This should be handled by renderer
-                    glViewport(0, 0, texture.image.width, texture.image.height);
-                    begin(*mRendererQuad, true, false, true);
+                    begin(*mRendererQuad, &texture);
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
                         mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
                         i += 4;
                     }
-                    end(*mRendererQuad, &texture);
-                    glViewport(0, 0, 1600, 900);
+                    end(*mRendererQuad);
 
                     {
 #if 1
@@ -273,18 +284,17 @@ namespace oni {
                             auto pos = view.get<component::WorldP3D>(id);
                             auto scale = component::Scale{100, 100, 1};
                             splat(pos, scale, brush);
-
                         }
 #else
                         {
                             begin(*mRendererTessellation, true, true, true);
                             auto pos = component::WorldP3D{0, 0, 0.4f};
                             auto heading = component::Heading{};
-                            auto scale = component::Scale{10, 10, 1};
+                            auto scale = component::Scale{160, 90, 1};
                             auto color = component::Color::WHITE();
 
                             mRendererTessellation->submit(pos, heading, scale, color, texture);
-                            end(*mRendererTessellation, nullptr);
+                            end(*mRendererTessellation);
                         }
 
 #endif

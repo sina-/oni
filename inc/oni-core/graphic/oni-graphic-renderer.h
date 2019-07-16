@@ -50,10 +50,17 @@ namespace oni {
                   const math::mat4 &view,
                   const math::mat4 &proj,
                   const math::vec2 &screenSize,
-                  common::r32 zoom);
+                  common::r32 zoom,
+                  component::Texture *renderTarget);
 
             void
-            end(component::Texture *renderTarget);
+            end();
+
+        protected:
+            struct WindowSize {
+                common::u32 width{0};
+                common::u32 height{0};
+            };
 
         protected:
             virtual void
@@ -69,8 +76,16 @@ namespace oni {
             virtual void
             _end() = 0;
 
+            virtual void
+            setViewportSize(const WindowSize &) = 0;
+
+            virtual WindowSize
+            getViewportSize() = 0;
+
         private:
             bool mBegun{false};
+            component::Texture *mRenderTarget{};
+            WindowSize mViewportSize{};
         };
     }
 }

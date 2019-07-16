@@ -35,6 +35,12 @@ namespace oni {
             void
             _end() override;
 
+            void
+            setViewportSize(const WindowSize &size) override;
+
+            WindowSize
+            getViewportSize() override;
+
         protected:
             virtual void
             enableShader(const math::mat4 &model,

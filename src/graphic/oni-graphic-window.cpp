@@ -147,6 +147,10 @@ namespace oni {
         Window::windowResizeCallback(GLFWwindow *window,
                                      common::i32 width,
                                      common::i32 height) {
+            // TODO: Can't handle viewport size changes as the renderer relies on it and this change is not communicated
+            // to it. Have to re-design Window and Renderer and SceneManager to better isolate OGL calls and viewport
+            // ownership
+            return;
             auto thiz = getThisFromGLFWWindow(window);
             TwWindowSize(width, height);
 

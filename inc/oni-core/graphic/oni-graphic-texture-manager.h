@@ -49,19 +49,20 @@ namespace oni {
 
             void
             blendAndUpdateTexture(component::Texture &texture,
-                                  common::oniGLint xOffset,
-                                  common::oniGLint yOffset,
-                                  component::Image &image);
+                                  component::Image &image,
+                                  const math::vec3 &brushTexturePos);
 
-            const component::Image &
-            loadOrGetImage(component::TextureTag tag);
+            void
+            loadOrGetImage(component::TextureTag tag,
+                           component::Image &image);
 
             const component::Texture &
             loadOrGetTexture(component::TextureTag tag,
                              bool loadBits);
 
             static void
-            createTexture(component::Texture&);
+            createTexture(component::Texture &texture,
+                          bool loadImage);
 
             static void
             loadFromTextureID(component::Texture &);

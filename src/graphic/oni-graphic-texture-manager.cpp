@@ -37,7 +37,8 @@ namespace oni {
         }
 
         void
-        TextureManager::createTexture(component::Texture &texture) {
+        TextureManager::createTexture(component::Texture &texture,
+                                      bool loadImage) {
             glGenTextures(1, &texture.textureID);
 
             assert(texture.textureID);
@@ -53,8 +54,11 @@ namespace oni {
             assert(texture.image.width);
             assert(texture.image.height);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.image.width, texture.image.height, 0, format, type,
-                         texture.image.data.data());
+            auto data = (common::u8 *) nullptr;
+            if (loadImage) {
+                data = texture.image.data.data();
+            }
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.image.width, texture.image.height, 0, format, type, data);
 
             texture.format = format;
             texture.type = type;
@@ -71,12 +75,10 @@ namespace oni {
                 return mTextureMap[tag];
             }
 
-            const auto &image = loadOrGetImage(tag);
-
             auto &texture = mTextureMap[tag];
-            texture.image = image;
+            loadOrGetImage(tag, texture.image);
 
-            createTexture(texture);
+            createTexture(texture, true);
 
             // TODO: This is clunky design, these bits are already copied, have to think about a way to
             // split between texture data that is generated and data that is loaded from the file, for the
@@ -89,11 +91,12 @@ namespace oni {
             return texture;
         }
 
-        const component::Image &
-        TextureManager::loadOrGetImage(component::TextureTag tag) {
+        void
+        TextureManager::loadOrGetImage(component::TextureTag tag,
+                                       component::Image &image) {
             assert(tag != component::TextureTag::UNKNOWN);
             if (isImageLoaded(tag)) {
-                return mImageMap[tag];
+                image = mImageMap[tag];
             }
 
             FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
@@ -126,7 +129,6 @@ namespace oni {
             auto bits = FreeImage_GetBits(dib);
             assert(bits);
 
-            auto &image = mImageMap[tag];
             image.height = height;
             image.width = width;
             image.path = path;
@@ -137,8 +139,6 @@ namespace oni {
             }
 
             FreeImage_Unload(dib);
-
-            return image;
         }
 
         void
@@ -190,9 +190,14 @@ namespace oni {
 
         void
         TextureManager::blendAndUpdateTexture(component::Texture &texture,
-                                              common::oniGLint xOffset,
-                                              common::oniGLint yOffset,
-                                              component::Image &image) {
+                                              component::Image &image,
+                                              const math::vec3 &brushTexturePos) {
+            assert(image.width);
+            assert(image.height);
+
+            auto xOffset = static_cast<common::oniGLint>(brushTexturePos.x - (image.width / 2.f));
+            auto yOffset = static_cast<common::oniGLint>(brushTexturePos.y - (image.height / 2.f));
+
             auto r = FI_RGBA_RED;
             auto g = FI_RGBA_GREEN;
             auto b = FI_RGBA_BLUE;

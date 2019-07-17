@@ -259,11 +259,11 @@ namespace oni {
                     }
 
                     static auto texture = component::Texture{};
-                    texture.image.width = 160 * 2;
-                    texture.image.height = 90 * 2;
+                    texture.image.width = 160 * 3;
+                    texture.image.height = 90 * 3;
                     texture.image.path = "WHAT";
                     if (!texture.textureID) {
-                        mTextureManager->createTexture(texture);
+                        mTextureManager->createTexture(texture, false);
                     }
 
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
@@ -287,8 +287,7 @@ namespace oni {
                         {
                             auto brush = Brush{};
                             brush.type = component::BrushType::TEXTURE;
-                            // TODO: Opps copies the whole thing!
-                            brush.texture = texture;
+                            brush.texture = &texture;
                             auto scale = component::Scale{100, 100, 1};
                             splat({m.x, m.y, m.z}, scale, brush);
                         }
@@ -504,35 +503,36 @@ namespace oni {
                                        const component::WorldP3D &worldPos,
                                        const component::Scale &scale) {
             auto &canvasTexture = mSceneEntityManager->get<component::Texture>(entityID);
-            auto canvasTilePos = mSceneEntityManager->get<component::WorldP3D>(entityID);
-            auto canvasSize = mSceneEntityManager->get<component::Scale>(entityID);
-            auto pos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f,
-                                           canvasTilePos.y - canvasSize.y / 2.f,
-                                           canvasTilePos.z};
+            const auto &canvasTilePos = mSceneEntityManager->get<component::WorldP3D>(entityID);
+            const auto &canvasSize = mSceneEntityManager->get<component::Scale>(entityID);
 
+            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
+            // in game units at this point.
+            auto canvasLowerLeftPos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f,
+                                                          canvasTilePos.y - canvasSize.y / 2.f,
+                                                          canvasTilePos.z};
             auto brushTexturePos = worldPos;
-            math::worldToTextureCoordinate(pos, mGameUnitToPixels, brushTexturePos);
+            math::worldToTextureCoordinate(canvasLowerLeftPos, mGameUnitToPixels, brushTexturePos);
 
-            component::Image image{};
             switch (brush.type) {
                 case component::BrushType::SPRITE: {
+                    component::Image image{};
                     image.width = static_cast<uint16>(scale.x * mGameUnitToPixels);
                     image.height = static_cast<uint16>(scale.y * mGameUnitToPixels);
                     mTextureManager->fill(image, brush.color);
+                    mTextureManager->blendAndUpdateTexture(canvasTexture, image, brushTexturePos.value);
                     break;
                 }
                 case component::BrushType::TEXTURE_TAG: {
-                    // TODO: This will create a copy every time! I don't need a copy a const ref should do the work
-                    // as long as down the line I can call sub texture update with the texture data only,
-                    // something along the lines of take the updated texture data and point to where the offsets point
+                    component::Image image{};
                     // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
                     // at all what I intended
-                    image = mTextureManager->loadOrGetImage(brush.tag);
+                    mTextureManager->loadOrGetImage(brush.tag, image);
+                    mTextureManager->blendAndUpdateTexture(canvasTexture, image, brushTexturePos.value);
                     break;
                 }
                 case component::BrushType::TEXTURE: {
-                    // TODO: Oops another fucking copy
-                    image = brush.texture.image;
+                    mTextureManager->blendAndUpdateTexture(canvasTexture, brush.texture->image, brushTexturePos.value);
                     break;
                 }
                 default: {
@@ -540,19 +540,6 @@ namespace oni {
                     return;
                 }
             }
-
-            assert(image.width);
-            assert(image.height);
-
-            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
-            // in game units at this point.
-            auto textureOffsetX = static_cast<common::oniGLint>(brushTexturePos.x - (image.width / 2.f));
-            auto textureOffsetY = static_cast<common::oniGLint>(brushTexturePos.y - (image.height / 2.f));
-
-            mTextureManager->blendAndUpdateTexture(canvasTexture,
-                                                   textureOffsetX,
-                                                   textureOffsetY,
-                                                   image);
         }
 
         void

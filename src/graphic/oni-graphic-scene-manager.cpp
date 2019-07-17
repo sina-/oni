@@ -266,8 +266,8 @@ namespace oni {
                         mTextureManager->createTexture(texture);
                     }
 
-                    begin(*mRendererQuad, &texture);
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
+                        begin(*mRendererQuad, &texture);
                         // TODO: This calculation could be replaed by a flag in the shader, such as centerAlign, which
                         // will move back quads so that center of quad is at (0, 0, z);
                         auto &a = trail.vertices[i];
@@ -282,19 +282,15 @@ namespace oni {
                         d.value -= m;
                         mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
                         i += 4;
-                    }
-                    end(*mRendererQuad);
-
-                    {
+                        end(*mRendererQuad);
 #if 1
                         {
                             auto brush = Brush{};
                             brush.type = component::BrushType::TEXTURE;
                             // TODO: Opps copies the whole thing!
                             brush.texture = texture;
-                            auto pos = view.get<component::WorldP3D>(id);
                             auto scale = component::Scale{100, 100, 1};
-                            splat(pos, scale, brush);
+                            splat({m.x, m.y, m.z}, scale, brush);
                         }
 #else
                         {

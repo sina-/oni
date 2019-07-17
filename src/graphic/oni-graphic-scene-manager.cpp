@@ -98,7 +98,6 @@ namespace oni {
             if (scale) {
                 view = view * math::mat4::scale(math::vec3{mCamera.z, mCamera.z, 1.0f});
             }
-
             if (translate) {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
@@ -119,7 +118,7 @@ namespace oni {
         void
         SceneManager::begin(Renderer &renderer2D,
                             component::Texture *renderTarget) {
-            begin(renderer2D, true, false, true, renderTarget);
+            begin(renderer2D, false, false, true, renderTarget);
         }
 
         void
@@ -269,6 +268,18 @@ namespace oni {
 
                     begin(*mRendererQuad, &texture);
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
+                        // TODO: This calculation could be replaed by a flag in the shader, such as centerAlign, which
+                        // will move back quads so that center of quad is at (0, 0, z);
+                        auto &a = trail.vertices[i];
+                        auto &b = trail.vertices[i + 1];
+                        auto &c = trail.vertices[i + 2];
+                        auto &d = trail.vertices[i + 3];
+                        auto m = a.value + b.value + c.value + d.value;
+                        m = m / 4.f;
+                        a.value -= m;
+                        b.value -= m;
+                        c.value -= m;
+                        d.value -= m;
                         mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
                         i += 4;
                     }

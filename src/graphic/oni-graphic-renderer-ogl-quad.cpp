@@ -142,7 +142,7 @@ namespace oni {
             // d.
             buffer->pos = pos->value;
             buffer->color = c;
-            buffer->uv = texture.uv[0];
+            buffer->uv = texture.uv[3];
             buffer->samplerID = samplerID;
 
             ++buffer;
@@ -153,10 +153,10 @@ namespace oni {
             // +6 as there are 6 vertices that makes up two adjacent triangles but those triangles are
             // defined by 4 vertices only.
             /**
-             *    1 +---+ 0
+             *    1 +---+ 2
              *      |  /|
              *      |/  |
-             *    2 +---+ 3
+             *    0 +---+ 3
              **/
             mIndexCount += 6;
         }

@@ -98,7 +98,7 @@ namespace oni {
             if (scale) {
                 view = view * math::mat4::scale({mCamera.z, mCamera.z, 1.0f});
             }
-            if (renderTarget) {
+            if (renderTarget and false) {
                 auto multiplier = 1.f;
                 if (mCamera.z > 1.f and false) {
                     view = view * math::mat4::scale({multiplier * mCamera.z, multiplier * mCamera.z, 1});
@@ -249,8 +249,71 @@ namespace oni {
         SceneManager::renderQuad(entities::EntityManager &manager,
                                  common::r32 viewWidth,
                                  common::r32 viewHeight) {
+#if 0
+            {
+                // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
+                static auto texture = component::Texture{};
+                texture.image.width = 100 * 1;
+                texture.image.height = 100 * 1;
+                texture.image.path = "WHAT";
+                if (!texture.textureID) {
+                    mTextureManager->createTexture(texture, false);
+                }
+                auto trailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::TEST_TEXTURE, false);
+                auto m = math::vec3{};
+                {
+                    begin(*mRendererQuad, &texture);
+                    auto C = 1.f;
+                    auto a = component::WorldP3D{-1 * C, -1 * C, 1};
+                    auto b = component::WorldP3D{-1 * C, +1 * C, 1};
+                    auto c = component::WorldP3D{+1 * C, +1 * C, 1};
+                    auto d = component::WorldP3D{+1 * C, -1 * C, 1};
+                    m = a.value + b.value + c.value + d.value;
+                    m = m / 4.f;
+                    a.value -= m;
+                    b.value -= m;
+                    c.value -= m;
+                    d.value -= m;
+                    auto v = std::vector<component::WorldP3D>();
+                    v.push_back(a);
+                    v.push_back(b);
+                    v.push_back(c);
+                    v.push_back(d);
+                    mRendererQuad->submit(v.data(), {}, trailTexture);
+                    end(*mRendererQuad);
+                }
+                {
+                    auto brush = Brush{};
+                    brush.type = component::BrushType::TEXTURE;
+                    brush.texture = &texture;
+                    // TODO: Correct the scale
+                    auto scale = component::Scale{100, 100, 1};
+                    splat({m.x, m.y, m.z}, scale, brush);
+                }
+                {
+                    begin(*mRendererTessellation, false, false, true);
+                    auto pos = component::WorldP3D{8 - 8 / 4.f, 4 - 4 / 4.f, 0.4f};
+                    auto heading = component::Heading{};
+                    auto scale = component::Scale{texture.image.width / 100.f, texture.image.height / 100.f, 1.f};
+                    auto color = component::Color::WHITE();
 
-            /// Test draw brush trail
+                    mRendererTessellation->submit(pos, heading, scale, color, texture);
+                    end(*mRendererTessellation);
+                }
+
+                {
+                    begin(*mRendererTessellation, false, false, true);
+                    auto pos = component::WorldP3D{8 - 8 / 4.f, -4 + 4 / 4.f, 0.4f};
+                    auto heading = component::Heading{};
+                    auto scale = component::Scale{texture.image.width / 100.f, texture.image.height / 100.f, 1.f};
+                    auto color = component::Color::WHITE();
+
+                    mRendererTessellation->submit(pos, heading, scale, color, trailTexture);
+                    end(*mRendererTessellation);
+                }
+            }
+
+#else
             {
                 auto view = manager.createView<
                         component::BrushTrail,
@@ -265,8 +328,6 @@ namespace oni {
                     if (trail.vertices.empty()) {
                         continue;
                     }
-
-#if 1
                     // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
                     static auto texture = component::Texture{};
                     texture.image.width = 160;
@@ -276,6 +337,7 @@ namespace oni {
                         mTextureManager->createTexture(texture, false);
                     }
 
+#if 1
                     auto m = math::vec3{};
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
                         {
@@ -320,20 +382,22 @@ namespace oni {
 
                     trail.vertices.clear();
 #else
-                    begin(*mRendererQuad, true, true, true);
-                    for (common::size i = 0; i + 3 < trail.vertices.size();) {
-                        mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
-                        std::cout <<
-                        trail.vertices[i].value << ", " << trail.vertices[i + 1].value << ", " <<
-                        trail.vertices[i + 2].value << ", " << trail.vertices[i + 3].value << "\n";
-                        i += 4;
+                    {
+                        begin(*mRendererQuad, true, true, true);
+                        for (common::size i = 0; i + 3 < trail.vertices.size();) {
+                            mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
+                            std::cout <<
+                                      trail.vertices[i].value << ", " << trail.vertices[i + 1].value << ", " <<
+                                      trail.vertices[i + 2].value << ", " << trail.vertices[i + 3].value << "\n";
+                            i += 4;
+                        }
+                        std::cout << "-----\n";
+                        end(*mRendererQuad);
                     }
-                    std::cout << "-----\n";
-                    end(*mRendererQuad);
 #endif
                 }
-
             }
+#endif
         }
 
         void
@@ -556,7 +620,8 @@ namespace oni {
                     break;
                 }
                 case component::BrushType::TEXTURE: {
-                    mTextureManager->blendAndUpdateTexture(canvasTexture, brush.texture->image, brushTexturePos.value);
+                    mTextureManager->blendAndUpdateTexture(canvasTexture, brush.texture->image,
+                                                           brushTexturePos.value);
                     break;
                 }
                 default: {

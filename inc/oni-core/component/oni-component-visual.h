@@ -42,6 +42,8 @@ namespace oni {
             WALL_HORIZONTAL,
             EXPLOSION,
 
+            TEST_TEXTURE,
+
             LAST
         };
 

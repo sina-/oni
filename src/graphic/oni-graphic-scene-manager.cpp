@@ -96,7 +96,15 @@ namespace oni {
             auto view = math::mat4::identity();
             auto proj = math::mat4::identity();
             if (scale) {
-                view = view * math::mat4::scale(math::vec3{mCamera.z, mCamera.z, 1.0f});
+                view = view * math::mat4::scale({mCamera.z, mCamera.z, 1.0f});
+            }
+            if (renderTarget) {
+                auto multiplier = 1.f;
+                if (mCamera.z > 1.f and false) {
+                    view = view * math::mat4::scale({multiplier * mCamera.z, multiplier * mCamera.z, 1});
+                } else {
+                    view = view * math::mat4::scale({multiplier, multiplier, 1});
+                }
             }
             if (translate) {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
@@ -258,55 +266,71 @@ namespace oni {
                         continue;
                     }
 
+#if 1
+                    // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
                     static auto texture = component::Texture{};
-                    texture.image.width = 160 * 3;
-                    texture.image.height = 90 * 3;
+                    texture.image.width = 160;
+                    texture.image.height = 90;
                     texture.image.path = "WHAT";
                     if (!texture.textureID) {
                         mTextureManager->createTexture(texture, false);
                     }
 
+                    auto m = math::vec3{};
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
-                        begin(*mRendererQuad, &texture);
-                        // TODO: This calculation could be replaed by a flag in the shader, such as centerAlign, which
-                        // will move back quads so that center of quad is at (0, 0, z);
-                        auto &a = trail.vertices[i];
-                        auto &b = trail.vertices[i + 1];
-                        auto &c = trail.vertices[i + 2];
-                        auto &d = trail.vertices[i + 3];
-                        auto m = a.value + b.value + c.value + d.value;
-                        m = m / 4.f;
-                        a.value -= m;
-                        b.value -= m;
-                        c.value -= m;
-                        d.value -= m;
-                        mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
-                        i += 4;
-                        end(*mRendererQuad);
-#if 1
+                        {
+                            // TODO: This is one draw call per quad!
+                            begin(*mRendererQuad, &texture);
+                            // TODO: This calculation could be replaced by a flag in the shader, such as centerAlign, which
+                            // will move back quads so that center of quad is at (0, 0, z);
+                            auto &a = trail.vertices[i];
+                            auto &b = trail.vertices[i + 1];
+                            auto &c = trail.vertices[i + 2];
+                            auto &d = trail.vertices[i + 3];
+                            m = a.value + b.value + c.value + d.value;
+                            m = m / 4.f;
+                            a.value -= m;
+                            b.value -= m;
+                            c.value -= m;
+                            d.value -= m;
+                            mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
+                            i += 4;
+                            end(*mRendererQuad);
+
+                        }
                         {
                             auto brush = Brush{};
                             brush.type = component::BrushType::TEXTURE;
                             brush.texture = &texture;
+                            // TODO: Correct the scale
                             auto scale = component::Scale{100, 100, 1};
                             splat({m.x, m.y, m.z}, scale, brush);
                         }
-#else
                         {
-                            begin(*mRendererTessellation, true, true, true);
-                            auto pos = component::WorldP3D{0, 0, 0.4f};
+                            begin(*mRendererTessellation, false, false, true);
+                            auto pos = component::WorldP3D{8 - 8 / 4.f, 4 - 4 / 4.f, 0.4f};
                             auto heading = component::Heading{};
-                            auto scale = component::Scale{160, 90, 1};
+                            auto scale = component::Scale{8 / 4.f, 4 / 4.f, 1};
                             auto color = component::Color::WHITE();
 
                             mRendererTessellation->submit(pos, heading, scale, color, texture);
                             end(*mRendererTessellation);
                         }
-
-#endif
                     }
 
                     trail.vertices.clear();
+#else
+                    begin(*mRendererQuad, true, true, true);
+                    for (common::size i = 0; i + 3 < trail.vertices.size();) {
+                        mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
+                        std::cout <<
+                        trail.vertices[i].value << ", " << trail.vertices[i + 1].value << ", " <<
+                        trail.vertices[i + 2].value << ", " << trail.vertices[i + 3].value << "\n";
+                        i += 4;
+                    }
+                    std::cout << "-----\n";
+                    end(*mRendererQuad);
+#endif
                 }
 
             }
@@ -516,7 +540,7 @@ namespace oni {
 
             switch (brush.type) {
                 case component::BrushType::SPRITE: {
-                    component::Image image{};
+                    auto image = component::Image{};
                     image.width = static_cast<uint16>(scale.x * mGameUnitToPixels);
                     image.height = static_cast<uint16>(scale.y * mGameUnitToPixels);
                     mTextureManager->fill(image, brush.color);
@@ -524,7 +548,7 @@ namespace oni {
                     break;
                 }
                 case component::BrushType::TEXTURE_TAG: {
-                    component::Image image{};
+                    auto image = component::Image{};
                     // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
                     // at all what I intended
                     mTextureManager->loadOrGetImage(brush.tag, image);

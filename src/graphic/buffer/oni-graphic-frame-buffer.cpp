@@ -26,7 +26,7 @@ namespace oni {
         }
 
         void
-        FrameBuffer::unbindAndClear() {
+        FrameBuffer::clear() {
             common::oniGLuint color[4] = {0, 0, 0, 0};
 #if 0
             // TODO: This is OGL 4.0+
@@ -34,6 +34,10 @@ namespace oni {
 #else
             glClearBufferuiv(GL_COLOR, 0, color);
 #endif
+        }
+
+        void
+        FrameBuffer::unbind() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 

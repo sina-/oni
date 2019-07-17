@@ -89,6 +89,9 @@ namespace oni {
             virtual void
             attachFrameBuffer(component::Texture &renderTarget);
 
+            virtual void
+            clearFrameBuffer();
+
             virtual common::oniGLsizei
             getIndexCount() = 0;
 

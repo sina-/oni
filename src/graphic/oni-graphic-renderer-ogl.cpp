@@ -69,6 +69,7 @@ namespace oni {
             if (renderTarget) {
                 bindFrameBuffer();
                 attachFrameBuffer(*renderTarget);
+                clearFrameBuffer();
             }
 
             TextureManager::bindRange(0, mTextures);
@@ -158,12 +159,17 @@ namespace oni {
 
         void
         Renderer_OpenGL::unbindFrameBuffer() {
-            mFrameBuffer->unbindAndClear();
+            mFrameBuffer->unbind();
         }
 
         void
         Renderer_OpenGL::attachFrameBuffer(component::Texture &renderTarget) {
             mFrameBuffer->attach(renderTarget);
+        }
+
+        void
+        Renderer_OpenGL::clearFrameBuffer() {
+            mFrameBuffer->clear();
         }
 
         void

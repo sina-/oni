@@ -18,10 +18,13 @@ namespace oni {
             bind();
 
             static void
-            unbindAndClear();
+            unbind();
 
             void
             attach(component::Texture &renderTarget);
+
+            static void
+            clear();
 
         private:
             static void

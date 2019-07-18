@@ -126,7 +126,7 @@ namespace oni {
         void
         SceneManager::begin(Renderer &renderer2D,
                             component::Texture *renderTarget) {
-            begin(renderer2D, false, false, true, renderTarget);
+            begin(renderer2D, false, false, false, renderTarget);
         }
 
         void
@@ -249,21 +249,15 @@ namespace oni {
         SceneManager::renderQuad(entities::EntityManager &manager,
                                  common::r32 viewWidth,
                                  common::r32 viewHeight) {
-#if 0
+#if 1
             {
                 // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
                 static auto texture = component::Texture{};
-                texture.image.width = 100 * 1;
-                texture.image.height = 100 * 1;
                 texture.image.path = "WHAT";
-                if (!texture.textureID) {
-                    mTextureManager->createTexture(texture, false);
-                }
                 auto trailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::TEST_TEXTURE, false);
                 auto m = math::vec3{};
                 {
-                    begin(*mRendererQuad, &texture);
-                    auto C = 1.f;
+                    auto C = 2.f;
                     auto a = component::WorldP3D{-1 * C, -1 * C, 1};
                     auto b = component::WorldP3D{-1 * C, +1 * C, 1};
                     auto c = component::WorldP3D{+1 * C, +1 * C, 1};
@@ -279,6 +273,23 @@ namespace oni {
                     v.push_back(b);
                     v.push_back(c);
                     v.push_back(d);
+
+                    auto width = std::ceil((d.x - a.x) * mGameUnitToPixels);
+                    auto height = std::ceil((b.y - a.y) * mGameUnitToPixels);
+                    if (!texture.textureID || texture.image.width != width || texture.image.height != height) {
+                        texture.image.width = width;
+                        texture.image.height = height;
+                        mTextureManager->createTexture(texture, false);
+                    }
+#if 1
+                    auto model = math::mat4::identity();
+                    auto view = math::mat4::identity();
+                    auto proj = math::mat4::orthographic(-C, C, -C, C, -1.0f, 1.0f);
+                    mRendererQuad->begin(model, view, proj, {getViewWidth(), getViewHeight()}, mCamera.z, &texture);
+#else
+                    begin(*mRendererQuad, &texture);
+#endif
+
                     mRendererQuad->submit(v.data(), {}, trailTexture);
                     end(*mRendererQuad);
                 }
@@ -287,7 +298,7 @@ namespace oni {
                     brush.type = component::BrushType::TEXTURE;
                     brush.texture = &texture;
                     // TODO: Correct the scale
-                    auto scale = component::Scale{100, 100, 1};
+                    auto scale = component::Scale{5, 5, 1};
                     splat({m.x, m.y, m.z}, scale, brush);
                 }
                 {
@@ -341,6 +352,13 @@ namespace oni {
                     auto m = math::vec3{};
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
                         {
+                            /// 1) Find the AABB
+                            /// 2) Set texture.width to gameUnitToPixel * width of AABB
+                            /// 3) Set texture.height to gameUnitToPixel * height of AABB
+                            /// 4) Create a new texture that fits the sizes
+                            /// 5) Set the projection matrix size to match AABB
+                            /// 6) Render to the texture
+                            /// 7) Splat
                             // TODO: This is one draw call per quad!
                             begin(*mRendererQuad, &texture);
                             // TODO: This calculation could be replaced by a flag in the shader, such as centerAlign, which

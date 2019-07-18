@@ -149,6 +149,9 @@ namespace oni {
 
             image.data.resize(static_cast<common::u32>(mElementsInRGBA * image.width * image.height), 0);
             common::u16 stride = image.width * mElementsInRGBA;
+            if (pixel.value == 0) {
+                return;
+            }
 
             for (common::u32 y = 0; y < image.height; ++y) {
                 for (common::u32 x = 0; x < image.width; ++x) {

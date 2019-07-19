@@ -141,5 +141,20 @@ namespace oni {
             common::EntityID entityID;
             entities::EntityType entityType;
         };
+
+        struct AABB {
+            math::vec2 min{};
+            math::vec2 max{};
+
+            auto
+            width() {
+                return max.x - min.x;
+            }
+
+            auto
+            height() {
+                return max.y - min.y;
+            }
+        };
     }
 }

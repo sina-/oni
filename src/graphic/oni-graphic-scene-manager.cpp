@@ -249,7 +249,7 @@ namespace oni {
         SceneManager::renderQuad(entities::EntityManager &manager,
                                  common::r32 viewWidth,
                                  common::r32 viewHeight) {
-#if 1
+#if 0
             {
                 // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
                 static auto texture = component::Texture{};
@@ -340,16 +340,10 @@ namespace oni {
                         continue;
                     }
                     // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
-                    static auto texture = component::Texture{};
-                    texture.image.width = 160;
-                    texture.image.height = 90;
-                    texture.image.path = "WHAT";
-                    if (!texture.textureID) {
-                        mTextureManager->createTexture(texture, false);
-                    }
-
+                    auto &texture = trail.texture;
 #if 1
-                    auto m = math::vec3{};
+                    auto mid = math::vec3{};
+                    auto aabb = component::AABB{};
                     for (common::size i = 0; i + 3 < trail.vertices.size();) {
                         {
                             /// 1) Find the AABB
@@ -360,19 +354,49 @@ namespace oni {
                             /// 6) Render to the texture
                             /// 7) Splat
                             // TODO: This is one draw call per quad!
-                            begin(*mRendererQuad, &texture);
                             // TODO: This calculation could be replaced by a flag in the shader, such as centerAlign, which
                             // will move back quads so that center of quad is at (0, 0, z);
                             auto &a = trail.vertices[i];
                             auto &b = trail.vertices[i + 1];
                             auto &c = trail.vertices[i + 2];
                             auto &d = trail.vertices[i + 3];
-                            m = a.value + b.value + c.value + d.value;
-                            m = m / 4.f;
-                            a.value -= m;
-                            b.value -= m;
-                            c.value -= m;
-                            d.value -= m;
+                            mid = a.value + b.value + c.value + d.value;
+                            mid = mid / 4.f;
+                            a.value -= mid;
+                            b.value -= mid;
+                            c.value -= mid;
+                            d.value -= mid;
+
+                            aabb.min = {math::min(math::min(a.x, b.x), math::min(c.x, d.x)),
+                                        math::min(math::min(a.y, b.y), math::min(c.y, d.y))};
+                            aabb.max = {math::max(math::max(a.x, b.x), math::max(c.x, d.x)),
+                                        math::max(math::max(a.y, b.y), math::max(c.y, d.y))};
+
+                            auto width = common::i32(std::round(mGameUnitToPixels * aabb.width()));
+                            auto height = common::i32(std::round(mGameUnitToPixels * aabb.height()));
+                            if (width <= 0 || height <= 0) {
+                                // TODO: There is a bug with the BrushTrail add segment that causes the first two
+                                // vertices to be equal
+                                i += 4;
+                                continue;
+                            }
+
+                            assert(aabb.min.y <= aabb.max.y);
+                            assert(aabb.min.x <= aabb.max.x);
+
+                            if (!texture.textureID || texture.image.width != width || texture.image.height != height) {
+                                texture.image.width = width;
+                                texture.image.height = height;
+                                texture.image.path = "WHAT";
+                                mTextureManager->createTexture(texture, false);
+                            }
+
+                            auto modelM = math::mat4::identity();
+                            auto viewM = math::mat4::identity();
+                            auto projM = math::mat4::orthographic(aabb.min.x, aabb.max.x, aabb.min.y, aabb.max.y, -1.0f,
+                                                                  1.0f);
+                            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z,
+                                                 &texture);
                             mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
                             i += 4;
                             end(*mRendererQuad);
@@ -383,8 +407,8 @@ namespace oni {
                             brush.type = component::BrushType::TEXTURE;
                             brush.texture = &texture;
                             // TODO: Correct the scale
-                            auto scale = component::Scale{100, 100, 1};
-                            splat({m.x, m.y, m.z}, scale, brush);
+                            auto scale = component::Scale{aabb.width(), aabb.height(), 1};
+                            splat({mid.x, mid.y, mid.z}, scale, brush);
                         }
                         {
                             begin(*mRendererTessellation, false, false, true);

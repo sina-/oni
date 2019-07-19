@@ -263,6 +263,7 @@ namespace oni {
 
         struct BrushTrail {
             bool initialized{false};
+            component::Texture texture{};
             common::r32 mass{1.f};
             common::r32 width{0.4f};
             component::Heading2D heading{};

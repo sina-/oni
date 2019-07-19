@@ -51,8 +51,8 @@ namespace oni {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-            assert(texture.image.width);
-            assert(texture.image.height);
+            assert(texture.image.width > 0);
+            assert(texture.image.height > 0);
 
             auto data = (common::u8 *) nullptr;
             if (loadImage) {

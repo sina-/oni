@@ -155,6 +155,26 @@ namespace oni {
             height() {
                 return max.y - min.y;
             }
+
+            auto
+            topLeft() {
+                return math::vec2{min.x, max.y};
+            }
+
+            auto
+            bottomLeft() {
+                return math::vec2{min.x, min.y};
+            }
+
+            auto
+            bottomRight() {
+                return math::vec2{max.x, min.y};
+            }
+
+            auto
+            topRight() {
+                return math::vec2{max.x, max.y};
+            }
         };
     }
 }

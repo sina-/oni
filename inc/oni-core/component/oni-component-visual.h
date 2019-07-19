@@ -27,7 +27,6 @@ namespace oni {
 
             BACKGROUND_CHUNK,
             BACKGROUND_WHITE,
-            CANVAS,
 
             RACE_CAR,
             TRUCK,
@@ -49,6 +48,7 @@ namespace oni {
 
         struct Texture {
             Image image{};
+            bool clear{false};
             common::oniGLuint textureID{0};
             // GL_BGRA          0x80E1
             common::oniGLenum format{0x80E1};
@@ -57,6 +57,11 @@ namespace oni {
             common::oniGLenum type{0x1401};
             std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
                                          math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
+        };
+
+        struct CanvasTexture {
+            component::Texture canvasFront;
+            component::Texture canvasBack;
         };
 
         struct Text {
@@ -265,7 +270,7 @@ namespace oni {
             bool initialized{false};
             component::Texture texture{};
             common::r32 mass{1.f};
-            common::r32 width{0.4f};
+            common::r32 width{1.4f};
             component::Heading2D heading{};
             component::WorldP2D last{};
             component::WorldP2D lastDelta{};

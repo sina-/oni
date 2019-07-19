@@ -68,6 +68,10 @@ namespace oni {
             loadFromTextureID(component::Texture &);
 
             static void
+            loadFromTextureID(component::Texture&,
+                              std::vector<common::u8> &data);
+
+            static void
             loadFromImage(component::Texture &);
 
             // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random
@@ -82,6 +86,9 @@ namespace oni {
 
             size_t
             numLoadedTexture() const;
+
+            static void
+            swapTextures(component::Texture &);
 
         private:
             bool

@@ -199,6 +199,9 @@ namespace oni {
 
 
             common::EntityID
+            getOrCreateCanvasTile(const math::vec2 &pos);
+
+            common::EntityID
             getOrCreateCanvasTile(const component::WorldP3D &pos);
 
             static SceneManager::WorldP3DAndHeading

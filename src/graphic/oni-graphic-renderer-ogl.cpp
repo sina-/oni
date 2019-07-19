@@ -69,7 +69,10 @@ namespace oni {
             if (renderTarget) {
                 bindFrameBuffer();
                 attachFrameBuffer(*renderTarget);
-                clearFrameBuffer();
+                // TODO: Refactor this code, this flag should not be part of Texture
+                if(renderTarget->clear){
+                    clearFrameBuffer();
+                }
             }
 
             TextureManager::bindRange(0, mTextures);

@@ -22,6 +22,11 @@ namespace oni {
                    const component::Color &,
                    const component::Texture &);
 
+            void
+            submit(const component::WorldP3D *,
+                   const component::Color &,
+                   const component::CanvasTexture &);
+
         protected:
             void
             enableShader(const math::mat4 &model,

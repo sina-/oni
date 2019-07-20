@@ -6,6 +6,7 @@ namespace oni {
     namespace graphic {
         struct Brush {
             Brush() {}
+
             ~Brush() {}
 
             component::BrushType type{component::BrushType::UNKNOWN};
@@ -15,7 +16,11 @@ namespace oni {
                 // TODO: Think about this, life-times! I probably need shared pointer, but I don't want to pay the
                 // price for the pointer house-keeping. Textures all come from TextureManager and that manager
                 // guarantees the life-time of the textures.
-                component::Texture* texture{};
+                component::Texture *texture{};
+            };
+            union {
+                component::Sprite *shape_Sprite{};
+                component::Quad *shape_Quad;
             };
         };
     }

@@ -155,6 +155,11 @@ namespace oni {
             component::WorldP3D d{+1, -1, +1};
         };
 
+        struct Sprite {
+            component::WorldP3D center;
+            math::vec2 size;
+        };
+
         struct AABB {
             math::vec2 min{};
             math::vec2 max{};

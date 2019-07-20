@@ -256,6 +256,7 @@ namespace oni {
             SPRITE,
             TEXTURE_TAG,
             TEXTURE,
+            QUAD,
 
 
             LAST

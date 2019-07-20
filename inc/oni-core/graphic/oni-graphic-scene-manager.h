@@ -81,8 +81,17 @@ namespace oni {
                   Brush &brush);
 
             void
+            splat(Brush &brush);
+
+            void
             blend(const component::Texture &front,
                   component::Texture &back);
+
+            void
+            renderToAnotherQuad(const component::Quad &quad,
+                                const component::Texture &src,
+                                const component::AABB &destAABB,
+                                component::Texture &dest);
 
             void
             lookAt(common::r32 x,

@@ -279,7 +279,7 @@ namespace oni {
             component::Velocity velocity{};
             component::Acceleration acceleration{};
             component::Acceleration2D acceleration2d{};
-            std::vector<component::WorldP3D> vertices;
+            std::vector<component::Quad> quads;
         };
     }
 }

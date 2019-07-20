@@ -451,22 +451,13 @@ namespace oni {
                 auto rocketTrailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
                 for (auto &&id: view) {
                     auto &trail = view.get<component::BrushTrail>(id);
-                    if (trail.vertices.empty()) {
+                    if (trail.quads.empty()) {
                         continue;
                     }
 
-                    for (common::size i = 0; i + 3 < trail.vertices.size();) {
-                        auto aabb = component::AABB{};
-                        auto &a = trail.vertices[i];
-                        auto &b = trail.vertices[i + 1];
-                        auto &c = trail.vertices[i + 2];
-                        auto &d = trail.vertices[i + 3];
-
-                        aabb.min = {math::min(math::min(a.x, b.x), math::min(c.x, d.x)),
-                                    math::min(math::min(a.y, b.y), math::min(c.y, d.y))};
-                        aabb.max = {math::max(math::max(a.x, b.x), math::max(c.x, d.x)),
-                                    math::max(math::max(a.y, b.y), math::max(c.y, d.y))};
-
+                    for (auto &&quad: trail.quads) {
+                        component::AABB aabb;
+                        math::findAABB(quad, aabb);
                         std::set<common::EntityID> tileEntities;
 
                         auto tl = getOrCreateCanvasTile(aabb.topLeft());
@@ -495,7 +486,7 @@ namespace oni {
                             auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
                             mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z,
                                                  &canvasTexture.canvasFront);
-                            mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
+                            mRendererQuad->submit(quad, {}, rocketTrailTexture);
                             end(*mRendererQuad);
                         }
 
@@ -503,10 +494,9 @@ namespace oni {
                             auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
                             blend(canvasTexture.canvasFront, canvasTexture.canvasBack);
                         }
-                        i += 4;
                     }
 
-                    trail.vertices.clear();
+                    trail.quads.clear();
                 }
 
             }

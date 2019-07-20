@@ -109,54 +109,49 @@ namespace oni {
         Renderer_OpenGL_Quad::~Renderer_OpenGL_Quad() = default;
 
         void
-        Renderer_OpenGL_Quad::submit(const component::WorldP3D *pos,
+        Renderer_OpenGL_Quad::submit(const component::Quad &quad,
                                      const component::Color &color,
                                      const component::Texture &texture) {
-            // TODO: Receive quad instead of *pos
             assert(mIndexCount + 6 < mMaxIndicesCount);
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
             common::i32 samplerFront = -1;
             common::i32 samplerBack = -1;
-            if (!texture.image.path.empty()) {
-                assert(texture.textureID);
+            if (texture.textureID) {
                 samplerFront = getSamplerID(texture.textureID);
             }
             auto c = color.rgba();
 
             // a.
-            buffer->pos = pos->value;
+            buffer->pos = quad.a.value;
             buffer->color = c;
             buffer->uv = texture.uv[0];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
             ++buffer;
-            ++pos;
 
             // b.
-            buffer->pos = pos->value;
+            buffer->pos = quad.b.value;
             buffer->color = c;
             buffer->uv = texture.uv[1];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
             ++buffer;
-            ++pos;
 
             // c.
-            buffer->pos = pos->value;
+            buffer->pos = quad.c.value;
             buffer->color = c;
             buffer->uv = texture.uv[2];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
             ++buffer;
-            ++pos;
 
             // d.
-            buffer->pos = pos->value;
+            buffer->pos = quad.d.value;
             buffer->color = c;
             buffer->uv = texture.uv[3];
             buffer->samplerFront = samplerFront;

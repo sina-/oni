@@ -9,6 +9,10 @@
 #include <oni-core/common/oni-common-const.h>
 
 namespace oni {
+    namespace component {
+        struct AABB;
+        struct Quad;
+    }
     namespace math {
         inline common::r64
         toRadians(common::r64 degrees) noexcept {
@@ -224,5 +228,8 @@ namespace oni {
         enumCast(T value) noexcept {
             return static_cast<std::underlying_type_t<T>>(value);
         }
+
+        void
+        findAABB(const component::Quad &, component::AABB&);
     }
 }

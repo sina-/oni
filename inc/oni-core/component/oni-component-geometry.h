@@ -153,11 +153,17 @@ namespace oni {
             component::WorldP3D b{-1, +1, +1};
             component::WorldP3D c{+1, +1, +1};
             component::WorldP3D d{+1, -1, +1};
-        };
 
-        struct Sprite {
-            component::WorldP3D center;
-            math::vec2 size;
+            static inline Quad
+            make(const component::WorldP3D &pos,
+                 const component::Scale &scale) {
+                auto halfSizeX = scale.x / 2.f;
+                auto halfSizeY = scale.y / 2.f;
+                return {{pos.x - halfSizeX, pos.y - halfSizeY, pos.z},
+                        {pos.x - halfSizeX, pos.y + halfSizeY, pos.z},
+                        {pos.x + halfSizeX, pos.y + halfSizeY, pos.z},
+                        {pos.x + halfSizeX, pos.y - halfSizeY, pos.z}};
+            }
         };
 
         struct AABB {

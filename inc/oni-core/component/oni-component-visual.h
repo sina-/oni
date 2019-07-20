@@ -253,11 +253,9 @@ namespace oni {
         enum class BrushType : common::u8 {
             UNKNOWN,
 
-            SPRITE,
-            TEXTURE_TAG,
+            COLOR,
             TEXTURE,
-            QUAD,
-
+            TEXTURE_TAG,
 
             LAST
         };
@@ -271,7 +269,7 @@ namespace oni {
             bool initialized{false};
             component::Texture texture{};
             common::r32 mass{1.f};
-            common::r32 width{1.4f};
+            common::r32 width{0.4f};
             component::Heading2D heading{};
             component::WorldP2D last{};
             component::WorldP2D lastDelta{};

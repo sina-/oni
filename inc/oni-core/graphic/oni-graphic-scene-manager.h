@@ -76,11 +76,6 @@ namespace oni {
                       const component::Color &color);
 
             void
-            splat(const component::WorldP3D &worldPos,
-                  const component::Scale &scale,
-                  Brush &brush);
-
-            void
             splat(Brush &brush);
 
             void
@@ -88,10 +83,16 @@ namespace oni {
                   component::Texture &back);
 
             void
-            renderToAnotherQuad(const component::Quad &quad,
-                                const component::Texture &src,
-                                const component::AABB &destAABB,
-                                component::Texture &dest);
+            renderToTexture(const component::Quad &quad,
+                            const component::Texture &src,
+                            const graphic::ScreenBounds &destBounds,
+                            component::Texture &dest);
+
+            void
+            renderToTexture(const component::Quad &quad,
+                            const component::Color &src,
+                            const graphic::ScreenBounds &destBounds,
+                            component::Texture &dest);
 
             void
             lookAt(common::r32 x,
@@ -201,15 +202,13 @@ namespace oni {
             begin(Renderer &renderer2D,
                   component::Texture *renderTarget);
 
+            void
+            begin(Renderer &renderer2D,
+                  const ScreenBounds &screenBounds,
+                  component::Texture *renderTarget);
+
             static void
             end(Renderer &renderer2D);
-
-            void
-            updateCanvasTile(common::EntityID entityID,
-                             Brush &brush,
-                             const component::WorldP3D &worldPos,
-                             const component::Scale &scale);
-
 
             common::EntityID
             getOrCreateCanvasTile(const math::vec2 &pos);

@@ -111,22 +111,30 @@ namespace oni {
         void
         Renderer_OpenGL_Quad::submit(const component::Quad &quad,
                                      const component::Color &color,
-                                     const component::Texture &texture) {
+                                     const component::Texture *texture) {
             assert(mIndexCount + 6 < mMaxIndicesCount);
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
             common::i32 samplerFront = -1;
             common::i32 samplerBack = -1;
-            if (texture.textureID) {
-                samplerFront = getSamplerID(texture.textureID);
+            auto uv0 = math::vec2{};
+            auto uv1 = math::vec2{};
+            auto uv2 = math::vec2{};
+            auto uv3 = math::vec2{};
+            if (texture) {
+                samplerFront = getSamplerID(texture->textureID);
+                uv0 = texture->uv[0];
+                uv1 = texture->uv[1];
+                uv2 = texture->uv[2];
+                uv3 = texture->uv[3];
             }
             auto c = color.rgba();
 
             // a.
             buffer->pos = quad.a.value;
             buffer->color = c;
-            buffer->uv = texture.uv[0];
+            buffer->uv = uv0;
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
@@ -135,7 +143,7 @@ namespace oni {
             // b.
             buffer->pos = quad.b.value;
             buffer->color = c;
-            buffer->uv = texture.uv[1];
+            buffer->uv = uv1;
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
@@ -144,7 +152,7 @@ namespace oni {
             // c.
             buffer->pos = quad.c.value;
             buffer->color = c;
-            buffer->uv = texture.uv[2];
+            buffer->uv = uv2;
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
@@ -153,7 +161,7 @@ namespace oni {
             // d.
             buffer->pos = quad.d.value;
             buffer->color = c;
-            buffer->uv = texture.uv[3];
+            buffer->uv = uv3;
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 

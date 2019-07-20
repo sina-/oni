@@ -98,14 +98,6 @@ namespace oni {
             if (scale) {
                 view = view * math::mat4::scale({mCamera.z, mCamera.z, 1.0f});
             }
-            if (renderTarget and false) {
-                auto multiplier = 1.f;
-                if (mCamera.z > 1.f and false) {
-                    view = view * math::mat4::scale({multiplier * mCamera.z, multiplier * mCamera.z, 1});
-                } else {
-                    view = view * math::mat4::scale({multiplier, multiplier, 1});
-                }
-            }
             if (translate) {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
@@ -127,6 +119,18 @@ namespace oni {
         SceneManager::begin(Renderer &renderer2D,
                             component::Texture *renderTarget) {
             begin(renderer2D, false, false, false, renderTarget);
+        }
+
+        void
+        SceneManager::begin(Renderer &renderer2D,
+                            const ScreenBounds &screenBounds,
+                            component::Texture *renderTarget) {
+            auto modelM = math::mat4::identity();
+            auto viewM = math::mat4::identity();
+            auto projM = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax,
+                                                  screenBounds.yMin, screenBounds.yMax,
+                                                  -1.0f, 1.0f);
+            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, renderTarget);
         }
 
         void
@@ -444,16 +448,12 @@ namespace oni {
                 auto view = manager.createView<
                         component::BrushTrail,
                         component::WorldP3D>();
-                if (view.empty()) {
-                    return;
-                }
-
                 auto rocketTrailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
                 for (auto &&id: view) {
                     auto &trail = view.get<component::BrushTrail>(id);
                     for (auto &&quad: trail.quads) {
                         auto brush = Brush{};
-                        brush.type = component::BrushType::QUAD;
+                        brush.type = component::BrushType::TEXTURE;
                         // TODO: After setting the texture on BrushTrail, use that instead.
                         brush.texture = &rocketTrailTexture;
                         brush.shape_Quad = &quad;
@@ -568,18 +568,22 @@ namespace oni {
         }
 
         void
-        SceneManager::renderToAnotherQuad(const component::Quad &quad,
-                                          const component::Texture &src,
-                                          const component::AABB &destAABB,
-                                          component::Texture &dest) {
-            auto modelM = math::mat4::identity();
-            auto viewM = math::mat4::identity();
-            auto projM = math::mat4::orthographic(destAABB.min.x, destAABB.max.x,
-                                                  destAABB.min.y, destAABB.max.y,
-                                                  -1.0f, 1.0f);
+        SceneManager::renderToTexture(const component::Quad &quad,
+                                      const component::Color &src,
+                                      const graphic::ScreenBounds &destBounds,
+                                      component::Texture &dest) {
+            begin(*mRendererQuad, destBounds, &dest);
+            mRendererQuad->submit(quad, src, nullptr);
+            end(*mRendererQuad);
+        }
 
-            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, &dest);
-            mRendererQuad->submit(quad, {}, src);
+        void
+        SceneManager::renderToTexture(const component::Quad &quad,
+                                      const component::Texture &src,
+                                      const graphic::ScreenBounds &destBounds,
+                                      component::Texture &dest) {
+            begin(*mRendererQuad, destBounds, &dest);
+            mRendererQuad->submit(quad, {}, &src);
             end(*mRendererQuad);
         }
 
@@ -599,97 +603,61 @@ namespace oni {
 
         void
         SceneManager::splat(Brush &brush) {
-            switch (brush.type) {
-                case component::BrushType::SPRITE: {
-                    break;
-                }
-                case component::BrushType::TEXTURE_TAG: {
-                    break;
-                }
-                case component::BrushType::TEXTURE: {
-                    break;
-                }
-                case component::BrushType::QUAD: {
-                    component::AABB aabb;
-                    math::findAABB(*brush.shape_Quad, aabb);
+            component::AABB aabb;
+            math::findAABB(*brush.shape_Quad, aabb);
 
-                    auto tileEntities = std::set<common::EntityID>();
-                    auto tl = getOrCreateCanvasTile(aabb.topLeft());
-                    tileEntities.insert(tl);
+            auto tileEntities = std::set<common::EntityID>();
+            auto tl = getOrCreateCanvasTile(aabb.topLeft());
+            tileEntities.insert(tl);
 
-                    auto bl = getOrCreateCanvasTile(aabb.bottomLeft());
-                    tileEntities.insert(bl);
+            auto bl = getOrCreateCanvasTile(aabb.bottomLeft());
+            tileEntities.insert(bl);
 
-                    auto br = getOrCreateCanvasTile(aabb.bottomRight());
-                    tileEntities.insert(br);
+            auto br = getOrCreateCanvasTile(aabb.bottomRight());
+            tileEntities.insert(br);
 
-                    auto tr = getOrCreateCanvasTile(aabb.topRight());
-                    tileEntities.insert(tr);
+            auto tr = getOrCreateCanvasTile(aabb.topRight());
+            tileEntities.insert(tr);
 
-                    /// Draw
-                    for (auto &&canvasEntity: tileEntities) {
-                        auto &canvasPos = mSceneEntityManager->get<component::WorldP3D>(canvasEntity);
-                        component::AABB canvasAABB;
-                        canvasAABB.min = {canvasPos.x - mHalfCanvasTileSizeX, canvasPos.y - mHalfCanvasTileSizeY};
-                        canvasAABB.max = {canvasPos.x + mHalfCanvasTileSizeX, canvasPos.y + mHalfCanvasTileSizeY};
-                        auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
-                        renderToAnotherQuad(*brush.shape_Quad, *brush.texture, canvasAABB, canvasTexture.canvasFront);
+            // TODO: The following code is a good candidate for multi-threaded worker-pool based architecture
+            // as it uses at least two draw calls per-canvas and the work does not interfere with there
+            // reset of the code since usage of mSceneEntityManager is limited to this class.
+
+            /// Draw
+            for (auto &&canvasEntity: tileEntities) {
+                auto &canvasPos = mSceneEntityManager->get<component::WorldP3D>(canvasEntity);
+                graphic::ScreenBounds screenBounds;
+                screenBounds.xMin = canvasPos.x - mHalfCanvasTileSizeX;
+                screenBounds.xMax = canvasPos.x + mHalfCanvasTileSizeX;
+                screenBounds.yMin = canvasPos.y - mHalfCanvasTileSizeY;
+                screenBounds.yMax = canvasPos.y + mHalfCanvasTileSizeY;
+                auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
+                switch (brush.type) {
+                    case component::BrushType::COLOR: {
+                        renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, canvasTexture.canvasFront);
+                        break;
                     }
-
-                    /// Blend
-                    for (auto &&canvasEntity: tileEntities) {
-                        auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
-                        blend(canvasTexture.canvasFront, canvasTexture.canvasBack);
+                    case component::BrushType::TEXTURE: {
+                        renderToTexture(*brush.shape_Quad, *brush.texture, screenBounds, canvasTexture.canvasFront);
+                        break;
                     }
-
-                    break;
-                }
-                case component::BrushType::UNKNOWN:
-                case component::BrushType::LAST: {
-                    assert(false);
-                    break;
+                    case component::BrushType::TEXTURE_TAG: {
+                        auto &brushTexture = mTextureManager->loadOrGetTexture(brush.tag, false);
+                        renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, canvasTexture.canvasFront);
+                        break;
+                    }
+                    case component::BrushType::UNKNOWN:
+                    case component::BrushType::LAST: {
+                        assert(false);
+                        break;
+                    }
                 }
             }
 
-
-        }
-
-        void
-        SceneManager::splat(const component::WorldP3D &worldPos,
-                            const component::Scale &scale,
-                            Brush &brush) {
-            std::set<common::EntityID> tileEntities;
-
-            auto entityID = getOrCreateCanvasTile(worldPos);
-            tileEntities.insert(entityID);
-
-            auto lowerLeft = worldPos;
-            lowerLeft.x -= scale.x / 2.f;
-            lowerLeft.y -= scale.y / 2.f;
-            auto lowerLeftEntityID = getOrCreateCanvasTile(lowerLeft);
-            tileEntities.insert(lowerLeftEntityID);
-
-            auto topRight = worldPos;
-            topRight.x += scale.x / 2.f;
-            topRight.y += scale.y / 2.f;
-
-            auto topRightEntityID = getOrCreateCanvasTile(topRight);
-            tileEntities.insert(topRightEntityID);
-
-            auto topLeft = worldPos;
-            topLeft.x -= scale.x / 2.f;
-            topLeft.y += scale.y / 2.f;
-            auto topLeftEntityID = getOrCreateCanvasTile(topLeft);
-            tileEntities.insert(topLeftEntityID);
-
-            auto lowerRight = worldPos;
-            lowerRight.x += scale.x / 2.f;
-            lowerRight.y -= scale.y / 2.f;
-            auto lowerRightEntityID = getOrCreateCanvasTile(lowerRight);
-            tileEntities.insert(lowerRightEntityID);
-
-            for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(tileEntity, brush, worldPos, scale);
+            /// Blend
+            for (auto &&canvasEntity: tileEntities) {
+                auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
+                blend(canvasTexture.canvasFront, canvasTexture.canvasBack);
             }
         }
 
@@ -766,65 +734,20 @@ namespace oni {
         void
         SceneManager::updateAfterMark(entities::EntityManager &manager,
                                       common::r64 tickTime) {
-            auto view = manager.createView<
-                    component::AfterMark,
-                    component::WorldP3D,
-                    component::Scale>();
-            for (auto &&id: view) {
-                const auto &scale = view.get<component::Scale>(id);
-                const auto &mark = view.get<component::AfterMark>(id);
-                auto brush = graphic::Brush{};
-                brush.tag = mark.textureTag;
-                brush.type = component::BrushType::TEXTURE_TAG;
-
-                const auto &pos = view.get<component::WorldP3D>(id);
-                splat(pos, scale, brush);
-            }
-        }
-
-        void
-        SceneManager::updateCanvasTile(common::EntityID entityID,
-                                       Brush &brush,
-                                       const component::WorldP3D &worldPos,
-                                       const component::Scale &scale) {
-            auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(entityID);
-            const auto &canvasTilePos = mSceneEntityManager->get<component::WorldP3D>(entityID);
-            const auto &canvasSize = mSceneEntityManager->get<component::Scale>(entityID);
-
-            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
-            // in game units at this point.
-            auto canvasLowerLeftPos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f,
-                                                          canvasTilePos.y - canvasSize.y / 2.f,
-                                                          canvasTilePos.z};
-            auto brushTexturePos = worldPos;
-            math::worldToTextureCoordinate(canvasLowerLeftPos, mGameUnitToPixels, brushTexturePos);
-
-            switch (brush.type) {
-                case component::BrushType::SPRITE: {
-                    auto image = component::Image{};
-                    image.width = static_cast<uint16>(scale.x * mGameUnitToPixels);
-                    image.height = static_cast<uint16>(scale.y * mGameUnitToPixels);
-                    mTextureManager->fill(image, brush.color);
-                    // mTextureManager->blendAndUpdateTexture(canvasTexture, image, brushTexturePos.value);
-                    break;
-                }
-                case component::BrushType::TEXTURE_TAG: {
-                    auto image = component::Image{};
-                    // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
-                    // at all what I intended
-                    mTextureManager->loadOrGetImage(brush.tag, image);
-                    //mTextureManager->blendAndUpdateTexture(canvasTexture, image, brushTexturePos.value);
-                    break;
-                }
-                case component::BrushType::TEXTURE: {
-                    //mTextureManager->blendAndUpdateTexture(canvasTexture, brush.texture->image, brushTexturePos.value);
-                    break;
-                }
-                default: {
-                    assert(false);
-                    return;
-                }
-            }
+//            auto view = manager.createView<
+//                    component::AfterMark,
+//                    component::WorldP3D,
+//                    component::Scale>();
+//            for (auto &&id: view) {
+//                const auto &scale = view.get<component::Scale>(id);
+//                const auto &mark = view.get<component::AfterMark>(id);
+//                auto brush = graphic::Brush{};
+//                brush.tag = mark.textureTag;
+//                brush.type = component::BrushType::TEXTURE_TAG;
+//
+//                const auto &pos = view.get<component::WorldP3D>(id);
+//                splat(pos, scale, brush);
+//            }
         }
 
         void

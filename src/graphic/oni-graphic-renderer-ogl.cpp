@@ -103,7 +103,6 @@ namespace oni {
             }
 
             if (renderTarget) {
-//                TextureManager::loadFromTextureID(*renderTarget);
                 unbindFrameBuffer();
             }
             unbindIndexBuffer();

@@ -35,30 +35,30 @@ namespace oni {
             auto positionIndex = glGetAttribLocation(program, "position");
             auto colorIndex = glGetAttribLocation(program, "color");
             auto uvIndex = glGetAttribLocation(program, "uv");
-            auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
-            auto samplerIDPreviousIndex = glGetAttribLocation(program, "samplerIDPrevious");
+            auto samplerFrontIndex = glGetAttribLocation(program, "samplerFront");
+            auto samplerBackIndex = glGetAttribLocation(program, "samplerBack");
 
             if (positionIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
-                samplerIDIndex == -1) {
+                samplerFrontIndex == -1) {
                 assert(false);
             }
 
-            graphic::BufferStructure sampler;
-            sampler.index = static_cast<common::oniGLuint>(samplerIDIndex);
-            sampler.componentCount = 1;
-            sampler.componentType = GL_FLOAT;
-            sampler.normalized = GL_FALSE;
-            sampler.stride = vertexSize;
-            sampler.offset = static_cast<const common::oniGLvoid *>(nullptr);
+            graphic::BufferStructure samplerFront;
+            samplerFront.index = static_cast<common::oniGLuint>(samplerFrontIndex);
+            samplerFront.componentCount = 1;
+            samplerFront.componentType = GL_FLOAT;
+            samplerFront.normalized = GL_FALSE;
+            samplerFront.stride = vertexSize;
+            samplerFront.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
-            graphic::BufferStructure samplerPrevious;
-            samplerPrevious.index = static_cast<common::oniGLuint>(samplerIDPreviousIndex);
-            samplerPrevious.componentCount = 1;
-            samplerPrevious.componentType = GL_FLOAT;
-            samplerPrevious.normalized = GL_FALSE;
-            samplerPrevious.stride = vertexSize;
-            samplerPrevious.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex,
-                                                                                          samplerIDPrevious));
+            graphic::BufferStructure samplerBack;
+            samplerBack.index = static_cast<common::oniGLuint>(samplerBackIndex);
+            samplerBack.componentCount = 1;
+            samplerBack.componentType = GL_FLOAT;
+            samplerBack.normalized = GL_FALSE;
+            samplerBack.stride = vertexSize;
+            samplerBack.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex,
+                                                                                      samplerBack));
 
             graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
@@ -85,7 +85,7 @@ namespace oni {
             uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, uv));
 
             std::vector<graphic::BufferStructure> bufferStructures;
-            bufferStructures.push_back(sampler);
+            bufferStructures.push_back(samplerFront);
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
             bufferStructures.push_back(uv);
@@ -112,15 +112,16 @@ namespace oni {
         Renderer_OpenGL_Quad::submit(const component::WorldP3D *pos,
                                      const component::Color &color,
                                      const component::Texture &texture) {
+            // TODO: Receive quad instead of *pos
             assert(mIndexCount + 6 < mMaxIndicesCount);
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
-            common::i32 samplerID = -1;
-            common::i32 samplerIDPrevious = -1;
+            common::i32 samplerFront = -1;
+            common::i32 samplerBack = -1;
             if (!texture.image.path.empty()) {
                 assert(texture.textureID);
-                samplerID = getSamplerID(texture.textureID);
+                samplerFront = getSamplerID(texture.textureID);
             }
             auto c = color.rgba();
 
@@ -128,8 +129,8 @@ namespace oni {
             buffer->pos = pos->value;
             buffer->color = c;
             buffer->uv = texture.uv[0];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
             ++pos;
@@ -138,8 +139,8 @@ namespace oni {
             buffer->pos = pos->value;
             buffer->color = c;
             buffer->uv = texture.uv[1];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
             ++pos;
@@ -148,8 +149,8 @@ namespace oni {
             buffer->pos = pos->value;
             buffer->color = c;
             buffer->uv = texture.uv[2];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
             ++pos;
@@ -158,8 +159,8 @@ namespace oni {
             buffer->pos = pos->value;
             buffer->color = c;
             buffer->uv = texture.uv[3];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
 
@@ -178,55 +179,61 @@ namespace oni {
         }
 
         void
-        Renderer_OpenGL_Quad::submit(const component::WorldP3D *pos,
+        Renderer_OpenGL_Quad::submit(const component::Quad &quad,
                                      const component::Color &color,
-                                     const component::CanvasTexture &canvasTexture) {
+                                     const component::Texture &front,
+                                     const component::Texture &back) {
             assert(mIndexCount + 6 < mMaxIndicesCount);
+
+            assert(front.textureID);
+            assert(back.textureID);
+
+            assert(math::almost_Equal(front.uv[0].x, back.uv[0].x));
+            assert(math::almost_Equal(front.uv[1].x, back.uv[1].x));
+            assert(math::almost_Equal(front.uv[2].x, back.uv[2].x));
+            assert(math::almost_Equal(front.uv[3].x, back.uv[3].x));
+
+            assert(math::almost_Equal(front.uv[0].y, back.uv[0].y));
+            assert(math::almost_Equal(front.uv[1].y, back.uv[1].y));
+            assert(math::almost_Equal(front.uv[2].y, back.uv[2].y));
+            assert(math::almost_Equal(front.uv[3].y, back.uv[3].y));
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
-            common::i32 samplerID = -1;
-            common::i32 samplerIDPrevious = -1;
-            if (canvasTexture.canvasFront.textureID) {
-                samplerID = getSamplerID(canvasTexture.canvasFront.textureID);
-            }
-            if (canvasTexture.canvasBack.textureID) {
-                samplerIDPrevious = getSamplerID(canvasTexture.canvasBack.textureID);
-            }
+            auto samplerFront = getSamplerID(front.textureID);
+            auto samplerBack = getSamplerID(back.textureID);
+
             auto c = color.rgba();
 
-            buffer->pos = pos->value;
+            buffer->pos = quad.a.value;
             buffer->color = c;
-            buffer->uv = canvasTexture.canvasFront.uv[0];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->uv = front.uv[0];
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
-            ++pos;
 
-            buffer->pos = pos->value;
+            buffer->pos = quad.b.value;
             buffer->color = c;
-            buffer->uv = canvasTexture.canvasFront.uv[1];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->uv = front.uv[1];
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
-            ++pos;
 
-            buffer->pos = pos->value;
+            buffer->pos = quad.c.value;
             buffer->color = c;
-            buffer->uv = canvasTexture.canvasFront.uv[2];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->uv = front.uv[2];
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
-            ++pos;
 
-            buffer->pos = pos->value;
+            buffer->pos = quad.d.value;
             buffer->color = c;
-            buffer->uv = canvasTexture.canvasFront.uv[3];
-            buffer->samplerID = samplerID;
-            buffer->samplerIDPrevious = samplerIDPrevious;
+            buffer->uv = front.uv[3];
+            buffer->samplerFront = samplerFront;
+            buffer->samplerBack = samplerBack;
 
             ++buffer;
 

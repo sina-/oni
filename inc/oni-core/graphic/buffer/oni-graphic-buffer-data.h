@@ -32,8 +32,8 @@ namespace oni {
         };
 
         struct QuadVertex {
-            common::oniGLint samplerID{-1};
-            common::oniGLint samplerIDPrevious{-1};
+            common::oniGLint samplerFront{-1};
+            common::oniGLint samplerBack{-1};
             math::vec4 color{0.f, 0.f, 0.f, 0.f};
             math::vec2 uv{};
             math::vec3 pos{};

@@ -81,6 +81,10 @@ namespace oni {
                   Brush &brush);
 
             void
+            blend(const component::Texture &front,
+                  component::Texture &back);
+
+            void
             lookAt(common::r32 x,
                    common::r32 y);
 

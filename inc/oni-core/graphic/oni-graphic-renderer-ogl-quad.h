@@ -23,9 +23,10 @@ namespace oni {
                    const component::Texture &);
 
             void
-            submit(const component::WorldP3D *,
+            submit(const component::Quad&,
                    const component::Color &,
-                   const component::CanvasTexture &);
+                   const component::Texture &front,
+                   const component::Texture &back);
 
         protected:
             void

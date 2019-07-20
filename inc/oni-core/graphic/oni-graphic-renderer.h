@@ -17,6 +17,8 @@ namespace oni {
 
         struct CanvasTexture;
 
+        struct Quad;
+
         class Text;
 
         union WorldP3D;

@@ -249,7 +249,7 @@ namespace oni {
         SceneManager::renderQuad(entities::EntityManager &manager,
                                  common::r32 viewWidth,
                                  common::r32 viewHeight) {
-#if 1
+#if 0
             {
                 static auto texture = component::Texture{};
                 texture.image.path = "WHAT";
@@ -499,27 +499,9 @@ namespace oni {
                             end(*mRendererQuad);
                         }
 
-                        /// Blend
                         for (auto &&canvasEntity: tileEntities) {
-                            auto &canvasPos = mSceneEntityManager->get<component::WorldP3D>(canvasEntity);
-                            auto modelM = math::mat4::identity();
-                            auto viewM = math::mat4::identity();
-                            auto projM = math::mat4::orthographic(-1,
-                                                                  +1,
-                                                                  -1,
-                                                                  +1,
-                                                                  -1.0f,
-                                                                  1.0f);
-                            auto v = std::vector<component::WorldP3D>();
-                            v.push_back({-1, -1, 1});
-                            v.push_back({-1, +1, 1});
-                            v.push_back({+1, +1, 1});
-                            v.push_back({+1, -1, 1});
                             auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
-                            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z,
-                                                 &canvasTexture.canvasBack);
-                            mRendererQuad->submit(v.data(), {}, canvasTexture);
-                            end(*mRendererQuad);
+                            blend(canvasTexture.canvasFront, canvasTexture.canvasBack);
                         }
                         i += 4;
                     }
@@ -631,6 +613,20 @@ namespace oni {
 
                 }
             }
+        }
+
+        void
+        SceneManager::blend(const component::Texture &front,
+                            component::Texture &back) {
+            auto quad = component::Quad{};
+            auto modelM = math::mat4::identity();
+            auto viewM = math::mat4::identity();
+            auto projM = math::mat4::orthographic(-1, +1,
+                                                  -1, +1,
+                                                  -1, +1);
+            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, &back);
+            mRendererQuad->submit(quad, {}, front, back);
+            end(*mRendererQuad);
         }
 
         void

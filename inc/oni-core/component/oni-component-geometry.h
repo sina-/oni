@@ -142,6 +142,19 @@ namespace oni {
             entities::EntityType entityType;
         };
 
+        struct Quad {
+            /**
+             *    b +---+ c
+             *      |  /|
+             *      |/  |
+             *    a +---+ d
+             **/
+            component::WorldP3D a{-1, -1, +1};
+            component::WorldP3D b{-1, +1, +1};
+            component::WorldP3D c{+1, +1, +1};
+            component::WorldP3D d{+1, -1, +1};
+        };
+
         struct AABB {
             math::vec2 min{};
             math::vec2 max{};

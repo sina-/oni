@@ -1,6 +1,7 @@
 #include <oni-core/math/oni-math-vec3.h>
 
 #include <cmath>
+#include <oni-core/math/oni-math-function.h>
 
 namespace oni {
     namespace math {
@@ -82,7 +83,7 @@ namespace oni {
 
         bool
         vec3::operator==(const vec3 &other) {
-            return x == other.x && y == other.y && z == other.z;
+            return math::almost_Equal(x, other.x) && math::almost_Equal(y, other.y) && math::almost_Equal(z, other.z);
         }
 
         bool

@@ -18,9 +18,15 @@ namespace oni {
             operator=(Renderer_OpenGL_Quad &) = delete;
 
             void
-            submit(const component::WorldP3D *,
+            submit(const component::Quad &,
                    const component::Color &,
-                   const component::Texture &);
+                   const component::Texture *);
+
+            void
+            submit(const component::Quad&,
+                   const component::Color &,
+                   const component::Texture &front,
+                   const component::Texture &back);
 
         protected:
             void

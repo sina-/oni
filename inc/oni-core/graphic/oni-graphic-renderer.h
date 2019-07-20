@@ -15,6 +15,10 @@ namespace oni {
 
         class Texture;
 
+        struct CanvasTexture;
+
+        struct Quad;
+
         class Text;
 
         union WorldP3D;
@@ -82,9 +86,11 @@ namespace oni {
             virtual WindowSize
             getViewportSize() = 0;
 
+        protected:
+            component::Texture *mRenderTarget{};
+
         private:
             bool mBegun{false};
-            component::Texture *mRenderTarget{};
             WindowSize mViewportSize{};
         };
     }

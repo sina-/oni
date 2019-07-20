@@ -871,19 +871,13 @@ namespace oni {
 
         common::EntityID
         EntityManager::createEntity_CanvasTile() {
+            assert(mSimMode == entities::SimMode::CLIENT);
             auto id = createEntity(entities::EntityType::CANVAS);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::CANVAS);
-
-            if (mSimMode == entities::SimMode::SERVER) {
-                auto &cc = createComponent<component::ComplementaryComponents>(id);
-                cc.types.emplace_back(component::ComponentType::TEXTURE);
-            } else {
-                createComponent<component::Texture>(id);
-            }
+            createComponent<component::CanvasTexture>(id);
 
             assignTag<component::Tag_Static>(id);
             assignTag<component::Tag_TextureShaded>(id);

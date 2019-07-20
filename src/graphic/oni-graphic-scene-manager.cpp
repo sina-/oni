@@ -98,14 +98,6 @@ namespace oni {
             if (scale) {
                 view = view * math::mat4::scale({mCamera.z, mCamera.z, 1.0f});
             }
-            if (renderTarget and false) {
-                auto multiplier = 1.f;
-                if (mCamera.z > 1.f and false) {
-                    view = view * math::mat4::scale({multiplier * mCamera.z, multiplier * mCamera.z, 1});
-                } else {
-                    view = view * math::mat4::scale({multiplier, multiplier, 1});
-                }
-            }
             if (translate) {
                 view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
@@ -127,6 +119,18 @@ namespace oni {
         SceneManager::begin(Renderer &renderer2D,
                             component::Texture *renderTarget) {
             begin(renderer2D, false, false, false, renderTarget);
+        }
+
+        void
+        SceneManager::begin(Renderer &renderer2D,
+                            const ScreenBounds &screenBounds,
+                            component::Texture *renderTarget) {
+            auto modelM = math::mat4::identity();
+            auto viewM = math::mat4::identity();
+            auto projM = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax,
+                                                  screenBounds.yMin, screenBounds.yMax,
+                                                  -1.0f, 1.0f);
+            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, renderTarget);
         }
 
         void
@@ -251,7 +255,6 @@ namespace oni {
                                  common::r32 viewHeight) {
 #if 0
             {
-                // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
                 static auto texture = component::Texture{};
                 texture.image.path = "WHAT";
                 auto trailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::TEST_TEXTURE, false);
@@ -324,7 +327,7 @@ namespace oni {
                 }
             }
 
-#else
+#elif 0
             {
                 auto view = manager.createView<
                         component::BrushTrail,
@@ -339,7 +342,6 @@ namespace oni {
                     if (trail.vertices.empty()) {
                         continue;
                     }
-                    // TODO: Note that this is used across entities! I should probably save this as part of BrushTrail.
                     auto &texture = trail.texture;
 #if 1
                     auto mid = math::vec3{};
@@ -360,6 +362,7 @@ namespace oni {
                             auto &b = trail.vertices[i + 1];
                             auto &c = trail.vertices[i + 2];
                             auto &d = trail.vertices[i + 3];
+
                             mid = a.value + b.value + c.value + d.value;
                             mid = mid / 4.f;
                             a.value -= mid;
@@ -372,17 +375,15 @@ namespace oni {
                             aabb.max = {math::max(math::max(a.x, b.x), math::max(c.x, d.x)),
                                         math::max(math::max(a.y, b.y), math::max(c.y, d.y))};
 
-                            auto width = common::i32(std::round(mGameUnitToPixels * aabb.width()));
-                            auto height = common::i32(std::round(mGameUnitToPixels * aabb.height()));
-                            if (width <= 0 || height <= 0) {
-                                // TODO: There is a bug with the BrushTrail add segment that causes the first two
-                                // vertices to be equal
+                            auto width = common::i32(mGameUnitToPixels * aabb.width());
+                            auto height = common::i32(mGameUnitToPixels * aabb.height());
+                            if (width == 0 || height == 0) {
                                 i += 4;
                                 continue;
                             }
 
-                            assert(aabb.min.y <= aabb.max.y);
-                            assert(aabb.min.x <= aabb.max.x);
+                            assert(aabb.min.y < aabb.max.y);
+                            assert(aabb.min.x < aabb.max.x);
 
                             if (!texture.textureID || texture.image.width != width || texture.image.height != height) {
                                 texture.image.width = width;
@@ -398,6 +399,9 @@ namespace oni {
                             mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z,
                                                  &texture);
                             mRendererQuad->submit(&trail.vertices[i], {}, rocketTrailTexture);
+                            std::cout <<
+                                      trail.vertices[i].value + mid << ", " << trail.vertices[i + 1].value  + mid<< ", " <<
+                                      trail.vertices[i + 2].value  + mid<< ", " << trail.vertices[i + 3].value  + mid<< "\n";
                             i += 4;
                             end(*mRendererQuad);
 
@@ -437,6 +441,25 @@ namespace oni {
                         end(*mRendererQuad);
                     }
 #endif
+                }
+            }
+#else
+            {
+                auto view = manager.createView<
+                        component::BrushTrail,
+                        component::WorldP3D>();
+                auto rocketTrailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
+                for (auto &&id: view) {
+                    auto &trail = view.get<component::BrushTrail>(id);
+                    for (auto &&quad: trail.quads) {
+                        auto brush = Brush{};
+                        brush.type = component::BrushType::TEXTURE;
+                        // TODO: After setting the texture on BrushTrail, use that instead.
+                        brush.texture = &rocketTrailTexture;
+                        brush.shape_Quad = &quad;
+                        splat(brush);
+                    }
+                    trail.quads.clear();
                 }
             }
 #endif
@@ -481,73 +504,166 @@ namespace oni {
         SceneManager::renderTessellationTexture(entities::EntityManager &manager,
                                                 common::r32 viewWidth,
                                                 common::r32 viewHeight) {
-            auto color = component::Color{};
-            auto view = manager.createView<
-                    component::WorldP3D,
-                    component::Heading,
-                    component::Scale,
-                    component::Texture,
-                    component::Tag_TextureShaded>();
-            for (auto &&id: view) {
-                const auto &pos = view.get<component::WorldP3D>(id);
-                const auto &heading = view.get<component::Heading>(id);
-                const auto &scale = view.get<component::Scale>(id);
+            {
+                auto color = component::Color{};
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Texture,
+                        component::Tag_TextureShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
 
-                auto result = applyParentTransforms(manager, id, pos, heading);
+                    auto result = applyParentTransforms(manager, id, pos, heading);
 
-                if (!isVisible(result.pos, scale)) {
-                    continue;
-                }
+                    if (!isVisible(result.pos, scale)) {
+                        continue;
+                    }
 
-                const auto &texture = manager.get<component::Texture>(id);
-                assert(!texture.image.path.empty());
+                    const auto &texture = manager.get<component::Texture>(id);
+                    assert(!texture.image.path.empty());
 #if DEBUG_Z
-                serverManager.printEntityType(id);
+                    serverManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
-                mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
+                    mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
 
-                ++mRenderedTexturesPerFrame;
+                    ++mRenderedTexturesPerFrame;
+                }
+            }
+            {
+                auto color = component::Color{};
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::CanvasTexture,
+                        component::Tag_TextureShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+
+                    auto result = applyParentTransforms(manager, id, pos, heading);
+
+                    if (!isVisible(result.pos, scale)) {
+                        continue;
+                    }
+
+                    const auto &texture = manager.get<component::CanvasTexture>(id);
+                    assert(!texture.canvasBack.image.path.empty());
+#if DEBUG_Z
+                    serverManager.printEntityType(id);
+                        printf("%f\n", result.pos.z);
+#endif
+                    mRendererTessellation->submit(result.pos, result.heading, scale, color, texture.canvasBack);
+
+                    ++mRenderedTexturesPerFrame;
+
+                }
             }
         }
 
         void
-        SceneManager::splat(const component::WorldP3D &worldPos,
-                            const component::Scale &scale,
-                            Brush &brush) {
-            std::set<common::EntityID> tileEntities;
+        SceneManager::renderToTexture(const component::Quad &quad,
+                                      const component::Color &src,
+                                      const graphic::ScreenBounds &destBounds,
+                                      component::Texture &dest) {
+            begin(*mRendererQuad, destBounds, &dest);
+            mRendererQuad->submit(quad, src, nullptr);
+            end(*mRendererQuad);
+        }
 
-            auto entityID = getOrCreateCanvasTile(worldPos);
-            tileEntities.insert(entityID);
+        void
+        SceneManager::renderToTexture(const component::Quad &quad,
+                                      const component::Texture &src,
+                                      const graphic::ScreenBounds &destBounds,
+                                      component::Texture &dest) {
+            begin(*mRendererQuad, destBounds, &dest);
+            mRendererQuad->submit(quad, {}, &src);
+            end(*mRendererQuad);
+        }
 
-            auto lowerLeft = worldPos;
-            lowerLeft.x -= scale.x / 2.f;
-            lowerLeft.y -= scale.y / 2.f;
-            auto lowerLeftEntityID = getOrCreateCanvasTile(lowerLeft);
-            tileEntities.insert(lowerLeftEntityID);
+        void
+        SceneManager::blend(const component::Texture &front,
+                            component::Texture &back) {
+            auto quad = component::Quad{};
+            auto modelM = math::mat4::identity();
+            auto viewM = math::mat4::identity();
+            auto projM = math::mat4::orthographic(-1, +1,
+                                                  -1, +1,
+                                                  -1, +1);
+            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, &back);
+            mRendererQuad->submit(quad, {}, front, back);
+            end(*mRendererQuad);
+        }
 
-            auto topRight = worldPos;
-            topRight.x += scale.x / 2.f;
-            topRight.y += scale.y / 2.f;
+        void
+        SceneManager::splat(Brush &brush) {
+            component::AABB aabb;
+            math::findAABB(*brush.shape_Quad, aabb);
 
-            auto topRightEntityID = getOrCreateCanvasTile(topRight);
-            tileEntities.insert(topRightEntityID);
+            auto tileEntities = std::set<common::EntityID>();
+            auto tl = getOrCreateCanvasTile(aabb.topLeft());
+            tileEntities.insert(tl);
 
-            auto topLeft = worldPos;
-            topLeft.x -= scale.x / 2.f;
-            topLeft.y += scale.y / 2.f;
-            auto topLeftEntityID = getOrCreateCanvasTile(topLeft);
-            tileEntities.insert(topLeftEntityID);
+            auto bl = getOrCreateCanvasTile(aabb.bottomLeft());
+            tileEntities.insert(bl);
 
-            auto lowerRight = worldPos;
-            lowerRight.x += scale.x / 2.f;
-            lowerRight.y -= scale.y / 2.f;
-            auto lowerRightEntityID = getOrCreateCanvasTile(lowerRight);
-            tileEntities.insert(lowerRightEntityID);
+            auto br = getOrCreateCanvasTile(aabb.bottomRight());
+            tileEntities.insert(br);
 
-            for (auto &&tileEntity: tileEntities) {
-                updateCanvasTile(tileEntity, brush, worldPos, scale);
+            auto tr = getOrCreateCanvasTile(aabb.topRight());
+            tileEntities.insert(tr);
+
+            // TODO: The following code is a good candidate for multi-threaded worker-pool based architecture
+            // as it uses at least two draw calls per-canvas and the work does not interfere with there
+            // reset of the code since usage of mSceneEntityManager is limited to this class.
+
+            /// Draw
+            for (auto &&canvasEntity: tileEntities) {
+                auto &canvasPos = mSceneEntityManager->get<component::WorldP3D>(canvasEntity);
+                graphic::ScreenBounds screenBounds;
+                screenBounds.xMin = canvasPos.x - mHalfCanvasTileSizeX;
+                screenBounds.xMax = canvasPos.x + mHalfCanvasTileSizeX;
+                screenBounds.yMin = canvasPos.y - mHalfCanvasTileSizeY;
+                screenBounds.yMax = canvasPos.y + mHalfCanvasTileSizeY;
+                auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
+                switch (brush.type) {
+                    case component::BrushType::COLOR: {
+                        renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, canvasTexture.canvasFront);
+                        break;
+                    }
+                    case component::BrushType::TEXTURE: {
+                        renderToTexture(*brush.shape_Quad, *brush.texture, screenBounds, canvasTexture.canvasFront);
+                        break;
+                    }
+                    case component::BrushType::TEXTURE_TAG: {
+                        auto &brushTexture = mTextureManager->loadOrGetTexture(brush.tag, false);
+                        renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, canvasTexture.canvasFront);
+                        break;
+                    }
+                    case component::BrushType::UNKNOWN:
+                    case component::BrushType::LAST: {
+                        assert(false);
+                        break;
+                    }
+                }
             }
+
+            /// Blend
+            for (auto &&canvasEntity: tileEntities) {
+                auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(canvasEntity);
+                blend(canvasTexture.canvasFront, canvasTexture.canvasBack);
+            }
+        }
+
+        common::EntityID
+        SceneManager::getOrCreateCanvasTile(const math::vec2 &pos) {
+            return getOrCreateCanvasTile(component::WorldP3D{pos.x, pos.y, 0.f});
         }
 
         common::EntityID
@@ -572,20 +688,27 @@ namespace oni {
                                               static_cast<common::r32>(mCanvasTileSizeY));
                 mSceneEntityManager->setHeading(id, heading.value);
 
-                auto &texture = mSceneEntityManager->get<component::Texture>(id);
+                auto &canvasTexture = mSceneEntityManager->get<component::CanvasTexture>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP32);
                 auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
                                                                common::EP32);
 
-                texture.image.width = widthInPixels;
-                texture.image.height = heightInPixels;
-                texture.image.path = "generated_by_getOrCreateCanvasTile";
+                canvasTexture.canvasFront.image.width = widthInPixels;
+                canvasTexture.canvasFront.image.height = heightInPixels;
+                canvasTexture.canvasFront.image.path = "generated_by_getOrCreateCanvasTile::canvasFront";
+                canvasTexture.canvasFront.clear = true;
 
-                auto defaultColor = component::Color{};
-                mTextureManager->fill(texture.image, defaultColor);
-                mTextureManager->loadFromImage(texture);
+                canvasTexture.canvasBack.image.width = widthInPixels;
+                canvasTexture.canvasBack.image.height = heightInPixels;
+                canvasTexture.canvasBack.image.path = "generated_by_getOrCreateCanvasTile::canvasBack";
+
+                mTextureManager->fill(canvasTexture.canvasFront.image, {});
+                mTextureManager->fill(canvasTexture.canvasBack.image, {});
+
+                mTextureManager->createTexture(canvasTexture.canvasFront, false);
+                mTextureManager->createTexture(canvasTexture.canvasBack, false);
 
                 mCanvasTileLookup.emplace(xy, id);
             }
@@ -611,66 +734,20 @@ namespace oni {
         void
         SceneManager::updateAfterMark(entities::EntityManager &manager,
                                       common::r64 tickTime) {
-            auto view = manager.createView<
-                    component::AfterMark,
-                    component::WorldP3D,
-                    component::Scale>();
-            for (auto &&id: view) {
-                const auto &scale = view.get<component::Scale>(id);
-                const auto &mark = view.get<component::AfterMark>(id);
-                auto brush = graphic::Brush{};
-                brush.tag = mark.textureTag;
-                brush.type = component::BrushType::TEXTURE_TAG;
-
-                const auto &pos = view.get<component::WorldP3D>(id);
-                splat(pos, scale, brush);
-            }
-        }
-
-        void
-        SceneManager::updateCanvasTile(common::EntityID entityID,
-                                       Brush &brush,
-                                       const component::WorldP3D &worldPos,
-                                       const component::Scale &scale) {
-            auto &canvasTexture = mSceneEntityManager->get<component::Texture>(entityID);
-            const auto &canvasTilePos = mSceneEntityManager->get<component::WorldP3D>(entityID);
-            const auto &canvasSize = mSceneEntityManager->get<component::Scale>(entityID);
-
-            // TODO: Probably better to not use texture coordinates until the very last moment and keep everything
-            // in game units at this point.
-            auto canvasLowerLeftPos = component::WorldP3D{canvasTilePos.x - canvasSize.x / 2.f,
-                                                          canvasTilePos.y - canvasSize.y / 2.f,
-                                                          canvasTilePos.z};
-            auto brushTexturePos = worldPos;
-            math::worldToTextureCoordinate(canvasLowerLeftPos, mGameUnitToPixels, brushTexturePos);
-
-            switch (brush.type) {
-                case component::BrushType::SPRITE: {
-                    auto image = component::Image{};
-                    image.width = static_cast<uint16>(scale.x * mGameUnitToPixels);
-                    image.height = static_cast<uint16>(scale.y * mGameUnitToPixels);
-                    mTextureManager->fill(image, brush.color);
-                    mTextureManager->blendAndUpdateTexture(canvasTexture, image, brushTexturePos.value);
-                    break;
-                }
-                case component::BrushType::TEXTURE_TAG: {
-                    auto image = component::Image{};
-                    // TODO: This will ignore brushSize and it will only depend on the image pixel size which is not
-                    // at all what I intended
-                    mTextureManager->loadOrGetImage(brush.tag, image);
-                    mTextureManager->blendAndUpdateTexture(canvasTexture, image, brushTexturePos.value);
-                    break;
-                }
-                case component::BrushType::TEXTURE: {
-                    mTextureManager->blendAndUpdateTexture(canvasTexture, brush.texture->image,
-                                                           brushTexturePos.value);
-                    break;
-                }
-                default: {
-                    assert(false);
-                    return;
-                }
-            }
+//            auto view = manager.createView<
+//                    component::AfterMark,
+//                    component::WorldP3D,
+//                    component::Scale>();
+//            for (auto &&id: view) {
+//                const auto &scale = view.get<component::Scale>(id);
+//                const auto &mark = view.get<component::AfterMark>(id);
+//                auto brush = graphic::Brush{};
+//                brush.tag = mark.textureTag;
+//                brush.type = component::BrushType::TEXTURE_TAG;
+//
+//                const auto &pos = view.get<component::WorldP3D>(id);
+//                splat(pos, scale, brush);
+//            }
         }
 
         void

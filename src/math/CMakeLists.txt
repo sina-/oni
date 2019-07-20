@@ -1,4 +1,4 @@
-add_library(oni-core-math oni-math-mat4.cpp oni-math-vec2.cpp oni-math-vec3.cpp oni-math-vec4.cpp oni-math-intersects.cpp oni-math-rand.cpp oni-math-z-layer-manager.cpp)
+add_library(oni-core-math oni-math-mat4.cpp oni-math-vec2.cpp oni-math-vec3.cpp oni-math-vec4.cpp oni-math-intersects.cpp oni-math-rand.cpp oni-math-z-layer-manager.cpp oni-math-function.cpp)
 
 target_compile_features(oni-core-math
         PUBLIC

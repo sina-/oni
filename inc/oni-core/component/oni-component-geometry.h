@@ -142,6 +142,30 @@ namespace oni {
             entities::EntityType entityType;
         };
 
+        struct Quad {
+            /**
+             *    b +---+ c
+             *      |  /|
+             *      |/  |
+             *    a +---+ d
+             **/
+            component::WorldP3D a{-1, -1, +1};
+            component::WorldP3D b{-1, +1, +1};
+            component::WorldP3D c{+1, +1, +1};
+            component::WorldP3D d{+1, -1, +1};
+
+            static inline Quad
+            make(const component::WorldP3D &pos,
+                 const component::Scale &scale) {
+                auto halfSizeX = scale.x / 2.f;
+                auto halfSizeY = scale.y / 2.f;
+                return {{pos.x - halfSizeX, pos.y - halfSizeY, pos.z},
+                        {pos.x - halfSizeX, pos.y + halfSizeY, pos.z},
+                        {pos.x + halfSizeX, pos.y + halfSizeY, pos.z},
+                        {pos.x + halfSizeX, pos.y - halfSizeY, pos.z}};
+            }
+        };
+
         struct AABB {
             math::vec2 min{};
             math::vec2 max{};
@@ -154,6 +178,26 @@ namespace oni {
             auto
             height() {
                 return max.y - min.y;
+            }
+
+            auto
+            topLeft() {
+                return math::vec2{min.x, max.y};
+            }
+
+            auto
+            bottomLeft() {
+                return math::vec2{min.x, min.y};
+            }
+
+            auto
+            bottomRight() {
+                return math::vec2{max.x, min.y};
+            }
+
+            auto
+            topRight() {
+                return math::vec2{max.x, max.y};
             }
         };
     }

@@ -87,9 +87,6 @@ namespace oni {
             size_t
             numLoadedTexture() const;
 
-            static void
-            swapTextures(component::Texture &);
-
         private:
             bool
             isTextureLoaded(component::TextureTag) const;

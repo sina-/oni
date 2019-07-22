@@ -38,5 +38,32 @@ namespace oni {
 
             mBegun = false;
         }
+
+        bool
+        operator<(const Renderable &left,
+                  const Renderable &right) {
+            return left.pos->z >= right.pos->z;
+        }
+
+        bool
+        operator>(const Renderable &left,
+                  const Renderable &right) {
+            return left.pos->z <= right.pos->z;
+        }
+
+        Renderable::Renderable(common::EntityID _id,
+                               entities::EntityManager *_manager,
+                               const component::WorldP3D *_pos,
+                               const component::Heading *_heading,
+                               const component::Scale *_scale,
+                               const component::Color *_color,
+                               const component::Texture *_texture) : id(_id),
+                                                                     manager(_manager),
+                                                                     pos(_pos),
+                                                                     heading(_heading),
+                                                                     scale(_scale),
+                                                                     color(_color),
+                                                                     texture(_texture) {}
+
     }
 }

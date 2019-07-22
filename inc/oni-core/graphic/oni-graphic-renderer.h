@@ -4,6 +4,9 @@
 #include <oni-core/math/oni-math-mat4.h>
 
 namespace oni {
+    namespace entities {
+        class EntityManager;
+    }
     namespace component {
         class Color;
 
@@ -42,6 +45,32 @@ namespace oni {
             LAST
         };
 
+        struct Renderable {
+            Renderable(common::EntityID _id,
+                       entities::EntityManager *_manager,
+                       const component::WorldP3D *_pos,
+                       const component::Heading *_heading,
+                       const component::Scale *_scale,
+                       const component::Color *_color,
+                       const component::Texture *_texture);
+
+            friend bool
+            operator<(const Renderable &left,
+                      const Renderable &right);
+
+            friend bool
+            operator>(const Renderable &left,
+                      const Renderable &right);
+
+            common::EntityID id{};
+            entities::EntityManager *manager{};
+            const component::WorldP3D *pos{};
+            const component::Heading *heading{};
+            const component::Scale *scale{};
+            const component::Color *color{};
+            const component::Texture *texture{};
+        };
+
         class Renderer {
         protected:
             Renderer();
@@ -56,6 +85,9 @@ namespace oni {
                   const math::vec2 &screenSize,
                   common::r32 zoom,
                   component::Texture *renderTarget);
+
+            virtual void
+            submit(const Renderable &) = 0;
 
             void
             end();

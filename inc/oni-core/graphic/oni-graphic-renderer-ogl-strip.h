@@ -14,6 +14,9 @@ namespace oni {
             ~Renderer_OpenGL_Strip() override;
 
             void
+            submit(const Renderable &renderable) override;
+
+            void
             submit(const component::WorldP3D &,
                    const common::r32 offset,
                    const component::Color &color,

@@ -12,18 +12,17 @@ namespace oni {
 
             ~Renderer_OpenGL_Quad() override;
 
-            Renderer_OpenGL_Quad(const Renderer_OpenGL_Quad &) = delete;
+            void
+            submit(const Renderable &renderable) override;
 
-            Renderer_OpenGL_Quad &
-            operator=(Renderer_OpenGL_Quad &) = delete;
-
+            // TODO: These are only used to render to texture, so there is no need to unify it at the moment.
             void
             submit(const component::Quad &,
                    const component::Color &,
                    const component::Texture *);
 
             void
-            submit(const component::Quad&,
+            submit(const component::Quad &,
                    const component::Color &,
                    const component::Texture &front,
                    const component::Texture &back);

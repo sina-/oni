@@ -1,12 +1,14 @@
 #pragma once
 
 #include <map>
+#include <queue>
 #include <memory>
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
 #include <oni-core/graphic/oni-graphic-camera.h>
+#include <oni-core/graphic/oni-graphic-renderer.h>
 
 class b2World;
 
@@ -58,7 +60,13 @@ namespace oni {
             ~SceneManager();
 
             void
-            render(entities::EntityManager &);
+            submit(entities::EntityManager &);
+
+            void
+            render();
+
+            void
+            _render(entities::EntityManager &);
 
             void
             renderInternal();
@@ -163,9 +171,7 @@ namespace oni {
                         common::r32 viewHeight);
 
             void
-            renderQuad(entities::EntityManager &,
-                       common::r32 viewWidth,
-                       common::r32 viewHeight);
+            renderQuad(entities::EntityManager &manager);
 
             void
             renderTessellationColor(entities::EntityManager &,
@@ -263,6 +269,8 @@ namespace oni {
             common::u16 mRenderedParticlesPerFrame{0};
 
             math::ZLayerManager &mZLayerManager;
+
+            std::priority_queue<Renderable, std::vector<Renderable>> mRenderables{};
         };
     }
 }

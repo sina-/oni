@@ -154,7 +154,93 @@ namespace oni {
         }
 
         void
-        SceneManager::render(entities::EntityManager &manager) {
+        SceneManager::submit(entities::EntityManager &manager) {
+            {
+                // TODO: This only renders BrushTrails and only renders them to texture, which doesn't fit nicely
+                // to the current structure of submit and render.
+                // TODO: Another refactoring I should do is to remove the quads from BrushTrail as the renderer doesn't
+                // need to know about them. The visible part, the quad and texture, should be another entity with Texture
+                // and QuadList component, the car can have that entity as a reference in the BrushTrail
+                renderQuad(manager);
+            }
+            // TODO: The following code includes everything, even the particles will be sorted, which might be
+            // over-kill, I could think about separating particles from the rest and always rendering them at the
+            // end on top of everything and accepting the fact that I won't be able to occlude particles with
+            // other solid objects.
+            {
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Texture,
+                        component::Tag_TextureShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &texture = view.get<component::Texture>(id);
+
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, nullptr, &texture);
+                }
+            }
+            {
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Color,
+                        component::Tag_ColorShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &color = view.get<component::Color>(id);
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr);
+                }
+            }
+            {
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::CanvasTexture,
+                        component::Tag_TextureShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &texture = view.get<component::CanvasTexture>(id);
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, nullptr, &texture.canvasBack);
+                }
+            }
+        }
+
+        void
+        SceneManager::render() {
+            submit(*mSceneEntityManager);
+
+            begin(*mRendererTessellation, true, true, true);
+            while (!mRenderables.empty()) {
+                auto &r = const_cast<graphic::Renderable &> (mRenderables.top());
+                auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
+
+                if (!isVisible(ePos.pos, *r.scale)) {
+                    mRenderables.pop();
+                    continue;
+                }
+
+                r.pos = &ePos.pos;
+                r.heading = &ePos.heading;
+
+                mRendererTessellation->submit(r);
+
+                mRenderables.pop();
+            }
+            end(*mRendererTessellation);
+        }
+
+        void
+        SceneManager::_render(entities::EntityManager &manager) {
             auto viewWidth = getViewWidth();
             auto viewHeight = getViewHeight();
 
@@ -163,6 +249,7 @@ namespace oni {
                 renderTessellation(manager, viewWidth, viewHeight);
             }
 
+            // TODO: This is obsolete in favour of Trail rendering with quads, for now!
             /// Trails
             {
                 // renderStrip(manager, viewWidth, viewHeight);
@@ -179,20 +266,23 @@ namespace oni {
 
             /// Quads
             {
-                renderQuad(manager, viewWidth, viewHeight);
+                renderQuad(manager);
             }
         }
 
         void
         SceneManager::renderInternal() {
-            render(*mSceneEntityManager);
+            // render(*mSceneEntityManager);
         }
 
         void
         SceneManager::renderStaticText(entities::EntityManager &manager,
                                        common::r32 viewWidth,
                                        common::r32 viewHeight) {
-            auto view = manager.createView<component::Text, component::Tag_Static, component::WorldP3D>();
+            auto view = manager.createView<
+                    component::Text,
+                    component::Tag_Static,
+                    component::WorldP3D>();
             for (const auto &entity: view) {
                 auto &text = view.get<component::Text>(entity);
                 auto &pos = view.get<component::WorldP3D>(entity);
@@ -250,9 +340,7 @@ namespace oni {
         }
 
         void
-        SceneManager::renderQuad(entities::EntityManager &manager,
-                                 common::r32 viewWidth,
-                                 common::r32 viewHeight) {
+        SceneManager::renderQuad(entities::EntityManager &manager) {
             {
                 auto view = manager.createView<
                         component::BrushTrail,
@@ -302,7 +390,7 @@ namespace oni {
                 manager.printEntityType(id);
                 printf("%f\n", result.pos.z);
 #endif
-                mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
+                // mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
 
                 ++mRenderedSpritesPerFrame;
             }
@@ -337,7 +425,7 @@ namespace oni {
                     serverManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
-                    mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
+                    // mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
 
                     ++mRenderedTexturesPerFrame;
                 }
@@ -367,7 +455,7 @@ namespace oni {
                     serverManager.printEntityType(id);
                         printf("%f\n", result.pos.z);
 #endif
-                    mRendererTessellation->submit(result.pos, result.heading, scale, color, texture.canvasBack);
+                    // mRendererTessellation->submit(result.pos, result.heading, scale, color, texture.canvasBack);
 
                     ++mRenderedTexturesPerFrame;
 

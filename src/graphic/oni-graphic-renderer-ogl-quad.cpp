@@ -246,6 +246,12 @@ namespace oni {
         }
 
         void
+        Renderer_OpenGL_Quad::submit(const Renderable &renderable) {
+            // TODO: Implement
+            assert(false);
+        }
+
+        void
         Renderer_OpenGL_Quad::enableShader(const math::mat4 &model,
                                            const math::mat4 &view,
                                            const math::mat4 &proj,

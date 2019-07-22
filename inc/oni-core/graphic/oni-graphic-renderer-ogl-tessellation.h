@@ -21,21 +21,12 @@ namespace oni {
 
             ~Renderer_OpenGL_Tessellation() override;
 
-            Renderer_OpenGL_Tessellation(const Renderer_OpenGL_Tessellation &) = delete;
-
-            Renderer_OpenGL_Tessellation &
-            operator=(Renderer_OpenGL_Tessellation &) = delete;
-
-            void
-            submit(const component::WorldP3D &,
-                   const component::Heading &,
-                   const component::Scale &,
-                   const component::Color &,
-                   const component::Texture &);
-
             void
             submit(const component::Text &,
                    const component::WorldP3D &);
+
+            void
+            submit(const Renderable &) override;
 
         protected:
             common::oniGLsizei

@@ -186,5 +186,13 @@ namespace oni {
         Renderer_OpenGL_Strip::setStripeSize(common::r32 size) {
             mStripeSize = size;
         }
+
+        void
+        Renderer_OpenGL_Strip::submit(const Renderable &renderable) {
+            // TODO: I have to unify this class specific submit function with this one, merge the shaders used for this,
+            // and then I can implement this function, unless I re-design my render pipeline to accomedate different
+            // shaders better.
+            assert(false);
+        }
     }
 }

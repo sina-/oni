@@ -132,27 +132,36 @@ namespace oni {
         Renderer_OpenGL_Tessellation::~Renderer_OpenGL_Tessellation() = default;
 
         void
-        Renderer_OpenGL_Tessellation::submit(const component::WorldP3D &pos,
-                                             const component::Heading &heading,
-                                             const component::Scale &scale,
-                                             const component::Color &color,
-                                             const component::Texture &texture) {
+        Renderer_OpenGL_Tessellation::submit(const Renderable &renderable) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
             auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
-            common::i32 samplerID = -1;
-            if (!texture.image.path.empty()) {
-                samplerID = getSamplerID(texture.textureID);
+            auto samplerID = -1;
+            auto color = component::Color{};
+            auto uv0 = math::vec2{};
+            auto uv1 = math::vec2{};
+            auto uv2 = math::vec2{};
+            auto uv3 = math::vec2{};
+
+            if (renderable.texture) {
+                samplerID = getSamplerID(renderable.texture->textureID);
+                uv0 = renderable.texture->uv[0];
+                uv1 = renderable.texture->uv[1];
+                uv2 = renderable.texture->uv[2];
+                uv3 = renderable.texture->uv[3];
+            } else {
+                color = *renderable.color;
             }
 
-            buffer->position = pos.value;
-            buffer->heading = heading.value;
-            buffer->halfSize = math::vec2{scale.x / 2.f, scale.y / 2.f}; // TODO: Why not vec2 for Scale?
+            buffer->position = renderable.pos->value;
+            buffer->heading = renderable.heading->value;
+            buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
+                                          renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
             buffer->color = color.rgba();
-            buffer->uv[0] = texture.uv[0];
-            buffer->uv[1] = texture.uv[1];
-            buffer->uv[2] = texture.uv[2];
-            buffer->uv[3] = texture.uv[3];
+            buffer->uv[0] = uv0;
+            buffer->uv[1] = uv1;
+            buffer->uv[2] = uv2;
+            buffer->uv[3] = uv3;
             buffer->samplerID = samplerID;
             buffer++;
 

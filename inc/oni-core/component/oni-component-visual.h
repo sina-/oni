@@ -82,7 +82,7 @@ namespace oni {
             std::vector<math::vec4> uv{};
         };
 
-        struct ParticleTrail {
+        struct ParticleEmitter {
             TextureTag textureTag = TextureTag::UNKNOWN;
             common::r32 size = 0.1f;
         };

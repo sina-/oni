@@ -115,6 +115,13 @@ namespace oni {
                               std::placeholders::_3,
                               std::placeholders::_4);
 
+            mCollisionHandlers[component::PhysicalCategory::PROJECTILE] =
+                    std::bind(&Dynamics::handleCollision, this,
+                              std::placeholders::_1,
+                              std::placeholders::_2,
+                              std::placeholders::_3,
+                              std::placeholders::_4);
+
             // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
             // skipping some of them!
             // mPhysicsWorld->SetContactListener(mCollisionHandler.get());
@@ -339,7 +346,8 @@ namespace oni {
         void
         Dynamics::updateCollision(entities::EntityManager &manager,
                                   common::r64 tickTime) {
-            assert(manager.getSimMode() == entities::SimMode::SERVER);
+            assert(manager.getSimMode() == entities::SimMode::SERVER ||
+                   manager.getSimMode() == entities::SimMode::CLIENT);
 
             auto view = manager.createView<
                     component::Tag_Dynamic,
@@ -349,17 +357,21 @@ namespace oni {
                 auto &props = view.get<component::PhysicalProperties>(id);
                 auto &pos = view.get<component::WorldP3D>(id);
 
-                mCollisionHandlers[props.physicalCategory](manager,
-                                                           id,
-                                                           props,
-                                                           pos);
+                auto *body = manager.getEntityBody(id);
+                if (isColliding(body)) {
+                    mCollisionHandlers[props.physicalCategory](manager,
+                                                               id,
+                                                               props,
+                                                               pos);
+                }
             }
             manager.flushDeletions();
         }
 
         void
         Dynamics::syncPosWithPhysWorld(entities::EntityManager &manager) {
-            assert(manager.getSimMode() == entities::SimMode::SERVER);
+            assert(manager.getSimMode() == entities::SimMode::SERVER ||
+                   manager.getSimMode() == entities::SimMode::CLIENT);
 
             auto view = manager.createView<
                     component::Tag_Dynamic,
@@ -370,7 +382,6 @@ namespace oni {
 
             for (auto &&id: view) {
                 auto *body = manager.getEntityBody(id);
-                auto &props = view.get<component::PhysicalProperties>(id);
                 auto &bPos = body->GetPosition();
                 auto &ePos = view.get<component::WorldP3D>(id);
                 auto &heading = view.get<component::Heading>(id);
@@ -437,6 +448,19 @@ namespace oni {
         }
 
         void
+        Dynamics::updateResting(entities::EntityManager &manager) {
+            auto view = manager.createView<
+                    component::PhysicalProperties,
+                    component::Tag_SplatOnRest>();
+            for (auto &&id: view) {
+                auto *body = manager.getEntityBody(id);
+                if (!body->IsAwake()) {
+                    // TODO: Trigger event
+                }
+            }
+        }
+
+        void
         Dynamics::updateFadeWithAge(entities::EntityManager &manager,
                                     common::r64 tickTime) {
             assert(manager.getSimMode() == entities::SimMode::CLIENT ||
@@ -484,29 +508,27 @@ namespace oni {
                                         component::WorldP3D &pos) {
 
             auto *body = manager.getEntityBody(id);
-            if (isColliding(body)) {
-                // TODO: Proper Z level!
-                common::r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
-                auto worldPos = component::WorldP3D{};
-                worldPos.x = body->GetPosition().x;
-                worldPos.y = body->GetPosition().y;
-                worldPos.z = particleZ;
+            // TODO: Proper Z level!
+            common::r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
+            auto worldPos = component::WorldP3D{};
+            worldPos.x = body->GetPosition().x;
+            worldPos.y = body->GetPosition().y;
+            worldPos.z = particleZ;
 
-                auto colliding = game::CollidingEntity{};
-                colliding.entityA = entities::EntityType::SIMPLE_ROCKET;
-                // TODO: use the proper type for the other entity instead of UNKNOWN
-                colliding.entityB = entities::EntityType::UNKNOWN;
+            auto colliding = game::CollidingEntity{};
+            colliding.entityA = entities::EntityType::SIMPLE_ROCKET;
+            // TODO: use the proper type for the other entity instead of UNKNOWN
+            colliding.entityB = entities::EntityType::UNKNOWN;
 
-                // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
-                // sound effects, etc.
-                manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
+            // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
+            // sound effects, etc.
+            manager.enqueueEvent<game::Event_Collision>(worldPos, colliding);
 
-                manager.markForDeletion(id);
-                // TODO: I'm leaking memory here, data in b2world is left behind :(
-                // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
-                // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
-                // and audio system.
-            }
+            manager.markForDeletion(id);
+            // TODO: I'm leaking memory here, data in b2world is left behind :(
+            // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
+            // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
+            // and audio system.
         }
 
 

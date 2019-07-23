@@ -93,12 +93,16 @@ namespace oni {
         };
 
         enum class PhysicalCategory : common::u8 {
-            UNKNOWN = 0,
-            GENERIC = 1,
-            VEHICLE = 2,
-            RACE_CAR = 3,
-            ROCKET = 4,
-            WALL = 5,
+            UNKNOWN,
+
+            GENERIC,
+            VEHICLE,
+            RACE_CAR,
+            ROCKET,
+            WALL,
+            PROJECTILE,
+
+            LAST
         };
 
         struct Velocity {
@@ -154,6 +158,7 @@ namespace oni {
             bool highPrecision{false};
             bool colliding{false};
             bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other
+            bool disableCollision{false};
             PhysicalCategory physicalCategory{PhysicalCategory::UNKNOWN};
             BodyType bodyType{BodyType::UNKNOWN};
         };

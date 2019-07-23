@@ -68,6 +68,9 @@ namespace oni {
             updateAge(entities::EntityManager &,
                       common::r64 tickTime);
 
+            static
+            void updateResting(entities::EntityManager&);
+
             static void
             updateFadeWithAge(entities::EntityManager &,
                               common::r64 tickTime);

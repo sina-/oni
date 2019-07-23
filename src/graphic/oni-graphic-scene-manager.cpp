@@ -55,8 +55,7 @@ namespace oni {
 
             mTextureManager = std::make_unique<TextureManager>(mAssetManager);
 
-            mSceneEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, zLayerManager,
-                                                                            nullptr);
+            mSceneEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
 
             mRand = std::make_unique<math::Rand>(0, 0);
 

@@ -34,6 +34,19 @@ namespace oni {
             component::TextureTag tag{};
         };
 
+        struct Event_SplatOnRest {
+            Event_SplatOnRest() = default;
+
+            Event_SplatOnRest(const component::WorldP3D &pos,
+                              const component::Scale &scale,
+                              const component::TextureTag &tag) : pos(pos), scale(scale), tag(tag) {}
+
+            component::WorldP3D pos{};
+            component::Scale scale{};
+            component::TextureTag tag{};
+        };
+
+
         struct Event_RocketLaunch {
             Event_RocketLaunch() = default;
 

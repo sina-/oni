@@ -22,6 +22,9 @@ namespace oni {
         struct Tag_SplatOnDeath {
         };
 
+        struct Tag_SplatOnRest{
+        };
+
         /// Network
         struct Tag_NetworkSyncEntity {
         };

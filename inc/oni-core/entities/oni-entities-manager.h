@@ -25,10 +25,6 @@ namespace oni {
         struct vec2;
     }
 
-    namespace math {
-        class ZLayerManager;
-    }
-
     namespace component {
         union WorldP3D;
     }
@@ -37,7 +33,6 @@ namespace oni {
         class EntityManager {
         public:
             EntityManager(entities::SimMode sMode,
-                          const math::ZLayerManager &,
                           b2World *);
 
             ~EntityManager();
@@ -128,10 +123,10 @@ namespace oni {
                        common::r32 lower,
                        common::r32 upper);
 
-            void
+            common::r32
             setRandHeading(common::EntityID);
 
-            void
+            common::r32
             setRandHeading(common::EntityID,
                            common::r32 lower,
                            common::r32 upper);
@@ -147,11 +142,6 @@ namespace oni {
             void
             setAfterMarkTextureTag(common::EntityID,
                                    component::TextureTag);
-
-            void
-            setRandVelocity(common::EntityID id,
-                            common::u32 lower,
-                            common::u32 upper);
 
             void
             createPhysics(
@@ -462,7 +452,6 @@ namespace oni {
 
         private:
             b2World *mPhysicsWorld;
-            const math::ZLayerManager &mZLayerManager;
             std::unique_ptr<math::Rand> mRand{};
 
             std::unordered_map<common::EntityID, b2Body *> mEntityBodyMap{};

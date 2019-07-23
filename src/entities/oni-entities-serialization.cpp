@@ -74,7 +74,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::ParticleTrail &data) {
+                  component::ParticleEmitter &data) {
             archive(data.textureTag, data.size);
         }
 
@@ -252,7 +252,7 @@ namespace oni {
                         component::Age,
                         component::FadeWithAge,
                         component::TextureTag,
-                        component::ParticleTrail,
+                        component::ParticleEmitter,
                         component::AfterMark,
                         component::EntityAttachment,
                         component::EntityAttachee,
@@ -304,7 +304,7 @@ namespace oni {
                         component::Age,
                         component::FadeWithAge,
                         component::TextureTag,
-                        component::ParticleTrail,
+                        component::ParticleEmitter,
                         component::AfterMark,
                         component::EntityAttachment,
                         component::EntityAttachee,

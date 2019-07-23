@@ -12,8 +12,11 @@ namespace oni {
     namespace component {
         struct AABB;
         struct Quad;
+        struct Heading;
     }
     namespace math {
+        struct vec2;
+
         inline common::r64
         toRadians(common::r64 degrees) noexcept {
             return degrees * (common::PI / 180.0f);
@@ -231,5 +234,11 @@ namespace oni {
 
         void
         findAABB(const component::Quad &, component::AABB&);
+
+        math::vec2
+        headingVector(common::r32 heading);
+
+        math::vec2
+        headingVector(const component::Heading&);
     }
 }

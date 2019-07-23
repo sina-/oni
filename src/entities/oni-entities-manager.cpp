@@ -8,16 +8,15 @@
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/component/oni-component-gameplay.h>
-#include <oni-core/level/oni-level-chunk.h>
-#include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
-#include <oni-core/math/oni-math-rand.h>
 #include <oni-core/component/oni-component-type.h>
+#include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
+#include <oni-core/level/oni-level-chunk.h>
+#include <oni-core/math/oni-math-rand.h>
 
 namespace oni {
     namespace entities {
         EntityManager::EntityManager(entities::SimMode sMode,
-                                     const math::ZLayerManager &zLayerManager,
-                                     b2World *physicsWorld) : mSimMode(sMode), mZLayerManager(zLayerManager),
+                                     b2World *physicsWorld) : mSimMode(sMode),
                                                               mPhysicsWorld(physicsWorld) {
             mRegistry = std::make_unique<entt::basic_registry<common::u32 >>();
             mLoader = std::make_unique<entt::basic_continuous_loader<common::EntityID>>(*mRegistry);
@@ -373,8 +372,12 @@ namespace oni {
                         collisionSensor.filter.groupIndex = -static_cast<common::i16>(props.physicalCategory);
                     }
 
+                    if (props.disableCollision) {
+                        fixtureDef.isSensor = true;
+                    } else {
+                        body->CreateFixture(&collisionSensor);
+                    }
                     body->CreateFixture(&fixtureDef);
-                    body->CreateFixture(&collisionSensor);
                     break;
                 }
                 case component::BodyType::STATIC: {
@@ -432,26 +435,18 @@ namespace oni {
             age.maxAge = mRand->next_r32(lower, upper);
         }
 
-        void
+        common::r32
         EntityManager::setRandHeading(common::EntityID id) {
-            setRandHeading(id, 0.f, common::FULL_CIRCLE_IN_RAD);
+            return setRandHeading(id, 0.f, common::FULL_CIRCLE_IN_RAD);
         }
 
-        void
+        common::r32
         EntityManager::setRandHeading(common::EntityID id,
                                       common::r32 lower,
                                       common::r32 upper) {
             auto &heading = mRegistry->get<component::Heading>(id);
             heading.value = mRand->next_r32(lower, upper);
-        }
-
-        void
-        EntityManager::setRandVelocity(common::EntityID id,
-                                       common::u32 lower,
-                                       common::u32 upper) {
-            auto &velocity = mRegistry->get<component::Velocity>(id);
-            velocity.current = mRand->next(lower, upper);
-            velocity.max = velocity.current;
+            return heading.value;
         }
 
         void
@@ -484,7 +479,7 @@ namespace oni {
         void
         EntityManager::setTrailTextureTag(common::EntityID id,
                                           component::TextureTag tag) {
-            auto &tt = mRegistry->get<component::ParticleTrail>(id);
+            auto &tt = mRegistry->get<component::ParticleEmitter>(id);
             tt.textureTag = tag;
         }
 
@@ -539,7 +534,7 @@ namespace oni {
             createComponent<component::Color>(id);
             createComponent<component::Age>(id);
             createComponent<component::FadeWithAge>(id);
-            createComponent<component::Velocity>(id);
+            // TODO: needs physics
 
             if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
@@ -652,7 +647,7 @@ namespace oni {
             createComponent<component::TextureTag>(id, component::TextureTag::ROCKET);
             createComponent<component::Color>(id);
             createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
-            auto &pt = createComponent<component::ParticleTrail>(id);
+            auto &pt = createComponent<component::ParticleEmitter>(id);
             pt.size = 3.f;
             auto &ph = createComponent<component::WorldP3D_History>(id);
             ph.size = 10;
@@ -756,7 +751,6 @@ namespace oni {
             createComponent<component::Scale>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::SMOKE);
             createComponent<component::Color>(id);
-            createComponent<component::Velocity>(id);
             createComponent<component::Age>(id);
             createComponent<component::FadeWithAge>(id);
 
@@ -777,11 +771,22 @@ namespace oni {
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::Scale>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::SMOKE);
             createComponent<component::Color>(id);
-            createComponent<component::Velocity>(id);
             createComponent<component::Age>(id);
+            auto &scale = createComponent<component::Scale>(id);
+            scale.x = mRand->next_r32(1.f, 3.f);
+            scale.y = scale.x;
+
+            auto &props = createComponent<component::PhysicalProperties>(id);
+            props.friction = 1.f;
+            props.density = 0.1f;
+            props.angularDamping = 2.f;
+            props.linearDamping = (scale.x + scale.y) / 2;
+            props.highPrecision = false;
+            props.disableCollision = true;
+            props.bodyType = component::BodyType::DYNAMIC;
+            props.physicalCategory = component::PhysicalCategory::PROJECTILE;
 
             if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);
@@ -792,6 +797,7 @@ namespace oni {
 
             assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_SplatOnDeath>(id);
+            assignTag<component::Tag_Dynamic>(id);
 
             return id;
         }

@@ -81,6 +81,13 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
+                  component::FadeWithAge &data) {
+            archive(data.factor);
+        }
+
+        template<class Archive>
+        void
+        serialize(Archive &archive,
                   component::AfterMark &data) {
             archive(data.textureTag);
         }
@@ -243,6 +250,7 @@ namespace oni {
                         component::Point,
                         component::Color,
                         component::Age,
+                        component::FadeWithAge,
                         component::TextureTag,
                         component::ParticleTrail,
                         component::AfterMark,
@@ -294,6 +302,7 @@ namespace oni {
                         component::Point,
                         component::Color,
                         component::Age,
+                        component::FadeWithAge,
                         component::TextureTag,
                         component::ParticleTrail,
                         component::AfterMark,

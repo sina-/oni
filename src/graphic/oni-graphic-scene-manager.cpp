@@ -173,14 +173,16 @@ namespace oni {
                         component::Heading,
                         component::Scale,
                         component::Texture,
+                        component::Color,
                         component::Tag_TextureShaded>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
                     const auto &texture = view.get<component::Texture>(id);
+                    const auto &color = view.get<component::Color>(id);
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, nullptr, &texture);
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture);
                 }
             }
             {
@@ -204,13 +206,15 @@ namespace oni {
                         component::Heading,
                         component::Scale,
                         component::CanvasTexture,
+                        component::Color,
                         component::Tag_TextureShaded>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
                     const auto &texture = view.get<component::CanvasTexture>(id);
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, nullptr, &texture.canvasBack);
+                    const auto &color = view.get<component::Color>(id);
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture.canvasBack);
                 }
             }
         }
@@ -235,6 +239,8 @@ namespace oni {
                 mRendererTessellation->submit(r);
 
                 mRenderables.pop();
+
+                ++mRenderedSpritesPerFrame;
             }
             end(*mRendererTessellation);
         }

@@ -128,7 +128,6 @@ namespace oni {
             math::vec2 value;
         };
 
-
         struct Age {
             common::duration currentAge{0.f};
             common::duration maxAge{1.f};

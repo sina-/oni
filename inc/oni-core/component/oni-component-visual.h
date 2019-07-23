@@ -22,6 +22,9 @@ namespace oni {
             std::string path{};
         };
 
+        // TODO: This seems to be just a way to get around the fact that server can not set values on Complementary
+        // components, so imagine that was possible, then this would be part of Texture component as it is pretty
+        // much useless on its own.
         enum class TextureTag : common::u32 {
             UNKNOWN,
 
@@ -247,7 +250,7 @@ namespace oni {
                 return color;
             }
 
-            common::u32 value{0};
+            common::u32 value{255u};
         };
 
         enum class BrushType : common::u8 {
@@ -258,6 +261,10 @@ namespace oni {
             TEXTURE_TAG,
 
             LAST
+        };
+
+        struct FadeWithAge {
+            common::r32 factor{1.f};
         };
 
         struct SmokeEmitterCD {

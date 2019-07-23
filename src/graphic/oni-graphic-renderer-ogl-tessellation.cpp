@@ -137,7 +137,6 @@ namespace oni {
             auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
             auto samplerID = -1;
-            auto color = component::Color{};
             auto uv0 = math::vec2{};
             auto uv1 = math::vec2{};
             auto uv2 = math::vec2{};
@@ -149,15 +148,13 @@ namespace oni {
                 uv1 = renderable.texture->uv[1];
                 uv2 = renderable.texture->uv[2];
                 uv3 = renderable.texture->uv[3];
-            } else {
-                color = *renderable.color;
             }
 
             buffer->position = renderable.pos->value;
             buffer->heading = renderable.heading->value;
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
-            buffer->color = color.rgba();
+            buffer->color = renderable.color->rgba();
             buffer->uv[0] = uv0;
             buffer->uv[1] = uv1;
             buffer->uv[2] = uv2;

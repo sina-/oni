@@ -69,6 +69,10 @@ namespace oni {
                       common::r64 tickTime);
 
             static void
+            updateFadeWithAge(entities::EntityManager &,
+                              common::r64 tickTime);
+
+            static void
             updateCooldDowns(entities::EntityManager &,
                              common::r64 tickTime);
 

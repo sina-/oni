@@ -437,6 +437,30 @@ namespace oni {
         }
 
         void
+        Dynamics::updateFadeWithAge(entities::EntityManager &manager,
+                                    common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::CLIENT ||
+                   manager.getSimMode() == entities::SimMode::SERVER);
+
+            auto view = manager.createView<
+                    component::Age,
+                    component::Color,
+                    component::FadeWithAge>();
+            for (auto &&id: view) {
+                auto &age = view.get<component::Age>(id);
+                auto &color = view.get<component::Color>(id);
+                auto &fade = view.get<component::FadeWithAge>(id);
+
+                auto targetAlpha = 1 - age.currentAge / age.maxAge;
+                auto currentAlpha = color.a_r32();
+                color.set_a(math::lerp(currentAlpha, targetAlpha, fade.factor));
+                if (!math::almost_Equal(color.a_r32(), currentAlpha)) {
+                    manager.markForNetSync(id);
+                }
+            }
+        }
+
+        void
         Dynamics::updateCooldDowns(entities::EntityManager &manager,
                                    common::r64 tickTime) {
             assert(manager.getSimMode() == entities::SimMode::SERVER);

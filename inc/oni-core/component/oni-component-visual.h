@@ -62,11 +62,6 @@ namespace oni {
                                          math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
         };
 
-        struct CanvasTexture {
-            component::Texture canvasFront;
-            component::Texture canvasBack;
-        };
-
         struct Text {
             common::EntityID entityID{0};
             common::r32 xScaling{1.f};

@@ -39,7 +39,7 @@ namespace oni {
             auto samplerBackIndex = glGetAttribLocation(program, "samplerBack");
 
             if (positionIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
-                samplerFrontIndex == -1) {
+                samplerFrontIndex == -1 || samplerBackIndex == -1) {
                 assert(false);
             }
 
@@ -60,14 +60,6 @@ namespace oni {
             samplerBack.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex,
                                                                                       samplerBack));
 
-            graphic::BufferStructure position;
-            position.index = static_cast<common::oniGLuint>(positionIndex);
-            position.componentCount = 3;
-            position.componentType = GL_FLOAT;
-            position.normalized = GL_FALSE;
-            position.stride = vertexSize;
-            position.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, pos));
-
             graphic::BufferStructure color;
             color.index = static_cast<common::oniGLuint>(colorIndex);
             color.componentCount = 4;
@@ -84,11 +76,20 @@ namespace oni {
             uv.stride = vertexSize;
             uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, uv));
 
+            graphic::BufferStructure position;
+            position.index = static_cast<common::oniGLuint>(positionIndex);
+            position.componentCount = 3;
+            position.componentType = GL_FLOAT;
+            position.normalized = GL_FALSE;
+            position.stride = vertexSize;
+            position.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::QuadVertex, pos));
+
             std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(samplerFront);
-            bufferStructures.push_back(position);
+            bufferStructures.push_back(samplerBack);
             bufferStructures.push_back(color);
             bufferStructures.push_back(uv);
+            bufferStructures.push_back(position);
 
             mVertexArray = std::make_unique<VertexArray>(bufferStructures, maxBufferSize);
 
@@ -116,8 +117,8 @@ namespace oni {
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
-            common::i32 samplerFront = -1;
-            common::i32 samplerBack = -1;
+            auto samplerFront = -1.f;
+            auto samplerBack = -1.f;
             auto uv0 = math::vec2{};
             auto uv1 = math::vec2{};
             auto uv2 = math::vec2{};

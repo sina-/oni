@@ -899,7 +899,7 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::CanvasTexture>(id);
+            createComponent<component::Texture>(id);
             createComponent<component::Color>(id);
 
             assignTag<component::Tag_Static>(id);

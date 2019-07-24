@@ -449,15 +449,25 @@ namespace oni {
 
         void
         Dynamics::updateResting(entities::EntityManager &manager) {
+            assert(manager.getSimMode() == entities::SimMode::CLIENT);
+
             auto view = manager.createView<
                     component::PhysicalProperties,
+                    component::Scale,
+                    component::TextureTag,
+                    component::WorldP3D,
                     component::Tag_SplatOnRest>();
             for (auto &&id: view) {
                 auto *body = manager.getEntityBody(id);
                 if (!body->IsAwake()) {
-                    // TODO: Trigger event
+                    auto &pos = manager.get<component::WorldP3D>(id);
+                    auto &size = manager.get<component::Scale>(id);
+                    auto &tag = manager.get<component::TextureTag>(id);
+                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, tag);
+                    manager.markForDeletion(id);
                 }
             }
+            manager.flushDeletions();
         }
 
         void
@@ -485,8 +495,8 @@ namespace oni {
         }
 
         void
-        Dynamics::updateCooldDowns(entities::EntityManager &manager,
-                                   common::r64 tickTime) {
+        Dynamics::updateCoolDowns(entities::EntityManager &manager,
+                                  common::r64 tickTime) {
             assert(manager.getSimMode() == entities::SimMode::SERVER);
 
             /// Update cool-downs

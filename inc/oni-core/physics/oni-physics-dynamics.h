@@ -76,8 +76,8 @@ namespace oni {
                               common::r64 tickTime);
 
             static void
-            updateCooldDowns(entities::EntityManager &,
-                             common::r64 tickTime);
+            updateCoolDowns(entities::EntityManager &manager,
+                            common::r64 tickTime);
 
         public:
             // TODO: Not very happy about this exposure, but it is really the simplest solution right now and only

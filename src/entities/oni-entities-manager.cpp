@@ -782,7 +782,7 @@ namespace oni {
             props.friction = 1.f;
             props.density = 0.1f;
             props.angularDamping = 2.f;
-            props.linearDamping = (scale.x + scale.y) / 2;
+            props.linearDamping = 2 + (scale.x + scale.y) / 2;
             props.highPrecision = false;
             props.disableCollision = true;
             props.bodyType = component::BodyType::DYNAMIC;
@@ -796,7 +796,7 @@ namespace oni {
             }
 
             assignTag<component::Tag_TextureShaded>(id);
-            assignTag<component::Tag_SplatOnDeath>(id);
+            assignTag<component::Tag_SplatOnRest>(id);
             assignTag<component::Tag_Dynamic>(id);
 
             return id;

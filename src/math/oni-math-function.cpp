@@ -15,7 +15,7 @@ namespace oni {
         }
 
         math::vec2
-        math::headingVector(common::r32 heading) {
+        headingVector(common::r32 heading) {
             return vec2{std::cos(heading), std::sin(heading)};
         }
 

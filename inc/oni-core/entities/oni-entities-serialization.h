@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assert.h>
 #include <sstream>
 
 #include <cereal/archives/portable_binary.hpp>

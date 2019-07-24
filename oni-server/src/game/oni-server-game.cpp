@@ -152,7 +152,7 @@ namespace oni {
                     mDynamics->syncPosWithPhysWorld(*mEntityManager);
                     mDynamics->updateAge(*mEntityManager, tickTime);
                     mDynamics->updateFadeWithAge(*mEntityManager, tickTime);
-                    mDynamics->updateCooldDowns(*mEntityManager, tickTime);
+                    mDynamics->updateCoolDowns(*mEntityManager, tickTime);
                     // TODO: use input
                     mProjectile->spawnProjectiles(*mEntityManager, mClientDataManager.get(), tickTime);
                 }

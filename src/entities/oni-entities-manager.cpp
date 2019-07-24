@@ -435,6 +435,15 @@ namespace oni {
             age.maxAge = mRand->next_r32(lower, upper);
         }
 
+        void
+        EntityManager::setRandVelocity(common::EntityID id,
+                                       common::u32 lower,
+                                       common::u32 upper) {
+            auto &velocity = mRegistry->get<component::Velocity>(id);
+            velocity.current = mRand->next(lower, upper);
+            velocity.max = velocity.current;
+        }
+
         common::r32
         EntityManager::setRandHeading(common::EntityID id) {
             return setRandHeading(id, 0.f, common::FULL_CIRCLE_IN_RAD);
@@ -534,6 +543,7 @@ namespace oni {
             createComponent<component::Color>(id);
             createComponent<component::Age>(id);
             createComponent<component::FadeWithAge>(id);
+            createComponent<component::Velocity>(id);
             // TODO: needs physics
 
             if (mSimMode == entities::SimMode::SERVER) {
@@ -753,6 +763,7 @@ namespace oni {
             createComponent<component::Color>(id);
             createComponent<component::Age>(id);
             createComponent<component::FadeWithAge>(id);
+            createComponent<component::Velocity>(id);
 
             if (mSimMode == entities::SimMode::SERVER) {
                 auto &cc = createComponent<component::ComplementaryComponents>(id);

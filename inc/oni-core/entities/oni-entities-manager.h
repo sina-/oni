@@ -123,6 +123,11 @@ namespace oni {
                        common::r32 lower,
                        common::r32 upper);
 
+            void
+            setRandVelocity(common::EntityID id,
+                            common::u32 lower,
+                            common::u32 upper);
+
             common::r32
             setRandHeading(common::EntityID);
 

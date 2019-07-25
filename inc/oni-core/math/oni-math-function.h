@@ -13,6 +13,8 @@ namespace oni {
         struct AABB;
         struct Quad;
         struct Heading;
+        union WorldP3D;
+        union Scale;
     }
     namespace math {
         struct vec2;
@@ -240,5 +242,11 @@ namespace oni {
 
         math::vec2
         headingVector(const component::Heading&);
+
+        void
+        translate(component::Quad&, const component::WorldP3D&);
+
+        void
+        scale(component::Quad&, const component::Scale&);
     }
 }

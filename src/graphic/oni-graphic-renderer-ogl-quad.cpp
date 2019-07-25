@@ -259,6 +259,7 @@ namespace oni {
                                            const math::vec2 &screenSize,
                                            common::r32 zoom) {
             mShader->enable();
+            mShader->setUniformMat4("model", model);
             mShader->setUniformMat4("view", view);
             mShader->setUniformMat4("proj", proj);
         }

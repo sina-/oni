@@ -149,10 +149,10 @@ namespace oni {
              *      |/  |
              *    a +---+ d
              **/
-            component::WorldP3D a{-1, -1, +1};
-            component::WorldP3D b{-1, +1, +1};
-            component::WorldP3D c{+1, +1, +1};
-            component::WorldP3D d{+1, -1, +1};
+            component::WorldP3D a{-0.5f, -0.5f, +1};
+            component::WorldP3D b{-0.5f, +0.5f, +1};
+            component::WorldP3D c{+0.5f, +0.5f, +1};
+            component::WorldP3D d{+0.5f, -0.5f, +1};
 
             static inline Quad
             make(const component::WorldP3D &pos,
@@ -163,6 +163,40 @@ namespace oni {
                         {pos.x - halfSizeX, pos.y + halfSizeY, pos.z},
                         {pos.x + halfSizeX, pos.y + halfSizeY, pos.z},
                         {pos.x + halfSizeX, pos.y - halfSizeY, pos.z}};
+            }
+
+            static inline Quad
+            make(const component::WorldP3D &pos,
+                 const component::Heading &heading,
+                 const component::Scale &scale) {
+                // NOTE: Very slow obviously, so use sparingly, ideally only for debugging
+
+                auto translationMat = math::mat4::translation(pos.value);
+                auto rotationMat = math::mat4::rotation(heading.value, math::vec3{0.0f, 0.0f, 1.0f});
+                auto scaleMat = math::mat4::scale(scale.value);
+                auto trans = translationMat * rotationMat * scaleMat;
+
+                auto halfSizeX = 0.5f;
+                auto halfSizeY = 0.5f;
+                auto quad = component::Quad{
+                        {-halfSizeX, -halfSizeY, pos.z},
+                        {-halfSizeX, +halfSizeY, pos.z},
+                        {+halfSizeX, +halfSizeY, pos.z},
+                        {+halfSizeX, -halfSizeY, pos.z},
+                };
+                quad.a.value = trans * quad.a.value;
+                quad.b.value = trans * quad.b.value;
+                quad.c.value = trans * quad.c.value;
+                quad.d.value = trans * quad.d.value;
+                return quad;
+            }
+
+            void
+            setZ(common::r32 z) {
+                a.z = z;
+                b.z = z;
+                c.z = z;
+                d.z = z;
             }
         };
 

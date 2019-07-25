@@ -1,6 +1,5 @@
 #include <oni-core/math/oni-math-transformation.h>
 
-#include <oni-core/entities/oni-entities-manager.h>
 
 namespace oni {
     namespace math {

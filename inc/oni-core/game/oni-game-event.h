@@ -39,10 +39,12 @@ namespace oni {
 
             Event_SplatOnRest(const component::WorldP3D &pos,
                               const component::Scale &scale,
-                              const component::TextureTag &tag) : pos(pos), scale(scale), tag(tag) {}
+                              const component::Heading &heading,
+                              const component::TextureTag &tag) : pos(pos), scale(scale), tag(tag), heading(heading) {}
 
             component::WorldP3D pos{};
             component::Scale scale{};
+            component::Heading heading{};
             component::TextureTag tag{};
         };
 

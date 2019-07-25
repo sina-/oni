@@ -456,14 +456,17 @@ namespace oni {
                     component::Scale,
                     component::TextureTag,
                     component::WorldP3D,
+                    component::Heading,
                     component::Tag_SplatOnRest>();
             for (auto &&id: view) {
                 auto *body = manager.getEntityBody(id);
                 if (!body->IsAwake()) {
-                    auto &pos = manager.get<component::WorldP3D>(id);
-                    auto &size = manager.get<component::Scale>(id);
-                    auto &tag = manager.get<component::TextureTag>(id);
-                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, tag);
+                    auto &pos = view.get<component::WorldP3D>(id);
+                    auto &size = view.get<component::Scale>(id);
+                    auto &tag = view.get<component::TextureTag>(id);
+                    auto &heading = view.get<component::Heading>(id);
+
+                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, heading, tag);
                     manager.markForDeletion(id);
                 }
             }

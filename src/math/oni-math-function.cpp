@@ -23,5 +23,33 @@ namespace oni {
         headingVector(const component::Heading &heading) {
             return headingVector(heading.value);
         }
+
+        void
+        translate(component::Quad &quad,
+                  const component::WorldP3D &pos) {
+            quad.a.x += pos.x;
+            quad.b.x += pos.x;
+            quad.c.x += pos.x;
+            quad.d.x += pos.x;
+
+            quad.a.y += pos.y;
+            quad.b.y += pos.y;
+            quad.c.y += pos.y;
+            quad.d.y += pos.y;
+        }
+
+        void
+        scale(component::Quad &quad,
+              const component::Scale &scale) {
+            quad.a.x *= scale.x;
+            quad.b.x *= scale.x;
+            quad.c.x *= scale.x;
+            quad.d.x *= scale.x;
+
+            quad.a.y *= scale.y;
+            quad.b.y *= scale.y;
+            quad.c.y *= scale.y;
+            quad.d.y *= scale.y;
+        }
     }
 }

@@ -18,7 +18,8 @@ namespace oni {
                 component::Color *color;
                 component::TextureTag tag;
             };
-            component::Quad *shape_Quad;
+            component::Quad *shape_Quad{};
+            math::mat4 *model{}; // NOTE: Optional model transformation matrix if the quad is untransformed
         };
     }
 }

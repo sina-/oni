@@ -123,13 +123,18 @@ namespace oni {
         void
         SceneManager::begin(Renderer &renderer2D,
                             const ScreenBounds &screenBounds,
-                            component::Texture *renderTarget) {
-            auto modelM = math::mat4::identity();
-            auto viewM = math::mat4::identity();
+                            component::Texture *renderTarget,
+                            const math::mat4 *m) {
+            auto identity = math::mat4::identity();
             auto projM = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax,
                                                   screenBounds.yMin, screenBounds.yMax,
                                                   -1.0f, 1.0f);
-            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, renderTarget);
+            auto model = identity;
+            if (m) {
+                model = *m;
+            }
+            mRendererQuad->begin(model, identity, projM, {getViewWidth(), getViewHeight()}, mCamera.z,
+                                 renderTarget);
         }
 
         void
@@ -424,8 +429,9 @@ namespace oni {
         SceneManager::renderToTexture(const component::Quad &quad,
                                       const component::Color &src,
                                       const graphic::ScreenBounds &destBounds,
-                                      component::Texture &dest) {
-            begin(*mRendererQuad, destBounds, &dest);
+                                      component::Texture &dest,
+                                      math::mat4 *model) {
+            begin(*mRendererQuad, destBounds, &dest, model);
             mRendererQuad->submit(quad, src, nullptr);
             end(*mRendererQuad);
         }
@@ -434,8 +440,9 @@ namespace oni {
         SceneManager::renderToTexture(const component::Quad &quad,
                                       const component::Texture &src,
                                       const graphic::ScreenBounds &destBounds,
-                                      component::Texture &dest) {
-            begin(*mRendererQuad, destBounds, &dest);
+                                      component::Texture &dest,
+                                      math::mat4 *model) {
+            begin(*mRendererQuad, destBounds, &dest, model);
             mRendererQuad->submit(quad, {}, &src);
             end(*mRendererQuad);
         }
@@ -487,16 +494,16 @@ namespace oni {
                 auto &texture = mSceneEntityManager->get<component::Texture>(canvasEntity);
                 switch (brush.type) {
                     case component::BrushType::COLOR: {
-                        renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, texture);
+                        renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, texture, brush.model);
                         break;
                     }
                     case component::BrushType::TEXTURE: {
-                        renderToTexture(*brush.shape_Quad, *brush.texture, screenBounds, texture);
+                        renderToTexture(*brush.shape_Quad, *brush.texture, screenBounds, texture, brush.model);
                         break;
                     }
                     case component::BrushType::TEXTURE_TAG: {
                         auto &brushTexture = mTextureManager->loadOrGetTexture(brush.tag, false);
-                        renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, texture);
+                        renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, texture, brush.model);
                         break;
                     }
                     case component::BrushType::UNKNOWN:

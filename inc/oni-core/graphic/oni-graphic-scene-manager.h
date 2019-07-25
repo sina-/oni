@@ -94,13 +94,15 @@ namespace oni {
             renderToTexture(const component::Quad &quad,
                             const component::Texture &src,
                             const graphic::ScreenBounds &destBounds,
-                            component::Texture &dest);
+                            component::Texture &dest,
+                            math::mat4 *model);
 
             void
             renderToTexture(const component::Quad &quad,
                             const component::Color &src,
                             const graphic::ScreenBounds &destBounds,
-                            component::Texture &dest);
+                            component::Texture &dest,
+                            math::mat4 *model);
 
             void
             lookAt(common::r32 x,
@@ -211,7 +213,8 @@ namespace oni {
             void
             begin(Renderer &renderer2D,
                   const ScreenBounds &screenBounds,
-                  component::Texture *renderTarget);
+                  component::Texture *renderTarget,
+                  const math::mat4 *model);
 
             static void
             end(Renderer &renderer2D);

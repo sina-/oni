@@ -8,6 +8,10 @@ namespace oni {
         class EntityManager;
     }
 
+    namespace component {
+        struct Rectangle;
+    }
+
     namespace math {
         struct vec2;
         struct vec3;

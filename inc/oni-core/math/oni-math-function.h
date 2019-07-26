@@ -247,6 +247,9 @@ namespace oni {
         translate(component::Quad&, const component::WorldP3D&);
 
         void
+        translate(component::WorldP3D&, const component::WorldP3D&);
+
+        void
         scale(component::Quad&, const component::Scale&);
     }
 }

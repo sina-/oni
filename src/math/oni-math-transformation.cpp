@@ -59,6 +59,15 @@ namespace oni {
 
         math::mat4
         createTransformation(const component::WorldP3D &position,
+                             const component::Heading &rotation) {
+            auto translationMat = math::mat4::translation(position.value);
+            auto rotationMat = math::mat4::rotation(rotation.value, math::vec3{0.0f, 0.0f, 1.0f});
+            auto transformation = translationMat * rotationMat;
+            return transformation;
+        }
+
+        math::mat4
+        createTransformation(const component::WorldP3D &position,
                              const component::Heading &rotation,
                              const component::Scale &scale) {
             auto translationMat = math::mat4::translation(position.value);

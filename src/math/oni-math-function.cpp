@@ -39,6 +39,13 @@ namespace oni {
         }
 
         void
+        translate(component::WorldP3D &pos,
+                  const component::WorldP3D &parent) {
+            pos.x += parent.x;
+            pos.y += parent.y;
+        }
+
+        void
         scale(component::Quad &quad,
               const component::Scale &scale) {
             quad.a.x *= scale.x;

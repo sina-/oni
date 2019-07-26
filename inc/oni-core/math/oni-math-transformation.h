@@ -26,6 +26,10 @@ namespace oni {
 
         math::mat4
         createTransformation(const component::WorldP3D &position,
+                             const component::Heading &rotation);
+
+        math::mat4
+        createTransformation(const component::WorldP3D &position,
                              const component::Heading &rotation,
                              const component::Scale &scale);
 

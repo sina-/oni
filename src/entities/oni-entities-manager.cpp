@@ -585,7 +585,6 @@ namespace oni {
             cc.types.emplace_back(component::ComponentType::SMOKE_EMITTER_CD);
             cc.types.emplace_back(component::ComponentType::SOUND_PITCH);
             cc.types.emplace_back(component::ComponentType::TEXTURE);
-            cc.types.emplace_back(component::ComponentType::BRUSH_TRAIL);
 
             assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Dynamic>(id);
@@ -742,6 +741,7 @@ namespace oni {
 
             auto &cc = createComponent<component::ComplementaryComponents>(id);
             cc.types.emplace_back(component::ComponentType::TEXTURE);
+            cc.types.emplace_back(component::ComponentType::BRUSH_TRAIL);
 
             assignTag<component::Tag_Dynamic>(id);
             assignTag<component::Tag_TextureShaded>(id);

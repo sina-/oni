@@ -170,11 +170,14 @@ namespace oni {
             markForDeletion(common::EntityID);
 
             void
-            markForDeletion(common::EntityID id,
-                            const entities::EntityOperationPolicy &policy);
+            flushDeletions();
 
             void
-            flushDeletions();
+            deleteEntity(common::EntityID);
+
+            void
+            deleteEntity(common::EntityID,
+                         const entities::EntityOperationPolicy &);
 
             void
             accommodateWithComplements();
@@ -186,8 +189,11 @@ namespace oni {
                    entities::EntityType childType);
 
         public:
-            size_t
-            size() noexcept;
+            common::size
+            size();
+
+            common::size
+            alive();
 
             template<class... ViewComponents>
             EntityView<common::EntityID, ViewComponents...>
@@ -413,13 +419,6 @@ namespace oni {
             }
 
             void
-            removeEntity(common::EntityID);
-
-            void
-            removeEntity(common::EntityID,
-                         const entities::EntityOperationPolicy &);
-
-            void
             removePhysicalBody(common::EntityID);
 
             common::EntityID
@@ -465,7 +464,6 @@ namespace oni {
             entities::EntityOperationPolicy mEntityOperationPolicy{};
 
             std::vector<common::EntityID> mEntitiesToDelete{};
-            std::vector<entities::EntityOperationPolicy> mEntitiesToDeletePolicy{};
             std::vector<entities::DeletedEntity> mDeletedEntities{};
         };
     }

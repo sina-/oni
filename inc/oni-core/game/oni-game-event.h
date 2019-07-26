@@ -40,14 +40,16 @@ namespace oni {
             Event_SplatOnRest(const component::WorldP3D &pos,
                               const component::Scale &scale,
                               const component::Heading &heading,
-                              const component::TextureTag &tag) : pos(pos), scale(scale), tag(tag), heading(heading) {}
+                              const component::TextureTag &tag,
+                              std::function<void()> func
+            ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
 
             component::WorldP3D pos{};
             component::Scale scale{};
             component::Heading heading{};
             component::TextureTag tag{};
+            std::function<void()> callback{};
         };
-
 
         struct Event_RocketLaunch {
             Event_RocketLaunch() = default;

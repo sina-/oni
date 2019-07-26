@@ -82,7 +82,7 @@ namespace oni {
             clientServer() {
                 auto policy = EntityOperationPolicy{};
                 policy.track = false;
-                policy.safe = false;
+                policy.safe = true;
                 return policy;
             }
         };

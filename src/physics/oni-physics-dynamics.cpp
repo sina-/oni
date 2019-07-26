@@ -466,11 +466,14 @@ namespace oni {
                     auto &tag = view.get<component::TextureTag>(id);
                     auto &heading = view.get<component::Heading>(id);
 
-                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, heading, tag);
-                    manager.markForDeletion(id);
+                    auto callback = [&manager, id]() {
+                        manager.deleteEntity(id);
+                    };
+                    // TODO: This will create copy for all. Good place for profiling and optimization as these entities
+                    // are often particles
+                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, heading, tag, callback);
                 }
             }
-            manager.flushDeletions();
         }
 
         void

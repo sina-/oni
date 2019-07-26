@@ -108,8 +108,14 @@ namespace oni {
         }
 
         size_t
-        EntityManager::size() noexcept {
+        EntityManager::size() {
             auto result = mRegistry->size();
+            return result;
+        }
+
+        common::size
+        EntityManager::alive() {
+            auto result = mRegistry->alive();
             return result;
         }
 
@@ -166,24 +172,15 @@ namespace oni {
         void
         EntityManager::markForDeletion(common::EntityID id) {
             mEntitiesToDelete.push_back(id);
-            mEntitiesToDeletePolicy.push_back(mEntityOperationPolicy);
-        }
-
-        void
-        EntityManager::markForDeletion(common::EntityID id,
-                                       const entities::EntityOperationPolicy &policy) {
-            mEntitiesToDelete.push_back(id);
-            mEntitiesToDeletePolicy.push_back(policy);
         }
 
         void
         EntityManager::flushDeletions() {
-            for (common::size i = 0; i < mEntitiesToDelete.size(); ++i) {
-                removeEntity(mEntitiesToDelete[i], mEntitiesToDeletePolicy[i]);
+            for (auto &&i : mEntitiesToDelete) {
+                deleteEntity(i);
             }
 
             mEntitiesToDelete.clear();
-            mEntitiesToDeletePolicy.clear();
         }
 
         common::EntityID
@@ -199,13 +196,12 @@ namespace oni {
         }
 
         void
-        EntityManager::removeEntity(common::EntityID id) {
-            assert(mSimMode == entities::SimMode::SERVER || mSimMode == entities::SimMode::CLIENT);
-            removeEntity(id, mEntityOperationPolicy);
+        EntityManager::deleteEntity(common::EntityID id) {
+            deleteEntity(id, mEntityOperationPolicy);
         }
 
         void
-        EntityManager::removeEntity(common::EntityID id,
+        EntityManager::deleteEntity(common::EntityID id,
                                     const entities::EntityOperationPolicy &policy) {
             if (policy.safe && !valid(id)) {
                 return;
@@ -213,7 +209,7 @@ namespace oni {
 
             if (mRegistry->has<component::EntityAttachment>(id)) {
                 for (auto &&childID: mRegistry->get<component::EntityAttachment>(id).entities) {
-                    removeEntity(childID, policy);
+                    deleteEntity(childID, policy);
                 }
             }
 

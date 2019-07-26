@@ -1,7 +1,7 @@
 #include <oni-core/graphic/oni-graphic-shader.h>
 
 #include <GL/glew.h>
-#include <assert.h>
+#include <cassert>
 
 namespace oni {
     namespace graphic {

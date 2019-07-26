@@ -2,8 +2,6 @@
 
 #include <enet/enet.h>
 
-#include <cstring>
-
 namespace oni {
     namespace network {
         Peer::Peer() = default;

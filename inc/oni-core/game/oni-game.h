@@ -1,7 +1,5 @@
 #pragma once
 
-#include <atomic>
-
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/util/oni-util-timer.h>
 

@@ -1,7 +1,7 @@
 #include <oni-core/entities/oni-entities-client-data-manager.h>
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 namespace oni {

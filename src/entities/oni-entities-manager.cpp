@@ -769,6 +769,7 @@ namespace oni {
             }
 
             assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_ShinnyEffect>(id);
             return id;
         }
 

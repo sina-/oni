@@ -1,7 +1,6 @@
 #include <oni-core/game/oni-game.h>
 
 #include <thread>
-#include <iostream>
 
 #include <oni-core/util/oni-util-timer.h>
 #include <oni-core/common/oni-common-const.h>

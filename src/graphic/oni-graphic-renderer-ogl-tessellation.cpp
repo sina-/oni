@@ -1,6 +1,5 @@
 #include <oni-core/graphic/oni-graphic-renderer-ogl-tessellation.h>
 
-#include <numeric>
 #include <cassert>
 
 #include <GL/glew.h>

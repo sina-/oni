@@ -19,10 +19,13 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
+        struct Tag_ShinnyEffect {
+        };
+
         struct Tag_SplatOnDeath {
         };
 
-        struct Tag_SplatOnRest{
+        struct Tag_SplatOnRest {
         };
 
         /// Network

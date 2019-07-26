@@ -9,9 +9,7 @@
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/math/oni-math-rand.h>
-#include <oni-core/graphic/oni-graphic-window.h>
 #include <oni-core/physics/oni-physics-car.h>
-#include <oni-core/math/oni-math-transformation.h>
 #include <oni-core/game/oni-game-event.h>
 #include <oni-core/component/oni-component-gameplay.h>
 

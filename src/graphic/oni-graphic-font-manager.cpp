@@ -6,7 +6,6 @@
 #include <ftgl/freetype-gl.h>
 
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
-#include <oni-core/component/oni-component-tag.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/entities/oni-entities-manager.h>
 

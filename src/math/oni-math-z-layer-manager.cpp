@@ -1,6 +1,6 @@
 #include <oni-core/math/oni-math-z-layer-manager.h>
 
-#include <assert.h>
+#include <cassert>
 
 namespace oni {
     namespace math {

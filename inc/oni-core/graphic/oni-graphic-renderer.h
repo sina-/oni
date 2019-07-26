@@ -1,7 +1,6 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/math/oni-math-mat4.h>
 
 namespace oni {
     namespace entities {
@@ -18,8 +17,6 @@ namespace oni {
 
         class Texture;
 
-        struct CanvasTexture;
-
         struct Quad;
 
         class Text;
@@ -31,6 +28,7 @@ namespace oni {
 
     namespace math {
         class mat4;
+        class vec2;
     }
 
     namespace graphic {

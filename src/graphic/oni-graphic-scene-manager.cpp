@@ -2,11 +2,8 @@
 
 #include <set>
 
-#include <GL/glew.h>
-
 #include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/graphic/oni-graphic-brush.h>
@@ -20,7 +17,8 @@
 #include <oni-core/math/oni-math-intersects.h>
 #include <oni-core/math/oni-math-rand.h>
 #include <oni-core/math/oni-math-z-layer-manager.h>
-#include <oni-core/physics/oni-physics-dynamics.h>
+#include <oni-core/math/oni-math-mat4.h>
+#include <oni-core/math/oni-math-vec2.h>
 
 #define DEBUG_Z 0
 
@@ -170,7 +168,8 @@ namespace oni {
             // TODO: The following code includes everything, even the particles will be sorted, which might be
             // over-kill, I could think about separating particles from the rest and always rendering them at the
             // end on top of everything and accepting the fact that I won't be able to occlude particles with
-            // other solid objects.
+            // other solid objects. Although... I could occlude them, if I keep the z-buffer around and do z test but
+            // don't write to z-buffer when rendering particles...
             {
                 auto view = manager.createView<
                         component::WorldP3D,
@@ -204,32 +203,59 @@ namespace oni {
                     mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr);
                 }
             }
+            {
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Texture,
+                        component::Color,
+                        component::Tag_ShinnyEffect>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &texture = view.get<component::Texture>(id);
+                    const auto &color = view.get<component::Color>(id);
+
+                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture);
+                }
+            }
         }
 
         void
         SceneManager::render() {
-            submit(*mSceneEntityManager);
-
-            begin(*mRendererTessellation, true, true, true);
-            while (!mRenderables.empty()) {
-                auto &r = const_cast<graphic::Renderable &> (mRenderables.top());
-                auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
-
-                if (!isVisible(ePos.pos, *r.scale)) {
-                    mRenderables.pop();
-                    continue;
-                }
-
-                r.pos = &ePos.pos;
-                r.heading = &ePos.heading;
-
-                mRendererTessellation->submit(r);
-
-                mRenderables.pop();
-
-                ++mRenderedSpritesPerFrame;
+            /// Queue internal entities
+            {
+                submit(*mSceneEntityManager);
             }
-            end(*mRendererTessellation);
+            /// Render everything but shinnies
+            {
+                begin(*mRendererTessellation, true, true, true);
+                while (!mRenderables.empty()) {
+                    auto &r = const_cast<graphic::Renderable &> (mRenderables.top());
+                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
+
+                    if (!isVisible(ePos.pos, *r.scale)) {
+                        mRenderables.pop();
+                        continue;
+                    }
+
+                    r.pos = &ePos.pos;
+                    r.heading = &ePos.heading;
+
+                    mRendererTessellation->submit(r);
+
+                    mRenderables.pop();
+
+                    ++mRenderedSpritesPerFrame;
+                }
+                end(*mRendererTessellation);
+            }
+            /// Render shinnies
+            {
+
+            }
         }
 
         void

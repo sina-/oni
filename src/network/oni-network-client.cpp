@@ -1,7 +1,5 @@
 #include <oni-core/network/oni-network-client.h>
 
-#include <chrono>
-
 #include <enet/enet.h>
 
 #include <oni-core/io/oni-io-output.h>

@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include <oni-core/io/oni-io-output.h>
 #include <oni-core/common/oni-common-typedef.h>
 
 namespace oni {

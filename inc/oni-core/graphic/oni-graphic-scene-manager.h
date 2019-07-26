@@ -273,7 +273,8 @@ namespace oni {
 
             math::ZLayerManager &mZLayerManager;
 
-            std::priority_queue<Renderable, std::vector<Renderable>> mRenderables{};
+            std::priority_queue<Renderable> mRenderables{};
+            std::priority_queue<Renderable> mShinnyRenderables{};
         };
     }
 }

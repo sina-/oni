@@ -1,7 +1,5 @@
 #include <oni-core/entities/oni-entities-serialization.h>
 
-#include <sstream>
-
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/deque.hpp>

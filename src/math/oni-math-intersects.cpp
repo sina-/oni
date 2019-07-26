@@ -1,7 +1,5 @@
 #include <oni-core/math/oni-math-intersects.h>
 
-#include <oni-core/common/oni-common-typedefs-graphic.h>
-
 namespace oni {
     namespace math {
         bool

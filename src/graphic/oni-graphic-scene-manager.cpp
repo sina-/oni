@@ -76,7 +76,14 @@ namespace oni {
 
         void
         SceneManager::beginColorRendering() {
-            begin(*mRendererTessellation, true, false, true);
+            RenderSpec spec;
+            spec.src = BlendMode::ONE;
+            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.renderTarget = nullptr;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            setMVP(spec, true, false, true);
+            begin(*mRendererTessellation, spec);
         }
 
         void
@@ -85,55 +92,55 @@ namespace oni {
         }
 
         void
-        SceneManager::begin(Renderer &renderer2D,
-                            bool translate,
-                            bool scale,
-                            bool project,
-                            component::Texture *renderTarget) {
-            auto model = math::mat4::identity();
-            auto view = math::mat4::identity();
-            auto proj = math::mat4::identity();
+        SceneManager::setMVP(RenderSpec &spec,
+                             bool translate,
+                             bool scale,
+                             bool project) {
+            spec.view = math::mat4::identity();
+            if (project) {
+                spec.proj = mProjectionMatrix;
+            }
             if (scale) {
-                view = view * math::mat4::scale({mCamera.z, mCamera.z, 1.0f});
+                spec.view *= math::mat4::scale({mCamera.z, mCamera.z, 1.0f});
             }
             if (translate) {
-                view = view * math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
+                spec.view *= math::mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
             }
-            if (project) {
-                proj = mProjectionMatrix;
-            }
-            renderer2D.begin(model, view, proj, {getViewWidth(), getViewHeight()}, mCamera.z, renderTarget);
         }
 
         void
-        SceneManager::begin(Renderer &renderer2D,
-                            bool translate,
-                            bool scale,
-                            bool project) {
-            begin(renderer2D, translate, scale, project, nullptr);
-        }
-
-        void
-        SceneManager::begin(Renderer &renderer2D,
-                            component::Texture *renderTarget) {
-            begin(renderer2D, false, false, false, renderTarget);
-        }
-
-        void
-        SceneManager::begin(Renderer &renderer2D,
-                            const ScreenBounds &screenBounds,
-                            component::Texture *renderTarget,
-                            const math::mat4 *m) {
-            auto identity = math::mat4::identity();
-            auto projM = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax,
-                                                  screenBounds.yMin, screenBounds.yMax,
-                                                  -1.0f, 1.0f);
-            auto model = identity;
-            if (m) {
-                model = *m;
+        SceneManager::setMVP(RenderSpec &spec,
+                             const ScreenBounds &destBounds,
+                             const math::mat4 *model) {
+            spec.proj = math::mat4::orthographic(destBounds.xMin, destBounds.xMax,
+                                                 destBounds.yMin, destBounds.yMax,
+                                                 -1.0f, 1.0f);
+            spec.view = math::mat4::identity();
+            spec.model = math::mat4::identity();
+            if (model) {
+                spec.model = *model;
             }
-            mRendererQuad->begin(model, identity, projM, {getViewWidth(), getViewHeight()}, mCamera.z,
-                                 renderTarget);
+        }
+
+        math::vec2
+        SceneManager::getScreenSize() {
+            return {getViewWidth(), getViewHeight()};
+        }
+
+        math::mat4
+        SceneManager::getCameraScale() {
+            return math::mat4::scale(mCamera.z, mCamera.z, 1.f);
+        }
+
+        math::mat4
+        SceneManager::getCameraTranslation() {
+            return math::mat4::translation(-mCamera.x, -mCamera.y, 0.f);
+        }
+
+        void
+        SceneManager::begin(Renderer &renderer,
+                            const RenderSpec &spec) {
+            renderer.begin(spec);
         }
 
         void
@@ -232,7 +239,15 @@ namespace oni {
             }
             /// Render everything but shinnies
             {
-                begin(*mRendererTessellation, true, true, true);
+                RenderSpec spec;
+                spec.src = BlendMode::ONE;
+                spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+                spec.renderTarget = nullptr;
+                spec.screenSize = getScreenSize();
+                spec.zoom = mCamera.z;
+                setMVP(spec, true, true, true);
+
+                begin(*mRendererTessellation, spec);
                 while (!mRenderables.empty()) {
                     auto &r = const_cast<graphic::Renderable &> (mRenderables.top());
                     auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
@@ -255,9 +270,15 @@ namespace oni {
             }
             /// Render shinnies
             {
-                // TODO: Define this as part of specification for renderer.begin() call
-                glBlendFunc(GL_ONE, GL_ONE);
-                begin(*mRendererTessellation, true, true, true);
+                RenderSpec spec;
+                spec.src = BlendMode::ONE;
+                spec.dest = BlendMode::ONE;
+                spec.renderTarget = nullptr;
+                spec.screenSize = getScreenSize();
+                spec.zoom = mCamera.z;
+                setMVP(spec, true, true, true);
+
+                begin(*mRendererTessellation, spec);
                 while (!mShinnyRenderables.empty()) {
                     auto &r = const_cast<graphic::Renderable &> (mShinnyRenderables.top());
                     auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
@@ -345,7 +366,15 @@ namespace oni {
                 return lhs.z < rhs.z;
             });
 
-            begin(*mRendererTessellation, true, true, true);
+            RenderSpec spec;
+            spec.src = BlendMode::ONE;
+            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.renderTarget = nullptr;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            setMVP(spec, true, true, true);
+
+            begin(*mRendererTessellation, spec);
 
             renderTessellationColor(manager, viewWidth, viewHeight);
             renderTessellationTexture(manager, viewWidth, viewHeight);
@@ -357,10 +386,18 @@ namespace oni {
         SceneManager::renderStrip(entities::EntityManager &manager,
                                   common::r32 viewWidth,
                                   common::r32 viewHeight) {
+            RenderSpec spec;
+            spec.src = BlendMode::ONE;
+            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.renderTarget = nullptr;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            setMVP(spec, true, true, true);
+
             auto view = manager.createView<
                     component::WorldP3D_History>();
             for (auto &&id: view) {
-                begin(*mRendererStrip, true, true, true);
+                begin(*mRendererStrip, spec);
 
                 const auto &ph = view.get<component::WorldP3D_History>(id).pos;
                 auto count = 0;
@@ -480,7 +517,15 @@ namespace oni {
                                       const graphic::ScreenBounds &destBounds,
                                       component::Texture &dest,
                                       math::mat4 *model) {
-            begin(*mRendererQuad, destBounds, &dest, model);
+            RenderSpec spec;
+            spec.src = BlendMode::ONE;
+            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.renderTarget = &dest;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            setMVP(spec, destBounds, model);
+
+            begin(*mRendererQuad, spec);
             mRendererQuad->submit(quad, src, nullptr);
             end(*mRendererQuad);
         }
@@ -491,7 +536,15 @@ namespace oni {
                                       const graphic::ScreenBounds &destBounds,
                                       component::Texture &dest,
                                       math::mat4 *model) {
-            begin(*mRendererQuad, destBounds, &dest, model);
+            RenderSpec spec;
+            spec.src = BlendMode::ONE;
+            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.renderTarget = &dest;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            setMVP(spec, destBounds, model);
+
+            begin(*mRendererQuad, spec);
             mRendererQuad->submit(quad, {}, &src);
             end(*mRendererQuad);
         }
@@ -499,13 +552,20 @@ namespace oni {
         void
         SceneManager::blend(const component::Texture &front,
                             component::Texture &back) {
+            RenderSpec spec;
+            spec.src = BlendMode::ONE;
+            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.renderTarget = &back;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            spec.view = math::mat4::identity();
+            spec.model = math::mat4::identity();
+            spec.proj = math::mat4::orthographic(-1, +1,
+                                                 -1, +1,
+                                                 -1, +1);
+
             auto quad = component::Quad{};
-            auto modelM = math::mat4::identity();
-            auto viewM = math::mat4::identity();
-            auto projM = math::mat4::orthographic(-1, +1,
-                                                  -1, +1,
-                                                  -1, +1);
-            mRendererQuad->begin(modelM, viewM, projM, {getViewWidth(), getViewHeight()}, mCamera.z, &back);
+            mRendererQuad->begin(spec);
             mRendererQuad->submit(quad, {}, front, back);
             end(*mRendererQuad);
         }

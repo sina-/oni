@@ -23,11 +23,7 @@ namespace oni {
 
         protected:
             void
-            _begin(const math::mat4 &model,
-                   const math::mat4 &view,
-                   const math::mat4 &proj,
-                   const math::vec2 &screenSize,
-                   common::r32 zoom) override;
+            _begin(const RenderSpec &spec) override;
 
             void
             _flush(component::Texture *renderTarget) override;
@@ -43,11 +39,7 @@ namespace oni {
 
         protected:
             virtual void
-            enableShader(const math::mat4 &model,
-                         const math::mat4 &view,
-                         const math::mat4 &proj,
-                         const math::vec2 &screenSize,
-                         common::r32 zoom) = 0;
+            enableShader(const RenderSpec &) = 0;
 
             virtual void
             disableShader();
@@ -97,6 +89,8 @@ namespace oni {
 
             virtual void
             resetIndexCount() = 0;
+        private:
+            static common::oniGLenum getBlendMode(BlendMode);
 
         protected:
             void *mBuffer{nullptr};

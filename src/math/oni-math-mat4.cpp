@@ -112,13 +112,20 @@ namespace oni {
         }
 
         mat4
-        mat4::scale(const vec3 &scale) {
+        mat4::scale(common::r32 x,
+                    common::r32 y,
+                    common::r32 z) {
             mat4 result(1.0f);
-            result.elements[0 + 0 * 4] = scale.x;
-            result.elements[1 + 1 * 4] = scale.y;
-            result.elements[2 + 2 * 4] = scale.z;
+            result.elements[0 + 0 * 4] = x;
+            result.elements[1 + 1 * 4] = y;
+            result.elements[2 + 2 * 4] = z;
 
             return result;
+        }
+
+        mat4
+        mat4::scale(const vec3 &v) {
+            return scale(v.x, v.y, v.z);
         }
 
         mat4 &
@@ -187,10 +194,14 @@ namespace oni {
         std::ostream &
         operator<<(std::ostream &stream,
                    const mat4 &other) {
-            stream << "|" << other.elements[0] << ", " << other.elements [1] << other.elements[2] << other.elements[3] << "|";
-            stream << "|" << other.elements[4] << ", " << other.elements [5] << other.elements[6] << other.elements[7] << "|";
-            stream << "|" << other.elements[8] << ", " << other.elements [9] << other.elements[10] << other.elements[11] << "|";
-            stream << "|" << other.elements[12] << ", " << other.elements [13] << other.elements[14] << other.elements[15] << "|";
+            stream << "|" << other.elements[0] << ", " << other.elements[1] << other.elements[2] << other.elements[3]
+                   << "|";
+            stream << "|" << other.elements[4] << ", " << other.elements[5] << other.elements[6] << other.elements[7]
+                   << "|";
+            stream << "|" << other.elements[8] << ", " << other.elements[9] << other.elements[10] << other.elements[11]
+                   << "|";
+            stream << "|" << other.elements[12] << ", " << other.elements[13] << other.elements[14]
+                   << other.elements[15] << "|";
             return stream;
         }
     }

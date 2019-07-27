@@ -37,13 +37,37 @@ namespace oni {
             }
         }
 
+        common::oniGLenum
+        Renderer_OpenGL::getBlendMode(BlendMode mode) {
+            auto result = GL_ONE;
+            switch (mode) {
+                case BlendMode::ZERO: {
+                    result = GL_ZERO;
+                    break;
+                }
+                case BlendMode::ONE: {
+                    result = GL_ONE;
+                    break;
+                }
+                case BlendMode::ONE_MINUS_SRC_ALPHA: {
+                    result = GL_ONE_MINUS_SRC_ALPHA;
+                    break;
+                }
+                case BlendMode::LAST:
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            return result;
+        }
+
         void
-        Renderer_OpenGL::_begin(const math::mat4 &model,
-                                const math::mat4 &view,
-                                const math::mat4 &proj,
-                                const math::vec2 &screenSize,
-                                common::r32 zoom) {
-            enableShader(model, view, proj, screenSize, zoom);
+        Renderer_OpenGL::_begin(const RenderSpec &spec) {
+            auto blendSrc = getBlendMode(spec.src);
+            auto blendDest = getBlendMode(spec.dest);
+            glBlendFunc(blendSrc, blendDest);
+            enableShader(spec);
 
             mNextSamplerID = 0;
             mSamplers.clear();
@@ -70,7 +94,7 @@ namespace oni {
                 bindFrameBuffer();
                 attachFrameBuffer(*renderTarget);
                 // TODO: Refactor this code, this flag should not be part of Texture
-                if(renderTarget->clear){
+                if (renderTarget->clear) {
                     clearFrameBuffer();
                 }
             }

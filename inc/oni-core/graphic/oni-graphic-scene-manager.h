@@ -193,28 +193,15 @@ namespace oni {
             };
 
         private:
-            void
-            begin(Renderer &renderer2D,
-                  bool translate,
-                  bool scale,
-                  bool project,
-                  component::Texture *renderTarget);
+            static void
+            begin(Renderer &,
+                  const RenderSpec &);
 
-            void
-            begin(Renderer &renderer2D,
-                  bool translate,
-                  bool scale,
-                  bool project);
+            math::mat4
+            getCameraScale();
 
-            void
-            begin(Renderer &renderer2D,
-                  component::Texture *renderTarget);
-
-            void
-            begin(Renderer &renderer2D,
-                  const ScreenBounds &screenBounds,
-                  component::Texture *renderTarget,
-                  const math::mat4 *model);
+            math::mat4
+            getCameraTranslation();
 
             static void
             end(Renderer &renderer2D);
@@ -230,6 +217,20 @@ namespace oni {
                                   common::EntityID child,
                                   const component::WorldP3D &pos,
                                   const component::Heading &heading);
+
+            void
+            setMVP(RenderSpec &,
+                   bool translate,
+                   bool scale,
+                   bool project);
+
+            static void
+            setMVP(RenderSpec &,
+                   const ScreenBounds &,
+                   const math::mat4 *model);
+
+            math::vec2
+            getScreenSize();
 
             common::r32
             getViewWidth() const;

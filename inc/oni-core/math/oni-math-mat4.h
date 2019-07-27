@@ -64,6 +64,9 @@ namespace oni {
                      const vec3 &axis);
 
             static mat4
+            scale(common::r32 x, common::r32 y, common::r32 z);
+
+            static mat4
             scale(const vec3 &scale);
 
             mat4 &

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/math/oni-math-mat4.h>
 
 namespace oni {
     namespace entities {
@@ -28,6 +29,7 @@ namespace oni {
 
     namespace math {
         class mat4;
+
         class vec2;
     }
 
@@ -69,6 +71,26 @@ namespace oni {
             const component::Texture *texture{};
         };
 
+        enum class BlendMode : common::u8 {
+            ZERO,
+            ONE,
+            ONE_MINUS_SRC_ALPHA,
+
+            LAST
+        };
+
+        struct RenderSpec {
+            math::mat4 model{};
+            math::mat4 view{};
+            math::mat4 proj{};
+            math::vec2 screenSize{};
+            common::r32 zoom{};
+
+            component::Texture *renderTarget{};
+            BlendMode src{};
+            BlendMode dest{};
+        };
+
         class Renderer {
         protected:
             Renderer();
@@ -77,12 +99,7 @@ namespace oni {
 
         public:
             void
-            begin(const math::mat4 &model,
-                  const math::mat4 &view,
-                  const math::mat4 &proj,
-                  const math::vec2 &screenSize,
-                  common::r32 zoom,
-                  component::Texture *renderTarget);
+            begin(const RenderSpec &);
 
             virtual void
             submit(const Renderable &) = 0;
@@ -98,11 +115,7 @@ namespace oni {
 
         protected:
             virtual void
-            _begin(const math::mat4 &model,
-                   const math::mat4 &view,
-                   const math::mat4 &proj,
-                   const math::vec2 &screenSize,
-                   common::r32 zoom) = 0;
+            _begin(const RenderSpec &) = 0;
 
             virtual void
             _flush(component::Texture *renderTarget) = 0;

@@ -253,15 +253,11 @@ namespace oni {
         }
 
         void
-        Renderer_OpenGL_Quad::enableShader(const math::mat4 &model,
-                                           const math::mat4 &view,
-                                           const math::mat4 &proj,
-                                           const math::vec2 &screenSize,
-                                           common::r32 zoom) {
+        Renderer_OpenGL_Quad::enableShader(const RenderSpec &spec) {
             mShader->enable();
-            mShader->setUniformMat4("model", model);
-            mShader->setUniformMat4("view", view);
-            mShader->setUniformMat4("proj", proj);
+            mShader->setUniformMat4("model", spec.model);
+            mShader->setUniformMat4("view", spec.view);
+            mShader->setUniformMat4("proj", spec.proj);
         }
 
         common::oniGLsizei

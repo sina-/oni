@@ -154,7 +154,8 @@ namespace oni {
             common::r32 linearDamping{2.f};
             common::r32 angularDamping{2.f};
             common::r32 density{0.1f};
-            common::r32 friction{1.0f};
+            common::r32 friction{1.f};
+            common::r32 gravityScale{1.f};
             bool highPrecision{false};
             bool colliding{false};
             bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other

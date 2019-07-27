@@ -436,10 +436,16 @@ namespace oni {
                         auto &pos = manager.get<component::WorldP3D>(id);
                         auto &size = manager.get<component::Scale>(id);
                         auto &tag = manager.get<component::TextureTag>(id);
+                        auto &heading = manager.get<component::Heading>(id);
 
-                        manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, tag);
+                        auto callback = [&manager, id]() {
+                            manager.deleteEntity(id);
+                        };
+
+                        manager.enqueueEvent<game::Event_SplatOnDeath>(pos, size, heading, tag, std::move(callback));
+                    } else {
+                        manager.markForDeletion(id);
                     }
-                    manager.markForDeletion(id);
                 }
             }
             manager.flushDeletions();
@@ -469,7 +475,7 @@ namespace oni {
                     };
                     // TODO: This will create copy for all. Good place for profiling and optimization as these entities
                     // are often particles
-                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, heading, tag, callback);
+                    manager.enqueueEvent<game::Event_SplatOnRest>(pos, size, heading, tag, std::move(callback));
                 }
             }
         }
@@ -489,7 +495,27 @@ namespace oni {
                 auto &color = view.get<component::Color>(id);
                 auto &fade = view.get<component::FadeWithAge>(id);
 
-                auto targetAlpha = 1 - age.currentAge / age.maxAge;
+                auto targetAlpha = 1.f;
+                switch (fade.fadeFunc) {
+                    case component::FadeFunc::LINEAR: {
+                        targetAlpha = 1 - age.currentAge / age.maxAge;
+                        break;
+                    }
+                    case component::FadeFunc::TAIL: {
+                        constexpr auto dropOffT = 0.7f;
+                        auto ageRatio = age.currentAge / age.maxAge;
+                        if (ageRatio > dropOffT) {
+                            targetAlpha = 1 - ageRatio;
+                        }
+                        break;
+                    }
+                    case component::FadeFunc::LAST:
+                    default: {
+                        assert(false);
+                        break;
+                    }
+                }
+
                 auto currentAlpha = color.a_r32();
                 color.set_a(math::lerp(currentAlpha, targetAlpha, fade.factor));
                 if (!math::almost_Equal(color.a_r32(), currentAlpha)) {

@@ -27,6 +27,8 @@ namespace oni {
 
             TRAIL_PARTICLE,
 
+            SHINNY_EFFECT,
+
             TEXT,
             WORLD_CHUNK,
             DEBUG_WORLD_CHUNK,

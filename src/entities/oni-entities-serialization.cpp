@@ -80,7 +80,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   component::FadeWithAge &data) {
-            archive(data.factor);
+            archive(data.fadeFunc, data.factor);
         }
 
         template<class Archive>

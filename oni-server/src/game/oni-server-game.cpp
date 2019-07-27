@@ -212,7 +212,7 @@ namespace oni {
             ServerGame::spawnRaceCar() {
                 auto vehicleZ = mZLayerManager->getZForEntity(oni::entities::EntityType::RACE_CAR);
                 // TODO: All cars spawn in the same location!
-                auto pos = component::WorldP3D{-0, -0, vehicleZ};
+                auto pos = component::WorldP3D{-30.0f, -30.0f, vehicleZ};
                 auto size = math::vec2{2.5f, 1.1f};
 
                 auto carEntity = mEntityManager->createEntity_RaceCar();

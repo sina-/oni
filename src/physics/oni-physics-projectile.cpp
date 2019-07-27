@@ -90,7 +90,6 @@ namespace oni {
                     manager.setWorldP3D(id, rocketPos.x, rocketPos.y, rocketPos.z);
                     manager.setScale(id, size.x, size.y);
                     manager.setHeading(id, heading.value);
-                    manager.setTrailTextureTag(id, component::TextureTag::CLOUD);
                     manager.createPhysics(id, rocketPos, size, heading.value);
 
                     auto *body = manager.getEntityBody(id);

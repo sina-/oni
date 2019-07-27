@@ -35,8 +35,10 @@ namespace oni {
             TRUCK,
             TIRE,
             VEHICLE_GUN,
-            SMOKE,
-            CLOUD,
+            SMOKE_WHITE,
+            SMOKE_BLACK,
+            CLOUD_WHITE,
+            CLOUD_BLACK,
             ROCKET,
             ROCKET_TRAIL,
             ROAD,
@@ -45,6 +47,8 @@ namespace oni {
             EXPLOSION,
 
             TEST_TEXTURE,
+            ROCK,
+            SPARK,
 
             LAST
         };
@@ -258,7 +262,15 @@ namespace oni {
             LAST
         };
 
+        enum class FadeFunc : common::u8 {
+            LINEAR,
+            TAIL,
+
+            LAST
+        };
+
         struct FadeWithAge {
+            FadeFunc fadeFunc{};
             common::r32 factor{1.f};
         };
 

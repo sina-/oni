@@ -19,6 +19,7 @@
 #include <oni-core/math/oni-math-z-layer-manager.h>
 #include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/math/oni-math-vec2.h>
+#include <GL/glew.h>
 
 #define DEBUG_Z 0
 
@@ -254,7 +255,29 @@ namespace oni {
             }
             /// Render shinnies
             {
+                // TODO: Define this as part of specification for renderer.begin() call
+                glBlendFunc(GL_ONE, GL_ONE);
+                begin(*mRendererTessellation, true, true, true);
+                while (!mShinnyRenderables.empty()) {
+                    auto &r = const_cast<graphic::Renderable &> (mShinnyRenderables.top());
+                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
 
+                    if (!isVisible(ePos.pos, *r.scale)) {
+                        mShinnyRenderables.pop();
+                        continue;
+                    }
+
+                    r.pos = &ePos.pos;
+                    r.heading = &ePos.heading;
+
+                    mRendererTessellation->submit(r);
+
+                    mShinnyRenderables.pop();
+
+                    ++mRenderedSpritesPerFrame;
+                }
+                end(*mRendererTessellation);
+                glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             }
         }
 

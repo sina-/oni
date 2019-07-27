@@ -344,6 +344,7 @@ namespace oni {
             bodyDef.angle = heading;
             bodyDef.linearDamping = props.linearDamping;
             bodyDef.angularDamping = props.angularDamping;
+            bodyDef.gravityScale = props.gravityScale;
 
             b2FixtureDef fixtureDef;
             // NOTE: Box2D will create a copy of the shape, so it is safe to pass a local ref.
@@ -535,7 +536,7 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::CLOUD);
+            createComponent<component::TextureTag>(id, component::TextureTag::CLOUD_WHITE);
             createComponent<component::Color>(id);
             createComponent<component::Age>(id);
             createComponent<component::FadeWithAge>(id);
@@ -654,6 +655,7 @@ namespace oni {
             createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
             auto &pt = createComponent<component::ParticleEmitter>(id);
             pt.size = 3.f;
+            pt.textureTag = component::TextureTag::CLOUD_BLACK;
             auto &ph = createComponent<component::WorldP3D_History>(id);
             ph.size = 10;
 
@@ -755,7 +757,7 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::SMOKE);
+            createComponent<component::TextureTag>(id, component::TextureTag::SMOKE_WHITE);
             createComponent<component::Color>(id);
             createComponent<component::Age>(id);
             createComponent<component::FadeWithAge>(id);
@@ -768,7 +770,7 @@ namespace oni {
                 createComponent<component::Texture>(id);
             }
 
-            assignTag<component::Tag_TextureShaded>(id);
+            // assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_ShinnyEffect>(id);
             return id;
         }
@@ -779,16 +781,18 @@ namespace oni {
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::SMOKE);
+            createComponent<component::TextureTag>(id, component::TextureTag::SPARK);
             createComponent<component::Color>(id);
             createComponent<component::Age>(id);
+            auto &f = createComponent<component::FadeWithAge>(id);
+            f.fadeFunc = component::FadeFunc::TAIL;
             auto &scale = createComponent<component::Scale>(id);
-            scale.x = mRand->next_r32(1.f, 3.f);
+            scale.x = mRand->next_r32(0.1f, 0.2f);
             scale.y = scale.x;
 
             auto &props = createComponent<component::PhysicalProperties>(id);
-            props.friction = 1.f;
-            props.density = 0.1f;
+            props.friction = 2.f;
+            props.density = 0.5f;
             props.angularDamping = 2.f;
             props.linearDamping = 2 + (scale.x + scale.y) / 2;
             props.highPrecision = false;
@@ -803,8 +807,8 @@ namespace oni {
                 createComponent<component::Texture>(id);
             }
 
-            assignTag<component::Tag_TextureShaded>(id);
-            assignTag<component::Tag_SplatOnRest>(id);
+            assignTag<component::Tag_ShinnyEffect>(id);
+            //assignTag<component::Tag_SplatOnDeath>(id);
             assignTag<component::Tag_Dynamic>(id);
 
             return id;

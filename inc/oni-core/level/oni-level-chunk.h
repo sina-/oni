@@ -6,8 +6,8 @@
 namespace oni {
     namespace level {
         struct ChunkIndex {
-            common::i64 x{0};
-            common::i64 y{0};
+            common::i32 x{0};
+            common::i32 y{0};
         };
 
         struct RoadTileIndex {
@@ -17,8 +17,8 @@ namespace oni {
         };
 
         struct TileIndex {
-            common::i64 x{0};
-            common::i64 y{0};
+            common::i32 x{0};
+            common::i32 y{0};
         };
 
         struct EdgeRoadTile {

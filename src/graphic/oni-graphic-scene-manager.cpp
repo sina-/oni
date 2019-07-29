@@ -633,7 +633,7 @@ namespace oni {
         SceneManager::getOrCreateCanvasTile(const component::WorldP3D &pos) {
             auto x = math::findBin(pos.x, mCanvasTileSizeX);
             auto y = math::findBin(pos.y, mCanvasTileSizeY);
-            auto xy = math::pack_i64(x, y);
+            auto xy = math::pack_i32(x, y);
 
             auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
             if (missing) {

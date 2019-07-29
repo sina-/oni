@@ -20,11 +20,11 @@ namespace oni {
 
         typedef double CarSimDouble;
 
-        typedef u64 i64p;
-
         typedef u32 u16p;
 
         typedef u64 u32p;
+
+        typedef u64 i32p;
 
         typedef u32 EntityID;
 

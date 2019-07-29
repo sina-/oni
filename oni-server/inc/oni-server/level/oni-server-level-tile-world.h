@@ -77,16 +77,16 @@ namespace oni {
                            const component::TextureTag);
 
                 void
-                genChunkRoads(oni::common::i64 chunkX,
-                              oni::common::i64 chunkY);
+                genChunkRoads(common::i32 chunkX,
+                              common::i32 chunkY);
 
                 void
-                genChunkGroundTexture(oni::common::i64 chunkX,
-                                      oni::common::i64 chunkY);
+                genChunkGroundTexture(common::i32 chunkX,
+                                      common::i32 chunkY);
 
                 void
-                genChunkGroundSprite(oni::common::i64 chunkX,
-                                     oni::common::i64 chunkY);
+                genChunkGroundSprite(common::i32 chunkX,
+                                     common::i32 chunkY);
 
                 void
                 genTileRoad(const oni::level::ChunkIndex &chunkIndex,

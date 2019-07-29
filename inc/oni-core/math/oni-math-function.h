@@ -94,12 +94,12 @@ namespace oni {
             return (T(0) < n) - (T(0) > n);
         }
 
-        inline common::i64
-        findBin(const common::r64 position,
+        inline common::i32
+        findBin(const common::r32 position,
                 const common::u16 binSize) {
             assert(binSize);
             auto result = std::floor(position / binSize);
-            auto truncated = static_cast<common::i64>(result);
+            auto truncated = static_cast<common::i32>(result);
             return truncated;
         }
 
@@ -109,9 +109,9 @@ namespace oni {
             return binSize * index;
         }
 
-        inline common::i64p
-        pack_i64(const common::i64 x,
-                 const common::i64 y) noexcept {
+        inline common::i32p
+        pack_i32(const common::i32 x,
+                 const common::i32 y) noexcept {
             // NOTE: Cast to unsigned int adds max(std::uint32_t) + 1 when input is negative.
             // For example: std::unint32_t(-1) = -1 + max(std::uint32_t) + 1 = max(std::uint32_t)
             // and std::uint32_t(-max(std::int32_t)) = -max(std::int32_t) + max(std::uint32_t) + 1 = max(std::uint32_t) / 2 + 1
@@ -121,7 +121,7 @@ namespace oni {
             // unique inputs to a unique output.
             // There are other ways to do this: https://stackoverflow.com/a/13871379 (Cantor pairing function and Szudzik's improved implementation)
             // I could also just yank the numbers together and save it as a string.
-            auto _x = static_cast<common::u64>(static_cast<common::u32>(x)) << 32;
+            auto _x = static_cast<common::u64>(static_cast<common::u32>(x)) << 32u;
             auto _y = static_cast<common::u64>(static_cast<common::u32>(y));
             auto result = _x | _y;
 
@@ -131,7 +131,7 @@ namespace oni {
         inline common::u32p
         pack_u32(const common::u32 x,
                  const common::u32 y) noexcept {
-            auto _x = static_cast<common::u64>(x) << 32;
+            auto _x = static_cast<common::u64>(x) << 32u;
             auto _y = static_cast<common::u64>(y);
             auto result = _x | _y;
             return result;
@@ -140,7 +140,10 @@ namespace oni {
         inline common::u16p
         pack_u16(common::u16 x,
                  common::u16 y) noexcept {
-            return x << 16 | y;
+            auto _x = (static_cast<common::u32>(x) << 16u);
+            auto _y = y;
+            auto result = _x | _y;
+            return result;
         }
 
         template<class T>
@@ -235,21 +238,25 @@ namespace oni {
         }
 
         void
-        findAABB(const component::Quad &, component::AABB&);
+        findAABB(const component::Quad &,
+                 component::AABB &);
 
         math::vec2
         headingVector(common::r32 heading);
 
         math::vec2
-        headingVector(const component::Heading&);
+        headingVector(const component::Heading &);
 
         void
-        translate(component::Quad&, const component::WorldP3D&);
+        translate(component::Quad &,
+                  const component::WorldP3D &);
 
         void
-        translate(component::WorldP3D&, const component::WorldP3D&);
+        translate(component::WorldP3D &,
+                  const component::WorldP3D &);
 
         void
-        scale(component::Quad&, const component::Scale&);
+        scale(component::Quad &,
+              const component::Scale &);
     }
 }

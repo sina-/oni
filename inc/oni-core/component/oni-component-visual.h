@@ -274,6 +274,8 @@ namespace oni {
             common::r32 factor{1.f};
         };
 
+        // TODO: Probably should be merged with ParticleEmitter with the goal of generic enough Particle Emitter
+        // component that covers most of the games needs.
         struct SmokeEmitterCD {
             common::r64 currentCD{0.f};
             common::r64 initialCD{0.2f};

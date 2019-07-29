@@ -95,14 +95,14 @@ namespace oni {
                             const component::Texture &src,
                             const graphic::ScreenBounds &destBounds,
                             component::Texture &dest,
-                            math::mat4 *model);
+                            const math::mat4 *model);
 
             void
             renderToTexture(const component::Quad &quad,
                             const component::Color &src,
                             const graphic::ScreenBounds &destBounds,
                             component::Texture &dest,
-                            math::mat4 *model);
+                            const math::mat4 *model);
 
             void
             lookAt(common::r32 x,
@@ -156,6 +156,20 @@ namespace oni {
             void
             endColorRendering();
 
+        public:
+            struct WorldP3DAndHeading {
+                component::WorldP3D pos;
+                component::Heading heading;
+            };
+
+            // TODO: Move somewhere else
+            static SceneManager::WorldP3DAndHeading
+            applyParentTransforms(const entities::EntityManager &manager,
+                                  common::EntityID child,
+                                  const component::WorldP3D &pos,
+                                  const component::Heading &heading);
+
+
         private:
             void
             renderStaticText(entities::EntityManager &,
@@ -185,13 +199,6 @@ namespace oni {
                                       common::r32 viewWidth,
                                       common::r32 viewHeight);
 
-
-        private:
-            struct WorldP3DAndHeading {
-                component::WorldP3D pos;
-                component::Heading heading;
-            };
-
         private:
             static void
             begin(Renderer &,
@@ -211,12 +218,6 @@ namespace oni {
 
             common::EntityID
             getOrCreateCanvasTile(const component::WorldP3D &pos);
-
-            static SceneManager::WorldP3DAndHeading
-            applyParentTransforms(const entities::EntityManager &manager,
-                                  common::EntityID child,
-                                  const component::WorldP3D &pos,
-                                  const component::Heading &heading);
 
             void
             setMVP(RenderSpec &,

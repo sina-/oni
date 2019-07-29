@@ -51,8 +51,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::SmokeEmitterCD &data) {
-            archive(data.currentCD);
+                  component::CoolDown &data) {
+            archive(data.current, data.initial);
         }
 
         template<class Archive>

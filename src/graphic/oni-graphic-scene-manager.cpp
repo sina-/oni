@@ -516,7 +516,7 @@ namespace oni {
                                       const component::Color &src,
                                       const graphic::ScreenBounds &destBounds,
                                       component::Texture &dest,
-                                      math::mat4 *model) {
+                                      const math::mat4 *model) {
             RenderSpec spec;
             spec.src = BlendMode::ONE;
             spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
@@ -535,7 +535,7 @@ namespace oni {
                                       const component::Texture &src,
                                       const graphic::ScreenBounds &destBounds,
                                       component::Texture &dest,
-                                      math::mat4 *model) {
+                                      const math::mat4 *model) {
             RenderSpec spec;
             spec.src = BlendMode::ONE;
             spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
@@ -615,7 +615,6 @@ namespace oni {
                         renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, texture, brush.model);
                         break;
                     }
-                    case component::BrushType::UNKNOWN:
                     case component::BrushType::LAST: {
                         assert(false);
                         break;
@@ -681,30 +680,55 @@ namespace oni {
             assert(manager.getSimMode() == entities::SimMode::CLIENT ||
                    manager.getSimMode() == entities::SimMode::CLIENT_SIDE_SERVER);
 
-            auto view = manager.createView<component::SmokeEmitterCD>();
+            auto view = manager.createView<component::CoolDown>();
             for (auto &&id: view) {
-                auto &emitter = view.get<component::SmokeEmitterCD>(id);
-                math::subAndZeroClip(emitter.currentCD, tickTime);
+                auto &emitter = view.get<component::CoolDown>(id);
+                math::subAndZeroClip(emitter.current, tickTime);
             }
         }
 
         void
         SceneManager::updateAfterMark(entities::EntityManager &manager,
                                       common::r64 tickTime) {
-//            auto view = manager.createView<
-//                    component::AfterMark,
-//                    component::WorldP3D,
-//                    component::Scale>();
-//            for (auto &&id: view) {
-//                const auto &scale = view.get<component::Scale>(id);
-//                const auto &mark = view.get<component::AfterMark>(id);
-//                auto brush = graphic::Brush{};
-//                brush.tag = mark.textureTag;
-//                brush.type = component::BrushType::TEXTURE_TAG;
-//
-//                const auto &pos = view.get<component::WorldP3D>(id);
-//                splat(pos, scale, brush);
-//            }
+            auto view = manager.createView<
+                    component::AfterMark,
+                    component::Heading,
+                    component::WorldP3D>();
+            for (auto &&id: view) {
+                const auto &mark = view.get<component::AfterMark>(id);
+                const auto &pos = view.get<component::WorldP3D>(id);
+                const auto &heading = view.get<component::Heading>(id);
+
+                auto transformed = applyParentTransforms(manager, id, pos, heading);
+                Brush brush;
+                auto quad = component::Quad{};
+                auto model = math::createTransformation(transformed.pos, transformed.heading, mark.scale);
+                switch(mark.type){
+                    case component::BrushType::COLOR:{
+                        brush.color = &mark.color;
+                        break;
+                    }
+                    case component::BrushType::TEXTURE:{
+                        // TODO: Implement
+                        assert(false);
+                        break;
+                    }
+                    case component::BrushType::TEXTURE_TAG:{
+                        brush.tag = mark.textureTag;
+                        break;
+                    }
+                    case component::BrushType::LAST:
+                    default:{
+                        assert(false);
+                        break;
+                    }
+                }
+                brush.shape_Quad = &quad;
+                brush.type = component::BrushType::COLOR;
+                brush.model = &model;
+
+                splat(brush);
+            }
         }
 
         void

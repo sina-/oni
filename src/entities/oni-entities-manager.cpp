@@ -74,8 +74,8 @@ namespace oni {
                     // auto generated compile time component id
                     switch (type) {
                         case component::ComponentType::SMOKE_EMITTER_CD: {
-                            if (!has<component::SmokeEmitterCD>(id)) {
-                                createComponent<component::SmokeEmitterCD>(id);
+                            if (!has<component::CoolDown>(id)) {
+                                createComponent<component::CoolDown>(id);
                             }
                             break;
                         }

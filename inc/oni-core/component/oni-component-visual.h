@@ -86,10 +86,6 @@ namespace oni {
             common::r32 size = 0.1f;
         };
 
-        struct AfterMark {
-            TextureTag textureTag = TextureTag::UNKNOWN;
-        };
-
         struct Color {
             common::u8
             r() const {
@@ -253,8 +249,6 @@ namespace oni {
         };
 
         enum class BrushType : common::u8 {
-            UNKNOWN,
-
             COLOR,
             TEXTURE,
             TEXTURE_TAG,
@@ -276,13 +270,14 @@ namespace oni {
 
         // TODO: Probably should be merged with ParticleEmitter with the goal of generic enough Particle Emitter
         // component that covers most of the games needs.
-        struct SmokeEmitterCD {
-            common::r64 currentCD{0.f};
-            common::r64 initialCD{0.2f};
+        struct CoolDown {
+            common::r64 current{0.f};
+            common::r64 initial{0.2f};
         };
 
         struct BrushTrail {
             bool initialized{false};
+            bool active{true};
             component::Texture texture{};
             common::r32 mass{1.f};
             common::r32 width{0.4f};
@@ -295,6 +290,15 @@ namespace oni {
             component::Acceleration acceleration{};
             component::Acceleration2D acceleration2d{};
             std::vector<component::Quad> quads;
+        };
+
+        struct AfterMark {
+            component::Scale scale{1, 1};
+            component::BrushType type{component::BrushType::COLOR};
+            union {
+                TextureTag textureTag = TextureTag::UNKNOWN;
+                component::Color color;
+            };
         };
     }
 }

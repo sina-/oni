@@ -80,28 +80,52 @@ namespace oni {
         }
 
         const component::Texture &
-        TextureManager::loadOrGetTexture(component::TextureTag tag,
-                                         bool loadBits) {
+        TextureManager::getTexture(component::TextureTag tag) {
             assert(tag != component::TextureTag::UNKNOWN);
             assert(tag != component::TextureTag::LAST);
-            if (isTextureLoaded(tag)) {
-                return mTextureMap[tag];
+            const auto it = mTextureMap.find(tag);
+            if (it == mTextureMap.end()) {
+                assert(false);
+            }
+            return it->second;
+        }
+
+        void
+        TextureManager::initTexture(component::TextureTag tag,
+                                    component::Texture &texture) {
+            assert(tag != component::TextureTag::UNKNOWN);
+            assert(tag != component::TextureTag::LAST);
+            const auto it = mTextureMap.find(tag);
+            if (it == mTextureMap.end()) {
+                // NOTE: Did you forget to call loadAssets()?
+                assert(false);
+                return;
+            }
+            texture = it->second;
+        }
+
+        void
+        TextureManager::loadAssets() {
+            for (auto &&tag: mAssetManager.knownTags()) {
+                loadTextureToCache(tag);
+            }
+        }
+
+        void
+        TextureManager::loadTextureToCache(component::TextureTag tag) {
+            assert(tag != component::TextureTag::UNKNOWN);
+            assert(tag != component::TextureTag::LAST);
+            auto it = mTextureMap.find(tag);
+            if (it != mTextureMap.end()) {
+                assert(false);
+                return;
             }
 
-            auto &texture = mTextureMap[tag];
+            auto texture = component::Texture{};
             loadOrGetImage(tag, texture.image);
-
             createTexture(texture, true);
-
-            // TODO: This is clunky design, these bits are already copied, have to think about a way to
-            // split between texture data that is generated and data that is loaded from the file, for the
-            // ones loaded from the file I don't need to keep a copy in the memory as I just have them in video memory
-            // but for generated ones I keep them in the memory as I often need to blit onto it, like Canvas tiles.
-            if (!loadBits) {
-                texture.image.data.clear();
-            }
-
-            return texture;
+            texture.image.data.clear();
+            mTextureMap.insert({tag, texture});
         }
 
         void
@@ -362,6 +386,11 @@ namespace oni {
             unbind();
 
             return textureID;
+        }
+
+        void
+        TextureManager::copy(const component::Texture &src,
+                             component::Texture &dest) {
         }
 
         bool

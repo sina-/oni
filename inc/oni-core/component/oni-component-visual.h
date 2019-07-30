@@ -50,7 +50,14 @@ namespace oni {
             ROCK,
             SPARK,
 
+            BLAST_TEXTURE_ANIMATED,
+
             LAST
+        };
+
+        struct UV {
+            std::array<math::vec2, 4> values{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
+                                             math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
         };
 
         struct Texture {
@@ -64,6 +71,15 @@ namespace oni {
             common::oniGLenum type{0x1401};
             std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
                                          math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
+        };
+
+        struct TextureAnimated {
+            Texture texture;
+            common::u8 numFrames{10};
+            common::u8 currentFrame{0};
+            common::r32 accumulator{0.f};
+            common::r32 fps{1.f};
+            std::vector<UV> frameUV;
         };
 
         struct Text {

@@ -142,11 +142,22 @@ namespace oni {
             auto uv3 = math::vec2{};
 
             if (renderable.texture) {
-                samplerID = getSamplerID(renderable.texture->textureID);
                 uv0 = renderable.texture->uv[0];
                 uv1 = renderable.texture->uv[1];
                 uv2 = renderable.texture->uv[2];
                 uv3 = renderable.texture->uv[3];
+                samplerID = getSamplerID(renderable.texture->textureID);
+
+                assert(!renderable.animatedTexture);
+            }
+            if (renderable.animatedTexture) {
+                auto currentFrame = renderable.animatedTexture->currentFrame;
+                uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
+                uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];
+                uv2 = renderable.animatedTexture->frameUV[currentFrame].values[2];
+                uv3 = renderable.animatedTexture->frameUV[currentFrame].values[3];
+                samplerID = getSamplerID(renderable.texture->textureID);
+                assert(!renderable.texture);
             }
 
             buffer->position = renderable.pos->value;
@@ -183,7 +194,7 @@ namespace oni {
 
             common::r32 z = 1.f;
 
-            for (common::u32 i = 0; i < text.textContent.size(); i++) {
+            for (common::size i = 0; i < text.textContent.size(); i++) {
                 assert(mIndexCount + 6 < mMaxIndicesCount);
 
                 auto x0 = pos.x + text.offsetX[i] / scaleX + advance;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string_view>
 
 #include <oni-core/asset/oni-asset-type.h>
@@ -20,15 +21,18 @@ namespace oni {
             setPath(component::TextureTag,
                     std::string_view);
 
-            const std::string&
+            const std::string &
             getAssetFilePath(component::SoundTag);
 
-            const std::string&
+            const std::string &
             getAssetFilePath(component::TextureTag);
 
+            std::vector<component::TextureTag>
+            knownTags();
+
         private:
-            std::unordered_map<component::SoundTag, std::string> mSoundAssetPath;
-            std::unordered_map<component::TextureTag, std::string> mTextureAssetPath;
+            std::map<component::SoundTag, std::string> mSoundAssetPath;
+            std::map<component::TextureTag, std::string> mTextureAssetPath;
         };
     }
 }

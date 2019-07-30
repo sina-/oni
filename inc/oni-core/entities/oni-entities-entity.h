@@ -23,6 +23,7 @@ namespace oni {
             SIMPLE_SPRITE,
             SIMPLE_PARTICLE,
             SIMPLE_BLAST_PARTICLE,
+            SIMPLE_BLAST_ANIMATION,
             SIMPLE_ROCKET,
 
             TRAIL_PARTICLE,

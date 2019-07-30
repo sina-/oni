@@ -215,13 +215,6 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Image &data) {
-            archive(data.data, data.width, data.height);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   component::Age &data) {
             archive(data.currentAge, data.maxAge);
         }

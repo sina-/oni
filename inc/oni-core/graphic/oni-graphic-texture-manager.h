@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 
 #include <oni-core/component/oni-component-visual.h>
 
@@ -57,8 +57,11 @@ namespace oni {
                            component::Image &image);
 
             const component::Texture &
-            loadOrGetTexture(component::TextureTag tag,
-                             bool loadBits);
+            getTexture(component::TextureTag tag);
+
+            void
+            initTexture(component::TextureTag tag,
+                        component::Texture &texture);
 
             static void
             createTexture(component::Texture &texture,
@@ -68,7 +71,7 @@ namespace oni {
             loadFromTextureID(component::Texture &);
 
             static void
-            loadFromTextureID(component::Texture&,
+            loadFromTextureID(component::Texture &,
                               std::vector<common::u8> &data);
 
             static void
@@ -87,9 +90,15 @@ namespace oni {
             size_t
             numLoadedTexture() const;
 
+            void
+            loadAssets();
+
         private:
             bool
             isTextureLoaded(component::TextureTag) const;
+
+            void
+            loadTextureToCache(component::TextureTag tag);
 
             bool
             isImageLoaded(component::TextureTag) const;
@@ -97,11 +106,15 @@ namespace oni {
             static void
             bind(common::oniGLuint textureID);
 
+            static void
+            copy(const component::Texture &,
+                 component::Texture &);
+
         private:
 
         private:
-            std::unordered_map<component::TextureTag, component::Texture> mTextureMap{};
-            std::unordered_map<component::TextureTag, component::Image> mImageMap{};
+            std::map<component::TextureTag, component::Texture> mTextureMap{};
+            std::map<component::TextureTag, component::Image> mImageMap{};
             const common::u8 mElementsInRGBA{4};
             asset::AssetManager &mAssetManager;
         };

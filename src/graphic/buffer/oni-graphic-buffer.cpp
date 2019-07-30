@@ -30,7 +30,7 @@ namespace oni {
             glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &actualSize);
             if (dataSize != actualSize) {
                 glDeleteBuffers(1, &mBufferID);
-                throw std::runtime_error("Could not allocate vertex buffer!");
+                assert(false);
             }
 
             unbind();

@@ -83,6 +83,9 @@ namespace oni {
             createEntity_SimpleBlastParticle();
 
             common::EntityID
+            createEntity_SimpleBlastAnimation();
+
+            common::EntityID
             createEntity_Text();
 
             common::EntityID

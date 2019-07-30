@@ -815,6 +815,22 @@ namespace oni {
         }
 
         common::EntityID
+        EntityManager::createEntity_SimpleBlastAnimation() {
+            assert(mSimMode == entities::SimMode::CLIENT);
+            auto id = createEntity(entities::EntityType::SIMPLE_BLAST_ANIMATION);
+
+            createComponent<component::WorldP3D>(id);
+            createComponent<component::Heading>(id);
+            createComponent<component::Scale>(id);
+            createComponent<component::Color>(id);
+            createComponent<component::TextureTag>(id, component::TextureTag::BLAST_TEXTURE_ANIMATED);
+            createComponent<component::TextureAnimated>(id);
+
+            assignTag<component::Tag_TextureShaded>(id);
+            return id;
+        }
+
+        common::EntityID
         EntityManager::createEntity_Text() {
             auto id = createEntity(entities::EntityType::TEXT);
 

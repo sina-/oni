@@ -28,6 +28,7 @@ namespace oni {
         SceneManager::SceneManager(const graphic::ScreenBounds &screenBounds,
                                    asset::AssetManager &assetManager,
                                    math::ZLayerManager &zLayerManager,
+                                   graphic::TextureManager &textureManager,
                                    b2World &physicsWorld,
                                    common::r32 gameUnitToPixels) :
                 mCanvasTileSizeX{110},
@@ -37,9 +38,9 @@ namespace oni {
                 // 64k vertices
                 mMaxSpriteCount(64 * 1000),
                 mScreenBounds(screenBounds),
-                mAssetManager(assetManager),
                 mPhysicsWorld(physicsWorld),
                 mGameUnitToPixels(gameUnitToPixels),
+                mTextureManager(textureManager),
                 mZLayerManager(zLayerManager) {
 
             mProjectionMatrix = math::mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
@@ -52,7 +53,6 @@ namespace oni {
             mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
             mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
 
-            mTextureManager = std::make_unique<TextureManager>(mAssetManager);
 
             mSceneEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
 
@@ -148,7 +148,7 @@ namespace oni {
                                      common::EntityID id,
                                      component::TextureTag tag) {
             auto &texture = manager.get<component::Texture>(id);
-            texture = mTextureManager->loadOrGetTexture(tag, false);
+            mTextureManager.initTexture(tag, texture);
         }
 
         void
@@ -178,6 +178,7 @@ namespace oni {
             // end on top of everything and accepting the fact that I won't be able to occlude particles with
             // other solid objects. Although... I could occlude them, if I keep the z-buffer around and do z test but
             // don't write to z-buffer when rendering particles...
+            /// Textures
             {
                 auto view = manager.createView<
                         component::WorldP3D,
@@ -193,9 +194,29 @@ namespace oni {
                     const auto &texture = view.get<component::Texture>(id);
                     const auto &color = view.get<component::Color>(id);
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture);
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
                 }
             }
+            /// Animated textures
+            {
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::TextureAnimated,
+                        component::Color,
+                        component::Tag_TextureShaded>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &animatedTexture = view.get<component::TextureAnimated>(id);
+                    const auto &color = view.get<component::Color>(id);
+
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, &animatedTexture);
+                }
+            }
+            /// Colors
             {
                 auto view = manager.createView<
                         component::WorldP3D,
@@ -208,9 +229,10 @@ namespace oni {
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
                     const auto &color = view.get<component::Color>(id);
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr);
+                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, nullptr);
                 }
             }
+            /// Shinnies
             {
                 auto view = manager.createView<
                         component::WorldP3D,
@@ -226,7 +248,7 @@ namespace oni {
                     const auto &texture = view.get<component::Texture>(id);
                     const auto &color = view.get<component::Color>(id);
 
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture);
+                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
                 }
             }
         }
@@ -298,7 +320,6 @@ namespace oni {
                     ++mRenderedSpritesPerFrame;
                 }
                 end(*mRendererTessellation);
-                glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             }
         }
 
@@ -424,7 +445,8 @@ namespace oni {
                 auto view = manager.createView<
                         component::BrushTrail,
                         component::WorldP3D>();
-                auto rocketTrailTexture = mTextureManager->loadOrGetTexture(component::TextureTag::ROCKET_TRAIL, false);
+                const auto &rocketTrailTexture = mTextureManager.getTexture(component::TextureTag::ROCKET_TRAIL);
+
                 auto brush = Brush{};
                 brush.type = component::BrushType::TEXTURE;
                 // TODO: After setting the texture on BrushTrail, use that instead.
@@ -611,7 +633,7 @@ namespace oni {
                         break;
                     }
                     case component::BrushType::TEXTURE_TAG: {
-                        auto &brushTexture = mTextureManager->loadOrGetTexture(brush.tag, false);
+                        auto &brushTexture = mTextureManager.getTexture(brush.tag);
                         renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, texture, brush.model);
                         break;
                     }
@@ -662,9 +684,7 @@ namespace oni {
                 canvasTexture.image.path = "generated_by_getOrCreateCanvasTile::canvasFront";
                 canvasTexture.clear = false;
 
-                mTextureManager->fill(canvasTexture.image, {});
-
-                mTextureManager->createTexture(canvasTexture, false);
+                mTextureManager.createTexture(canvasTexture, false);
 
                 mCanvasTileLookup.emplace(xy, id);
             }
@@ -703,22 +723,22 @@ namespace oni {
                 Brush brush;
                 auto quad = component::Quad{};
                 auto model = math::createTransformation(transformed.pos, transformed.heading, mark.scale);
-                switch(mark.type){
-                    case component::BrushType::COLOR:{
+                switch (mark.type) {
+                    case component::BrushType::COLOR: {
                         brush.color = &mark.color;
                         break;
                     }
-                    case component::BrushType::TEXTURE:{
+                    case component::BrushType::TEXTURE: {
                         // TODO: Implement
                         assert(false);
                         break;
                     }
-                    case component::BrushType::TEXTURE_TAG:{
+                    case component::BrushType::TEXTURE_TAG: {
                         brush.tag = mark.textureTag;
                         break;
                     }
                     case component::BrushType::LAST:
-                    default:{
+                    default: {
                         assert(false);
                         break;
                     }

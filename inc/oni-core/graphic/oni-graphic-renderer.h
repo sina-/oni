@@ -18,6 +18,8 @@ namespace oni {
 
         class Texture;
 
+        struct TextureAnimated;
+
         struct Quad;
 
         class Text;
@@ -47,12 +49,13 @@ namespace oni {
 
         struct Renderable {
             Renderable(common::EntityID _id,
-                       entities::EntityManager *_manager,
+                       const entities::EntityManager *_manager,
                        const component::WorldP3D *_pos,
                        const component::Heading *_heading,
                        const component::Scale *_scale,
                        const component::Color *_color,
-                       const component::Texture *_texture);
+                       const component::Texture *_texture,
+                       const component::TextureAnimated *_animatedTexture);
 
             friend bool
             operator<(const Renderable &left,
@@ -63,12 +66,13 @@ namespace oni {
                       const Renderable &right);
 
             common::EntityID id{};
-            entities::EntityManager *manager{};
+            const entities::EntityManager *manager{};
             const component::WorldP3D *pos{};
             const component::Heading *heading{};
             const component::Scale *scale{};
             const component::Color *color{};
             const component::Texture *texture{};
+            const component::TextureAnimated *animatedTexture{};
         };
 
         enum class BlendMode : common::u8 {

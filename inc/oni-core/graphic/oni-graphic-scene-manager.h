@@ -53,6 +53,7 @@ namespace oni {
             SceneManager(const graphic::ScreenBounds &,
                          asset::AssetManager &,
                          math::ZLayerManager &,
+                         graphic::TextureManager &,
                          b2World &,
                          common::r32 gameUnitToPixel
             );
@@ -244,10 +245,9 @@ namespace oni {
             std::unique_ptr<Renderer_OpenGL_Strip> mRendererStrip{};
             std::unique_ptr<Renderer_OpenGL_Quad> mRendererQuad{};
 
-            std::unique_ptr<TextureManager> mTextureManager{};
+            TextureManager& mTextureManager;
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
             std::unique_ptr<entities::EntityManager> mSceneEntityManager{};
-            asset::AssetManager &mAssetManager;
             b2World &mPhysicsWorld;
 
             std::unique_ptr<math::Rand> mRand{};

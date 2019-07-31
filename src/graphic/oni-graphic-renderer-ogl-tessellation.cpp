@@ -45,11 +45,15 @@ namespace oni {
             auto headingIndex = glGetAttribLocation(program, "heading");
             auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
             auto colorIndex = glGetAttribLocation(program, "color");
-            auto uvIndex = glGetAttribLocation(program, "uv");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
+            auto uvIndex_0 = glGetAttribLocation(program, "uv_0");
+            auto uvIndex_1 = glGetAttribLocation(program, "uv_1");
+            auto uvIndex_2 = glGetAttribLocation(program, "uv_2");
+            auto uvIndex_3 = glGetAttribLocation(program, "uv_3");
 
-            if (positionIndex == -1 || headingIndex == -1 || uvIndex == -1 || colorIndex == -1 ||
-                samplerIDIndex == -1 || halfSizeIndex == -1) {
+            if (positionIndex == -1 || headingIndex == -1 || colorIndex == -1 ||
+                samplerIDIndex == -1 || halfSizeIndex == -1 ||
+                uvIndex_0 == -1 || uvIndex_1 == -1 || uvIndex_2 == -1 || uvIndex_3 == -1) {
                 assert(false);
             }
 
@@ -61,15 +65,6 @@ namespace oni {
             sampler.stride = vertexSize;
             sampler.offset = static_cast<const common::oniGLvoid *>(nullptr);
 
-            graphic::BufferStructure halfSize;
-            halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
-            halfSize.componentCount = 2;
-            halfSize.componentType = GL_FLOAT;
-            halfSize.normalized = GL_FALSE;
-            halfSize.stride = vertexSize;
-            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
-                                                                                   halfSize));
-
             graphic::BufferStructure heading;
             heading.index = static_cast<common::oniGLuint>(headingIndex);
             heading.componentCount = 1;
@@ -78,6 +73,15 @@ namespace oni {
             heading.stride = vertexSize;
             heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
                                                                                   heading));
+
+            graphic::BufferStructure halfSize;
+            halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
+            halfSize.componentCount = 2;
+            halfSize.componentType = GL_FLOAT;
+            halfSize.normalized = GL_FALSE;
+            halfSize.stride = vertexSize;
+            halfSize.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
+                                                                                   halfSize));
 
             graphic::BufferStructure position;
             position.index = static_cast<common::oniGLuint>(positionIndex);
@@ -96,21 +100,48 @@ namespace oni {
             color.stride = vertexSize;
             color.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, color));
 
-            graphic::BufferStructure uv;
-            uv.index = static_cast<common::oniGLuint>(uvIndex);
-            uv.componentCount = 2;
-            uv.componentType = GL_FLOAT;
-            uv.normalized = GL_TRUE;
-            uv.stride = vertexSize;
-            uv.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, uv));
+            graphic::BufferStructure uv_0;
+            uv_0.index = static_cast<common::oniGLuint>(uvIndex_0);
+            uv_0.componentCount = 2;
+            uv_0.componentType = GL_FLOAT;
+            uv_0.normalized = GL_TRUE;
+            uv_0.stride = vertexSize;
+            uv_0.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, uv_0));
+
+            graphic::BufferStructure uv_1;
+            uv_1.index = static_cast<common::oniGLuint>(uvIndex_1);
+            uv_1.componentCount = 2;
+            uv_1.componentType = GL_FLOAT;
+            uv_1.normalized = GL_TRUE;
+            uv_1.stride = vertexSize;
+            uv_1.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, uv_1));
+
+            graphic::BufferStructure uv_2;
+            uv_2.index = static_cast<common::oniGLuint>(uvIndex_2);
+            uv_2.componentCount = 2;
+            uv_2.componentType = GL_FLOAT;
+            uv_2.normalized = GL_TRUE;
+            uv_2.stride = vertexSize;
+            uv_2.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, uv_2));
+
+            graphic::BufferStructure uv_3;
+            uv_3.index = static_cast<common::oniGLuint>(uvIndex_3);
+            uv_3.componentCount = 2;
+            uv_3.componentType = GL_FLOAT;
+            uv_3.normalized = GL_TRUE;
+            uv_3.stride = vertexSize;
+            uv_3.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex, uv_3));
 
             std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(sampler);
-            bufferStructures.push_back(halfSize);
             bufferStructures.push_back(heading);
+            bufferStructures.push_back(halfSize);
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
-            bufferStructures.push_back(uv);
+            bufferStructures.push_back(uv_0);
+            bufferStructures.push_back(uv_1);
+            bufferStructures.push_back(uv_2);
+            bufferStructures.push_back(uv_3);
 
             mVertexArray = std::make_unique<VertexArray>(bufferStructures, maxBufferSize);
 
@@ -142,21 +173,25 @@ namespace oni {
             auto uv3 = math::vec2{};
 
             if (renderable.texture) {
-                uv0 = renderable.texture->uv[0];
-                uv1 = renderable.texture->uv[1];
-                uv2 = renderable.texture->uv[2];
-                uv3 = renderable.texture->uv[3];
+                uv0 = renderable.texture->uv.values[0];
+                uv1 = renderable.texture->uv.values[1];
+                uv2 = renderable.texture->uv.values[2];
+                uv3 = renderable.texture->uv.values[3];
                 samplerID = getSamplerID(renderable.texture->textureID);
 
                 assert(!renderable.animatedTexture);
             }
             if (renderable.animatedTexture) {
                 auto currentFrame = renderable.animatedTexture->currentFrame;
-                uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
-                uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];
-                uv2 = renderable.animatedTexture->frameUV[currentFrame].values[2];
-                uv3 = renderable.animatedTexture->frameUV[currentFrame].values[3];
-                samplerID = getSamplerID(renderable.texture->textureID);
+                if (currentFrame < renderable.animatedTexture->frameUV.size()) {
+                    uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
+                    uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];
+                    uv2 = renderable.animatedTexture->frameUV[currentFrame].values[2];
+                    uv3 = renderable.animatedTexture->frameUV[currentFrame].values[3];
+                    samplerID = getSamplerID(renderable.animatedTexture->texture.textureID);
+                } else {
+                    assert(false);
+                }
                 assert(!renderable.texture);
             }
 
@@ -165,10 +200,10 @@ namespace oni {
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
             buffer->color = renderable.color->rgba();
-            buffer->uv[0] = uv0;
-            buffer->uv[1] = uv1;
-            buffer->uv[2] = uv2;
-            buffer->uv[3] = uv3;
+            buffer->uv_0 = uv0;
+            buffer->uv_1 = uv1;
+            buffer->uv_2 = uv2;
+            buffer->uv_3 = uv3;
             buffer->samplerID = samplerID;
             buffer++;
 
@@ -208,22 +243,22 @@ namespace oni {
                 auto v1 = text.uv[i].w;
 
                 buffer->position = math::vec3{x0, y0, z};
-                buffer->uv[0] = math::vec2{u0, v0};
+                buffer->uv_0 = math::vec2{u0, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 
                 buffer->position = math::vec3{x0, y1, z};
-                buffer->uv[1] = math::vec2{u0, v1};
+                buffer->uv_1 = math::vec2{u0, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
                 buffer->position = math::vec3{x1, y1, z};
-                buffer->uv[2] = math::vec2{u1, v1};
+                buffer->uv_2 = math::vec2{u1, v1};
                 buffer->samplerID = samplerID;
                 buffer++;
 
                 buffer->position = math::vec3{x1, y0, z};
-                buffer->uv[3] = math::vec2{u1, v0};
+                buffer->uv_3 = math::vec2{u1, v0};
                 buffer->samplerID = samplerID;
                 buffer++;
 

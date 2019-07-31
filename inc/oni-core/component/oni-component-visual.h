@@ -55,6 +55,18 @@ namespace oni {
             LAST
         };
 
+        enum class NumAnimationFrames : common::u8 {
+            TWO = 2,
+            FOUR = 4,
+            FIVE = 5,
+            TEN = 10,
+            TWENTY = 20,
+            TWENTYFIVE = 25,
+            FIFTY = 50,
+
+            LAST
+        };
+
         struct UV {
             std::array<math::vec2, 4> values{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
                                              math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
@@ -69,17 +81,49 @@ namespace oni {
             // GL_UNSIGNED_BYTE 0x1401
             // GL_FLOAT         0x1406
             common::oniGLenum type{0x1401};
-            std::array<math::vec2, 4> uv{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
-                                         math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
+            UV uv{};
         };
 
         struct TextureAnimated {
-            Texture texture;
-            common::u8 numFrames{10};
+            Texture texture{};
+            NumAnimationFrames numFrames{NumAnimationFrames::TWO};
             common::u8 currentFrame{0};
-            common::r32 accumulator{0.f};
-            common::r32 fps{1.f};
-            std::vector<UV> frameUV;
+            common::r64 timeElapsed{0.f};
+            common::r64 frameDuration{0.1f};
+            std::vector<UV> frameUV{};
+
+            inline static TextureAnimated
+            make(NumAnimationFrames numFrames,
+                 common::r32 fps) noexcept {
+                TextureAnimated result;
+                init(result, numFrames, fps);
+                return result;
+            }
+
+            inline static void
+            init(TextureAnimated &output,
+                 NumAnimationFrames numFrames,
+                 common::r32 fps) {
+                output.numFrames = numFrames;
+                output.frameDuration = 1.0 / fps;
+                output.currentFrame = 0;
+                output.timeElapsed = 0;
+                output.texture = {};
+
+                auto countFrame = math::enumCast(numFrames);
+                auto xOffset = 0.f;
+                auto xWidth = 1.f / countFrame;
+
+                output.frameUV.resize(countFrame);
+                for (auto &&uv: output.frameUV) {
+                    uv.values[0] = {xOffset, 0.f};
+                    uv.values[1] = {xOffset, 1.f};
+                    uv.values[2] = {xOffset + xWidth, 1.f};
+                    uv.values[3] = {xOffset + xWidth, 0.f};
+
+                    xOffset += xWidth;
+                }
+            }
         };
 
         struct Text {

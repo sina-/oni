@@ -125,10 +125,10 @@ namespace oni {
             auto uv3 = math::vec2{};
             if (texture) {
                 samplerFront = getSamplerID(texture->textureID);
-                uv0 = texture->uv[0];
-                uv1 = texture->uv[1];
-                uv2 = texture->uv[2];
-                uv3 = texture->uv[3];
+                uv0 = texture->uv.values[0];
+                uv1 = texture->uv.values[1];
+                uv2 = texture->uv.values[2];
+                uv3 = texture->uv.values[3];
             }
             auto c = color.rgba();
 
@@ -192,15 +192,15 @@ namespace oni {
             assert(front.textureID);
             assert(back.textureID);
 
-            assert(math::almost_Equal(front.uv[0].x, back.uv[0].x));
-            assert(math::almost_Equal(front.uv[1].x, back.uv[1].x));
-            assert(math::almost_Equal(front.uv[2].x, back.uv[2].x));
-            assert(math::almost_Equal(front.uv[3].x, back.uv[3].x));
+            assert(math::almost_Equal(front.uv.values[0].x, back.uv.values[0].x));
+            assert(math::almost_Equal(front.uv.values[1].x, back.uv.values[1].x));
+            assert(math::almost_Equal(front.uv.values[2].x, back.uv.values[2].x));
+            assert(math::almost_Equal(front.uv.values[3].x, back.uv.values[3].x));
 
-            assert(math::almost_Equal(front.uv[0].y, back.uv[0].y));
-            assert(math::almost_Equal(front.uv[1].y, back.uv[1].y));
-            assert(math::almost_Equal(front.uv[2].y, back.uv[2].y));
-            assert(math::almost_Equal(front.uv[3].y, back.uv[3].y));
+            assert(math::almost_Equal(front.uv.values[0].y, back.uv.values[0].y));
+            assert(math::almost_Equal(front.uv.values[1].y, back.uv.values[1].y));
+            assert(math::almost_Equal(front.uv.values[2].y, back.uv.values[2].y));
+            assert(math::almost_Equal(front.uv.values[3].y, back.uv.values[3].y));
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
@@ -211,7 +211,7 @@ namespace oni {
 
             buffer->pos = quad.a.value;
             buffer->color = c;
-            buffer->uv = front.uv[0];
+            buffer->uv = front.uv.values[0];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
@@ -219,7 +219,7 @@ namespace oni {
 
             buffer->pos = quad.b.value;
             buffer->color = c;
-            buffer->uv = front.uv[1];
+            buffer->uv = front.uv.values[1];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
@@ -227,7 +227,7 @@ namespace oni {
 
             buffer->pos = quad.c.value;
             buffer->color = c;
-            buffer->uv = front.uv[2];
+            buffer->uv = front.uv.values[2];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 
@@ -235,7 +235,7 @@ namespace oni {
 
             buffer->pos = quad.d.value;
             buffer->color = c;
-            buffer->uv = front.uv[3];
+            buffer->uv = front.uv.values[3];
             buffer->samplerFront = samplerFront;
             buffer->samplerBack = samplerBack;
 

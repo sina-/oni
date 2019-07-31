@@ -752,6 +752,22 @@ namespace oni {
         }
 
         void
+        SceneManager::updateTextureAnimated(entities::EntityManager &manager,
+                                            common::r64 tickTime) {
+            auto view = manager.createView<component::TextureAnimated>();
+            for (auto &&id: view) {
+                auto &ta = view.get<component::TextureAnimated>(id);
+                ta.timeElapsed += tickTime;
+                // NOTE: It is assumed that this function is called more often than animation fps!
+                assert(ta.frameDuration > tickTime);
+                if (math::almost_Greater(ta.timeElapsed, ta.frameDuration)) {
+                    ta.currentFrame = (ta.currentFrame + 1) % math::enumCast(ta.numFrames);
+                    ta.timeElapsed = 0;
+                }
+            }
+        }
+
+        void
         SceneManager::zoom(common::r32 distance) {
             mCamera.z = 1 / distance;
         }

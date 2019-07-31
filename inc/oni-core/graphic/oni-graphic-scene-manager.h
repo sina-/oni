@@ -80,6 +80,10 @@ namespace oni {
             updateAfterMark(entities::EntityManager &,
                             common::r64 tickTime);
 
+            static void
+            updateTextureAnimated(entities::EntityManager &,
+                                  common::r64 tickTime);
+
             void
             renderRaw(const component::WorldP3D pos,
                       const component::Color &color);

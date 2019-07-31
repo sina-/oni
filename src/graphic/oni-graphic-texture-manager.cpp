@@ -101,6 +101,7 @@ namespace oni {
                 assert(false);
                 return;
             }
+            // NOTE: This is a copy
             texture = it->second;
         }
 
@@ -433,12 +434,10 @@ namespace oni {
 
             unbind();
 
-            std::array<math::vec2, 4> uv{math::vec2{0, 0}, math::vec2{0, 1}, math::vec2{1, 1}, math::vec2{1, 0}};
-
             texture.textureID = textureID;
             texture.format = format;
             texture.type = type;
-            texture.uv = uv;
+            texture.uv = {};
         }
 
         size_t

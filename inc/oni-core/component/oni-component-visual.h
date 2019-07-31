@@ -67,6 +67,14 @@ namespace oni {
             LAST
         };
 
+        enum class AnimationEndingBehavior : common::u8 {
+            LOOP,
+            PLAY_AND_STOP,
+            PLAY_AND_REMOVE_ENTITY,
+
+            LAST
+        };
+
         struct UV {
             std::array<math::vec2, 4> values{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
                                              math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
@@ -87,7 +95,9 @@ namespace oni {
         struct TextureAnimated {
             Texture texture{};
             NumAnimationFrames numFrames{NumAnimationFrames::TWO};
-            common::u8 currentFrame{0};
+            common::u8 nextFrame{0};
+            bool playing{true};
+            AnimationEndingBehavior endingBehaviour{AnimationEndingBehavior::LOOP};
             common::r64 timeElapsed{0.f};
             common::r64 frameDuration{0.1f};
             std::vector<UV> frameUV{};
@@ -106,7 +116,7 @@ namespace oni {
                  common::r32 fps) {
                 output.numFrames = numFrames;
                 output.frameDuration = 1.0 / fps;
-                output.currentFrame = 0;
+                output.nextFrame = 0;
                 output.timeElapsed = 0;
                 output.texture = {};
 

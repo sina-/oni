@@ -182,7 +182,7 @@ namespace oni {
                 assert(!renderable.animatedTexture);
             }
             if (renderable.animatedTexture) {
-                auto currentFrame = renderable.animatedTexture->currentFrame;
+                auto currentFrame = renderable.animatedTexture->nextFrame;
                 if (currentFrame < renderable.animatedTexture->frameUV.size()) {
                     uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
                     uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];

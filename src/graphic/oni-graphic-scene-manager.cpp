@@ -754,17 +754,41 @@ namespace oni {
         void
         SceneManager::updateTextureAnimated(entities::EntityManager &manager,
                                             common::r64 tickTime) {
+            assert(manager.getSimMode() == entities::SimMode::CLIENT ||
+                   manager.getSimMode() == entities::SimMode::CLIENT_SIDE_SERVER);
+
             auto view = manager.createView<component::TextureAnimated>();
             for (auto &&id: view) {
                 auto &ta = view.get<component::TextureAnimated>(id);
                 ta.timeElapsed += tickTime;
                 // NOTE: It is assumed that this function is called more often than animation fps!
                 assert(ta.frameDuration > tickTime);
-                if (math::almost_Greater(ta.timeElapsed, ta.frameDuration)) {
-                    ta.currentFrame = (ta.currentFrame + 1) % math::enumCast(ta.numFrames);
+                if (ta.playing && math::almost_Greater(ta.timeElapsed, ta.frameDuration)) {
+                    ta.nextFrame = (ta.nextFrame + 1) % math::enumCast(ta.numFrames);
                     ta.timeElapsed = 0;
+                    if (ta.nextFrame == 0) {
+                        switch (ta.endingBehaviour) {
+                            case component::AnimationEndingBehavior::LOOP: {
+                                break;
+                            }
+                            case component::AnimationEndingBehavior::PLAY_AND_STOP: {
+                                ta.playing = false;
+                                break;
+                            }
+                            case component::AnimationEndingBehavior::PLAY_AND_REMOVE_ENTITY: {
+                                manager.markForDeletion(id);
+                                break;
+                            }
+                            case component::AnimationEndingBehavior::LAST:
+                            default: {
+                                assert(false);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
+            manager.flushDeletions();
         }
 
         void

@@ -824,7 +824,8 @@ namespace oni {
             createComponent<component::Scale>(id);
             createComponent<component::Color>(id);
             createComponent<component::TextureTag>(id, component::TextureTag::BLAST_TEXTURE_ANIMATED);
-            createComponent<component::TextureAnimated>(id);
+            auto &ta = createComponent<component::TextureAnimated>(id);
+            ta.endingBehaviour = component::AnimationEndingBehavior::PLAY_AND_REMOVE_ENTITY;
 
             assignTag<component::Tag_TextureShaded>(id);
             return id;

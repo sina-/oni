@@ -251,6 +251,25 @@ namespace oni {
                     mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
                 }
             }
+            /// Animated shinnies
+            {
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::TextureAnimated,
+                        component::Color,
+                        component::Tag_ShinnyEffect>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &animatedTexture = view.get<component::TextureAnimated>(id);
+                    const auto &color = view.get<component::Color>(id);
+
+                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, &animatedTexture);
+                }
+            }
         }
 
         void
@@ -310,6 +329,10 @@ namespace oni {
                         continue;
                     }
 
+                    // NOTE: Shinnies need to be rendered at the top to get the blending and z order right. Maybe not
+                    // the best solution but has to do for now with the current render pipeline. If I come up with a
+                    // better pipeline I can chagne this.
+                    ePos.pos.z = mZLayerManager.getZForEntity(entities::EntityType::SHINNY_EFFECT);
                     r.pos = &ePos.pos;
                     r.heading = &ePos.heading;
 

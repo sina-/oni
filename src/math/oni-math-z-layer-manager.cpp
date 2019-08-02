@@ -45,7 +45,6 @@ namespace oni {
             mEntityZLayers[EntityType::SMOKE_CLOUD] = getNextZAtLayer(ZLayerDef::LAYER_4);
             mEntityZLayers[EntityType::TRAIL_PARTICLE] = getNextZAtLayer(ZLayerDef::LAYER_4);
 
-
             mEntityZLayers[EntityType::SHINNY_EFFECT] = getNextZAtLayer(ZLayerDef::LAYER_7);
             mEntityZLayers[EntityType::UI] = getNextZAtLayer(ZLayerDef::LAYER_8);
         }

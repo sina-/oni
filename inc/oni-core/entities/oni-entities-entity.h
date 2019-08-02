@@ -28,6 +28,8 @@ namespace oni {
 
             TRAIL_PARTICLE,
 
+            // TODO: This is not really an entity type, any entity can be rendered as a shinny! It really just effects
+            // the blend function
             SHINNY_EFFECT,
 
             TEXT,

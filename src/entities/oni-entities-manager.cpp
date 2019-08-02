@@ -827,7 +827,7 @@ namespace oni {
             auto &ta = createComponent<component::TextureAnimated>(id);
             ta.endingBehaviour = component::AnimationEndingBehavior::PLAY_AND_REMOVE_ENTITY;
 
-            assignTag<component::Tag_TextureShaded>(id);
+            assignTag<component::Tag_ShinnyEffect>(id);
             return id;
         }
 

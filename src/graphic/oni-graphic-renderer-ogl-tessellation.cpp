@@ -164,7 +164,7 @@ namespace oni {
         void
         Renderer_OpenGL_Tessellation::submit(const Renderable &renderable) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
-            auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
+            auto *buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
             auto samplerID = -1;
             auto uv0 = math::vec2{};
@@ -205,7 +205,7 @@ namespace oni {
             buffer->uv_2 = uv2;
             buffer->uv_3 = uv3;
             buffer->samplerID = samplerID;
-            buffer++;
+            ++buffer;
 
             // Update the mBuffer to point to the head.
             mBuffer = static_cast<void *>(buffer);
@@ -218,7 +218,7 @@ namespace oni {
         Renderer_OpenGL_Tessellation::submit(const component::Text &text,
                                              const component::WorldP3D &pos) {
             assert(false); // TODO: Need to re-implement this function
-            auto buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
+            auto *buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
             auto samplerID = getSamplerID(text.textureID);
 
@@ -245,22 +245,22 @@ namespace oni {
                 buffer->position = math::vec3{x0, y0, z};
                 buffer->uv_0 = math::vec2{u0, v0};
                 buffer->samplerID = samplerID;
-                buffer++;
+                ++buffer;
 
                 buffer->position = math::vec3{x0, y1, z};
                 buffer->uv_1 = math::vec2{u0, v1};
                 buffer->samplerID = samplerID;
-                buffer++;
+                ++buffer;
 
                 buffer->position = math::vec3{x1, y1, z};
                 buffer->uv_2 = math::vec2{u1, v1};
                 buffer->samplerID = samplerID;
-                buffer++;
+                ++buffer;
 
                 buffer->position = math::vec3{x1, y0, z};
                 buffer->uv_3 = math::vec2{u1, v0};
                 buffer->samplerID = samplerID;
-                buffer++;
+                ++buffer;
 
                 advance += text.advanceX[i] / scaleX;
                 mIndexCount += 6;

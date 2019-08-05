@@ -43,6 +43,7 @@ namespace oni {
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto headingIndex = glGetAttribLocation(program, "heading");
+            auto effectIndex = glGetAttribLocation(program, "effect");
             auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
             auto colorIndex = glGetAttribLocation(program, "color");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
@@ -53,6 +54,7 @@ namespace oni {
 
             if (positionIndex == -1 || headingIndex == -1 || colorIndex == -1 ||
                 samplerIDIndex == -1 || halfSizeIndex == -1 ||
+                effectIndex == -1 ||
                 uvIndex_0 == -1 || uvIndex_1 == -1 || uvIndex_2 == -1 || uvIndex_3 == -1) {
                 assert(false);
             }
@@ -73,6 +75,15 @@ namespace oni {
             heading.stride = vertexSize;
             heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
                                                                                   heading));
+
+            graphic::BufferStructure effect;
+            effect.index = static_cast<common::oniGLuint>(effectIndex);
+            effect.componentCount = 1;
+            effect.componentType = GL_FLOAT;
+            effect.normalized = GL_FALSE;
+            effect.stride = vertexSize;
+            effect.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
+                                                                                 effect));
 
             graphic::BufferStructure halfSize;
             halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
@@ -135,6 +146,7 @@ namespace oni {
             std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(sampler);
             bufferStructures.push_back(heading);
+            bufferStructures.push_back(effect);
             bufferStructures.push_back(halfSize);
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
@@ -197,6 +209,7 @@ namespace oni {
 
             buffer->position = renderable.pos->value;
             buffer->heading = renderable.heading->value;
+            buffer->effect = common::r32(math::enumCast(renderable.effect));
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
             buffer->color = renderable.color->rgba();
@@ -275,7 +288,6 @@ namespace oni {
             mShader->setUniformMat4("view", spec.view);
             mShader->setUniformMat4("proj", spec.proj);
         }
-
 
         common::oniGLsizei
         Renderer_OpenGL_Tessellation::getIndexCount() {

@@ -318,6 +318,11 @@ namespace oni {
             common::u32 value{255u};
         };
 
+        struct AnimatedColor {
+            Color begin{Color::WHITE()};
+            Color end{Color::BLACK()};
+        };
+
         enum class BrushType : common::u8 {
             COLOR,
             TEXTURE,

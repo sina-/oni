@@ -9,6 +9,32 @@ namespace oni {
 
         Renderer::~Renderer() = default;
 
+        Renderer::BlendSpec
+        Renderer::getBlendSpec(RenderEffect effect) {
+            auto result = BlendSpec{};
+            switch (effect) {
+                case RenderEffect::COLOR:
+                case RenderEffect::TEXTURE:
+                case RenderEffect::TINTED: {
+                    result.src = BlendMode::ONE;
+                    result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+                    break;
+                }
+                case RenderEffect::SHINNY_COLOR:
+                case RenderEffect::SHINNY_TEXTURE: {
+                    result.src = BlendMode::ONE;
+                    result.dest = BlendMode::ONE;
+                    break;
+                }
+                case RenderEffect::LAST:
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            return result;
+        }
+
         void
         Renderer::begin(const RenderSpec &spec) {
             assert(!mBegun);
@@ -20,7 +46,7 @@ namespace oni {
                 setViewportSize({spec.renderTarget->image.width, spec.renderTarget->image.height});
             }
 
-            _begin(spec);
+            _begin(spec, getBlendSpec(spec.effect));
         }
 
         void
@@ -52,6 +78,7 @@ namespace oni {
                                const entities::EntityManager *_manager,
                                const component::WorldP3D *_pos,
                                const component::Heading *_heading,
+                               const graphic::RenderEffect _effect,
                                const component::Scale *_scale,
                                const component::Color *_color,
                                const component::Texture *_texture,
@@ -60,11 +87,10 @@ namespace oni {
                 manager(_manager),
                 pos(_pos),
                 heading(_heading),
+                effect(_effect),
                 scale(_scale),
                 color(_color),
                 texture(_texture),
-                animatedTexture(
-                        _animatedTexture) {}
-
+                animatedTexture(_animatedTexture) {}
     }
 }

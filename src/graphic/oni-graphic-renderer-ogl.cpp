@@ -63,9 +63,11 @@ namespace oni {
         }
 
         void
-        Renderer_OpenGL::_begin(const RenderSpec &spec) {
-            auto blendSrc = getBlendMode(spec.src);
-            auto blendDest = getBlendMode(spec.dest);
+        Renderer_OpenGL::_begin(const RenderSpec &spec,
+                                const BlendSpec &blending) {
+            auto blendSrc = getBlendMode(blending.src);
+            auto blendDest = getBlendMode(blending.dest);
+
             glBlendFunc(blendSrc, blendDest);
             enableShader(spec);
 

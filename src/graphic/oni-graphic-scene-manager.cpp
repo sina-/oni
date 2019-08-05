@@ -77,11 +77,10 @@ namespace oni {
         void
         SceneManager::beginColorRendering() {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
+            spec.effect = RenderEffect::COLOR;
             setMVP(spec, true, false, true);
             begin(*mRendererTessellation, spec);
         }
@@ -180,6 +179,7 @@ namespace oni {
             // don't write to z-buffer when rendering particles...
             /// Textures
             {
+                auto effect = RenderEffect::TEXTURE;
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::Heading,
@@ -194,11 +194,32 @@ namespace oni {
                     const auto &texture = view.get<component::Texture>(id);
                     const auto &color = view.get<component::Color>(id);
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
+                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, &texture, nullptr);
+                }
+            }
+            /// Textures tinted
+            {
+                auto effect = RenderEffect::TINTED;
+                auto view = manager.createView<
+                        component::WorldP3D,
+                        component::Heading,
+                        component::Scale,
+                        component::Texture,
+                        component::Color,
+                        component::Tag_TextureTint>();
+                for (auto &&id: view) {
+                    const auto &pos = view.get<component::WorldP3D>(id);
+                    const auto &heading = view.get<component::Heading>(id);
+                    const auto &scale = view.get<component::Scale>(id);
+                    const auto &texture = view.get<component::Texture>(id);
+                    const auto &color = view.get<component::Color>(id);
+
+                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, &texture, nullptr);
                 }
             }
             /// Animated textures
             {
+                auto effect = RenderEffect::TEXTURE;
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::Heading,
@@ -213,11 +234,13 @@ namespace oni {
                     const auto &animatedTexture = view.get<component::TextureAnimated>(id);
                     const auto &color = view.get<component::Color>(id);
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, &animatedTexture);
+                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, nullptr,
+                                         &animatedTexture);
                 }
             }
             /// Colors
             {
+                auto effect = RenderEffect::COLOR;
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::Heading,
@@ -229,11 +252,13 @@ namespace oni {
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
                     const auto &color = view.get<component::Color>(id);
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, nullptr);
+
+                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, nullptr, nullptr);
                 }
             }
             /// Shinnies
             {
+                auto effect = RenderEffect::SHINNY_TEXTURE;
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::Heading,
@@ -248,11 +273,12 @@ namespace oni {
                     const auto &texture = view.get<component::Texture>(id);
                     const auto &color = view.get<component::Color>(id);
 
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
+                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, &texture, nullptr);
                 }
             }
             /// Animated shinnies
             {
+                auto effect = RenderEffect::SHINNY_TEXTURE;
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::Heading,
@@ -267,7 +293,7 @@ namespace oni {
                     const auto &animatedTexture = view.get<component::TextureAnimated>(id);
                     const auto &color = view.get<component::Color>(id);
 
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, &animatedTexture);
+                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, nullptr, &animatedTexture);
                 }
             }
         }
@@ -281,11 +307,12 @@ namespace oni {
             /// Render everything but shinnies
             {
                 RenderSpec spec;
-                spec.src = BlendMode::ONE;
-                spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
                 spec.renderTarget = nullptr;
                 spec.screenSize = getScreenSize();
                 spec.zoom = mCamera.z;
+                // TODO: I'm trying to mix blend function of opengl and blend function I implement in the shader
+                // into one enum and its not working great, one is per pixel, the other is per submit batch.
+                spec.effect = RenderEffect::TEXTURE;
                 setMVP(spec, true, true, true);
 
                 begin(*mRendererTessellation, spec);
@@ -312,11 +339,10 @@ namespace oni {
             /// Render shinnies
             {
                 RenderSpec spec;
-                spec.src = BlendMode::ONE;
-                spec.dest = BlendMode::ONE;
                 spec.renderTarget = nullptr;
                 spec.screenSize = getScreenSize();
                 spec.zoom = mCamera.z;
+                spec.effect = RenderEffect::SHINNY_TEXTURE;
                 setMVP(spec, true, true, true);
 
                 begin(*mRendererTessellation, spec);
@@ -411,8 +437,7 @@ namespace oni {
             });
 
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.effect = RenderEffect::TEXTURE;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -431,8 +456,7 @@ namespace oni {
                                   common::r32 viewWidth,
                                   common::r32 viewHeight) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.effect = RenderEffect::TEXTURE;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -563,8 +587,7 @@ namespace oni {
                                       component::Texture &dest,
                                       const math::mat4 *model) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.effect = RenderEffect::COLOR;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -582,8 +605,7 @@ namespace oni {
                                       component::Texture &dest,
                                       const math::mat4 *model) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.effect = RenderEffect::TEXTURE;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -598,8 +620,7 @@ namespace oni {
         SceneManager::blend(const component::Texture &front,
                             component::Texture &back) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            spec.effect = RenderEffect::TEXTURE;
             spec.renderTarget = &back;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;

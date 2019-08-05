@@ -19,6 +19,9 @@ namespace oni {
         struct Tag_TextureShaded {
         };
 
+        struct Tag_TextureTint{
+        };
+
         struct Tag_ShinnyEffect {
         };
 

@@ -28,14 +28,14 @@ namespace oni {
             Event_SplatOnDeath(const component::WorldP3D &pos,
                                const component::Scale &scale,
                                const component::Heading &heading,
-                               const component::TextureTag &tag,
+                               const component::EntityPreset &tag,
                                std::function<void()> func
             ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
 
             component::WorldP3D pos{};
             component::Scale scale{};
             component::Heading heading{};
-            component::TextureTag tag{};
+            component::EntityPreset tag{};
             std::function<void()> callback{};
         };
 
@@ -45,14 +45,14 @@ namespace oni {
             Event_SplatOnRest(const component::WorldP3D &pos,
                               const component::Scale &scale,
                               const component::Heading &heading,
-                              const component::TextureTag &tag,
+                              const component::EntityPreset &tag,
                               std::function<void()> func
             ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
 
             component::WorldP3D pos{};
             component::Scale scale{};
             component::Heading heading{};
-            component::TextureTag tag{};
+            component::EntityPreset tag{};
             std::function<void()> callback{};
         };
 
@@ -78,10 +78,10 @@ namespace oni {
             Event_SoundPlay() = default;
 
             Event_SoundPlay(const component::WorldP3D &pos,
-                            const component::SoundTag &soundTag) : pos(pos), tag(soundTag) {}
+                            const component::Sound_Tag &soundTag) : pos(pos), tag(soundTag) {}
 
             component::WorldP3D pos{};
-            component::SoundTag tag{};
+            component::Sound_Tag tag{};
         };
     }
 }

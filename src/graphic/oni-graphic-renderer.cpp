@@ -10,23 +10,46 @@ namespace oni {
         Renderer::~Renderer() = default;
 
         Renderer::BlendSpec
-        Renderer::getBlendSpec(RenderEffect effect) {
+        Renderer::getBlendSpec(component::MaterialFinishType type) {
             auto result = BlendSpec{};
-            switch (effect) {
-                case RenderEffect::COLOR:
-                case RenderEffect::TEXTURE:
-                case RenderEffect::TINTED: {
+            switch (type) {
+                case component::MaterialFinishType::SOLID:
+                case component::MaterialFinishType::TRANSLUCENT: {
                     result.src = BlendMode::ONE;
                     result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
                     break;
                 }
-                case RenderEffect::SHINNY_COLOR:
-                case RenderEffect::SHINNY_TEXTURE: {
+                case component::MaterialFinishType::SHINNY: {
                     result.src = BlendMode::ONE;
                     result.dest = BlendMode::ONE;
                     break;
                 }
-                case RenderEffect::LAST:
+                case component::MaterialFinishType::LAST:
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            return result;
+        }
+
+        Renderer::DepthSpec
+        Renderer::getDepthSpec(component::MaterialFinishType type) {
+            auto result = DepthSpec{};
+            switch (type) {
+                case component::MaterialFinishType::SOLID: {
+                    result.depthRead = true;
+                    result.depthWrite = true;
+                    break;
+                }
+                    // TODO: Is this correct?
+                case component::MaterialFinishType::TRANSLUCENT:
+                case component::MaterialFinishType::SHINNY: {
+                    result.depthRead = true;
+                    result.depthWrite = false;
+                    break;
+                }
+                case component::MaterialFinishType::LAST:
                 default: {
                     assert(false);
                     break;
@@ -36,17 +59,19 @@ namespace oni {
         }
 
         void
-        Renderer::begin(const RenderSpec &spec) {
+        Renderer::begin(const RenderSpec &renderSpec) {
             assert(!mBegun);
             mBegun = true;
 
-            if (spec.renderTarget) {
-                mRenderTarget = spec.renderTarget;
+            if (renderSpec.renderTarget) {
+                mRenderTarget = renderSpec.renderTarget;
                 mViewportSize = getViewportSize();
-                setViewportSize({spec.renderTarget->image.width, spec.renderTarget->image.height});
+                setViewportSize({renderSpec.renderTarget->image.width, renderSpec.renderTarget->image.height});
             }
 
-            _begin(spec, getBlendSpec(spec.effect));
+            auto blendSpec = getBlendSpec(renderSpec.finishType);
+            auto depthSpec = getDepthSpec(renderSpec.finishType);
+            _begin(renderSpec, blendSpec, depthSpec);
         }
 
         void
@@ -73,24 +98,5 @@ namespace oni {
                   const Renderable &right) {
             return left.pos->z <= right.pos->z;
         }
-
-        Renderable::Renderable(common::EntityID _id,
-                               const entities::EntityManager *_manager,
-                               const component::WorldP3D *_pos,
-                               const component::Heading *_heading,
-                               const graphic::RenderEffect _effect,
-                               const component::Scale *_scale,
-                               const component::Color *_color,
-                               const component::Texture *_texture,
-                               const component::TextureAnimated *_animatedTexture) :
-                id(_id),
-                manager(_manager),
-                pos(_pos),
-                heading(_heading),
-                effect(_effect),
-                scale(_scale),
-                color(_color),
-                texture(_texture),
-                animatedTexture(_animatedTexture) {}
     }
 }

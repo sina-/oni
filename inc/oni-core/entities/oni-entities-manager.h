@@ -102,17 +102,13 @@ namespace oni {
                         common::r32 z);
 
             void
-            setTexturePath(common::EntityID id,
-                           std::string_view path);
-
-            void
-            setTextureTag(common::EntityID,
-                          component::TextureTag);
-
-            void
             setScale(common::EntityID,
                      common::r32 x,
                      common::r32 y);
+
+            void
+            setEntityPreset(common::EntityID,
+                            component::EntityPreset);
 
             void
             setColor(common::EntityID,
@@ -144,14 +140,6 @@ namespace oni {
                        common::r32 heading);
 
             void
-            setTrailTextureTag(common::EntityID,
-                               component::TextureTag);
-
-            void
-            setAfterMarkTextureTag(common::EntityID,
-                                   component::TextureTag);
-
-            void
             createPhysics(
                     common::EntityID,
                     const component::WorldP3D &worldPos,
@@ -181,9 +169,6 @@ namespace oni {
             void
             deleteEntity(common::EntityID,
                          const entities::EntityOperationPolicy &);
-
-            void
-            accommodateWithComplements();
 
             void
             attach(common::EntityID parent,
@@ -396,6 +381,12 @@ namespace oni {
                 }
             }
 
+            template<class Tag>
+            void
+            assignTag(common::EntityID id) {
+                mRegistry->assign<Tag>(id);
+            }
+
             void
             printEntityType(common::EntityID id);
 
@@ -414,12 +405,6 @@ namespace oni {
             void
             assignSimMode(common::EntityID,
                           entities::SimMode);
-
-            template<class Tag>
-            void
-            assignTag(common::EntityID id) {
-                mRegistry->assign<Tag>(id);
-            }
 
             void
             removePhysicalBody(common::EntityID);

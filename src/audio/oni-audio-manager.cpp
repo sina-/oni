@@ -143,10 +143,10 @@ namespace oni {
         AudioManager::preLoadSounds() {
             // TODO: The sound must have been loaded using the asset packet instead of just going through all the
             // sound types and shotgun loading all
-            for (auto i = math::enumCast(component::SoundTag::UNKNOWN) + 1;
-                 i < math::enumCast(component::SoundTag::LAST);
+            for (auto i = math::enumCast(component::Sound_Tag::UNKNOWN) + 1;
+                 i < math::enumCast(component::Sound_Tag::LAST);
                  ++i) {
-                auto tag = static_cast<component::SoundTag>(i);
+                auto tag = static_cast<component::Sound_Tag>(i);
                 auto path = mAssetManager.getAssetFilePath(tag);
                 loadSound(tag, path);
             }
@@ -156,7 +156,7 @@ namespace oni {
                  ++i) {
                 auto id = createCollisionEffectID(entities::EntityType::SIMPLE_ROCKET,
                                                   static_cast<entities::EntityType>(i));
-                mCollisionEffects[id] = component::SoundTag::COLLISION_ROCKET_UNKNOWN;
+                mCollisionEffects[id] = component::Sound_Tag::COLLISION_ROCKET_UNKNOWN;
             }
         }
 
@@ -174,7 +174,7 @@ namespace oni {
         }
 
         void
-        AudioManager::loadSound(component::SoundTag tag,
+        AudioManager::loadSound(component::Sound_Tag tag,
                                 std::string_view filePath) {
 //            if (mSounds[tag]) {
 //                return;
@@ -253,7 +253,7 @@ namespace oni {
         }
 
         AudioManager::EntitySoundTag
-        AudioManager::createEntitySoundID(component::SoundTag tag,
+        AudioManager::createEntitySoundID(component::Sound_Tag tag,
                                           common::EntityID id) {
             auto result = math::pack_u32(math::enumCast(tag), id);
             return result;

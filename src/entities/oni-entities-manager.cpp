@@ -10,6 +10,7 @@
 #include <oni-core/component/oni-component-gameplay.h>
 #include <oni-core/component/oni-component-type.h>
 #include <oni-core/gameplay/oni-gameplay-lap-tracker.h>
+#include <oni-core/graphic/oni-graphic-texture-manager.h>
 #include <oni-core/level/oni-level-chunk.h>
 #include <oni-core/math/oni-math-rand.h>
 
@@ -62,49 +63,6 @@ namespace oni {
             auto &attachee = mRegistry->get<component::EntityAttachee>(child);
             attachee.entityID = parent;
             attachee.entityType = parentType;
-        }
-
-        void
-        EntityManager::accommodateWithComplements() {
-            auto view = createView<component::ComplementaryComponents>();
-            for (auto &&id: view) {
-                auto types = view.get<component::ComplementaryComponents>(id).types;
-                for (auto &&type: types) {
-                    // TODO: Maybe there is a better way to identify components? In effect I'm looking for
-                    // auto generated compile time component id
-                    switch (type) {
-                        case component::ComponentType::SMOKE_EMITTER_CD: {
-                            if (!has<component::CoolDown>(id)) {
-                                createComponent<component::CoolDown>(id);
-                            }
-                            break;
-                        }
-                        case component::ComponentType::SOUND_PITCH: {
-                            if (!has<component::SoundPitch>(id)) {
-                                createComponent<component::SoundPitch>(id);
-                            }
-                            break;
-                        }
-                        case component::ComponentType::TEXTURE: {
-                            if (!has<component::Texture>(id)) {
-                                createComponent<component::Texture>(id);
-                            }
-                            break;
-                        }
-                        case component::ComponentType::BRUSH_TRAIL: {
-                            if (!has<component::BrushTrail>(id)) {
-                                createComponent<component::BrushTrail>(id);
-                            }
-                            break;
-                        }
-                        case component::ComponentType::UNKNOWN:
-                        case component::ComponentType::LAST:
-                        default: {
-                            assert(false);
-                        }
-                    }
-                }
-            }
         }
 
         size_t
@@ -221,7 +179,7 @@ namespace oni {
                 // TODO: Clean up the texture in video-memory or tag it stale or something if I end up having a asset manager
             }
 
-            if (mRegistry->has<component::SoundTag>(id)) {
+            if (mRegistry->has<component::Sound_Tag>(id)) {
                 // TODO: Same as texture, audio system needs to free the resource or let its resource manager at least know about this
             }
 
@@ -413,18 +371,6 @@ namespace oni {
         }
 
         void
-        EntityManager::setTexturePath(common::EntityID id,
-                                      std::string_view path) {
-            mRegistry->get<component::Texture>(id).image.path = path;
-        }
-
-        void
-        EntityManager::setTextureTag(common::EntityID id,
-                                     component::TextureTag tag) {
-            mRegistry->get<component::TextureTag>(id) = tag;
-        }
-
-        void
         EntityManager::setRandAge(common::EntityID id,
                                   common::r32 lower,
                                   common::r32 upper) {
@@ -476,24 +422,18 @@ namespace oni {
         }
 
         void
+        EntityManager::setEntityPreset(common::EntityID id,
+                                       component::EntityPreset tag) {
+
+            auto &ep = mRegistry->get<component::EntityPreset>(id);
+            ep = tag;
+        }
+
+        void
         EntityManager::setHeading(common::EntityID id,
                                   common::r32 heading) {
             auto &h = mRegistry->get<component::Heading>(id);
             h.value = heading;
-        }
-
-        void
-        EntityManager::setTrailTextureTag(common::EntityID id,
-                                          component::TextureTag tag) {
-            auto &tt = mRegistry->get<component::ParticleEmitter>(id);
-            tt.textureTag = tag;
-        }
-
-        void
-        EntityManager::setAfterMarkTextureTag(common::EntityID id,
-                                              component::TextureTag tag) {
-            auto &am = mRegistry->get<component::AfterMark>(id);
-            am.textureTag = tag;
         }
 
         void
@@ -531,26 +471,17 @@ namespace oni {
 
         common::EntityID
         EntityManager::createEntity_SmokeCloud() {
+            assert(mSimMode == entities::SimMode::CLIENT);
             auto id = createEntity(entities::EntityType::SMOKE_CLOUD);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::CLOUD_WHITE);
-            createComponent<component::Color>(id);
             createComponent<component::Age>(id);
-            createComponent<component::FadeWithAge>(id);
             createComponent<component::Velocity>(id);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::SMOKE_WHITE);
             // TODO: needs physics
 
-            if (mSimMode == entities::SimMode::SERVER) {
-                auto &cc = createComponent<component::ComplementaryComponents>(id);
-                cc.types.emplace_back(component::ComponentType::TEXTURE);
-            } else {
-                createComponent<component::Texture>(id);
-            }
-
-            assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Dynamic>(id);
 
             return id;
@@ -558,15 +489,16 @@ namespace oni {
 
         common::EntityID
         EntityManager::createEntity_RaceCar() {
+            assert(mSimMode == entities::SimMode::SERVER);
+
             auto id = createEntity(entities::EntityType::RACE_CAR);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::RACE_CAR);
-            createComponent<component::Color>(id);
-            createComponent<component::Sound>(id, component::SoundTag::ENGINE_IDLE, component::ChannelGroup::EFFECT);
+            createComponent<component::Sound>(id, component::Sound_Tag::ENGINE_IDLE, component::ChannelGroup::EFFECT);
             createComponent<component::EntityAttachment>(id);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::RACE_CAR_DEFAULT);
 
             auto &ph = createComponent<component::WorldP3D_History>(id);
             ph.size = 20;
@@ -582,12 +514,6 @@ namespace oni {
             properties.bodyType = component::BodyType::DYNAMIC;
             properties.highPrecision = true;
 
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::SMOKE_EMITTER_CD);
-            cc.types.emplace_back(component::ComponentType::SOUND_PITCH);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
-
-            assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Dynamic>(id);
             assignTag<component::Tag_Audible>(id);
 
@@ -601,16 +527,11 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::VEHICLE_GUN);
-            createComponent<component::Color>(id);
             createComponent<component::EntityAttachee>(id);
             createComponent<component::GunCoolDown>(id);
-
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::VEHICLE_GUN_DEFAULT);
 
             assignTag<component::Tag_Dynamic>(id);
-            assignTag<component::Tag_TextureShaded>(id);
 
             return id;
         }
@@ -622,8 +543,7 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::Color>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::TRUCK);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::VEHICLE_DEFAULT);
 
             auto &properties = createComponent<component::PhysicalProperties>(id);
             properties.friction = 1.f;
@@ -634,10 +554,6 @@ namespace oni {
             properties.bodyType = component::BodyType::DYNAMIC;
             properties.physicalCategory = component::PhysicalCategory::VEHICLE;
 
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
-
-            assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Dynamic>(id);
 
             return id;
@@ -650,12 +566,11 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::ROCKET);
-            createComponent<component::Color>(id);
-            createComponent<component::Sound>(id, component::SoundTag::ROCKET_BURN, component::ChannelGroup::EFFECT);
+            createComponent<component::Sound>(id, component::Sound_Tag::ROCKET_BURN, component::ChannelGroup::EFFECT);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::ROCKET_DEFAULT);
             auto &pt = createComponent<component::ParticleEmitter>(id);
             pt.size = 3.f;
-            pt.textureTag = component::TextureTag::CLOUD_BLACK;
+            pt.tag = component::EntityPreset::CLOUD_BLACK;
             auto &ph = createComponent<component::WorldP3D_History>(id);
             ph.size = 10;
 
@@ -676,12 +591,7 @@ namespace oni {
             jet.fuze = 3.f;
             jet.force = 3.f;
 
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
-            cc.types.emplace_back(component::ComponentType::BRUSH_TRAIL);
-
             assignTag<component::Tag_Dynamic>(id);
-            assignTag<component::Tag_TextureShaded>(id);
             assignTag<component::Tag_Audible>(id);
 
             return id;
@@ -694,19 +604,14 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::WALL_VERTICAL);
-            createComponent<component::Color>(id);
 
             auto &properties = createComponent<component::PhysicalProperties>(id);
             properties.highPrecision = false;
             properties.bodyType = component::BodyType::STATIC;
             properties.physicalCategory = component::PhysicalCategory::WALL;
-
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::WALL_VERTICAL);
 
             assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_TextureShaded>(id);
 
             return id;
         }
@@ -718,15 +623,10 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::TIRE);
-            createComponent<component::Color>(id);
             createComponent<component::EntityAttachee>(id);
-
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::RACE_CAR_TIRE_DEFAULT);
 
             assignTag<component::Tag_Dynamic>(id);
-            assignTag<component::Tag_TextureShaded>(id);
             return id;
         }
 
@@ -737,55 +637,37 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::TIRE);
-            createComponent<component::Color>(id);
             createComponent<component::EntityAttachee>(id);
-
-            auto &cc = createComponent<component::ComplementaryComponents>(id);
-            cc.types.emplace_back(component::ComponentType::TEXTURE);
-            cc.types.emplace_back(component::ComponentType::BRUSH_TRAIL);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::RACE_CAR_TIRE_WITH_TRAIL);
 
             assignTag<component::Tag_Dynamic>(id);
-            assignTag<component::Tag_TextureShaded>(id);
             return id;
         }
 
         common::EntityID
         EntityManager::createEntity_SimpleParticle() {
+            assert(mSimMode == entities::SimMode::CLIENT);
             auto id = createEntity(entities::EntityType::SIMPLE_PARTICLE);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::SMOKE_WHITE);
-            createComponent<component::Color>(id);
             createComponent<component::Age>(id);
-            createComponent<component::FadeWithAge>(id);
             createComponent<component::Velocity>(id);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::CLOUD_WHITE);
 
-            if (mSimMode == entities::SimMode::SERVER) {
-                auto &cc = createComponent<component::ComplementaryComponents>(id);
-                cc.types.emplace_back(component::ComponentType::TEXTURE);
-            } else {
-                createComponent<component::Texture>(id);
-            }
-
-            // assignTag<component::Tag_TextureShaded>(id);
-            assignTag<component::Tag_ShinnyEffect>(id);
             return id;
         }
 
         common::EntityID
         EntityManager::createEntity_SimpleBlastParticle() {
+            assert(mSimMode == entities::SimMode::CLIENT);
             auto id = createEntity(entities::EntityType::SIMPLE_BLAST_PARTICLE);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::SPARK);
-            createComponent<component::Color>(id);
             createComponent<component::Age>(id);
-            auto &f = createComponent<component::FadeWithAge>(id);
-            f.fadeFunc = component::FadeFunc::TAIL;
+            createComponent<component::EntityPreset>(id, component::EntityPreset::BLAST_PARTICLE_DEFAULT);
             auto &scale = createComponent<component::Scale>(id);
             scale.x = mRand->next_r32(0.1f, 0.2f);
             scale.y = scale.x;
@@ -800,14 +682,6 @@ namespace oni {
             props.bodyType = component::BodyType::DYNAMIC;
             props.physicalCategory = component::PhysicalCategory::PROJECTILE;
 
-            if (mSimMode == entities::SimMode::SERVER) {
-                auto &cc = createComponent<component::ComplementaryComponents>(id);
-                cc.types.emplace_back(component::ComponentType::TEXTURE);
-            } else {
-                createComponent<component::Texture>(id);
-            }
-
-            assignTag<component::Tag_ShinnyEffect>(id);
             //assignTag<component::Tag_SplatOnDeath>(id);
             assignTag<component::Tag_Dynamic>(id);
 
@@ -822,12 +696,8 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::Color>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::BLAST_TEXTURE_ANIMATED);
-            auto &ta = createComponent<component::TextureAnimated>(id);
-            ta.endingBehaviour = component::AnimationEndingBehavior::PLAY_AND_REMOVE_ENTITY;
+            createComponent<component::EntityPreset>(id, component::EntityPreset::BLAST_ANIMATION_DEFAULT);
 
-            assignTag<component::Tag_ShinnyEffect>(id);
             return id;
         }
 
@@ -844,78 +714,61 @@ namespace oni {
 
         common::EntityID
         EntityManager::createEntity_WorldChunk() {
+            assert(mSimMode == entities::SimMode::SERVER);
             auto id = createEntity(entities::EntityType::WORLD_CHUNK);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::Color>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::BACKGROUND_CHUNK);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::BACKGROUND_DEFAULT);
             createComponent<level::Chunk>(id);
 
-            if (mSimMode == entities::SimMode::SERVER) {
-                auto &cc = createComponent<component::ComplementaryComponents>(id);
-                cc.types.emplace_back(component::ComponentType::TEXTURE);
-            } else {
-                createComponent<component::Texture>(id);
-            }
-
             assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_TextureShaded>(id);
 
             return id;
         }
 
         common::EntityID
         EntityManager::createEntity_DebugWorldChunk() {
+            assert(mSimMode == entities::SimMode::SERVER);
             auto id = createEntity(entities::EntityType::DEBUG_WORLD_CHUNK);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Heading>(id);
             createComponent<component::Scale>(id);
-            createComponent<component::Color>(id);
-            createComponent<level::Chunk>(id);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::BACKGROUND_DEBUG);
 
             assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_ColorShaded>(id);
 
             return id;
         }
 
         common::EntityID
         EntityManager::createEntity_SimpleSpriteColored() {
+            // TODO: Implement
+            assert(false);
             auto id = createEntity(entities::EntityType::SIMPLE_SPRITE);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::Color>(id);
 
             assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_ColorShaded>(id);
 
             return id;
         }
 
         common::EntityID
         EntityManager::createEntity_SimpleSpriteTextured() {
+            // TODO: Implement
+            assert(false);
             auto id = createEntity(entities::EntityType::SIMPLE_SPRITE);
 
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::Color>(id);
-            createComponent<component::TextureTag>(id, component::TextureTag::BACKGROUND_WHITE);
-
-            if (mSimMode == entities::SimMode::SERVER) {
-                auto &cc = createComponent<component::ComplementaryComponents>(id);
-                cc.types.emplace_back(component::ComponentType::TEXTURE);
-            } else {
-                createComponent<component::Texture>(id);
-            }
 
             assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_TextureShaded>(id);
 
             return id;
         }
@@ -928,11 +781,9 @@ namespace oni {
             createComponent<component::WorldP3D>(id);
             createComponent<component::Scale>(id);
             createComponent<component::Heading>(id);
-            createComponent<component::Texture>(id);
-            createComponent<component::Color>(id);
+            createComponent<component::EntityPreset>(id, component::EntityPreset::CANVAS);
 
             assignTag<component::Tag_Static>(id);
-            assignTag<component::Tag_TextureShaded>(id);
 
             return id;
         }

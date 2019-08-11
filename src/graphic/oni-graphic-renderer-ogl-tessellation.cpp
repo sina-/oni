@@ -175,6 +175,13 @@ namespace oni {
 
         void
         Renderer_OpenGL_Tessellation::submit(const Renderable &renderable) {
+            // TODO: Have to rewrite to support the new Material based renderables.
+            const auto *material = renderable.material;
+            const auto transitionType = renderable.transitionType;
+            const auto *finish = renderable.finish;
+
+            return;
+            assert(false);
             assert(mIndexCount + 1 < mMaxIndicesCount);
             auto *buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
@@ -184,35 +191,34 @@ namespace oni {
             auto uv2 = math::vec2{};
             auto uv3 = math::vec2{};
 
-            if (renderable.texture) {
-                uv0 = renderable.texture->uv.values[0];
-                uv1 = renderable.texture->uv.values[1];
-                uv2 = renderable.texture->uv.values[2];
-                uv3 = renderable.texture->uv.values[3];
-                samplerID = getSamplerID(renderable.texture->textureID);
-
-                assert(!renderable.animatedTexture);
+            if (renderable.material->texture.textureID) {
+                uv0 = renderable.material->texture.uv.values[0];
+                uv1 = renderable.material->texture.uv.values[1];
+                uv2 = renderable.material->texture.uv.values[2];
+                uv3 = renderable.material->texture.uv.values[3];
+                samplerID = getSamplerID(renderable.material->texture.textureID);
             }
-            if (renderable.animatedTexture) {
-                auto currentFrame = renderable.animatedTexture->nextFrame;
-                if (currentFrame < renderable.animatedTexture->frameUV.size()) {
-                    uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
-                    uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];
-                    uv2 = renderable.animatedTexture->frameUV[currentFrame].values[2];
-                    uv3 = renderable.animatedTexture->frameUV[currentFrame].values[3];
-                    samplerID = getSamplerID(renderable.animatedTexture->texture.textureID);
-                } else {
-                    assert(false);
-                }
-                assert(!renderable.texture);
-            }
+//            if (renderable.animatedTexture) {
+//                auto currentFrame = renderable.animatedTexture->nextFrame;
+//                if (currentFrame < renderable.animatedTexture->frameUV.size()) {
+//                    uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
+//                    uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];
+//                    uv2 = renderable.animatedTexture->frameUV[currentFrame].values[2];
+//                    uv3 = renderable.animatedTexture->frameUV[currentFrame].values[3];
+//                    samplerID = getSamplerID(renderable.animatedTexture->texture.textureID);
+//                } else {
+//                    assert(false);
+//                }
+//                assert(!renderable.texture);
+//            }
 
             buffer->position = renderable.pos->value;
             buffer->heading = renderable.heading->value;
-            buffer->effect = common::r32(math::enumCast(renderable.effect));
+            // TODO: use the new material
+            // buffer->effect = common::r32(math::enumCast(renderable.effect));
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
-            buffer->color = renderable.color->rgba();
+            buffer->color = renderable.material->color.rgba();
             buffer->uv_0 = uv0;
             buffer->uv_1 = uv1;
             buffer->uv_2 = uv2;

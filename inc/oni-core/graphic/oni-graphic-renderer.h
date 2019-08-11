@@ -2,6 +2,7 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/math/oni-math-mat4.h>
+#include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
     namespace entities {
@@ -47,29 +48,7 @@ namespace oni {
             LAST
         };
 
-        // TODO: I can probably just let a mix of these instead of creating one enum per combo
-        enum class RenderEffect : common::u8 {
-            COLOR = 0,
-            TEXTURE = 1,
-            TINTED = 2,
-            SHINNY_COLOR = 3,
-            SHINNY_TEXTURE = 4,
-            FADE = 5,
-
-            LAST
-        };
-
         struct Renderable {
-            Renderable(common::EntityID _id,
-                       const entities::EntityManager *_manager,
-                       const component::WorldP3D *_pos,
-                       const component::Heading *_heading,
-                       const graphic::RenderEffect _effect,
-                       const component::Scale *_scale,
-                       const component::Color *_color,
-                       const component::Texture *_texture,
-                       const component::TextureAnimated *_animatedTexture);
-
             friend bool
             operator<(const Renderable &left,
                       const Renderable &right);
@@ -79,14 +58,18 @@ namespace oni {
                       const Renderable &right);
 
             common::EntityID id{};
-            graphic::RenderEffect effect{RenderEffect::COLOR};
-            const entities::EntityManager *manager{};
-            const component::WorldP3D *pos{};
-            const component::Heading *heading{};
-            const component::Scale *scale{};
-            const component::Color *color{};
-            const component::Texture *texture{};
-            const component::TextureAnimated *animatedTexture{};
+            const entities::EntityManager *manager;
+
+            const component::WorldP3D *pos;
+            const component::Heading *heading;
+            const component::Scale *scale;
+
+            const component::MaterialSurface *material;
+            const component::MaterialFinish *finish;
+            const component::MaterialTransition_Fade *transitionFade;
+            const component::MaterialTransition_Animated *transitionAnimated;
+            const component::MaterialTransition_Tint *transitionTint;
+            component::MaterialTransition_Type transitionType;
         };
 
         struct RenderSpec {
@@ -95,9 +78,11 @@ namespace oni {
             math::mat4 proj{};
             math::vec2 screenSize{};
             common::r32 zoom{};
-
             component::Texture *renderTarget{};
-            RenderEffect effect{RenderEffect::COLOR};
+
+            ///
+
+            component::MaterialFinishType finishType{};
         };
 
         class Renderer {
@@ -135,12 +120,18 @@ namespace oni {
                 BlendMode dest{BlendMode::ONE};
             };
 
+            struct DepthSpec {
+                bool depthWrite{false};
+                bool depthRead{false};
+            };
+
             component::Texture *mRenderTarget{};
 
         protected:
             virtual void
             _begin(const RenderSpec &,
-                   const BlendSpec &) = 0;
+                   const BlendSpec &,
+                   const DepthSpec &) = 0;
 
             virtual void
             _flush(component::Texture *renderTarget) = 0;
@@ -156,7 +147,10 @@ namespace oni {
 
         private:
             static BlendSpec
-            getBlendSpec(RenderEffect);
+            getBlendSpec(component::MaterialFinishType);
+
+            static DepthSpec
+            getDepthSpec(component::MaterialFinishType);
 
         private:
             bool mBegun{false};

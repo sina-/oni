@@ -101,14 +101,14 @@ namespace oni {
             getChannelGroup(component::ChannelGroup);
 
             void
-            loadSound(component::SoundTag,
+            loadSound(component::Sound_Tag,
                       std::string_view);
 
             void
             loadChannels();
 
             static EntitySoundTag
-            createEntitySoundID(component::SoundTag,
+            createEntitySoundID(component::Sound_Tag,
                                 common::EntityID);
 
             AudioManager::EntityChannel &
@@ -138,9 +138,9 @@ namespace oni {
             std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
 
             std::unordered_map<component::ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroup;
-            std::unordered_map<component::SoundTag, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
+            std::unordered_map<component::Sound_Tag, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
             std::unordered_map<AudioManager::EntitySoundTag, EntityChannel> mLoopingChannels;
-            std::unordered_map<AudioManager::CollisionSoundTag, component::SoundTag> mCollisionEffects;
+            std::unordered_map<AudioManager::CollisionSoundTag, component::Sound_Tag> mCollisionEffects;
             std::unordered_map<component::ChannelGroup, common::r32> mChannelVolume;
 
             common::r32 mMasterVolume{1.f};

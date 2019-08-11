@@ -435,7 +435,7 @@ namespace oni {
                     if (manager.has<component::Tag_SplatOnDeath>(id)) {
                         auto &pos = manager.get<component::WorldP3D>(id);
                         auto &size = manager.get<component::Scale>(id);
-                        auto &tag = manager.get<component::TextureTag>(id);
+                        auto &tag = manager.get<component::EntityPreset>(id);
                         auto &heading = manager.get<component::Heading>(id);
 
                         auto callback = [&manager, id]() {
@@ -458,7 +458,7 @@ namespace oni {
             auto view = manager.createView<
                     component::PhysicalProperties,
                     component::Scale,
-                    component::TextureTag,
+                    component::EntityPreset,
                     component::WorldP3D,
                     component::Heading,
                     component::Tag_SplatOnRest>();
@@ -467,7 +467,7 @@ namespace oni {
                 if (!body->IsAwake()) {
                     auto &pos = view.get<component::WorldP3D>(id);
                     auto &size = view.get<component::Scale>(id);
-                    auto &tag = view.get<component::TextureTag>(id);
+                    auto &tag = view.get<component::EntityPreset>(id);
                     auto &heading = view.get<component::Heading>(id);
 
                     auto callback = [&manager, id]() {
@@ -489,11 +489,11 @@ namespace oni {
             auto view = manager.createView<
                     component::Age,
                     component::Color,
-                    component::FadeWithAge>();
+                    component::MaterialTransition_Fade>();
             for (auto &&id: view) {
                 auto &age = view.get<component::Age>(id);
                 auto &color = view.get<component::Color>(id);
-                auto &fade = view.get<component::FadeWithAge>(id);
+                auto &fade = view.get<component::MaterialTransition_Fade>(id);
 
                 auto targetAlpha = 1.f;
                 switch (fade.fadeFunc) {

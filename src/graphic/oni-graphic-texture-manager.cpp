@@ -80,9 +80,9 @@ namespace oni {
         }
 
         const component::Texture &
-        TextureManager::getTexture(component::TextureTag tag) {
-            assert(tag != component::TextureTag::UNKNOWN);
-            assert(tag != component::TextureTag::LAST);
+        TextureManager::getTexture(component::EntityPreset tag) {
+            assert(tag != component::EntityPreset::UNKNOWN);
+            assert(tag != component::EntityPreset::LAST);
             const auto it = mTextureMap.find(tag);
             if (it == mTextureMap.end()) {
                 assert(false);
@@ -91,17 +91,17 @@ namespace oni {
         }
 
         void
-        TextureManager::initTexture(component::TextureTag tag,
+        TextureManager::initTexture(component::EntityPreset tag,
                                     component::Texture &texture) {
-            assert(tag != component::TextureTag::UNKNOWN);
-            assert(tag != component::TextureTag::LAST);
+            assert(tag != component::EntityPreset::UNKNOWN);
+            assert(tag != component::EntityPreset::LAST);
             const auto it = mTextureMap.find(tag);
             if (it == mTextureMap.end()) {
                 // NOTE: Did you forget to call loadAssets()?
                 assert(false);
                 return;
             }
-            // NOTE: This is a copy
+            // TODO: This is a copy
             texture = it->second;
         }
 
@@ -113,9 +113,9 @@ namespace oni {
         }
 
         void
-        TextureManager::loadTextureToCache(component::TextureTag tag) {
-            assert(tag != component::TextureTag::UNKNOWN);
-            assert(tag != component::TextureTag::LAST);
+        TextureManager::loadTextureToCache(component::EntityPreset tag) {
+            assert(tag != component::EntityPreset::UNKNOWN);
+            assert(tag != component::EntityPreset::LAST);
             auto it = mTextureMap.find(tag);
             if (it != mTextureMap.end()) {
                 assert(false);
@@ -130,9 +130,9 @@ namespace oni {
         }
 
         void
-        TextureManager::loadOrGetImage(component::TextureTag tag,
+        TextureManager::loadOrGetImage(component::EntityPreset tag,
                                        component::Image &image) {
-            assert(tag != component::TextureTag::UNKNOWN);
+            assert(tag != component::EntityPreset::UNKNOWN);
             if (isImageLoaded(tag)) {
                 image = mImageMap[tag];
             }
@@ -395,12 +395,12 @@ namespace oni {
         }
 
         bool
-        TextureManager::isTextureLoaded(component::TextureTag tag) const {
+        TextureManager::isTextureLoaded(component::EntityPreset tag) const {
             return mTextureMap.find(tag) != mTextureMap.end();
         }
 
         bool
-        TextureManager::isImageLoaded(component::TextureTag tag) const {
+        TextureManager::isImageLoaded(component::EntityPreset tag) const {
             return mImageMap.find(tag) != mImageMap.end();
         }
 

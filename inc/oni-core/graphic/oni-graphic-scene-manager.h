@@ -129,9 +129,9 @@ namespace oni {
                       const component::Scale &);
 
             void
-            prepareTexture(entities::EntityManager &,
-                           common::EntityID,
-                           component::TextureTag);
+            prepareTexture(entities::EntityManager &manager,
+                           common::EntityID id,
+                           component::EntityPreset tag);
 
             common::u16
             getSpritesPerFrame() const;
@@ -180,11 +180,6 @@ namespace oni {
             renderStaticText(entities::EntityManager &,
                              common::r32 viewWidth,
                              common::r32 viewHeight);
-
-            void
-            renderTessellation(entities::EntityManager &serverManager,
-                               common::r32 viewWidth,
-                               common::r32 viewHeight);
 
             void
             renderStrip(entities::EntityManager &,
@@ -249,9 +244,9 @@ namespace oni {
             std::unique_ptr<Renderer_OpenGL_Strip> mRendererStrip{};
             std::unique_ptr<Renderer_OpenGL_Quad> mRendererQuad{};
 
-            TextureManager& mTextureManager;
+            TextureManager &mTextureManager;
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
-            std::unique_ptr<entities::EntityManager> mSceneEntityManager{};
+            std::unique_ptr<entities::EntityManager> mInternalReg{};
             b2World &mPhysicsWorld;
 
             std::unique_ptr<math::Rand> mRand{};
@@ -279,8 +274,8 @@ namespace oni {
 
             math::ZLayerManager &mZLayerManager;
 
-            std::priority_queue<Renderable> mRenderables{};
-            std::priority_queue<Renderable> mShinnyRenderables{};
+            using RenderableQueue = std::priority_queue<Renderable>;
+            std::array<RenderableQueue, math::enumCast(component::MaterialFinishType::LAST)> mRenderables{};
         };
     }
 }

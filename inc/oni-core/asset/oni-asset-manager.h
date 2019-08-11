@@ -14,25 +14,25 @@ namespace oni {
             AssetManager();
 
             void
-            setPath(component::SoundTag,
+            setPath(component::Sound_Tag,
                     std::string_view);
 
             void
-            setPath(component::TextureTag,
+            setPath(component::EntityPreset,
                     std::string_view);
 
             const std::string &
-            getAssetFilePath(component::SoundTag);
+            getAssetFilePath(component::Sound_Tag);
 
             const std::string &
-            getAssetFilePath(component::TextureTag);
+            getAssetFilePath(component::EntityPreset);
 
-            std::vector<component::TextureTag>
+            std::vector<component::EntityPreset>
             knownTags();
 
         private:
-            std::map<component::SoundTag, std::string> mSoundAssetPath;
-            std::map<component::TextureTag, std::string> mTextureAssetPath;
+            std::map<component::Sound_Tag, std::string> mSoundAssetPath;
+            std::map<component::EntityPreset, std::string> mTextureAssetPath;
         };
     }
 }

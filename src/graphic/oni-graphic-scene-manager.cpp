@@ -54,7 +54,7 @@ namespace oni {
             mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
 
 
-            mSceneEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
+            mInternalReg = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
 
             mRand = std::make_unique<math::Rand>(0, 0);
 
@@ -80,7 +80,7 @@ namespace oni {
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
-            spec.effect = RenderEffect::COLOR;
+            spec.finishType = component::MaterialFinishType::SOLID;
             setMVP(spec, true, false, true);
             begin(*mRendererTessellation, spec);
         }
@@ -145,9 +145,9 @@ namespace oni {
         void
         SceneManager::prepareTexture(entities::EntityManager &manager,
                                      common::EntityID id,
-                                     component::TextureTag tag) {
-            auto &texture = manager.get<component::Texture>(id);
-            mTextureManager.initTexture(tag, texture);
+                                     component::EntityPreset tag) {
+            auto &ms = manager.get<component::MaterialSurface>(id);
+            mTextureManager.initTexture(tag, ms.texture);
         }
 
         void
@@ -177,123 +177,56 @@ namespace oni {
             // end on top of everything and accepting the fact that I won't be able to occlude particles with
             // other solid objects. Although... I could occlude them, if I keep the z-buffer around and do z test but
             // don't write to z-buffer when rendering particles...
-            /// Textures
             {
-                auto effect = RenderEffect::TEXTURE;
                 auto view = manager.createView<
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::Texture,
-                        component::Color,
-                        component::Tag_TextureShaded>();
+                        component::MaterialSurface,
+                        component::MaterialTransition_Type,
+                        component::MaterialFinish>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
-                    const auto &texture = view.get<component::Texture>(id);
-                    const auto &color = view.get<component::Color>(id);
+                    const auto &material = view.get<component::MaterialSurface>(id);
+                    const auto &transitionType = view.get<component::MaterialTransition_Type>(id);
+                    const auto &finish = view.get<component::MaterialFinish>(id);
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, &texture, nullptr);
-                }
-            }
-            /// Textures tinted
-            {
-                auto effect = RenderEffect::TINTED;
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Texture,
-                        component::Color,
-                        component::Tag_TextureTint>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &texture = view.get<component::Texture>(id);
-                    const auto &color = view.get<component::Color>(id);
+                    auto renderable = Renderable{};
+                    renderable.id = id;
+                    renderable.manager = &manager;
+                    renderable.material = &material;
+                    renderable.pos = &pos;
+                    renderable.heading = &heading;
+                    renderable.scale = &scale;
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, &texture, nullptr);
-                }
-            }
-            /// Animated textures
-            {
-                auto effect = RenderEffect::TEXTURE;
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::TextureAnimated,
-                        component::Color,
-                        component::Tag_TextureShaded>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &animatedTexture = view.get<component::TextureAnimated>(id);
-                    const auto &color = view.get<component::Color>(id);
+                    renderable.material = &material;
+                    renderable.finish = &finish;
+                    renderable.transitionType = transitionType;
+                    switch (transitionType) {
+                        case component::MaterialTransition_Type::NONE:
+                            break;
+                        case component::MaterialTransition_Type::FADE: {
+                            renderable.transitionFade = &manager.get<component::MaterialTransition_Fade>(id);
+                            break;
+                        }
+                        case component::MaterialTransition_Type::TINT: {
+                            renderable.transitionTint = &manager.get<component::MaterialTransition_Tint>(id);
+                            break;
+                        }
+                        case component::MaterialTransition_Type::ANIMATED: {
+                            renderable.transitionAnimated = &manager.get<component::MaterialTransition_Animated>(id);
+                            break;
+                        }
+                        case component::MaterialTransition_Type::LAST:
+                        default: {
+                            assert(false);
+                            break;
+                        }
+                    }
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, nullptr,
-                                         &animatedTexture);
-                }
-            }
-            /// Colors
-            {
-                auto effect = RenderEffect::COLOR;
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Color,
-                        component::Tag_ColorShaded>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &color = view.get<component::Color>(id);
-
-                    mRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, nullptr, nullptr);
-                }
-            }
-            /// Shinnies
-            {
-                auto effect = RenderEffect::SHINNY_TEXTURE;
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Texture,
-                        component::Color,
-                        component::Tag_ShinnyEffect>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &texture = view.get<component::Texture>(id);
-                    const auto &color = view.get<component::Color>(id);
-
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, &texture, nullptr);
-                }
-            }
-            /// Animated shinnies
-            {
-                auto effect = RenderEffect::SHINNY_TEXTURE;
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::TextureAnimated,
-                        component::Color,
-                        component::Tag_ShinnyEffect>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &animatedTexture = view.get<component::TextureAnimated>(id);
-                    const auto &color = view.get<component::Color>(id);
-
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, effect, &scale, &color, nullptr, &animatedTexture);
+                    mRenderables[finish.typeID()].push(renderable);
                 }
             }
         }
@@ -302,73 +235,42 @@ namespace oni {
         SceneManager::render() {
             /// Queue internal entities
             {
-                submit(*mSceneEntityManager);
+                submit(*mInternalReg);
             }
+
             /// Render everything but shinnies
             {
-                RenderSpec spec;
-                spec.renderTarget = nullptr;
-                spec.screenSize = getScreenSize();
-                spec.zoom = mCamera.z;
-                // TODO: I'm trying to mix blend function of opengl and blend function I implement in the shader
-                // into one enum and its not working great, one is per pixel, the other is per submit batch.
-                spec.effect = RenderEffect::TEXTURE;
-                setMVP(spec, true, true, true);
+                for (auto i = 0; i < math::enumCast(component::MaterialFinishType::LAST); ++i) {
+                    RenderSpec spec;
+                    spec.renderTarget = nullptr;
+                    spec.screenSize = getScreenSize();
+                    spec.zoom = mCamera.z;
+                    spec.finishType = static_cast<component::MaterialFinishType>(i);
+                    setMVP(spec, true, true, true);
 
-                begin(*mRendererTessellation, spec);
-                while (!mRenderables.empty()) {
-                    auto &r = const_cast<graphic::Renderable &> (mRenderables.top());
-                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
+                    begin(*mRendererTessellation, spec);
+                    while (!mRenderables[i].empty()) {
+                        auto &r = const_cast<graphic::Renderable &> (mRenderables[i].top());
+                        auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
 
-                    if (!isVisible(ePos.pos, *r.scale)) {
-                        mRenderables.pop();
-                        continue;
+                        if (!isVisible(ePos.pos, *r.scale)) {
+                            mRenderables[i].pop();
+                            continue;
+                        }
+
+                        // This will just point r.pos to a new location, which is temporary to this scope, but submit()
+                        // will create a copy so it is safe.
+                        r.pos = &ePos.pos;
+                        r.heading = &ePos.heading;
+
+                        mRendererTessellation->submit(r);
+
+                        mRenderables[i].pop();
+
+                        ++mRenderedSpritesPerFrame;
                     }
-
-                    r.pos = &ePos.pos;
-                    r.heading = &ePos.heading;
-
-                    mRendererTessellation->submit(r);
-
-                    mRenderables.pop();
-
-                    ++mRenderedSpritesPerFrame;
+                    end(*mRendererTessellation);
                 }
-                end(*mRendererTessellation);
-            }
-            /// Render shinnies
-            {
-                RenderSpec spec;
-                spec.renderTarget = nullptr;
-                spec.screenSize = getScreenSize();
-                spec.zoom = mCamera.z;
-                spec.effect = RenderEffect::SHINNY_TEXTURE;
-                setMVP(spec, true, true, true);
-
-                begin(*mRendererTessellation, spec);
-                while (!mShinnyRenderables.empty()) {
-                    auto &r = const_cast<graphic::Renderable &> (mShinnyRenderables.top());
-                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
-
-                    if (!isVisible(ePos.pos, *r.scale)) {
-                        mShinnyRenderables.pop();
-                        continue;
-                    }
-
-                    // NOTE: Shinnies need to be rendered at the top to get the blending and z order right. Maybe not
-                    // the best solution but has to do for now with the current render pipeline. If I come up with a
-                    // better pipeline I can chagne this.
-                    ePos.pos.z = mZLayerManager.getZForEntity(entities::EntityType::SHINNY_EFFECT);
-                    r.pos = &ePos.pos;
-                    r.heading = &ePos.heading;
-
-                    mRendererTessellation->submit(r);
-
-                    mShinnyRenderables.pop();
-
-                    ++mRenderedSpritesPerFrame;
-                }
-                end(*mRendererTessellation);
             }
         }
 
@@ -379,7 +281,6 @@ namespace oni {
 
             /// Sprites
             {
-                renderTessellation(manager, viewWidth, viewHeight);
             }
 
             // TODO: This is obsolete in favour of Trail rendering with quads, for now!
@@ -428,35 +329,10 @@ namespace oni {
         }
 
         void
-        SceneManager::renderTessellation(entities::EntityManager &manager,
-                                         common::r32 viewWidth,
-                                         common::r32 viewHeight) {
-            manager.sort<component::WorldP3D>([](const auto &lhs,
-                                                 const auto &rhs) {
-                return lhs.z < rhs.z;
-            });
-
-            RenderSpec spec;
-            spec.effect = RenderEffect::TEXTURE;
-            spec.renderTarget = nullptr;
-            spec.screenSize = getScreenSize();
-            spec.zoom = mCamera.z;
-            setMVP(spec, true, true, true);
-
-            begin(*mRendererTessellation, spec);
-
-            renderTessellationColor(manager, viewWidth, viewHeight);
-            renderTessellationTexture(manager, viewWidth, viewHeight);
-
-            end(*mRendererTessellation);
-        }
-
-        void
         SceneManager::renderStrip(entities::EntityManager &manager,
                                   common::r32 viewWidth,
                                   common::r32 viewHeight) {
             RenderSpec spec;
-            spec.effect = RenderEffect::TEXTURE;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -492,7 +368,8 @@ namespace oni {
                 auto view = manager.createView<
                         component::BrushTrail,
                         component::WorldP3D>();
-                const auto &rocketTrailTexture = mTextureManager.getTexture(component::TextureTag::ROCKET_TRAIL);
+                const auto &rocketTrailTexture = mTextureManager.getTexture(
+                        component::EntityPreset::ROCKET_TRAIL_DEFAULT);
 
                 auto brush = Brush{};
                 brush.type = component::BrushType::TEXTURE;
@@ -518,8 +395,7 @@ namespace oni {
                     component::WorldP3D,
                     component::Heading,
                     component::Scale,
-                    component::Color,
-                    component::Tag_ColorShaded>();
+                    component::Color>();
 
             for (auto &&id: view) {
                 const auto &pos = view.get<component::WorldP3D>(id);
@@ -554,8 +430,7 @@ namespace oni {
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::Texture,
-                        component::Tag_TextureShaded>();
+                        component::Texture>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
@@ -587,10 +462,11 @@ namespace oni {
                                       component::Texture &dest,
                                       const math::mat4 *model) {
             RenderSpec spec;
-            spec.effect = RenderEffect::COLOR;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
+            // TODO: I should probably take this as an argument
+            spec.finishType = component::MaterialFinishType::SOLID;
             setMVP(spec, destBounds, model);
 
             begin(*mRendererQuad, spec);
@@ -605,7 +481,8 @@ namespace oni {
                                       component::Texture &dest,
                                       const math::mat4 *model) {
             RenderSpec spec;
-            spec.effect = RenderEffect::TEXTURE;
+            // TODO: I should probably take this as an argument
+            spec.finishType = component::MaterialFinishType::SOLID;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -620,7 +497,8 @@ namespace oni {
         SceneManager::blend(const component::Texture &front,
                             component::Texture &back) {
             RenderSpec spec;
-            spec.effect = RenderEffect::TEXTURE;
+            // TODO: I should probably take this as an argument
+            spec.finishType = component::MaterialFinishType::SOLID;
             spec.renderTarget = &back;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -660,13 +538,13 @@ namespace oni {
 
             /// Draw
             for (auto &&canvasEntity: tileEntities) {
-                auto &canvasPos = mSceneEntityManager->get<component::WorldP3D>(canvasEntity);
+                auto &canvasPos = mInternalReg->get<component::WorldP3D>(canvasEntity);
                 graphic::ScreenBounds screenBounds;
                 screenBounds.xMin = canvasPos.x - mHalfCanvasTileSizeX;
                 screenBounds.xMax = canvasPos.x + mHalfCanvasTileSizeX;
                 screenBounds.yMin = canvasPos.y - mHalfCanvasTileSizeY;
                 screenBounds.yMax = canvasPos.y + mHalfCanvasTileSizeY;
-                auto &texture = mSceneEntityManager->get<component::Texture>(canvasEntity);
+                auto &texture = mInternalReg->get<component::Texture>(canvasEntity);
                 switch (brush.type) {
                     case component::BrushType::COLOR: {
                         renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, texture, brush.model);
@@ -702,7 +580,9 @@ namespace oni {
 
             auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
             if (missing) {
-                auto id = mSceneEntityManager->createEntity_CanvasTile();
+                // TODO: I need a factory to create entities like this and then initialize them based on
+                // preset.
+                auto id = mInternalReg->createEntity_CanvasTile();
 
                 auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
                 auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
@@ -710,31 +590,31 @@ namespace oni {
 
                 auto heading = component::Heading{0.f};
 
-                mSceneEntityManager->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
-                mSceneEntityManager->setScale(id,
-                                              static_cast<common::r32>(mCanvasTileSizeX),
-                                              static_cast<common::r32>(mCanvasTileSizeY));
-                mSceneEntityManager->setHeading(id, heading.value);
+                mInternalReg->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
+                mInternalReg->setScale(id,
+                                       static_cast<common::r32>(mCanvasTileSizeX),
+                                       static_cast<common::r32>(mCanvasTileSizeY));
+                mInternalReg->setHeading(id, heading.value);
 
-                auto &canvasTexture = mSceneEntityManager->get<component::Texture>(id);
+                auto &ms = mInternalReg->get<component::MaterialSurface>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP32);
                 auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
                                                                common::EP32);
 
-                canvasTexture.image.width = widthInPixels;
-                canvasTexture.image.height = heightInPixels;
-                canvasTexture.image.path = "generated_by_getOrCreateCanvasTile::canvasFront";
-                canvasTexture.clear = false;
+                ms.texture.image.width = widthInPixels;
+                ms.texture.image.height = heightInPixels;
+                ms.texture.image.path = "generated_by_getOrCreateCanvasTile::canvasFront";
+                ms.texture.clear = false;
 
-                mTextureManager.createTexture(canvasTexture, false);
+                mTextureManager.createTexture(ms.texture, false);
 
                 mCanvasTileLookup.emplace(xy, id);
             }
 
             auto entity = mCanvasTileLookup[xy];
-            assert(mSceneEntityManager->valid(entity));
+            assert(mInternalReg->valid(entity));
             return entity;
         }
 
@@ -778,7 +658,7 @@ namespace oni {
                         break;
                     }
                     case component::BrushType::TEXTURE_TAG: {
-                        brush.tag = mark.textureTag;
+                        brush.tag = mark.tag;
                         break;
                     }
                     case component::BrushType::LAST:

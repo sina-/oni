@@ -64,11 +64,27 @@ namespace oni {
 
         void
         Renderer_OpenGL::_begin(const RenderSpec &spec,
-                                const BlendSpec &blending) {
-            auto blendSrc = getBlendMode(blending.src);
-            auto blendDest = getBlendMode(blending.dest);
+                                const BlendSpec &blending,
+                                const DepthSpec &depthSpec) {
+            /// Set blend
+            {
+                auto blendSrc = getBlendMode(blending.src);
+                auto blendDest = getBlendMode(blending.dest);
 
-            glBlendFunc(blendSrc, blendDest);
+                glBlendFunc(blendSrc, blendDest);
+            }
+
+            /// Set depth
+            {
+                glDepthMask(depthSpec.depthWrite);
+
+                if (depthSpec.depthRead) {
+                    glEnable(GL_DEPTH_TEST);
+                } else {
+                    glDisable(GL_DEPTH_TEST);
+                }
+            }
+
             enableShader(spec);
 
             mNextSamplerID = 0;

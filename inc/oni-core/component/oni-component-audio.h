@@ -11,7 +11,7 @@ namespace oni {
             FADE_OUT,
         };
 
-        enum class SoundTag : common::u32 {
+        enum class Sound_Tag : common::u32 {
             UNKNOWN,
 
             ROCKET_LAUNCH,
@@ -33,7 +33,7 @@ namespace oni {
         };
 
         struct Sound {
-            SoundTag tag = SoundTag::UNKNOWN;
+            Sound_Tag tag = Sound_Tag::UNKNOWN;
             ChannelGroup group = ChannelGroup::UNKNOWN;
         };
 

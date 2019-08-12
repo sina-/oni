@@ -43,57 +43,6 @@ namespace oni {
             operator=(const EntityManager &) const = delete;
 
         public:
-            common::EntityID
-            createEntity_SmokeCloud();
-
-            common::EntityID
-            createEntity_SimpleSpriteColored();
-
-            common::EntityID
-            createEntity_SimpleSpriteTextured();
-
-            common::EntityID
-            createEntity_CanvasTile();
-
-            common::EntityID
-            createEntity_RaceCar();
-
-            common::EntityID
-            createEntity_VehicleGun();
-
-            common::EntityID
-            createEntity_Vehicle();
-
-            common::EntityID
-            createEntity_SimpleRocket();
-
-            common::EntityID
-            createEntity_Wall();
-
-            common::EntityID
-            createEntity_VehicleTireFront();
-
-            common::EntityID
-            createEntity_VehicleTireRear();
-
-            common::EntityID
-            createEntity_SimpleParticle();
-
-            common::EntityID
-            createEntity_SimpleBlastParticle();
-
-            common::EntityID
-            createEntity_SimpleBlastAnimation();
-
-            common::EntityID
-            createEntity_Text();
-
-            common::EntityID
-            createEntity_WorldChunk();
-
-            common::EntityID
-            createEntity_DebugWorldChunk();
-
         public:
             void
             setWorldP3D(common::EntityID,
@@ -359,6 +308,9 @@ namespace oni {
             void
             dispatchEvents();
 
+            common::EntityID
+            createEntity(entities::EntityType);
+
             template<class Component, class... Args>
             Component &
             createComponent(common::EntityID entityID,
@@ -399,9 +351,6 @@ namespace oni {
             }
 
         private:
-            common::EntityID
-            createEntity(entities::EntityType);
-
             void
             assignSimMode(common::EntityID,
                           entities::SimMode);

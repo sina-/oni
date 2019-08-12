@@ -37,9 +37,10 @@ namespace oni {
             operator=(FontManager &) = delete;
 
             common::EntityID
-            createTextFromString(entities::EntityManager &,
-                                 std::string_view text,
-                                 const component::WorldP3D &pos);
+            initializeText(entities::EntityManager &,
+                           std::string_view text,
+                           common::EntityID id,
+                           const component::WorldP3D &pos);
 
             void
             updateText(const std::string &textContent,

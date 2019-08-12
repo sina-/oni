@@ -54,7 +54,7 @@ namespace oni {
             mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
 
 
-            mInternalReg = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
+            mEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
 
             mRand = std::make_unique<math::Rand>(0, 0);
 
@@ -235,7 +235,7 @@ namespace oni {
         SceneManager::render() {
             /// Queue internal entities
             {
-                submit(*mInternalReg);
+                submit(*mEntityManager);
             }
 
             /// Render everything but shinnies
@@ -538,13 +538,13 @@ namespace oni {
 
             /// Draw
             for (auto &&canvasEntity: tileEntities) {
-                auto &canvasPos = mInternalReg->get<component::WorldP3D>(canvasEntity);
+                auto &canvasPos = mEntityManager->get<component::WorldP3D>(canvasEntity);
                 graphic::ScreenBounds screenBounds;
                 screenBounds.xMin = canvasPos.x - mHalfCanvasTileSizeX;
                 screenBounds.xMax = canvasPos.x + mHalfCanvasTileSizeX;
                 screenBounds.yMin = canvasPos.y - mHalfCanvasTileSizeY;
                 screenBounds.yMax = canvasPos.y + mHalfCanvasTileSizeY;
-                auto &texture = mInternalReg->get<component::Texture>(canvasEntity);
+                auto &texture = mEntityManager->get<component::Texture>(canvasEntity);
                 switch (brush.type) {
                     case component::BrushType::COLOR: {
                         renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, texture, brush.model);
@@ -582,7 +582,9 @@ namespace oni {
             if (missing) {
                 // TODO: I need a factory to create entities like this and then initialize them based on
                 // preset.
-                auto id = mInternalReg->createEntity_CanvasTile();
+                // TODO: Move canvas logic into game, it has nothing to do with scene manager
+                assert(false);
+                auto id = 0;//mEntityManager->createEntity_CanvasTile();
 
                 auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
                 auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
@@ -590,13 +592,13 @@ namespace oni {
 
                 auto heading = component::Heading{0.f};
 
-                mInternalReg->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
-                mInternalReg->setScale(id,
-                                       static_cast<common::r32>(mCanvasTileSizeX),
-                                       static_cast<common::r32>(mCanvasTileSizeY));
-                mInternalReg->setHeading(id, heading.value);
+                mEntityManager->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
+                mEntityManager->setScale(id,
+                                         static_cast<common::r32>(mCanvasTileSizeX),
+                                         static_cast<common::r32>(mCanvasTileSizeY));
+                mEntityManager->setHeading(id, heading.value);
 
-                auto &ms = mInternalReg->get<component::MaterialSurface>(id);
+                auto &ms = mEntityManager->get<component::MaterialSurface>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP32);
@@ -614,7 +616,7 @@ namespace oni {
             }
 
             auto entity = mCanvasTileLookup[xy];
-            assert(mInternalReg->valid(entity));
+            assert(mEntityManager->valid(entity));
             return entity;
         }
 

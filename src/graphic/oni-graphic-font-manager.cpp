@@ -70,10 +70,10 @@ namespace oni {
         FontManager::getTextureID() const { return m_FTAtlas->id; }
 
         common::EntityID
-        FontManager::createTextFromString(entities::EntityManager &manager,
-                                          std::string_view text,
-                                          const component::WorldP3D &pos) {
-            auto id = manager.createEntity_Text();
+        FontManager::initializeText(entities::EntityManager &manager,
+                                    std::string_view text,
+                                    common::EntityID id,
+                                    const component::WorldP3D &pos) {
             manager.setWorldP3D(id, pos.x, pos.y, pos.z);
             manager.setText(id, text);
 

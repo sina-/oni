@@ -246,7 +246,7 @@ namespace oni {
 
             TextureManager &mTextureManager;
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
-            std::unique_ptr<entities::EntityManager> mInternalReg{};
+            std::unique_ptr<entities::EntityManager> mEntityManager{};
             b2World &mPhysicsWorld;
 
             std::unique_ptr<math::Rand> mRand{};

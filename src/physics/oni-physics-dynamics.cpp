@@ -488,11 +488,11 @@ namespace oni {
 
             auto view = manager.createView<
                     component::Age,
-                    component::Color,
+                    component::MaterialSkin,
                     component::MaterialTransition_Fade>();
             for (auto &&id: view) {
                 auto &age = view.get<component::Age>(id);
-                auto &color = view.get<component::Color>(id);
+                auto &surface = view.get<component::MaterialSkin>(id);
                 auto &fade = view.get<component::MaterialTransition_Fade>(id);
 
                 auto targetAlpha = 1.f;
@@ -516,9 +516,9 @@ namespace oni {
                     }
                 }
 
-                auto currentAlpha = color.a_r32();
-                color.set_a(math::lerp(currentAlpha, targetAlpha, fade.factor));
-                if (!math::almost_Equal(color.a_r32(), currentAlpha)) {
+                auto currentAlpha = surface.color.a_r32();
+                surface.color.set_a(math::lerp(currentAlpha, targetAlpha, fade.factor));
+                if (!math::almost_Equal(surface.color.a_r32(), currentAlpha)) {
                     manager.markForNetSync(id);
                 }
             }

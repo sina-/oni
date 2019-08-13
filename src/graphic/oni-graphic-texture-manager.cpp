@@ -30,8 +30,8 @@ namespace oni {
             auto textureSize = common::size(texture.image.height * texture.image.width * numTextureElements);
             assert(textureSize);
             texture.image.data.resize(textureSize);
-            glBindTexture(GL_TEXTURE_2D, texture.textureID);
-            glGetTextureImage(texture.textureID, 0, texture.format, texture.type, textureSize,
+            glBindTexture(GL_TEXTURE_2D, texture.id);
+            glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize,
                               texture.image.data.data());
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -43,8 +43,8 @@ namespace oni {
             auto textureSize = common::size(texture.image.height * texture.image.width * numTextureElements);
             assert(textureSize);
             data.resize(textureSize);
-            glBindTexture(GL_TEXTURE_2D, texture.textureID);
-            glGetTextureImage(texture.textureID, 0, texture.format, texture.type, textureSize, data.data());
+            glBindTexture(GL_TEXTURE_2D, texture.id);
+            glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize, data.data());
             glBindTexture(GL_TEXTURE_2D, 0);
 
         }
@@ -52,14 +52,14 @@ namespace oni {
         void
         TextureManager::createTexture(component::Texture &texture,
                                       bool loadImage) {
-            glGenTextures(1, &texture.textureID);
+            glGenTextures(1, &texture.id);
 
-            assert(texture.textureID);
+            assert(texture.id);
 
             common::oniGLenum format = GL_BGRA;
             common::oniGLenum type = GL_UNSIGNED_BYTE;
 
-            bind(texture.textureID);
+            bind(texture.id);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -225,7 +225,7 @@ namespace oni {
             assert(texture.image.height >= height);
 
             // TODO: Do I need ot bind the texture? Seems to be working :/
-            glTextureSubImage2D(texture.textureID, 0, xOffset, yOffset, width, height, texture.format, texture.type,
+            glTextureSubImage2D(texture.id, 0, xOffset, yOffset, width, height, texture.format, texture.type,
                                 bits.data());
         }
 
@@ -434,7 +434,7 @@ namespace oni {
 
             unbind();
 
-            texture.textureID = textureID;
+            texture.id = textureID;
             texture.format = format;
             texture.type = type;
             texture.uv = {};

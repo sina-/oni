@@ -64,10 +64,10 @@ namespace oni {
             const component::Heading *heading;
             const component::Scale *scale;
 
-            const component::MaterialSurface *material;
+            const component::MaterialSkin *skin;
             const component::MaterialFinish *finish;
             const component::MaterialTransition_Fade *transitionFade;
-            const component::MaterialTransition_Animated *transitionAnimated;
+            const component::MaterialTransition_Animation *transitionAnimation;
             const component::MaterialTransition_Tint *transitionTint;
             component::MaterialTransition_Type transitionType;
         };

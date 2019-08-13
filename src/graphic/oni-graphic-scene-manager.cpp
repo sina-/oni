@@ -146,7 +146,7 @@ namespace oni {
         SceneManager::prepareTexture(entities::EntityManager &manager,
                                      common::EntityID id,
                                      component::EntityPreset tag) {
-            auto &ms = manager.get<component::MaterialSurface>(id);
+            auto &ms = manager.get<component::MaterialSkin>(id);
             mTextureManager.initTexture(tag, ms.texture);
         }
 
@@ -182,26 +182,26 @@ namespace oni {
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::MaterialSurface,
+                        component::MaterialSkin,
                         component::MaterialTransition_Type,
                         component::MaterialFinish>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
-                    const auto &material = view.get<component::MaterialSurface>(id);
+                    const auto &material = view.get<component::MaterialSkin>(id);
                     const auto &transitionType = view.get<component::MaterialTransition_Type>(id);
                     const auto &finish = view.get<component::MaterialFinish>(id);
 
                     auto renderable = Renderable{};
                     renderable.id = id;
                     renderable.manager = &manager;
-                    renderable.material = &material;
+                    renderable.skin = &material;
                     renderable.pos = &pos;
                     renderable.heading = &heading;
                     renderable.scale = &scale;
 
-                    renderable.material = &material;
+                    renderable.skin = &material;
                     renderable.finish = &finish;
                     renderable.transitionType = transitionType;
                     switch (transitionType) {
@@ -216,7 +216,7 @@ namespace oni {
                             break;
                         }
                         case component::MaterialTransition_Type::ANIMATED: {
-                            renderable.transitionAnimated = &manager.get<component::MaterialTransition_Animated>(id);
+                            renderable.transitionAnimation = &manager.get<component::MaterialTransition_Animation>(id);
                             break;
                         }
                         case component::MaterialTransition_Type::LAST:
@@ -598,7 +598,7 @@ namespace oni {
                                          static_cast<common::r32>(mCanvasTileSizeY));
                 mEntityManager->setHeading(id, heading.value);
 
-                auto &ms = mEntityManager->get<component::MaterialSurface>(id);
+                auto &ms = mEntityManager->get<component::MaterialSkin>(id);
 
                 auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
                                                               common::EP32);

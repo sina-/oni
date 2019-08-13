@@ -124,7 +124,7 @@ namespace oni {
             auto uv2 = math::vec2{};
             auto uv3 = math::vec2{};
             if (texture) {
-                samplerFront = getSamplerID(texture->textureID);
+                samplerFront = getSamplerID(texture->id);
                 uv0 = texture->uv.values[0];
                 uv1 = texture->uv.values[1];
                 uv2 = texture->uv.values[2];
@@ -189,8 +189,8 @@ namespace oni {
                                      const component::Texture &back) {
             assert(mIndexCount + 6 < mMaxIndicesCount);
 
-            assert(front.textureID);
-            assert(back.textureID);
+            assert(front.id);
+            assert(back.id);
 
             assert(math::almost_Equal(front.uv.values[0].x, back.uv.values[0].x));
             assert(math::almost_Equal(front.uv.values[1].x, back.uv.values[1].x));
@@ -204,8 +204,8 @@ namespace oni {
 
             auto buffer = static_cast<graphic::QuadVertex *>(mBuffer);
 
-            auto samplerFront = getSamplerID(front.textureID);
-            auto samplerBack = getSamplerID(back.textureID);
+            auto samplerFront = getSamplerID(front.id);
+            auto samplerBack = getSamplerID(back.id);
 
             auto c = color.rgba();
 

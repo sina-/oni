@@ -50,7 +50,7 @@ namespace oni {
         struct Texture {
             Image image{};
             bool clear{false};
-            common::oniGLuint textureID{0};
+            common::oniGLuint id{0};
             // GL_BGRA          0x80E1
             common::oniGLenum format{0x80E1};
             // GL_UNSIGNED_BYTE 0x1401
@@ -353,7 +353,7 @@ namespace oni {
             LAST
         };
 
-        struct MaterialSurface {
+        struct MaterialSkin {
             Texture texture{};
             Color color{};
         };
@@ -384,7 +384,7 @@ namespace oni {
             common::r32 tint{};
         };
 
-        struct MaterialTransition_Animated {
+        struct MaterialTransition_Animation {
             TextureAnimated textureAnimated;
         };
 

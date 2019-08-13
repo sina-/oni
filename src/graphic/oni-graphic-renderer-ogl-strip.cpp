@@ -143,7 +143,7 @@ namespace oni {
 
             common::i32 samplerID = -1;
             if (!texture.image.path.empty()) {
-                samplerID = getSamplerID(texture.textureID);
+                samplerID = getSamplerID(texture.id);
             }
 
             buffer->center = math::vec4{pos.x, pos.y, pos.z, offset};

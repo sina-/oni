@@ -54,9 +54,7 @@ namespace oni {
                          asset::AssetManager &,
                          math::ZLayerManager &,
                          graphic::TextureManager &,
-                         b2World &,
-                         common::r32 gameUnitToPixel
-            );
+                         b2World &);
 
             ~SceneManager();
 
@@ -87,9 +85,6 @@ namespace oni {
             void
             renderRaw(const component::WorldP3D pos,
                       const component::Color &color);
-
-            void
-            splat(Brush &brush);
 
             void
             blend(const component::Texture &front,
@@ -187,9 +182,6 @@ namespace oni {
                         common::r32 viewHeight);
 
             void
-            renderQuad(entities::EntityManager &manager);
-
-            void
             renderTessellationColor(entities::EntityManager &,
                                     common::r32 viewWidth,
                                     common::r32 viewHeight);
@@ -212,12 +204,6 @@ namespace oni {
 
             static void
             end(Renderer &renderer2D);
-
-            common::EntityID
-            getOrCreateCanvasTile(const math::vec2 &pos);
-
-            common::EntityID
-            getOrCreateCanvasTile(const component::WorldP3D &pos);
 
             void
             setMVP(RenderSpec &,
@@ -246,7 +232,6 @@ namespace oni {
 
             TextureManager &mTextureManager;
             std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
-            std::unique_ptr<entities::EntityManager> mEntityManager{};
             b2World &mPhysicsWorld;
 
             std::unique_ptr<math::Rand> mRand{};
@@ -255,18 +240,10 @@ namespace oni {
             math::mat4 mViewMatrix{};
             math::mat4 mProjectionMatrix{};
 
-            std::map<common::u64, common::EntityID> mCanvasTileLookup{};
-
-            const common::u16 mCanvasTileSizeX{0};
-            const common::u16 mCanvasTileSizeY{0};
-            const common::r32 mHalfCanvasTileSizeX{0.0f};
-            const common::r32 mHalfCanvasTileSizeY{0.0f};
-
             graphic::ScreenBounds mScreenBounds{};
             graphic::Camera mCamera{0.0f, 0.0f, 1.0f};
 
             const common::u16 mMaxSpriteCount{0};
-            const common::r32 mGameUnitToPixels{0};
 
             common::u16 mRenderedSpritesPerFrame{0};
             common::u16 mRenderedTexturesPerFrame{0};

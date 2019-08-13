@@ -29,17 +29,11 @@ namespace oni {
                                    asset::AssetManager &assetManager,
                                    math::ZLayerManager &zLayerManager,
                                    graphic::TextureManager &textureManager,
-                                   b2World &physicsWorld,
-                                   common::r32 gameUnitToPixels) :
-                mCanvasTileSizeX{110},
-                mCanvasTileSizeY{110},
-                mHalfCanvasTileSizeX{mCanvasTileSizeX / 2.f},
-                mHalfCanvasTileSizeY{mCanvasTileSizeY / 2.f},
-                // 64k vertices
+                                   b2World &physicsWorld) :
+        // 64k vertices
                 mMaxSpriteCount(64 * 1000),
                 mScreenBounds(screenBounds),
                 mPhysicsWorld(physicsWorld),
-                mGameUnitToPixels(gameUnitToPixels),
                 mTextureManager(textureManager),
                 mZLayerManager(zLayerManager) {
 
@@ -53,8 +47,6 @@ namespace oni {
             mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
             mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
 
-
-            mEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
 
             mRand = std::make_unique<math::Rand>(0, 0);
 
@@ -164,14 +156,6 @@ namespace oni {
 
         void
         SceneManager::submit(entities::EntityManager &manager) {
-            {
-                // TODO: This only renders BrushTrails and only renders them to texture, which doesn't fit nicely
-                // to the current structure of submit and render.
-                // TODO: Another refactoring I should do is to remove the quads from BrushTrail as the renderer doesn't
-                // need to know about them. The visible part, the quad and texture, should be another entity with Texture
-                // and QuadList component, the car can have that entity as a reference in the BrushTrail
-                renderQuad(manager);
-            }
             // TODO: The following code includes everything, even the particles will be sorted, which might be
             // over-kill, I could think about separating particles from the rest and always rendering them at the
             // end on top of everything and accepting the fact that I won't be able to occlude particles with
@@ -233,11 +217,6 @@ namespace oni {
 
         void
         SceneManager::render() {
-            /// Queue internal entities
-            {
-                submit(*mEntityManager);
-            }
-
             /// Render everything but shinnies
             {
                 for (auto i = 0; i < math::enumCast(component::MaterialFinishType::LAST); ++i) {
@@ -297,11 +276,6 @@ namespace oni {
                 // renderStaticText(entityManager, viewWidth, viewHeight);
                 //end(*mTextureShader, *mTextureRenderer);
             }
-
-            /// Quads
-            {
-                renderQuad(manager);
-            }
         }
 
         void
@@ -359,30 +333,6 @@ namespace oni {
                 }
 
                 end(*mRendererStrip);
-            }
-        }
-
-        void
-        SceneManager::renderQuad(entities::EntityManager &manager) {
-            {
-                auto view = manager.createView<
-                        component::BrushTrail,
-                        component::WorldP3D>();
-                const auto &rocketTrailTexture = mTextureManager.getTexture(
-                        component::EntityPreset::ROCKET_TRAIL_DEFAULT);
-
-                auto brush = Brush{};
-                brush.type = component::BrushType::TEXTURE;
-                // TODO: After setting the texture on BrushTrail, use that instead.
-                brush.texture = &rocketTrailTexture;
-                for (auto &&id: view) {
-                    auto &trail = view.get<component::BrushTrail>(id);
-                    for (auto &&quad: trail.quads) {
-                        brush.shape_Quad = &quad;
-                        splat(brush);
-                    }
-                    trail.quads.clear();
-                }
             }
         }
 
@@ -515,112 +465,6 @@ namespace oni {
         }
 
         void
-        SceneManager::splat(Brush &brush) {
-            component::AABB aabb;
-            math::findAABB(*brush.shape_Quad, aabb);
-
-            auto tileEntities = std::set<common::EntityID>();
-            auto tl = getOrCreateCanvasTile(aabb.topLeft());
-            tileEntities.insert(tl);
-
-            auto bl = getOrCreateCanvasTile(aabb.bottomLeft());
-            tileEntities.insert(bl);
-
-            auto br = getOrCreateCanvasTile(aabb.bottomRight());
-            tileEntities.insert(br);
-
-            auto tr = getOrCreateCanvasTile(aabb.topRight());
-            tileEntities.insert(tr);
-
-            // TODO: The following code is a good candidate for multi-threaded worker-pool based architecture
-            // as it uses at least two draw calls per-canvas and the work does not interfere with there
-            // reset of the code since usage of mSceneEntityManager is limited to this class.
-
-            /// Draw
-            for (auto &&canvasEntity: tileEntities) {
-                auto &canvasPos = mEntityManager->get<component::WorldP3D>(canvasEntity);
-                graphic::ScreenBounds screenBounds;
-                screenBounds.xMin = canvasPos.x - mHalfCanvasTileSizeX;
-                screenBounds.xMax = canvasPos.x + mHalfCanvasTileSizeX;
-                screenBounds.yMin = canvasPos.y - mHalfCanvasTileSizeY;
-                screenBounds.yMax = canvasPos.y + mHalfCanvasTileSizeY;
-                auto &texture = mEntityManager->get<component::Texture>(canvasEntity);
-                switch (brush.type) {
-                    case component::BrushType::COLOR: {
-                        renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, texture, brush.model);
-                        break;
-                    }
-                    case component::BrushType::TEXTURE: {
-                        renderToTexture(*brush.shape_Quad, *brush.texture, screenBounds, texture, brush.model);
-                        break;
-                    }
-                    case component::BrushType::TEXTURE_TAG: {
-                        auto &brushTexture = mTextureManager.getTexture(brush.tag);
-                        renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, texture, brush.model);
-                        break;
-                    }
-                    case component::BrushType::LAST: {
-                        assert(false);
-                        break;
-                    }
-                }
-            }
-        }
-
-        common::EntityID
-        SceneManager::getOrCreateCanvasTile(const math::vec2 &pos) {
-            return getOrCreateCanvasTile(component::WorldP3D{pos.x, pos.y, 0.f});
-        }
-
-        common::EntityID
-        SceneManager::getOrCreateCanvasTile(const component::WorldP3D &pos) {
-            auto x = math::findBin(pos.x, mCanvasTileSizeX);
-            auto y = math::findBin(pos.y, mCanvasTileSizeY);
-            auto xy = math::pack_i32(x, y);
-
-            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
-            if (missing) {
-                // TODO: I need a factory to create entities like this and then initialize them based on
-                // preset.
-                // TODO: Move canvas logic into game, it has nothing to do with scene manager
-                assert(false);
-                auto id = 0;//mEntityManager->createEntity_CanvasTile();
-
-                auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
-                auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
-                auto tilePosZ = mZLayerManager.getZForEntity(entities::EntityType::CANVAS);
-
-                auto heading = component::Heading{0.f};
-
-                mEntityManager->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
-                mEntityManager->setScale(id,
-                                         static_cast<common::r32>(mCanvasTileSizeX),
-                                         static_cast<common::r32>(mCanvasTileSizeY));
-                mEntityManager->setHeading(id, heading.value);
-
-                auto &ms = mEntityManager->get<component::MaterialSkin>(id);
-
-                auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                              common::EP32);
-                auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                               common::EP32);
-
-                ms.texture.image.width = widthInPixels;
-                ms.texture.image.height = heightInPixels;
-                ms.texture.image.path = "generated_by_getOrCreateCanvasTile::canvasFront";
-                ms.texture.clear = false;
-
-                mTextureManager.createTexture(ms.texture, false);
-
-                mCanvasTileLookup.emplace(xy, id);
-            }
-
-            auto entity = mCanvasTileLookup[xy];
-            assert(mEntityManager->valid(entity));
-            return entity;
-        }
-
-        void
         SceneManager::updateSmokeEmitter(entities::EntityManager &manager,
                                          common::r64 tickTime) {
             assert(manager.getSimMode() == entities::SimMode::CLIENT ||
@@ -673,7 +517,9 @@ namespace oni {
                 brush.type = component::BrushType::COLOR;
                 brush.model = &model;
 
-                splat(brush);
+                // TODO: This function needs to move to game scene manager, it is not part of the engine.
+                assert(false);
+                // splat(brush);
             }
         }
 

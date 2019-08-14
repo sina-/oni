@@ -64,12 +64,12 @@ namespace oni {
             const component::Heading *heading;
             const component::Scale *scale;
 
+            component::MaterialDefinition def;
+
             const component::MaterialSkin *skin;
-            const component::MaterialFinish *finish;
             const component::MaterialTransition_Fade *transitionFade;
             const component::MaterialTransition_Animation *transitionAnimation;
             const component::MaterialTransition_Tint *transitionTint;
-            component::MaterialTransition_Type transitionType;
         };
 
         struct RenderSpec {
@@ -82,7 +82,7 @@ namespace oni {
 
             ///
 
-            component::MaterialFinishType finishType{};
+            component::MaterialFinish_Type finishType{};
         };
 
         class Renderer {
@@ -147,10 +147,10 @@ namespace oni {
 
         private:
             static BlendSpec
-            getBlendSpec(component::MaterialFinishType);
+            getBlendSpec(component::MaterialFinish_Type);
 
             static DepthSpec
-            getDepthSpec(component::MaterialFinishType);
+            getDepthSpec(component::MaterialFinish_Type);
 
         private:
             bool mBegun{false};

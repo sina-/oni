@@ -10,21 +10,21 @@ namespace oni {
         Renderer::~Renderer() = default;
 
         Renderer::BlendSpec
-        Renderer::getBlendSpec(component::MaterialFinishType type) {
+        Renderer::getBlendSpec(component::MaterialFinish_Type type) {
             auto result = BlendSpec{};
             switch (type) {
-                case component::MaterialFinishType::SOLID:
-                case component::MaterialFinishType::TRANSLUCENT: {
+                case component::MaterialFinish_Type::SOLID:
+                case component::MaterialFinish_Type::TRANSLUCENT: {
                     result.src = BlendMode::ONE;
                     result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
                     break;
                 }
-                case component::MaterialFinishType::SHINNY: {
+                case component::MaterialFinish_Type::SHINNY: {
                     result.src = BlendMode::ONE;
                     result.dest = BlendMode::ONE;
                     break;
                 }
-                case component::MaterialFinishType::LAST:
+                case component::MaterialFinish_Type::LAST:
                 default: {
                     assert(false);
                     break;
@@ -34,22 +34,22 @@ namespace oni {
         }
 
         Renderer::DepthSpec
-        Renderer::getDepthSpec(component::MaterialFinishType type) {
+        Renderer::getDepthSpec(component::MaterialFinish_Type type) {
             auto result = DepthSpec{};
             switch (type) {
-                case component::MaterialFinishType::SOLID: {
+                case component::MaterialFinish_Type::SOLID: {
                     result.depthRead = true;
                     result.depthWrite = true;
                     break;
                 }
                     // TODO: Is this correct?
-                case component::MaterialFinishType::TRANSLUCENT:
-                case component::MaterialFinishType::SHINNY: {
+                case component::MaterialFinish_Type::TRANSLUCENT:
+                case component::MaterialFinish_Type::SHINNY: {
                     result.depthRead = true;
                     result.depthWrite = false;
                     break;
                 }
-                case component::MaterialFinishType::LAST:
+                case component::MaterialFinish_Type::LAST:
                 default: {
                     assert(false);
                     break;

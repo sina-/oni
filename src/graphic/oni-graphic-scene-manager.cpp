@@ -72,7 +72,7 @@ namespace oni {
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
-            spec.finishType = component::MaterialFinishType::SOLID;
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             setMVP(spec, true, false, true);
             begin(*mRendererTessellation, spec);
         }
@@ -167,15 +167,13 @@ namespace oni {
                         component::Heading,
                         component::Scale,
                         component::MaterialSkin,
-                        component::MaterialTransition_Type,
-                        component::MaterialFinish>();
+                        component::MaterialDefinition>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
                     const auto &material = view.get<component::MaterialSkin>(id);
-                    const auto &transitionType = view.get<component::MaterialTransition_Type>(id);
-                    const auto &finish = view.get<component::MaterialFinish>(id);
+                    const auto &def = view.get<component::MaterialDefinition>(id);
 
                     auto renderable = Renderable{};
                     renderable.id = id;
@@ -186,9 +184,8 @@ namespace oni {
                     renderable.scale = &scale;
 
                     renderable.skin = &material;
-                    renderable.finish = &finish;
-                    renderable.transitionType = transitionType;
-                    switch (transitionType) {
+                    renderable.def = def;
+                    switch (def.transition) {
                         case component::MaterialTransition_Type::NONE:
                             break;
                         case component::MaterialTransition_Type::FADE: {
@@ -210,7 +207,7 @@ namespace oni {
                         }
                     }
 
-                    mRenderables[finish.typeID()].push(renderable);
+                    mRenderables[math::enumCast(def.finish)].push(renderable);
                 }
             }
         }
@@ -219,12 +216,12 @@ namespace oni {
         SceneManager::render() {
             /// Render everything but shinnies
             {
-                for (auto i = 0; i < math::enumCast(component::MaterialFinishType::LAST); ++i) {
+                for (auto i = 0; i < math::enumCast(component::MaterialFinish_Type::LAST); ++i) {
                     RenderSpec spec;
                     spec.renderTarget = nullptr;
                     spec.screenSize = getScreenSize();
                     spec.zoom = mCamera.z;
-                    spec.finishType = static_cast<component::MaterialFinishType>(i);
+                    spec.finishType = static_cast<component::MaterialFinish_Type>(i);
                     setMVP(spec, true, true, true);
 
                     begin(*mRendererTessellation, spec);
@@ -416,7 +413,7 @@ namespace oni {
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
             // TODO: I should probably take this as an argument
-            spec.finishType = component::MaterialFinishType::SOLID;
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             setMVP(spec, destBounds, model);
 
             begin(*mRendererQuad, spec);
@@ -432,7 +429,7 @@ namespace oni {
                                       const math::mat4 *model) {
             RenderSpec spec;
             // TODO: I should probably take this as an argument
-            spec.finishType = component::MaterialFinishType::SOLID;
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -448,7 +445,7 @@ namespace oni {
                             component::Texture &back) {
             RenderSpec spec;
             // TODO: I should probably take this as an argument
-            spec.finishType = component::MaterialFinishType::SOLID;
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             spec.renderTarget = &back;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;

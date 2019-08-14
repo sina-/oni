@@ -186,8 +186,7 @@ namespace oni {
 
             const auto *skin = renderable.skin;
             const auto *animation = renderable.transitionAnimation;
-            const auto transitionType = renderable.transitionType;
-            const auto *finish = renderable.finish;
+            const auto transitionType = renderable.def.transition;
 
             if (skin && skin->texture.id) {
                 effectID = 1.f;

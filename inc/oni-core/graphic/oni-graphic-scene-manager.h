@@ -252,7 +252,7 @@ namespace oni {
             math::ZLayerManager &mZLayerManager;
 
             using RenderableQueue = std::priority_queue<Renderable>;
-            std::array<RenderableQueue, math::enumCast(component::MaterialFinishType::LAST)> mRenderables{};
+            std::array<RenderableQueue, math::enumCast(component::MaterialFinish_Type::LAST)> mRenderables{};
         };
     }
 }

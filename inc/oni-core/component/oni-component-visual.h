@@ -389,7 +389,11 @@ namespace oni {
         };
 
         // TODO: Better name
-        enum class MaterialFinishType : common::u8 {
+        // TODO: Split this up, MaterialTransparency_Type: SOLID and TRANSLUECENT
+        // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
+        // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
+        // blend function so it can't just be a range of values, it has to be a Type hmmm...
+        enum class MaterialFinish_Type : common::u8 {
             SOLID,
             TRANSLUCENT,
             SHINNY,
@@ -397,18 +401,23 @@ namespace oni {
             LAST
         };
 
-        struct MaterialFinish {
-            union {
-                common::r32 solidness;
-                common::r32 translecency;
-                common::r32 shinniness;
-            };
-            MaterialFinishType type;
-
-            auto
-            typeID() const {
-                return math::enumCast(type);
-            }
+//        struct MaterialFinish {
+//            union {
+//                common::r32 solidness;
+//                common::r32 translecency;
+//                common::r32 shinniness;
+//            };
+//            MaterialFinishType type;
+//
+//            auto
+//            typeID() const {
+//                return math::enumCast(type);
+//            }
+//        };
+//
+        struct MaterialDefinition {
+            MaterialTransition_Type transition;
+            MaterialFinish_Type finish;
         };
 
         struct ParticleEmitter {

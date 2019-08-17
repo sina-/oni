@@ -23,7 +23,9 @@ namespace oni {
 
         protected:
             void
-            _begin(const RenderSpec &spec) override;
+            _begin(const RenderSpec &spec,
+                   const BlendSpec &,
+                   const DepthSpec &) override;
 
             void
             _flush(component::Texture *renderTarget) override;

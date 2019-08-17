@@ -43,6 +43,7 @@ namespace oni {
 
             auto positionIndex = glGetAttribLocation(program, "position");
             auto headingIndex = glGetAttribLocation(program, "heading");
+            auto effectIndex = glGetAttribLocation(program, "effect");
             auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
             auto colorIndex = glGetAttribLocation(program, "color");
             auto samplerIDIndex = glGetAttribLocation(program, "samplerID");
@@ -53,6 +54,7 @@ namespace oni {
 
             if (positionIndex == -1 || headingIndex == -1 || colorIndex == -1 ||
                 samplerIDIndex == -1 || halfSizeIndex == -1 ||
+                effectIndex == -1 ||
                 uvIndex_0 == -1 || uvIndex_1 == -1 || uvIndex_2 == -1 || uvIndex_3 == -1) {
                 assert(false);
             }
@@ -73,6 +75,15 @@ namespace oni {
             heading.stride = vertexSize;
             heading.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
                                                                                   heading));
+
+            graphic::BufferStructure effect;
+            effect.index = static_cast<common::oniGLuint>(effectIndex);
+            effect.componentCount = 1;
+            effect.componentType = GL_FLOAT;
+            effect.normalized = GL_FALSE;
+            effect.stride = vertexSize;
+            effect.offset = reinterpret_cast<const common::oniGLvoid *>(offsetof(graphic::TessellationVertex,
+                                                                                 effect));
 
             graphic::BufferStructure halfSize;
             halfSize.index = static_cast<common::oniGLuint>(halfSizeIndex);
@@ -135,6 +146,7 @@ namespace oni {
             std::vector<graphic::BufferStructure> bufferStructures;
             bufferStructures.push_back(sampler);
             bufferStructures.push_back(heading);
+            bufferStructures.push_back(effect);
             bufferStructures.push_back(halfSize);
             bufferStructures.push_back(position);
             bufferStructures.push_back(color);
@@ -164,42 +176,78 @@ namespace oni {
         void
         Renderer_OpenGL_Tessellation::submit(const Renderable &renderable) {
             assert(mIndexCount + 1 < mMaxIndicesCount);
-            auto *buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
-            auto samplerID = -1;
             auto uv0 = math::vec2{};
             auto uv1 = math::vec2{};
             auto uv2 = math::vec2{};
             auto uv3 = math::vec2{};
+            auto samplerID = -1;
+            auto effectID = 0.f;
 
-            if (renderable.texture) {
-                uv0 = renderable.texture->uv.values[0];
-                uv1 = renderable.texture->uv.values[1];
-                uv2 = renderable.texture->uv.values[2];
-                uv3 = renderable.texture->uv.values[3];
-                samplerID = getSamplerID(renderable.texture->textureID);
+            const auto *skin = renderable.skin;
+            const auto *animation = renderable.transitionAnimation;
+            const auto transitionType = renderable.def.transition;
 
-                assert(!renderable.animatedTexture);
+            if (skin && skin->texture.id) {
+                effectID = 1.f;
+                uv0 = skin->texture.uv.values[0];
+                uv1 = skin->texture.uv.values[1];
+                uv2 = skin->texture.uv.values[2];
+                uv3 = skin->texture.uv.values[3];
+                samplerID = getSamplerID(skin->texture.id);
+                assert(!animation);
             }
-            if (renderable.animatedTexture) {
-                auto currentFrame = renderable.animatedTexture->nextFrame;
-                if (currentFrame < renderable.animatedTexture->frameUV.size()) {
-                    uv0 = renderable.animatedTexture->frameUV[currentFrame].values[0];
-                    uv1 = renderable.animatedTexture->frameUV[currentFrame].values[1];
-                    uv2 = renderable.animatedTexture->frameUV[currentFrame].values[2];
-                    uv3 = renderable.animatedTexture->frameUV[currentFrame].values[3];
-                    samplerID = getSamplerID(renderable.animatedTexture->texture.textureID);
-                } else {
-                    assert(false);
+
+            switch (transitionType) {
+                case component::MaterialTransition_Type::NONE: {
+                    break;
                 }
-                assert(!renderable.texture);
+                case component::MaterialTransition_Type::FADE: {
+                    effectID = 2.f;
+                    break;
+                }
+                case component::MaterialTransition_Type::TINT: {
+                    effectID = 3.f;
+                    break;
+                }
+                case component::MaterialTransition_Type::ANIMATED: {
+                    if (animation) {
+                        effectID = 1.f;
+                        auto currentFrame = animation->value.nextFrame;
+                        if (currentFrame < animation->value.frameUV.size()) {
+                            uv0 = animation->value.frameUV[currentFrame].values[0];
+                            uv1 = animation->value.frameUV[currentFrame].values[1];
+                            uv2 = animation->value.frameUV[currentFrame].values[2];
+                            uv3 = animation->value.frameUV[currentFrame].values[3];
+                            samplerID = getSamplerID(animation->value.texture.id);
+                        } else {
+                            assert(false);
+                        }
+                        assert(!skin);
+                        break;
+                    } else {
+                        assert(false);
+                    }
+                }
+                case component::MaterialTransition_Type::LAST:
+                default: {
+                    assert(false);
+                    break;
+                }
             }
+
+            auto *buffer = static_cast<graphic::TessellationVertex *>(mBuffer);
 
             buffer->position = renderable.pos->value;
             buffer->heading = renderable.heading->value;
+            buffer->effect = effectID;
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
-            buffer->color = renderable.color->rgba();
+            if (renderable.skin) {
+                buffer->color = renderable.skin->color.rgba();
+            } else {
+                buffer->color = {};
+            }
             buffer->uv_0 = uv0;
             buffer->uv_1 = uv1;
             buffer->uv_2 = uv2;
@@ -275,7 +323,6 @@ namespace oni {
             mShader->setUniformMat4("view", spec.view);
             mShader->setUniformMat4("proj", spec.proj);
         }
-
 
         common::oniGLsizei
         Renderer_OpenGL_Tessellation::getIndexCount() {

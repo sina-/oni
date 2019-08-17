@@ -14,6 +14,7 @@ namespace oni {
         struct TessellationVertex {
             common::oniGLint samplerID{-1};
             common::r32 heading{0.f};
+            common::r32 effect{0.f};
             math::vec2 halfSize{1.f};
             math::vec3 position{0.f, 0.f, 0.f};
             math::vec4 color{0.f, 0.f, 0.f, 0.f};

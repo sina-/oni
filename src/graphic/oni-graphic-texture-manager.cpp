@@ -30,8 +30,8 @@ namespace oni {
             auto textureSize = common::size(texture.image.height * texture.image.width * numTextureElements);
             assert(textureSize);
             texture.image.data.resize(textureSize);
-            glBindTexture(GL_TEXTURE_2D, texture.textureID);
-            glGetTextureImage(texture.textureID, 0, texture.format, texture.type, textureSize,
+            glBindTexture(GL_TEXTURE_2D, texture.id);
+            glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize,
                               texture.image.data.data());
             glBindTexture(GL_TEXTURE_2D, 0);
         }
@@ -43,8 +43,8 @@ namespace oni {
             auto textureSize = common::size(texture.image.height * texture.image.width * numTextureElements);
             assert(textureSize);
             data.resize(textureSize);
-            glBindTexture(GL_TEXTURE_2D, texture.textureID);
-            glGetTextureImage(texture.textureID, 0, texture.format, texture.type, textureSize, data.data());
+            glBindTexture(GL_TEXTURE_2D, texture.id);
+            glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize, data.data());
             glBindTexture(GL_TEXTURE_2D, 0);
 
         }
@@ -52,14 +52,14 @@ namespace oni {
         void
         TextureManager::createTexture(component::Texture &texture,
                                       bool loadImage) {
-            glGenTextures(1, &texture.textureID);
+            glGenTextures(1, &texture.id);
 
-            assert(texture.textureID);
+            assert(texture.id);
 
             common::oniGLenum format = GL_BGRA;
             common::oniGLenum type = GL_UNSIGNED_BYTE;
 
-            bind(texture.textureID);
+            bind(texture.id);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -80,9 +80,9 @@ namespace oni {
         }
 
         const component::Texture &
-        TextureManager::getTexture(component::TextureTag tag) {
-            assert(tag != component::TextureTag::UNKNOWN);
-            assert(tag != component::TextureTag::LAST);
+        TextureManager::getTexture(component::EntityPreset tag) {
+            assert(tag != component::EntityPreset::UNKNOWN);
+            assert(tag != component::EntityPreset::LAST);
             const auto it = mTextureMap.find(tag);
             if (it == mTextureMap.end()) {
                 assert(false);
@@ -91,17 +91,17 @@ namespace oni {
         }
 
         void
-        TextureManager::initTexture(component::TextureTag tag,
+        TextureManager::initTexture(component::EntityPreset tag,
                                     component::Texture &texture) {
-            assert(tag != component::TextureTag::UNKNOWN);
-            assert(tag != component::TextureTag::LAST);
+            assert(tag != component::EntityPreset::UNKNOWN);
+            assert(tag != component::EntityPreset::LAST);
             const auto it = mTextureMap.find(tag);
             if (it == mTextureMap.end()) {
                 // NOTE: Did you forget to call loadAssets()?
                 assert(false);
                 return;
             }
-            // NOTE: This is a copy
+            // TODO: This is a copy
             texture = it->second;
         }
 
@@ -113,9 +113,9 @@ namespace oni {
         }
 
         void
-        TextureManager::loadTextureToCache(component::TextureTag tag) {
-            assert(tag != component::TextureTag::UNKNOWN);
-            assert(tag != component::TextureTag::LAST);
+        TextureManager::loadTextureToCache(component::EntityPreset tag) {
+            assert(tag != component::EntityPreset::UNKNOWN);
+            assert(tag != component::EntityPreset::LAST);
             auto it = mTextureMap.find(tag);
             if (it != mTextureMap.end()) {
                 assert(false);
@@ -130,9 +130,9 @@ namespace oni {
         }
 
         void
-        TextureManager::loadOrGetImage(component::TextureTag tag,
+        TextureManager::loadOrGetImage(component::EntityPreset tag,
                                        component::Image &image) {
-            assert(tag != component::TextureTag::UNKNOWN);
+            assert(tag != component::EntityPreset::UNKNOWN);
             if (isImageLoaded(tag)) {
                 image = mImageMap[tag];
             }
@@ -225,7 +225,7 @@ namespace oni {
             assert(texture.image.height >= height);
 
             // TODO: Do I need ot bind the texture? Seems to be working :/
-            glTextureSubImage2D(texture.textureID, 0, xOffset, yOffset, width, height, texture.format, texture.type,
+            glTextureSubImage2D(texture.id, 0, xOffset, yOffset, width, height, texture.format, texture.type,
                                 bits.data());
         }
 
@@ -395,12 +395,12 @@ namespace oni {
         }
 
         bool
-        TextureManager::isTextureLoaded(component::TextureTag tag) const {
+        TextureManager::isTextureLoaded(component::EntityPreset tag) const {
             return mTextureMap.find(tag) != mTextureMap.end();
         }
 
         bool
-        TextureManager::isImageLoaded(component::TextureTag tag) const {
+        TextureManager::isImageLoaded(component::EntityPreset tag) const {
             return mImageMap.find(tag) != mImageMap.end();
         }
 
@@ -434,7 +434,7 @@ namespace oni {
 
             unbind();
 
-            texture.textureID = textureID;
+            texture.id = textureID;
             texture.format = format;
             texture.type = type;
             texture.uv = {};

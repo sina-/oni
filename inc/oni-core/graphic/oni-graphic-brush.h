@@ -16,7 +16,7 @@ namespace oni {
                 // guarantees the life-time of the textures.
                 const component::Texture *texture{};
                 const component::Color *color;
-                component::TextureTag tag;
+                component::EntityPreset tag;
             };
             const component::Quad *shape_Quad{};
             const math::mat4 *model{}; // NOTE: Optional model transformation matrix if the quad is untransformed

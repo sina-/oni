@@ -53,14 +53,14 @@ namespace oni {
                                   const math::vec3 &brushTexturePos);
 
             void
-            loadOrGetImage(component::TextureTag tag,
+            loadOrGetImage(component::EntityPreset tag,
                            component::Image &image);
 
             const component::Texture &
-            getTexture(component::TextureTag tag);
+            getTexture(component::EntityPreset tag);
 
             void
-            initTexture(component::TextureTag tag,
+            initTexture(component::EntityPreset tag,
                         component::Texture &texture);
 
             static void
@@ -95,13 +95,13 @@ namespace oni {
 
         private:
             bool
-            isTextureLoaded(component::TextureTag) const;
+            isTextureLoaded(component::EntityPreset) const;
 
             void
-            loadTextureToCache(component::TextureTag tag);
+            loadTextureToCache(component::EntityPreset tag);
 
             bool
-            isImageLoaded(component::TextureTag) const;
+            isImageLoaded(component::EntityPreset) const;
 
             static void
             bind(common::oniGLuint textureID);
@@ -113,8 +113,8 @@ namespace oni {
         private:
 
         private:
-            std::map<component::TextureTag, component::Texture> mTextureMap{};
-            std::map<component::TextureTag, component::Image> mImageMap{};
+            std::map<component::EntityPreset, component::Texture> mTextureMap{};
+            std::map<component::EntityPreset, component::Image> mImageMap{};
             const common::u8 mElementsInRGBA{4};
             asset::AssetManager &mAssetManager;
         };

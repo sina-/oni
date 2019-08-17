@@ -19,6 +19,7 @@ namespace oni {
 
         common::oniGLint
         Renderer_OpenGL::getSamplerID(common::oniGLuint textureID) {
+            assert(textureID);
             auto it = std::find(mTextures.begin(), mTextures.end(), textureID);
             if (it == mTextures.end()) {
                 /*
@@ -63,10 +64,28 @@ namespace oni {
         }
 
         void
-        Renderer_OpenGL::_begin(const RenderSpec &spec) {
-            auto blendSrc = getBlendMode(spec.src);
-            auto blendDest = getBlendMode(spec.dest);
-            glBlendFunc(blendSrc, blendDest);
+        Renderer_OpenGL::_begin(const RenderSpec &spec,
+                                const BlendSpec &blending,
+                                const DepthSpec &depthSpec) {
+            /// Set blend
+            {
+                auto blendSrc = getBlendMode(blending.src);
+                auto blendDest = getBlendMode(blending.dest);
+
+                glBlendFunc(blendSrc, blendDest);
+            }
+
+            /// Set depth
+            {
+                glDepthMask(depthSpec.depthWrite);
+
+                if (depthSpec.depthRead) {
+                    glEnable(GL_DEPTH_TEST);
+                } else {
+                    glDisable(GL_DEPTH_TEST);
+                }
+            }
+
             enableShader(spec);
 
             mNextSamplerID = 0;

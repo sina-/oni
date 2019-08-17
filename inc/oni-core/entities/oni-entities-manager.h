@@ -43,57 +43,6 @@ namespace oni {
             operator=(const EntityManager &) const = delete;
 
         public:
-            common::EntityID
-            createEntity_SmokeCloud();
-
-            common::EntityID
-            createEntity_SimpleSpriteColored();
-
-            common::EntityID
-            createEntity_SimpleSpriteTextured();
-
-            common::EntityID
-            createEntity_CanvasTile();
-
-            common::EntityID
-            createEntity_RaceCar();
-
-            common::EntityID
-            createEntity_VehicleGun();
-
-            common::EntityID
-            createEntity_Vehicle();
-
-            common::EntityID
-            createEntity_SimpleRocket();
-
-            common::EntityID
-            createEntity_Wall();
-
-            common::EntityID
-            createEntity_VehicleTireFront();
-
-            common::EntityID
-            createEntity_VehicleTireRear();
-
-            common::EntityID
-            createEntity_SimpleParticle();
-
-            common::EntityID
-            createEntity_SimpleBlastParticle();
-
-            common::EntityID
-            createEntity_SimpleBlastAnimation();
-
-            common::EntityID
-            createEntity_Text();
-
-            common::EntityID
-            createEntity_WorldChunk();
-
-            common::EntityID
-            createEntity_DebugWorldChunk();
-
         public:
             void
             setWorldP3D(common::EntityID,
@@ -102,17 +51,13 @@ namespace oni {
                         common::r32 z);
 
             void
-            setTexturePath(common::EntityID id,
-                           std::string_view path);
-
-            void
-            setTextureTag(common::EntityID,
-                          component::TextureTag);
-
-            void
             setScale(common::EntityID,
                      common::r32 x,
                      common::r32 y);
+
+            void
+            setEntityPreset(common::EntityID,
+                            component::EntityPreset);
 
             void
             setColor(common::EntityID,
@@ -144,14 +89,6 @@ namespace oni {
                        common::r32 heading);
 
             void
-            setTrailTextureTag(common::EntityID,
-                               component::TextureTag);
-
-            void
-            setAfterMarkTextureTag(common::EntityID,
-                                   component::TextureTag);
-
-            void
             createPhysics(
                     common::EntityID,
                     const component::WorldP3D &worldPos,
@@ -181,9 +118,6 @@ namespace oni {
             void
             deleteEntity(common::EntityID,
                          const entities::EntityOperationPolicy &);
-
-            void
-            accommodateWithComplements();
 
             void
             attach(common::EntityID parent,
@@ -374,6 +308,9 @@ namespace oni {
             void
             dispatchEvents();
 
+            common::EntityID
+            createEntity(entities::EntityType);
+
             template<class Component, class... Args>
             Component &
             createComponent(common::EntityID entityID,
@@ -396,6 +333,12 @@ namespace oni {
                 }
             }
 
+            template<class Tag>
+            void
+            assignTag(common::EntityID id) {
+                mRegistry->assign<Tag>(id);
+            }
+
             void
             printEntityType(common::EntityID id);
 
@@ -408,18 +351,9 @@ namespace oni {
             }
 
         private:
-            common::EntityID
-            createEntity(entities::EntityType);
-
             void
             assignSimMode(common::EntityID,
                           entities::SimMode);
-
-            template<class Tag>
-            void
-            assignTag(common::EntityID id) {
-                mRegistry->assign<Tag>(id);
-            }
 
             void
             removePhysicalBody(common::EntityID);

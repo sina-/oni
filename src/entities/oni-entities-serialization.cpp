@@ -37,13 +37,6 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::ComplementaryComponents &data) {
-            archive(data.types);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   component::Point &data) {
             archive(data);
         }
@@ -73,13 +66,13 @@ namespace oni {
         void
         serialize(Archive &archive,
                   component::ParticleEmitter &data) {
-            archive(data.textureTag, data.size);
+            archive(data.tag, data.size);
         }
 
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::FadeWithAge &data) {
+                  component::MaterialTransition_Fade &data) {
             archive(data.fadeFunc, data.factor);
         }
 
@@ -87,7 +80,7 @@ namespace oni {
         void
         serialize(Archive &archive,
                   component::AfterMark &data) {
-            archive(data.textureTag);
+            archive(data.tag);
         }
 
         template<class Archive>
@@ -193,24 +186,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive,
-                  component::Tag_TextureShaded &) {}
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
-                  component::Tag_ColorShaded &) {}
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
                   component::Tag_Audible &) {}
-
-        template<class Archive>
-        void
-        serialize(Archive &archive,
-                  component::Color &data) {
-            archive(data.value);
-        }
 
         template<class Archive>
         void
@@ -236,13 +212,10 @@ namespace oni {
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
-                        //component::SmokeEmitterCD,
                         component::Rectangle,
                         component::Point,
-                        component::Color,
                         component::Age,
-                        component::FadeWithAge,
-                        component::TextureTag,
+                        component::EntityPreset,
                         component::ParticleEmitter,
                         component::AfterMark,
                         component::EntityAttachment,
@@ -258,11 +231,8 @@ namespace oni {
                         // find a solution to this shit.
                         //components::PhysicalProperties,
 
-                        component::ComplementaryComponents,
                         component::Tag_Dynamic,
                         component::Tag_Static,
-                        component::Tag_TextureShaded,
-                        component::Tag_ColorShaded,
                         component::Tag_Audible
                                 >(output, snapshotType);
             }
@@ -288,13 +258,10 @@ namespace oni {
                         component::WorldP2D,
                         component::Heading,
                         component::Scale,
-                        //component::SmokeEmitterCD,
                         component::Rectangle,
                         component::Point,
-                        component::Color,
                         component::Age,
-                        component::FadeWithAge,
-                        component::TextureTag,
+                        component::EntityPreset,
                         component::ParticleEmitter,
                         component::AfterMark,
                         component::EntityAttachment,
@@ -306,11 +273,8 @@ namespace oni {
 
                         //components::PhysicalProperties,
 
-                        component::ComplementaryComponents,
                         component::Tag_Dynamic,
                         component::Tag_Static,
-                        component::Tag_TextureShaded,
-                        component::Tag_ColorShaded,
                         component::Tag_Audible
                                >(snapshotType, input,
                         // NOTE: Entities might keep references to other entities but those ids might change during

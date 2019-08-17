@@ -13,15 +13,6 @@ namespace oni {
         struct Tag_Dynamic {
         };
 
-        struct Tag_ColorShaded {
-        };
-
-        struct Tag_TextureShaded {
-        };
-
-        struct Tag_ShinnyEffect {
-        };
-
         struct Tag_SplatOnDeath {
         };
 
@@ -33,6 +24,9 @@ namespace oni {
         };
 
         struct Tag_NetworkSyncComponent {
+        };
+
+        struct Tag_EntityInitialized {
         };
     }
 }

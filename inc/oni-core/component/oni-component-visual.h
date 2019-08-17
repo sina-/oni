@@ -22,39 +22,6 @@ namespace oni {
             std::string path{};
         };
 
-        // TODO: This seems to be just a way to get around the fact that server can not set values on Complementary
-        // components, so imagine that was possible, then this would be part of Texture component as it is pretty
-        // much useless on its own.
-        enum class TextureTag : common::u32 {
-            UNKNOWN,
-
-            BACKGROUND_CHUNK,
-            BACKGROUND_WHITE,
-
-            RACE_CAR,
-            TRUCK,
-            TIRE,
-            VEHICLE_GUN,
-            SMOKE_WHITE,
-            SMOKE_BLACK,
-            CLOUD_WHITE,
-            CLOUD_BLACK,
-            ROCKET,
-            ROCKET_TRAIL,
-            ROAD,
-            WALL_VERTICAL,
-            WALL_HORIZONTAL,
-            EXPLOSION,
-
-            TEST_TEXTURE,
-            ROCK,
-            SPARK,
-
-            BLAST_TEXTURE_ANIMATED,
-
-            LAST
-        };
-
         enum class NumAnimationFrames : common::u8 {
             TWO = 2,
             FOUR = 4,
@@ -83,7 +50,7 @@ namespace oni {
         struct Texture {
             Image image{};
             bool clear{false};
-            common::oniGLuint textureID{0};
+            common::oniGLuint id{0};
             // GL_BGRA          0x80E1
             common::oniGLenum format{0x80E1};
             // GL_UNSIGNED_BYTE 0x1401
@@ -149,11 +116,6 @@ namespace oni {
             std::vector<common::r32> advanceX{};
             std::vector<common::r32> advanceY{};
             std::vector<math::vec4> uv{};
-        };
-
-        struct ParticleEmitter {
-            TextureTag textureTag = TextureTag::UNKNOWN;
-            common::r32 size = 0.1f;
         };
 
         struct Color {
@@ -318,24 +280,17 @@ namespace oni {
             common::u32 value{255u};
         };
 
+        struct AnimatedColor {
+            Color begin{Color::WHITE()};
+            Color end{Color::BLACK()};
+        };
+
         enum class BrushType : common::u8 {
             COLOR,
             TEXTURE,
             TEXTURE_TAG,
 
             LAST
-        };
-
-        enum class FadeFunc : common::u8 {
-            LINEAR,
-            TAIL,
-
-            LAST
-        };
-
-        struct FadeWithAge {
-            FadeFunc fadeFunc{};
-            common::r32 factor{1.f};
         };
 
         // TODO: Probably should be merged with ParticleEmitter with the goal of generic enough Particle Emitter
@@ -359,14 +314,122 @@ namespace oni {
             component::Velocity velocity{};
             component::Acceleration acceleration{};
             component::Acceleration2D acceleration2d{};
-            std::vector<component::Quad> quads;
+            std::vector<component::Quad> quads{};
+        };
+
+        enum class EntityPreset : common::u32 {
+            UNKNOWN,
+
+            RACE_CAR_DEFAULT,
+            RACE_CAR_TIRE_DEFAULT,
+            RACE_CAR_TIRE_WITH_TRAIL,
+            VEHICLE_GUN_DEFAULT,
+            VEHICLE_DEFAULT,
+            ROCKET_DEFAULT,
+            ROCKET_TRAIL_DEFAULT,
+
+            WALL_VERTICAL,
+            WALL_HORIZONTAL,
+
+            ROAD_DEFAULT,
+
+            EXPLOSION_DEFAULT,
+            BLAST_ANIMATION_DEFAULT,
+            BLAST_PARTICLE_DEFAULT,
+
+            // TODO: I probably want to split the variations into another enum.
+
+            CLOUD_BLACK,
+            CLOUD_WHITE,
+
+            SMOKE_BLACK,
+            SMOKE_WHITE,
+
+            BACKGROUND_DEFAULT,
+            BACKGROUND_DEBUG,
+
+            CANVAS,
+
+            LAST
+        };
+
+        struct MaterialSkin {
+            Texture texture{};
+            Color color{};
+        };
+
+        enum class MaterialTransition_Type : common::u8 {
+            NONE,
+            FADE,
+            TINT,
+            ANIMATED,
+
+            LAST
+        };
+
+        enum class FadeFunc : common::u8 {
+            LINEAR,
+            TAIL,
+
+            LAST
+        };
+
+        struct MaterialTransition_Fade {
+            FadeFunc fadeFunc{FadeFunc::LINEAR};
+            common::r32 factor{1.f};
+        };
+
+        struct MaterialTransition_Tint {
+            // TODO: Probably Color
+            common::r32 tint{};
+        };
+
+        struct MaterialTransition_Animation {
+            TextureAnimated value;
+        };
+
+        // TODO: Better name
+        // TODO: Split this up, MaterialTransparency_Type: SOLID and TRANSLUECENT
+        // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
+        // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
+        // blend function so it can't just be a range of values, it has to be a Type hmmm...
+        enum class MaterialFinish_Type : common::u8 {
+            SOLID,
+            TRANSLUCENT,
+            SHINNY,
+
+            LAST
+        };
+
+//        struct MaterialFinish {
+//            union {
+//                common::r32 solidness;
+//                common::r32 translecency;
+//                common::r32 shinniness;
+//            };
+//            MaterialFinishType type;
+//
+//            auto
+//            typeID() const {
+//                return math::enumCast(type);
+//            }
+//        };
+//
+        struct MaterialDefinition {
+            MaterialTransition_Type transition;
+            MaterialFinish_Type finish;
+        };
+
+        struct ParticleEmitter {
+            EntityPreset tag;
+            common::r32 size = 0.1f;
         };
 
         struct AfterMark {
             component::Scale scale{1, 1};
             component::BrushType type{component::BrushType::COLOR};
             union {
-                TextureTag textureTag = TextureTag::UNKNOWN;
+                component::EntityPreset tag = {};
                 component::Color color;
             };
         };

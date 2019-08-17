@@ -2,6 +2,7 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/math/oni-math-mat4.h>
+#include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
     namespace entities {
@@ -48,15 +49,6 @@ namespace oni {
         };
 
         struct Renderable {
-            Renderable(common::EntityID _id,
-                       const entities::EntityManager *_manager,
-                       const component::WorldP3D *_pos,
-                       const component::Heading *_heading,
-                       const component::Scale *_scale,
-                       const component::Color *_color,
-                       const component::Texture *_texture,
-                       const component::TextureAnimated *_animatedTexture);
-
             friend bool
             operator<(const Renderable &left,
                       const Renderable &right);
@@ -66,21 +58,19 @@ namespace oni {
                       const Renderable &right);
 
             common::EntityID id{};
-            const entities::EntityManager *manager{};
-            const component::WorldP3D *pos{};
-            const component::Heading *heading{};
-            const component::Scale *scale{};
-            const component::Color *color{};
-            const component::Texture *texture{};
-            const component::TextureAnimated *animatedTexture{};
-        };
+            entities::EntityType type{};
+            const entities::EntityManager *manager;
 
-        enum class BlendMode : common::u8 {
-            ZERO,
-            ONE,
-            ONE_MINUS_SRC_ALPHA,
+            const component::WorldP3D *pos;
+            const component::Heading *heading;
+            const component::Scale *scale;
 
-            LAST
+            component::MaterialDefinition def;
+
+            const component::MaterialSkin *skin;
+            const component::MaterialTransition_Fade *transitionFade;
+            const component::MaterialTransition_Animation *transitionAnimation;
+            const component::MaterialTransition_Tint *transitionTint;
         };
 
         struct RenderSpec {
@@ -89,10 +79,11 @@ namespace oni {
             math::mat4 proj{};
             math::vec2 screenSize{};
             common::r32 zoom{};
-
             component::Texture *renderTarget{};
-            BlendMode src{};
-            BlendMode dest{};
+
+            ///
+
+            component::MaterialFinish_Type finishType{};
         };
 
         class Renderer {
@@ -117,9 +108,31 @@ namespace oni {
                 common::u32 height{0};
             };
 
+            enum class BlendMode : common::u8 {
+                ZERO,
+                ONE,
+                ONE_MINUS_SRC_ALPHA,
+
+                LAST
+            };
+
+            struct BlendSpec {
+                BlendMode src{BlendMode::ONE};
+                BlendMode dest{BlendMode::ONE};
+            };
+
+            struct DepthSpec {
+                bool depthWrite{false};
+                bool depthRead{false};
+            };
+
+            component::Texture *mRenderTarget{};
+
         protected:
             virtual void
-            _begin(const RenderSpec &) = 0;
+            _begin(const RenderSpec &,
+                   const BlendSpec &,
+                   const DepthSpec &) = 0;
 
             virtual void
             _flush(component::Texture *renderTarget) = 0;
@@ -133,8 +146,12 @@ namespace oni {
             virtual WindowSize
             getViewportSize() = 0;
 
-        protected:
-            component::Texture *mRenderTarget{};
+        private:
+            static BlendSpec
+            getBlendSpec(component::MaterialFinish_Type);
+
+            static DepthSpec
+            getDepthSpec(component::MaterialFinish_Type);
 
         private:
             bool mBegun{false};

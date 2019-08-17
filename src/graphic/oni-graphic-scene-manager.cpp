@@ -29,17 +29,11 @@ namespace oni {
                                    asset::AssetManager &assetManager,
                                    math::ZLayerManager &zLayerManager,
                                    graphic::TextureManager &textureManager,
-                                   b2World &physicsWorld,
-                                   common::r32 gameUnitToPixels) :
-                mCanvasTileSizeX{110},
-                mCanvasTileSizeY{110},
-                mHalfCanvasTileSizeX{mCanvasTileSizeX / 2.f},
-                mHalfCanvasTileSizeY{mCanvasTileSizeY / 2.f},
-                // 64k vertices
+                                   b2World &physicsWorld) :
+        // 64k vertices
                 mMaxSpriteCount(64 * 1000),
                 mScreenBounds(screenBounds),
                 mPhysicsWorld(physicsWorld),
-                mGameUnitToPixels(gameUnitToPixels),
                 mTextureManager(textureManager),
                 mZLayerManager(zLayerManager) {
 
@@ -53,8 +47,6 @@ namespace oni {
             mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
             mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
 
-
-            mSceneEntityManager = std::make_unique<entities::EntityManager>(entities::SimMode::CLIENT, nullptr);
 
             mRand = std::make_unique<math::Rand>(0, 0);
 
@@ -77,11 +69,10 @@ namespace oni {
         void
         SceneManager::beginColorRendering() {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             setMVP(spec, true, false, true);
             begin(*mRendererTessellation, spec);
         }
@@ -146,9 +137,9 @@ namespace oni {
         void
         SceneManager::prepareTexture(entities::EntityManager &manager,
                                      common::EntityID id,
-                                     component::TextureTag tag) {
-            auto &texture = manager.get<component::Texture>(id);
-            mTextureManager.initTexture(tag, texture);
+                                     component::EntityPreset tag) {
+            auto &ms = manager.get<component::MaterialSkin>(id);
+            mTextureManager.initTexture(tag, ms.texture);
         }
 
         void
@@ -165,184 +156,99 @@ namespace oni {
 
         void
         SceneManager::submit(entities::EntityManager &manager) {
-            {
-                // TODO: This only renders BrushTrails and only renders them to texture, which doesn't fit nicely
-                // to the current structure of submit and render.
-                // TODO: Another refactoring I should do is to remove the quads from BrushTrail as the renderer doesn't
-                // need to know about them. The visible part, the quad and texture, should be another entity with Texture
-                // and QuadList component, the car can have that entity as a reference in the BrushTrail
-                renderQuad(manager);
-            }
             // TODO: The following code includes everything, even the particles will be sorted, which might be
             // over-kill, I could think about separating particles from the rest and always rendering them at the
             // end on top of everything and accepting the fact that I won't be able to occlude particles with
             // other solid objects. Although... I could occlude them, if I keep the z-buffer around and do z test but
             // don't write to z-buffer when rendering particles...
-            /// Textures
             {
                 auto view = manager.createView<
+                        entities::EntityType,
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::Texture,
-                        component::Color,
-                        component::Tag_TextureShaded>();
+                        component::MaterialDefinition>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
-                    const auto &texture = view.get<component::Texture>(id);
-                    const auto &color = view.get<component::Color>(id);
+                    const auto &def = view.get<component::MaterialDefinition>(id);
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
-                }
-            }
-            /// Animated textures
-            {
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::TextureAnimated,
-                        component::Color,
-                        component::Tag_TextureShaded>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &animatedTexture = view.get<component::TextureAnimated>(id);
-                    const auto &color = view.get<component::Color>(id);
+                    auto renderable = Renderable{};
+                    renderable.id = id;
+                    // NOTE: Just for debug
+                    renderable.type = view.get<entities::EntityType>(id);
+                    renderable.manager = &manager;
+                    renderable.pos = &pos;
+                    renderable.heading = &heading;
+                    renderable.scale = &scale;
 
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, &animatedTexture);
-                }
-            }
-            /// Colors
-            {
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Color,
-                        component::Tag_ColorShaded>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &color = view.get<component::Color>(id);
-                    mRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, nullptr);
-                }
-            }
-            /// Shinnies
-            {
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::Texture,
-                        component::Color,
-                        component::Tag_ShinnyEffect>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &texture = view.get<component::Texture>(id);
-                    const auto &color = view.get<component::Color>(id);
+                    renderable.def = def;
+                    switch (def.transition) {
+                        case component::MaterialTransition_Type::NONE:
+                            renderable.skin = &manager.get<component::MaterialSkin>(id);
+                            break;
+                        case component::MaterialTransition_Type::FADE: {
+                            renderable.skin = &manager.get<component::MaterialSkin>(id);
+                            renderable.transitionFade = &manager.get<component::MaterialTransition_Fade>(id);
+                            break;
+                        }
+                        case component::MaterialTransition_Type::TINT: {
+                            renderable.skin = &manager.get<component::MaterialSkin>(id);
+                            renderable.transitionTint = &manager.get<component::MaterialTransition_Tint>(id);
+                            break;
+                        }
+                        case component::MaterialTransition_Type::ANIMATED: {
+                            renderable.transitionAnimation = &manager.get<component::MaterialTransition_Animation>(id);
+                            break;
+                        }
+                        case component::MaterialTransition_Type::LAST:
+                        default: {
+                            assert(false);
+                            break;
+                        }
+                    }
 
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, &texture, nullptr);
-                }
-            }
-            /// Animated shinnies
-            {
-                auto view = manager.createView<
-                        component::WorldP3D,
-                        component::Heading,
-                        component::Scale,
-                        component::TextureAnimated,
-                        component::Color,
-                        component::Tag_ShinnyEffect>();
-                for (auto &&id: view) {
-                    const auto &pos = view.get<component::WorldP3D>(id);
-                    const auto &heading = view.get<component::Heading>(id);
-                    const auto &scale = view.get<component::Scale>(id);
-                    const auto &animatedTexture = view.get<component::TextureAnimated>(id);
-                    const auto &color = view.get<component::Color>(id);
-
-                    mShinnyRenderables.emplace(id, &manager, &pos, &heading, &scale, &color, nullptr, &animatedTexture);
+                    mRenderables[math::enumCast(def.finish)].push(renderable);
                 }
             }
         }
 
         void
         SceneManager::render() {
-            /// Queue internal entities
-            {
-                submit(*mSceneEntityManager);
-            }
             /// Render everything but shinnies
             {
-                RenderSpec spec;
-                spec.src = BlendMode::ONE;
-                spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
-                spec.renderTarget = nullptr;
-                spec.screenSize = getScreenSize();
-                spec.zoom = mCamera.z;
-                setMVP(spec, true, true, true);
+                for (auto i = 0; i < math::enumCast(component::MaterialFinish_Type::LAST); ++i) {
+                    RenderSpec spec;
+                    spec.renderTarget = nullptr;
+                    spec.screenSize = getScreenSize();
+                    spec.zoom = mCamera.z;
+                    spec.finishType = static_cast<component::MaterialFinish_Type>(i);
+                    setMVP(spec, true, true, true);
 
-                begin(*mRendererTessellation, spec);
-                while (!mRenderables.empty()) {
-                    auto &r = const_cast<graphic::Renderable &> (mRenderables.top());
-                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
+                    begin(*mRendererTessellation, spec);
+                    while (!mRenderables[i].empty()) {
+                        auto &r = const_cast<graphic::Renderable &> (mRenderables[i].top());
+                        auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
 
-                    if (!isVisible(ePos.pos, *r.scale)) {
-                        mRenderables.pop();
-                        continue;
+                        if (!isVisible(ePos.pos, *r.scale)) {
+                            mRenderables[i].pop();
+                            continue;
+                        }
+
+                        // This will just point r.pos to a new location, which is temporary to this scope, but submit()
+                        // will create a copy so it is safe.
+                        r.pos = &ePos.pos;
+                        r.heading = &ePos.heading;
+
+                        mRendererTessellation->submit(r);
+
+                        mRenderables[i].pop();
+
+                        ++mRenderedSpritesPerFrame;
                     }
-
-                    r.pos = &ePos.pos;
-                    r.heading = &ePos.heading;
-
-                    mRendererTessellation->submit(r);
-
-                    mRenderables.pop();
-
-                    ++mRenderedSpritesPerFrame;
+                    end(*mRendererTessellation);
                 }
-                end(*mRendererTessellation);
-            }
-            /// Render shinnies
-            {
-                RenderSpec spec;
-                spec.src = BlendMode::ONE;
-                spec.dest = BlendMode::ONE;
-                spec.renderTarget = nullptr;
-                spec.screenSize = getScreenSize();
-                spec.zoom = mCamera.z;
-                setMVP(spec, true, true, true);
-
-                begin(*mRendererTessellation, spec);
-                while (!mShinnyRenderables.empty()) {
-                    auto &r = const_cast<graphic::Renderable &> (mShinnyRenderables.top());
-                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
-
-                    if (!isVisible(ePos.pos, *r.scale)) {
-                        mShinnyRenderables.pop();
-                        continue;
-                    }
-
-                    // NOTE: Shinnies need to be rendered at the top to get the blending and z order right. Maybe not
-                    // the best solution but has to do for now with the current render pipeline. If I come up with a
-                    // better pipeline I can chagne this.
-                    ePos.pos.z = mZLayerManager.getZForEntity(entities::EntityType::SHINNY_EFFECT);
-                    r.pos = &ePos.pos;
-                    r.heading = &ePos.heading;
-
-                    mRendererTessellation->submit(r);
-
-                    mShinnyRenderables.pop();
-
-                    ++mRenderedSpritesPerFrame;
-                }
-                end(*mRendererTessellation);
             }
         }
 
@@ -353,7 +259,6 @@ namespace oni {
 
             /// Sprites
             {
-                renderTessellation(manager, viewWidth, viewHeight);
             }
 
             // TODO: This is obsolete in favour of Trail rendering with quads, for now!
@@ -369,11 +274,6 @@ namespace oni {
                 // TODO: This should actually be split up from static text and entities part of UI should be tagged so
                 // renderStaticText(entityManager, viewWidth, viewHeight);
                 //end(*mTextureShader, *mTextureRenderer);
-            }
-
-            /// Quads
-            {
-                renderQuad(manager);
             }
         }
 
@@ -402,37 +302,10 @@ namespace oni {
         }
 
         void
-        SceneManager::renderTessellation(entities::EntityManager &manager,
-                                         common::r32 viewWidth,
-                                         common::r32 viewHeight) {
-            manager.sort<component::WorldP3D>([](const auto &lhs,
-                                                 const auto &rhs) {
-                return lhs.z < rhs.z;
-            });
-
-            RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
-            spec.renderTarget = nullptr;
-            spec.screenSize = getScreenSize();
-            spec.zoom = mCamera.z;
-            setMVP(spec, true, true, true);
-
-            begin(*mRendererTessellation, spec);
-
-            renderTessellationColor(manager, viewWidth, viewHeight);
-            renderTessellationTexture(manager, viewWidth, viewHeight);
-
-            end(*mRendererTessellation);
-        }
-
-        void
         SceneManager::renderStrip(entities::EntityManager &manager,
                                   common::r32 viewWidth,
                                   common::r32 viewHeight) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -463,29 +336,6 @@ namespace oni {
         }
 
         void
-        SceneManager::renderQuad(entities::EntityManager &manager) {
-            {
-                auto view = manager.createView<
-                        component::BrushTrail,
-                        component::WorldP3D>();
-                const auto &rocketTrailTexture = mTextureManager.getTexture(component::TextureTag::ROCKET_TRAIL);
-
-                auto brush = Brush{};
-                brush.type = component::BrushType::TEXTURE;
-                // TODO: After setting the texture on BrushTrail, use that instead.
-                brush.texture = &rocketTrailTexture;
-                for (auto &&id: view) {
-                    auto &trail = view.get<component::BrushTrail>(id);
-                    for (auto &&quad: trail.quads) {
-                        brush.shape_Quad = &quad;
-                        splat(brush);
-                    }
-                    trail.quads.clear();
-                }
-            }
-        }
-
-        void
         SceneManager::renderTessellationColor(entities::EntityManager &manager,
                                               common::r32 viewWidth,
                                               common::r32 viewHeight) {
@@ -494,8 +344,7 @@ namespace oni {
                     component::WorldP3D,
                     component::Heading,
                     component::Scale,
-                    component::Color,
-                    component::Tag_ColorShaded>();
+                    component::Color>();
 
             for (auto &&id: view) {
                 const auto &pos = view.get<component::WorldP3D>(id);
@@ -530,8 +379,7 @@ namespace oni {
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::Texture,
-                        component::Tag_TextureShaded>();
+                        component::Texture>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
@@ -563,11 +411,11 @@ namespace oni {
                                       component::Texture &dest,
                                       const math::mat4 *model) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
+            // TODO: I should probably take this as an argument
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             setMVP(spec, destBounds, model);
 
             begin(*mRendererQuad, spec);
@@ -582,8 +430,8 @@ namespace oni {
                                       component::Texture &dest,
                                       const math::mat4 *model) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            // TODO: I should probably take this as an argument
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             spec.renderTarget = &dest;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -598,8 +446,8 @@ namespace oni {
         SceneManager::blend(const component::Texture &front,
                             component::Texture &back) {
             RenderSpec spec;
-            spec.src = BlendMode::ONE;
-            spec.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+            // TODO: I should probably take this as an argument
+            spec.finishType = component::MaterialFinish_Type::SOLID;
             spec.renderTarget = &back;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
@@ -613,108 +461,6 @@ namespace oni {
             mRendererQuad->begin(spec);
             mRendererQuad->submit(quad, {}, front, back);
             end(*mRendererQuad);
-        }
-
-        void
-        SceneManager::splat(Brush &brush) {
-            component::AABB aabb;
-            math::findAABB(*brush.shape_Quad, aabb);
-
-            auto tileEntities = std::set<common::EntityID>();
-            auto tl = getOrCreateCanvasTile(aabb.topLeft());
-            tileEntities.insert(tl);
-
-            auto bl = getOrCreateCanvasTile(aabb.bottomLeft());
-            tileEntities.insert(bl);
-
-            auto br = getOrCreateCanvasTile(aabb.bottomRight());
-            tileEntities.insert(br);
-
-            auto tr = getOrCreateCanvasTile(aabb.topRight());
-            tileEntities.insert(tr);
-
-            // TODO: The following code is a good candidate for multi-threaded worker-pool based architecture
-            // as it uses at least two draw calls per-canvas and the work does not interfere with there
-            // reset of the code since usage of mSceneEntityManager is limited to this class.
-
-            /// Draw
-            for (auto &&canvasEntity: tileEntities) {
-                auto &canvasPos = mSceneEntityManager->get<component::WorldP3D>(canvasEntity);
-                graphic::ScreenBounds screenBounds;
-                screenBounds.xMin = canvasPos.x - mHalfCanvasTileSizeX;
-                screenBounds.xMax = canvasPos.x + mHalfCanvasTileSizeX;
-                screenBounds.yMin = canvasPos.y - mHalfCanvasTileSizeY;
-                screenBounds.yMax = canvasPos.y + mHalfCanvasTileSizeY;
-                auto &texture = mSceneEntityManager->get<component::Texture>(canvasEntity);
-                switch (brush.type) {
-                    case component::BrushType::COLOR: {
-                        renderToTexture(*brush.shape_Quad, *brush.color, screenBounds, texture, brush.model);
-                        break;
-                    }
-                    case component::BrushType::TEXTURE: {
-                        renderToTexture(*brush.shape_Quad, *brush.texture, screenBounds, texture, brush.model);
-                        break;
-                    }
-                    case component::BrushType::TEXTURE_TAG: {
-                        auto &brushTexture = mTextureManager.getTexture(brush.tag);
-                        renderToTexture(*brush.shape_Quad, brushTexture, screenBounds, texture, brush.model);
-                        break;
-                    }
-                    case component::BrushType::LAST: {
-                        assert(false);
-                        break;
-                    }
-                }
-            }
-        }
-
-        common::EntityID
-        SceneManager::getOrCreateCanvasTile(const math::vec2 &pos) {
-            return getOrCreateCanvasTile(component::WorldP3D{pos.x, pos.y, 0.f});
-        }
-
-        common::EntityID
-        SceneManager::getOrCreateCanvasTile(const component::WorldP3D &pos) {
-            auto x = math::findBin(pos.x, mCanvasTileSizeX);
-            auto y = math::findBin(pos.y, mCanvasTileSizeY);
-            auto xy = math::pack_i32(x, y);
-
-            auto missing = mCanvasTileLookup.find(xy) == mCanvasTileLookup.end();
-            if (missing) {
-                auto id = mSceneEntityManager->createEntity_CanvasTile();
-
-                auto tilePosX = math::binPos(x, mCanvasTileSizeX) + mCanvasTileSizeX / 2.f;
-                auto tilePosY = math::binPos(y, mCanvasTileSizeY) + mCanvasTileSizeY / 2.f;
-                auto tilePosZ = mZLayerManager.getZForEntity(entities::EntityType::CANVAS);
-
-                auto heading = component::Heading{0.f};
-
-                mSceneEntityManager->setWorldP3D(id, tilePosX, tilePosY, tilePosZ);
-                mSceneEntityManager->setScale(id,
-                                              static_cast<common::r32>(mCanvasTileSizeX),
-                                              static_cast<common::r32>(mCanvasTileSizeY));
-                mSceneEntityManager->setHeading(id, heading.value);
-
-                auto &canvasTexture = mSceneEntityManager->get<component::Texture>(id);
-
-                auto widthInPixels = static_cast<common::u16>(mCanvasTileSizeX * mGameUnitToPixels +
-                                                              common::EP32);
-                auto heightInPixels = static_cast<common::u16>(mCanvasTileSizeY * mGameUnitToPixels +
-                                                               common::EP32);
-
-                canvasTexture.image.width = widthInPixels;
-                canvasTexture.image.height = heightInPixels;
-                canvasTexture.image.path = "generated_by_getOrCreateCanvasTile::canvasFront";
-                canvasTexture.clear = false;
-
-                mTextureManager.createTexture(canvasTexture, false);
-
-                mCanvasTileLookup.emplace(xy, id);
-            }
-
-            auto entity = mCanvasTileLookup[xy];
-            assert(mSceneEntityManager->valid(entity));
-            return entity;
         }
 
         void
@@ -757,7 +503,7 @@ namespace oni {
                         break;
                     }
                     case component::BrushType::TEXTURE_TAG: {
-                        brush.tag = mark.textureTag;
+                        brush.tag = mark.tag;
                         break;
                     }
                     case component::BrushType::LAST:
@@ -770,7 +516,9 @@ namespace oni {
                 brush.type = component::BrushType::COLOR;
                 brush.model = &model;
 
-                splat(brush);
+                // TODO: This function needs to move to game scene manager, it is not part of the engine.
+                assert(false);
+                // splat(brush);
             }
         }
 
@@ -780,9 +528,10 @@ namespace oni {
             assert(manager.getSimMode() == entities::SimMode::CLIENT ||
                    manager.getSimMode() == entities::SimMode::CLIENT_SIDE_SERVER);
 
-            auto view = manager.createView<component::TextureAnimated>();
+            auto view = manager.createView<component::MaterialTransition_Animation>();
             for (auto &&id: view) {
-                auto &ta = view.get<component::TextureAnimated>(id);
+                auto &mta = view.get<component::MaterialTransition_Animation>(id);
+                auto &ta = mta.value;
                 ta.timeElapsed += tickTime;
                 // NOTE: It is assumed that this function is called more often than animation fps!
                 assert(ta.frameDuration > tickTime);

@@ -163,36 +163,38 @@ namespace oni {
             // don't write to z-buffer when rendering particles...
             {
                 auto view = manager.createView<
+                        entities::EntityType,
                         component::WorldP3D,
                         component::Heading,
                         component::Scale,
-                        component::MaterialSkin,
                         component::MaterialDefinition>();
                 for (auto &&id: view) {
                     const auto &pos = view.get<component::WorldP3D>(id);
                     const auto &heading = view.get<component::Heading>(id);
                     const auto &scale = view.get<component::Scale>(id);
-                    const auto &material = view.get<component::MaterialSkin>(id);
                     const auto &def = view.get<component::MaterialDefinition>(id);
 
                     auto renderable = Renderable{};
                     renderable.id = id;
+                    // NOTE: Just for debug
+                    renderable.type = view.get<entities::EntityType>(id);
                     renderable.manager = &manager;
-                    renderable.skin = &material;
                     renderable.pos = &pos;
                     renderable.heading = &heading;
                     renderable.scale = &scale;
 
-                    renderable.skin = &material;
                     renderable.def = def;
                     switch (def.transition) {
                         case component::MaterialTransition_Type::NONE:
+                            renderable.skin = &manager.get<component::MaterialSkin>(id);
                             break;
                         case component::MaterialTransition_Type::FADE: {
+                            renderable.skin = &manager.get<component::MaterialSkin>(id);
                             renderable.transitionFade = &manager.get<component::MaterialTransition_Fade>(id);
                             break;
                         }
                         case component::MaterialTransition_Type::TINT: {
+                            renderable.skin = &manager.get<component::MaterialSkin>(id);
                             renderable.transitionTint = &manager.get<component::MaterialTransition_Tint>(id);
                             break;
                         }
@@ -526,9 +528,10 @@ namespace oni {
             assert(manager.getSimMode() == entities::SimMode::CLIENT ||
                    manager.getSimMode() == entities::SimMode::CLIENT_SIDE_SERVER);
 
-            auto view = manager.createView<component::TextureAnimated>();
+            auto view = manager.createView<component::MaterialTransition_Animation>();
             for (auto &&id: view) {
-                auto &ta = view.get<component::TextureAnimated>(id);
+                auto &mta = view.get<component::MaterialTransition_Animation>(id);
+                auto &ta = mta.value;
                 ta.timeElapsed += tickTime;
                 // NOTE: It is assumed that this function is called more often than animation fps!
                 assert(ta.frameDuration > tickTime);

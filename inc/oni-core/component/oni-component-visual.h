@@ -385,7 +385,7 @@ namespace oni {
         };
 
         struct MaterialTransition_Animation {
-            TextureAnimated textureAnimated;
+            TextureAnimated value;
         };
 
         // TODO: Better name

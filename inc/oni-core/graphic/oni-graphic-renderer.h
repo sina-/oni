@@ -58,6 +58,7 @@ namespace oni {
                       const Renderable &right);
 
             common::EntityID id{};
+            entities::EntityType type{};
             const entities::EntityManager *manager;
 
             const component::WorldP3D *pos;

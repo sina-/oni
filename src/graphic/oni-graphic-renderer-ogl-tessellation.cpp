@@ -212,14 +212,14 @@ namespace oni {
                 }
                 case component::MaterialTransition_Type::ANIMATED: {
                     if (animation) {
-                        auto currentFrame = animation->textureAnimated.nextFrame;
-                        if (currentFrame < animation->textureAnimated.frameUV.size()) {
-                            uv0 = animation->textureAnimated.frameUV[currentFrame].values[0];
-                            uv1 = animation->textureAnimated.frameUV[currentFrame].values[1];
-                            uv2 = animation->textureAnimated.frameUV[currentFrame].values[2];
-                            uv3 = animation->textureAnimated.frameUV[currentFrame].values[3];
-                            // TODO: This is insane
-                            samplerID = getSamplerID(animation->textureAnimated.texture.id);
+                        effectID = 1.f;
+                        auto currentFrame = animation->value.nextFrame;
+                        if (currentFrame < animation->value.frameUV.size()) {
+                            uv0 = animation->value.frameUV[currentFrame].values[0];
+                            uv1 = animation->value.frameUV[currentFrame].values[1];
+                            uv2 = animation->value.frameUV[currentFrame].values[2];
+                            uv3 = animation->value.frameUV[currentFrame].values[3];
+                            samplerID = getSamplerID(animation->value.texture.id);
                         } else {
                             assert(false);
                         }
@@ -243,7 +243,11 @@ namespace oni {
             buffer->effect = effectID;
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
-            buffer->color = renderable.skin->color.rgba();
+            if (renderable.skin) {
+                buffer->color = renderable.skin->color.rgba();
+            } else {
+                buffer->color = {};
+            }
             buffer->uv_0 = uv0;
             buffer->uv_1 = uv1;
             buffer->uv_2 = uv2;

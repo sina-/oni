@@ -19,6 +19,7 @@ namespace oni {
 
         common::oniGLint
         Renderer_OpenGL::getSamplerID(common::oniGLuint textureID) {
+            assert(textureID);
             auto it = std::find(mTextures.begin(), mTextures.end(), textureID);
             if (it == mTextures.end()) {
                 /*

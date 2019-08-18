@@ -196,6 +196,7 @@ namespace oni {
                         case component::MaterialTransition_Type::TINT: {
                             renderable.skin = &manager.get<component::MaterialSkin>(id);
                             renderable.transitionTint = &manager.get<component::MaterialTransition_Tint>(id);
+                            renderable.age = &manager.get<component::Age>(id);
                             break;
                         }
                         case component::MaterialTransition_Type::ANIMATED: {

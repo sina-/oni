@@ -342,6 +342,8 @@ namespace oni {
             CLOUD_BLACK,
             CLOUD_WHITE,
 
+            ROCKET_FLAME_DEFAULT,
+
             SMOKE_BLACK,
             SMOKE_WHITE,
 
@@ -380,8 +382,8 @@ namespace oni {
         };
 
         struct MaterialTransition_Tint {
-            // TODO: Probably Color
-            common::r32 tint{};
+            component::Color begin{};
+            component::Color end{};
         };
 
         struct MaterialTransition_Animation {

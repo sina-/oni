@@ -64,6 +64,7 @@ namespace oni {
             const component::WorldP3D *pos;
             const component::Heading *heading;
             const component::Scale *scale;
+            const component::Age *age;
 
             component::MaterialDefinition def;
 

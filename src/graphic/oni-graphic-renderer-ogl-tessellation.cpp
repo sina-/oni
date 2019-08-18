@@ -175,6 +175,8 @@ namespace oni {
 
         void
         Renderer_OpenGL_Tessellation::submit(const Renderable &renderable) {
+            // TODO: Break up the renderable into smaller pieces, with geometry being mandetory and the rest as pointers.
+            // Just as they are in the registry. submit can split it down to more calls given other params
             assert(mIndexCount + 1 < mMaxIndicesCount);
 
             auto uv0 = math::vec2{};
@@ -182,7 +184,9 @@ namespace oni {
             auto uv2 = math::vec2{};
             auto uv3 = math::vec2{};
             auto samplerID = -1;
+            // TODO: would be nice to have an enum specific to the graphics that captures this?
             auto effectID = 0.f;
+            auto color = component::Color{};
 
             const auto *skin = renderable.skin;
             const auto *animation = renderable.transitionAnimation;
@@ -195,6 +199,7 @@ namespace oni {
                 uv2 = skin->texture.uv.values[2];
                 uv3 = skin->texture.uv.values[3];
                 samplerID = getSamplerID(skin->texture.id);
+                color = skin->color;
                 assert(!animation);
             }
 
@@ -207,6 +212,16 @@ namespace oni {
                     break;
                 }
                 case component::MaterialTransition_Type::TINT: {
+                    // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
+                    auto &begin = renderable.transitionTint->begin;
+                    auto &end = renderable.transitionTint->end;
+                    auto t = renderable.age->currentAge / renderable.age->maxAge;
+                    auto r = math::lerp(begin.r_r32(), end.r_r32(), t);
+                    auto g = math::lerp(begin.g_r32(), end.g_r32(), t);
+                    auto b = math::lerp(begin.b_r32(), end.b_r32(), t);
+                    color.set_r(r);
+                    color.set_g(g);
+                    color.set_b(b);
                     effectID = 3.f;
                     break;
                 }
@@ -243,11 +258,7 @@ namespace oni {
             buffer->effect = effectID;
             buffer->halfSize = math::vec2{renderable.scale->x / 2.f,
                                           renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
-            if (renderable.skin) {
-                buffer->color = renderable.skin->color.rgba();
-            } else {
-                buffer->color = {};
-            }
+            buffer->color = color.rgba();
             buffer->uv_0 = uv0;
             buffer->uv_1 = uv1;
             buffer->uv_2 = uv2;

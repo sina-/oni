@@ -2,21 +2,21 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+
+#include <oni-core/common/oni-common-typedefs-network.h>
+
 
 namespace oni {
-    namespace entities {
+    ClientDataManager::ClientDataManager() {
+        mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
+    }
 
-        ClientDataManager::ClientDataManager() {
-            mLock = std::unique_lock<std::mutex>(mMutex, std::defer_lock);
-        }
+    ClientDataManager::~ClientDataManager() = default;
 
-        ClientDataManager::~ClientDataManager() = default;
-
-        std::unique_lock<std::mutex>
-        ClientDataManager::scopedLock() {
-            return std::unique_lock<std::mutex>(mMutex);
-        }
+    std::unique_lock<std::mutex>
+    ClientDataManager::scopedLock() {
+        return std::unique_lock<std::mutex>(mMutex);
+    }
 
 /*        void ClientDataManager::lock() {
             mLock.lock();
@@ -26,75 +26,74 @@ namespace oni {
             mLock.unlock();
         }*/
 
-        common::EntityID
-        ClientDataManager::getEntityID(const common::PeerID &clientID) const {
-            assert(mClientToCarEntity.find(clientID) != mClientToCarEntity.end());
-            return mClientToCarEntity.at(clientID);
+    EntityID
+    ClientDataManager::getEntityID(const std::string &clientID) const {
+        assert(mClientToCarEntity.find(clientID) != mClientToCarEntity.end());
+        return mClientToCarEntity.at(clientID);
+    }
+
+    void
+    ClientDataManager::addNewClient(const std::string &clientID,
+                                    EntityID entityID) {
+        mClientToCarEntity[clientID] = entityID;
+        mCarEntityToClient[entityID] = clientID;
+        mCarEntityToInput[entityID] = Input{};
+        mClients.push_back(clientID);
+    }
+
+    void
+    ClientDataManager::deleteClient(const std::string &clientID) {
+        auto carID = mClientToCarEntity[clientID];
+        if (carID) {
+            mCarEntityToInput.erase(carID);
+            mClientToCarEntity.erase(clientID);
         }
 
-        void
-        ClientDataManager::addNewClient(const common::PeerID &clientID,
-                                        common::EntityID entityID) {
-            mClientToCarEntity[clientID] = entityID;
-            mCarEntityToClient[entityID] = clientID;
-            mCarEntityToInput[entityID] = io::Input{};
-            mClients.push_back(clientID);
+        if (auto it = std::find_if(mClients.begin(), mClients.end(),
+                                   [&](const std::string &peerID) { return (peerID == clientID); });
+                it != mClients.end()) {
+            mClients.erase(it);
+        } else {
+            assert(false);
         }
+    }
 
-        void
-        ClientDataManager::deleteClient(const common::PeerID &clientID) {
-            auto carID = mClientToCarEntity[clientID];
-            if (carID) {
-                mCarEntityToInput.erase(carID);
-                mClientToCarEntity.erase(clientID);
-            }
-
-            if (auto it = std::find_if(mClients.begin(), mClients.end(),
-                                       [&](const common::PeerID &peerID) { return (peerID == clientID); });
-                    it != mClients.end()) {
-                mClients.erase(it);
-            } else {
-                assert(false);
-            }
+    void
+    ClientDataManager::setClientInput(const std::string &clientID,
+                                      const Input &input) {
+        auto carID = mClientToCarEntity[clientID];
+        if (carID) {
+            mCarEntityToInput[carID] = input;
         }
+    }
 
-        void
-        ClientDataManager::setClientInput(const common::PeerID &clientID,
-                                          const io::Input &input) {
-            auto carID = mClientToCarEntity[clientID];
-            if (carID) {
-                mCarEntityToInput[carID] = input;
-            }
+    CarEntities
+    ClientDataManager::getCarEntities() const {
+        CarEntities entities{};
+        for (const auto &entity : mClientToCarEntity) {
+            entities.push_back(entity.second);
         }
+        return entities;
+    }
 
-        CarEntities
-        ClientDataManager::getCarEntities() const {
-            CarEntities entities{};
-            for (const auto &entity : mClientToCarEntity) {
-                entities.push_back(entity.second);
-            }
-            return entities;
-        }
+    size_t
+    ClientDataManager::getNumClients() const {
+        return mClients.size();
+    }
 
-        size_t
-        ClientDataManager::getNumClients() const {
-            return mClients.size();
+    void
+    ClientDataManager::resetClientsInput() {
+        for (auto &&input:mCarEntityToInput) {
+            input.second.reset();
         }
+    }
 
-        void
-        ClientDataManager::resetClientsInput() {
-            for (auto &&input:mCarEntityToInput) {
-                input.second.reset();
-            }
+    const Input *
+    ClientDataManager::getClientInput(const EntityID &entityID) const {
+        auto input = mCarEntityToInput.find(entityID);
+        if (input == mCarEntityToInput.end()) {
+            return nullptr;
         }
-
-        const io::Input *
-        ClientDataManager::getClientInput(const common::EntityID &entityID) const {
-            auto input = mCarEntityToInput.find(entityID);
-            if (input == mCarEntityToInput.end()) {
-                return nullptr;
-            }
-            return &mCarEntityToInput.at(entityID);
-        }
+        return &mCarEntityToInput.at(entityID);
     }
 }

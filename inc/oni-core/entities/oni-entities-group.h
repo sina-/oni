@@ -7,8 +7,8 @@
 #include <oni-core/common/oni-common-typedef.h>
 
 
+
 namespace oni {
-    namespace entities {
         class EntityManager;
 
         // TODO: Group like this is use-less. Each component that is used is kinda "owned" by the group and
@@ -20,11 +20,11 @@ namespace oni {
         private:
             friend EntityManager;
 
-            explicit EntityGroup(entt::basic_registry <common::EntityID> &registry) :
+            explicit EntityGroup(entt::basic_registry<EntityID> &registry) :
                     mGroup(registry.group<Components...>()) {
             }
 
-            EntityGroup(entt::basic_registry <common::EntityID> &registry,
+            EntityGroup(entt::basic_registry<EntityID> &registry,
                         std::unique_lock <std::mutex> registryLock) :
                     mGroup(registry.group<Components...>()),
                     mRegistryLock(std::move(registryLock)) {
@@ -57,7 +57,7 @@ namespace oni {
 
             template<class Component>
             Component &
-            get(common::EntityID entityID) noexcept {
+            get(EntityID entityID) noexcept {
                 if constexpr(sizeof...(Components) == 1) {
                     return mGroup.get(entityID);
                 } else {
@@ -67,7 +67,7 @@ namespace oni {
 
             template<class Component>
             const Component &
-            get(common::EntityID entityID) const noexcept {
+            get(EntityID entityID) const noexcept {
                 if constexpr(sizeof...(Components) == 1) {
                     return mGroup.get(entityID);
                 } else {
@@ -85,6 +85,4 @@ namespace oni {
             entt::basic_group<Entity, entt::get_t<>, Components...> mGroup;
             std::unique_lock <std::mutex> mRegistryLock{};
         };
-
-    }
 }

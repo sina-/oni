@@ -6,38 +6,35 @@
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 
 namespace oni {
-    namespace graphic {
 
-        /*
-         * Great tutorial on OpenGL buffers: https://open.gl/drawing
-         */
-        class Buffer {
-        public:
-            Buffer(const std::vector<common::oniGLfloat> &data,
-                   common::oniGLsizeiptr dataSize,
-                   common::oniGLenum usage);
+    /*
+     * Great tutorial on OpenGL buffers: https://open.gl/drawing
+     */
+    class Buffer {
+    public:
+        Buffer(const std::vector<oniGLfloat> &data,
+               oniGLsizeiptr dataSize,
+               oniGLenum usage);
 
-            ~Buffer();
+        ~Buffer();
 
-            Buffer &
-            operator=(const Buffer &) = delete;
+        Buffer &
+        operator=(const Buffer &) = delete;
 
-            Buffer &
-            operator=(Buffer &) = delete;
+        Buffer &
+        operator=(Buffer &) = delete;
 
-            Buffer(const Buffer &) = delete;
+        Buffer(const Buffer &) = delete;
 
-            Buffer(Buffer &) = delete;
+        Buffer(Buffer &) = delete;
 
-            void
-            bind();
+        void
+        bind();
 
-            void
-            unbind();
+        void
+        unbind();
 
-        private:
-            common::oniGLuint mBufferID;
-        };
-
-    }
+    private:
+        oniGLuint mBufferID;
+    };
 }

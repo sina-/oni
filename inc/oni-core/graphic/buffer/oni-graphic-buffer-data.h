@@ -9,44 +9,43 @@
 #include <oni-core/math/oni-math-vec4.h>
 #include <oni-core/math/oni-math-mat4.h>
 
+
 namespace oni {
-    namespace graphic {
-        struct TessellationVertex {
-            common::oniGLint samplerID{-1};
-            common::r32 heading{0.f};
-            common::r32 effect{0.f};
-            math::vec2 halfSize{1.f};
-            math::vec3 position{0.f, 0.f, 0.f};
-            math::vec4 color{0.f, 0.f, 0.f, 0.f};
-            math::vec2 uv_0{0, 0};
-            math::vec2 uv_1{0, 1};
-            math::vec2 uv_2{1, 1};
-            math::vec2 uv_3{1, 0};
-        };
+    struct TessellationVertex {
+        oniGLint samplerID{-1};
+        r32 heading{0.f};
+        r32 effect{0.f};
+        vec2 halfSize{1.f};
+        vec3 position{0.f, 0.f, 0.f};
+        vec4 color{0.f, 0.f, 0.f, 0.f};
+        vec2 uv_0{0, 0};
+        vec2 uv_1{0, 1};
+        vec2 uv_2{1, 1};
+        vec2 uv_3{1, 0};
+    };
 
-        struct StripVertex {
-            math::vec4 center{0.f, 0.f, 0.f, 0.f};
-            common::r32 texoff{0.f};
-            math::vec3 bc{};
-            //math::vec4 color{0.f, 0.f, 0.f, 0.f};
-            //common::oniGLint samplerID{-1};
-        };
+    struct StripVertex {
+        vec4 center{0.f, 0.f, 0.f, 0.f};
+        r32 texoff{0.f};
+        vec3 bc{};
+        //vec4 color{0.f, 0.f, 0.f, 0.f};
+        //common::oniGLint samplerID{-1};
+    };
 
-        struct QuadVertex {
-            common::oniGLfloat samplerFront{-1};
-            common::oniGLfloat samplerBack{-1};
-            math::vec4 color{0.f, 0.f, 0.f, 0.f};
-            math::vec2 uv{};
-            math::vec3 pos{};
-        };
+    struct QuadVertex {
+        oniGLfloat samplerFront{-1};
+        oniGLfloat samplerBack{-1};
+        vec4 color{0.f, 0.f, 0.f, 0.f};
+        vec2 uv{};
+        vec3 pos{};
+    };
 
-        struct BufferStructure {
-            common::oniGLuint index{0};
-            common::oniGLint componentCount{0};
-            common::oniGLenum componentType{0};
-            common::oniGLboolean normalized{0};
-            common::oniGLsizei stride{0};
-            const common::oniGLvoid *offset{nullptr};
-        };
-    }
+    struct BufferStructure {
+        oniGLuint index{0};
+        oniGLint componentCount{0};
+        oniGLenum componentType{0};
+        oniGLboolean normalized{0};
+        oniGLsizei stride{0};
+        const oniGLvoid *offset{nullptr};
+    };
 }

@@ -3,15 +3,13 @@
 #include <oni-core/common/oni-common-typedef.h>
 
 namespace oni {
-    namespace io {
-        typedef common::u16 oniKeyPress;
+    typedef u16 oniKeyPress;
 
-        struct CarInput {
-            common::r32 left{0.0f};
-            common::r32 right{0.0f};
-            common::r32 throttle{0.0f};
-            common::r32 brake{0.0f};
-            common::r32 eBrake{0.0f};
-        };
-    }
+    struct CarInput {
+        r32 left{0.0f};
+        r32 right{0.0f};
+        r32 throttle{0.0f};
+        r32 brake{0.0f};
+        r32 eBrake{0.0f};
+    };
 }

@@ -5,27 +5,24 @@
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 
 namespace oni {
-    namespace graphic {
-        class IndexBuffer {
-        public:
-            explicit IndexBuffer(common::oniGLuint count,
-                                 common::oniGLsizei size = 1);
+    class IndexBuffer {
+    public:
+        explicit IndexBuffer(oniGLuint count,
+                             oniGLsizei size = 1);
 
-            IndexBuffer() = default;
+        IndexBuffer() = default;
 
-            ~IndexBuffer();
+        ~IndexBuffer();
 
-            void
-            bind() const;
+        void
+        bind() const;
 
-            void
-            unbind() const;
+        void
+        unbind() const;
 
-        private:
-            common::oniGLuint mBufferID;
-            common::oniGLuint mCount;
-            common::oniGLsizei mSize;
-        };
-
-    }
+    private:
+        oniGLuint mBufferID;
+        oniGLuint mCount;
+        oniGLsizei mSize;
+    };
 }

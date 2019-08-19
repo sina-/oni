@@ -8,80 +8,78 @@
 
 
 namespace oni {
-    namespace game {
-        enum class EventType : common::u8 {
-            COLLISION,
-            SPAWN_PARTICLE,
-            SOUND_PLAY,
-            ROCKET_LAUNCH,
-        };
+    enum class EventType : oni::u8 {
+        COLLISION,
+        SPAWN_PARTICLE,
+        SOUND_PLAY,
+        ROCKET_LAUNCH,
+    };
 
-        // TODO: Doent look like the right place
-        struct CollidingEntity {
-            entities::EntityType entityA{entities::EntityType::UNKNOWN};
-            entities::EntityType entityB{entities::EntityType::UNKNOWN};
-        };
+    // TODO: Doent look like the right place
+    struct CollidingEntity {
+        EntityType entityA{EntityType::UNKNOWN};
+        EntityType entityB{EntityType::UNKNOWN};
+    };
 
-        struct Event_SplatOnDeath {
-            Event_SplatOnDeath() = default;
+    struct Event_SplatOnDeath {
+        Event_SplatOnDeath() = default;
 
-            Event_SplatOnDeath(const component::WorldP3D &pos,
-                               const component::Scale &scale,
-                               const component::Heading &heading,
-                               const component::EntityPreset &tag,
-                               std::function<void()> func
-            ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
+        Event_SplatOnDeath(const WorldP3D &pos,
+                           const Scale &scale,
+                           const Heading &heading,
+                           const EntityPreset &tag,
+                           std::function<void()> func
+        ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
 
-            component::WorldP3D pos{};
-            component::Scale scale{};
-            component::Heading heading{};
-            component::EntityPreset tag{};
-            std::function<void()> callback{};
-        };
+        WorldP3D pos{};
+        Scale scale{};
+        Heading heading{};
+        EntityPreset tag{};
+        std::function<void()> callback{};
+    };
 
-        struct Event_SplatOnRest {
-            Event_SplatOnRest() = default;
+    struct Event_SplatOnRest {
+        Event_SplatOnRest() = default;
 
-            Event_SplatOnRest(const component::WorldP3D &pos,
-                              const component::Scale &scale,
-                              const component::Heading &heading,
-                              const component::EntityPreset &tag,
-                              std::function<void()> func
-            ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
+        Event_SplatOnRest(const WorldP3D &pos,
+                          const Scale &scale,
+                          const Heading &heading,
+                          const EntityPreset &tag,
+                          std::function<void()> func
+        ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
 
-            component::WorldP3D pos{};
-            component::Scale scale{};
-            component::Heading heading{};
-            component::EntityPreset tag{};
-            std::function<void()> callback{};
-        };
+        WorldP3D pos{};
+        Scale scale{};
+        Heading heading{};
+        EntityPreset tag{};
+        std::function<void()> callback{};
+    };
 
-        struct Event_RocketLaunch {
-            Event_RocketLaunch() = default;
+    struct Event_RocketLaunch {
+        Event_RocketLaunch() = default;
 
-            Event_RocketLaunch(const component::WorldP3D &pos) : pos(pos) {}
+        Event_RocketLaunch(const WorldP3D &pos) : pos(pos) {}
 
-            component::WorldP3D pos{};
-        };
+        WorldP3D pos{};
+    };
 
-        struct Event_Collision {
-            Event_Collision() = default;
+    struct Event_Collision {
+        Event_Collision() = default;
 
-            Event_Collision(const component::WorldP3D &pos,
-                            const CollidingEntity &colliding) : pos(pos), colliding(colliding) {}
+        Event_Collision(const WorldP3D &pos,
+                        const CollidingEntity &colliding) : pos(pos), colliding(colliding) {}
 
-            component::WorldP3D pos{};
-            CollidingEntity colliding{};
-        };
+        WorldP3D pos{};
+        CollidingEntity colliding{};
+    };
 
-        struct Event_SoundPlay {
-            Event_SoundPlay() = default;
+    struct Event_SoundPlay {
+        Event_SoundPlay() = default;
 
-            Event_SoundPlay(const component::WorldP3D &pos,
-                            const component::Sound_Tag &soundTag) : pos(pos), tag(soundTag) {}
+        Event_SoundPlay(const WorldP3D &pos,
+                        const Sound_Tag &soundTag) : pos(pos), tag(soundTag) {}
 
-            component::WorldP3D pos{};
-            component::Sound_Tag tag{};
-        };
-    }
+        WorldP3D pos{};
+        Sound_Tag tag{};
+    };
 }

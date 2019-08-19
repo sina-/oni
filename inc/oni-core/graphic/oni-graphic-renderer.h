@@ -1,162 +1,132 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/component/oni-component-visual.h>
+#include <oni-core/component/oni-component-fwd.h>
+#include <oni-core/entities/oni-entities-fwd.h>
+#include <oni-core/math/oni-math-fwd.h>
+#include <oni-core/math/oni-math-mat4.h>
 
 namespace oni {
-    namespace entities {
-        class EntityManager;
-    }
-    namespace component {
-        class Color;
+    enum class PrimitiveType : oni::u8 {
+        UNKNOWN,
 
-        class Age;
+        POINTS,
+        LINES,
+        TRIANGLES,
+        TRIANGLE_STRIP,
 
-        union Scale;
+        LAST
+    };
 
-        class Velocity;
+    struct Renderable {
+        friend bool
+        operator<(const Renderable &left,
+                  const Renderable &right);
 
-        class Texture;
+        friend bool
+        operator>(const Renderable &left,
+                  const Renderable &right);
 
-        struct TextureAnimated;
+        EntityID id{};
+        EntityType type{};
+        const EntityManager *manager{};
 
-        struct Quad;
+        const WorldP3D *pos{};
+        const Heading *heading{};
+        const Scale *scale{};
+        const Age *age{};
 
-        class Text;
+        MaterialDefinition def{};
 
-        union WorldP3D;
+        const MaterialSkin *skin{};
+        const MaterialTransition_Fade *transitionFade{};
+        const MaterialTransition_Animation *transitionAnimation{};
+        const MaterialTransition_Tint *transitionTint{};
+    };
 
-        class Heading;
-    }
+    struct RenderSpec {
+        mat4 model{};
+        mat4 view{};
+        mat4 proj{};
+        vec2 screenSize{};
+        r32 zoom{};
+        Texture *renderTarget{};
 
-    namespace math {
-        class mat4;
+        ///
 
-        class vec2;
-    }
+        MaterialFinish_Type finishType{};
+    };
 
-    namespace graphic {
-        enum class PrimitiveType : common::u8 {
-            UNKNOWN,
+    class Renderer {
+    protected:
+        Renderer();
 
-            POINTS,
-            LINES,
-            TRIANGLES,
-            TRIANGLE_STRIP,
+        virtual ~Renderer();
+
+    public:
+        void
+        begin(const RenderSpec &);
+
+        virtual void
+        submit(const Renderable &) = 0;
+
+        void
+        end();
+
+    protected:
+        struct WindowSize {
+            u32 width{0};
+            u32 height{0};
+        };
+
+        enum class BlendMode : oni::u8 {
+            ZERO,
+            ONE,
+            ONE_MINUS_SRC_ALPHA,
 
             LAST
         };
 
-        struct Renderable {
-            friend bool
-            operator<(const Renderable &left,
-                      const Renderable &right);
-
-            friend bool
-            operator>(const Renderable &left,
-                      const Renderable &right);
-
-            common::EntityID id{};
-            entities::EntityType type{};
-            const entities::EntityManager *manager;
-
-            const component::WorldP3D *pos;
-            const component::Heading *heading;
-            const component::Scale *scale;
-            const component::Age *age;
-
-            component::MaterialDefinition def;
-
-            const component::MaterialSkin *skin;
-            const component::MaterialTransition_Fade *transitionFade;
-            const component::MaterialTransition_Animation *transitionAnimation;
-            const component::MaterialTransition_Tint *transitionTint;
+        struct BlendSpec {
+            BlendMode src{BlendMode::ONE};
+            BlendMode dest{BlendMode::ONE};
         };
 
-        struct RenderSpec {
-            math::mat4 model{};
-            math::mat4 view{};
-            math::mat4 proj{};
-            math::vec2 screenSize{};
-            common::r32 zoom{};
-            component::Texture *renderTarget{};
-
-            ///
-
-            component::MaterialFinish_Type finishType{};
+        struct DepthSpec {
+            bool depthWrite{false};
+            bool depthRead{false};
         };
 
-        class Renderer {
-        protected:
-            Renderer();
+        Texture *mRenderTarget{};
 
-            virtual ~Renderer();
+    protected:
+        virtual void
+        _begin(const RenderSpec &,
+               const BlendSpec &,
+               const DepthSpec &) = 0;
 
-        public:
-            void
-            begin(const RenderSpec &);
+        virtual void
+        _flush(Texture *renderTarget) = 0;
 
-            virtual void
-            submit(const Renderable &) = 0;
+        virtual void
+        _end() = 0;
 
-            void
-            end();
+        virtual void
+        setViewportSize(const WindowSize &) = 0;
 
-        protected:
-            struct WindowSize {
-                common::u32 width{0};
-                common::u32 height{0};
-            };
+        virtual WindowSize
+        getViewportSize() = 0;
 
-            enum class BlendMode : common::u8 {
-                ZERO,
-                ONE,
-                ONE_MINUS_SRC_ALPHA,
+    private:
+        static BlendSpec
+        getBlendSpec(MaterialFinish_Type);
 
-                LAST
-            };
+        static DepthSpec
+        getDepthSpec(MaterialFinish_Type);
 
-            struct BlendSpec {
-                BlendMode src{BlendMode::ONE};
-                BlendMode dest{BlendMode::ONE};
-            };
-
-            struct DepthSpec {
-                bool depthWrite{false};
-                bool depthRead{false};
-            };
-
-            component::Texture *mRenderTarget{};
-
-        protected:
-            virtual void
-            _begin(const RenderSpec &,
-                   const BlendSpec &,
-                   const DepthSpec &) = 0;
-
-            virtual void
-            _flush(component::Texture *renderTarget) = 0;
-
-            virtual void
-            _end() = 0;
-
-            virtual void
-            setViewportSize(const WindowSize &) = 0;
-
-            virtual WindowSize
-            getViewportSize() = 0;
-
-        private:
-            static BlendSpec
-            getBlendSpec(component::MaterialFinish_Type);
-
-            static DepthSpec
-            getDepthSpec(component::MaterialFinish_Type);
-
-        private:
-            bool mBegun{false};
-            WindowSize mViewportSize{};
-        };
-    }
+    private:
+        bool mBegun{false};
+        WindowSize mViewportSize{};
+    };
 }

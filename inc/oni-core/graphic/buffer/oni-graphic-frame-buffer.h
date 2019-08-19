@@ -1,39 +1,33 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedefs-graphic.h>
+#include <oni-core/component/oni-component-fwd.h>
 
 namespace oni {
-    namespace component {
-        struct Texture;
-    }
-    namespace graphic {
+    class FrameBuffer {
+    public:
+        FrameBuffer();
 
-        class FrameBuffer {
-        public:
-            FrameBuffer();
+        ~FrameBuffer();
 
-            ~FrameBuffer();
+        void
+        bind();
 
-            void
-            bind();
+        static void
+        unbind();
 
-            static void
-            unbind();
+        void
+        attach(Texture &renderTarget);
 
-            void
-            attach(component::Texture &renderTarget);
+        static void
+        clear();
 
-            static void
-            clear();
+    private:
+        static void
+        checkFBO();
 
-        private:
-            static void
-            checkFBO();
-
-        private:
-            common::oniGLuint mBufferID{};
-            common::oniGLuint mTextureID{};
-        };
-    }
+    private:
+        oniGLuint mBufferID{};
+        oniGLuint mTextureID{};
+    };
 }
-

@@ -13,395 +13,385 @@
 #include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/entities/oni-entities-view.h>
 #include <oni-core/entities/oni-entities-group.h>
+#include <oni-core/math/oni-math-fwd.h>
+
 
 class b2World;
 
 class b2Body;
 
 namespace oni {
-    namespace math {
-        class Rand;
+    class EntityManager {
+    public:
+        EntityManager(SimMode sMode,
+                      b2World *);
 
-        struct vec2;
-    }
+        ~EntityManager();
 
-    namespace component {
-        union WorldP3D;
-    }
+        EntityManager(const EntityManager &) = delete;
 
-    namespace entities {
-        class EntityManager {
-        public:
-            EntityManager(entities::SimMode sMode,
-                          b2World *);
+        EntityManager
+        operator=(const EntityManager &) const = delete;
 
-            ~EntityManager();
+    public:
+    public:
+        void
+        setWorldP3D(EntityID,
+                    r32 x,
+                    r32 y,
+                    r32 z);
 
-            EntityManager(const EntityManager &) = delete;
+        void
+        setScale(EntityID,
+                 r32 x,
+                 r32 y);
 
-            EntityManager
-            operator=(const EntityManager &) const = delete;
+        void
+        setEntityPreset(EntityID,
+                        EntityPreset);
 
-        public:
-        public:
-            void
-            setWorldP3D(common::EntityID,
-                        common::r32 x,
-                        common::r32 y,
-                        common::r32 z);
+        void
+        setColor(EntityID,
+                 r32 red,
+                 r32 green,
+                 r32 blue,
+                 r32 alpha);
 
-            void
-            setScale(common::EntityID,
-                     common::r32 x,
-                     common::r32 y);
+        void
+        setRandAge(EntityID,
+                   r32 lower,
+                   r32 upper);
 
-            void
-            setEntityPreset(common::EntityID,
-                            component::EntityPreset);
+        void
+        setRandVelocity(EntityID id,
+                        u32 lower,
+                        u32 upper);
 
-            void
-            setColor(common::EntityID,
-                     common::r32 red,
-                     common::r32 green,
-                     common::r32 blue,
-                     common::r32 alpha);
+        r32
+        setRandHeading(EntityID);
 
-            void
-            setRandAge(common::EntityID,
-                       common::r32 lower,
-                       common::r32 upper);
+        r32
+        setRandHeading(EntityID,
+                       r32 lower,
+                       r32 upper);
 
-            void
-            setRandVelocity(common::EntityID id,
-                            common::u32 lower,
-                            common::u32 upper);
+        void
+        setHeading(EntityID,
+                   r32 heading);
 
-            common::r32
-            setRandHeading(common::EntityID);
+        void
+        createPhysics(
+                EntityID,
+                const WorldP3D &worldPos,
+                const vec2 &size,
+                const r32 heading);
 
-            common::r32
-            setRandHeading(common::EntityID,
-                           common::r32 lower,
-                           common::r32 upper);
+        void
+        setText(EntityID,
+                std::string_view content);
 
-            void
-            setHeading(common::EntityID,
-                       common::r32 heading);
+        b2Body *
+        getEntityBody(EntityID);
 
-            void
-            createPhysics(
-                    common::EntityID,
-                    const component::WorldP3D &worldPos,
-                    const math::vec2 &size,
-                    const common::r32 heading);
+        SimMode
+        getSimMode();
 
-            void
-            setText(common::EntityID,
-                    std::string_view content);
+    public:
+        void
+        markForDeletion(EntityID);
 
-            b2Body *
-            getEntityBody(common::EntityID);
+        void
+        flushDeletions();
 
-            entities::SimMode
-            getSimMode();
+        void
+        deleteEntity(EntityID);
 
-        public:
-            void
-            markForDeletion(common::EntityID);
+        void
+        deleteEntity(EntityID,
+                     const EntityOperationPolicy &);
 
-            void
-            flushDeletions();
+        void
+        attach(EntityID parent,
+               EntityID child,
+               EntityType parentType,
+               EntityType childType);
 
-            void
-            deleteEntity(common::EntityID);
+    public:
+        oni::size
+        size();
 
-            void
-            deleteEntity(common::EntityID,
-                         const entities::EntityOperationPolicy &);
+        oni::size
+        alive();
 
-            void
-            attach(common::EntityID parent,
-                   common::EntityID child,
-                   entities::EntityType parentType,
-                   entities::EntityType childType);
+        template<class... ViewComponents>
+        EntityView<EntityID, ViewComponents...>
+        createView() {
+            return EntityView<EntityID, ViewComponents...>(*mRegistry);
+        }
 
-        public:
-            common::size
-            size();
+        template<class... ViewComponents>
+        EntityView<EntityID, ViewComponents...>
+        createView() const {
+            return EntityView<EntityID, ViewComponents...>(*mRegistry);
+        }
 
-            common::size
-            alive();
+        template<class... ViewComponents>
+        EntityView<EntityID, ViewComponents...>
+        createViewWithLock() {
+            std::unique_lock<std::mutex> registryLock(mMutex);
+            return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
+        }
 
-            template<class... ViewComponents>
-            EntityView<common::EntityID, ViewComponents...>
-            createView() {
-                return EntityView<common::EntityID, ViewComponents...>(*mRegistry);
-            }
+        template<class... GroupComponents>
+        EntityGroup<EntityID, GroupComponents...>
+        createGroup() {
+            return EntityGroup<EntityID, GroupComponents...>(*mRegistry);
+        }
 
-            template<class... ViewComponents>
-            EntityView<common::EntityID, ViewComponents...>
-            createView() const {
-                return EntityView<common::EntityID, ViewComponents...>(*mRegistry);
-            }
+        template<class... GroupComponents>
+        EntityGroup<EntityID, GroupComponents...>
+        createGroupWithLock() {
+            std::unique_lock<std::mutex> registryLock(mMutex);
+            return EntityView<EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
+        }
 
-            template<class... ViewComponents>
-            EntityView<common::EntityID, ViewComponents...>
-            createViewWithLock() {
-                std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<common::EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
-            }
+        template<class Component>
+        Component &
+        get(EntityID entityID) noexcept {
+            return mRegistry->get<Component>(entityID);
+        }
 
-            template<class... GroupComponents>
-            EntityGroup<common::EntityID, GroupComponents...>
-            createGroup() {
-                return EntityGroup<common::EntityID, GroupComponents...>(*mRegistry);
-            }
+        template<class Component>
+        const Component &
+        get(EntityID entityID) const noexcept {
+            return mRegistry->get<Component>(entityID);
+        }
 
-            template<class... GroupComponents>
-            EntityGroup<common::EntityID, GroupComponents...>
-            createGroupWithLock() {
-                std::unique_lock<std::mutex> registryLock(mMutex);
-                return EntityView<common::EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
-            }
+        EntityID
+        map(EntityID entityID);
 
-            template<class Component>
-            Component &
-            get(common::EntityID entityID) noexcept {
-                return mRegistry->get<Component>(entityID);
-            }
+        template<class Component>
+        bool
+        has(EntityID entityID) const noexcept {
+            bool result{false};
+            result = mRegistry->has<Component>(entityID);
+            return result;
+        }
 
-            template<class Component>
-            const Component &
-            get(common::EntityID entityID) const noexcept {
-                return mRegistry->get<Component>(entityID);
-            }
+        template<class Component, class... Args>
+        void
+        replace(EntityID entityID,
+                Args &&... args) {
+            mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
+        }
 
-            common::EntityID
-            map(common::EntityID entityID);
-
-            template<class Component>
-            bool
-            has(common::EntityID entityID) const noexcept {
-                bool result{false};
-                result = mRegistry->has<Component>(entityID);
-                return result;
-            }
-
-            template<class Component, class... Args>
-            void
-            replace(common::EntityID entityID,
-                    Args &&... args) {
-                mRegistry->replace<Component>(entityID, std::forward<Args>(args)...);
-            }
-
-            template<class Archive, class... ArchiveComponents, class... Type, class... Member>
-            void
-            restore(entities::SnapshotType snapshotType,
-                    Archive &archive,
-                    Member Type::*... member) {
-                switch (snapshotType) {
-                    case entities::SnapshotType::ENTIRE_REGISTRY: {
-                        mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
-                        break;
-                    }
-                    case entities::SnapshotType::ONLY_COMPONENTS: {
-                        mLoader->template component<ArchiveComponents...>(true, archive, member...);
-                        break;
-                    }
-                    case entities::SnapshotType::ONLY_NEW_ENTITIES: {
-                        mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
-                        break;
-                    }
+        template<class Archive, class... ArchiveComponents, class... Type, class... Member>
+        void
+        restore(SnapshotType snapshotType,
+                Archive &archive,
+                Member Type::*... member) {
+            switch (snapshotType) {
+                case SnapshotType::ENTIRE_REGISTRY: {
+                    mLoader->entities(archive).template component<ArchiveComponents...>(false, archive, member...);
+                    break;
+                }
+                case SnapshotType::ONLY_COMPONENTS: {
+                    mLoader->template component<ArchiveComponents...>(true, archive, member...);
+                    break;
+                }
+                case SnapshotType::ONLY_NEW_ENTITIES: {
+                    mLoader->entities(archive).template component<ArchiveComponents...>(true, archive, member...);
+                    break;
+                }
 /*                    case components::SnapshotType::REMOVE_NON_EXISTING_ENTITIES: {
                         mLoader->entities(archive);
                         break;
                     }*/
-                    default: {
-                        assert(false);
-                    }
+                default: {
+                    assert(false);
                 }
             }
+        }
 
-            template<class Archive, class ...ArchiveComponents>
-            void
-            snapshot(Archive &archive,
-                     entities::SnapshotType snapshotType) {
-                switch (snapshotType) {
-                    case entities::SnapshotType::ONLY_COMPONENTS: {
-                        // TODO: Rather not have this class know about specific components!
-                        {
-                            auto view = mRegistry->view<component::Tag_NetworkSyncComponent>();
-                            if (!view.empty()) {
-                                mRegistry->snapshot().template component<ArchiveComponents...>(archive,
-                                                                                               view.begin(),
-                                                                                               view.end());
-                                mRegistry->reset<component::Tag_NetworkSyncComponent>();
-                            }
+        template<class Archive, class ...ArchiveComponents>
+        void
+        snapshot(Archive &archive,
+                 SnapshotType snapshotType) {
+            switch (snapshotType) {
+                case SnapshotType::ONLY_COMPONENTS: {
+                    // TODO: Rather not have this class know about specific components!
+                    {
+                        auto view = mRegistry->view<Tag_NetworkSyncComponent>();
+                        if (!view.empty()) {
+                            mRegistry->snapshot().template component<ArchiveComponents...>(archive,
+                                                                                           view.begin(),
+                                                                                           view.end());
+                            mRegistry->reset<Tag_NetworkSyncComponent>();
                         }
-                        break;
                     }
-                    case entities::SnapshotType::ONLY_NEW_ENTITIES: {
-                        {
-                            auto view = mRegistry->view<component::Tag_NetworkSyncEntity>();
-                            if (!view.empty()) {
-                                mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
-                                        archive,
-                                        view.begin(),
-                                        view.end());
-                                mRegistry->reset<component::Tag_NetworkSyncEntity>();
-                            }
+                    break;
+                }
+                case SnapshotType::ONLY_NEW_ENTITIES: {
+                    {
+                        auto view = mRegistry->view<Tag_NetworkSyncEntity>();
+                        if (!view.empty()) {
+                            mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
+                                    archive,
+                                    view.begin(),
+                                    view.end());
+                            mRegistry->reset<Tag_NetworkSyncEntity>();
                         }
-                        break;
                     }
-                    case entities::SnapshotType::ENTIRE_REGISTRY: {
-                        mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
-                        break;
-                    }
+                    break;
+                }
+                case SnapshotType::ENTIRE_REGISTRY: {
+                    mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
+                    break;
+                }
 /*                    case components::SnapshotType::REMOVE_NON_EXISTING_ENTITIES: {
                         mRegistry->snapshot().entities(archive).template component<>(archive,);
                         break;
                     }*/
-                    default: {
-                        assert(false);
-                    }
+                default: {
+                    assert(false);
                 }
             }
+        }
 
-            std::unique_lock<std::mutex>
-            scopedLock() {
-                return std::unique_lock<std::mutex>(mMutex);
-            }
+        std::unique_lock<std::mutex>
+        scopedLock() {
+            return std::unique_lock<std::mutex>(mMutex);
+        }
 
-            void
-            clearDeletedEntitiesList();
+        void
+        clearDeletedEntitiesList();
 
-            const std::vector<entities::DeletedEntity> &
-            getDeletedEntities() const;
+        const std::vector<DeletedEntity> &
+        getDeletedEntities() const;
 
-            void
-            markForNetSync(common::EntityID entity);
+        void
+        markForNetSync(EntityID entity);
 
-            template<class Component, class Comparator>
-            void
-            sort(Comparator comparator) {
-                mRegistry->sort<Component, Comparator>(std::move(comparator));
-            }
+        template<class Component, class Comparator>
+        void
+        sort(Comparator comparator) {
+            mRegistry->sort<Component, Comparator>(std::move(comparator));
+        }
 
-            template<class Event, auto Method, class MethodInstance>
-            void
-            registerEventHandler(MethodInstance *instance) {
-                mDispatcher->sink<Event>().template connect<Method>(instance);
-            }
+        template<class Event, auto Method, class MethodInstance>
+        void
+        registerEventHandler(MethodInstance *instance) {
+            mDispatcher->sink<Event>().template connect<Method>(instance);
+        }
 
-            template<class Event, class... Args>
-            void
-            enqueueEvent(Args &&...args) {
-                mDispatcher->enqueue<Event>(std::forward<Args>(args)...);
-            }
+        template<class Event, class... Args>
+        void
+        enqueueEvent(Args &&...args) {
+            mDispatcher->enqueue<Event>(std::forward<Args>(args)...);
+        }
 
-            template<class Event>
-            void
-            enqueueEvent() {
-                mDispatcher->enqueue<Event>();
-            }
+        template<class Event>
+        void
+        enqueueEvent() {
+            mDispatcher->enqueue<Event>();
+        }
 
-            void
-            dispatchEvents();
+        void
+        dispatchEvents();
 
-            common::EntityID
-            createEntity(entities::EntityType);
+        EntityID
+        createEntity(EntityType);
 
-            template<class Component, class... Args>
-            Component &
-            createComponent(common::EntityID entityID,
-                            Args &&... args) {
-                static_assert(std::is_aggregate_v<Component> || std::is_enum_v<Component>);
-                return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
-            }
+        template<class Component, class... Args>
+        Component &
+        createComponent(EntityID entityID,
+                        Args &&... args) {
+            static_assert(std::is_aggregate_v<Component> || std::is_enum_v<Component>);
+            return mRegistry->assign<Component>(entityID, std::forward<Args>(args)...);
+        }
 
-            template<class Component>
-            void
-            removeComponent(common::EntityID entityID) {
+        template<class Component>
+        void
+        removeComponent(EntityID entityID) {
+            mRegistry->remove<Component>(entityID);
+        }
+
+        template<class Component>
+        void
+        removeComponentSafe(EntityID entityID) {
+            if (mRegistry->has<Component>(entityID)) {
                 mRegistry->remove<Component>(entityID);
             }
+        }
 
-            template<class Component>
-            void
-            removeComponentSafe(common::EntityID entityID) {
-                if (mRegistry->has<Component>(entityID)) {
-                    mRegistry->remove<Component>(entityID);
-                }
-            }
+        template<class Tag>
+        void
+        assignTag(EntityID id) {
+            mRegistry->assign<Tag>(id);
+        }
 
-            template<class Tag>
-            void
-            assignTag(common::EntityID id) {
-                mRegistry->assign<Tag>(id);
-            }
+        void
+        printEntityType(EntityID id);
 
-            void
-            printEntityType(common::EntityID id);
+        bool
+        valid(EntityID entityID);
 
-            bool
-            valid(common::EntityID entityID);
+        static auto
+        nullEntity() {
+            return entt::null;
+        }
 
-            static auto
-            nullEntity() {
-                return entt::null;
-            }
+    private:
+        void
+        assignSimMode(EntityID,
+                      SimMode);
 
-        private:
-            void
-            assignSimMode(common::EntityID,
-                          entities::SimMode);
+        void
+        removePhysicalBody(EntityID);
 
-            void
-            removePhysicalBody(common::EntityID);
+        EntityID
+        create();
 
-            common::EntityID
-            create();
+        template<class Component, class... Args>
+        void
+        accommodate(EntityID entityID,
+                    Args &&... args) {
+            mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
+        }
 
-            template<class Component, class... Args>
-            void
-            accommodate(common::EntityID entityID,
-                        Args &&... args) {
-                mRegistry->assign_or_replace<Component>(entityID, std::forward<Args>(args)...);
-            }
+        void
+        destroy(EntityID entityID);
 
-            void
-            destroy(common::EntityID entityID);
+        template<class... Component>
+        void
+        destroy() {
+            mRegistry->reset<Component...>();
+        }
 
-            template<class... Component>
-            void
-            destroy() {
-                mRegistry->reset<Component...>();
-            }
+        void
+        destroyAndTrack(EntityID entityID);
 
-            void
-            destroyAndTrack(common::EntityID entityID);
+    private:
+        std::unique_ptr<entt::basic_registry<EntityID>> mRegistry{};
+        std::unique_ptr<entt::basic_continuous_loader<EntityID>> mLoader{};
+        std::unique_ptr<entt::dispatcher> mDispatcher{};
+        mutable std::mutex mMutex{};
 
-        private:
-            std::unique_ptr<entt::basic_registry<common::EntityID>> mRegistry{};
-            std::unique_ptr<entt::basic_continuous_loader<common::EntityID>> mLoader{};
-            std::unique_ptr<entt::dispatcher> mDispatcher{};
-            mutable std::mutex mMutex{};
+        // NOTE: Entities which are complement of entities in another registry. Used for creating components on
+        // client side with matching entity from server side. For example a car that is emiting smoke would have
+        // an emitter component attached to the car entity of the server only on client side.
+        std::unordered_map<EntityID, EntityID> mComplementaryEntities{};
 
-            // NOTE: Entities which are complement of entities in another registry. Used for creating components on
-            // client side with matching entity from server side. For example a car that is emiting smoke would have
-            // an emitter component attached to the car entity of the server only on client side.
-            std::unordered_map<common::EntityID, common::EntityID> mComplementaryEntities{};
+    private:
+        b2World *mPhysicsWorld;
+        std::unique_ptr<Rand> mRand{};
 
-        private:
-            b2World *mPhysicsWorld;
-            std::unique_ptr<math::Rand> mRand{};
+        std::unordered_map<EntityID, b2Body *> mEntityBodyMap{};
 
-            std::unordered_map<common::EntityID, b2Body *> mEntityBodyMap{};
+        SimMode mSimMode{SimMode::CLIENT};
+        EntityOperationPolicy mEntityOperationPolicy{};
 
-            entities::SimMode mSimMode{entities::SimMode::CLIENT};
-            entities::EntityOperationPolicy mEntityOperationPolicy{};
-
-            std::vector<common::EntityID> mEntitiesToDelete{};
-            std::vector<entities::DeletedEntity> mDeletedEntities{};
-        };
-    }
+        std::vector<EntityID> mEntitiesToDelete{};
+        std::vector<DeletedEntity> mDeletedEntities{};
+    };
 }

@@ -3,79 +3,65 @@
 #include <map>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/network/oni-network-peer.h>
-#include <oni-core/network/oni-network-packet.h>
 #include <oni-core/component/oni-component-visual.h>
+#include <oni-core/entities/oni-entities-fwd.h>
+#include <oni-core/game/oni-game-fwd.h>
+#include <oni-core/network/oni-network-address.h>
+#include <oni-core/network/oni-network-packet.h>
+#include <oni-core/network/oni-network-peer.h>
+#include <oni-core/physics/oni-physics-fwd.h>
+
 
 namespace oni {
-    namespace physics {
-        class Dynamics;
-    }
+    class Server : public Peer {
+    public:
+        Server(const Address *,
+               u8,
+               u8);
 
-    namespace entities {
-        class EntityManager;
+        ~Server() override;
 
-        class EntityFactory;
-    }
+        void
+        sendEntitiesAll(EntityManager &);
 
-    namespace game {
-        struct Event_Collision;
-        struct Event_SoundPlay;
-        struct Event_RocketLaunch;
-    }
+        void
+        sendComponentsUpdate(EntityManager &);
 
-    namespace network {
+        void
+        sendNewEntities(EntityManager &);
 
-        class Server : public Peer {
-        public:
-            Server(const Address *,
-                   common::u8,
-                   common::u8);
+        void
+        broadcastDeletedEntities(EntityManager &);
 
-            ~Server() override;
+        void
+        sendCarEntityID(EntityID,
+                        const std::string &);
 
-            void
-            sendEntitiesAll(entities::EntityManager &);
+    public:
+        void
+        handleEvent_Collision(const Event_Collision &event);
 
-            void
-            sendComponentsUpdate(entities::EntityManager &);
+        void
+        handleEvent_SoundPlay(const Event_SoundPlay &event);
 
-            void
-            sendNewEntities(entities::EntityManager &);
+        void
+        handleEvent_RocketLaunch(const Event_RocketLaunch &event);
 
-            void
-            broadcastDeletedEntities(entities::EntityManager &);
+    private:
+        Server();
 
-            void
-            sendCarEntityID(common::EntityID,
-                            const common::PeerID &);
+        void
+        handle(ENetPeer *,
+               u8 *,
+               size_t,
+               PacketType) override;
 
-        public:
-            void
-            handleEvent_Collision(const oni::game::Event_Collision &event);
+        void
+        postConnectHook(const ENetEvent *) override;
 
-            void
-            handleEvent_SoundPlay(const oni::game::Event_SoundPlay &event);
+        void
+        postDisconnectHook(const ENetEvent *) override;
 
-            void
-            handleEvent_RocketLaunch(const oni::game::Event_RocketLaunch &event);
-
-        private:
-            Server();
-
-            void
-            handle(ENetPeer *,
-                   common::u8 *,
-                   size_t,
-                   PacketType) override;
-
-            void
-            postConnectHook(const ENetEvent *) override;
-
-            void
-            postDisconnectHook(const ENetEvent *) override;
-
-        private:
-        };
-    }
+    private:
+    };
 }

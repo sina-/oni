@@ -2,61 +2,56 @@
 
 #include <memory>
 
+#include <oni-core/io/oni-io-fwd.h>
 #include <oni-core/network/oni-network-peer.h>
 
 namespace oni {
-
     namespace utils {
         class Timer;
     }
-    namespace io {
-        class Input;
-    }
 
-    namespace network {
-        class Client : public Peer {
-        public:
-            Client();
+    class Client : public Peer {
+    public:
+        Client();
 
-            ~Client() override;
+        ~Client() override;
 
-            void
-            connect(const Address &address);
+        void
+        connect(const Address &address);
 
-            void
-            disconnect();
+        void
+        disconnect();
 
-            void
-            pingServer();
+        void
+        pingServer();
 
-            void
-            sendMessage(std::string &&message);
+        void
+        sendMessage(std::string &&message);
 
-            void
-            sendInput(const io::Input *input);
+        void
+        sendInput(const Input *input);
 
-            void
-            requestZLevelDelta();
+        void
+        requestZLevelDelta();
 
-        private:
-            void
-            handle(ENetPeer *peer,
-                   common::u8 *data,
-                   common::size size,
-                   PacketType header) override;
+    private:
+        void
+        handle(ENetPeer *peer,
+               u8 *data,
+               size size,
+               PacketType header) override;
 
-            void
-            postConnectHook(const ENetEvent *event) override;
+        void
+        postConnectHook(const ENetEvent *event) override;
 
-            void
-            postDisconnectHook(const ENetEvent *event) override;
+        void
+        postDisconnectHook(const ENetEvent *event) override;
 
-            void
-            requestSessionSetup();
+        void
+        requestSessionSetup();
 
-        private:
-            ENetPeer *mEnetServer;
-            std::unique_ptr<utils::Timer> mTimer{};
-        };
-    }
+    private:
+        ENetPeer *mEnetServer;
+        std::unique_ptr<utils::Timer> mTimer{};
+    };
 }

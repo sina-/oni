@@ -6,36 +6,32 @@
 #include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
 
 namespace oni {
-    namespace graphic {
+    class Buffer;
 
-        class Buffer;
+    class VertexArray {
+    public:
+        VertexArray(
+                const std::vector<BufferStructure> &,
+                oniGLsizei maxBufferSize);
 
-        class VertexArray {
-        public:
-            VertexArray(
-                    const std::vector<graphic::BufferStructure> &,
-                    common::oniGLsizei maxBufferSize);
+        ~VertexArray();
 
-            ~VertexArray();
+        void
+        bindVAO() const;
 
-            void
-            bindVAO() const;
+        void
+        unbindVAO() const;
 
-            void
-            unbindVAO() const;
+        void
+        bindVBO() const;
 
-            void
-            bindVBO() const;
+        void
+        unbindVBO() const;
 
-            void
-            unbindVBO() const;
-
-        private:
-            common::oniGLuint mArrayID{0};
-            std::unique_ptr<Buffer> mVertexBuffers;
-            std::vector<graphic::BufferStructure> mBufferStructure;
-            common::oniGLsizei mMaxBufferSize{0};
-        };
-
-    }
+    private:
+        oniGLuint mArrayID{0};
+        std::unique_ptr<Buffer> mVertexBuffers;
+        std::vector<BufferStructure> mBufferStructure;
+        oniGLsizei mMaxBufferSize{0};
+    };
 }

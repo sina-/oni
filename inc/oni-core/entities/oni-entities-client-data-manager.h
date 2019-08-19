@@ -5,61 +5,60 @@
 
 #include <oni-core/io/oni-io-input.h>
 
+
 namespace oni {
-    namespace entities {
-        typedef std::map<common::PeerID, common::EntityID> ClientToCarEntity;
-        typedef std::map<common::EntityID, common::PeerID> CarEntityToClient;
-        typedef std::map<common::EntityID, io::Input> CarEntityToInput;
-        typedef std::vector<common::PeerID> ClientList;
-        typedef std::vector<common::EntityID> CarEntities;
+    typedef std::map<std::string, EntityID> ClientToCarEntity;
+    typedef std::map<EntityID, std::string> CarEntityToClient;
+    typedef std::map<EntityID, Input> CarEntityToInput;
+    typedef std::vector<std::string> ClientList;
+    typedef std::vector<EntityID> CarEntities;
 
-        class ClientDataManager {
-        public:
-            ClientDataManager();
+    class ClientDataManager {
+    public:
+        ClientDataManager();
 
-            ~ClientDataManager();
+        ~ClientDataManager();
 
-            void
-            addNewClient(const common::PeerID &clientID,
-                         common::EntityID entityID);
+        void
+        addNewClient(const std::string &clientID,
+                     EntityID entityID);
 
-            void
-            deleteClient(const common::PeerID &clientID);
+        void
+        deleteClient(const std::string &clientID);
 
-            void
-            setClientInput(const common::PeerID &clientID,
-                           const io::Input &input);
+        void
+        setClientInput(const std::string &clientID,
+                       const Input &input);
 
-            const io::Input *
-            getClientInput(const common::EntityID &entityID) const;
+        const Input *
+        getClientInput(const EntityID &entityID) const;
 
-            void
-            resetClientsInput();
+        void
+        resetClientsInput();
 
-            CarEntities
-            getCarEntities() const;
+        CarEntities
+        getCarEntities() const;
 
-            size_t
-            getNumClients() const;
+        size_t
+        getNumClients() const;
 
-            common::EntityID
-            getEntityID(const common::PeerID &clientID) const;
+        EntityID
+        getEntityID(const std::string &clientID) const;
 
-            std::unique_lock<std::mutex>
-            scopedLock();
+        std::unique_lock<std::mutex>
+        scopedLock();
 
 /*            void lock();
 
             void unlock();*/
 
-        private:
-            ClientToCarEntity mClientToCarEntity{};
-            CarEntityToClient mCarEntityToClient{};
-            CarEntityToInput mCarEntityToInput{};
-            ClientList mClients{};
+    private:
+        ClientToCarEntity mClientToCarEntity{};
+        CarEntityToClient mCarEntityToClient{};
+        CarEntityToInput mCarEntityToInput{};
+        ClientList mClients{};
 
-            std::mutex mMutex{};
-            std::unique_lock<std::mutex> mLock{};
-        };
-    }
+        std::mutex mMutex{};
+        std::unique_lock<std::mutex> mLock{};
+    };
 }

@@ -7,367 +7,366 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/entities/oni-entities-manager.h>
 
+
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
 
 namespace oni {
-    namespace audio {
-        AudioManager::AudioManager(asset::AssetManager &assetManager) : mAssetManager(assetManager) {
-            mMaxAudibleDistance = 150.f;
-            mMaxNumberOfChannels = 1024;
+    AudioManager::AudioManager(AssetManager &assetManager) : mAssetManager(assetManager) {
+        mMaxAudibleDistance = 150.f;
+        mMaxNumberOfChannels = 1024;
 
-            FMOD::System *system;
-            auto result = FMOD::System_Create(&system);
-            ERRCHECK(result);
-            mSystem = std::unique_ptr<FMOD::System, FMODDeleter>(system, FMODDeleter());
+        FMOD::System *system;
+        auto result = FMOD::System_Create(&system);
+        ERRCHECK(result);
+        mSystem = std::unique_ptr<FMOD::System, FMODDeleter>(system, FMODDeleter());
 
-            common::u32 version;
-            result = mSystem->getVersion(&version);
-            ERRCHECK(result);
+        u32 version;
+        result = mSystem->getVersion(&version);
+        ERRCHECK(result);
 
-            assert(version >= FMOD_VERSION);
+        assert(version >= FMOD_VERSION);
 
-            result = mSystem->init(mMaxNumberOfChannels, FMOD_INIT_NORMAL, nullptr);
-            ERRCHECK(result);
+        result = mSystem->init(mMaxNumberOfChannels, FMOD_INIT_NORMAL, nullptr);
+        ERRCHECK(result);
 
-            result = mSystem->update();
-            ERRCHECK(result);
+        result = mSystem->update();
+        ERRCHECK(result);
 
-            loadChannels();
-            preLoadSounds();
+        loadChannels();
+        preLoadSounds();
+    }
+
+    void
+    AudioManager::tick(EntityManager &manager,
+                       const WorldP3D &playerPos) {
+        mPlayerPos = playerPos;
+        auto result = mSystem->update();
+        ERRCHECK(result);
+
+        /// Engine pitch
+        {
+            auto view = manager.createView<
+                    Tag_Audible,
+                    Car,
+                    Sound,
+                    SoundPitch>();
+            for (auto &&id : view) {
+                auto &car = view.get<Car>(id);
+                auto &sound = view.get<Sound>(id);
+
+                auto &pitch = view.get<SoundPitch>(id);
+                pitch.value = static_cast< r32>(car.rpm) / 2000;
+            }
         }
 
-        void
-        AudioManager::tick(entities::EntityManager &manager,
-                           const component::WorldP3D &playerPos) {
-            mPlayerPos = playerPos;
-            auto result = mSystem->update();
-            ERRCHECK(result);
+        /// Play and Pause
+        {
+            auto view = manager.createView<
+                    Tag_Audible,
+                    WorldP3D,
+                    Sound>();
+            for (auto &&id : view) {
+                auto &pos = view.get<WorldP3D>(id).value;
+                auto &sound = view.get<Sound>(id);
 
-            /// Engine pitch
-            {
-                auto view = manager.createView<
-                        component::Tag_Audible,
-                        component::Car,
-                        component::Sound,
-                        component::SoundPitch>();
-                for (auto &&id : view) {
-                    auto &car = view.get<component::Car>(id);
-                    auto &sound = view.get<component::Sound>(id);
-
-                    auto &pitch = view.get<component::SoundPitch>(id);
-                    pitch.value = static_cast< common::r32>(car.rpm) / 2000;
-                }
-            }
-
-            /// Play and Pause
-            {
-                auto view = manager.createView<
-                        component::Tag_Audible,
-                        component::WorldP3D,
-                        component::Sound>();
-                for (auto &&id : view) {
-                    auto &pos = view.get<component::WorldP3D>(id).value;
-                    auto &sound = view.get<component::Sound>(id);
-
-                    auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
-                    auto distance = (pos - mPlayerPos.value).len();
-                    if (distance < mMaxAudibleDistance) {
-                        if (manager.has<component::SoundPitch>(id)) {
-                            auto &pitch = manager.get<component::SoundPitch>(id);
-                            setPitch(*entityChannel.channel, pitch.value);
-                        }
-
-                        auto v = math::vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
-                        set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
-                        unPause(*entityChannel.channel);
-                    } else {
-                        pause(*entityChannel.channel);
+                auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
+                auto distance = (pos - mPlayerPos.value).len();
+                if (distance < mMaxAudibleDistance) {
+                    if (manager.has<SoundPitch>(id)) {
+                        auto &pitch = manager.get<SoundPitch>(id);
+                        setPitch(*entityChannel.channel, pitch.value);
                     }
-                }
-            }
-        }
 
-        void
-        AudioManager::playCollisionSoundEffect(entities::EntityType A,
-                                               entities::EntityType B,
-                                               const component::WorldP3D &pos) {
-            auto collisionTag = createCollisionEffectID(A, B);
-            auto distance = mPlayerPos.value - pos.value;
-            auto soundTag = mCollisionEffects[collisionTag];
-            assert(soundTag);
-            auto sound = component::Sound{soundTag, component::ChannelGroup::EFFECT};
-            auto pitch = component::SoundPitch{1.f};
-            playOneShot(sound, pitch, distance);
-        }
-
-        AudioManager::CollisionSoundTag
-        AudioManager::createCollisionEffectID(entities::EntityType A,
-                                              entities::EntityType B) {
-            static_assert(sizeof(A) == sizeof(common::u16), "Hashing will fail due to size mismatch");
-            auto x = math::enumCast(A);
-            auto y = math::enumCast(B);
-
-            if (x > y) {
-                std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
-            }
-
-            auto soundID = math::pack_u16(x, y);
-            return soundID;
-        }
-
-        void
-        AudioManager::loadChannels() {
-            FMOD::ChannelGroup *group{nullptr};
-            auto result = mSystem->createChannelGroup("effectsChannel", &group);
-            ERRCHECK(result);
-            auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
-            effectsGroup->setVolume(1.f);
-            mChannelGroup[component::ChannelGroup::EFFECT] = std::move(effectsGroup);
-            group = nullptr;
-
-            result = mSystem->createChannelGroup("musicChannel", &group);
-            ERRCHECK(result);
-            auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
-            musicGroup->setVolume(1.f);
-            mChannelGroup[component::ChannelGroup::MUSIC] = std::move(musicGroup);
-            group = nullptr;
-
-            for (auto i = math::enumCast(component::ChannelGroup::UNKNOWN) + 1;
-                 i < math::enumCast(component::ChannelGroup::LAST); ++i) {
-                auto channelGroup = static_cast<component::ChannelGroup>(i);
-                setChannelGroupVolume(channelGroup, 1.f);
-            }
-        }
-
-        void
-        AudioManager::preLoadSounds() {
-            // TODO: The sound must have been loaded using the asset packet instead of just going through all the
-            // sound types and shotgun loading all
-            for (auto i = math::enumCast(component::Sound_Tag::UNKNOWN) + 1;
-                 i < math::enumCast(component::Sound_Tag::LAST);
-                 ++i) {
-                auto tag = static_cast<component::Sound_Tag>(i);
-                auto path = mAssetManager.getAssetFilePath(tag);
-                loadSound(tag, path);
-            }
-
-            for (auto i = math::enumCast(entities::EntityType::UNKNOWN);
-                 i < math::enumCast(entities::EntityType::LAST);
-                 ++i) {
-                auto id = createCollisionEffectID(entities::EntityType::SIMPLE_ROCKET,
-                                                  static_cast<entities::EntityType>(i));
-                mCollisionEffects[id] = component::Sound_Tag::COLLISION_ROCKET_UNKNOWN;
-            }
-        }
-
-        void
-        AudioManager::kill(common::EntityID entityID) {
-            for (auto it = mLoopingChannels.begin(); it != mLoopingChannels.end();) {
-                if (it->second.entityID == entityID) {
-                    auto result = it->second.channel->stop();
-                    ERRCHECK(result);
-                    it = mLoopingChannels.erase(it);
+                    auto v = vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
+                    set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
+                    unPause(*entityChannel.channel);
                 } else {
-                    ++it;
+                    pause(*entityChannel.channel);
                 }
             }
         }
+    }
 
-        void
-        AudioManager::loadSound(component::Sound_Tag tag,
-                                std::string_view filePath) {
+    void
+    AudioManager::playCollisionSoundEffect(EntityType A,
+                                           EntityType B,
+                                           const WorldP3D &pos) {
+        auto collisionTag = createCollisionEffectID(A, B);
+        auto distance = mPlayerPos.value - pos.value;
+        auto soundTag = mCollisionEffects[collisionTag];
+        assert(soundTag);
+        auto sound = Sound{soundTag, ChannelGroup::EFFECT};
+        auto pitch = SoundPitch{1.f};
+        playOneShot(sound, pitch, distance);
+    }
+
+    AudioManager::CollisionSoundTag
+    AudioManager::createCollisionEffectID(EntityType A,
+                                          EntityType B) {
+        static_assert(sizeof(A) == sizeof(u16), "Hashing will fail due to size mismatch");
+        auto x = enumCast(A);
+        auto y = enumCast(B);
+
+        if (x > y) {
+            std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
+        }
+
+        auto soundID = pack_u16(x, y);
+        return soundID;
+    }
+
+    void
+    AudioManager::loadChannels() {
+        FMOD::ChannelGroup *group{nullptr};
+        auto result = mSystem->createChannelGroup("effectsChannel", &group);
+        ERRCHECK(result);
+        auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
+        effectsGroup->setVolume(1.f);
+        mChannelGroup[ChannelGroup::EFFECT] = std::move(effectsGroup);
+        group = nullptr;
+
+        result = mSystem->createChannelGroup("musicChannel", &group);
+        ERRCHECK(result);
+        auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
+        musicGroup->setVolume(1.f);
+        mChannelGroup[ChannelGroup::MUSIC] = std::move(musicGroup);
+        group = nullptr;
+
+        for (auto i = enumCast(ChannelGroup::UNKNOWN) + 1;
+             i < enumCast(ChannelGroup::LAST); ++i) {
+            auto channelGroup = static_cast<ChannelGroup>(i);
+            setChannelGroupVolume(channelGroup, 1.f);
+        }
+    }
+
+    void
+    AudioManager::preLoadSounds() {
+        // TODO: The sound must have been loaded using the asset packet instead of just going through all the
+        // sound types and shotgun loading all
+        for (auto i = enumCast(Sound_Tag::UNKNOWN) + 1;
+             i < enumCast(Sound_Tag::LAST);
+             ++i) {
+            auto tag = static_cast<Sound_Tag>(i);
+            auto path = mAssetManager.getAssetFilePath(tag);
+            loadSound(tag, path);
+        }
+
+        for (auto i = enumCast(EntityType::UNKNOWN);
+             i < enumCast(EntityType::LAST);
+             ++i) {
+            auto id = createCollisionEffectID(EntityType::SIMPLE_ROCKET,
+                                              static_cast<EntityType>(i));
+            mCollisionEffects[id] = Sound_Tag::COLLISION_ROCKET_UNKNOWN;
+        }
+    }
+
+    void
+    AudioManager::kill(EntityID entityID) {
+        for (auto it = mLoopingChannels.begin(); it != mLoopingChannels.end();) {
+            if (it->second.entityID == entityID) {
+                auto result = it->second.channel->stop();
+                ERRCHECK(result);
+                it = mLoopingChannels.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    void
+    AudioManager::loadSound(Sound_Tag tag,
+                            std::string_view filePath) {
 //            if (mSounds[tag]) {
 //                return;
 //            }
 
-            FMOD::Sound *sound{};
-            auto result = mSystem->createSound(filePath.data(), FMOD_DEFAULT, nullptr, &sound);
-            ERRCHECK(result);
-            assert(sound);
+        FMOD::Sound *sound{};
+        auto result = mSystem->createSound(filePath.data(), FMOD_DEFAULT, nullptr, &sound);
+        ERRCHECK(result);
+        assert(sound);
 
-            std::unique_ptr<FMOD::Sound, FMODDeleter> value(sound);
-            mSounds.insert({tag, std::move(value)});
-        }
+        std::unique_ptr<FMOD::Sound, FMODDeleter> value(sound);
+        mSounds.insert({tag, std::move(value)});
+    }
 
-        FMOD::Channel *
-        AudioManager::createChannel(const component::Sound &sound) {
-            assert(mChannelGroup[sound.group]);
-            auto *group = mChannelGroup[sound.group].get();
-            assert(group);
-            assert(mSounds[sound.tag]);
+    FMOD::Channel *
+    AudioManager::createChannel(const Sound &sound) {
+        assert(mChannelGroup[sound.group]);
+        auto *group = mChannelGroup[sound.group].get();
+        assert(group);
+        assert(mSounds[sound.tag]);
 
-            FMOD::Channel *channel{nullptr};
-            auto paused = true;
-            auto result = mSystem->playSound(mSounds[sound.tag].get(), group, paused, &channel);
-            ERRCHECK(result);
+        FMOD::Channel *channel{nullptr};
+        auto paused = true;
+        auto result = mSystem->playSound(mSounds[sound.tag].get(), group, paused, &channel);
+        ERRCHECK(result);
 
-            return channel;
-        }
+        return channel;
+    }
 
-        FMOD::ChannelGroup *
-        AudioManager::getChannelGroup(component::ChannelGroup channelGroup) {
-            assert(mChannelGroup[channelGroup]);
-            auto *group = mChannelGroup[channelGroup].get();
-            assert(group);
-            return group;
-        }
+    FMOD::ChannelGroup *
+    AudioManager::getChannelGroup(ChannelGroup channelGroup) {
+        assert(mChannelGroup[channelGroup]);
+        auto *group = mChannelGroup[channelGroup].get();
+        assert(group);
+        return group;
+    }
 
-        void
-        AudioManager::playOneShot(const component::Sound &sound,
-                                  const component::SoundPitch &pitch,
-                                  const math::vec3 &distance) {
-            auto *channel = createChannel(sound);
-            assert(channel);
+    void
+    AudioManager::playOneShot(const Sound &sound,
+                              const SoundPitch &pitch,
+                              const vec3 &distance) {
+        auto *channel = createChannel(sound);
+        assert(channel);
 
-            auto result = channel->setMode(FMOD_3D);
-            ERRCHECK(result);
+        auto result = channel->setMode(FMOD_3D);
+        ERRCHECK(result);
 
-            setPitch(*channel, pitch.value);
+        setPitch(*channel, pitch.value);
 
-            // TODO: Does this matter?
-            math::vec3 velocity{1.f, 1.f, 0.f};
-            set3DPos(*channel, distance, velocity);
+        // TODO: Does this matter?
+        vec3 velocity{1.f, 1.f, 0.f};
+        set3DPos(*channel, distance, velocity);
 
-            unPause(*channel);
-        }
+        unPause(*channel);
+    }
 
-        static FMOD_RESULT
-        endOfPlayCallback(FMOD_CHANNELCONTROL *channelControl,
-                          FMOD_CHANNELCONTROL_TYPE type,
-                          FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType,
-                          void *,
-                          void *) {
-            if (type == FMOD_CHANNELCONTROL_TYPE::FMOD_CHANNELCONTROL_CHANNELGROUP) {
-                return FMOD_OK;
-            }
-
-            auto *channel = (FMOD::Channel *) (channelControl);
-            if (callbackType == FMOD_CHANNELCONTROL_CALLBACK_TYPE::FMOD_CHANNELCONTROL_CALLBACK_END) {
-                void *finished;
-                auto result = channel->getUserData(&finished);
-                ERRCHECK(result);
-                *(bool *) finished = true;
-            }
-
+    static FMOD_RESULT
+    endOfPlayCallback(FMOD_CHANNELCONTROL *channelControl,
+                      FMOD_CHANNELCONTROL_TYPE type,
+                      FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType,
+                      void *,
+                      void *) {
+        if (type == FMOD_CHANNELCONTROL_TYPE::FMOD_CHANNELCONTROL_CHANNELGROUP) {
             return FMOD_OK;
         }
 
-        AudioManager::EntitySoundTag
-        AudioManager::createEntitySoundID(component::Sound_Tag tag,
-                                          common::EntityID id) {
-            auto result = math::pack_u32(math::enumCast(tag), id);
-            return result;
-        }
-
-        AudioManager::EntityChannel &
-        AudioManager::getOrCreateLooping3DChannel(const component::Sound &sound,
-                                                  common::EntityID entityID) {
-            auto id = createEntitySoundID(sound.tag, entityID);
-            if (mLoopingChannels.find(id) == mLoopingChannels.end()) {
-                EntityChannel entityChannel;
-                entityChannel.entityID = entityID;
-                entityChannel.channel = createChannel(sound);
-                entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
-
-                mLoopingChannels[id] = entityChannel;
-            }
-            return mLoopingChannels[id];
-        }
-
-        void
-        AudioManager::setPitch(FMOD::Channel &channel,
-                               common::r32 pitch) {
-            if (pitch > 256) {
-                pitch = 256;
-            }
-            auto result = channel.setPitch(pitch);
+        auto *channel = (FMOD::Channel *) (channelControl);
+        if (callbackType == FMOD_CHANNELCONTROL_CALLBACK_TYPE::FMOD_CHANNELCONTROL_CALLBACK_END) {
+            void *finished;
+            auto result = channel->getUserData(&finished);
             ERRCHECK(result);
+            *(bool *) finished = true;
         }
 
-        bool
-        AudioManager::isPaused(FMOD::Channel &channel) {
-            bool paused{false};
-            auto result = channel.getPaused(&paused);
-            ERRCHECK(result);
-            return paused;
+        return FMOD_OK;
+    }
+
+    AudioManager::EntitySoundTag
+    AudioManager::createEntitySoundID(Sound_Tag tag,
+                                      EntityID id) {
+        auto result = pack_u32(enumCast(tag), id);
+        return result;
+    }
+
+    AudioManager::EntityChannel &
+    AudioManager::getOrCreateLooping3DChannel(const Sound &sound,
+                                              EntityID entityID) {
+        auto id = createEntitySoundID(sound.tag, entityID);
+        if (mLoopingChannels.find(id) == mLoopingChannels.end()) {
+            EntityChannel entityChannel;
+            entityChannel.entityID = entityID;
+            entityChannel.channel = createChannel(sound);
+            entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
+
+            mLoopingChannels[id] = entityChannel;
         }
+        return mLoopingChannels[id];
+    }
 
-        void
-        AudioManager::unPause(FMOD::Channel &channel) {
-            auto result = channel.setPaused(false);
-            ERRCHECK(result);
+    void
+    AudioManager::setPitch(FMOD::Channel &channel,
+                           r32 pitch) {
+        if (pitch > 256) {
+            pitch = 256;
         }
+        auto result = channel.setPitch(pitch);
+        ERRCHECK(result);
+    }
 
-        void
-        AudioManager::pause(FMOD::Channel &channel) {
-            auto result = channel.setPaused(true);
-            ERRCHECK(result);
-        }
+    bool
+    AudioManager::isPaused(FMOD::Channel &channel) {
+        bool paused{false};
+        auto result = channel.getPaused(&paused);
+        ERRCHECK(result);
+        return paused;
+    }
 
-        void
-        AudioManager::FMODDeleter::operator()(FMOD::Sound *s) const {
-            s->release();
-        }
+    void
+    AudioManager::unPause(FMOD::Channel &channel) {
+        auto result = channel.setPaused(false);
+        ERRCHECK(result);
+    }
 
-        void
-        AudioManager::FMODDeleter::operator()(FMOD::System *sys) const {
-            sys->close();
-            sys->release();
-        }
+    void
+    AudioManager::pause(FMOD::Channel &channel) {
+        auto result = channel.setPaused(true);
+        ERRCHECK(result);
+    }
 
-        void
-        AudioManager::FMODDeleter::operator()(FMOD::ChannelGroup *channel) const {
-            channel->stop();
-            channel->release();
-        }
+    void
+    AudioManager::FMODDeleter::operator()(FMOD::Sound *s) const {
+        s->release();
+    }
 
-        void
-        AudioManager::set3DPos(FMOD::Channel &channel,
-                               const math::vec3 &pos,
-                               const math::vec3 &velocity) {
-            FMOD_VECTOR fPos;
-            fPos.x = pos.x;
-            fPos.y = pos.y;
-            fPos.z = pos.z;
-            FMOD_VECTOR fVelocity;
-            fVelocity.x = velocity.x;
-            fVelocity.y = velocity.y;
-            fVelocity.z = velocity.z;
+    void
+    AudioManager::FMODDeleter::operator()(FMOD::System *sys) const {
+        sys->close();
+        sys->release();
+    }
 
-            auto result = channel.set3DAttributes(&fPos, &fVelocity);
-            ERRCHECK(result);
+    void
+    AudioManager::FMODDeleter::operator()(FMOD::ChannelGroup *channel) const {
+        channel->stop();
+        channel->release();
+    }
 
-            result = channel.set3DMinMaxDistance(20.f, mMaxAudibleDistance); // In meters
-            ERRCHECK(result);
-        }
+    void
+    AudioManager::set3DPos(FMOD::Channel &channel,
+                           const vec3 &pos,
+                           const vec3 &velocity) {
+        FMOD_VECTOR fPos;
+        fPos.x = pos.x;
+        fPos.y = pos.y;
+        fPos.z = pos.z;
+        FMOD_VECTOR fVelocity;
+        fVelocity.x = velocity.x;
+        fVelocity.y = velocity.y;
+        fVelocity.z = velocity.z;
 
-        common::r32
-        AudioManager::getChannelGroupVolume(component::ChannelGroup channelGroup) {
-            auto result = mChannelVolume[channelGroup];
-            return result;
-        }
+        auto result = channel.set3DAttributes(&fPos, &fVelocity);
+        ERRCHECK(result);
 
-        void
-        AudioManager::setChannelGroupVolume(component::ChannelGroup channelGroup,
-                                            common::r32 volume) {
-            auto effectiveVolume = volume * mMasterVolume;
-            auto *group = getChannelGroup(channelGroup);
-            auto result = group->setVolume(effectiveVolume);
-            ERRCHECK(result);
-            mChannelVolume[channelGroup] = volume;
-        }
+        result = channel.set3DMinMaxDistance(20.f, mMaxAudibleDistance); // In meters
+        ERRCHECK(result);
+    }
 
-        void
-        AudioManager::setMasterVolume(common::r32 volume) {
-            assert(math::almost_Positive(volume) || math::almost_Zero(volume));
-            assert(math::almost_Less(volume, 1.f));
-            mMasterVolume = volume;
+    r32
+    AudioManager::getChannelGroupVolume(ChannelGroup channelGroup) {
+        auto result = mChannelVolume[channelGroup];
+        return result;
+    }
 
-            for (auto i = math::enumCast(component::ChannelGroup::UNKNOWN) + 1;
-                 i < math::enumCast(component::ChannelGroup::LAST); ++i) {
-                auto channelGroup = static_cast<component::ChannelGroup>(i);
-                setChannelGroupVolume(channelGroup, volume);
-            }
+    void
+    AudioManager::setChannelGroupVolume(ChannelGroup channelGroup,
+                                        r32 volume) {
+        auto effectiveVolume = volume * mMasterVolume;
+        auto *group = getChannelGroup(channelGroup);
+        auto result = group->setVolume(effectiveVolume);
+        ERRCHECK(result);
+        mChannelVolume[channelGroup] = volume;
+    }
+
+    void
+    AudioManager::setMasterVolume(r32 volume) {
+        assert(almost_Positive(volume) || almost_Zero(volume));
+        assert(almost_Less(volume, 1.f));
+        mMasterVolume = volume;
+
+        for (auto i = enumCast(ChannelGroup::UNKNOWN) + 1;
+             i < enumCast(ChannelGroup::LAST); ++i) {
+            auto channelGroup = static_cast<ChannelGroup>(i);
+            setChannelGroupVolume(channelGroup, volume);
         }
     }
 }

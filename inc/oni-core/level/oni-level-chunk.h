@@ -3,22 +3,24 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/math/oni-math-vec3.h>
 
+// TODO: Move to game
+
 namespace oni {
     namespace level {
         struct ChunkIndex {
-            common::i32 x{0};
-            common::i32 y{0};
+            i32 x{0};
+            i32 y{0};
         };
 
         struct RoadTileIndex {
             // NOTE: This is relative to Chunk
-            common::u16 x{0};
-            common::u16 y{0};
+            u16 x{0};
+            u16 y{0};
         };
 
         struct TileIndex {
-            common::i32 x{0};
-            common::i32 y{0};
+            i32 x{0};
+            i32 y{0};
         };
 
         struct EdgeRoadTile {
@@ -29,7 +31,7 @@ namespace oni {
         };
 
         struct Chunk {
-            common::u64 index{0};
+            u64 index{0};
             EdgeRoadTile edgeRoad{};
         };
     }

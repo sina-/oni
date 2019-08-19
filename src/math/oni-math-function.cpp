@@ -3,60 +3,59 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/math/oni-math-vec2.h>
 
+
 namespace oni {
-    namespace math {
-        void
-        findAABB(const component::Quad &quad,
-                 component::AABB &aabb) {
-            aabb.min = {math::min(math::min(quad.a.x, quad.b.x), math::min(quad.c.x, quad.d.x)),
-                        math::min(math::min(quad.a.y, quad.b.y), math::min(quad.c.y, quad.d.y))};
-            aabb.max = {math::max(math::max(quad.a.x, quad.b.x), math::max(quad.c.x, quad.d.x)),
-                        math::max(math::max(quad.a.y, quad.b.y), math::max(quad.c.y, quad.d.y))};
-        }
+    void
+    findAABB(const Quad &quad,
+             AABB &aabb) {
+        aabb.min = {min(min(quad.a.x, quad.b.x), min(quad.c.x, quad.d.x)),
+                    min(min(quad.a.y, quad.b.y), min(quad.c.y, quad.d.y))};
+        aabb.max = {max(max(quad.a.x, quad.b.x), max(quad.c.x, quad.d.x)),
+                    max(max(quad.a.y, quad.b.y), max(quad.c.y, quad.d.y))};
+    }
 
-        math::vec2
-        headingVector(common::r32 heading) {
-            return vec2{std::cos(heading), std::sin(heading)};
-        }
+    vec2
+    headingVector(r32 heading) {
+        return vec2{std::cos(heading), std::sin(heading)};
+    }
 
-        math::vec2
-        headingVector(const component::Heading &heading) {
-            return headingVector(heading.value);
-        }
+    vec2
+    headingVector(const Heading &heading) {
+        return headingVector(heading.value);
+    }
 
-        void
-        translate(component::Quad &quad,
-                  const component::WorldP3D &pos) {
-            quad.a.x += pos.x;
-            quad.b.x += pos.x;
-            quad.c.x += pos.x;
-            quad.d.x += pos.x;
+    void
+    translate(Quad &quad,
+              const WorldP3D &pos) {
+        quad.a.x += pos.x;
+        quad.b.x += pos.x;
+        quad.c.x += pos.x;
+        quad.d.x += pos.x;
 
-            quad.a.y += pos.y;
-            quad.b.y += pos.y;
-            quad.c.y += pos.y;
-            quad.d.y += pos.y;
-        }
+        quad.a.y += pos.y;
+        quad.b.y += pos.y;
+        quad.c.y += pos.y;
+        quad.d.y += pos.y;
+    }
 
-        void
-        translate(component::WorldP3D &pos,
-                  const component::WorldP3D &parent) {
-            pos.x += parent.x;
-            pos.y += parent.y;
-        }
+    void
+    translate(WorldP3D &pos,
+              const WorldP3D &parent) {
+        pos.x += parent.x;
+        pos.y += parent.y;
+    }
 
-        void
-        scale(component::Quad &quad,
-              const component::Scale &scale) {
-            quad.a.x *= scale.x;
-            quad.b.x *= scale.x;
-            quad.c.x *= scale.x;
-            quad.d.x *= scale.x;
+    void
+    scale(Quad &quad,
+          const Scale &scale) {
+        quad.a.x *= scale.x;
+        quad.b.x *= scale.x;
+        quad.c.x *= scale.x;
+        quad.d.x *= scale.x;
 
-            quad.a.y *= scale.y;
-            quad.b.y *= scale.y;
-            quad.c.y *= scale.y;
-            quad.d.y *= scale.y;
-        }
+        quad.a.y *= scale.y;
+        quad.b.y *= scale.y;
+        quad.c.y *= scale.y;
+        quad.d.y *= scale.y;
     }
 }

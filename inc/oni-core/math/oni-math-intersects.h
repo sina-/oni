@@ -3,50 +3,44 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/math/oni-math-vec3.h>
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-fwd.h>
+
 
 namespace oni {
-    namespace component {
-        struct Rectangle;
-        union WorldP3D;
-        union Point;
-    }
+    bool
+    intersects(const Rectangle &first,
+               const Rectangle &second);
 
-    namespace math {
-        bool
-        intersects(const component::Rectangle &first,
-                   const component::Rectangle &second);
+    bool
+    intersects(const Rectangle &first,
+               const Point &second);
 
-        bool
-        intersects(const component::Rectangle &first,
-                   const component::Point &second);
+    bool
+    intersects(const Rectangle &first,
+               r32 x,
+               r32 y,
+               r32 lengthX,
+               r32 lengthY);
 
-        bool
-        intersects(const component::Rectangle &first,
-                   common::r32 x,
-                   common::r32 y,
-                   common::r32 lengthX,
-                   common::r32 lengthY);
+    bool
+    intersects(const WorldP3D &first,
+               r32 x,
+               r32 y,
+               r32 lengthX,
+               r32 lengthY);
 
-        bool
-        intersects(const component::WorldP3D &first,
-                   common::r32 x,
-                   common::r32 y,
-                   common::r32 lengthX,
-                   common::r32 lengthY);
+    bool
+    intersects(const WorldP3D &,
+               const Scale &,
+               r32 x,
+               r32 y,
+               r32 lengthX,
+               r32 lengthY);
 
-        bool
-        intersects(const component::WorldP3D &,
-                   const component::Scale &,
-                   common::r32 x,
-                   common::r32 y,
-                   common::r32 lengthX,
-                   common::r32 lengthY);
-
-        bool
-        intersects(const component::Point &first,
-                   common::r32 x,
-                   common::r32 y,
-                   common::r32 lengthX,
-                   common::r32 lengthY);
-    }
+    bool
+    intersects(const Point &first,
+               r32 x,
+               r32 y,
+               r32 lengthX,
+               r32 lengthY);
 }

@@ -13,395 +13,387 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-physics.h>
 
+
 namespace oni {
-    namespace component {
-        struct Image {
-            common::u16 width{};
-            common::u16 height{};
-            std::vector<common::u8> data{};
-            std::string path{};
-        };
+    struct Image {
+        u16 width{};
+        u16 height{};
+        std::vector<u8> data{};
+        std::string path{};
+    };
 
-        enum class NumAnimationFrames : common::u8 {
-            TWO = 2,
-            FOUR = 4,
-            FIVE = 5,
-            TEN = 10,
-            TWENTY = 20,
-            TWENTYFIVE = 25,
-            FIFTY = 50,
+    enum class NumAnimationFrames : oni::u8 {
+        TWO = 2,
+        FOUR = 4,
+        FIVE = 5,
+        TEN = 10,
+        TWENTY = 20,
+        TWENTYFIVE = 25,
+        FIFTY = 50,
 
-            LAST
-        };
+        LAST
+    };
 
-        enum class AnimationEndingBehavior : common::u8 {
-            LOOP,
-            PLAY_AND_STOP,
-            PLAY_AND_REMOVE_ENTITY,
+    enum class AnimationEndingBehavior : oni::u8 {
+        LOOP,
+        PLAY_AND_STOP,
+        PLAY_AND_REMOVE_ENTITY,
+    };
 
-            LAST
-        };
+    struct UV {
+        std::array<vec2, 4> values{vec2{0.f, 0.f}, vec2{0.f, 1.f},
+                                         vec2{1.f, 1.f}, vec2{1.f, 0.f}};
+    };
 
-        struct UV {
-            std::array<math::vec2, 4> values{math::vec2{0.f, 0.f}, math::vec2{0.f, 1.f},
-                                             math::vec2{1.f, 1.f}, math::vec2{1.f, 0.f}};
-        };
+    struct Texture {
+        Image image{};
+        bool clear{false};
+        oniGLuint id{0};
+        // GL_BGRA          0x80E1
+        oniGLenum format{0x80E1};
+        // GL_UNSIGNED_BYTE 0x1401
+        // GL_FLOAT         0x1406
+        oniGLenum type{0x1401};
+        UV uv{};
+    };
 
-        struct Texture {
-            Image image{};
-            bool clear{false};
-            common::oniGLuint id{0};
-            // GL_BGRA          0x80E1
-            common::oniGLenum format{0x80E1};
-            // GL_UNSIGNED_BYTE 0x1401
-            // GL_FLOAT         0x1406
-            common::oniGLenum type{0x1401};
-            UV uv{};
-        };
+    struct TextureAnimated {
+        Texture texture{};
+        NumAnimationFrames numFrames{NumAnimationFrames::TWO};
+        u8 nextFrame{0};
+        bool playing{true};
+        AnimationEndingBehavior endingBehaviour{AnimationEndingBehavior::LOOP};
+        r64 timeElapsed{0.f};
+        r64 frameDuration{0.1f};
+        std::vector<UV> frameUV{};
 
-        struct TextureAnimated {
-            Texture texture{};
-            NumAnimationFrames numFrames{NumAnimationFrames::TWO};
-            common::u8 nextFrame{0};
-            bool playing{true};
-            AnimationEndingBehavior endingBehaviour{AnimationEndingBehavior::LOOP};
-            common::r64 timeElapsed{0.f};
-            common::r64 frameDuration{0.1f};
-            std::vector<UV> frameUV{};
+        inline static TextureAnimated
+        make(NumAnimationFrames numFrames,
+             r32 fps) noexcept {
+            TextureAnimated result;
+            init(result, numFrames, fps);
+            return result;
+        }
 
-            inline static TextureAnimated
-            make(NumAnimationFrames numFrames,
-                 common::r32 fps) noexcept {
-                TextureAnimated result;
-                init(result, numFrames, fps);
-                return result;
+        inline static void
+        init(TextureAnimated &output,
+             NumAnimationFrames numFrames,
+             r32 fps) {
+            output.numFrames = numFrames;
+            output.frameDuration = 1.0 / fps;
+            output.nextFrame = 0;
+            output.timeElapsed = 0;
+            output.texture = {};
+
+            auto countFrame = enumCast(numFrames);
+            auto xOffset = 0.f;
+            auto xWidth = 1.f / countFrame;
+
+            output.frameUV.resize(countFrame);
+            for (auto &&uv: output.frameUV) {
+                uv.values[0] = {xOffset, 0.f};
+                uv.values[1] = {xOffset, 1.f};
+                uv.values[2] = {xOffset + xWidth, 1.f};
+                uv.values[3] = {xOffset + xWidth, 0.f};
+
+                xOffset += xWidth;
             }
+        }
+    };
 
-            inline static void
-            init(TextureAnimated &output,
-                 NumAnimationFrames numFrames,
-                 common::r32 fps) {
-                output.numFrames = numFrames;
-                output.frameDuration = 1.0 / fps;
-                output.nextFrame = 0;
-                output.timeElapsed = 0;
-                output.texture = {};
+    struct Text {
+        EntityID entityID{0};
+        r32 xScaling{1.f};
+        r32 yScaling{1.f};
+        oniGLuint textureID{0};
+        std::string textContent{};
+        std::vector<size_t> width{};
+        std::vector<size_t> height{};
+        std::vector<u32> offsetX{};
+        std::vector<u32> offsetY{};
+        std::vector<r32> advanceX{};
+        std::vector<r32> advanceY{};
+        std::vector<vec4> uv{};
+    };
 
-                auto countFrame = math::enumCast(numFrames);
-                auto xOffset = 0.f;
-                auto xWidth = 1.f / countFrame;
+    struct Color {
+        u8
+        r() const {
+            return value >> 24u;
+        }
 
-                output.frameUV.resize(countFrame);
-                for (auto &&uv: output.frameUV) {
-                    uv.values[0] = {xOffset, 0.f};
-                    uv.values[1] = {xOffset, 1.f};
-                    uv.values[2] = {xOffset + xWidth, 1.f};
-                    uv.values[3] = {xOffset + xWidth, 0.f};
+        r32
+        r_r32() const {
+            return r() / 255.f;
+        }
 
-                    xOffset += xWidth;
-                }
-            }
-        };
+        u8
+        g() const {
+            return (value << 8u) >> 24u;
+        }
 
-        struct Text {
-            common::EntityID entityID{0};
-            common::r32 xScaling{1.f};
-            common::r32 yScaling{1.f};
-            common::oniGLuint textureID{0};
-            std::string textContent{};
-            std::vector<size_t> width{};
-            std::vector<size_t> height{};
-            std::vector<common::u32> offsetX{};
-            std::vector<common::u32> offsetY{};
-            std::vector<common::r32> advanceX{};
-            std::vector<common::r32> advanceY{};
-            std::vector<math::vec4> uv{};
-        };
+        r32
+        g_r32() const {
+            return g() / 255.f;
+        }
 
-        struct Color {
-            common::u8
-            r() const {
-                return value >> 24u;
-            }
+        u8
+        b() const {
+            return (value << 16u) >> 24u;
+        }
 
-            common::r32
-            r_r32() const {
-                return r() / 255.f;
-            }
+        r32
+        b_r32() const {
+            return b() / 255.f;
+        }
 
-            common::u8
-            g() const {
-                return (value << 8u) >> 24u;
-            }
+        r32
+        a_r32() const {
+            return a() / 255.f;
+        }
 
-            common::r32
-            g_r32() const {
-                return g() / 255.f;
-            }
+        u8
+        a() const {
+            return (value << 24u) >> 24u;
+        }
 
-            common::u8
-            b() const {
-                return (value << 16u) >> 24u;
-            }
+        inline vec3
+        rgb() const {
+            return vec3{r() / 255.f, g() / 255.f, b() / 255.f};
+        }
 
-            common::r32
-            b_r32() const {
-                return b() / 255.f;
-            }
+        inline vec4
+        rgba() const {
+            return vec4{r() / 255.f, g() / 255.f, b() / 255.f, a() / 255.f};
+        }
 
-            common::r32
-            a_r32() const {
-                return a() / 255.f;
-            }
+        void
+        set_r(u8 r) {
+            value &= ~R_MASK;
+            value |= (u32(r) << 24u);
+        }
 
-            common::u8
-            a() const {
-                return (value << 24u) >> 24u;
-            }
+        void
+        set_r(r32 r) {
+            value &= ~R_MASK;
+            value |= (u32(r * 255) << 24u);
+        }
 
-            inline math::vec3
-            rgb() const {
-                return math::vec3{r() / 255.f, g() / 255.f, b() / 255.f};
-            }
+        void
+        set_G(u8 g) {
+            value &= ~G_MASK;
+            value |= (u32(g) << 16u);
+        }
 
-            inline math::vec4
-            rgba() const {
-                return math::vec4{r() / 255.f, g() / 255.f, b() / 255.f, a() / 255.f};
-            }
+        void
+        set_g(r32 g) {
+            value &= ~G_MASK;
+            value |= (u32(g * 255) << 16u);
+        }
 
-            void
-            set_r(common::u8 r) {
-                value &= ~common::R_MASK;
-                value |= (common::u32(r) << 24u);
-            }
+        void
+        set_b(u8 b) {
+            value &= ~B_MASK;
+            value |= (u32(b) << 8u);
+        }
 
-            void
-            set_r(common::r32 r) {
-                value &= ~common::R_MASK;
-                value |= (common::u32(r * 255) << 24u);
-            }
+        void
+        set_b(r32 b) {
+            value &= ~B_MASK;
+            value |= (u32(b * 255) << 8u);
+        }
 
-            void
-            set_G(common::u8 g) {
-                value &= ~common::G_MASK;
-                value |= (common::u32(g) << 16u);
-            }
+        void
+        set_a(u8 a) {
+            value &= ~A_MASK;
+            value |= (u32(a));
+        }
 
-            void
-            set_g(common::r32 g) {
-                value &= ~common::G_MASK;
-                value |= (common::u32(g * 255) << 16u);
-            }
+        void
+        set_a(r32 a) {
+            value &= ~A_MASK;
+            value |= (u32(a * 255));
+        }
 
-            void
-            set_b(common::u8 b) {
-                value &= ~common::B_MASK;
-                value |= (common::u32(b) << 8u);
-            }
+        void
+        set_rgb(r32 _r,
+                r32 _g,
+                r32 _b) {
+            value &= ~R_MASK;
+            value &= ~B_MASK;
+            value &= ~G_MASK;
+            set_r(_r);
+            set_g(_g);
+            set_b(_b);
+        }
 
-            void
-            set_b(common::r32 b) {
-                value &= ~common::B_MASK;
-                value |= (common::u32(b * 255) << 8u);
-            }
+        void
+        set_rgb(u8 _r,
+                u8 _g,
+                u8 _b) {
+            value &= ~R_MASK;
+            value &= ~G_MASK;
+            value &= ~B_MASK;
+            set_r(_r);
+            set_g(_g);
+            set_b(_b);
+        }
 
-            void
-            set_a(common::u8 a) {
-                value &= ~common::A_MASK;
-                value |= (common::u32(a));
-            }
+        void
+        set_rgba(r32 _r,
+                 r32 _g,
+                 r32 _b,
+                 r32 _a) {
+            value = 0;
+            set_rgb(_r, _g, _b);
+            set_a(_a);
+        }
 
-            void
-            set_a(common::r32 a) {
-                value &= ~common::A_MASK;
-                value |= (common::u32(a * 255));
-            }
+        void
+        set_rgba(u8 _r,
+                 u8 _g,
+                 u8 _b,
+                 u8 _a) {
+            value = 0;
+            set_rgb(_r, _g, _b);
+            set_a(_a);
+        }
 
-            void
-            set_rgb(common::r32 _r,
-                    common::r32 _g,
-                    common::r32 _b) {
-                value &= ~common::R_MASK;
-                value &= ~common::B_MASK;
-                value &= ~common::G_MASK;
-                set_r(_r);
-                set_g(_g);
-                set_b(_b);
-            }
+        static constexpr
+        Color
+        WHITE() {
+            auto color = Color{};
+            color.value = (255u << 24u) | (255u << 16u) | (255u << 8u) | (255u);
+            return color;
+        }
 
-            void
-            set_rgb(common::u8 _r,
-                    common::u8 _g,
-                    common::u8 _b) {
-                value &= ~common::R_MASK;
-                value &= ~common::G_MASK;
-                value &= ~common::B_MASK;
-                set_r(_r);
-                set_g(_g);
-                set_b(_b);
-            }
+        static constexpr
+        Color
+        BLACK() {
+            auto color = Color{};
+            color.value = (0u << 24u) | (0u << 16u) | (0u << 8u) | (255u);
+            return color;
+        }
 
-            void
-            set_rgba(common::r32 _r,
-                     common::r32 _g,
-                     common::r32 _b,
-                     common::r32 _a) {
-                value = 0;
-                set_rgb(_r, _g, _b);
-                set_a(_a);
-            }
+        u32 value{255u};
+    };
 
-            void
-            set_rgba(common::u8 _r,
-                     common::u8 _g,
-                     common::u8 _b,
-                     common::u8 _a) {
-                value = 0;
-                set_rgb(_r, _g, _b);
-                set_a(_a);
-            }
+    struct AnimatedColor {
+        Color begin{Color::WHITE()};
+        Color end{Color::BLACK()};
+    };
 
-            static constexpr
-            Color
-            WHITE() {
-                auto color = Color{};
-                color.value = (255u << 24u) | (255u << 16u) | (255u << 8u) | (255u);
-                return color;
-            }
+    enum class BrushType : oni::u8 {
+        COLOR,
+        TEXTURE,
+        TEXTURE_TAG,
+    };
 
-            static constexpr
-            Color
-            BLACK() {
-                auto color = Color{};
-                color.value = (0u << 24u) | (0u << 16u) | (0u << 8u) | (255u);
-                return color;
-            }
+    // TODO: Probably should be merged with ParticleEmitter with the goal of generic enough Particle Emitter
+    // component that covers most of the games needs.
+    struct CoolDown {
+        r64 current{0.f};
+        r64 initial{0.2f};
+    };
 
-            common::u32 value{255u};
-        };
+    struct BrushTrail {
+        bool initialized{false};
+        bool active{true};
+        Texture texture{};
+        r32 mass{1.f};
+        r32 width{0.4f};
+        Heading2D heading{};
+        WorldP2D last{};
+        WorldP2D lastDelta{};
+        WorldP2D current{};
+        Velocity2D velocity2d{};
+        Velocity velocity{};
+        Acceleration acceleration{};
+        Acceleration2D acceleration2d{};
+        std::vector<Quad> quads{};
+    };
 
-        struct AnimatedColor {
-            Color begin{Color::WHITE()};
-            Color end{Color::BLACK()};
-        };
+    enum class EntityPreset : oni::u32 {
+        UNKNOWN,
 
-        enum class BrushType : common::u8 {
-            COLOR,
-            TEXTURE,
-            TEXTURE_TAG,
+        RACE_CAR_DEFAULT,
+        RACE_CAR_TIRE_DEFAULT,
+        RACE_CAR_TIRE_WITH_TRAIL,
+        VEHICLE_GUN_DEFAULT,
+        VEHICLE_DEFAULT,
+        ROCKET_DEFAULT,
+        ROCKET_TRAIL_DEFAULT,
 
-            LAST
-        };
+        WALL_VERTICAL,
+        WALL_HORIZONTAL,
 
-        // TODO: Probably should be merged with ParticleEmitter with the goal of generic enough Particle Emitter
-        // component that covers most of the games needs.
-        struct CoolDown {
-            common::r64 current{0.f};
-            common::r64 initial{0.2f};
-        };
+        ROAD_DEFAULT,
 
-        struct BrushTrail {
-            bool initialized{false};
-            bool active{true};
-            component::Texture texture{};
-            common::r32 mass{1.f};
-            common::r32 width{0.4f};
-            component::Heading2D heading{};
-            component::WorldP2D last{};
-            component::WorldP2D lastDelta{};
-            component::WorldP2D current{};
-            component::Velocity2D velocity2d{};
-            component::Velocity velocity{};
-            component::Acceleration acceleration{};
-            component::Acceleration2D acceleration2d{};
-            std::vector<component::Quad> quads{};
-        };
+        EXPLOSION_DEFAULT,
+        BLAST_ANIMATION_DEFAULT,
+        BLAST_PARTICLE_DEFAULT,
 
-        enum class EntityPreset : common::u32 {
-            UNKNOWN,
+        // TODO: I probably want to split the variations into another enum.
 
-            RACE_CAR_DEFAULT,
-            RACE_CAR_TIRE_DEFAULT,
-            RACE_CAR_TIRE_WITH_TRAIL,
-            VEHICLE_GUN_DEFAULT,
-            VEHICLE_DEFAULT,
-            ROCKET_DEFAULT,
-            ROCKET_TRAIL_DEFAULT,
+        CLOUD_BLACK,
+        CLOUD_WHITE,
 
-            WALL_VERTICAL,
-            WALL_HORIZONTAL,
+        ROCKET_FLAME_DEFAULT,
 
-            ROAD_DEFAULT,
+        SMOKE_BLACK,
+        SMOKE_WHITE,
 
-            EXPLOSION_DEFAULT,
-            BLAST_ANIMATION_DEFAULT,
-            BLAST_PARTICLE_DEFAULT,
+        BACKGROUND_DEFAULT,
+        BACKGROUND_DEBUG,
 
-            // TODO: I probably want to split the variations into another enum.
+        CANVAS,
 
-            CLOUD_BLACK,
-            CLOUD_WHITE,
+        LAST
+    };
 
-            ROCKET_FLAME_DEFAULT,
+    struct MaterialSkin {
+        Texture texture{};
+        Color color{};
+    };
 
-            SMOKE_BLACK,
-            SMOKE_WHITE,
+    enum class MaterialTransition_Type : oni::u8 {
+        NONE,
+        FADE,
+        TINT,
+        ANIMATED,
+    };
 
-            BACKGROUND_DEFAULT,
-            BACKGROUND_DEBUG,
+    enum class FadeFunc : oni::u8 {
+        LINEAR,
+        TAIL,
+    };
 
-            CANVAS,
+    struct MaterialTransition_Fade {
+        FadeFunc fadeFunc{FadeFunc::LINEAR};
+        r32 factor{1.f};
+    };
 
-            LAST
-        };
+    struct MaterialTransition_Tint {
+        Color begin{};
+        Color end{};
+    };
 
-        struct MaterialSkin {
-            Texture texture{};
-            Color color{};
-        };
+    struct MaterialTransition_Animation {
+        TextureAnimated value{};
+    };
 
-        enum class MaterialTransition_Type : common::u8 {
-            NONE,
-            FADE,
-            TINT,
-            ANIMATED,
+    // TODO: Better name
+    // TODO: Split this up, MaterialTransparency_Type: SOLID and TRANSLUECENT
+    // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
+    // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
+    // blend function so it can't just be a range of values, it has to be a Type hmmm...
+    enum class MaterialFinish_Type : oni::u8 {
+        SOLID,
+        TRANSLUCENT,
+        SHINNY,
 
-            LAST
-        };
-
-        enum class FadeFunc : common::u8 {
-            LINEAR,
-            TAIL,
-
-            LAST
-        };
-
-        struct MaterialTransition_Fade {
-            FadeFunc fadeFunc{FadeFunc::LINEAR};
-            common::r32 factor{1.f};
-        };
-
-        struct MaterialTransition_Tint {
-            component::Color begin{};
-            component::Color end{};
-        };
-
-        struct MaterialTransition_Animation {
-            TextureAnimated value;
-        };
-
-        // TODO: Better name
-        // TODO: Split this up, MaterialTransparency_Type: SOLID and TRANSLUECENT
-        // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
-        // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
-        // blend function so it can't just be a range of values, it has to be a Type hmmm...
-        enum class MaterialFinish_Type : common::u8 {
-            SOLID,
-            TRANSLUCENT,
-            SHINNY,
-
-            LAST
-        };
+        LAST
+    };
 
 //        struct MaterialFinish {
 //            union {
@@ -413,27 +405,26 @@ namespace oni {
 //
 //            auto
 //            typeID() const {
-//                return math::enumCast(type);
+//                return enumCast(type);
 //            }
 //        };
 //
-        struct MaterialDefinition {
-            MaterialTransition_Type transition;
-            MaterialFinish_Type finish;
-        };
+    struct MaterialDefinition {
+        MaterialTransition_Type transition{};
+        MaterialFinish_Type finish{};
+    };
 
-        struct ParticleEmitter {
-            EntityPreset tag;
-            common::r32 size = 0.1f;
-        };
+    struct ParticleEmitter {
+        EntityPreset tag{};
+        r32 size = 0.1f;
+    };
 
-        struct AfterMark {
-            component::Scale scale{1, 1};
-            component::BrushType type{component::BrushType::COLOR};
-            union {
-                component::EntityPreset tag = {};
-                component::Color color;
-            };
+    struct AfterMark {
+        Scale scale{1, 1};
+        BrushType type{BrushType::COLOR};
+        union {
+            EntityPreset tag = {};
+            Color color;
         };
-    }
+    };
 }

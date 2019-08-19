@@ -4,106 +4,102 @@
 
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/io/oni-io-fwd.h>
 
 class GLFWwindow;
 
 namespace oni {
-    namespace io {
-        class Input;
-    }
-    namespace graphic {
-        class Window {
-        public:
-            Window(io::Input &,
-                   std::string &&name,
-                   common::i32 gameWidth,
-                   common::i32 gameHeight);
+    class Window {
+    public:
+        Window(Input &,
+               std::string &&name,
+               i32 gameWidth,
+               i32 gameHeight);
 
-            ~Window();
+        ~Window();
 
-            Window(const Window &) = delete;
+        Window(const Window &) = delete;
 
-            Window &
-            operator=(const Window &) = delete;
+        Window &
+        operator=(const Window &) = delete;
 
-            static void
-            tick(io::Input &input);
+        static void
+        tick(Input &input);
 
-            void
-            display();
+        void
+        display();
 
-            bool
-            closed() const;
+        bool
+        closed() const;
 
-            void
-            clear() const;
+        void
+        clear() const;
 
-            const common::i32 &
-            getWidth() const;
+        const i32 &
+        getWidth() const;
 
-            const common::i32 &
-            getHeight() const;
+        const i32 &
+        getHeight() const;
 
-        private:
-            void
-            addKeyPressed(common::i32 key);
+    private:
+        void
+        addKeyPressed(i32 key);
 
-            void
-            addKeyReleased(common::i32 key);
+        void
+        addKeyReleased(i32 key);
 
-            void
-            setHeight(common::i32 height);
+        void
+        setHeight(i32 height);
 
-            void
-            setWidth(common::i32 width);
+        void
+        setWidth(i32 width);
 
-            static Window *
-            getThisFromGLFWWindow(GLFWwindow *window);
+        static Window *
+        getThisFromGLFWWindow(GLFWwindow *window);
 
-            static void
-            windowResizeCallback(GLFWwindow *window,
-                                 common::i32 width,
-                                 common::i32 height);
+        static void
+        windowResizeCallback(GLFWwindow *window,
+                             i32 width,
+                             i32 height);
 
-            static void
-            keyCallback(GLFWwindow *window,
-                        common::i32 key,
-                        common::i32 scancode,
-                        common::i32 action,
-                        common::i32 mods);
+        static void
+        keyCallback(GLFWwindow *window,
+                    i32 key,
+                    i32 scancode,
+                    i32 action,
+                    i32 mods);
 
-            static void
-            mouseCallback(GLFWwindow *window,
-                          common::i32 button,
-                          common::i32 action,
-                          common::i32 mods);
+        static void
+        mouseCallback(GLFWwindow *window,
+                      i32 button,
+                      i32 action,
+                      i32 mods);
 
-            static void
-            scrollCallback(GLFWwindow *window,
-                           common::r64 xOffset,
-                           common::r64 yOffset);
+        static void
+        scrollCallback(GLFWwindow *window,
+                       r64 xOffset,
+                       r64 yOffset);
 
-            static void
-            cursorPosCallback(GLFWwindow *window,
-                              oni::common::r64 x,
-                              oni::common::r64 y);
+        static void
+        cursorPosCallback(GLFWwindow *window,
+                          r64 x,
+                          r64 y);
 
-            static void
-            messageCallback(common::oniGLenum source,
-                            common::oniGLenum type,
-                            common::oniGLuint id,
-                            common::oniGLenum severity,
-                            common::oniGLsizei length,
-                            const common::oniGLchar *message,
-                            const void *userParam);
+        static void
+        messageCallback(oniGLenum source,
+                        oniGLenum type,
+                        oniGLuint id,
+                        oniGLenum severity,
+                        oniGLsizei length,
+                        const oniGLchar *message,
+                        const void *userParam);
 
-        private:
-            io::Input &mInput;
+    private:
+        Input &mInput;
 
-            std::string mTitle{};
-            common::i32 mWidth{};
-            common::i32 mHeight{};
-            GLFWwindow *mWindow{};
-        };
-    }
+        std::string mTitle{};
+        i32 mWidth{};
+        i32 mHeight{};
+        GLFWwindow *mWindow{};
+    };
 }

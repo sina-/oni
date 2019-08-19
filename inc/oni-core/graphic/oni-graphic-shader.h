@@ -10,75 +10,74 @@
 #include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 
+
 namespace oni {
-    namespace graphic {
-        class Shader {
-        public:
-            Shader(std::string_view vertPath,
-                   std::string_view geomPath,
-                   std::string_view fragPath);
+    class Shader {
+    public:
+        Shader(std::string_view vertPath,
+               std::string_view geomPath,
+               std::string_view fragPath);
 
-            ~Shader();
+        ~Shader();
 
-            Shader(const Shader &) = delete;
+        Shader(const Shader &) = delete;
 
-            Shader &
-            operator=(Shader &) = delete;
+        Shader &
+        operator=(Shader &) = delete;
 
-            void
-            enable() const;
+        void
+        enable() const;
 
-            void
-            disable() const;
+        void
+        disable() const;
 
-            common::oniGLuint
-            getProgram() const;
+        oniGLuint
+        getProgram() const;
 
-            void
-            setUniform1f(const common::oniGLchar *name,
-                         oni::common::r32 value) const;
+        void
+        setUniform1f(const oniGLchar *name,
+                     r32 value) const;
 
-            void
-            setUniform2f(const common::oniGLchar *name,
-                         const math::vec2 &vector) const;
+        void
+        setUniform2f(const oniGLchar *name,
+                     const vec2 &vector) const;
 
-            void
-            setUniform3f(const common::oniGLchar *name,
-                         const math::vec3 &vector) const;
+        void
+        setUniform3f(const oniGLchar *name,
+                     const vec3 &vector) const;
 
-            void
-            setUniform4f(const common::oniGLchar *name,
-                         const math::vec4 &vector) const;
+        void
+        setUniform4f(const oniGLchar *name,
+                     const vec4 &vector) const;
 
-            void
-            setUniform1i(const common::oniGLchar *name,
-                         common::i32 value) const;
+        void
+        setUniform1i(const oniGLchar *name,
+                     i32 value) const;
 
-            void
-            setUniformMat4(const common::oniGLchar *name,
-                           const math::mat4 &matrix) const;
+        void
+        setUniformMat4(const oniGLchar *name,
+                       const mat4 &matrix) const;
 
-            void
-            setUniformiv(const common::oniGLchar *name,
-                         const std::vector<common::oniGLint> &textureIDs) const;
+        void
+        setUniformiv(const oniGLchar *name,
+                     const std::vector<oniGLint> &textureIDs) const;
 
-            void
-            setUniformuiv(const common::oniGLchar *name,
-                          const std::vector<common::oniGLuint> &textureIDs) const;
+        void
+        setUniformuiv(const oniGLchar *name,
+                      const std::vector<oniGLuint> &textureIDs) const;
 
-            void
-            setUniformui(const common::oniGLchar *name,
-                         common::oniGLuint textureID) const;
+        void
+        setUniformui(const oniGLchar *name,
+                     oniGLuint textureID) const;
 
-        private:
-            common::oniGLint
-            getUniformLocation(const common::oniGLchar *name) const;
+    private:
+        oniGLint
+        getUniformLocation(const oniGLchar *name) const;
 
-        private:
-            common::oniGLuint mProgram;
-            std::string mVertPath;
-            std::string mGeomPath;
-            std::string mFragPath;
-        };
-    }
+    private:
+        oniGLuint mProgram;
+        std::string mVertPath;
+        std::string mGeomPath;
+        std::string mFragPath;
+    };
 }

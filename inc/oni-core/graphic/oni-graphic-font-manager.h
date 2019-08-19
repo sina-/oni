@@ -1,7 +1,9 @@
 #pragma once
 
-#include <oni-core/math/oni-math-vec3.h>
 #include <oni-core/common/oni-common-typedefs-graphic.h>
+#include <oni-core/component/oni-component-fwd.h>
+#include <oni-core/entities/oni-entities-fwd.h>
+#include <oni-core/math/oni-math-vec3.h>
 
 namespace ftgl {
     class texture_atlas_t;
@@ -12,69 +14,58 @@ namespace ftgl {
 }
 
 namespace oni {
-    namespace component {
-        struct Text;
-        union WorldP3D;
-    }
+    class FontManager {
+    public:
+        FontManager(std::string font,
+                    u8 size,
+                    r32 gameWidth,
+                    r32 gameHeight);
 
-    namespace entities {
-        class EntityManager;
-    }
+        ~FontManager();
 
-    namespace graphic {
-        class FontManager {
-        public:
-            FontManager(std::string font,
-                        common::u8 size,
-                        common::r32 gameWidth,
-                        common::r32 gameHeight);
+        FontManager(const FontManager &) = delete;
 
-            ~FontManager();
+        FontManager &
+        operator=(FontManager &) = delete;
 
-            FontManager(const FontManager &) = delete;
+        EntityID
+        initializeText(EntityManager &,
+                       std::string_view text,
+                       EntityID id,
+                       const WorldP3D &pos);
 
-            FontManager &
-            operator=(FontManager &) = delete;
+        void
+        updateText(const std::string &textContent,
+                   Text &text);
 
-            common::EntityID
-            initializeText(entities::EntityManager &,
-                           std::string_view text,
-                           common::EntityID id,
-                           const component::WorldP3D &pos);
+        size_t
+        getAtlasWidth() const;
 
-            void
-            updateText(const std::string &textContent,
-                       component::Text &text);
+        size_t
+        getAtlasHeight() const;
 
-            size_t
-            getAtlasWidth() const;
+        unsigned char *
+        getAtlasData() const;
 
-            size_t
-            getAtlasHeight() const;
+        oniGLuint
+        getTextureID() const;
 
-            unsigned char *
-            getAtlasData() const;
+    private:
+        const ftgl::texture_glyph_t *
+        findGlyph(const char &character) const;
 
-            common::oniGLuint
-            getTextureID() const;
+        void
+        assignGlyphs(Text &);
 
-        private:
-            const ftgl::texture_glyph_t *
-            findGlyph(const char &character) const;
-
-            void
-            assignGlyphs(component::Text &);
-
-        private:
-            // Wrap atlas and font with unique_ptr and pass the custom deleter
+    private:
+        // Wrap atlas and font with unique_ptr and pass the custom deleter
 //            std::unique_ptr<ftgl::texture_font_t, decltype(&ftgl::texture_font_delete)> m_FTFont;
 //            std::unique_ptr<ftgl::texture_atlas_t, decltype(&ftgl::texture_atlas_delete)> m_FTAtlas;
-            ftgl::texture_atlas_t *m_FTAtlas;
-            ftgl::texture_font_t *m_FTFont;
+        ftgl::texture_atlas_t *m_FTAtlas;
+        ftgl::texture_font_t *m_FTFont;
 
-            common::r32 mGameWidth;
-            common::r32 mGameHeight;
+        r32 mGameWidth;
+        r32 mGameHeight;
 
-        };
-    }
+    };
 }

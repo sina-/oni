@@ -3,46 +3,44 @@
 #include <oni-core/graphic/oni-graphic-renderer-ogl.h>
 
 namespace oni {
-    namespace graphic {
-        class Shader;
+    class Shader;
 
-        class Renderer_OpenGL_Quad : public Renderer_OpenGL {
-        public:
-            explicit Renderer_OpenGL_Quad(common::oniGLsizei maxSpriteCount);
+    class Renderer_OpenGL_Quad : public Renderer_OpenGL {
+    public:
+        explicit Renderer_OpenGL_Quad(oniGLsizei maxSpriteCount);
 
-            ~Renderer_OpenGL_Quad() override;
+        ~Renderer_OpenGL_Quad() override;
 
-            void
-            submit(const Renderable &renderable) override;
+        void
+        submit(const Renderable &renderable) override;
 
-            // TODO: These are only used to render to texture, so there is no need to unify it at the moment.
-            void
-            submit(const component::Quad &,
-                   const component::Color &,
-                   const component::Texture *);
+        // TODO: These are only used to render to texture, so there is no need to unify it at the moment.
+        void
+        submit(const Quad &,
+               const Color &,
+               const Texture *);
 
-            void
-            submit(const component::Quad &,
-                   const component::Color &,
-                   const component::Texture &front,
-                   const component::Texture &back);
+        void
+        submit(const Quad &,
+               const Color &,
+               const Texture &front,
+               const Texture &back);
 
-        protected:
-            void
-            enableShader(const RenderSpec &) override;
+    protected:
+        void
+        enableShader(const RenderSpec &) override;
 
-            common::oniGLsizei
-            getIndexCount() override;
+        oniGLsizei
+        getIndexCount() override;
 
-            void
-            resetIndexCount() override;
+        void
+        resetIndexCount() override;
 
-        private:
-            common::oniGLsizei mMaxPrimitiveCount{0};
-            common::oniGLsizei mMaxIndicesCount{0};
+    private:
+        oniGLsizei mMaxPrimitiveCount{0};
+        oniGLsizei mMaxIndicesCount{0};
 
-            // Actual number of indices used.
-            common::oniGLsizei mIndexCount{0};
-        };
-    }
+        // Actual number of indices used.
+        oniGLsizei mIndexCount{0};
+    };
 }

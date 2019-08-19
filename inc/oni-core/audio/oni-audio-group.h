@@ -2,12 +2,11 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 
+
 namespace oni {
-    namespace audio {
-        enum class AudioGroup : common::u8 {
-            MASTER,
-            MUSIC,
-            EFFECTS,
-        };
-    }
+    enum class AudioGroup : oni::u8 {
+        MASTER,
+        MUSIC,
+        EFFECTS,
+    };
 }

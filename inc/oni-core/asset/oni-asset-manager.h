@@ -8,32 +8,30 @@
 #include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
-    namespace asset {
-        class AssetManager {
-        public:
-            AssetManager();
+    class AssetManager {
+    public:
+        AssetManager();
 
-            void
-            setPath(component::Sound_Tag,
-                    std::string_view);
+        void
+        setPath(Sound_Tag,
+                std::string_view);
 
-            void
-            setPath(component::EntityPreset,
-                    std::string_view);
+        void
+        setPath(EntityPreset,
+                std::string_view);
 
-            const std::string &
-            getAssetFilePath(component::Sound_Tag);
+        const std::string &
+        getAssetFilePath(Sound_Tag);
 
-            const std::string &
-            getAssetFilePath(component::EntityPreset);
+        const std::string &
+        getAssetFilePath(EntityPreset);
 
-            std::vector<component::EntityPreset>
-            knownTags();
+        std::vector<EntityPreset>
+        knownTags();
 
-        private:
-            std::map<component::Sound_Tag, std::string> mSoundAssetPath;
-            std::map<component::EntityPreset, std::string> mTextureAssetPath;
-        };
-    }
+    private:
+        std::map<Sound_Tag, std::string> mSoundAssetPath;
+        std::map<EntityPreset, std::string> mTextureAssetPath;
+    };
 }
 

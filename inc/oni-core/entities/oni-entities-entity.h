@@ -2,95 +2,94 @@
 
 #include<oni-core/common/oni-common-typedef.h>
 
+
 namespace oni {
-    namespace entities {
-        enum class EntityType : common::u16 {
-            UNKNOWN,
+    // TODO: This should move to game
+    enum class EntityType : oni::u16 {
+        UNKNOWN,
 
-            BACKGROUND,
-            ROAD,
-            WALL,
+        BACKGROUND,
+        ROAD,
+        WALL,
 
-            RACE_CAR,
-            VEHICLE,
-            VEHICLE_GUN,
-            VEHICLE_TIRE_REAR,
-            VEHICLE_TIRE_FRONT,
+        RACE_CAR,
+        VEHICLE,
+        VEHICLE_GUN,
+        VEHICLE_TIRE_REAR,
+        VEHICLE_TIRE_FRONT,
 
-            UI,
-            CANVAS,
+        UI,
+        CANVAS,
 
-            SIMPLE_SPRITE,
-            SIMPLE_PARTICLE,
-            SIMPLE_BLAST_PARTICLE,
-            SIMPLE_BLAST_ANIMATION,
-            SIMPLE_ROCKET,
+        SIMPLE_SPRITE,
+        SIMPLE_PARTICLE,
+        SIMPLE_BLAST_PARTICLE,
+        SIMPLE_BLAST_ANIMATION,
+        SIMPLE_ROCKET,
 
-            TRAIL_PARTICLE,
+        TRAIL_PARTICLE,
 
-            // TODO: This is not really an entity type, any entity can be rendered as a shinny! It really just effects
-            // the blend function
-            SHINNY_EFFECT,
+        // TODO: This is not really an entity type, any entity can be rendered as a shinny! It really just effects
+        // the blend function
+                SHINNY_EFFECT,
 
-            TEXT,
-            WORLD_CHUNK,
-            DEBUG_WORLD_CHUNK,
+        TEXT,
+        WORLD_CHUNK,
+        DEBUG_WORLD_CHUNK,
 
-            SMOKE_CLOUD,
+        SMOKE_CLOUD,
 
-            COMPLEMENT,
+        COMPLEMENT,
 
-            LAST
-        };
+        LAST
+    };
 
-        enum class SimMode : common::u8 {
-            UNKNOWN,
+    enum class SimMode : oni::u8 {
+        UNKNOWN,
 
-            CLIENT,
-            SERVER,
-            CLIENT_SIDE_SERVER,
+        CLIENT,
+        SERVER,
+        CLIENT_SIDE_SERVER,
 
-            LAST
-        };
+        LAST
+    };
 
-        enum class SnapshotType {
-            ONLY_COMPONENTS = 1,
-            ONLY_NEW_ENTITIES = 2,
-            ENTIRE_REGISTRY = 3,
-        };
+    enum class SnapshotType {
+        ONLY_COMPONENTS = 1,
+        ONLY_NEW_ENTITIES = 2,
+        ENTIRE_REGISTRY = 3,
+    };
 
-        struct DeletedEntity {
-            common::EntityID id;
-            entities::EntityType type;
-        };
+    struct DeletedEntity {
+        EntityID id;
+        EntityType type;
+    };
 
-        struct EntityOperationPolicy {
-            bool track{true};
-            bool safe{false};
+    struct EntityOperationPolicy {
+        bool track{true};
+        bool safe{false};
 
-            inline static EntityOperationPolicy
-            client() {
-                auto policy = EntityOperationPolicy{};
-                policy.track = false;
-                policy.safe = false;
-                return policy;
-            }
+        inline static EntityOperationPolicy
+        client() {
+            auto policy = EntityOperationPolicy{};
+            policy.track = false;
+            policy.safe = false;
+            return policy;
+        }
 
-            inline static EntityOperationPolicy
-            server() {
-                auto policy = EntityOperationPolicy{};
-                policy.track = true;
-                return policy;
-            }
+        inline static EntityOperationPolicy
+        server() {
+            auto policy = EntityOperationPolicy{};
+            policy.track = true;
+            return policy;
+        }
 
-            inline static EntityOperationPolicy
-            clientServer() {
-                auto policy = EntityOperationPolicy{};
-                policy.track = false;
-                policy.safe = true;
-                return policy;
-            }
-        };
-
-    }
+        inline static EntityOperationPolicy
+        clientServer() {
+            auto policy = EntityOperationPolicy{};
+            policy.track = false;
+            policy.safe = true;
+            return policy;
+        }
+    };
 }

@@ -6,13 +6,11 @@
 
 
 namespace oni {
-    namespace network {
-        struct Packet_EntityID {
-            common::u32 entity{0};
-        };
+    struct Packet_EntityID {
+        u32 entity{0};
+    };
 
-        struct Packet_Data {
-            std::string data{};
-        };
-    }
+    struct Packet_Data {
+        std::string data{};
+    };
 }

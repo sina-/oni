@@ -5,9 +5,11 @@
 #include <functional>
 
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/network/oni-network-address.h>
 #include <oni-core/network/oni-network-packet.h>
 #include <oni-core/network/oni-network-packet-type.h>
 #include <oni-core/util/oni-util-timer.h>
+
 
 struct _ENetAddress;
 typedef struct _ENetAddress ENetAddress;
@@ -25,98 +27,91 @@ struct _ENetEvent;
 typedef struct _ENetEvent ENetEvent;
 
 namespace oni {
-    namespace network {
-        struct Address {
-            std::string host;
-            common::u16 port;
-        };
+    class Peer {
+    protected:
+        Peer();
 
-        class Peer {
-        protected:
-            Peer();
+        Peer(const Address *address,
+             u8 peerCount,
+             u8 channelLimit,
+             u32 incomingBandwidth,
+             u32 outgoingBandwidth);
 
-            Peer(const Address *address,
-                 common::u8 peerCount,
-                 common::u8 channelLimit,
-                 common::u32 incomingBandwidth,
-                 common::u32 outgoingBandwidth);
+    public:
+        virtual ~Peer();
 
-        public:
-            virtual ~Peer();
+        void
+        poll();
 
-            void
-            poll();
+        void
+        flush();
 
-            void
-            flush();
+        void
+        registerPacketHandler(PacketType type,
+                              std::function<
+                                      void(const std::string &,
+                                           const std::string &)> &&handler);
 
-            void
-            registerPacketHandler(PacketType type,
-                                  std::function<
-                                          void(const common::PeerID &,
-                                               const std::string &)> &&handler);
+        void
+        registerPostDisconnectHook(std::function<void(const std::string &)> &&handler);
 
-            void
-            registerPostDisconnectHook(std::function<void(const common::PeerID &)> &&handler);
+        r32
+        getDownloadKBPS() const;
 
-            common::r32
-            getDownloadKBPS() const;
+        r32
+        getUploadKBPS() const;
 
-            common::r32
-            getUploadKBPS() const;
+    protected:
+        virtual void
+        handle(ENetPeer *peer,
+               u8 *data,
+               size size,
+               PacketType header) = 0;
 
-        protected:
-            virtual void
-            handle(ENetPeer *peer,
-                   common::u8 *data,
-                   common::size size,
-                   PacketType header) = 0;
+        std::string
+        getPeerID(const ENetPeer &peer) const;
 
-            common::PeerID
-            getPeerID(const ENetPeer &peer) const;
+        PacketType
+        getHeader(const u8 *data) const;
 
-            PacketType
-            getHeader(const common::u8 *data) const;
+        // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
+        void
+        send(PacketType type,
+             std::string &data,
+             ENetPeer *peer);
 
-            // TODO: Add support for different types of send modes, for example unreliable, or none allocating packets
-            void
-            send(PacketType type,
-                 std::string &data,
-                 ENetPeer *peer);
+        void
+        send(const u8 *data,
+             size size,
+             ENetPeer *peer);
 
-            void
-            send(const common::u8 *data,
-                 common::size size,
-                 ENetPeer *peer);
+        void
+        broadcast(PacketType type,
+                  std::string &data);
 
-            void
-            broadcast(PacketType type,
-                      std::string &data);
+        virtual void
+        postConnectHook(const ENetEvent *event) = 0;
 
-            virtual void
-            postConnectHook(const ENetEvent *event) = 0;
+        virtual void
+        postDisconnectHook(const ENetEvent *event) = 0;
 
-            virtual void
-            postDisconnectHook(const ENetEvent *event) = 0;
+    protected:
+        ENetHost *mEnetHost{};
+        std::map<std::string, ENetPeer *> mPeers{};
+        std::map<
+                PacketType, std::function<
+                        void(std::string,
+                             const std::string &)>> mPacketHandlers{};
+        std::function<void(const std::string &)> mPostDisconnectHook{};
 
-        protected:
-            ENetHost *mEnetHost{};
-            std::map<common::PeerID, ENetPeer *> mPeers{};
-            std::map<
-                    PacketType, std::function<
-                            void(common::PeerID,
-                                 const std::string &)>> mPacketHandlers{};
-            std::function<void(const common::PeerID &)> mPostDisconnectHook{};
+    private:
+        u64 mTotalDownload{}; // Number of bytes received
+        u64 mTotalUpload{}; // Number of bytes sent
 
-        private:
-            common::u64 mTotalDownload{}; // Number of bytes received
-            common::u64 mTotalUpload{}; // Number of bytes sent
+        utils::Timer mDownloadTimer{};
+        utils::Timer mUploadTimer{};
 
-            utils::Timer mDownloadTimer{};
-            utils::Timer mUploadTimer{};
-
-            common::r32 mDownloadBPS{};
-            common::r32 mUploadBPS{};
-        };
-    }
+        r32 mDownloadBPS{};
+        r32 mUploadBPS{};
+    };
 }

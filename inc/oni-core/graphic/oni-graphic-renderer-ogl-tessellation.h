@@ -2,49 +2,39 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/graphic/oni-graphic-renderer-ogl.h>
+#include <oni-core/component/oni-component-fwd.h>
 
 namespace oni {
-    namespace component {
-        struct Texture;
+    class Shader;
 
-        struct Text;
+    class Renderer_OpenGL_Tessellation : public Renderer_OpenGL {
+    public:
+        explicit Renderer_OpenGL_Tessellation(oniGLsizei maxSpriteCount);
 
-        struct Color;
-    }
+        ~Renderer_OpenGL_Tessellation() override;
 
-    namespace graphic {
-        class Shader;
+        void
+        submit(const Text &,
+               const WorldP3D &);
 
-        class Renderer_OpenGL_Tessellation : public Renderer_OpenGL {
-        public:
-            explicit Renderer_OpenGL_Tessellation(common::oniGLsizei maxSpriteCount);
+        void
+        submit(const Renderable &) override;
 
-            ~Renderer_OpenGL_Tessellation() override;
+    protected:
+        oniGLsizei
+        getIndexCount() override;
 
-            void
-            submit(const component::Text &,
-                   const component::WorldP3D &);
+        void
+        resetIndexCount() override;
 
-            void
-            submit(const Renderable &) override;
+        void
+        enableShader(const RenderSpec &) override;
 
-        protected:
-            common::oniGLsizei
-            getIndexCount() override;
+    private:
+        oniGLsizei mMaxPrimitiveCount{0};
+        oniGLsizei mMaxIndicesCount{0};
 
-            void
-            resetIndexCount() override;
-
-            void
-            enableShader(const RenderSpec &) override;
-
-        private:
-            common::oniGLsizei mMaxPrimitiveCount{0};
-            common::oniGLsizei mMaxIndicesCount{0};
-
-            // Actual number of indices used.
-            common::oniGLsizei mIndexCount{0};
-        };
-
-    }
+        // Actual number of indices used.
+        oniGLsizei mIndexCount{0};
+    };
 }

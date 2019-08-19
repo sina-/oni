@@ -5,81 +5,80 @@
 #include <oni-core/io/oni-io-input-data.h>
 #include <oni-core/component/oni-component-geometry.h>
 
+
 namespace oni {
-    namespace io {
-        enum class ScrollDirection {
-            UNKNOWN,
-            UP,
-            DOWN,
-            LAST
-        };
+    enum class ScrollDirection {
+        UNKNOWN,
+        UP,
+        DOWN,
+        LAST
+    };
 
-        class Input {
-        public:
-            Input();
+    class Input {
+    public:
+        Input();
 
-            template<class Archive>
-            void
-            serialize(Archive &archive) {
-                archive(mKeysPressed, mKeysReleased);
-            }
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(mKeysPressed, mKeysReleased);
+        }
 
-            void
-            update(io::oniKeyPress keyPressed,
-                   io::oniKeyPress keyReleased);
+        void
+        update(oniKeyPress keyPressed,
+               oniKeyPress keyReleased);
 
-            void
-            reset();
+        void
+        reset();
 
-            bool
-            hasData() const;
+        bool
+        hasData() const;
 
-            bool
-            isPressed(io::oniKeyPress key) const;
+        bool
+        isPressed(oniKeyPress key) const;
 
-            bool
-            isReleased(io::oniKeyPress key) const;
+        bool
+        isReleased(oniKeyPress key) const;
 
-            void
-            setPressed(io::oniKeyPress key);
+        void
+        setPressed(oniKeyPress key);
 
-            void
-            setReleased(io::oniKeyPress key);
+        void
+        setReleased(oniKeyPress key);
 
-            void
-            addScrollDirectionX(io::ScrollDirection);
+        void
+        addScrollDirectionX(ScrollDirection);
 
-            void
-            addScrollDirectionY(io::ScrollDirection);
+        void
+        addScrollDirectionY(ScrollDirection);
 
-            const std::vector<io::ScrollDirection> &
-            getScrollDirectionX() const;
+        const std::vector<ScrollDirection> &
+        getScrollDirectionX() const;
 
-            const std::vector<io::ScrollDirection> &
-            getScrollDirectionY() const;
+        const std::vector<ScrollDirection> &
+        getScrollDirectionY() const;
 
-            void
-            setMouseButton(common::i32 button);
+        void
+        setMouseButton(i32 button);
 
-            void
-            addCursor(oni::common::r64 x,
-                      oni::common::r64 y);
+        void
+        addCursor(r64 x,
+                  r64 y);
 
-            const std::vector<component::WorldP2D>&
-            getCursor() const;
+        const std::vector<WorldP2D> &
+        getCursor() const;
 
-            const common::i32 &
-            getMouseButton() const;
+        const i32 &
+        getMouseButton() const;
 
-        private:
-            std::vector<io::oniKeyPress> mKeysPressed{};
-            std::vector<io::oniKeyPress> mKeysReleased{};
+    private:
+        std::vector<oniKeyPress> mKeysPressed{};
+        std::vector<oniKeyPress> mKeysReleased{};
 
-            std::vector<io::ScrollDirection> mScrollDirectionX{};
-            std::vector<io::ScrollDirection> mScrollDirectionY{};
+        std::vector<ScrollDirection> mScrollDirectionX{};
+        std::vector<ScrollDirection> mScrollDirectionY{};
 
-            common::i32 mMouseButton{-1};
-            std::vector<component::WorldP2D> mCursorPos{};
-        };
-    }
+        i32 mMouseButton{-1};
+        std::vector<WorldP2D> mCursorPos{};
+    };
 }

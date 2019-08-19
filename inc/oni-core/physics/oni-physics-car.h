@@ -4,41 +4,31 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-fwd.h>
+#include <oni-core/io/oni-io-fwd.h>
+
 
 /**
  * The idea is from https://github.com/sina-/carphysics2d
  */
 
 namespace oni {
-    namespace component {
-        class Car;
-
-        class CarConfig;
-    }
-
-    namespace io {
-        struct CarInput;
-    }
-
-    namespace physics {
-
-        void
-        tickCar(component::Car &car,
-                component::WorldP3D&,
-                component::Heading&,
-                const component::CarConfig &config,
-                const io::CarInput &inputs,
-                common::r64 dt);
+    void
+    tickCar(Car &car,
+            WorldP3D &,
+            Heading &,
+            const CarConfig &config,
+            const CarInput &inputs,
+            r64 dt);
 
 
-        common::CarSimDouble
-        applySmoothSteer(const component::Car &car,
-                         common::CarSimDouble steerInput,
-                         common::r64 dt);
+    r64
+    applySmoothSteer(const Car &car,
+                     r64 steerInput,
+                     r64 dt);
 
-        common::CarSimDouble
-        applySafeSteer(const component::Car &car,
-                       common::CarSimDouble steerInput);
+    r64
+    applySafeSteer(const Car &car,
+                   r64 steerInput);
 
-    }
 }

@@ -4,99 +4,97 @@
 
 
 namespace oni {
-    namespace graphic {
-        Renderer::Renderer() = default;
+    Renderer::Renderer() = default;
 
-        Renderer::~Renderer() = default;
+    Renderer::~Renderer() = default;
 
-        Renderer::BlendSpec
-        Renderer::getBlendSpec(component::MaterialFinish_Type type) {
-            auto result = BlendSpec{};
-            switch (type) {
-                case component::MaterialFinish_Type::SOLID:
-                case component::MaterialFinish_Type::TRANSLUCENT: {
-                    result.src = BlendMode::ONE;
-                    result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
-                    break;
-                }
-                case component::MaterialFinish_Type::SHINNY: {
-                    result.src = BlendMode::ONE;
-                    result.dest = BlendMode::ONE;
-                    break;
-                }
-                case component::MaterialFinish_Type::LAST:
-                default: {
-                    assert(false);
-                    break;
-                }
+    Renderer::BlendSpec
+    Renderer::getBlendSpec(MaterialFinish_Type type) {
+        auto result = BlendSpec{};
+        switch (type) {
+            case MaterialFinish_Type::SOLID:
+            case MaterialFinish_Type::TRANSLUCENT: {
+                result.src = BlendMode::ONE;
+                result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+                break;
             }
-            return result;
-        }
-
-        Renderer::DepthSpec
-        Renderer::getDepthSpec(component::MaterialFinish_Type type) {
-            auto result = DepthSpec{};
-            switch (type) {
-                case component::MaterialFinish_Type::SOLID: {
-                    result.depthRead = true;
-                    result.depthWrite = true;
-                    break;
-                }
-                    // TODO: Is this correct?
-                case component::MaterialFinish_Type::TRANSLUCENT:
-                case component::MaterialFinish_Type::SHINNY: {
-                    result.depthRead = true;
-                    result.depthWrite = false;
-                    break;
-                }
-                case component::MaterialFinish_Type::LAST:
-                default: {
-                    assert(false);
-                    break;
-                }
+            case MaterialFinish_Type::SHINNY: {
+                result.src = BlendMode::ONE;
+                result.dest = BlendMode::ONE;
+                break;
             }
-            return result;
-        }
-
-        void
-        Renderer::begin(const RenderSpec &renderSpec) {
-            assert(!mBegun);
-            mBegun = true;
-
-            if (renderSpec.renderTarget) {
-                mRenderTarget = renderSpec.renderTarget;
-                mViewportSize = getViewportSize();
-                setViewportSize({renderSpec.renderTarget->image.width, renderSpec.renderTarget->image.height});
+            case MaterialFinish_Type::LAST:
+            default: {
+                assert(false);
+                break;
             }
-
-            auto blendSpec = getBlendSpec(renderSpec.finishType);
-            auto depthSpec = getDepthSpec(renderSpec.finishType);
-            _begin(renderSpec, blendSpec, depthSpec);
         }
+        return result;
+    }
 
-        void
-        Renderer::end() {
-            assert(mBegun);
-            _end();
-            _flush(mRenderTarget);
-
-            if (mRenderTarget) {
-                setViewportSize(mViewportSize);
+    Renderer::DepthSpec
+    Renderer::getDepthSpec(MaterialFinish_Type type) {
+        auto result = DepthSpec{};
+        switch (type) {
+            case MaterialFinish_Type::SOLID: {
+                result.depthRead = true;
+                result.depthWrite = true;
+                break;
             }
+                // TODO: Is this correct?
+            case MaterialFinish_Type::TRANSLUCENT:
+            case MaterialFinish_Type::SHINNY: {
+                result.depthRead = true;
+                result.depthWrite = false;
+                break;
+            }
+            case MaterialFinish_Type::LAST:
+            default: {
+                assert(false);
+                break;
+            }
+        }
+        return result;
+    }
 
-            mBegun = false;
+    void
+    Renderer::begin(const RenderSpec &renderSpec) {
+        assert(!mBegun);
+        mBegun = true;
+
+        if (renderSpec.renderTarget) {
+            mRenderTarget = renderSpec.renderTarget;
+            mViewportSize = getViewportSize();
+            setViewportSize({renderSpec.renderTarget->image.width, renderSpec.renderTarget->image.height});
         }
 
-        bool
-        operator<(const Renderable &left,
-                  const Renderable &right) {
-            return left.pos->z >= right.pos->z;
+        auto blendSpec = getBlendSpec(renderSpec.finishType);
+        auto depthSpec = getDepthSpec(renderSpec.finishType);
+        _begin(renderSpec, blendSpec, depthSpec);
+    }
+
+    void
+    Renderer::end() {
+        assert(mBegun);
+        _end();
+        _flush(mRenderTarget);
+
+        if (mRenderTarget) {
+            setViewportSize(mViewportSize);
         }
 
-        bool
-        operator>(const Renderable &left,
-                  const Renderable &right) {
-            return left.pos->z <= right.pos->z;
-        }
+        mBegun = false;
+    }
+
+    bool
+    operator<(const Renderable &left,
+              const Renderable &right) {
+        return left.pos->z >= right.pos->z;
+    }
+
+    bool
+    operator>(const Renderable &left,
+              const Renderable &right) {
+        return left.pos->z <= right.pos->z;
     }
 }

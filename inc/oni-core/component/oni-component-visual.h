@@ -180,7 +180,7 @@ namespace oni {
         }
 
         void
-        set_G(u8 g) {
+        set_g(u8 g) {
             value &= ~G_MASK;
             value |= (u32(g) << 16u);
         }

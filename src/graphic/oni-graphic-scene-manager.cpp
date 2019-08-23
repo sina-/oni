@@ -38,7 +38,7 @@ namespace oni {
             mZLayerManager(zLayerManager) {
 
         mProjectionMatrix = mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
-                                                     screenBounds.yMax, -1.0f, 1.0f);
+                                               screenBounds.yMax, -1.0f, 1.0f);
         mViewMatrix = mat4::identity();
 
         mModelMatrix = mat4::identity();
@@ -104,8 +104,8 @@ namespace oni {
                          const ScreenBounds &destBounds,
                          const mat4 *model) {
         spec.proj = mat4::orthographic(destBounds.xMin, destBounds.xMax,
-                                             destBounds.yMin, destBounds.yMax,
-                                             -1.0f, 1.0f);
+                                       destBounds.yMin, destBounds.yMax,
+                                       -1.0f, 1.0f);
         spec.view = mat4::identity();
         spec.model = mat4::identity();
         if (model) {
@@ -116,16 +116,6 @@ namespace oni {
     vec2
     SceneManager::getScreenSize() {
         return {getViewWidth(), getViewHeight()};
-    }
-
-    mat4
-    SceneManager::getCameraScale() {
-        return mat4::scale(mCamera.z, mCamera.z, 1.f);
-    }
-
-    mat4
-    SceneManager::getCameraTranslation() {
-        return mat4::translation(-mCamera.x, -mCamera.y, 0.f);
     }
 
     void
@@ -156,148 +146,89 @@ namespace oni {
 
     void
     SceneManager::submit(EntityManager &manager) {
-        // TODO: The following code includes everything, even the particles will be sorted, which might be
-        // over-kill, I could think about separating particles from the rest and always rendering them at the
-        // end on top of everything and accepting the fact that I won't be able to occlude particles with
-        // other solid objects. Although... I could occlude them, if I keep the z-buffer around and do z test but
-        // don't write to z-buffer when rendering particles...
-        {
-            auto view = manager.createView<
-                    EntityType,
-                    WorldP3D,
-                    Heading,
-                    Scale,
-                    MaterialDefinition>();
-            for (auto &&id: view) {
-                const auto &pos = view.get<WorldP3D>(id);
-                const auto &heading = view.get<Heading>(id);
-                const auto &scale = view.get<Scale>(id);
-                const auto &def = view.get<MaterialDefinition>(id);
+        // TODO: The following code includes everything, even the particles will be sorted, which might be over-kill
+        auto view = manager.createView<
+                EntityType,
+                WorldP3D,
+                Heading,
+                Scale,
+                MaterialDefinition>();
+        for (auto &&id: view) {
+            const auto &pos = view.get<WorldP3D>(id);
+            const auto &heading = view.get<Heading>(id);
+            const auto &scale = view.get<Scale>(id);
+            const auto &def = view.get<MaterialDefinition>(id);
 
-                auto renderable = Renderable{};
-                renderable.id = id;
-                // NOTE: Just for debug
-                renderable.type = view.get<EntityType>(id);
-                renderable.manager = &manager;
-                renderable.pos = &pos;
-                renderable.heading = &heading;
-                renderable.scale = &scale;
+            auto renderable = Renderable{};
+            renderable.id = id;
+            renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
+            renderable.manager = &manager;
+            renderable.pos = &pos;
+            renderable.heading = &heading;
+            renderable.scale = &scale;
 
-                renderable.def = def;
-                switch (def.transition) {
-                    case MaterialTransition_Type::NONE:
-                        renderable.skin = &manager.get<MaterialSkin>(id);
-                        break;
-                    case MaterialTransition_Type::FADE: {
-                        renderable.skin = &manager.get<MaterialSkin>(id);
-                        renderable.transitionFade = &manager.get<MaterialTransition_Fade>(id);
-                        break;
-                    }
-                    case MaterialTransition_Type::TINT: {
-                        renderable.skin = &manager.get<MaterialSkin>(id);
-                        renderable.transitionTint = &manager.get<MaterialTransition_Tint>(id);
-                        renderable.age = &manager.get<Age>(id);
-                        break;
-                    }
-                    case MaterialTransition_Type::ANIMATED: {
-                        renderable.transitionAnimation = &manager.get<MaterialTransition_Animation>(id);
-                        break;
-                    }
-                    default: {
-                        assert(false);
-                        break;
-                    }
+            renderable.def = def;
+            switch (def.transition) {
+                case MaterialTransition_Type::NONE:
+                    renderable.skin = &manager.get<MaterialSkin>(id);
+                    break;
+                case MaterialTransition_Type::FADE: {
+                    renderable.skin = &manager.get<MaterialSkin>(id);
+                    renderable.transitionFade = &manager.get<MaterialTransition_Fade>(id);
+                    break;
                 }
-
-                mRenderables[enumCast(def.finish)].push(renderable);
+                case MaterialTransition_Type::COLOR: {
+                    renderable.skin = &manager.get<MaterialSkin>(id);
+                    renderable.transitionTint = &manager.get<MaterialTransition_Color>(id);
+                    renderable.age = &manager.get<Age>(id);
+                    break;
+                }
+                case MaterialTransition_Type::TEXTURE: {
+                    renderable.transitionAnimation = &manager.get<MaterialTransition_Texture>(id);
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
             }
+
+            mRenderables[enumCast(def.finish)].push(renderable);
         }
     }
 
     void
     SceneManager::render() {
-        /// Render everything but shinnies
-        {
-            for (auto i = 0; i < enumCast(MaterialFinish_Type::LAST); ++i) {
-                RenderSpec spec;
-                spec.renderTarget = nullptr;
-                spec.screenSize = getScreenSize();
-                spec.zoom = mCamera.z;
-                spec.finishType = static_cast<MaterialFinish_Type>(i);
-                setMVP(spec, true, true, true);
+        for (auto i = 0; i < enumCast(MaterialFinish_Type::LAST); ++i) {
+            RenderSpec spec;
+            spec.renderTarget = nullptr;
+            spec.screenSize = getScreenSize();
+            spec.zoom = mCamera.z;
+            spec.finishType = static_cast<MaterialFinish_Type>(i);
+            setMVP(spec, true, true, true);
 
-                begin(*mRendererTessellation, spec);
-                while (!mRenderables[i].empty()) {
-                    auto &r = const_cast<Renderable &> (mRenderables[i].top());
-                    auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
+            begin(*mRendererTessellation, spec);
+            while (!mRenderables[i].empty()) {
+                auto &r = const_cast<Renderable &> (mRenderables[i].top());
+                auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
 
-                    if (!isVisible(ePos.pos, *r.scale)) {
-                        mRenderables[i].pop();
-                        continue;
-                    }
-
-                    // This will just point r.pos to a new location, which is temporary to this scope, but submit()
-                    // will create a copy so it is safe.
-                    r.pos = &ePos.pos;
-                    r.heading = &ePos.heading;
-
-                    mRendererTessellation->submit(r);
-
+                if (!isVisible(ePos.pos, *r.scale)) {
                     mRenderables[i].pop();
-
-                    ++mRenderedSpritesPerFrame;
+                    continue;
                 }
-                end(*mRendererTessellation);
+
+                // This will just point r.pos to a new location, which is temporary to this scope, but submit()
+                // will create a copy so it is safe.
+                r.pos = &ePos.pos;
+                r.heading = &ePos.heading;
+
+                mRendererTessellation->submit(r);
+
+                mRenderables[i].pop();
+
+                ++mRenderedSpritesPerFrame;
             }
-        }
-    }
-
-    void
-    SceneManager::_render(EntityManager &manager) {
-        auto viewWidth = getViewWidth();
-        auto viewHeight = getViewHeight();
-
-        /// Sprites
-        {
-        }
-
-        // TODO: This is obsolete in favour of Trail rendering with quads, for now!
-        /// Trails
-        {
-            // renderStrip(manager, viewWidth, viewHeight);
-        }
-
-        /// UI
-        {
-            // Render UI text with fixed camera
-            //begin(*mTextureShader, *mTextureRenderer, false, false, true);
-            // TODO: This should actually be split up from static text and entities part of UI should be tagged so
-            // renderStaticText(entityManager, viewWidth, viewHeight);
-            //end(*mTextureShader, *mTextureRenderer);
-        }
-    }
-
-    void
-    SceneManager::renderInternal() {
-        // render(*mSceneEntityManager);
-    }
-
-    void
-    SceneManager::renderStaticText(EntityManager &manager,
-                                   r32 viewWidth,
-                                   r32 viewHeight) {
-        auto view = manager.createView<
-                Text,
-                Tag_Static,
-                WorldP3D>();
-        for (const auto &entity: view) {
-            auto &text = view.get<Text>(entity);
-            auto &pos = view.get<WorldP3D>(entity);
-
-            ++mRenderedSpritesPerFrame;
-            ++mRenderedTexturesPerFrame;
-
-            // mTextureRenderer->submit(text, pos);
+            end(*mRendererTessellation);
         }
     }
 
@@ -332,75 +263,6 @@ namespace oni {
             }
 
             end(*mRendererStrip);
-        }
-    }
-
-    void
-    SceneManager::renderTessellationColor(EntityManager &manager,
-                                          r32 viewWidth,
-                                          r32 viewHeight) {
-        auto texture = Texture{};
-        auto view = manager.createView<
-                WorldP3D,
-                Heading,
-                Scale,
-                Color>();
-
-        for (auto &&id: view) {
-            const auto &pos = view.get<WorldP3D>(id);
-            const auto &heading = view.get<Heading>(id);
-            const auto &scale = view.get<Scale>(id);
-
-            auto result = applyParentTransforms(manager, id, pos, heading);
-
-            if (!isVisible(result.pos, scale)) {
-                continue;
-            }
-
-            const auto &color = view.get<Color>(id);
-
-#if DEBUG_Z
-            manager.printEntityType(id);
-            printf("%f\n", result.pos.z);
-#endif
-            // mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
-
-            ++mRenderedSpritesPerFrame;
-        }
-    }
-
-    void
-    SceneManager::renderTessellationTexture(EntityManager &manager,
-                                            r32 viewWidth,
-                                            r32 viewHeight) {
-        {
-            auto color = Color{};
-            auto view = manager.createView<
-                    WorldP3D,
-                    Heading,
-                    Scale,
-                    Texture>();
-            for (auto &&id: view) {
-                const auto &pos = view.get<WorldP3D>(id);
-                const auto &heading = view.get<Heading>(id);
-                const auto &scale = view.get<Scale>(id);
-
-                auto result = applyParentTransforms(manager, id, pos, heading);
-
-                if (!isVisible(result.pos, scale)) {
-                    continue;
-                }
-
-                const auto &texture = manager.get<Texture>(id);
-                assert(!texture.image.path.empty());
-#if DEBUG_Z
-                serverManager.printEntityType(id);
-                    printf("%f\n", result.pos.z);
-#endif
-                // mRendererTessellation->submit(result.pos, result.heading, scale, color, texture);
-
-                ++mRenderedTexturesPerFrame;
-            }
         }
     }
 
@@ -454,8 +316,8 @@ namespace oni {
         spec.view = mat4::identity();
         spec.model = mat4::identity();
         spec.proj = mat4::orthographic(-1, +1,
-                                             -1, +1,
-                                             -1, +1);
+                                       -1, +1,
+                                       -1, +1);
 
         auto quad = Quad{};
         mRendererQuad->begin(spec);
@@ -527,9 +389,9 @@ namespace oni {
         assert(manager.getSimMode() == SimMode::CLIENT ||
                manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
 
-        auto view = manager.createView<MaterialTransition_Animation>();
+        auto view = manager.createView<MaterialTransition_Texture>();
         for (auto &&id: view) {
-            auto &mta = view.get<MaterialTransition_Animation>(id);
+            auto &mta = view.get<MaterialTransition_Texture>(id);
             auto &ta = mta.value;
             ta.timeElapsed += tickTime;
             // NOTE: It is assumed that this function is called more often than animation fps!

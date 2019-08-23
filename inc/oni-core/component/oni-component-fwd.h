@@ -58,9 +58,9 @@ namespace oni {
     struct Image;
     struct MaterialDefinition;
     struct MaterialSkin;
-    struct MaterialTransition_Animation;
+    struct MaterialTransition_Texture;
     struct MaterialTransition_Fade;
-    struct MaterialTransition_Tint;
+    struct MaterialTransition_Color;
     struct ParticleEmitter;
     struct Text;
     struct Texture;

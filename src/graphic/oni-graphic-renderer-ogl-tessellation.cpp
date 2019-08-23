@@ -210,7 +210,7 @@ namespace oni {
                 effectID = 2.f;
                 break;
             }
-            case MaterialTransition_Type::TINT: {
+            case MaterialTransition_Type::COLOR: {
                 // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
                 auto &begin = renderable.transitionTint->begin;
                 auto &end = renderable.transitionTint->end;
@@ -224,7 +224,7 @@ namespace oni {
                 effectID = 3.f;
                 break;
             }
-            case MaterialTransition_Type::ANIMATED: {
+            case MaterialTransition_Type::TEXTURE: {
                 if (animation) {
                     effectID = 1.f;
                     auto currentFrame = animation->value.nextFrame;
@@ -238,10 +238,10 @@ namespace oni {
                         assert(false);
                     }
                     assert(!skin);
-                    break;
                 } else {
                     assert(false);
                 }
+                break;
             }
             default: {
                 assert(false);

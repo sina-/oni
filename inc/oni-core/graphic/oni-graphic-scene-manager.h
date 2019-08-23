@@ -10,26 +10,13 @@
 #include <oni-core/entities/oni-entities-fwd.h>
 #include <oni-core/graphic/oni-graphic-camera.h>
 #include <oni-core/graphic/oni-graphic-renderer.h>
+#include <oni-core/graphic/oni-graphic-fwd.h>
 #include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/math/oni-math-fwd.h>
 
 class b2World;
 
 namespace oni {
-    class Renderer_OpenGL_Tessellation;
-
-    class Renderer_OpenGL_Strip;
-
-    class Renderer_OpenGL_Quad;
-
-    class Renderer;
-
-    class TextureManager;
-
-    class DebugDrawBox2D;
-
-    struct Brush;
-
     class SceneManager {
     public:
         // TODO: Getting quite big, I can split it into, SceneRenderer, SceneUpdater, and SceneManager
@@ -46,12 +33,6 @@ namespace oni {
 
         void
         render();
-
-        void
-        _render(EntityManager &);
-
-        void
-        renderInternal();
 
         static void
         updateSmokeEmitter(EntityManager &,
@@ -154,36 +135,16 @@ namespace oni {
 
 
     private:
-        void
-        renderStaticText(EntityManager &,
-                         r32 viewWidth,
-                         r32 viewHeight);
 
         void
         renderStrip(EntityManager &,
                     r32 viewWidth,
                     r32 viewHeight);
 
-        void
-        renderTessellationColor(EntityManager &,
-                                r32 viewWidth,
-                                r32 viewHeight);
-
-        void
-        renderTessellationTexture(EntityManager &,
-                                  r32 viewWidth,
-                                  r32 viewHeight);
-
     private:
         static void
         begin(Renderer &,
               const RenderSpec &);
-
-        mat4
-        getCameraScale();
-
-        mat4
-        getCameraTranslation();
 
         static void
         end(Renderer &renderer2D);

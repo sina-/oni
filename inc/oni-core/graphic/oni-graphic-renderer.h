@@ -41,8 +41,8 @@ namespace oni {
 
         const MaterialSkin *skin{};
         const MaterialTransition_Fade *transitionFade{};
-        const MaterialTransition_Animation *transitionAnimation{};
-        const MaterialTransition_Tint *transitionTint{};
+        const MaterialTransition_Texture *transitionAnimation{};
+        const MaterialTransition_Color *transitionTint{};
     };
 
     struct RenderSpec {

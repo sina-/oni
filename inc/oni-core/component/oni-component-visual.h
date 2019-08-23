@@ -278,11 +278,6 @@ namespace oni {
         u32 value{255u};
     };
 
-    struct AnimatedColor {
-        Color begin{Color::WHITE()};
-        Color end{Color::BLACK()};
-    };
-
     enum class BrushType : oni::u8 {
         COLOR,
         TEXTURE,
@@ -313,6 +308,7 @@ namespace oni {
         std::vector<Quad> quads{};
     };
 
+    // TODO: Game code
     enum class EntityPreset : oni::u32 {
         UNKNOWN,
 
@@ -359,8 +355,8 @@ namespace oni {
     enum class MaterialTransition_Type : oni::u8 {
         NONE,
         FADE,
-        TINT,
-        ANIMATED,
+        COLOR,
+        TEXTURE,
     };
 
     enum class FadeFunc : oni::u8 {
@@ -373,12 +369,12 @@ namespace oni {
         r32 factor{1.f};
     };
 
-    struct MaterialTransition_Tint {
+    struct MaterialTransition_Color {
         Color begin{};
         Color end{};
     };
 
-    struct MaterialTransition_Animation {
+    struct MaterialTransition_Texture {
         TextureAnimated value{};
     };
 

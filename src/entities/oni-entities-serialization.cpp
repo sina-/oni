@@ -52,8 +52,15 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
+              GrowInTime &data) {
+        archive(data.initialSize, data.maxSize, data.period, data.factor, data.elapsed);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
               ParticleEmitter &data) {
-        archive(data.tag, data.size);
+        archive(data.tag, data.size, data.count, data.growth);
     }
 
     template<class Archive>
@@ -271,8 +278,8 @@ namespace oni {
                     // mapping from client side ids to server side ids for each entity.
                              &EntityAttachment::entities,
                              &EntityAttachee::entityID
-                             // TODO: same as above TODO
-                             //, &CarLapInfo::entityID
+                    // TODO: same as above TODO
+                    //, &CarLapInfo::entityID
             );
         }
     }

@@ -341,6 +341,9 @@ namespace oni {
     void
     SceneManager::updateAfterMark(EntityManager &manager,
                                   r64 tickTime) {
+        assert(manager.getSimMode() == SimMode::CLIENT ||
+               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
+
         auto view = manager.createView<
                 AfterMark,
                 Heading,
@@ -380,6 +383,48 @@ namespace oni {
             // TODO: This function needs to move to game scene manager, it is not part of the engine.
             assert(false);
             // splat(brush);
+        }
+    }
+
+    void
+    SceneManager::updateGrowthInTime(EntityManager &manager,
+                                     r64 tickTime) {
+        assert(manager.getSimMode() == SimMode::CLIENT ||
+               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
+
+        auto doneGrowing = std::vector<EntityID>();
+        auto view = manager.createView<
+                GrowInTime,
+                Scale>();
+        for (auto &&id: view) {
+            auto &growth = view.get<GrowInTime>(id);
+            auto &scale = view.get<Scale>(id);
+            bool doneGrowingX = false;
+            bool doneGrowingY = false;
+
+            growth.elapsed += tickTime;
+            if (almost_Greater(growth.elapsed, growth.period)) {
+                if (almost_Less(scale.x, growth.maxSize.x)) {
+                    scale.x += growth.factor;
+                } else {
+                    doneGrowingX = true;
+                }
+
+                if (almost_Less(scale.y, growth.maxSize.y)) {
+                    scale.y += growth.factor;
+                } else {
+                    doneGrowingY = true;
+                }
+
+                if (doneGrowingX && doneGrowingY) {
+                    doneGrowing.emplace_back(id);
+                }
+                growth.elapsed = 0.f;
+            }
+        }
+
+        for (auto &&id: doneGrowing) {
+            manager.removeComponent<GrowInTime>(id);
         }
     }
 

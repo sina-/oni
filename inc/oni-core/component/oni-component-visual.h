@@ -42,7 +42,7 @@ namespace oni {
 
     struct UV {
         std::array<vec2, 4> values{vec2{0.f, 0.f}, vec2{0.f, 1.f},
-                                         vec2{1.f, 1.f}, vec2{1.f, 0.f}};
+                                   vec2{1.f, 1.f}, vec2{1.f, 0.f}};
     };
 
     struct Texture {
@@ -410,9 +410,19 @@ namespace oni {
         MaterialFinish_Type finish{};
     };
 
+    struct GrowInTime {
+        duration period{0.2f}; // NOTE: Grow every period
+        duration elapsed{0.f}; // NOTE: Since last growth
+        r32 factor{0.1f}; // NOTE: add this much to current size
+        Scale initialSize{1, 1};
+        Scale maxSize{1, 1};
+    };
+
     struct ParticleEmitter {
         EntityPreset tag{};
         r32 size = 0.1f;
+        u8 count = 1;
+        GrowInTime growth{};
     };
 
     struct AfterMark {

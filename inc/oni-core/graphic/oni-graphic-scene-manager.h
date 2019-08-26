@@ -43,6 +43,10 @@ namespace oni {
                         r64 tickTime);
 
         static void
+        updateGrowthInTime(EntityManager &,
+                           r64 tickTime);
+
+        static void
         updateTextureAnimated(EntityManager &,
                               r64 tickTime);
 

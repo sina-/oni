@@ -244,6 +244,10 @@ namespace oni {
                 name = "simple_blast_particle";
                 break;
             }
+            case EntityType::SIMPLE_BLAST_ANIMATION: {
+                name = "simple_blast_animation";
+                break;
+            }
             case EntityType::SIMPLE_ROCKET: {
                 name = "simple_rocket";
                 break;

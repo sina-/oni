@@ -38,7 +38,7 @@ namespace oni {
         updateSmokeEmitter(EntityManager &,
                            r64 tickTime);
 
-        void
+        static void
         updateAfterMark(EntityManager &,
                         r64 tickTime);
 

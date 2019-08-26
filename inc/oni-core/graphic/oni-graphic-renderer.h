@@ -33,7 +33,7 @@ namespace oni {
         const EntityManager *manager{};
 
         const WorldP3D *pos{};
-        const Heading *heading{};
+        const Orientation *ornt{};
         const Scale *scale{};
         const Age *age{};
 

@@ -125,17 +125,17 @@ namespace oni {
         endColorRendering();
 
     public:
-        struct WorldP3DAndHeading {
+        struct WorldP3DAndOrientation {
             WorldP3D pos;
-            Heading heading;
+            Orientation ornt;
         };
 
         // TODO: Move somewhere else
-        static SceneManager::WorldP3DAndHeading
+        static SceneManager::WorldP3DAndOrientation
         applyParentTransforms(const EntityManager &manager,
                               EntityID child,
                               const WorldP3D &pos,
-                              const Heading &heading);
+                              const Orientation &ornt);
 
 
     private:

@@ -297,7 +297,7 @@ namespace oni {
         Texture texture{};
         r32 mass{1.f};
         r32 width{0.4f};
-        Heading2D heading{};
+        Direction ornt{};
         WorldP2D last{};
         WorldP2D lastDelta{};
         WorldP2D current{};

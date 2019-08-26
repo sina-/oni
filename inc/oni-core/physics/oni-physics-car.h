@@ -16,7 +16,7 @@ namespace oni {
     void
     tickCar(Car &car,
             WorldP3D &,
-            Heading &,
+            Orientation &,
             const CarConfig &config,
             const CarInput &inputs,
             r64 dt);

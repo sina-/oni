@@ -26,14 +26,14 @@ namespace oni {
 
         Event_SplatOnDeath(const WorldP3D &pos,
                            const Scale &scale,
-                           const Heading &heading,
+                           const Orientation &ornt,
                            const EntityPreset &tag,
                            std::function<void()> func
-        ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
+        ) : pos(pos), scale(scale), tag(tag), ornt(ornt), callback(std::move(func)) {}
 
         WorldP3D pos{};
         Scale scale{};
-        Heading heading{};
+        Orientation ornt{};
         EntityPreset tag{};
         std::function<void()> callback{};
     };
@@ -43,14 +43,14 @@ namespace oni {
 
         Event_SplatOnRest(const WorldP3D &pos,
                           const Scale &scale,
-                          const Heading &heading,
+                          const Orientation &ornt,
                           const EntityPreset &tag,
                           std::function<void()> func
-        ) : pos(pos), scale(scale), tag(tag), heading(heading), callback(std::move(func)) {}
+        ) : pos(pos), scale(scale), tag(tag), ornt(ornt), callback(std::move(func)) {}
 
         WorldP3D pos{};
         Scale scale{};
-        Heading heading{};
+        Orientation ornt{};
         EntityPreset tag{};
         std::function<void()> callback{};
     };

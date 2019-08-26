@@ -12,11 +12,11 @@ namespace oni {
 
     mat4
     createTransformation(const WorldP3D &position,
-                         const Heading &rotation);
+                         const Orientation &rotation);
 
     mat4
     createTransformation(const WorldP3D &position,
-                         const Heading &rotation,
+                         const Orientation &rotation,
                          const Scale &scale);
 
     void

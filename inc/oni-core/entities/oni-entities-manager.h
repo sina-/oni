@@ -68,23 +68,26 @@ namespace oni {
                         u32 upper);
 
         r32
-        setRandHeading(EntityID);
+        setRandOrientation(EntityID);
 
         r32
-        setRandHeading(EntityID,
-                       r32 lower,
-                       r32 upper);
+        setRandOrientation(EntityID,
+                           r32 lower,
+                           r32 upper);
 
         void
-        setHeading(EntityID,
-                   r32 heading);
+        setDirectionFromOrientation(EntityID);
+
+        void
+        setOrientation(EntityID,
+                       r32 ornt);
 
         void
         createPhysics(
                 EntityID,
                 const WorldP3D &worldPos,
                 const vec2 &size,
-                const r32 heading);
+                const r32 ornt);
 
         void
         setText(EntityID,

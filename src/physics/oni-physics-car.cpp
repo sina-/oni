@@ -8,12 +8,12 @@ namespace oni {
     void
     tickCar(Car &car,
             WorldP3D &pos,
-            Heading &heading,
+            Orientation &ornt,
             const CarConfig &config,
             const CarInput &inputs,
             r64 dt) {
-        r64 sn = std::sin(heading.value);
-        r64 cs = std::cos(heading.value);
+        r64 sn = std::sin(ornt.value);
+        r64 cs = std::cos(ornt.value);
 
         car.velocityLocal.x = cs * car.velocity.x + sn * car.velocity.y;
         car.velocityLocal.y = cs * car.velocity.y - sn * car.velocity.x;
@@ -117,7 +117,7 @@ namespace oni {
 
         car.angularVelocity += angularAcceleration * dt;
 
-        heading.value += car.angularVelocity * dt;
+        ornt.value += car.angularVelocity * dt;
         pos.x += car.velocity.x * dt;
         pos.y += car.velocity.y * dt;
     }

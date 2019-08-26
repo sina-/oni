@@ -41,7 +41,7 @@ namespace oni {
         auto program = mShader->getProgram();
 
         auto positionIndex = glGetAttribLocation(program, "position");
-        auto headingIndex = glGetAttribLocation(program, "heading");
+        auto orntIndex = glGetAttribLocation(program, "ornt");
         auto effectIndex = glGetAttribLocation(program, "effect");
         auto halfSizeIndex = glGetAttribLocation(program, "halfSize");
         auto colorIndex = glGetAttribLocation(program, "color");
@@ -51,7 +51,7 @@ namespace oni {
         auto uvIndex_2 = glGetAttribLocation(program, "uv_2");
         auto uvIndex_3 = glGetAttribLocation(program, "uv_3");
 
-        if (positionIndex == -1 || headingIndex == -1 || colorIndex == -1 ||
+        if (positionIndex == -1 || orntIndex == -1 || colorIndex == -1 ||
             samplerIDIndex == -1 || halfSizeIndex == -1 ||
             effectIndex == -1 ||
             uvIndex_0 == -1 || uvIndex_1 == -1 || uvIndex_2 == -1 || uvIndex_3 == -1) {
@@ -66,14 +66,14 @@ namespace oni {
         sampler.stride = vertexSize;
         sampler.offset = static_cast<const oniGLvoid *>(nullptr);
 
-        BufferStructure heading;
-        heading.index = static_cast<oniGLuint>(headingIndex);
-        heading.componentCount = 1;
-        heading.componentType = GL_FLOAT;
-        heading.normalized = GL_FALSE;
-        heading.stride = vertexSize;
-        heading.offset = reinterpret_cast<const oniGLvoid *>(offsetof(TessellationVertex,
-                                                                      heading));
+        BufferStructure ornt;
+        ornt.index = static_cast<oniGLuint>(orntIndex);
+        ornt.componentCount = 1;
+        ornt.componentType = GL_FLOAT;
+        ornt.normalized = GL_FALSE;
+        ornt.stride = vertexSize;
+        ornt.offset = reinterpret_cast<const oniGLvoid *>(offsetof(TessellationVertex,
+                                                                      ornt));
 
         BufferStructure effect;
         effect.index = static_cast<oniGLuint>(effectIndex);
@@ -144,7 +144,7 @@ namespace oni {
 
         std::vector<BufferStructure> bufferStructures;
         bufferStructures.push_back(sampler);
-        bufferStructures.push_back(heading);
+        bufferStructures.push_back(ornt);
         bufferStructures.push_back(effect);
         bufferStructures.push_back(halfSize);
         bufferStructures.push_back(position);
@@ -252,7 +252,7 @@ namespace oni {
         auto *buffer = static_cast<TessellationVertex *>(mBuffer);
 
         buffer->position = renderable.pos->value;
-        buffer->heading = renderable.heading->value;
+        buffer->ornt = renderable.ornt->value;
         buffer->effect = effectID;
         buffer->halfSize = vec2{renderable.scale->x / 2.f,
                                       renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?

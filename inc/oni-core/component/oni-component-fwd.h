@@ -12,7 +12,6 @@ namespace oni {
     struct SoundPitch;
 
     /// Geometry
-    union Heading2D;
     union OriginP2D;
     union OriginP3D;
     union Point;
@@ -24,7 +23,7 @@ namespace oni {
     struct AABB;
     struct EntityAttachee;
     struct EntityAttachment;
-    struct Heading;
+    struct Orientation;
     struct Quad;
     struct Rectangle;
     struct WorldP3D_History;
@@ -39,6 +38,7 @@ namespace oni {
     struct Velocity;
 
     union Acceleration2D;
+    union Direction;
     union Force;
     union Velocity2D;
 

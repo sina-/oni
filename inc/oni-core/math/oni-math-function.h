@@ -234,12 +234,6 @@ namespace oni {
     findAABB(const Quad &,
              AABB &);
 
-    vec2
-    headingVector(r32 heading);
-
-    vec2
-    headingVector(const Heading &);
-
     void
     translate(Quad &,
               const WorldP3D &);

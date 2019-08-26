@@ -94,7 +94,7 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              Heading &data) {
+              Orientation &data) {
         archive(data.value);
     }
 
@@ -202,7 +202,7 @@ namespace oni {
                     WorldP3D,
                     WorldP3D_History,
                     WorldP2D,
-                    Heading,
+                    Orientation,
                     Scale,
                     Rectangle,
                     Point,
@@ -250,7 +250,7 @@ namespace oni {
                     WorldP3D,
                     WorldP3D_History,
                     WorldP2D,
-                    Heading,
+                    Orientation,
                     Scale,
                     Rectangle,
                     Point,

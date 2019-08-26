@@ -13,7 +13,7 @@
 namespace oni {
     struct TessellationVertex {
         oniGLint samplerID{-1};
-        r32 heading{0.f};
+        r32 ornt{0.f};
         r32 effect{0.f};
         vec2 halfSize{1.f};
         vec3 position{0.f, 0.f, 0.f};

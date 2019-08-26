@@ -58,7 +58,7 @@ namespace oni {
 
     mat4
     createTransformation(const WorldP3D &position,
-                         const Heading &rotation) {
+                         const Orientation &rotation) {
         auto translationMat = mat4::translation(position.value);
         auto rotationMat = mat4::rotation(rotation.value, vec3{0.0f, 0.0f, 1.0f});
         auto transformation = translationMat * rotationMat;
@@ -67,7 +67,7 @@ namespace oni {
 
     mat4
     createTransformation(const WorldP3D &position,
-                         const Heading &rotation,
+                         const Orientation &rotation,
                          const Scale &scale) {
         auto translationMat = mat4::translation(position.value);
         auto rotationMat = mat4::rotation(rotation.value, vec3{0.0f, 0.0f, 1.0f});

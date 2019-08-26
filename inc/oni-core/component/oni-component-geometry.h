@@ -111,11 +111,11 @@ namespace oni {
         };
     };
 
-    struct Heading {
+    struct Orientation {
         r32 value{0.f}; // radians
     };
 
-    union Heading2D {
+    union Direction {
         vec2 value{};
         struct {
             r32 x;
@@ -167,12 +167,12 @@ namespace oni {
 
         static inline Quad
         make(const WorldP3D &pos,
-             const Heading &heading,
+             const Orientation &ornt,
              const Scale &scale) {
             // NOTE: Very slow obviously, so use sparingly, ideally only for debugging
 
             auto translationMat = mat4::translation(pos.value);
-            auto rotationMat = mat4::rotation(heading.value, vec3{0.0f, 0.0f, 1.0f});
+            auto rotationMat = mat4::rotation(ornt.value, vec3{0.0f, 0.0f, 1.0f});
             auto scaleMat = mat4::scale(scale.value);
             auto trans = translationMat * rotationMat * scaleMat;
 

@@ -150,12 +150,12 @@ namespace oni {
         auto view = manager.createView<
                 EntityType,
                 WorldP3D,
-                Heading,
+                Orientation,
                 Scale,
                 MaterialDefinition>();
         for (auto &&id: view) {
             const auto &pos = view.get<WorldP3D>(id);
-            const auto &heading = view.get<Heading>(id);
+            const auto &ornt = view.get<Orientation>(id);
             const auto &scale = view.get<Scale>(id);
             const auto &def = view.get<MaterialDefinition>(id);
 
@@ -164,7 +164,7 @@ namespace oni {
             renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
             renderable.manager = &manager;
             renderable.pos = &pos;
-            renderable.heading = &heading;
+            renderable.ornt = &ornt;
             renderable.scale = &scale;
 
             renderable.def = def;
@@ -210,7 +210,7 @@ namespace oni {
             begin(*mRendererTessellation, spec);
             while (!mRenderables[i].empty()) {
                 auto &r = const_cast<Renderable &> (mRenderables[i].top());
-                auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.heading);
+                auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.ornt);
 
                 if (!isVisible(ePos.pos, *r.scale)) {
                     mRenderables[i].pop();
@@ -220,7 +220,7 @@ namespace oni {
                 // This will just point r.pos to a new location, which is temporary to this scope, but submit()
                 // will create a copy so it is safe.
                 r.pos = &ePos.pos;
-                r.heading = &ePos.heading;
+                r.ornt = &ePos.ornt;
 
                 mRendererTessellation->submit(r);
 
@@ -346,17 +346,17 @@ namespace oni {
 
         auto view = manager.createView<
                 AfterMark,
-                Heading,
+                Orientation,
                 WorldP3D>();
         for (auto &&id: view) {
             const auto &mark = view.get<AfterMark>(id);
             const auto &pos = view.get<WorldP3D>(id);
-            const auto &heading = view.get<Heading>(id);
+            const auto &ornt = view.get<Orientation>(id);
 
-            auto transformed = applyParentTransforms(manager, id, pos, heading);
+            auto transformed = applyParentTransforms(manager, id, pos, ornt);
             Brush brush;
             auto quad = Quad{};
-            auto model = createTransformation(transformed.pos, transformed.heading, mark.scale);
+            auto model = createTransformation(transformed.pos, transformed.ornt, mark.scale);
             switch (mark.type) {
                 case BrushType::COLOR: {
                     brush.color = &mark.color;
@@ -537,19 +537,19 @@ namespace oni {
         mRenderedTexturesPerFrame = 0;
     }
 
-    SceneManager::WorldP3DAndHeading
+    SceneManager::WorldP3DAndOrientation
     SceneManager::applyParentTransforms(const EntityManager &manager,
                                         EntityID child,
                                         const WorldP3D &childPos,
-                                        const Heading &childHeading) {
+                                        const Orientation &childOrientation) {
         auto transformation = mat4::identity();
-        auto result = WorldP3DAndHeading{childPos, childHeading};
+        auto result = WorldP3DAndOrientation{childPos, childOrientation};
         auto numParents = size{};
 
         while (manager.has<EntityAttachee>(child)) {
             const auto &parent = manager.get<EntityAttachee>(child);
             const auto &parentPos = manager.get<WorldP3D>(parent.entityID);
-            const auto &parentHeading = manager.get<Heading>(parent.entityID);
+            const auto &parentOrientation = manager.get<Orientation>(parent.entityID);
 
             // TODO: Scaling is ignored because it is used to store the size of the object, so even non-scaled
             // objects have scaling matrix larger than identity matrix, so if I use the parent scaling
@@ -557,9 +557,9 @@ namespace oni {
             // Perhaps removing Size component was the wrong decision, and I should have a distinction
             // between size and Scale. Renderer passes scale down to shader as a size anyway, it does NOT
             // use it as a multiplier.
-            transformation *= createTransformation(parentPos, parentHeading, {});
+            transformation *= createTransformation(parentPos, parentOrientation, {});
             result.pos.value = transformation * result.pos.value;
-            result.heading.value += parentHeading.value;
+            result.ornt.value += parentOrientation.value;
 
             child = parent.entityID;
             ++numParents;

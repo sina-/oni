@@ -1,5 +1,7 @@
 #include <oni-core/entities/oni-entities-manager.h>
 
+#include <cmath>
+
 #include <Box2D/Dynamics/b2Body.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
@@ -290,7 +292,7 @@ namespace oni {
     EntityManager::createPhysics(EntityID id,
                                  const WorldP3D &pos,
                                  const vec2 &size,
-                                 r32 heading) {
+                                 r32 ornt) {
         auto &props = mRegistry->get<PhysicalProperties>(id);
         auto shape = b2PolygonShape{};
         shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
@@ -300,7 +302,7 @@ namespace oni {
 
         b2BodyDef bodyDef;
         bodyDef.bullet = props.highPrecision;
-        bodyDef.angle = heading;
+        bodyDef.angle = ornt;
         bodyDef.linearDamping = props.linearDamping;
         bodyDef.angularDamping = props.angularDamping;
         bodyDef.gravityScale = props.gravityScale;
@@ -389,17 +391,25 @@ namespace oni {
     }
 
     r32
-    EntityManager::setRandHeading(EntityID id) {
-        return setRandHeading(id, 0.f, FULL_CIRCLE_IN_RAD);
+    EntityManager::setRandOrientation(EntityID id) {
+        return setRandOrientation(id, 0.f, FULL_CIRCLE_IN_RAD);
     }
 
     r32
-    EntityManager::setRandHeading(EntityID id,
+    EntityManager::setRandOrientation(EntityID id,
                                   r32 lower,
                                   r32 upper) {
-        auto &heading = mRegistry->get<Heading>(id);
-        heading.value = mRand->next_r32(lower, upper);
-        return heading.value;
+        auto &ornt = mRegistry->get<Orientation>(id);
+        ornt.value = mRand->next_r32(lower, upper);
+        return ornt.value;
+    }
+
+    void
+    EntityManager::setDirectionFromOrientation(EntityID id) {
+        const auto &ornt = mRegistry->get<Orientation>(id);
+        auto &dir = mRegistry->get<Direction>(id);
+        dir.x = std::cos(ornt.value);
+        dir.y = std::sin(ornt.value);
     }
 
     void
@@ -431,10 +441,10 @@ namespace oni {
     }
 
     void
-    EntityManager::setHeading(EntityID id,
-                              r32 heading) {
-        auto &h = mRegistry->get<Heading>(id);
-        h.value = heading;
+    EntityManager::setOrientation(EntityID id,
+                              r32 ornt) {
+        auto &h = mRegistry->get<Orientation>(id);
+        h.value = ornt;
     }
 
     void

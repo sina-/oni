@@ -14,16 +14,6 @@ namespace oni {
                     max(max(quad.a.y, quad.b.y), max(quad.c.y, quad.d.y))};
     }
 
-    vec2
-    headingVector(r32 heading) {
-        return vec2{std::cos(heading), std::sin(heading)};
-    }
-
-    vec2
-    headingVector(const Heading &heading) {
-        return headingVector(heading.value);
-    }
-
     void
     translate(Quad &quad,
               const WorldP3D &pos) {

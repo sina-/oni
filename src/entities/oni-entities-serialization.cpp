@@ -60,7 +60,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               ParticleEmitter &data) {
-        archive(data.tag, data.size, data.count, data.growth);
+        archive(data.tag, data.size, data.count, data.growth, data.initialVMin, data.initialVMax);
     }
 
     template<class Archive>

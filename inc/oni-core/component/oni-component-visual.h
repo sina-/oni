@@ -421,6 +421,8 @@ namespace oni {
     struct ParticleEmitter {
         EntityPreset tag{};
         r32 size = 0.1f;
+        r32 initialVMin = 1.f;
+        r32 initialVMax = 2.f;
         u8 count = 1;
         GrowInTime growth{};
     };

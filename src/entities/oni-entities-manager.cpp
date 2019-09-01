@@ -7,10 +7,6 @@
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 #include <Box2D/Dynamics/b2World.h>
 
-#include <oni-core/component/oni-component-physics.h>
-#include <oni-core/component/oni-component-audio.h>
-#include <oni-core/component/oni-component-gameplay.h>
-#include <oni-core/graphic/oni-graphic-texture-manager.h>
 #include <oni-core/math/oni-math-rand.h>
 
 

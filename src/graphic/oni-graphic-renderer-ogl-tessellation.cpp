@@ -73,7 +73,7 @@ namespace oni {
         ornt.normalized = GL_FALSE;
         ornt.stride = vertexSize;
         ornt.offset = reinterpret_cast<const oniGLvoid *>(offsetof(TessellationVertex,
-                                                                      ornt));
+                                                                   ornt));
 
         BufferStructure effect;
         effect.index = static_cast<oniGLuint>(effectIndex);
@@ -214,6 +214,8 @@ namespace oni {
                 // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
                 auto &begin = renderable.transitionTint->begin;
                 auto &end = renderable.transitionTint->end;
+                // TODO: This is buggy, given blend function of (GL_ONE, GL_ONE) I can't produce black instead
+                // when rgb = 0 I just get transparent objects.
                 auto t = renderable.age->currentAge / renderable.age->maxAge;
                 auto r = lerp(begin.r_r32(), end.r_r32(), t);
                 auto g = lerp(begin.g_r32(), end.g_r32(), t);
@@ -255,7 +257,7 @@ namespace oni {
         buffer->ornt = renderable.ornt->value;
         buffer->effect = effectID;
         buffer->halfSize = vec2{renderable.scale->x / 2.f,
-                                      renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
+                                renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
         buffer->color = color.rgba();
         buffer->uv_0 = uv0;
         buffer->uv_1 = uv1;

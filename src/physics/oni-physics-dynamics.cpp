@@ -11,7 +11,6 @@
 #include <oni-core/math/oni-math-rand.h>
 #include <oni-core/physics/oni-physics-car.h>
 #include <oni-core/game/oni-game-event.h>
-#include <oni-core/component/oni-component-gameplay.h>
 
 
 namespace oni {
@@ -519,23 +518,6 @@ namespace oni {
             surface.color.set_a(lerp(currentAlpha, targetAlpha, fade.factor));
             if (!almost_Equal(surface.color.a_r32(), currentAlpha)) {
                 manager.markForNetSync(id);
-            }
-        }
-    }
-
-    void
-    Dynamics::updateCoolDowns(EntityManager &manager,
-                              r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::SERVER);
-
-        /// Update cool-downs
-        {
-            // NOTE: This is not communicated to the clients so there are is no need for net-sync
-            auto view = manager.createView<
-                    GunCoolDown>();
-            for (auto &&entity: view) {
-                auto &coolDown = view.get<GunCoolDown>(entity);
-                subAndZeroClip(coolDown.value, tickTime);
             }
         }
     }

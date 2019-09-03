@@ -1,5 +1,5 @@
 #pragma once
 
 namespace oni {
-    class Dynamics;
+    class Physics;
 }

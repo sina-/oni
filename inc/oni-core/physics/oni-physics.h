@@ -17,11 +17,11 @@ class b2Body;
 namespace oni {
     using UserInputMap = std::unordered_map<EntityID, CarInput>;
 
-    class Dynamics {
+    class Physics {
     public:
-        Dynamics();
+        Physics();
 
-        ~Dynamics();
+        ~Physics();
 
         static void
         processInput(EntityManager &,

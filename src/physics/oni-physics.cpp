@@ -1,4 +1,4 @@
-#include <oni-core/physics/oni-physics-dynamics.h>
+#include <oni-core/physics/oni-physics.h>
 
 #include <Box2D/Box2D.h>
 #include <GLFW/glfw3.h>
@@ -71,49 +71,49 @@ namespace oni {
     };
 #endif
 
-    Dynamics::Dynamics() {
+    Physics::Physics() {
         auto gravity = b2Vec2(0.0f, 0.0f);
         ///mCollisionHandler = std::make_unique<CollisionHandler>();
         mPhysicsWorld = std::make_unique<b2World>(gravity);
         mRand = std::make_unique<Rand>(0, 0);
 
         mCollisionHandlers[PhysicalCategory::ROCKET] =
-                std::bind(&Dynamics::handleRocketCollision, this,
+                std::bind(&Physics::handleRocketCollision, this,
                           std::placeholders::_1,
                           std::placeholders::_2,
                           std::placeholders::_3,
                           std::placeholders::_4);
 
         mCollisionHandlers[PhysicalCategory::VEHICLE] =
-                std::bind(&Dynamics::handleVehicleCollision, this,
+                std::bind(&Physics::handleVehicleCollision, this,
                           std::placeholders::_1,
                           std::placeholders::_2,
                           std::placeholders::_3,
                           std::placeholders::_4);
 
         mCollisionHandlers[PhysicalCategory::RACE_CAR] =
-                std::bind(&Dynamics::handleRaceCarCollision, this,
+                std::bind(&Physics::handleRaceCarCollision, this,
                           std::placeholders::_1,
                           std::placeholders::_2,
                           std::placeholders::_3,
                           std::placeholders::_4);
 
         mCollisionHandlers[PhysicalCategory::WALL] =
-                std::bind(&Dynamics::handleCollision, this,
+                std::bind(&Physics::handleCollision, this,
                           std::placeholders::_1,
                           std::placeholders::_2,
                           std::placeholders::_3,
                           std::placeholders::_4);
 
         mCollisionHandlers[PhysicalCategory::GENERIC] =
-                std::bind(&Dynamics::handleCollision, this,
+                std::bind(&Physics::handleCollision, this,
                           std::placeholders::_1,
                           std::placeholders::_2,
                           std::placeholders::_3,
                           std::placeholders::_4);
 
         mCollisionHandlers[PhysicalCategory::PROJECTILE] =
-                std::bind(&Dynamics::handleCollision, this,
+                std::bind(&Physics::handleCollision, this,
                           std::placeholders::_1,
                           std::placeholders::_2,
                           std::placeholders::_3,
@@ -124,12 +124,12 @@ namespace oni {
         // mPhysicsWorld->SetContactListener(mCollisionHandler.get());
     }
 
-    Dynamics::~Dynamics() = default;
+    Physics::~Physics() = default;
 
     void
-    Dynamics::processInput(EntityManager &manager,
-                           ClientDataManager &clientData,
-                           std::unordered_map<EntityID, CarInput> &result) {
+    Physics::processInput(EntityManager &manager,
+                          ClientDataManager &clientData,
+                          std::unordered_map<EntityID, CarInput> &result) {
         assert(manager.getSimMode() == SimMode::SERVER);
 
         auto carView = manager.createView<
@@ -167,9 +167,9 @@ namespace oni {
     }
 
     void
-    Dynamics::updateCars(EntityManager &manager,
-                         UserInputMap &input,
-                         r64 tickTime) {
+    Physics::updateCars(EntityManager &manager,
+                        UserInputMap &input,
+                        r64 tickTime) {
         assert(manager.getSimMode() == SimMode::SERVER);
 
         /// Update car
@@ -246,8 +246,8 @@ namespace oni {
     }
 
     void
-    Dynamics::updateJetForce(EntityManager &manager,
-                             r64 tickTime) {
+    Physics::updateJetForce(EntityManager &manager,
+                            r64 tickTime) {
         assert(manager.getSimMode() == SimMode::SERVER);
 
         auto emptyFuel = std::vector<EntityID>();
@@ -274,7 +274,7 @@ namespace oni {
     }
 
     void
-    Dynamics::updatePhysWorld(r64 tickTime) {
+    Physics::updatePhysWorld(r64 tickTime) {
         // TODO: entity registry has pointers to mPhysicsWorld internal data structures :(
         // One way to hide it is to provide a function in physics library that creates physical entities
         // for a given entity id an maintains an internal mapping between them without leaking the
@@ -283,9 +283,9 @@ namespace oni {
     }
 
     void
-    Dynamics::updateCarCollision(EntityManager &manager,
-                                 UserInputMap &input,
-                                 r64 tickTime) {
+    Physics::updateCarCollision(EntityManager &manager,
+                                UserInputMap &input,
+                                r64 tickTime) {
         assert(manager.getSimMode() == SimMode::SERVER);
 
         auto view = manager.createView<
@@ -341,8 +341,8 @@ namespace oni {
     }
 
     void
-    Dynamics::updateCollision(EntityManager &manager,
-                              r64 tickTime) {
+    Physics::updateCollision(EntityManager &manager,
+                             r64 tickTime) {
         assert(manager.getSimMode() == SimMode::SERVER ||
                manager.getSimMode() == SimMode::CLIENT);
 
@@ -366,7 +366,7 @@ namespace oni {
     }
 
     void
-    Dynamics::syncPosWithPhysWorld(EntityManager &manager) {
+    Physics::syncPosWithPhysWorld(EntityManager &manager) {
         assert(manager.getSimMode() == SimMode::SERVER ||
                manager.getSimMode() == SimMode::CLIENT);
 
@@ -402,12 +402,12 @@ namespace oni {
     }
 
     b2World *
-    Dynamics::getPhysicsWorld() {
+    Physics::getPhysicsWorld() {
         return mPhysicsWorld.get();
     }
 
     bool
-    Dynamics::isColliding(b2Body *body) {
+    Physics::isColliding(b2Body *body) {
         bool colliding{false};
         for (b2ContactEdge *ce = body->GetContactList();
              ce && !colliding; ce = ce->next) {
@@ -420,8 +420,8 @@ namespace oni {
     }
 
     void
-    Dynamics::updateAge(EntityManager &manager,
-                        r64 tickTime) {
+    Physics::updateAge(EntityManager &manager,
+                       r64 tickTime) {
         assert(manager.getSimMode() == SimMode::CLIENT ||
                manager.getSimMode() == SimMode::SERVER);
 
@@ -451,7 +451,7 @@ namespace oni {
     }
 
     void
-    Dynamics::updateResting(EntityManager &manager) {
+    Physics::updateResting(EntityManager &manager) {
         assert(manager.getSimMode() == SimMode::CLIENT);
 
         auto view = manager.createView<
@@ -480,8 +480,8 @@ namespace oni {
     }
 
     void
-    Dynamics::updateFadeWithAge(EntityManager &manager,
-                                r64 tickTime) {
+    Physics::updateFadeWithAge(EntityManager &manager,
+                               r64 tickTime) {
         assert(manager.getSimMode() == SimMode::CLIENT ||
                manager.getSimMode() == SimMode::SERVER);
 
@@ -523,10 +523,10 @@ namespace oni {
     }
 
     void
-    Dynamics::handleRocketCollision(EntityManager &manager,
-                                    EntityID id,
-                                    PhysicalProperties &props,
-                                    WorldP3D &pos) {
+    Physics::handleRocketCollision(EntityManager &manager,
+                                   EntityID id,
+                                   PhysicalProperties &props,
+                                   WorldP3D &pos) {
 
         auto *body = manager.getEntityBody(id);
         // TODO: Proper Z level!
@@ -554,26 +554,26 @@ namespace oni {
 
 
     void
-    Dynamics::handleCollision(EntityManager &,
-                              EntityID,
-                              PhysicalProperties &,
-                              WorldP3D &) {
+    Physics::handleCollision(EntityManager &,
+                             EntityID,
+                             PhysicalProperties &,
+                             WorldP3D &) {
 
     }
 
     void
-    Dynamics::handleRaceCarCollision(EntityManager &,
-                                     EntityID,
-                                     PhysicalProperties &,
-                                     WorldP3D &) {
+    Physics::handleRaceCarCollision(EntityManager &,
+                                    EntityID,
+                                    PhysicalProperties &,
+                                    WorldP3D &) {
 
     }
 
     void
-    Dynamics::handleVehicleCollision(EntityManager &,
-                                     EntityID,
-                                     PhysicalProperties &,
-                                     WorldP3D &) {
+    Physics::handleVehicleCollision(EntityManager &,
+                                    EntityID,
+                                    PhysicalProperties &,
+                                    WorldP3D &) {
 
     }
 }

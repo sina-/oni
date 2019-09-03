@@ -359,6 +359,7 @@ namespace oni {
                 break;
             }
         }
+        body->SetUserData(static_cast<void *>(&props.id));
         mEntityBodyMap[id] = body;
     }
 
@@ -393,8 +394,8 @@ namespace oni {
 
     r32
     EntityManager::setRandOrientation(EntityID id,
-                                  r32 lower,
-                                  r32 upper) {
+                                      r32 lower,
+                                      r32 upper) {
         auto &ornt = mRegistry->get<Orientation>(id);
         ornt.value = mRand->next_r32(lower, upper);
         return ornt.value;
@@ -438,7 +439,7 @@ namespace oni {
 
     void
     EntityManager::setOrientation(EntityID id,
-                              r32 ornt) {
+                                  r32 ornt) {
         auto &h = mRegistry->get<Orientation>(id);
         h.value = ornt;
     }

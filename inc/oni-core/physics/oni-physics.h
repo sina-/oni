@@ -71,33 +71,30 @@ namespace oni {
         getPhysicsWorld();
 
     private:
-        // TODO: I hate this type of handlers and how I have to register them with bind and shit. Maybe try lambdas?
         void
         handleRocketCollision(EntityManager &,
-                              EntityID,
+                              EntityID base,
+                              EntityID other,
                               PhysicalProperties &,
                               WorldP3D &pos);
 
         void
         handleVehicleCollision(EntityManager &,
-                               EntityID,
+                               EntityID base,
+                               EntityID other,
                                PhysicalProperties &,
                                WorldP3D &);
 
         void
         handleRaceCarCollision(EntityManager &,
-                               EntityID,
+                               EntityID base,
+                               EntityID other,
                                PhysicalProperties &,
                                WorldP3D &);
 
-        void
-        handleCollision(EntityManager &,
-                        EntityID,
-                        PhysicalProperties &,
-                        WorldP3D &);
-
         static bool
-        isColliding(b2Body *);
+        isColliding(b2Body *,
+                    EntityID &otherID);
 
     private:
 
@@ -109,7 +106,8 @@ namespace oni {
                 PhysicalCategory,
                 std::function<
                         void(EntityManager &,
-                             EntityID,
+                             EntityID base,
+                             EntityID other,
                              PhysicalProperties &,
                              WorldP3D &
                         )>> mCollisionHandlers{};

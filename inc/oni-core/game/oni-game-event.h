@@ -17,8 +17,8 @@ namespace oni {
 
     // TODO: Doent look like the right place
     struct CollidingEntity {
-        EntityType entityA{EntityType::UNKNOWN};
-        EntityType entityB{EntityType::UNKNOWN};
+        EntityType a{EntityType::UNKNOWN};
+        EntityType b{EntityType::UNKNOWN};
     };
 
     struct Event_SplatOnDeath {

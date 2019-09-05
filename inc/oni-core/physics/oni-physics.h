@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_set>
 #include <functional>
 #include <memory>
 
@@ -73,30 +74,25 @@ namespace oni {
     private:
         void
         handleRocketCollision(EntityManager &,
-                              EntityID base,
-                              EntityID other,
-                              PhysicalProperties &,
-                              WorldP3D &pos);
-
-        void
-        handleVehicleCollision(EntityManager &,
-                               EntityID base,
-                               EntityID other,
-                               PhysicalProperties &,
-                               WorldP3D &);
+                              EntityID a,
+                              EntityID b,
+                              const WorldP3D &pos);
 
         void
         handleRaceCarCollision(EntityManager &,
-                               EntityID base,
-                               EntityID other,
-                               PhysicalProperties &,
-                               WorldP3D &);
+                               EntityID a,
+                               EntityID b,
+                               const WorldP3D &);
+
+        void
+        collisionEvent(EntityManager &,
+                       const EntityPair &,
+                       const WorldP3D &);
 
         static bool
         isColliding(b2Body *,
-                    EntityID &otherID);
-
-    private:
+                    std::unordered_set<EntityPair, EntityPairHasher> &
+        );
 
     private:
         std::unique_ptr<b2World> mPhysicsWorld{};
@@ -106,10 +102,9 @@ namespace oni {
                 PhysicalCategory,
                 std::function<
                         void(EntityManager &,
-                             EntityID base,
-                             EntityID other,
-                             PhysicalProperties &,
-                             WorldP3D &
+                             EntityID a,
+                             EntityID b,
+                             const WorldP3D &
                         )>> mCollisionHandlers{};
         std::unique_ptr<Rand> mRand{};
     };

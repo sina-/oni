@@ -1,5 +1,7 @@
 #include <oni-core/physics/oni-physics.h>
 
+#include <unordered_set>
+
 #include <Box2D/Box2D.h>
 #include <GLFW/glfw3.h>
 
@@ -78,36 +80,29 @@ namespace oni {
         mRand = std::make_unique<Rand>(0, 0);
 
         mCollisionHandlers[PhysicalCategory::ROCKET] = [this](EntityManager &manager,
-                                                              EntityID base,
-                                                              EntityID other,
-                                                              PhysicalProperties &pp,
-                                                              WorldP3D &pos) {
-            handleRocketCollision(manager, base, other, pp, pos);
+                                                              EntityID a,
+                                                              EntityID b,
+                                                              const WorldP3D &pos) {
+            handleRocketCollision(manager, a, b, pos);
         };
 
         mCollisionHandlers[PhysicalCategory::VEHICLE] = [this](EntityManager &manager,
-                                                               EntityID base,
-                                                               EntityID other,
-                                                               PhysicalProperties &pp,
-                                                               WorldP3D &pos) {
-            handleVehicleCollision(manager, base, other, pp, pos);
-
+                                                               EntityID a,
+                                                               EntityID b,
+                                                               const WorldP3D &pos) {
         };
 
         mCollisionHandlers[PhysicalCategory::RACE_CAR] = [this](EntityManager &manager,
-                                                                EntityID base,
-                                                                EntityID other,
-                                                                PhysicalProperties &pp,
-                                                                WorldP3D &pos) {
-            handleRaceCarCollision(manager, base, other, pp, pos);
+                                                                EntityID a,
+                                                                EntityID b,
+                                                                const WorldP3D &pos) {
+            handleRaceCarCollision(manager, a, b, pos);
         };
 
         mCollisionHandlers[PhysicalCategory::PROJECTILE] = [this](EntityManager &manager,
-                                                                EntityID base,
-                                                                EntityID other,
-                                                                PhysicalProperties &pp,
-                                                                WorldP3D &pos) {
-            assert(false);
+                                                                  EntityID a,
+                                                                  EntityID b,
+                                                                  const WorldP3D &pos) {
         };
 
         // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
@@ -291,7 +286,7 @@ namespace oni {
             auto &pos = view.get<WorldP3D>(id);
             auto &ornt = view.get<Orientation>(id);
             auto *body = manager.getEntityBody(id);
-            auto collidingWith = EntityID{};
+            auto collisionPairs = std::unordered_set<EntityPair, EntityPairHasher>();
             // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
             // just apply user input to box2d representation of physical body without syncing
             // car dynamics with box2d physics, that way the next tick if the
@@ -312,7 +307,7 @@ namespace oni {
                         true);
                 car.isColliding = false;
             } else {
-                if (isColliding(body, collidingWith)) {
+                if (isColliding(body, collisionPairs)) {
                     car.velocity = vec2{body->GetLinearVelocity().x,
                                         body->GetLinearVelocity().y};
                     car.angularVelocity = body->GetAngularVelocity();
@@ -330,34 +325,6 @@ namespace oni {
                 }
             }
         }
-    }
-
-    void
-    Physics::updateCollision(EntityManager &manager,
-                             r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::SERVER ||
-               manager.getSimMode() == SimMode::CLIENT);
-
-        auto view = manager.createView<
-                Tag_Dynamic,
-                WorldP3D,
-                PhysicalProperties>();
-        for (auto &&id: view) {
-            auto &props = view.get<PhysicalProperties>(id);
-            auto &pos = view.get<WorldP3D>(id);
-            auto *body = manager.getEntityBody(id);
-            auto collidingWith = EntityID{};
-            if (isColliding(body, collidingWith)) {
-                manager.printEntityType(id);
-                manager.printEntityType(collidingWith);
-                mCollisionHandlers[props.physicalCategory](manager,
-                                                           id,
-                                                           collidingWith,
-                                                           props,
-                                                           pos);
-            }
-        }
-        manager.flushDeletions();
     }
 
     void
@@ -403,11 +370,14 @@ namespace oni {
 
     bool
     Physics::isColliding(b2Body *body,
-                         EntityID &otherID) {
+                         std::unordered_set<EntityPair, EntityPairHasher> &result) {
         for (auto *ce = body->GetContactList(); ce; ce = ce->next) {
             auto *c = ce->contact;
             if (c->IsTouching()) {
-                otherID = *static_cast<EntityID *>(ce->other->GetUserData());
+                auto a = body->GetEntityID();
+                auto b = ce->other->GetEntityID();
+                assert(a != b);
+                result.insert({a, b});
                 return true;
             }
         }
@@ -518,52 +488,67 @@ namespace oni {
     }
 
     void
-    Physics::handleRocketCollision(EntityManager &manager,
-                                   EntityID base,
-                                   EntityID other,
-                                   PhysicalProperties &props,
-                                   WorldP3D &pos) {
-        auto *body = manager.getEntityBody(base);
-        // TODO: Proper Z level!
-        r32 particleZ = 0.25f; //mZLevel.level_2 + mZLevel.majorLevelDelta;
-        auto worldPos = WorldP3D{};
-        worldPos.x = body->GetPosition().x;
-        worldPos.y = body->GetPosition().y;
-        worldPos.z = particleZ;
+    Physics::updateCollision(EntityManager &manager,
+                             r64 tickTime) {
+        assert(manager.getSimMode() == SimMode::SERVER);
 
+        auto collisionPairs = std::unordered_set<EntityPair, EntityPairHasher>();
+        {
+            auto view = manager.createView<
+                    WorldP3D,
+                    PhysicalProperties>();
+            for (auto &&id: view) {
+                auto *body = manager.getEntityBody(id);
+                isColliding(body, collisionPairs);
+            }
+        }
+
+        for (auto &&pair: collisionPairs) {
+            auto &propsA = manager.get<PhysicalProperties>(pair.a);
+            auto &propsB = manager.get<PhysicalProperties>(pair.b);
+            // TODO: This is wrong, I need to get the position of point of contact
+            auto &pos = manager.get<WorldP3D>(pair.a);
+            mCollisionHandlers[propsA.physicalCategory](manager,
+                                                        pair.a,
+                                                        pair.b,
+                                                        pos);
+            mCollisionHandlers[propsB.physicalCategory](manager,
+                                                        pair.b,
+                                                        pair.a,
+                                                        pos);
+            collisionEvent(manager, pair, pos);
+        }
+        manager.flushDeletions();
+    }
+
+    void
+    Physics::collisionEvent(EntityManager &manager,
+                            const EntityPair &pair,
+                            const WorldP3D &pos) {
         CollidingEntity colliding;
-        colliding.entityA = EntityType::SIMPLE_ROCKET;
-        // TODO: use the proper type for the other entity instead of UNKNOWN
-        colliding.entityB = EntityType::UNKNOWN;
-
+        colliding.a = manager.get<EntityType>(pair.a);
+        colliding.b = manager.get<EntityType>(pair.b);
         // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
         // sound effects, etc.
-        manager.enqueueEvent<Event_Collision>(worldPos, colliding);
+        manager.enqueueEvent<Event_Collision>(pos, colliding);
+    }
 
-        manager.markForDeletion(base);
-        // TODO: I'm leaking memory here, data in b2world is left behind :(
-        // TODO: How can I make an interface that makes this impossible? I don't want to remember everytime
-        // that I removeEntity that I also have to delete it from other places, such as b2world, textures,
-        // and audio system.
+    void
+    Physics::handleRocketCollision(EntityManager &manager,
+                                   EntityID a,
+                                   EntityID b,
+                                   const WorldP3D &pos) {
+        assert(manager.get<EntityType>(a) == EntityType::SIMPLE_ROCKET);
+        manager.markForDeletion(a);
     }
 
 
     void
-    Physics::handleRaceCarCollision(EntityManager &,
-                                    EntityID base,
-                                    EntityID other,
-                                    PhysicalProperties &,
-                                    WorldP3D &) {
+    Physics::handleRaceCarCollision(EntityManager &manager,
+                                    EntityID a,
+                                    EntityID b,
+                                    const WorldP3D &pos) {
+        assert(manager.get<EntityType>(a) == EntityType::RACE_CAR);
         // TODO: Reduce HP
-
-    }
-
-    void
-    Physics::handleVehicleCollision(EntityManager &,
-                                    EntityID base,
-                                    EntityID other,
-                                    PhysicalProperties &,
-                                    WorldP3D &) {
-
     }
 }

@@ -1,4 +1,4 @@
-add_library(oni-core-entities oni-entities-serialization.cpp oni-entities-client-data-manager.cpp oni-entities-manager.cpp)
+add_library(oni-core-entities oni-entities-serialization.cpp oni-entities-client-data-manager.cpp oni-entities-manager.cpp oni-entities-entity.cpp)
 
 target_compile_features(oni-core-entities
         PUBLIC

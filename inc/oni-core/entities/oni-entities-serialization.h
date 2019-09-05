@@ -78,7 +78,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               CollidingEntity &collidingEntity) {
-        archive(collidingEntity.entityA, collidingEntity.entityB);
+        archive(collidingEntity.a, collidingEntity.b);
     }
 
     template<class Archive>

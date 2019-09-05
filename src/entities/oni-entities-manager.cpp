@@ -281,7 +281,7 @@ namespace oni {
                 break;
             }
         }
-        std::cout << name << '\n';
+        std::cout << id << ", " << name << '\n';
     }
 
     void
@@ -289,7 +289,7 @@ namespace oni {
                                  const WorldP3D &pos,
                                  const vec2 &size,
                                  r32 ornt) {
-        auto &props = mRegistry->get<PhysicalProperties>(id);
+        auto &props = get<PhysicalProperties>(id);
         auto shape = b2PolygonShape{};
         shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
@@ -359,15 +359,15 @@ namespace oni {
                 break;
             }
         }
-        body->SetUserData(static_cast<void *>(&props.id));
-        mEntityBodyMap[id] = body;
+        body->SetEntityID(id);
+        mEntityBodyMap.emplace(id, body);
     }
 
     void
     EntityManager::removePhysicalBody(EntityID id) {
-        auto *body = mEntityBodyMap[id];
-        assert(body);
+        auto *body = getEntityBody(id);
         mPhysicsWorld->DestroyBody(body);
+        assert(mEntityBodyMap.erase(id));
     }
 
     void
@@ -467,9 +467,9 @@ namespace oni {
 
     b2Body *
     EntityManager::getEntityBody(EntityID id) {
-        auto result = mEntityBodyMap[id];
-        assert(result);
-        return result;
+        auto r = mEntityBodyMap.find(id);
+        assert(r != mEntityBodyMap.end());
+        return r->second;
     }
 
     SimMode

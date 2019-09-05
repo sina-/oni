@@ -61,8 +61,22 @@ namespace oni {
     };
 
     struct DeletedEntity {
-        EntityID id;
-        EntityType type;
+        EntityID id{};
+        EntityType type{};
+    };
+
+    struct EntityPair {
+        EntityID a{};
+        EntityID b{};
+    };
+
+     bool
+    operator==(const EntityPair &,
+               const EntityPair &);
+
+    struct EntityPairHasher {
+        oni::size
+        operator()(const EntityPair &) const noexcept;
     };
 
     struct EntityOperationPolicy {

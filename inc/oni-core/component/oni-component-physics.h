@@ -152,7 +152,6 @@ namespace oni {
     };
 
     struct PhysicalProperties {
-        EntityID id{0};
         r32 linearDamping{2.f};
         r32 angularDamping{2.f};
         r32 density{0.1f};

@@ -380,11 +380,6 @@ namespace oni {
         std::unique_ptr<entt::dispatcher> mDispatcher{};
         mutable std::mutex mMutex{};
 
-        // NOTE: Entities which are complement of entities in another registry. Used for creating components on
-        // client side with matching entity from server side. For example a car that is emiting smoke would have
-        // an emitter component attached to the car entity of the server only on client side.
-        std::unordered_map<EntityID, EntityID> mComplementaryEntities{};
-
     private:
         b2World *mPhysicsWorld;
         std::unique_ptr<Rand> mRand{};

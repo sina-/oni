@@ -287,6 +287,12 @@ namespace oni {
             mDispatcher->sink<Event>().template connect<Method>(instance);
         }
 
+        template<class Event, auto Method>
+        void
+        registerEventHandler() {
+            mDispatcher->sink<Event>().template connect<Method>();
+        }
+
         template<class Event, class... Args>
         void
         enqueueEvent(Args &&...args) {

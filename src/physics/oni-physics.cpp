@@ -79,32 +79,6 @@ namespace oni {
         mPhysicsWorld = std::make_unique<b2World>(gravity);
         mRand = std::make_unique<Rand>(0, 0);
 
-        mCollisionHandlers[PhysicalCategory::ROCKET] = [this](EntityManager &manager,
-                                                              EntityID a,
-                                                              EntityID b,
-                                                              const WorldP3D &pos) {
-            handleRocketCollision(manager, a, b, pos);
-        };
-
-        mCollisionHandlers[PhysicalCategory::VEHICLE] = [this](EntityManager &manager,
-                                                               EntityID a,
-                                                               EntityID b,
-                                                               const WorldP3D &pos) {
-        };
-
-        mCollisionHandlers[PhysicalCategory::RACE_CAR] = [this](EntityManager &manager,
-                                                                EntityID a,
-                                                                EntityID b,
-                                                                const WorldP3D &pos) {
-            handleRaceCarCollision(manager, a, b, pos);
-        };
-
-        mCollisionHandlers[PhysicalCategory::PROJECTILE] = [this](EntityManager &manager,
-                                                                  EntityID a,
-                                                                  EntityID b,
-                                                                  const WorldP3D &pos) {
-        };
-
         // TODO: Can't get this working, its unreliable, when there are lot of collisions in the world, it keeps
         // skipping some of them!
         // mPhysicsWorld->SetContactListener(mCollisionHandler.get());
@@ -508,47 +482,11 @@ namespace oni {
             auto &propsB = manager.get<PhysicalProperties>(pair.b);
             // TODO: This is wrong, I need to get the position of point of contact
             auto &pos = manager.get<WorldP3D>(pair.a);
-            mCollisionHandlers[propsA.physicalCategory](manager,
-                                                        pair.a,
-                                                        pair.b,
-                                                        pos);
-            mCollisionHandlers[propsB.physicalCategory](manager,
-                                                        pair.b,
-                                                        pair.a,
-                                                        pos);
-            collisionEvent(manager, pair, pos);
+            auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
+
+            // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
+            // sound effects, etc.
+            manager.enqueueEvent<Event_Collision>(pos, pair, pcPair);
         }
-        manager.flushDeletions();
-    }
-
-    void
-    Physics::collisionEvent(EntityManager &manager,
-                            const EntityPair &pair,
-                            const WorldP3D &pos) {
-        CollidingEntity colliding;
-        colliding.a = manager.get<EntityType>(pair.a);
-        colliding.b = manager.get<EntityType>(pair.b);
-        // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
-        // sound effects, etc.
-        manager.enqueueEvent<Event_Collision>(pos, colliding);
-    }
-
-    void
-    Physics::handleRocketCollision(EntityManager &manager,
-                                   EntityID a,
-                                   EntityID b,
-                                   const WorldP3D &pos) {
-        assert(manager.get<EntityType>(a) == EntityType::SIMPLE_ROCKET);
-        manager.markForDeletion(a);
-    }
-
-
-    void
-    Physics::handleRaceCarCollision(EntityManager &manager,
-                                    EntityID a,
-                                    EntityID b,
-                                    const WorldP3D &pos) {
-        assert(manager.get<EntityType>(a) == EntityType::RACE_CAR);
-        // TODO: Reduce HP
     }
 }

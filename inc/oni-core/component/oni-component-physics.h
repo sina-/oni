@@ -106,6 +106,11 @@ namespace oni {
         LAST
     };
 
+    struct PhysicalCatPair {
+        PhysicalCategory a{};
+        PhysicalCategory b{};
+    };
+
     struct Velocity {
         r32 current{0.f};
         r32 max{0.f};

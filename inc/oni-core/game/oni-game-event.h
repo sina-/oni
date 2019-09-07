@@ -8,19 +8,6 @@
 
 
 namespace oni {
-    enum class EventType : oni::u8 {
-        COLLISION,
-        SPAWN_PARTICLE,
-        SOUND_PLAY,
-        ROCKET_LAUNCH,
-    };
-
-    // TODO: Doent look like the right place
-    struct CollidingEntity {
-        EntityType a{EntityType::UNKNOWN};
-        EntityType b{EntityType::UNKNOWN};
-    };
-
     struct Event_SplatOnDeath {
         Event_SplatOnDeath() = default;
 
@@ -67,10 +54,12 @@ namespace oni {
         Event_Collision() = default;
 
         Event_Collision(const WorldP3D &pos,
-                        const CollidingEntity &colliding) : pos(pos), colliding(colliding) {}
+                        const EntityPair &pair,
+                        const PhysicalCatPair &pcPair) : pos(pos), pair(pair), pcPair(pcPair) {}
 
         WorldP3D pos{};
-        CollidingEntity colliding{};
+        EntityPair pair{};
+        PhysicalCatPair pcPair{};
     };
 
     struct Event_SoundPlay {

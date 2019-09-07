@@ -77,15 +77,24 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              CollidingEntity &collidingEntity) {
-        archive(collidingEntity.a, collidingEntity.b);
+              EntityPair &data) {
+        archive(data.a, data.b);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              PhysicalCatPair &data) {
+        archive(data.a, data.b);
     }
 
     template<class Archive>
     void
     serialize(Archive &archive,
               Event_Collision &data) {
-        archive(data.pos, data.colliding);
+        // NOTE: EntityPair is not serialized as this is server specific, although I could send it to the client
+        // and do a mapping prior to use if need be!
+        archive(data.pos, data.pcPair);
     }
 
     template<class Archive>

@@ -46,7 +46,7 @@ namespace oni {
                            UserInputMap &input,
                            r64 tickTime);
 
-        void
+        static void
         updateCollision(EntityManager &,
                         r64 tickTime);
 
@@ -72,22 +72,7 @@ namespace oni {
         getPhysicsWorld();
 
     private:
-        void
-        handleRocketCollision(EntityManager &,
-                              EntityID a,
-                              EntityID b,
-                              const WorldP3D &pos);
 
-        void
-        handleRaceCarCollision(EntityManager &,
-                               EntityID a,
-                               EntityID b,
-                               const WorldP3D &);
-
-        void
-        collisionEvent(EntityManager &,
-                       const EntityPair &,
-                       const WorldP3D &);
 
         static bool
         isColliding(b2Body *,
@@ -96,16 +81,6 @@ namespace oni {
 
     private:
         std::unique_ptr<b2World> mPhysicsWorld{};
-        //std::unique_ptr<CollisionHandler> mCollisionHandler{};
-
-        std::map<
-                PhysicalCategory,
-                std::function<
-                        void(EntityManager &,
-                             EntityID a,
-                             EntityID b,
-                             const WorldP3D &
-                        )>> mCollisionHandlers{};
         std::unique_ptr<Rand> mRand{};
     };
 }

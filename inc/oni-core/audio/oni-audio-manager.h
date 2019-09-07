@@ -9,6 +9,7 @@
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/entities/oni-entities-fwd.h>
+#include <oni-core/game/oni-game-fwd.h>
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/asset/oni-asset-manager.h>
@@ -34,9 +35,7 @@ namespace oni {
              const WorldP3D &playerPos);
 
         void
-        playCollisionSoundEffect(EntityType A,
-                                 EntityType B,
-                                 const WorldP3D &pos);
+        playCollisionSoundEffect(const Event_Collision&);
 
         void
         kill(EntityID);
@@ -69,7 +68,7 @@ namespace oni {
             operator()(FMOD::ChannelGroup *channel) const;
         };
 
-        using CollisionSoundTag = u16p;
+        using CollisionSoundTag = u8p;
         using EntitySoundTag = u32p;
 
         struct EntityChannel {
@@ -82,8 +81,7 @@ namespace oni {
         preLoadSounds();
 
         static CollisionSoundTag
-        createCollisionEffectID(EntityType,
-                                EntityType);
+        createCollisionEffectID(const PhysicalCatPair&);
 
         FMOD::Channel *
         createChannel(const Sound &);

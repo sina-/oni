@@ -6,6 +6,7 @@
 
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/entities/oni-entities-manager.h>
+#include <oni-core/game/oni-game-event.h>
 
 
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
@@ -88,11 +89,10 @@ namespace oni {
     }
 
     void
-    AudioManager::playCollisionSoundEffect(EntityType A,
-                                           EntityType B,
-                                           const WorldP3D &pos) {
-        auto collisionTag = createCollisionEffectID(A, B);
-        auto distance = mPlayerPos.value - pos.value;
+    AudioManager::playCollisionSoundEffect(const Event_Collision &event) {
+        static_assert(sizeof(event.pcPair.a) == sizeof(u8), "Hashing will fail due to size mismatch");
+        auto collisionTag = createCollisionEffectID(event.pcPair);
+        auto distance = mPlayerPos.value - event.pos.value;
         auto soundTag = mCollisionEffects[collisionTag];
         assert(soundTag);
         auto sound = Sound{soundTag, ChannelGroup::EFFECT};
@@ -101,17 +101,15 @@ namespace oni {
     }
 
     AudioManager::CollisionSoundTag
-    AudioManager::createCollisionEffectID(EntityType A,
-                                          EntityType B) {
-        static_assert(sizeof(A) == sizeof(u16), "Hashing will fail due to size mismatch");
-        auto x = enumCast(A);
-        auto y = enumCast(B);
+    AudioManager::createCollisionEffectID(const PhysicalCatPair &pcp) {
+        auto a = enumCast(pcp.a);
+        auto b = enumCast(pcp.b);
 
-        if (x > y) {
-            std::swap(x, y); // Assuming soundEffect for A->B collision is same as B->A
+        if (a > b) {
+            std::swap(a, b); // Assuming soundEffect for A->B collision is same as B->A
         }
 
-        auto soundID = pack_u16(x, y);
+        auto soundID = pack_u8(a, b);
         return soundID;
     }
 
@@ -151,11 +149,11 @@ namespace oni {
             loadSound(tag, path);
         }
 
-        for (auto i = enumCast(EntityType::UNKNOWN);
-             i < enumCast(EntityType::LAST);
+        for (auto i = enumCast(PhysicalCategory::UNKNOWN);
+             i < enumCast(PhysicalCategory::LAST);
              ++i) {
-            auto id = createCollisionEffectID(EntityType::SIMPLE_ROCKET,
-                                              static_cast<EntityType>(i));
+            auto id = createCollisionEffectID({PhysicalCategory::ROCKET,
+                                               static_cast<PhysicalCategory >(i)});
             mCollisionEffects[id] = Sound_Tag::COLLISION_ROCKET_UNKNOWN;
         }
     }

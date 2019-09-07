@@ -17,6 +17,7 @@ namespace oni {
     typedef float r32;
     typedef double r64;
 
+    typedef u16 u8p;
     typedef u32 u16p;
     typedef u64 u32p;
     typedef u64 i32p;

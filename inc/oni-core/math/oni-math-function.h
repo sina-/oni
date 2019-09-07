@@ -122,8 +122,8 @@ namespace oni {
     }
 
     inline u32p
-    pack_u32(const u32 x,
-             const u32 y) noexcept {
+    pack_u32(u32 x,
+             u32 y) noexcept {
         auto _x = static_cast<u64>(x) << 32u;
         auto _y = static_cast<u64>(y);
         auto result = _x | _y;
@@ -133,8 +133,17 @@ namespace oni {
     inline u16p
     pack_u16(u16 x,
              u16 y) noexcept {
-        auto _x = (static_cast<u32>(x) << 16u);
-        auto _y = y;
+        auto _x = static_cast<u32>(x) << 16u;
+        auto _y = static_cast<u32>(y);
+        auto result = _x | _y;
+        return result;
+    }
+
+    inline u8p
+    pack_u8(u8 x,
+            u8 y) noexcept {
+        auto _x = static_cast<u16>(x) << 8u;
+        auto _y = static_cast<u16>(y);
         auto result = _x | _y;
         return result;
     }

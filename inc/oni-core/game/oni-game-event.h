@@ -8,6 +8,15 @@
 
 
 namespace oni {
+    enum class EventDispatcherType : u8 {
+        LOCAL,
+        SYNCED,
+
+        LAST
+    };
+
+    constexpr auto NumEventDispatcher = static_cast<u8>(EventDispatcherType::LAST);
+
     struct Event_SplatOnDeath {
         Event_SplatOnDeath() = default;
 
@@ -70,5 +79,13 @@ namespace oni {
 
         WorldP3D pos{};
         Sound_Tag tag{};
+    };
+
+    struct Event_EntityDeath{
+        Event_EntityDeath() = default;
+
+
+
+        EntityID id{};
     };
 }

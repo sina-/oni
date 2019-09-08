@@ -4,6 +4,7 @@
 #include <mutex>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <entt/entt.hpp>
 
@@ -14,6 +15,7 @@
 #include <oni-core/entities/oni-entities-view.h>
 #include <oni-core/entities/oni-entities-group.h>
 #include <oni-core/math/oni-math-fwd.h>
+#include <oni-core/game/oni-game-event.h>
 
 
 class b2World;
@@ -102,6 +104,9 @@ namespace oni {
     public:
         void
         markForDeletion(EntityID);
+
+        void
+        flushDeletions(const EntityOperationPolicy&);
 
         void
         flushDeletions();
@@ -283,30 +288,41 @@ namespace oni {
 
         template<class Event, auto Method, class MethodInstance>
         void
-        registerEventHandler(MethodInstance *instance) {
-            mDispatcher->sink<Event>().template connect<Method>(instance);
+        registerEventHandler(MethodInstance *instance,
+                             EventDispatcherType type) {
+            auto idx = enumCast(type);
+            mDispatcher[idx]->sink<Event>().template connect<Method>(instance);
         }
 
         template<class Event, auto Method>
         void
-        registerEventHandler() {
-            mDispatcher->sink<Event>().template connect<Method>();
+        registerEventHandler(EventDispatcherType type) {
+            auto idx = enumCast(type);
+            mDispatcher[idx]->sink<Event>().template connect<Method>();
         }
 
         template<class Event, class... Args>
         void
         enqueueEvent(Args &&...args) {
-            mDispatcher->enqueue<Event>(std::forward<Args>(args)...);
+            // TODO: Inefficient, as not all the dispatchers are interested in all event types! But it works for now.
+            for (auto i = 0; i < NumEventDispatcher; ++i) {
+                mDispatcher[i]->enqueue<Event>(std::forward<Args>(args)...);
+            }
         }
 
         template<class Event>
         void
         enqueueEvent() {
-            mDispatcher->enqueue<Event>();
+            for (auto i = 0; i < NumEventDispatcher; ++i) {
+                mDispatcher[i]->enqueue<Event>();
+            }
         }
 
         void
-        dispatchEvents();
+        dispatchEvents(EventDispatcherType type);
+
+        void
+        dispatchEventsAndFlush(EventDispatcherType type);
 
         EntityID
         createEntity(EntityType);
@@ -383,7 +399,7 @@ namespace oni {
     private:
         std::unique_ptr<entt::basic_registry<EntityID>> mRegistry{};
         std::unique_ptr<entt::basic_continuous_loader<EntityID>> mLoader{};
-        std::unique_ptr<entt::dispatcher> mDispatcher{};
+        std::array<std::unique_ptr<entt::dispatcher>, NumEventDispatcher> mDispatcher{};
         mutable std::mutex mMutex{};
 
     private:
@@ -395,7 +411,7 @@ namespace oni {
         SimMode mSimMode{SimMode::CLIENT};
         EntityOperationPolicy mEntityOperationPolicy{};
 
-        std::vector<EntityID> mEntitiesToDelete{};
+        std::unordered_set<EntityID> mEntitiesToDelete{};
         std::vector<DeletedEntity> mDeletedEntities{};
     };
 }

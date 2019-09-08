@@ -16,7 +16,9 @@ namespace oni {
                                                           mPhysicsWorld(physicsWorld) {
         mRegistry = std::make_unique<entt::basic_registry<u32 >>();
         mLoader = std::make_unique<entt::basic_continuous_loader<EntityID>>(*mRegistry);
-        mDispatcher = std::make_unique<entt::dispatcher>();
+        for (auto i = 0; i < NumEventDispatcher; ++i) {
+            mDispatcher[i] = std::make_unique<entt::dispatcher>();
+        }
         mRand = std::make_unique<Rand>(0, 0);
 
         switch (sMode) {
@@ -95,8 +97,15 @@ namespace oni {
     }
 
     void
-    EntityManager::dispatchEvents() {
-        mDispatcher->update();
+    EntityManager::dispatchEvents(EventDispatcherType type) {
+        auto idx = enumCast(type);
+        mDispatcher[idx]->update();
+    }
+
+    void
+    EntityManager::dispatchEventsAndFlush(EventDispatcherType type) {
+        dispatchEvents(type);
+        flushDeletions();
     }
 
     EntityID
@@ -124,13 +133,22 @@ namespace oni {
 
     void
     EntityManager::markForDeletion(EntityID id) {
-        mEntitiesToDelete.push_back(id);
+        mEntitiesToDelete.emplace(id);
     }
 
     void
     EntityManager::flushDeletions() {
         for (auto &&i : mEntitiesToDelete) {
             deleteEntity(i);
+        }
+
+        mEntitiesToDelete.clear();
+    }
+
+    void
+    EntityManager::flushDeletions(const EntityOperationPolicy& policy) {
+        for (auto &&i : mEntitiesToDelete) {
+            deleteEntity(i, policy);
         }
 
         mEntitiesToDelete.clear();

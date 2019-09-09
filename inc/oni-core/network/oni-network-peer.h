@@ -87,7 +87,7 @@ namespace oni {
 
         void
         broadcast(PacketType type,
-                  std::string &data);
+                  std::string &&data);
 
         virtual void
         postConnectHook(const ENetEvent *event) = 0;

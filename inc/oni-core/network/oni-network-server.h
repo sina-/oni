@@ -22,13 +22,15 @@ namespace oni {
         ~Server() override;
 
         void
-        sendEntitiesAll(EntityManager &);
+        sendEntitiesAll(EntityManager &, std::string &&data);
 
         void
-        sendComponentsUpdate(EntityManager &);
+        sendComponentsUpdate(EntityManager &,
+                             std::string &&data);
 
         void
-        sendNewEntities(EntityManager &);
+        sendNewEntities(EntityManager &,
+                        std::string &&data);
 
         void
         broadcastDeletedEntities(EntityManager &);

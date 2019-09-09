@@ -81,10 +81,8 @@ namespace oni {
         Sound_Tag tag{};
     };
 
-    struct Event_EntityDeath{
+    struct Event_EntityDeath {
         Event_EntityDeath() = default;
-
-
 
         EntityID id{};
     };

@@ -68,29 +68,27 @@ namespace oni {
     }
 
     void
-    Server::sendEntitiesAll(EntityManager &manager) {
-        std::string data = serialize(manager, SnapshotType::ENTIRE_REGISTRY);
+    Server::sendEntitiesAll(EntityManager &manager,
+                            std::string &&data) {
         auto type = PacketType::REGISTRY_REPLACE_ALL_ENTITIES;
-
-        broadcast(type, data);
+        broadcast(type, std::move(data));
     }
 
     void
-    Server::sendComponentsUpdate(EntityManager &manager) {
+    Server::sendComponentsUpdate(EntityManager &manager,
+                                 std::string &&data) {
         // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-        std::string data = serialize(manager, SnapshotType::ONLY_COMPONENTS);
         auto type = PacketType::REGISTRY_ONLY_COMPONENT_UPDATE;
-
-        broadcast(type, data);
+        broadcast(type, std::move(data));
     }
 
     void
-    Server::sendNewEntities(EntityManager &manager) {
+    Server::sendNewEntities(EntityManager &manager,
+                            std::string &&data) {
         // TODO: What happens if broadcast fails for some clients? Would they miss these entities forever?
-        std::string data = serialize(manager, SnapshotType::ONLY_NEW_ENTITIES);
         auto type = PacketType::REGISTRY_ADD_NEW_ENTITIES;
 
-        broadcast(type, data);
+        broadcast(type, std::move(data));
     }
 
     void
@@ -99,7 +97,7 @@ namespace oni {
         auto data = serialize(manager.getDeletedEntities());
         manager.clearDeletedEntitiesList();
 
-        broadcast(type, data);
+        broadcast(type, std::move(data));
     }
 
     void
@@ -117,7 +115,7 @@ namespace oni {
         auto data = oni::serialize(event);
         auto packetType = oni::PacketType::EVENT_COLLISION;
 
-        broadcast(packetType, data);
+        broadcast(packetType, std::move(data));
     }
 
     void
@@ -125,7 +123,7 @@ namespace oni {
         auto data = oni::serialize(event);
         auto packetType = oni::PacketType::EVENT_SOUND_PLAY;
 
-        broadcast(packetType, data);
+        broadcast(packetType, std::move(data));
     }
 
     void
@@ -133,6 +131,6 @@ namespace oni {
         auto data = oni::serialize(event);
         auto packetType = oni::PacketType::EVENT_ROCKET_LAUNCH;
 
-        broadcast(packetType, data);
+        broadcast(packetType, std::move(data));
     }
 }

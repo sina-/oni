@@ -466,18 +466,18 @@ namespace oni {
                              r64 tickTime) {
         assert(manager.getSimMode() == SimMode::SERVER);
 
-        auto collisionPairs = std::unordered_set<EntityPair, EntityPairHasher>();
+        auto uniqueCollisions = std::unordered_set<EntityPair, EntityPairHasher>();
         {
             auto view = manager.createView<
                     WorldP3D,
                     PhysicalProperties>();
             for (auto &&id: view) {
                 auto *body = manager.getEntityBody(id);
-                isColliding(body, collisionPairs);
+                isColliding(body, uniqueCollisions);
             }
         }
 
-        for (auto &&pair: collisionPairs) {
+        for (auto &&pair: uniqueCollisions) {
             auto &propsA = manager.get<PhysicalProperties>(pair.a);
             auto &propsB = manager.get<PhysicalProperties>(pair.b);
             // TODO: This is wrong, I need to get the position of point of contact

@@ -162,7 +162,7 @@ namespace oni {
 
     void
     Peer::broadcast(PacketType type,
-                    std::string &data) {
+                    std::string &&data) {
         // TODO: Might want to whitelist some packet types that have empty payload
         if (data.size() <= 1) {
             return;

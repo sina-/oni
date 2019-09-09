@@ -5,9 +5,13 @@
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/deque.hpp>
+#include <cereal/types/array.hpp>
+#include <cereal/types/map.hpp>
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/network/oni-network-packet.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/component/oni-component-geometry.h>
@@ -16,6 +20,7 @@
 
 
 namespace oni {
+    // TODO: These all non engine components needs to move to game
     // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
     // other compilation units such as server.cpp
     template<class Archive>
@@ -118,8 +123,6 @@ namespace oni {
         archive(data.pos, data.scale, data.tag);
     }
 
-    class EntityManager;
-
     template<class Archive>
     void
     serialize(Archive &archive,
@@ -127,14 +130,208 @@ namespace oni {
         archive(data.id, data.type);
     }
 
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Rectangle &data) {
+        archive(data.A, data.B, data.C, data.D);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Point &data) {
+        archive(data);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              CoolDown &data) {
+        archive(data.current, data.initial);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              WorldP3D_History &data) {
+        archive(data.pos);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              WorldP2D &data) {
+        archive(data.value);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              GrowInTime &data) {
+        archive(data.initialSize, data.maxSize, data.period, data.factor, data.elapsed);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              ParticleEmitter &data) {
+        archive(data.tag, data.size, data.count, data.growth, data.initialVMin, data.initialVMax);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              MaterialTransition_Fade &data) {
+        archive(data.fadeFunc, data.factor);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              AfterMark &data) {
+        archive(data.tag);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              EntityAttachment &data) {
+        archive(data.entities, data.entityTypes);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              EntityAttachee &data) {
+        archive(data.entityID, data.entityType);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Orientation &data) {
+        archive(data.value);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Scale &data) {
+        archive(data.value);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              CarConfig &data) {
+        archive(data.gravity,
+                data.mass,
+                data.inertialScale,
+                data.halfWidth,
+                data.cgToFront,
+                data.cgToRear,
+                data.cgToFrontAxle,
+                data.cgToRearAxle,
+                data.cgHeight,
+                data.wheelRadius,
+                data.wheelWidth,
+                data.tireGrip,
+                data.lockGrip,
+                data.engineForce,
+                data.brakeForce,
+                data.eBrakeForce,
+                data.weightTransfer,
+                data.maxSteer,
+                data.cornerStiffnessFront,
+                data.cornerStiffnessRear,
+                data.airResist,
+                data.rollResist,
+                data.gearRatio,
+                data.differentialRatio
+        );
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Car &data) {
+        archive(
+                data.velocityAbsolute,
+                data.angularVelocity,
+                data.steer,
+                data.steerAngle,
+                data.inertia,
+                data.wheelBase,
+                data.axleWeightRatioFront,
+                data.axleWeightRatioRear,
+                data.rpm,
+                data.maxVelocityAbsolute,
+                data.slipAngleFront,
+                data.slipAngleRear,
+                data.velocity,
+                data.velocityLocal,
+                data.acceleration,
+                data.accelerationLocal,
+                data.accelerating,
+                data.slippingFront,
+                data.slippingRear,
+                data.smoothSteer,
+                data.safeSteer,
+                data.distanceFromCamera,
+                data.isColliding
+        );
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Tag_Static &) {}
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Tag_Dynamic &) {}
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Tag_Audible &) {}
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Age &data) {
+        archive(data.currentAge, data.maxAge);
+    }
+
+
+    template<class ...Components>
     std::string
     serialize(EntityManager &manager,
-              SnapshotType snapshotType);
+              SnapshotType snapshotType) {
+        auto storage = std::stringstream{};
+        {
+            cereal::PortableBinaryOutputArchive output{storage};
+            manager.snapshot<cereal::PortableBinaryOutputArchive, Components...>(output, snapshotType);
+        }
 
+        return storage.str();
+    }
+
+    template<class ...Components, class... Type, class... Member>
     void
     deserialize(oni::EntityManager &manager,
                 const std::string &data,
-                SnapshotType snapshotType);
+                SnapshotType snapshotType,
+                Member Type::*... member) {
+        auto storage = std::stringstream{};
+        storage.str(data);
+        {
+            cereal::PortableBinaryInputArchive input{storage};
+            manager.restore<cereal::PortableBinaryInputArchive, Components...>(snapshotType, input, member...);
+        }
+    }
 
     template<class T>
     T

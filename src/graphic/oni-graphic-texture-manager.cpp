@@ -79,9 +79,9 @@ namespace oni {
     }
 
     const Texture &
-    TextureManager::getTexture(EntityPreset tag) {
-        assert(tag != EntityPreset::UNKNOWN);
-        assert(tag != EntityPreset::LAST);
+    TextureManager::getTexture(EntityAssetsPack tag) {
+        assert(tag != EntityAssetsPack::UNKNOWN);
+        assert(tag != EntityAssetsPack::LAST);
         const auto it = mTextureMap.find(tag);
         if (it == mTextureMap.end()) {
             assert(false);
@@ -90,10 +90,10 @@ namespace oni {
     }
 
     void
-    TextureManager::initTexture(EntityPreset tag,
+    TextureManager::initTexture(EntityAssetsPack tag,
                                 Texture &texture) {
-        assert(tag != EntityPreset::UNKNOWN);
-        assert(tag != EntityPreset::LAST);
+        assert(tag != EntityAssetsPack::UNKNOWN);
+        assert(tag != EntityAssetsPack::LAST);
         const auto it = mTextureMap.find(tag);
         if (it == mTextureMap.end()) {
             // NOTE: Did you forget to call loadAssets()?
@@ -112,9 +112,9 @@ namespace oni {
     }
 
     void
-    TextureManager::loadTextureToCache(EntityPreset tag) {
-        assert(tag != EntityPreset::UNKNOWN);
-        assert(tag != EntityPreset::LAST);
+    TextureManager::loadTextureToCache(EntityAssetsPack tag) {
+        assert(tag != EntityAssetsPack::UNKNOWN);
+        assert(tag != EntityAssetsPack::LAST);
         auto it = mTextureMap.find(tag);
         if (it != mTextureMap.end()) {
             assert(false);
@@ -129,9 +129,9 @@ namespace oni {
     }
 
     void
-    TextureManager::loadOrGetImage(EntityPreset tag,
+    TextureManager::loadOrGetImage(EntityAssetsPack tag,
                                    Image &image) {
-        assert(tag != EntityPreset::UNKNOWN);
+        assert(tag != EntityAssetsPack::UNKNOWN);
         if (isImageLoaded(tag)) {
             image = mImageMap[tag];
         }
@@ -394,12 +394,12 @@ namespace oni {
     }
 
     bool
-    TextureManager::isTextureLoaded(EntityPreset tag) const {
+    TextureManager::isTextureLoaded(EntityAssetsPack tag) const {
         return mTextureMap.find(tag) != mTextureMap.end();
     }
 
     bool
-    TextureManager::isImageLoaded(EntityPreset tag) const {
+    TextureManager::isImageLoaded(EntityAssetsPack tag) const {
         return mImageMap.find(tag) != mImageMap.end();
     }
 

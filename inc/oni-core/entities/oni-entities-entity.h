@@ -1,6 +1,9 @@
 #pragma once
 
-#include<oni-core/common/oni-common-typedef.h>
+#include <vector>
+
+#include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/entities/oni-entities-fwd.h>
 
 
 namespace oni {
@@ -29,17 +32,11 @@ namespace oni {
 
         TRAIL_PARTICLE,
 
-        // TODO: This is not really an entity type, any entity can be rendered as a shinny! It really just effects
-        // the blend function
-                SHINNY_EFFECT,
-
         TEXT,
         WORLD_CHUNK,
         DEBUG_WORLD_CHUNK,
 
         SMOKE_CLOUD,
-
-        COMPLEMENT,
 
         LAST
     };
@@ -70,7 +67,7 @@ namespace oni {
         EntityID b{};
     };
 
-     bool
+    bool
     operator==(const EntityPair &,
                const EntityPair &);
 
@@ -105,5 +102,25 @@ namespace oni {
             policy.safe = true;
             return policy;
         }
+    };
+
+    struct EntityContext {
+        EntityManager *mng;
+        EntityID id;
+    };
+
+    struct BindLifetimeParent {
+        std::vector<EntityContext> children;
+    };
+
+    struct BindLifetimeChild {
+        // NOTE: Mostly useful for debugging
+        EntityContext parent;
+    };
+
+    template<class T>
+    struct AttachedComponent {
+        T component;
+        EntityContext attachee;
     };
 }

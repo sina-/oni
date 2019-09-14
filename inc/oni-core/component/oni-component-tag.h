@@ -25,6 +25,9 @@ namespace oni {
     struct Tag_NetworkSyncComponent {
     };
 
+    struct Tag_EntityAssetsInitialized {
+    };
+
     struct Tag_EntityInitialized {
     };
 }

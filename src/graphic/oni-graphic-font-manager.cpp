@@ -68,23 +68,15 @@ namespace oni {
     GLuint
     FontManager::getTextureID() const { return m_FTAtlas->id; }
 
-    EntityID
-    FontManager::initializeText(EntityManager &manager,
-                                std::string_view text,
-                                EntityID id,
-                                const WorldP3D &pos) {
-        manager.setWorldP3D(id, pos.x, pos.y, pos.z);
-        manager.setText(id, text);
-
-        auto &textComponent = manager.get<Text>(id);
-        assignGlyphs(textComponent);
-
-        return id;
+    void
+    FontManager::initializeText(MaterialText &text) {
+        text.textureID = m_FTAtlas->id;
+        assignGlyphs(text);
     }
 
     void
     FontManager::updateText(const std::string &textContent,
-                            Text &text) {
+                            MaterialText &text) {
         // TODO: This could be optimized to only update part of text that is actually different.
         text.textContent = textContent;
         text.height.clear();
@@ -98,7 +90,7 @@ namespace oni {
     }
 
     void
-    FontManager::assignGlyphs(Text &text) {
+    FontManager::assignGlyphs(MaterialText &text) {
         for (auto &&character: text.textContent) {
             auto glyph = findGlyph(character);
             text.height.emplace_back(glyph->height);
@@ -111,6 +103,5 @@ namespace oni {
             text.xScaling = mGameWidth;
             text.yScaling = mGameHeight;
         }
-        text.textureID = m_FTAtlas->id;
     }
 }

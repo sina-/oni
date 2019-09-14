@@ -17,21 +17,21 @@ namespace oni {
                 std::string_view);
 
         void
-        setPath(EntityPreset,
+        setPath(EntityAssetsPack,
                 std::string_view);
 
         const std::string &
         getAssetFilePath(Sound_Tag);
 
         const std::string &
-        getAssetFilePath(EntityPreset);
+        getAssetFilePath(EntityAssetsPack);
 
-        std::vector<EntityPreset>
+        std::vector<EntityAssetsPack>
         knownTags();
 
     private:
         std::map<Sound_Tag, std::string> mSoundAssetPath;
-        std::map<EntityPreset, std::string> mTextureAssetPath;
+        std::map<EntityAssetsPack, std::string> mTextureAssetPath;
     };
 }
 

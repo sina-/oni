@@ -23,14 +23,14 @@ namespace oni {
         Event_SplatOnDeath(const WorldP3D &pos,
                            const Scale &scale,
                            const Orientation &ornt,
-                           const EntityPreset &tag,
+                           const EntityAssetsPack &tag,
                            std::function<void()> func
         ) : pos(pos), scale(scale), tag(tag), ornt(ornt), callback(std::move(func)) {}
 
         WorldP3D pos{};
         Scale scale{};
         Orientation ornt{};
-        EntityPreset tag{};
+        EntityAssetsPack tag{};
         std::function<void()> callback{};
     };
 
@@ -40,14 +40,14 @@ namespace oni {
         Event_SplatOnRest(const WorldP3D &pos,
                           const Scale &scale,
                           const Orientation &ornt,
-                          const EntityPreset &tag,
+                          const EntityAssetsPack &tag,
                           std::function<void()> func
         ) : pos(pos), scale(scale), tag(tag), ornt(ornt), callback(std::move(func)) {}
 
         WorldP3D pos{};
         Scale scale{};
         Orientation ornt{};
-        EntityPreset tag{};
+        EntityAssetsPack tag{};
         std::function<void()> callback{};
     };
 

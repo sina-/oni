@@ -52,14 +52,14 @@ namespace oni {
                               const vec3 &brushTexturePos);
 
         void
-        loadOrGetImage(EntityPreset tag,
+        loadOrGetImage(EntityAssetsPack tag,
                        Image &image);
 
         const Texture &
-        getTexture(EntityPreset tag);
+        getTexture(EntityAssetsPack tag);
 
         void
-        initTexture(EntityPreset tag,
+        initTexture(EntityAssetsPack tag,
                     Texture &texture);
 
         static void
@@ -94,13 +94,13 @@ namespace oni {
 
     private:
         bool
-        isTextureLoaded(EntityPreset) const;
+        isTextureLoaded(EntityAssetsPack) const;
 
         void
-        loadTextureToCache(EntityPreset tag);
+        loadTextureToCache(EntityAssetsPack tag);
 
         bool
-        isImageLoaded(EntityPreset) const;
+        isImageLoaded(EntityAssetsPack) const;
 
         static void
         bind(oniGLuint textureID);
@@ -112,8 +112,8 @@ namespace oni {
     private:
 
     private:
-        std::map<EntityPreset, Texture> mTextureMap{};
-        std::map<EntityPreset, Image> mImageMap{};
+        std::map<EntityAssetsPack, Texture> mTextureMap{};
+        std::map<EntityAssetsPack, Image> mImageMap{};
         const u8 mElementsInRGBA{4};
         oni::AssetManager &mAssetManager;
     };

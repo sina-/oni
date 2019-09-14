@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <mutex>
 #include <vector>
 #include <unordered_map>
@@ -36,7 +35,6 @@ namespace oni {
         operator=(const EntityManager &) const = delete;
 
     public:
-    public:
         void
         setWorldP3D(EntityID,
                     r32 x,
@@ -49,8 +47,8 @@ namespace oni {
                  r32 y);
 
         void
-        setEntityPreset(EntityID,
-                        EntityPreset);
+        setEntityAssetsPack(EntityID,
+                            EntityAssetsPack);
 
         void
         setColor(EntityID,
@@ -98,6 +96,9 @@ namespace oni {
         b2Body *
         getEntityBody(EntityID);
 
+        Rand *
+        getRand();
+
         SimMode
         getSimMode();
 
@@ -106,7 +107,7 @@ namespace oni {
         markForDeletion(EntityID);
 
         void
-        flushDeletions(const EntityOperationPolicy&);
+        flushDeletions(const EntityOperationPolicy &);
 
         void
         flushDeletions();
@@ -123,6 +124,10 @@ namespace oni {
                EntityID child,
                EntityType parentType,
                EntityType childType);
+
+        static void
+        bindLifetime(const EntityContext &parent,
+                     const EntityContext &child);
 
     public:
         oni::size
@@ -368,14 +373,7 @@ namespace oni {
 
     private:
         void
-        assignSimMode(EntityID,
-                      SimMode);
-
-        void
         removePhysicalBody(EntityID);
-
-        EntityID
-        create();
 
         template<class Component, class... Args>
         void

@@ -46,6 +46,7 @@ namespace oni {
     };
 
     struct Texture {
+        // TODO: Can I move this out? Textures are massive because of it
         Image image{};
         bool clear{false};
         oniGLuint id{0};
@@ -99,21 +100,6 @@ namespace oni {
                 xOffset += xWidth;
             }
         }
-    };
-
-    struct Text {
-        EntityID entityID{0};
-        r32 xScaling{1.f};
-        r32 yScaling{1.f};
-        oniGLuint textureID{0};
-        std::string textContent{};
-        std::vector<size_t> width{};
-        std::vector<size_t> height{};
-        std::vector<u32> offsetX{};
-        std::vector<u32> offsetY{};
-        std::vector<r32> advanceX{};
-        std::vector<r32> advanceY{};
-        std::vector<vec4> uv{};
     };
 
     struct Color {
@@ -309,7 +295,7 @@ namespace oni {
     };
 
     // TODO: Game code
-    enum class EntityPreset : oni::u32 {
+    enum class EntityAssetsPack : oni::u32 {
         UNKNOWN,
 
         RACE_CAR_DEFAULT,
@@ -342,9 +328,15 @@ namespace oni {
         BACKGROUND_DEFAULT,
         BACKGROUND_DEBUG,
 
-        CANVAS,
+        CANVAS_DEFAULT,
+
+        TEXT_DEFAULT,
 
         LAST
+    };
+
+    struct TextAttachment {
+        EntityContext attachee;
     };
 
     struct MaterialSkin {
@@ -352,11 +344,25 @@ namespace oni {
         Color color{};
     };
 
+    struct MaterialText {
+        r32 xScaling{1.f};
+        r32 yScaling{1.f};
+        oniGLuint textureID{0};
+        std::string textContent{};
+        std::vector<size_t> width{};
+        std::vector<size_t> height{};
+        std::vector<u32> offsetX{};
+        std::vector<u32> offsetY{};
+        std::vector<r32> advanceX{};
+        std::vector<r32> advanceY{};
+        std::vector<vec4> uv{};
+    };
+
     enum class MaterialTransition_Type : oni::u8 {
-        NONE,
-        FADE,
-        COLOR,
-        TEXTURE,
+        NONE = 0,
+        TEXTURE = 1,
+        FADE = 2,
+        TINT = 3,
     };
 
     enum class FadeFunc : oni::u8 {
@@ -384,6 +390,7 @@ namespace oni {
     // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
     enum class MaterialFinish_Type : oni::u8 {
+        // NOTE: The order of the enums defines the order in which they are rendered!
         SOLID,
         TRANSLUCENT,
         SHINNY,
@@ -419,7 +426,7 @@ namespace oni {
     };
 
     struct ParticleEmitter {
-        EntityPreset tag{};
+        EntityAssetsPack tag{};
         r32 size = 0.1f;
         r32 initialVMin = 1.f;
         r32 initialVMax = 2.f;
@@ -431,7 +438,7 @@ namespace oni {
         Scale scale{1, 1};
         BrushType type{BrushType::COLOR};
         union {
-            EntityPreset tag = {};
+            EntityAssetsPack tag = {};
             Color color;
         };
     };

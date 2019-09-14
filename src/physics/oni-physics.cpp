@@ -182,6 +182,7 @@ namespace oni {
         }
 
         /// Update tires
+        // TODO: This is useless in Engine code. Input processing should be able to take care of this.
         {
             auto view = manager.createView<
                     EntityAttachment,
@@ -373,7 +374,7 @@ namespace oni {
                 if (manager.has<Tag_SplatOnDeath>(id)) {
                     auto &pos = manager.get<WorldP3D>(id);
                     auto &size = manager.get<Scale>(id);
-                    auto &tag = manager.get<EntityPreset>(id);
+                    auto &tag = manager.get<EntityAssetsPack>(id);
                     auto &ornt = manager.get<Orientation>(id);
 
                     auto callback = [&manager, id]() {
@@ -396,7 +397,7 @@ namespace oni {
         auto view = manager.createView<
                 PhysicalProperties,
                 Scale,
-                EntityPreset,
+                EntityAssetsPack,
                 WorldP3D,
                 Orientation,
                 Tag_SplatOnRest>();
@@ -405,7 +406,7 @@ namespace oni {
             if (!body->IsAwake()) {
                 auto &pos = view.get<WorldP3D>(id);
                 auto &size = view.get<Scale>(id);
-                auto &tag = view.get<EntityPreset>(id);
+                auto &tag = view.get<EntityAssetsPack>(id);
                 auto &ornt = view.get<Orientation>(id);
 
                 auto callback = [&manager, id]() {

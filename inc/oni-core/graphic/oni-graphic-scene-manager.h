@@ -94,7 +94,7 @@ namespace oni {
         void
         prepareTexture(EntityManager &manager,
                        EntityID id,
-                       EntityPreset tag);
+                       EntityAssetsPack tag);
 
         u16
         getSpritesPerFrame() const;

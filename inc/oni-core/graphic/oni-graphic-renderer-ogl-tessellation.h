@@ -14,10 +14,6 @@ namespace oni {
         ~Renderer_OpenGL_Tessellation() override;
 
         void
-        submit(const Text &,
-               const WorldP3D &);
-
-        void
         submit(const Renderable &) override;
 
     protected:

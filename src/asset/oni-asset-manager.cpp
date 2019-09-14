@@ -13,7 +13,7 @@ namespace oni {
     }
 
     const std::string &
-    AssetManager::getAssetFilePath(EntityPreset tag) {
+    AssetManager::getAssetFilePath(EntityAssetsPack tag) {
         const auto &result = mTextureAssetPath[tag];
         return result;
     }
@@ -25,14 +25,14 @@ namespace oni {
     }
 
     void
-    AssetManager::setPath(EntityPreset tag,
+    AssetManager::setPath(EntityAssetsPack tag,
                           std::string_view path) {
         mTextureAssetPath.emplace(tag, path);
     }
 
-    std::vector<EntityPreset>
+    std::vector<EntityAssetsPack>
     AssetManager::knownTags() {
-        auto tags = std::vector<EntityPreset>();
+        auto tags = std::vector<EntityAssetsPack>();
         for (auto &&asset: mTextureAssetPath) {
             tags.emplace_back(asset.first);
         }

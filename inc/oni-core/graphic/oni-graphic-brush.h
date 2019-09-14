@@ -15,7 +15,7 @@ namespace oni {
             // guarantees the life-time of the textures.
             const Texture *texture{};
             const Color *color;
-            EntityPreset tag;
+            EntityAssetsPack tag;
         };
         const Quad *shape_Quad{};
         const mat4 *model{}; // NOTE: Optional model transformation matrix if the quad is untransformed

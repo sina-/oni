@@ -28,15 +28,12 @@ namespace oni {
         FontManager &
         operator=(FontManager &) = delete;
 
-        EntityID
-        initializeText(EntityManager &,
-                       std::string_view text,
-                       EntityID id,
-                       const WorldP3D &pos);
+        void
+        initializeText(MaterialText &);
 
         void
         updateText(const std::string &textContent,
-                   Text &text);
+                   MaterialText &text);
 
         size_t
         getAtlasWidth() const;
@@ -55,7 +52,7 @@ namespace oni {
         findGlyph(const char &character) const;
 
         void
-        assignGlyphs(Text &);
+        assignGlyphs(MaterialText &);
 
     private:
         // Wrap atlas and font with unique_ptr and pass the custom deleter

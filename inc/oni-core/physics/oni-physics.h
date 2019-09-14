@@ -72,8 +72,6 @@ namespace oni {
         getPhysicsWorld();
 
     private:
-
-
         static bool
         isColliding(b2Body *,
                     std::unordered_set<EntityPair, EntityPairHasher> &

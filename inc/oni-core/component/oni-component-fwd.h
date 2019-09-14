@@ -46,7 +46,7 @@ namespace oni {
     enum class NumAnimationFrames : oni::u8;
     enum class AnimationEndingBehavior : oni::u8;
     enum class BrushType : oni::u8;
-    enum class EntityPreset : oni::u32;
+    enum class EntityAssetsPack : oni::u32;
     enum class MaterialTransition_Type : oni::u8;
     enum class FadeFunc : oni::u8;
 
@@ -55,15 +55,16 @@ namespace oni {
     struct BrushTrail;
     struct Color;
     struct CoolDown;
-    struct Image;
     struct GrowInTime;
+    struct Image;
     struct MaterialDefinition;
     struct MaterialSkin;
-    struct MaterialTransition_Texture;
-    struct MaterialTransition_Fade;
+    struct MaterialText;
     struct MaterialTransition_Color;
+    struct MaterialTransition_Fade;
+    struct MaterialTransition_Texture;
     struct ParticleEmitter;
-    struct Text;
+    struct TextAttachment;
     struct Texture;
     struct TextureAnimated;
     struct UV;

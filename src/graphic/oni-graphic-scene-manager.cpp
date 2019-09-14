@@ -127,7 +127,7 @@ namespace oni {
     void
     SceneManager::prepareTexture(EntityManager &manager,
                                  EntityID id,
-                                 EntityPreset tag) {
+                                 EntityAssetsPack tag) {
         auto &ms = manager.get<MaterialSkin>(id);
         mTextureManager.initTexture(tag, ms.texture);
     }
@@ -146,54 +146,82 @@ namespace oni {
 
     void
     SceneManager::submit(EntityManager &manager) {
-        // TODO: The following code includes everything, even the particles will be sorted, which might be over-kill
-        auto view = manager.createView<
-                EntityType,
-                WorldP3D,
-                Orientation,
-                Scale,
-                MaterialDefinition>();
-        for (auto &&id: view) {
-            const auto &pos = view.get<WorldP3D>(id);
-            const auto &ornt = view.get<Orientation>(id);
-            const auto &scale = view.get<Scale>(id);
-            const auto &def = view.get<MaterialDefinition>(id);
+        {
+            // TODO: The following code includes everything, even the particles will be sorted, which might be over-kill
+            auto view = manager.createView<
+                    EntityType,
+                    WorldP3D,
+                    Orientation,
+                    Scale,
+                    MaterialDefinition>();
+            for (auto &&id: view) {
+                const auto &pos = view.get<WorldP3D>(id);
+                const auto &ornt = view.get<Orientation>(id);
+                const auto &scale = view.get<Scale>(id);
+                const auto &def = view.get<MaterialDefinition>(id);
 
-            auto renderable = Renderable{};
-            renderable.id = id;
-            renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
-            renderable.manager = &manager;
-            renderable.pos = &pos;
-            renderable.ornt = &ornt;
-            renderable.scale = &scale;
+                auto renderable = Renderable{};
+                renderable.id = id;
+                renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
+                renderable.manager = &manager;
+                renderable.pos = &pos;
+                renderable.ornt = &ornt;
+                renderable.scale = &scale;
+                renderable.def = def;
 
-            renderable.def = def;
-            switch (def.transition) {
-                case MaterialTransition_Type::NONE:
-                    renderable.skin = &manager.get<MaterialSkin>(id);
-                    break;
-                case MaterialTransition_Type::FADE: {
-                    renderable.skin = &manager.get<MaterialSkin>(id);
-                    renderable.transitionFade = &manager.get<MaterialTransition_Fade>(id);
-                    break;
+                switch (def.transition) {
+                    case MaterialTransition_Type::NONE:
+                        renderable.skin = &manager.get<MaterialSkin>(id);
+                        break;
+                    case MaterialTransition_Type::FADE: {
+                        renderable.skin = &manager.get<MaterialSkin>(id);
+                        renderable.transitionFade = &manager.get<MaterialTransition_Fade>(id);
+                        break;
+                    }
+                    case MaterialTransition_Type::TINT: {
+                        renderable.skin = &manager.get<MaterialSkin>(id);
+                        renderable.transitionTint = &manager.get<MaterialTransition_Color>(id);
+                        renderable.age = &manager.get<Age>(id);
+                        break;
+                    }
+                    case MaterialTransition_Type::TEXTURE: {
+                        renderable.transitionAnimation = &manager.get<MaterialTransition_Texture>(id);
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                        break;
+                    }
                 }
-                case MaterialTransition_Type::COLOR: {
-                    renderable.skin = &manager.get<MaterialSkin>(id);
-                    renderable.transitionTint = &manager.get<MaterialTransition_Color>(id);
-                    renderable.age = &manager.get<Age>(id);
-                    break;
-                }
-                case MaterialTransition_Type::TEXTURE: {
-                    renderable.transitionAnimation = &manager.get<MaterialTransition_Texture>(id);
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
+
+                mRenderables[enumCast(def.finish)].push(renderable);
             }
+        }
 
-            mRenderables[enumCast(def.finish)].push(renderable);
+        {
+            auto view = manager.createView<
+                    EntityType,
+                    WorldP3D,
+                    Orientation,
+                    Scale,
+                    MaterialText>();
+            for (auto &&id: view) {
+                const auto &pos = view.get<WorldP3D>(id);
+                const auto &ornt = view.get<Orientation>(id);
+                const auto &scale = view.get<Scale>(id);
+                const auto &text = view.get<MaterialText>(id);
+
+                auto renderable = Renderable{};
+                renderable.id = id;
+                renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
+                renderable.manager = &manager;
+                renderable.pos = &pos;
+                renderable.ornt = &ornt;
+                renderable.scale = &scale;
+                renderable.text = &text;
+
+                mRenderables[enumCast(MaterialFinish_Type::TRANSLUCENT)].push(renderable);
+            }
         }
     }
 

@@ -40,6 +40,7 @@ namespace oni {
         MaterialDefinition def{};
 
         const MaterialSkin *skin{};
+        const MaterialText *text{};
         const MaterialTransition_Fade *transitionFade{};
         const MaterialTransition_Texture *transitionAnimation{};
         const MaterialTransition_Color *transitionTint{};

@@ -8,6 +8,7 @@
 #include <Box2D/Dynamics/b2World.h>
 
 #include <oni-core/math/oni-math-rand.h>
+#include <oni-core/entities/oni-entities-entity.h>
 
 
 namespace oni {
@@ -62,6 +63,16 @@ namespace oni {
         attachee.entityType = parentType;
     }
 
+    void
+    EntityManager::bindLifetime(const EntityContext &parent,
+                                const EntityContext &child) {
+        auto &blp = parent.mng->createComponent<BindLifetimeParent>(parent.id);
+        blp.children.emplace_back(child);
+
+        auto &blc = child.mng->createComponent<BindLifetimeChild>(child.id);
+        blc.parent = parent;
+    }
+
     size_t
     EntityManager::size() {
         auto result = mRegistry->size();
@@ -108,12 +119,6 @@ namespace oni {
         flushDeletions();
     }
 
-    EntityID
-    EntityManager::create() {
-        auto result = mRegistry->create();
-        return result;
-    }
-
     void
     EntityManager::destroy(EntityID entityID) {
         mRegistry->destroy(entityID);
@@ -146,7 +151,7 @@ namespace oni {
     }
 
     void
-    EntityManager::flushDeletions(const EntityOperationPolicy& policy) {
+    EntityManager::flushDeletions(const EntityOperationPolicy &policy) {
         for (auto &&i : mEntitiesToDelete) {
             deleteEntity(i, policy);
         }
@@ -181,6 +186,12 @@ namespace oni {
         if (mRegistry->has<EntityAttachment>(id)) {
             for (auto &&childID: mRegistry->get<EntityAttachment>(id).entities) {
                 deleteEntity(childID, policy);
+            }
+        }
+
+        if (mRegistry->has<BindLifetimeParent>(id)) {
+            for (auto &&childContext: mRegistry->get<BindLifetimeParent>(id).children) {
+                childContext.mng->deleteEntity(childContext.id);
             }
         }
 
@@ -286,10 +297,6 @@ namespace oni {
             }
             case EntityType::SMOKE_CLOUD: {
                 name = "smoke_cloud";
-                break;
-            }
-            case EntityType::COMPLEMENT: {
-                name = "complement";
                 break;
             }
             case EntityType::UNKNOWN:
@@ -448,10 +455,10 @@ namespace oni {
     }
 
     void
-    EntityManager::setEntityPreset(EntityID id,
-                                   EntityPreset tag) {
+    EntityManager::setEntityAssetsPack(EntityID id,
+                                       EntityAssetsPack tag) {
 
-        auto &ep = mRegistry->get<EntityPreset>(id);
+        auto &ep = mRegistry->get<EntityAssetsPack>(id);
         ep = tag;
     }
 
@@ -465,9 +472,8 @@ namespace oni {
     void
     EntityManager::setText(EntityID id,
                            std::string_view content) {
-        auto &text = mRegistry->get<Text>(id);
+        auto &text = mRegistry->get<MaterialText>(id);
         text.textContent = content;
-
     }
 
     void
@@ -493,5 +499,10 @@ namespace oni {
     SimMode
     EntityManager::getSimMode() {
         return mSimMode;
+    }
+
+    Rand *
+    EntityManager::getRand() {
+        return mRand.get();
     }
 }

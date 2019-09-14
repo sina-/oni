@@ -184,147 +184,144 @@ namespace oni {
         auto uv3 = vec2{};
         auto samplerID = -1;
         // TODO: would be nice to have an enum specific to the graphics that captures this?
+        // Actually I CAN NOT enumCast MaterialTransition_Type yet :/ as None is still
         auto effectID = 0.f;
         auto color = Color{};
 
         const auto *skin = renderable.skin;
+        const auto *text = renderable.text;
         const auto *animation = renderable.transitionAnimation;
-        const auto transitionType = renderable.def.transition;
 
-        if (skin && skin->texture.id) {
-            effectID = 1.f;
-            uv0 = skin->texture.uv.values[0];
-            uv1 = skin->texture.uv.values[1];
-            uv2 = skin->texture.uv.values[2];
-            uv3 = skin->texture.uv.values[3];
-            samplerID = getSamplerID(skin->texture.id);
-            color = skin->color;
+        auto *buffer = static_cast<TessellationVertex *>(mBuffer);
+
+        if (text) {
+            // TODO: Add support for transitions! I could generalize MaterialSkin rendering to include text rendering.
+            // Text is just an array of MaterialSkin where offsets and advance are used to calculate position
+            // and uv, which I can do in a separate function and then I can unify this if block with else and support
+            // transitions
             assert(!animation);
-        }
+            assert(!skin);
+            auto advance = 0.0f;
 
-        switch (transitionType) {
-            case MaterialTransition_Type::NONE: {
-                break;
+            auto scaleX = text->xScaling;
+            auto scaleY = text->yScaling;
+
+            effectID = 1.f;
+            samplerID = getSamplerID(text->textureID);
+
+            for (size i = 0; i < text->textContent.size(); i++) {
+                auto x0 = text->offsetX[i] / scaleX + advance;
+                auto x1 = x0 + text->width[i] / scaleX;
+
+                auto y0 = text->offsetY[i] / scaleY;
+                auto y1 = y0 - text->height[i] / scaleY;
+
+                auto u0 = text->uv[i].x;
+                auto v0 = text->uv[i].y;
+                auto u1 = text->uv[i].z;
+                auto v1 = text->uv[i].w;
+
+                advance += text->advanceX[i] / scaleX;
+
+                auto halfGlyphX = (x0 + x1) / 2.f;
+                auto halfGlyphY = (y0 + y1) / 2.f;
+
+                buffer->position = renderable.pos->value;
+                buffer->position.x += halfGlyphX;
+                buffer->position.y += halfGlyphY;
+
+                buffer->ornt = renderable.ornt->value;
+                buffer->effect = effectID;
+                buffer->halfSize = vec2{halfGlyphX, halfGlyphY};
+                buffer->color = {};
+                buffer->uv_0 = vec2{u0, v0};
+                buffer->uv_1 = vec2{u0, v1};
+                buffer->uv_2 = vec2{u1, v1};
+                buffer->uv_3 = vec2{u1, v0};
+                buffer->samplerID = samplerID;
+
+                ++buffer;
+                mIndexCount += 1;
             }
-            case MaterialTransition_Type::FADE: {
-                effectID = 2.f;
-                break;
+        } else {
+            if (skin && skin->texture.id) {
+                assert(!animation);
+                assert(!text);
+                effectID = 1.f;
+                uv0 = skin->texture.uv.values[0];
+                uv1 = skin->texture.uv.values[1];
+                uv2 = skin->texture.uv.values[2];
+                uv3 = skin->texture.uv.values[3];
+                samplerID = getSamplerID(skin->texture.id);
+                color = skin->color;
             }
-            case MaterialTransition_Type::COLOR: {
-                // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
-                auto &begin = renderable.transitionTint->begin;
-                auto &end = renderable.transitionTint->end;
-                // TODO: This is buggy, given blend function of (GL_ONE, GL_ONE) I can't produce black instead
-                // when rgb = 0 I just get transparent objects.
-                auto t = renderable.age->currentAge / renderable.age->maxAge;
-                auto r = lerp(begin.r_r32(), end.r_r32(), t);
-                auto g = lerp(begin.g_r32(), end.g_r32(), t);
-                auto b = lerp(begin.b_r32(), end.b_r32(), t);
-                color.set_r(r);
-                color.set_g(g);
-                color.set_b(b);
-                effectID = 3.f;
-                break;
-            }
-            case MaterialTransition_Type::TEXTURE: {
-                if (animation) {
-                    effectID = 1.f;
-                    auto currentFrame = animation->value.nextFrame;
-                    if (currentFrame < animation->value.frameUV.size()) {
-                        uv0 = animation->value.frameUV[currentFrame].values[0];
-                        uv1 = animation->value.frameUV[currentFrame].values[1];
-                        uv2 = animation->value.frameUV[currentFrame].values[2];
-                        uv3 = animation->value.frameUV[currentFrame].values[3];
-                        samplerID = getSamplerID(animation->value.texture.id);
+
+            const auto transitionType = renderable.def.transition;
+            switch (transitionType) {
+                case MaterialTransition_Type::NONE: {
+                    break;
+                }
+                case MaterialTransition_Type::TEXTURE: {
+                    if (animation) {
+                        effectID = 1.f;
+                        auto currentFrame = animation->value.nextFrame;
+                        if (currentFrame < animation->value.frameUV.size()) {
+                            uv0 = animation->value.frameUV[currentFrame].values[0];
+                            uv1 = animation->value.frameUV[currentFrame].values[1];
+                            uv2 = animation->value.frameUV[currentFrame].values[2];
+                            uv3 = animation->value.frameUV[currentFrame].values[3];
+                            samplerID = getSamplerID(animation->value.texture.id);
+                        } else {
+                            assert(false);
+                        }
+                        assert(!skin);
                     } else {
                         assert(false);
                     }
-                    assert(!skin);
-                } else {
-                    assert(false);
+                    break;
                 }
-                break;
+                case MaterialTransition_Type::FADE: {
+                    effectID = 2.f;
+                    break;
+                }
+                case MaterialTransition_Type::TINT: {
+                    // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
+                    auto &begin = renderable.transitionTint->begin;
+                    auto &end = renderable.transitionTint->end;
+                    // TODO: This is buggy, given blend function of (GL_ONE, GL_ONE) I can't produce black instead
+                    // when rgb = 0 I just get transparent objects.
+                    auto t = renderable.age->currentAge / renderable.age->maxAge;
+                    auto r = lerp(begin.r_r32(), end.r_r32(), t);
+                    auto g = lerp(begin.g_r32(), end.g_r32(), t);
+                    auto b = lerp(begin.b_r32(), end.b_r32(), t);
+                    color.set_r(r);
+                    color.set_g(g);
+                    color.set_b(b);
+                    effectID = 3.f;
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
             }
-            default: {
-                assert(false);
-                break;
-            }
+
+            buffer->position = renderable.pos->value;
+            buffer->ornt = renderable.ornt->value;
+            buffer->effect = effectID;
+            buffer->halfSize = vec2{renderable.scale->x / 2.f,
+                                    renderable.scale->y / 2.f};
+            buffer->color = color.rgba();
+            buffer->uv_0 = uv0;
+            buffer->uv_1 = uv1;
+            buffer->uv_2 = uv2;
+            buffer->uv_3 = uv3;
+            buffer->samplerID = samplerID;
+            ++buffer;
+            mIndexCount += 1;
         }
-
-        auto *buffer = static_cast<TessellationVertex *>(mBuffer);
-
-        buffer->position = renderable.pos->value;
-        buffer->ornt = renderable.ornt->value;
-        buffer->effect = effectID;
-        buffer->halfSize = vec2{renderable.scale->x / 2.f,
-                                renderable.scale->y / 2.f}; // TODO: Why not vec2 for Scale?
-        buffer->color = color.rgba();
-        buffer->uv_0 = uv0;
-        buffer->uv_1 = uv1;
-        buffer->uv_2 = uv2;
-        buffer->uv_3 = uv3;
-        buffer->samplerID = samplerID;
-        ++buffer;
 
         // Update the mBuffer to point to the head.
-        mBuffer = static_cast<void *>(buffer);
-
-        mIndexCount += 1;
-    }
-
-    // TODO: Move this into a font renderer
-    void
-    Renderer_OpenGL_Tessellation::submit(const Text &text,
-                                         const WorldP3D &pos) {
-        assert(false); // TODO: Need to re-implement this function
-        auto *buffer = static_cast<TessellationVertex *>(mBuffer);
-
-        auto samplerID = getSamplerID(text.textureID);
-
-        auto advance = 0.0f;
-
-        auto scaleX = text.xScaling;
-        auto scaleY = text.yScaling;
-
-        r32 z = 1.f;
-
-        for (size i = 0; i < text.textContent.size(); i++) {
-            assert(mIndexCount + 6 < mMaxIndicesCount);
-
-            auto x0 = pos.x + text.offsetX[i] / scaleX + advance;
-            auto y0 = pos.y + text.offsetY[i] / scaleY;
-            auto x1 = x0 + text.width[i] / scaleX;
-            auto y1 = y0 - text.height[i] / scaleY;
-
-            auto u0 = text.uv[i].x;
-            auto v0 = text.uv[i].y;
-            auto u1 = text.uv[i].z;
-            auto v1 = text.uv[i].w;
-
-            buffer->position = vec3{x0, y0, z};
-            buffer->uv_0 = vec2{u0, v0};
-            buffer->samplerID = samplerID;
-            ++buffer;
-
-            buffer->position = vec3{x0, y1, z};
-            buffer->uv_1 = vec2{u0, v1};
-            buffer->samplerID = samplerID;
-            ++buffer;
-
-            buffer->position = vec3{x1, y1, z};
-            buffer->uv_2 = vec2{u1, v1};
-            buffer->samplerID = samplerID;
-            ++buffer;
-
-            buffer->position = vec3{x1, y0, z};
-            buffer->uv_3 = vec2{u1, v0};
-            buffer->samplerID = samplerID;
-            ++buffer;
-
-            advance += text.advanceX[i] / scaleX;
-            mIndexCount += 6;
-        }
-
         mBuffer = static_cast<void *>(buffer);
     }
 

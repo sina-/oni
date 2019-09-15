@@ -44,6 +44,15 @@ namespace oni {
         unsigned char *
         getAtlasData() const;
 
+        oniGLenum
+        getAtlasColorFormatInternal() const;
+
+        oniGLenum
+        getAtlasColorFormat() const;
+
+        oniGLenum
+        getAtlasColorType() const;
+
         oniGLuint
         getTextureID() const;
 
@@ -58,8 +67,8 @@ namespace oni {
         // Wrap atlas and font with unique_ptr and pass the custom deleter
 //            std::unique_ptr<ftgl::texture_font_t, decltype(&ftgl::texture_font_delete)> m_FTFont;
 //            std::unique_ptr<ftgl::texture_atlas_t, decltype(&ftgl::texture_atlas_delete)> m_FTAtlas;
-        ftgl::texture_atlas_t *m_FTAtlas;
-        ftgl::texture_font_t *m_FTFont;
+        ftgl::texture_atlas_t *mAtlas;
+        ftgl::texture_font_t *mFont;
 
         r32 mGameWidth;
         r32 mGameHeight;

@@ -7,21 +7,17 @@
 
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/entities/oni-entities-manager.h>
 
 
 namespace oni {
     FontManager::FontManager(std::string font,
                              unsigned char size,
                              r32 gameWidth,
-                             r32 gameHeight)
-//                m_FTAtlas(, ftgl::texture_atlas_delete),
-//                m_FTFont(ftgl::texture_font_new_from_file(m_FTAtlas.get(), 10, "resources/fonts/Vera.ttf"),
-//                         ftgl::texture_font_delete) {
-    {
-
-        m_FTAtlas = ftgl::texture_atlas_new(512, 512, 1);
-        m_FTFont = ftgl::texture_font_new_from_file(m_FTAtlas, size, font.c_str());
+                             r32 gameHeight) {
+        // NOTE: 4 means RGBA which also corresponds to OpenGL texture format GL_RGBA
+        // TODO: freetype can't handle depth 4 and it is buggy so I have to stick to 3
+        mAtlas = ftgl::texture_atlas_new(512, 512, 3);
+        mFont = ftgl::texture_font_new_from_file(mAtlas, size, font.c_str());
 
         mGameWidth = gameWidth;
         mGameHeight = gameHeight;
@@ -29,21 +25,21 @@ namespace oni {
         std::string cache = " !\"#$%&'()*+,-./0123456789:;<=>?@"
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-        auto glyph = ftgl::texture_font_load_glyphs(m_FTFont, cache.c_str());
+        auto glyph = ftgl::texture_font_load_glyphs(mFont, cache.c_str());
 
         assert(glyph == 0);
 
-        m_FTAtlas->id = TextureManager::load(*this);
+        mAtlas->id = TextureManager::load(*this);
     }
 
     FontManager::~FontManager() {
-        ftgl::texture_atlas_delete(m_FTAtlas);
-        ftgl::texture_font_delete(m_FTFont);
+        ftgl::texture_atlas_delete(mAtlas);
+        ftgl::texture_font_delete(mFont);
     }
 
     const ftgl::texture_glyph_t *
     FontManager::findGlyph(const char &character) const {
-        auto glyph = ftgl::texture_font_find_glyph(m_FTFont, &character);
+        auto glyph = ftgl::texture_font_find_glyph(mFont, &character);
 
         // Make sure the character is pre-loaded and valid.
         assert(glyph);
@@ -52,25 +48,40 @@ namespace oni {
 
     size_t
     FontManager::getAtlasWidth() const {
-        return m_FTAtlas->width;
+        return mAtlas->width;
     }
 
     size_t
     FontManager::getAtlasHeight() const {
-        return m_FTAtlas->height;
+        return mAtlas->height;
     }
 
     unsigned char *
     FontManager::getAtlasData() const {
-        return m_FTAtlas->data;
+        return mAtlas->data;
+    }
+
+    oniGLenum
+    FontManager::getAtlasColorFormatInternal() const {
+        return GL_RGB;
+    }
+
+    oniGLenum
+    FontManager::getAtlasColorFormat() const {
+        return GL_BGR;
+    }
+
+    oniGLenum
+    FontManager::getAtlasColorType() const {
+        return GL_UNSIGNED_BYTE;
     }
 
     GLuint
-    FontManager::getTextureID() const { return m_FTAtlas->id; }
+    FontManager::getTextureID() const { return mAtlas->id; }
 
     void
     FontManager::initializeText(MaterialText &text) {
-        text.textureID = m_FTAtlas->id;
+        text.textureID = mAtlas->id;
         assignGlyphs(text);
     }
 
@@ -91,17 +102,23 @@ namespace oni {
 
     void
     FontManager::assignGlyphs(MaterialText &text) {
-        for (auto &&character: text.textContent) {
-            auto glyph = findGlyph(character);
-            text.height.emplace_back(glyph->height);
-            text.width.emplace_back(glyph->width);
-            text.offsetX.emplace_back(glyph->offset_x);
-            text.offsetY.emplace_back(glyph->offset_y);
-            text.advanceX.emplace_back(glyph->advance_x);
-            text.advanceY.emplace_back(glyph->advance_y);
-            text.uv.emplace_back(vec4{glyph->s0, glyph->t0, glyph->s1, glyph->t1});
-            text.xGameScaleDenom = mGameWidth / text.fontSize;
-            text.yGameScaleDenom = mGameHeight / text.fontSize;
+        for (size i = 0; i < text.textContent.size(); ++i) {
+            auto glyph = findGlyph(text.textContent[i]);
+            if (glyph) {
+                auto kerning = 0.f;
+                if (i) {
+                    kerning = ftgl::texture_glyph_get_kerning(glyph, &text.textContent[i - 1]);
+                }
+                text.height.emplace_back(glyph->height);
+                text.width.emplace_back(glyph->width);
+                text.offsetX.emplace_back(glyph->offset_x + kerning);
+                text.offsetY.emplace_back(glyph->offset_y);
+                text.advanceX.emplace_back(glyph->advance_x);
+                text.advanceY.emplace_back(glyph->advance_y);
+                text.uv.emplace_back(vec4{glyph->s0, glyph->t0, glyph->s1, glyph->t1});
+                text.xGameScaleDenom = mGameWidth / text.fontSize;
+                text.yGameScaleDenom = mGameHeight / text.fontSize;
+            }
         }
     }
 }

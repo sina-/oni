@@ -200,13 +200,12 @@ namespace oni {
             // and uv, which I can do in a separate function and then I can unify this if block with else and support
             // transitions
             assert(!animation);
-            assert(!skin);
             auto advance = 0.0f;
 
             auto scaleX = text->xGameScaleDenom;
             auto scaleY = text->yGameScaleDenom;
 
-            effectID = 1.f;
+            effectID = 3.f;
             samplerID = getSamplerID(text->textureID);
             for (size i = 0; i < text->textContent.size(); i++) {
                 auto x0 = text->offsetX[i] / scaleX + advance;
@@ -233,7 +232,8 @@ namespace oni {
                 buffer->ornt = renderable.ornt->value;
                 buffer->effect = effectID;
                 buffer->halfSize = vec2{halfGlyphX, halfGlyphY};
-                buffer->color = {};
+                buffer->color = renderable.skin->color.rgba();
+                buffer->color.w = 0;
                 buffer->uv_0 = vec2{u0, v0};
                 buffer->uv_1 = vec2{u0, v1};
                 buffer->uv_2 = vec2{u1, v1};

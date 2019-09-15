@@ -55,6 +55,7 @@ namespace oni {
 
         assert(texture.id);
 
+        oniGLenum internalFormat = GL_RGBA;
         oniGLenum format = GL_BGRA;
         oniGLenum type = GL_UNSIGNED_BYTE;
 
@@ -70,7 +71,8 @@ namespace oni {
         if (loadImage) {
             data = texture.image.data.data();
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.image.width, texture.image.height, 0, format, type, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
+                     data);
 
         texture.format = format;
         texture.type = type;
@@ -370,9 +372,9 @@ namespace oni {
 
         assert(textureID);
 
-        oniGLint internalFormat = GL_RED;
-        oniGLenum format = GL_RED;
-        oniGLenum type = GL_UNSIGNED_BYTE;
+        oniGLenum internalFormat = fontManager.getAtlasColorFormatInternal();
+        oniGLenum format = fontManager.getAtlasColorFormat();
+        oniGLenum type = fontManager.getAtlasColorType();
 
         bind(textureID);
 
@@ -420,6 +422,7 @@ namespace oni {
 
         assert(textureID);
 
+        oniGLint internalFormat = GL_RGBA;
         oniGLenum format = GL_BGRA;
         oniGLenum type = GL_UNSIGNED_BYTE;
 
@@ -428,7 +431,7 @@ namespace oni {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.image.width, texture.image.height, 0, format, type,
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
                      texture.image.data.data());
 
         unbind();

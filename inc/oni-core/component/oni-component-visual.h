@@ -357,6 +357,7 @@ namespace oni {
         std::vector<r32> advanceX{};
         std::vector<r32> advanceY{};
         std::vector<vec4> uv{};
+        MaterialSkin skin{}; // TODO: only the color is used for now, but for ease of use with Renderable I have skin, but when MaterialText is merged with the rest I can remove this field.
     };
 
     enum class MaterialTransition_Type : oni::u8 {

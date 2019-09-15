@@ -219,6 +219,7 @@ namespace oni {
                 renderable.ornt = &ornt;
                 renderable.scale = &scale;
                 renderable.text = &text;
+                renderable.skin = &text.skin;
 
                 mRenderables[enumCast(MaterialFinish_Type::TRANSLUCENT)].push(renderable);
             }

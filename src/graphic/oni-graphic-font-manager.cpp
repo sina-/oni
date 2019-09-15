@@ -88,7 +88,9 @@ namespace oni {
     void
     FontManager::updateText(const std::string &textContent,
                             MaterialText &text) {
-        // TODO: This could be optimized to only update part of text that is actually different.
+        if (textContent == text.textContent) {
+            return;
+        }
         text.textContent = textContent;
         text.height.clear();
         text.width.clear();

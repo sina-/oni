@@ -345,8 +345,9 @@ namespace oni {
     };
 
     struct MaterialText {
-        r32 xScaling{1.f};
-        r32 yScaling{1.f};
+        r32 xGameScaleDenom{1.f};
+        r32 yGameScaleDenom{1.f};
+        r32 fontSize{1.f};
         oniGLuint textureID{0};
         std::string textContent{};
         std::vector<size_t> width{};

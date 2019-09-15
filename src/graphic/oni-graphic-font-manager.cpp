@@ -100,8 +100,8 @@ namespace oni {
             text.advanceX.emplace_back(glyph->advance_x);
             text.advanceY.emplace_back(glyph->advance_y);
             text.uv.emplace_back(vec4{glyph->s0, glyph->t0, glyph->s1, glyph->t1});
-            text.xScaling = mGameWidth;
-            text.yScaling = mGameHeight;
+            text.xGameScaleDenom = mGameWidth / text.fontSize;
+            text.yGameScaleDenom = mGameHeight / text.fontSize;
         }
     }
 }

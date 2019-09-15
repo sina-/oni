@@ -203,12 +203,11 @@ namespace oni {
             assert(!skin);
             auto advance = 0.0f;
 
-            auto scaleX = text->xScaling;
-            auto scaleY = text->yScaling;
+            auto scaleX = text->xGameScaleDenom;
+            auto scaleY = text->yGameScaleDenom;
 
             effectID = 1.f;
             samplerID = getSamplerID(text->textureID);
-
             for (size i = 0; i < text->textContent.size(); i++) {
                 auto x0 = text->offsetX[i] / scaleX + advance;
                 auto x1 = x0 + text->width[i] / scaleX;
@@ -223,12 +222,13 @@ namespace oni {
 
                 advance += text->advanceX[i] / scaleX;
 
-                auto halfGlyphX = (x0 + x1) / 2.f;
-                auto halfGlyphY = (y0 + y1) / 2.f;
+                auto halfGlyphX = (x1 - x0) / 2.f;
+                auto halfGlyphY = (y1 - y0) / 2.f;
 
                 buffer->position = renderable.pos->value;
-                buffer->position.x += halfGlyphX;
-                buffer->position.y += halfGlyphY;
+
+                buffer->position.x += x0 + halfGlyphX;
+                buffer->position.y += y0 + halfGlyphY;
 
                 buffer->ornt = renderable.ornt->value;
                 buffer->effect = effectID;

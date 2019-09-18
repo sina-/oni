@@ -47,8 +47,8 @@ namespace oni {
                            r64 tickTime);
 
         static void
-        updateTextureAnimated(EntityManager &,
-                              r64 tickTime);
+        updateTransitions(EntityManager &,
+                          r64 tickTime);
 
         void
         renderRaw(const WorldP3D pos,
@@ -139,6 +139,19 @@ namespace oni {
 
 
     private:
+        static void
+        updateTextureAnimated(MaterialTransition_Texture &,
+                              r64 tickTime);
+
+        static void
+        updateTint(MaterialSkin &,
+                   MaterialTransition_Color,
+                   const TimeToLive &);
+
+        static void
+        updateFade(MaterialSkin &skin,
+                   MaterialTransition_Fade &,
+                   const TimeToLive &);
 
         void
         renderStrip(EntityManager &,

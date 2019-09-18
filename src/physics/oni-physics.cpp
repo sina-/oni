@@ -366,9 +366,9 @@ namespace oni {
                manager.getSimMode() == SimMode::SERVER);
 
         auto view = manager.createView<
-                Age>();
+                TimeToLive>();
         for (auto &&id: view) {
-            auto &age = view.get<Age>(id);
+            auto &age = view.get<TimeToLive>(id);
             age.currentAge += tickTime;
             if (age.currentAge > age.maxAge) {
                 if (manager.has<Tag_SplatOnDeath>(id)) {
@@ -415,49 +415,6 @@ namespace oni {
                 // TODO: This will create copy for all. Good place for profiling and optimization as these entities
                 // are often particles
                 manager.enqueueEvent<Event_SplatOnRest>(pos, size, ornt, tag, std::move(callback));
-            }
-        }
-    }
-
-    void
-    Physics::updateFadeWithAge(EntityManager &manager,
-                               r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::CLIENT ||
-               manager.getSimMode() == SimMode::SERVER);
-
-        auto view = manager.createView<
-                Age,
-                MaterialSkin,
-                MaterialTransition_Fade>();
-        for (auto &&id: view) {
-            auto &age = view.get<Age>(id);
-            auto &surface = view.get<MaterialSkin>(id);
-            auto &fade = view.get<MaterialTransition_Fade>(id);
-
-            auto targetAlpha = 1.f;
-            switch (fade.fadeFunc) {
-                case FadeFunc::LINEAR: {
-                    targetAlpha = 1 - age.currentAge / age.maxAge;
-                    break;
-                }
-                case FadeFunc::TAIL: {
-                    constexpr auto dropOffT = 0.7f;
-                    auto ageRatio = age.currentAge / age.maxAge;
-                    if (ageRatio > dropOffT) {
-                        targetAlpha = 1 - ageRatio;
-                    }
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
-            }
-
-            auto currentAlpha = surface.color.a_r32();
-            surface.color.set_a(lerp(currentAlpha, targetAlpha, fade.factor));
-            if (!almost_Equal(surface.color.a_r32(), currentAlpha)) {
-                manager.markForNetSync(id);
             }
         }
     }

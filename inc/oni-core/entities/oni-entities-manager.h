@@ -58,7 +58,7 @@ namespace oni {
                  r32 alpha);
 
         void
-        setRandAge(EntityID,
+        setRandTTL(EntityID id,
                    r32 lower,
                    r32 upper);
 

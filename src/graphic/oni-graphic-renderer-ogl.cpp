@@ -48,6 +48,10 @@ namespace oni {
                 result = GL_ONE;
                 break;
             }
+            case BlendMode ::SRC_ALPHA: {
+                result =GL_SRC_ALPHA;
+                break;
+            }
             case BlendMode::ONE_MINUS_SRC_ALPHA: {
                 result = GL_ONE_MINUS_SRC_ALPHA;
                 break;

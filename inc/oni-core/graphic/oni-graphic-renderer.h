@@ -35,15 +35,10 @@ namespace oni {
         const WorldP3D *pos{};
         const Orientation *ornt{};
         const Scale *scale{};
-        const Age *age{};
-
-        MaterialDefinition def{};
 
         const MaterialSkin *skin{};
         const MaterialText *text{};
-        const MaterialTransition_Fade *transitionFade{};
-        const MaterialTransition_Texture *transitionAnimation{};
-        const MaterialTransition_Color *transitionTint{};
+        const MaterialTransition_Def *trans{};
     };
 
     struct RenderSpec {
@@ -84,6 +79,7 @@ namespace oni {
         enum class BlendMode : oni::u8 {
             ZERO,
             ONE,
+            SRC_ALPHA,
             ONE_MINUS_SRC_ALPHA,
 
             LAST

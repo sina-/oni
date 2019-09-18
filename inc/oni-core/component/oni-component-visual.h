@@ -18,8 +18,7 @@ namespace oni {
     struct Image {
         u16 width{};
         u16 height{};
-        std::vector<u8> data{};
-        std::string path{};
+        std::string_view path{};
     };
 
     enum class NumAnimationFrames : oni::u8 {
@@ -34,7 +33,7 @@ namespace oni {
         LAST
     };
 
-    enum class AnimationEndingBehavior : oni::u8 {
+    enum class MaterialTransEndingBehavior : oni::u8 {
         LOOP,
         PLAY_AND_STOP,
         PLAY_AND_REMOVE_ENTITY,
@@ -48,6 +47,7 @@ namespace oni {
     struct Texture {
         // TODO: Can I move this out? Textures are massive because of it
         Image image{};
+        // TODO: NOOooooooooooooooooooo what is this.
         bool clear{false};
         oniGLuint id{0};
         // GL_BGRA          0x80E1
@@ -59,14 +59,13 @@ namespace oni {
     };
 
     struct TextureAnimated {
-        Texture texture{};
         NumAnimationFrames numFrames{NumAnimationFrames::TWO};
         u8 nextFrame{0};
         bool playing{true};
-        AnimationEndingBehavior endingBehaviour{AnimationEndingBehavior::LOOP};
         r64 timeElapsed{0.f};
         r64 frameDuration{0.1f};
-        std::vector<UV> frameUV{};
+        // TODO: LOL NO.
+        std::array<UV, enumCast(NumAnimationFrames::LAST)> frameUV{};
 
         inline static TextureAnimated
         make(NumAnimationFrames numFrames,
@@ -84,13 +83,12 @@ namespace oni {
             output.frameDuration = 1.0 / fps;
             output.nextFrame = 0;
             output.timeElapsed = 0;
-            output.texture = {};
 
             auto countFrame = enumCast(numFrames);
             auto xOffset = 0.f;
             auto xWidth = 1.f / countFrame;
 
-            output.frameUV.resize(countFrame);
+            //output.frameUV.resize(countFrame);
             for (auto &&uv: output.frameUV) {
                 uv.values[0] = {xOffset, 0.f};
                 uv.values[1] = {xOffset, 1.f};
@@ -332,6 +330,8 @@ namespace oni {
 
         TEXT_DEFAULT,
 
+        GENERATED,
+
         LAST
     };
 
@@ -361,10 +361,9 @@ namespace oni {
     };
 
     enum class MaterialTransition_Type : oni::u8 {
-        NONE = 0,
-        TEXTURE = 1,
-        FADE = 2,
-        TINT = 3,
+        TEXTURE = 0,
+        FADE = 1,
+        TINT = 2,
     };
 
     enum class FadeFunc : oni::u8 {
@@ -386,6 +385,24 @@ namespace oni {
         TextureAnimated value{};
     };
 
+    struct MaterialTransition_Def {
+        MaterialTransition_Type type{};
+        TimeToLive ttl;
+
+        union {
+            MaterialTransition_Fade fade{};
+            MaterialTransition_Color color;
+            MaterialTransition_Texture texture;
+        };
+    };
+
+    struct MaterialTransition_List {
+        size activeTransIdx{0};
+        MaterialTransEndingBehavior ending{};
+        bool ended{false};
+        std::vector<MaterialTransition_Def> transitions{};
+    };
+
     // TODO: Better name
     // TODO: Split this up, MaterialTransparency_Type: SOLID and TRANSLUECENT
     // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
@@ -393,9 +410,11 @@ namespace oni {
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
     enum class MaterialFinish_Type : oni::u8 {
         // NOTE: The order of the enums defines the order in which they are rendered!
+
         SOLID,
         TRANSLUCENT,
         SHINNY,
+        TRANSLUCENT_AND_SHINNY, // TODO: Can I merge these in a better way? Should I?
 
         LAST
     };
@@ -414,16 +433,11 @@ namespace oni {
 //            }
 //        };
 //
-    struct MaterialDefinition {
-        MaterialTransition_Type transition{};
-        MaterialFinish_Type finish{};
-    };
 
-    struct GrowInTime {
+    struct GrowOverTime {
         duration period{0.2f}; // NOTE: Grow every period
         duration elapsed{0.f}; // NOTE: Since last growth
         r32 factor{0.1f}; // NOTE: add this much to current size
-        Scale initialSize{1, 1};
         Scale maxSize{1, 1};
     };
 
@@ -433,7 +447,7 @@ namespace oni {
         r32 initialVMin = 1.f;
         r32 initialVMax = 2.f;
         u8 count = 1;
-        GrowInTime growth{};
+        GrowOverTime growth{};
     };
 
     struct AfterMark {

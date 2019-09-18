@@ -138,7 +138,7 @@ namespace oni {
         vec2 value;
     };
 
-    struct Age {
+    struct TimeToLive {
         duration currentAge{0.f};
         duration maxAge{1.f};
     };

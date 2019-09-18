@@ -168,8 +168,8 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              GrowInTime &data) {
-        archive(data.initialSize, data.maxSize, data.period, data.factor, data.elapsed);
+              GrowOverTime &data) {
+        archive(data.maxSize, data.period, data.factor, data.elapsed);
     }
 
     template<class Archive>
@@ -301,10 +301,9 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              Age &data) {
+              TimeToLive &data) {
         archive(data.currentAge, data.maxAge);
     }
-
 
     template<class ...Components>
     std::string

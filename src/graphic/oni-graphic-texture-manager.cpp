@@ -24,14 +24,16 @@ namespace oni {
     }
 
     void
-    TextureManager::loadFromTextureID(Texture &texture) {
+    TextureManager::loadFromTextureID(Texture &texture,
+                                      EntityAssetsPack tag) {
         auto numTextureElements = 4;
         auto textureSize = size(texture.image.height * texture.image.width * numTextureElements);
         assert(textureSize);
-        texture.image.data.resize(textureSize);
+        auto &storage = mImageDataMap[tag];
+        storage.resize(textureSize);
         glBindTexture(GL_TEXTURE_2D, texture.id);
         glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize,
-                          texture.image.data.data());
+                          storage.data());
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -50,11 +52,12 @@ namespace oni {
 
     void
     TextureManager::createTexture(Texture &texture,
-                                  bool loadImage) {
+                                  EntityAssetsPack tag) {
         glGenTextures(1, &texture.id);
 
         assert(texture.id);
 
+        // TODO: Hard-coded! This should be part of Texture
         oniGLenum internalFormat = GL_RGBA;
         oniGLenum format = GL_BGRA;
         oniGLenum type = GL_UNSIGNED_BYTE;
@@ -68,9 +71,12 @@ namespace oni {
         assert(texture.image.height > 0);
 
         auto data = (u8 *) nullptr;
-        if (loadImage) {
-            data = texture.image.data.data();
+        if (tag != EntityAssetsPack::GENERATED) {
+            assert(mImageDataMap.find(tag) != mImageDataMap.end());
+            auto &storage = mImageDataMap[tag];
+            data = storage.data();
         }
+
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
                      data);
 
@@ -125,8 +131,7 @@ namespace oni {
 
         auto texture = Texture{};
         loadOrGetImage(tag, texture.image);
-        createTexture(texture, true);
-        texture.image.data.clear();
+        createTexture(texture, tag);
         mTextureMap.insert({tag, texture});
     }
 
@@ -171,10 +176,11 @@ namespace oni {
         image.height = height;
         image.width = width;
         image.path = path;
-        image.data.resize(width * height * mElementsInRGBA, 0);
+        auto &storage = mImageDataMap[tag];
+        storage.resize(width * height * mElementsInRGBA, 0);
 
-        for (auto i = 0; i < image.data.size(); ++i) {
-            image.data[i] = bits[i];
+        for (size i = 0; i < storage.size(); ++i) {
+            storage[i] = bits[i];
         }
 
         FreeImage_Unload(dib);
@@ -182,11 +188,12 @@ namespace oni {
 
     void
     TextureManager::fill(Image &image,
+                         std::vector<u8> &storage,
                          const Color &pixel) {
         assert(image.width);
         assert(image.height);
 
-        image.data.resize(static_cast<u32>(mElementsInRGBA * image.width * image.height), 0);
+        storage.resize(static_cast<u32>(mElementsInRGBA * image.width * image.height), 0);
         u16 stride = image.width * mElementsInRGBA;
         if (pixel.value == 0) {
             return;
@@ -197,10 +204,10 @@ namespace oni {
                 auto r = u8(pixel.r_r32() * pixel.a_r32());
                 auto g = u8(pixel.g_r32() * pixel.a_r32());
                 auto b = u8(pixel.b_r32() * pixel.a_r32());
-                image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = r;
-                image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = g;
-                image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = b;
-                image.data[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_ALPHA] = pixel.a();
+                storage[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_RED] = r;
+                storage[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_GREEN] = g;
+                storage[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_BLUE] = b;
+                storage[(y * stride) + (x * mElementsInRGBA) + FI_RGBA_ALPHA] = pixel.a();
             }
         }
     }
@@ -233,6 +240,8 @@ namespace oni {
     void
     TextureManager::blendAndUpdateTexture(Texture &texture,
                                           Image &image,
+                                          std::vector<u8> &storageTexture,
+                                          std::vector<u8> &storageImage,
                                           const vec3 &brushTexturePos) {
         assert(image.width);
         assert(image.height);
@@ -312,23 +321,23 @@ namespace oni {
                     continue;
                 }
 
-                assert(n + a < image.data.size());
-                assert(m + a < texture.image.data.size());
+                assert(n + a < storageImage.size());
+                assert(m + a < storageTexture.size());
                 assert(p + a < subImage.size());
 
                 assert(n >= 0);
                 assert(m >= 0);
                 assert(p >= 0);
 
-                r32 oldR = texture.image.data[m + r] / 255.f;
-                r32 oldG = texture.image.data[m + g] / 255.f;
-                r32 oldB = texture.image.data[m + b] / 255.f;
-                r32 oldA = texture.image.data[m + a] / 255.f;
+                r32 oldR = storageTexture[m + r] / 255.f;
+                r32 oldG = storageTexture[m + g] / 255.f;
+                r32 oldB = storageTexture[m + b] / 255.f;
+                r32 oldA = storageTexture[m + a] / 255.f;
 
-                r32 newR = image.data[n + r] / 255.f;
-                r32 newG = image.data[n + g] / 255.f;
-                r32 newB = image.data[n + b] / 255.f;
-                r32 newA = image.data[n + a] / 255.f;
+                r32 newR = storageImage[n + r] / 255.f;
+                r32 newG = storageImage[n + g] / 255.f;
+                r32 newB = storageImage[n + b] / 255.f;
+                r32 newA = storageImage[n + a] / 255.f;
 
                 r32 blendR = lerp(oldR, newR, newA);
                 r32 blendG = lerp(oldG, newG, newA);
@@ -347,10 +356,10 @@ namespace oni {
                 subImage[p + a] = (u8) (blendA * 255);
 
                 // NOTE: Store the blend for future
-                texture.image.data[m + r] = subImage[p + r];
-                texture.image.data[m + g] = subImage[p + g];
-                texture.image.data[m + b] = subImage[p + b];
-                texture.image.data[m + a] = subImage[p + a];
+                storageTexture[m + r] = subImage[p + r];
+                storageTexture[m + g] = subImage[p + g];
+                storageTexture[m + b] = subImage[p + b];
+                storageTexture[m + a] = subImage[p + a];
             }
         }
 
@@ -416,7 +425,8 @@ namespace oni {
     }
 
     void
-    TextureManager::loadFromImage(Texture &texture) {
+    TextureManager::loadFromData(Texture &texture,
+                                 const std::vector<u8> &data) {
         oniGLuint textureID = 0;
         glGenTextures(1, &textureID);
 
@@ -432,7 +442,7 @@ namespace oni {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
-                     texture.image.data.data());
+                     data.data());
 
         unbind();
 

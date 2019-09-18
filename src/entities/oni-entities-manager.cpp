@@ -396,10 +396,10 @@ namespace oni {
     }
 
     void
-    EntityManager::setRandAge(EntityID id,
+    EntityManager::setRandTTL(EntityID id,
                               r32 lower,
                               r32 upper) {
-        auto &age = mRegistry->get<Age>(id);
+        auto &age = mRegistry->get<TimeToLive>(id);
         age.maxAge = mRand->next_r32(lower, upper);
     }
 

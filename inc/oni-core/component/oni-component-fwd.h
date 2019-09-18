@@ -30,11 +30,11 @@ namespace oni {
 
     /// Physics
     struct Acceleration;
-    struct Age;
     struct Car;
     struct CarConfig;
     struct JetForce;
     struct PhysicalProperties;
+    struct TimeToLive;
     struct Velocity;
 
     union Acceleration2D;
@@ -44,7 +44,7 @@ namespace oni {
 
     /// Visual
     enum class NumAnimationFrames : oni::u8;
-    enum class AnimationEndingBehavior : oni::u8;
+    enum class MaterialTransEndingBehavior : oni::u8;
     enum class BrushType : oni::u8;
     enum class EntityAssetsPack : oni::u32;
     enum class MaterialTransition_Type : oni::u8;
@@ -55,7 +55,7 @@ namespace oni {
     struct BrushTrail;
     struct Color;
     struct CoolDown;
-    struct GrowInTime;
+    struct GrowOverTime;
     struct Image;
     struct MaterialDefinition;
     struct MaterialSkin;

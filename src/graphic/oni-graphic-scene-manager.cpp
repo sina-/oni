@@ -153,12 +153,14 @@ namespace oni {
                     WorldP3D,
                     Orientation,
                     Scale,
-                    MaterialDefinition>();
+                    MaterialSkin,
+                    MaterialFinish_Type>();
             for (auto &&id: view) {
                 const auto &pos = view.get<WorldP3D>(id);
                 const auto &ornt = view.get<Orientation>(id);
                 const auto &scale = view.get<Scale>(id);
-                const auto &def = view.get<MaterialDefinition>(id);
+                const auto &finish = view.get<MaterialFinish_Type>(id);
+                const auto &skin = view.get<MaterialSkin>(id);
 
                 auto renderable = Renderable{};
                 renderable.id = id;
@@ -167,34 +169,16 @@ namespace oni {
                 renderable.pos = &pos;
                 renderable.ornt = &ornt;
                 renderable.scale = &scale;
-                renderable.def = def;
+                renderable.skin = &skin;
 
-                switch (def.transition) {
-                    case MaterialTransition_Type::NONE:
-                        renderable.skin = &manager.get<MaterialSkin>(id);
-                        break;
-                    case MaterialTransition_Type::FADE: {
-                        renderable.skin = &manager.get<MaterialSkin>(id);
-                        renderable.transitionFade = &manager.get<MaterialTransition_Fade>(id);
-                        break;
-                    }
-                    case MaterialTransition_Type::TINT: {
-                        renderable.skin = &manager.get<MaterialSkin>(id);
-                        renderable.transitionTint = &manager.get<MaterialTransition_Color>(id);
-                        renderable.age = &manager.get<Age>(id);
-                        break;
-                    }
-                    case MaterialTransition_Type::TEXTURE: {
-                        renderable.transitionAnimation = &manager.get<MaterialTransition_Texture>(id);
-                        break;
-                    }
-                    default: {
-                        assert(false);
-                        break;
-                    }
+                if (manager.has<MaterialTransition_List>(id)) {
+                    const auto &transList = manager.get<MaterialTransition_List>(id);
+                    const auto &trans = transList.transitions[transList.activeTransIdx];
+                    renderable.trans = &trans;
                 }
-
-                mRenderables[enumCast(def.finish)].push(renderable);
+                // TODO: Now that I distinguish between opaque and translucent objects I should draw the
+                // opaque objects front to back to avoid over draw
+                mRenderables[enumCast(finish)].push(renderable);
             }
         }
 
@@ -355,149 +339,6 @@ namespace oni {
     }
 
     void
-    SceneManager::updateSmokeEmitter(EntityManager &manager,
-                                     r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::CLIENT ||
-               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
-
-        auto view = manager.createView<CoolDown>();
-        for (auto &&id: view) {
-            auto &emitter = view.get<CoolDown>(id);
-            subAndZeroClip(emitter.current, tickTime);
-        }
-    }
-
-    void
-    SceneManager::updateAfterMark(EntityManager &manager,
-                                  r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::CLIENT ||
-               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
-
-        auto view = manager.createView<
-                AfterMark,
-                Orientation,
-                WorldP3D>();
-        for (auto &&id: view) {
-            const auto &mark = view.get<AfterMark>(id);
-            const auto &pos = view.get<WorldP3D>(id);
-            const auto &ornt = view.get<Orientation>(id);
-
-            auto transformed = applyParentTransforms(manager, id, pos, ornt);
-            Brush brush;
-            auto quad = Quad{};
-            auto model = createTransformation(transformed.pos, transformed.ornt, mark.scale);
-            switch (mark.type) {
-                case BrushType::COLOR: {
-                    brush.color = &mark.color;
-                    break;
-                }
-                case BrushType::TEXTURE: {
-                    // TODO: Implement
-                    assert(false);
-                    break;
-                }
-                case BrushType::TEXTURE_TAG: {
-                    brush.tag = mark.tag;
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
-            }
-            brush.shape_Quad = &quad;
-            brush.type = BrushType::COLOR;
-            brush.model = &model;
-
-            // TODO: This function needs to move to game scene manager, it is not part of the engine.
-            assert(false);
-            // splat(brush);
-        }
-    }
-
-    void
-    SceneManager::updateGrowthInTime(EntityManager &manager,
-                                     r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::CLIENT ||
-               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
-
-        auto doneGrowing = std::vector<EntityID>();
-        auto view = manager.createView<
-                GrowInTime,
-                Scale>();
-        for (auto &&id: view) {
-            auto &growth = view.get<GrowInTime>(id);
-            auto &scale = view.get<Scale>(id);
-            bool doneGrowingX = false;
-            bool doneGrowingY = false;
-
-            growth.elapsed += tickTime;
-            if (almost_Greater(growth.elapsed, growth.period)) {
-                if (almost_Less(scale.x, growth.maxSize.x)) {
-                    scale.x += growth.factor;
-                } else {
-                    doneGrowingX = true;
-                }
-
-                if (almost_Less(scale.y, growth.maxSize.y)) {
-                    scale.y += growth.factor;
-                } else {
-                    doneGrowingY = true;
-                }
-
-                if (doneGrowingX && doneGrowingY) {
-                    doneGrowing.emplace_back(id);
-                }
-                growth.elapsed = 0.f;
-            }
-        }
-
-        for (auto &&id: doneGrowing) {
-            manager.removeComponent<GrowInTime>(id);
-        }
-    }
-
-    void
-    SceneManager::updateTextureAnimated(EntityManager &manager,
-                                        r64 tickTime) {
-        assert(manager.getSimMode() == SimMode::CLIENT ||
-               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
-
-        auto view = manager.createView<MaterialTransition_Texture>();
-        for (auto &&id: view) {
-            auto &mta = view.get<MaterialTransition_Texture>(id);
-            auto &ta = mta.value;
-            ta.timeElapsed += tickTime;
-            // NOTE: It is assumed that this function is called more often than animation fps!
-            assert(ta.frameDuration > tickTime);
-            if (ta.playing && almost_Greater(ta.timeElapsed, ta.frameDuration)) {
-                ta.nextFrame = (ta.nextFrame + 1) % enumCast(ta.numFrames);
-                ta.timeElapsed = 0;
-                if (ta.nextFrame == 0) {
-                    switch (ta.endingBehaviour) {
-                        case AnimationEndingBehavior::LOOP: {
-                            break;
-                        }
-                        case AnimationEndingBehavior::PLAY_AND_STOP: {
-                            ta.playing = false;
-                            break;
-                        }
-                        case AnimationEndingBehavior::PLAY_AND_REMOVE_ENTITY: {
-                            manager.markForDeletion(id);
-                            break;
-                        }
-                        default: {
-                            assert(false);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        manager.flushDeletions();
-    }
-
-    void
     SceneManager::zoom(r32 distance) {
         mCamera.z = 1 / distance;
     }
@@ -596,5 +437,235 @@ namespace oni {
             assert(numParents < 20);
         }
         return result;
+    }
+
+    void
+    SceneManager::updateSmokeEmitter(EntityManager &manager,
+                                     r64 tickTime) {
+        assert(manager.getSimMode() == SimMode::CLIENT ||
+               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
+
+        auto view = manager.createView<CoolDown>();
+        for (auto &&id: view) {
+            auto &emitter = view.get<CoolDown>(id);
+            subAndZeroClip(emitter.current, tickTime);
+        }
+    }
+
+    void
+    SceneManager::updateAfterMark(EntityManager &manager,
+                                  r64 tickTime) {
+        assert(manager.getSimMode() == SimMode::CLIENT ||
+               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
+
+        auto view = manager.createView<
+                AfterMark,
+                Orientation,
+                WorldP3D>();
+        for (auto &&id: view) {
+            const auto &mark = view.get<AfterMark>(id);
+            const auto &pos = view.get<WorldP3D>(id);
+            const auto &ornt = view.get<Orientation>(id);
+
+            auto transformed = applyParentTransforms(manager, id, pos, ornt);
+            Brush brush;
+            auto quad = Quad{};
+            auto model = createTransformation(transformed.pos, transformed.ornt, mark.scale);
+            switch (mark.type) {
+                case BrushType::COLOR: {
+                    brush.color = &mark.color;
+                    break;
+                }
+                case BrushType::TEXTURE: {
+                    // TODO: Implement
+                    assert(false);
+                    break;
+                }
+                case BrushType::TEXTURE_TAG: {
+                    brush.tag = mark.tag;
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            brush.shape_Quad = &quad;
+            brush.type = BrushType::COLOR;
+            brush.model = &model;
+
+            // TODO: This function needs to move to game scene manager, it is not part of the engine.
+            assert(false);
+            // splat(brush);
+        }
+    }
+
+    void
+    SceneManager::updateGrowthInTime(EntityManager &manager,
+                                     r64 tickTime) {
+        assert(manager.getSimMode() == SimMode::CLIENT ||
+               manager.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
+
+        auto doneGrowing = std::vector<EntityID>();
+        auto view = manager.createView<
+                GrowOverTime,
+                Scale>();
+        for (auto &&id: view) {
+            auto &growth = view.get<GrowOverTime>(id);
+            auto &scale = view.get<Scale>(id);
+            bool doneGrowingX = false;
+            bool doneGrowingY = false;
+
+            growth.elapsed += tickTime;
+            if (almost_Greater(growth.elapsed, growth.period)) {
+                if (almost_Less(scale.x, growth.maxSize.x)) {
+                    scale.x += growth.factor;
+                } else {
+                    doneGrowingX = true;
+                }
+
+                if (almost_Less(scale.y, growth.maxSize.y)) {
+                    scale.y += growth.factor;
+                } else {
+                    doneGrowingY = true;
+                }
+
+                if (doneGrowingX && doneGrowingY) {
+                    doneGrowing.emplace_back(id);
+                }
+                growth.elapsed = 0.f;
+            }
+        }
+
+        for (auto &&id: doneGrowing) {
+            manager.removeComponent<GrowOverTime>(id);
+        }
+    }
+
+    void
+    SceneManager::updateTextureAnimated(MaterialTransition_Texture &mta,
+                                        r64 tickTime) {
+        auto &ta = mta.value;
+        ta.timeElapsed += tickTime;
+        // NOTE: It is assumed that this function is called more often than animation fps!
+        assert(ta.frameDuration > tickTime);
+        if (ta.playing && almost_Greater(ta.timeElapsed, ta.frameDuration)) {
+            ta.nextFrame = (ta.nextFrame + 1) % enumCast(ta.numFrames);
+            ta.timeElapsed = 0;
+        }
+    }
+
+    void
+    SceneManager::updateTint(MaterialSkin &skin,
+                             MaterialTransition_Color mtc,
+                             const TimeToLive &ttl) {
+        // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
+        auto &begin = mtc.begin;
+        auto &end = mtc.end;
+        auto t = ttl.currentAge / ttl.maxAge;
+
+        auto r = lerp(begin.r_r32(), end.r_r32(), t);
+        auto g = lerp(begin.g_r32(), end.g_r32(), t);
+        auto b = lerp(begin.b_r32(), end.b_r32(), t);
+        auto a = lerp(begin.a_r32(), end.a_r32(), t);
+
+        skin.color.set_r(r);
+        skin.color.set_g(g);
+        skin.color.set_b(b);
+        skin.color.set_a(a);
+    }
+
+    void
+    SceneManager::updateFade(MaterialSkin &skin,
+                             MaterialTransition_Fade &fade,
+                             const TimeToLive &ttl) {
+        auto targetAlpha = 1.f;
+        switch (fade.fadeFunc) {
+            case FadeFunc::LINEAR: {
+                targetAlpha = 1 - ttl.currentAge / ttl.maxAge;
+                break;
+            }
+            case FadeFunc::TAIL: {
+                constexpr auto dropOffT = 0.7f;
+                auto ageRatio = ttl.currentAge / ttl.maxAge;
+                if (ageRatio > dropOffT) {
+                    targetAlpha = 1 - ageRatio;
+                }
+                break;
+            }
+            default: {
+                assert(false);
+                break;
+            }
+        }
+
+        auto currentAlpha = skin.color.a_r32();
+        skin.color.set_a(lerp(currentAlpha, targetAlpha, fade.factor));
+    }
+
+    void
+    SceneManager::updateTransitions(EntityManager &manager,
+                                    r64 tickTime) {
+        auto view = manager.createView<
+                MaterialSkin,
+                MaterialTransition_List>();
+        for (auto &&id: view) {
+            auto &mtl = view.get<MaterialTransition_List>(id);
+            if (mtl.ended) {
+                continue;
+            }
+            auto &current = mtl.transitions[mtl.activeTransIdx];
+            current.ttl.currentAge += tickTime;
+            if (almost_Greater(current.ttl.currentAge, current.ttl.maxAge)) {
+                if (mtl.transitions.size() - 1 > mtl.activeTransIdx) {
+                    current.ttl.currentAge = 0.f;
+                    ++mtl.activeTransIdx;
+                } else {
+                    switch (mtl.ending) {
+                        case MaterialTransEndingBehavior::LOOP: {
+                            current.ttl.currentAge = 0.f;
+                            mtl.activeTransIdx = 0;
+                            break;
+                        }
+                        case MaterialTransEndingBehavior::PLAY_AND_STOP: {
+                            // TODO: Can I not have this special case?
+                            if (current.type == MaterialTransition_Type::TEXTURE) {
+                                current.texture.value.playing = false;
+                            }
+                            mtl.ended = true;
+                            break;
+                        }
+                        case MaterialTransEndingBehavior::PLAY_AND_REMOVE_ENTITY: {
+                            assert(manager.getSimMode() != SimMode::CLIENT_SIDE_SERVER);
+                            manager.markForDeletion(id);
+                            break;
+                        }
+                        default: {
+                            assert(false);
+                        }
+                    }
+                }
+            } else {
+                auto &skin = view.get<MaterialSkin>(id);
+                switch (current.type) {
+                    case MaterialTransition_Type::TEXTURE: {
+                        updateTextureAnimated(current.texture, tickTime);
+                        break;
+                    }
+                    case MaterialTransition_Type::FADE: {
+                        updateFade(skin, current.fade, current.ttl);
+                        break;
+                    }
+                    case MaterialTransition_Type::TINT: {
+                        updateTint(skin, current.color, current.ttl);
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                    }
+                }
+            }
+        }
+        manager.flushDeletions();
     }
 }

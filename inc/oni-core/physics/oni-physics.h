@@ -61,10 +61,6 @@ namespace oni {
         void
         updateResting(EntityManager &);
 
-        static void
-        updateFadeWithAge(EntityManager &,
-                          r64 tickTime);
-
     public:
         // TODO: Not very happy about this exposure, but it is really the simplest solution right now and only
         // EntityManager uses it for creating components in b2World when creating entities.

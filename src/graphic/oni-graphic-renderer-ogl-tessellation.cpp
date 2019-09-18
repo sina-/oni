@@ -182,6 +182,7 @@ namespace oni {
         auto uv1 = vec2{};
         auto uv2 = vec2{};
         auto uv3 = vec2{};
+
         auto samplerID = -1;
         // TODO: would be nice to have an enum specific to the graphics that captures this?
         // Actually I CAN NOT enumCast MaterialTransition_Type yet :/ as None is still
@@ -190,7 +191,6 @@ namespace oni {
 
         const auto *skin = renderable.skin;
         const auto *text = renderable.text;
-        const auto *animation = renderable.transitionAnimation;
 
         auto *buffer = static_cast<TessellationVertex *>(mBuffer);
 
@@ -199,7 +199,6 @@ namespace oni {
             // Text is just an array of MaterialSkin where offsets and advance are used to calculate position
             // and uv, which I can do in a separate function and then I can unify this if block with else and support
             // transitions
-            assert(!animation);
             auto advance = 0.0f;
 
             auto scaleX = text->xGameScaleDenom;
@@ -244,66 +243,53 @@ namespace oni {
                 mIndexCount += 1;
             }
         } else {
-            if (skin && skin->texture.id) {
-                assert(!animation);
-                assert(!text);
+            samplerID = getSamplerID(skin->texture.id);
+
+            if (renderable.trans) {
+                switch (renderable.trans->type) {
+                    case MaterialTransition_Type::TEXTURE: {
+                        const auto &animation = renderable.trans->texture;
+                        effectID = 1.f;
+                        auto currentFrame = animation.value.nextFrame;
+                        if (currentFrame < animation.value.frameUV.size()) {
+                            uv0 = animation.value.frameUV[currentFrame].values[0];
+                            uv1 = animation.value.frameUV[currentFrame].values[1];
+                            uv2 = animation.value.frameUV[currentFrame].values[2];
+                            uv3 = animation.value.frameUV[currentFrame].values[3];
+                        } else {
+                            assert(false);
+                        }
+                        break;
+                    }
+                    case MaterialTransition_Type::FADE: {
+                        uv0 = skin->texture.uv.values[0];
+                        uv1 = skin->texture.uv.values[1];
+                        uv2 = skin->texture.uv.values[2];
+                        uv3 = skin->texture.uv.values[3];
+                        effectID = 2.f;
+                        break;
+                    }
+                    case MaterialTransition_Type::TINT: {
+                        uv0 = skin->texture.uv.values[0];
+                        uv1 = skin->texture.uv.values[1];
+                        uv2 = skin->texture.uv.values[2];
+                        uv3 = skin->texture.uv.values[3];
+                        color = skin->color;
+                        effectID = 3.f;
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                        break;
+                    }
+                }
+            } else {
                 effectID = 1.f;
                 uv0 = skin->texture.uv.values[0];
                 uv1 = skin->texture.uv.values[1];
                 uv2 = skin->texture.uv.values[2];
                 uv3 = skin->texture.uv.values[3];
-                samplerID = getSamplerID(skin->texture.id);
                 color = skin->color;
-            }
-
-            const auto transitionType = renderable.def.transition;
-            switch (transitionType) {
-                case MaterialTransition_Type::NONE: {
-                    break;
-                }
-                case MaterialTransition_Type::TEXTURE: {
-                    if (animation) {
-                        effectID = 1.f;
-                        auto currentFrame = animation->value.nextFrame;
-                        if (currentFrame < animation->value.frameUV.size()) {
-                            uv0 = animation->value.frameUV[currentFrame].values[0];
-                            uv1 = animation->value.frameUV[currentFrame].values[1];
-                            uv2 = animation->value.frameUV[currentFrame].values[2];
-                            uv3 = animation->value.frameUV[currentFrame].values[3];
-                            samplerID = getSamplerID(animation->value.texture.id);
-                        } else {
-                            assert(false);
-                        }
-                        assert(!skin);
-                    } else {
-                        assert(false);
-                    }
-                    break;
-                }
-                case MaterialTransition_Type::FADE: {
-                    effectID = 2.f;
-                    break;
-                }
-                case MaterialTransition_Type::TINT: {
-                    // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
-                    auto &begin = renderable.transitionTint->begin;
-                    auto &end = renderable.transitionTint->end;
-                    // TODO: This is buggy, given blend function of (GL_ONE, GL_ONE) I can't produce black instead
-                    // when rgb = 0 I just get transparent objects.
-                    auto t = renderable.age->currentAge / renderable.age->maxAge;
-                    auto r = lerp(begin.r_r32(), end.r_r32(), t);
-                    auto g = lerp(begin.g_r32(), end.g_r32(), t);
-                    auto b = lerp(begin.b_r32(), end.b_r32(), t);
-                    color.set_r(r);
-                    color.set_g(g);
-                    color.set_b(b);
-                    effectID = 3.f;
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
             }
 
             buffer->position = renderable.pos->value;

@@ -545,13 +545,12 @@ namespace oni {
     void
     SceneManager::updateTextureAnimated(MaterialTransition_Texture &mta,
                                         r64 tickTime) {
-        auto &ta = mta.value;
-        ta.timeElapsed += tickTime;
+        mta.timeElapsed += tickTime;
         // NOTE: It is assumed that this function is called more often than animation fps!
-        assert(ta.frameDuration > tickTime);
-        if (ta.playing && almost_Greater(ta.timeElapsed, ta.frameDuration)) {
-            ta.nextFrame = (ta.nextFrame + 1) % enumCast(ta.numFrames);
-            ta.timeElapsed = 0;
+        assert(mta.frameDuration > tickTime);
+        if (mta.playing && almost_Greater(mta.timeElapsed, mta.frameDuration)) {
+            mta.nextFrame = (mta.nextFrame + 1) % enumCast(mta.numFrames);
+            mta.timeElapsed = 0;
         }
     }
 
@@ -622,20 +621,20 @@ namespace oni {
                     ++mtl.activeTransIdx;
                 } else {
                     switch (mtl.ending) {
-                        case MaterialTransEndingBehavior::LOOP: {
+                        case MaterialTransition_EndBehavior::LOOP: {
                             current.ttl.currentAge = 0.f;
                             mtl.activeTransIdx = 0;
                             break;
                         }
-                        case MaterialTransEndingBehavior::PLAY_AND_STOP: {
+                        case MaterialTransition_EndBehavior::PLAY_AND_STOP: {
                             // TODO: Can I not have this special case?
                             if (current.type == MaterialTransition_Type::TEXTURE) {
-                                current.texture.value.playing = false;
+                                current.texture.playing = false;
                             }
                             mtl.ended = true;
                             break;
                         }
-                        case MaterialTransEndingBehavior::PLAY_AND_REMOVE_ENTITY: {
+                        case MaterialTransition_EndBehavior::PLAY_AND_REMOVE_ENTITY: {
                             assert(manager.getSimMode() != SimMode::CLIENT_SIDE_SERVER);
                             manager.markForDeletion(id);
                             break;

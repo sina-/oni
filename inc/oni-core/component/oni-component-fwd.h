@@ -44,7 +44,7 @@ namespace oni {
 
     /// Visual
     enum class NumAnimationFrames : oni::u8;
-    enum class MaterialTransEndingBehavior : oni::u8;
+    enum class MaterialTransition_EndBehavior : oni::u8;
     enum class BrushType : oni::u8;
     enum class EntityAssetsPack : oni::u32;
     enum class MaterialTransition_Type : oni::u8;
@@ -66,6 +66,6 @@ namespace oni {
     struct ParticleEmitter;
     struct TextAttachment;
     struct Texture;
-    struct TextureAnimated;
+    struct MaterialTransition_Texture;
     struct UV;
 }

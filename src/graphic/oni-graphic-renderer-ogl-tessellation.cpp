@@ -250,12 +250,12 @@ namespace oni {
                     case MaterialTransition_Type::TEXTURE: {
                         const auto &animation = renderable.trans->texture;
                         effectID = 1.f;
-                        auto currentFrame = animation.value.nextFrame;
-                        if (currentFrame < animation.value.frameUV.size()) {
-                            uv0 = animation.value.frameUV[currentFrame].values[0];
-                            uv1 = animation.value.frameUV[currentFrame].values[1];
-                            uv2 = animation.value.frameUV[currentFrame].values[2];
-                            uv3 = animation.value.frameUV[currentFrame].values[3];
+                        auto currentFrame = animation.nextFrame;
+                        if (currentFrame < animation.frameUV.size()) {
+                            uv0 = animation.frameUV[currentFrame].values[0];
+                            uv1 = animation.frameUV[currentFrame].values[1];
+                            uv2 = animation.frameUV[currentFrame].values[2];
+                            uv3 = animation.frameUV[currentFrame].values[3];
                         } else {
                             assert(false);
                         }

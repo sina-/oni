@@ -33,12 +33,6 @@ namespace oni {
         LAST
     };
 
-    enum class MaterialTransEndingBehavior : oni::u8 {
-        LOOP,
-        PLAY_AND_STOP,
-        PLAY_AND_REMOVE_ENTITY,
-    };
-
     struct UV {
         std::array<vec2, 4> values{vec2{0.f, 0.f}, vec2{0.f, 1.f},
                                    vec2{1.f, 1.f}, vec2{1.f, 0.f}};
@@ -56,48 +50,6 @@ namespace oni {
         // GL_FLOAT         0x1406
         oniGLenum type{0x1401};
         UV uv{};
-    };
-
-    struct TextureAnimated {
-        NumAnimationFrames numFrames{NumAnimationFrames::TWO};
-        u8 nextFrame{0};
-        bool playing{true};
-        r64 timeElapsed{0.f};
-        r64 frameDuration{0.1f};
-        // TODO: LOL NO.
-        std::array<UV, enumCast(NumAnimationFrames::LAST)> frameUV{};
-
-        inline static TextureAnimated
-        make(NumAnimationFrames numFrames,
-             r32 fps) noexcept {
-            TextureAnimated result;
-            init(result, numFrames, fps);
-            return result;
-        }
-
-        inline static void
-        init(TextureAnimated &output,
-             NumAnimationFrames numFrames,
-             r32 fps) {
-            output.numFrames = numFrames;
-            output.frameDuration = 1.0 / fps;
-            output.nextFrame = 0;
-            output.timeElapsed = 0;
-
-            auto countFrame = enumCast(numFrames);
-            auto xOffset = 0.f;
-            auto xWidth = 1.f / countFrame;
-
-            //output.frameUV.resize(countFrame);
-            for (auto &&uv: output.frameUV) {
-                uv.values[0] = {xOffset, 0.f};
-                uv.values[1] = {xOffset, 1.f};
-                uv.values[2] = {xOffset + xWidth, 1.f};
-                uv.values[3] = {xOffset + xWidth, 0.f};
-
-                xOffset += xWidth;
-            }
-        }
     };
 
     struct Color {
@@ -382,7 +334,45 @@ namespace oni {
     };
 
     struct MaterialTransition_Texture {
-        TextureAnimated value{};
+        NumAnimationFrames numFrames{NumAnimationFrames::TWO};
+        u8 nextFrame{0};
+        bool playing{true};
+        r64 timeElapsed{0.f};
+        r64 frameDuration{0.1f};
+        // TODO: LOL NO.
+        std::array<UV, enumCast(NumAnimationFrames::LAST)> frameUV{};
+
+        inline static MaterialTransition_Texture
+        make(NumAnimationFrames numFrames,
+             r32 fps) noexcept {
+            MaterialTransition_Texture result;
+            init(result, numFrames, fps);
+            return result;
+        }
+
+        inline static void
+        init(MaterialTransition_Texture &output,
+             NumAnimationFrames numFrames,
+             r32 fps) {
+            output.numFrames = numFrames;
+            output.frameDuration = 1.0 / fps;
+            output.nextFrame = 0;
+            output.timeElapsed = 0;
+
+            auto countFrame = enumCast(numFrames);
+            auto xOffset = 0.f;
+            auto xWidth = 1.f / countFrame;
+
+            //output.frameUV.resize(countFrame);
+            for (auto &&uv: output.frameUV) {
+                uv.values[0] = {xOffset, 0.f};
+                uv.values[1] = {xOffset, 1.f};
+                uv.values[2] = {xOffset + xWidth, 1.f};
+                uv.values[3] = {xOffset + xWidth, 0.f};
+
+                xOffset += xWidth;
+            }
+        }
     };
 
     struct MaterialTransition_Def {
@@ -396,9 +386,15 @@ namespace oni {
         };
     };
 
+    enum class MaterialTransition_EndBehavior : oni::u8 {
+        LOOP,
+        PLAY_AND_STOP,
+        PLAY_AND_REMOVE_ENTITY,
+    };
+
     struct MaterialTransition_List {
         size activeTransIdx{0};
-        MaterialTransEndingBehavior ending{};
+        MaterialTransition_EndBehavior ending{};
         bool ended{false};
         std::vector<MaterialTransition_Def> transitions{};
     };

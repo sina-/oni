@@ -6,6 +6,7 @@
 #include <oni-core/entities/oni-entities-fwd.h>
 #include <oni-core/math/oni-math-fwd.h>
 #include <oni-core/math/oni-math-mat4.h>
+#include <oni-core/graphic/oni-graphic-fwd.h>
 
 namespace oni {
     enum class PrimitiveType : oni::u8 {
@@ -56,7 +57,7 @@ namespace oni {
 
     class Renderer {
     protected:
-        Renderer();
+        explicit Renderer(TextureManager&);
 
         virtual ~Renderer();
 
@@ -96,6 +97,7 @@ namespace oni {
         };
 
         Texture *mRenderTarget{};
+        TextureManager &mTextureManager;
 
     protected:
         virtual void

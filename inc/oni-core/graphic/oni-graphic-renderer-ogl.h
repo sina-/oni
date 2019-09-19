@@ -16,7 +16,8 @@ namespace oni {
 
     class Renderer_OpenGL : public Renderer {
     public:
-        explicit Renderer_OpenGL(PrimitiveType);
+        explicit Renderer_OpenGL(PrimitiveType,
+                                 TextureManager &);
 
         ~Renderer_OpenGL() override;
 

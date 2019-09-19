@@ -12,8 +12,9 @@
 
 
 namespace oni {
-    Renderer_OpenGL_Quad::Renderer_OpenGL_Quad(oniGLsizei maxPrimitiveCount) :
-            Renderer_OpenGL(PrimitiveType::TRIANGLES), mMaxPrimitiveCount(maxPrimitiveCount) {
+    Renderer_OpenGL_Quad::Renderer_OpenGL_Quad(oniGLsizei maxPrimitiveCount,
+                                               TextureManager &tm) :
+            Renderer_OpenGL(PrimitiveType::TRIANGLES, tm), mMaxPrimitiveCount(maxPrimitiveCount) {
         mMaxIndicesCount = mMaxPrimitiveCount * 6;
 
         oniGLsizei vertexSize = sizeof(QuadVertex);

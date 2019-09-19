@@ -11,7 +11,29 @@
 
 
 namespace oni {
-    TextureManager::TextureManager(AssetManager &assetManager) : mAssetManager(assetManager) {}
+    TextureManager::TextureManager(AssetManager &assetManager) : mAssetManager(assetManager) {
+        mAnimationUVs.resize(enumCast(NumAnimationFrames::LAST));
+        size numFrames = 0;
+        for (auto &&uvs: mAnimationUVs) {
+            if (!numFrames) {
+                ++numFrames;
+                continue;
+            }
+            uvs.resize(numFrames);
+            auto xOffset = 0.f;
+            for (auto &&uv: uvs) {
+                auto xWidth = 1.f / numFrames;
+
+                uv.values[0] = {xOffset, 0.f};
+                uv.values[1] = {xOffset, 1.f};
+                uv.values[2] = {xOffset + xWidth, 1.f};
+                uv.values[3] = {xOffset + xWidth, 0.f};
+
+                xOffset += xWidth;
+            }
+            ++numFrames;
+        }
+    }
 
     TextureManager::~TextureManager() = default;
 
@@ -455,5 +477,24 @@ namespace oni {
     size_t
     TextureManager::numLoadedTexture() const {
         return mTextureMap.size();
+    }
+
+    const UV &
+    TextureManager::getUV(AnimationID aID,
+                          FrameID fID) {
+        return mAnimationUVs[aID][fID];
+    }
+
+    void
+    TextureManager::makeAnim(MaterialTransition_Texture &output,
+                             NumAnimationFrames numFrames,
+                             r32 fps) {
+        output.nextFrame = 0;
+        output.playing = true;
+        output.numFrames = numFrames;
+        output.ttl.maxAge = 1.0 / fps;
+        output.nextFrame = 0;
+        output.ttl.currentAge = 0;
+        output.animID = enumCast(numFrames);
     }
 }

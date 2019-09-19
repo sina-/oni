@@ -4,7 +4,6 @@
 
 #include <GL/glew.h>
 
-#include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/graphic/buffer/oni-graphic-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
@@ -14,8 +13,9 @@
 
 
 namespace oni {
-    Renderer_OpenGL_Tessellation::Renderer_OpenGL_Tessellation(oniGLsizei maxSpriteCount) :
-            Renderer_OpenGL(PrimitiveType::POINTS),
+    Renderer_OpenGL_Tessellation::Renderer_OpenGL_Tessellation(oniGLsizei maxSpriteCount,
+                                                               TextureManager &tm) :
+            Renderer_OpenGL(PrimitiveType::POINTS, tm),
             mMaxPrimitiveCount{maxSpriteCount} {
         mMaxIndicesCount = mMaxPrimitiveCount;
         oniGLsizei vertexSize = sizeof(TessellationVertex);
@@ -250,15 +250,11 @@ namespace oni {
                     case MaterialTransition_Type::TEXTURE: {
                         const auto &animation = renderable.trans->texture;
                         effectID = 1.f;
-                        auto currentFrame = animation.nextFrame;
-                        if (currentFrame < animation.frameUV.size()) {
-                            uv0 = animation.frameUV[currentFrame].values[0];
-                            uv1 = animation.frameUV[currentFrame].values[1];
-                            uv2 = animation.frameUV[currentFrame].values[2];
-                            uv3 = animation.frameUV[currentFrame].values[3];
-                        } else {
-                            assert(false);
-                        }
+                        const auto &UVs = mTextureManager.getUV(animation.animID, animation.nextFrame);
+                        uv0 = UVs.values[0];
+                        uv1 = UVs.values[1];
+                        uv2 = UVs.values[2];
+                        uv3 = UVs.values[3];
                         break;
                     }
                     case MaterialTransition_Type::FADE: {

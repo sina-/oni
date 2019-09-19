@@ -28,13 +28,13 @@ namespace oni {
     SceneManager::SceneManager(const ScreenBounds &screenBounds,
                                AssetManager &assetManager,
                                ZLayerManager &zLayerManager,
-                               TextureManager &textureManager,
+                               TextureManager &tm,
                                b2World &physicsWorld) :
     // 64k vertices
             mMaxSpriteCount(64 * 1000),
             mScreenBounds(screenBounds),
             mPhysicsWorld(physicsWorld),
-            mTextureManager(textureManager),
+            mTextureManager(tm),
             mZLayerManager(zLayerManager) {
 
         mProjectionMatrix = mat4::orthographic(screenBounds.xMin, screenBounds.xMax, screenBounds.yMin,
@@ -43,10 +43,9 @@ namespace oni {
 
         mModelMatrix = mat4::identity();
 
-        mRendererTessellation = std::make_unique<Renderer_OpenGL_Tessellation>(mMaxSpriteCount);
-        mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount);
-        mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount);
-
+        mRendererTessellation = std::make_unique<Renderer_OpenGL_Tessellation>(mMaxSpriteCount, tm);
+        mRendererStrip = std::make_unique<Renderer_OpenGL_Strip>(mMaxSpriteCount, tm);
+        mRendererQuad = std::make_unique<Renderer_OpenGL_Quad>(mMaxSpriteCount, tm);
 
         mRand = std::make_unique<Rand>(0, 0);
 
@@ -545,12 +544,12 @@ namespace oni {
     void
     SceneManager::updateTextureAnimated(MaterialTransition_Texture &mta,
                                         r64 tickTime) {
-        mta.timeElapsed += tickTime;
+        mta.ttl.currentAge += tickTime;
         // NOTE: It is assumed that this function is called more often than animation fps!
-        assert(mta.frameDuration > tickTime);
-        if (mta.playing && almost_Greater(mta.timeElapsed, mta.frameDuration)) {
+        assert(mta.ttl.maxAge > tickTime);
+        if (mta.playing && almost_Greater(mta.ttl.currentAge, mta.ttl.maxAge)) {
             mta.nextFrame = (mta.nextFrame + 1) % enumCast(mta.numFrames);
-            mta.timeElapsed = 0;
+            mta.ttl.currentAge = 0;
         }
     }
 

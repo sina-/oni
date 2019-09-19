@@ -7,7 +7,8 @@ namespace oni {
 
     class Renderer_OpenGL_Quad : public Renderer_OpenGL {
     public:
-        explicit Renderer_OpenGL_Quad(oniGLsizei maxSpriteCount);
+        explicit Renderer_OpenGL_Quad(oniGLsizei maxSpriteCount,
+                                      TextureManager &);
 
         ~Renderer_OpenGL_Quad() override;
 

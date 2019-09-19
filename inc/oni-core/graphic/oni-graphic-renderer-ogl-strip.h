@@ -9,7 +9,8 @@ namespace oni {
 
     class Renderer_OpenGL_Strip : public Renderer_OpenGL {
     public:
-        explicit Renderer_OpenGL_Strip(oniGLsizei maxSpriteCount);
+        explicit Renderer_OpenGL_Strip(oniGLsizei maxSpriteCount,
+                                       TextureManager &);
 
         ~Renderer_OpenGL_Strip() override;
 

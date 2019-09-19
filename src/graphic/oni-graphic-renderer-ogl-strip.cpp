@@ -11,8 +11,9 @@
 
 
 namespace oni {
-    Renderer_OpenGL_Strip::Renderer_OpenGL_Strip(oniGLsizei maxSpriteCount) :
-            Renderer_OpenGL(PrimitiveType::TRIANGLE_STRIP),
+    Renderer_OpenGL_Strip::Renderer_OpenGL_Strip(oniGLsizei maxSpriteCount,
+                                                 TextureManager &tm) :
+            Renderer_OpenGL(PrimitiveType::TRIANGLE_STRIP, tm),
             mMaxPrimitiveCount(maxSpriteCount) {
         mVertexSize = sizeof(StripVertex);
         mMaxIndicesCount = mMaxPrimitiveCount;

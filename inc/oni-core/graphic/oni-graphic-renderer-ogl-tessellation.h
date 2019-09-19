@@ -9,7 +9,8 @@ namespace oni {
 
     class Renderer_OpenGL_Tessellation : public Renderer_OpenGL {
     public:
-        explicit Renderer_OpenGL_Tessellation(oniGLsizei maxSpriteCount);
+        explicit Renderer_OpenGL_Tessellation(oniGLsizei maxSpriteCount,
+                                              TextureManager &);
 
         ~Renderer_OpenGL_Tessellation() override;
 

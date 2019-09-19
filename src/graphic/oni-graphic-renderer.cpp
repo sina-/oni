@@ -4,7 +4,7 @@
 
 
 namespace oni {
-    Renderer::Renderer() = default;
+    Renderer::Renderer(TextureManager &tm) : mTextureManager(tm) {}
 
     Renderer::~Renderer() = default;
 

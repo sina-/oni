@@ -50,8 +50,8 @@ namespace oni {
         void
         blendAndUpdateTexture(Texture &texture,
                               Image &image,
-                              std::vector<u8>& storageTexture,
-                              std::vector<u8>& storageImage,
+                              std::vector<u8> &storageTexture,
+                              std::vector<u8> &storageImage,
                               const vec3 &brushTexturePos);
 
         void
@@ -70,14 +70,16 @@ namespace oni {
                       EntityAssetsPack tag);
 
         void
-        loadFromTextureID(Texture &, EntityAssetsPack tag);
+        loadFromTextureID(Texture &,
+                          EntityAssetsPack tag);
 
         static void
         loadFromTextureID(Texture &,
                           std::vector<u8> &data);
 
         static void
-        loadFromData(Texture &, const std::vector<u8> &data);
+        loadFromData(Texture &,
+                     const std::vector<u8> &data);
 
         // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random
         // data generations of all types
@@ -95,6 +97,15 @@ namespace oni {
 
         void
         loadAssets();
+
+        const UV &
+        getUV(AnimationID,
+              FrameID);
+
+        static void
+        makeAnim(MaterialTransition_Texture &,
+                 NumAnimationFrames,
+                 r32 fps);
 
     private:
         bool
@@ -114,12 +125,12 @@ namespace oni {
              Texture &);
 
     private:
-
-    private:
         std::map<EntityAssetsPack, Texture> mTextureMap{};
         std::map<EntityAssetsPack, Image> mImageMap{};
-        std::map<EntityAssetsPack , std::vector<u8>> mImageDataMap{};
+        std::map<EntityAssetsPack, std::vector<u8>> mImageDataMap{};
         const u8 mElementsInRGBA{4};
         oni::AssetManager &mAssetManager;
+
+        std::vector<std::vector<UV>> mAnimationUVs{};
     };
 }

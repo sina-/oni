@@ -9,7 +9,10 @@
 
 
 namespace oni {
-    Renderer_OpenGL::Renderer_OpenGL(PrimitiveType primitiveType) : mPrimitiveType(primitiveType) {
+    Renderer_OpenGL::Renderer_OpenGL(PrimitiveType primitiveType,
+                                     TextureManager &tm) :
+            Renderer(tm),
+            mPrimitiveType(primitiveType) {
         mFrameBuffer = std::make_unique<FrameBuffer>();
     }
 
@@ -48,8 +51,8 @@ namespace oni {
                 result = GL_ONE;
                 break;
             }
-            case BlendMode ::SRC_ALPHA: {
-                result =GL_SRC_ALPHA;
+            case BlendMode::SRC_ALPHA: {
+                result = GL_SRC_ALPHA;
                 break;
             }
             case BlendMode::ONE_MINUS_SRC_ALPHA: {

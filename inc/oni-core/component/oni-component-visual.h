@@ -12,6 +12,7 @@
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-physics.h>
+#include <oni-core/graphic/oni-graphic-fwd.h>
 
 
 namespace oni {
@@ -21,7 +22,7 @@ namespace oni {
         std::string_view path{};
     };
 
-    enum class NumAnimationFrames : oni::u8 {
+    enum class NumAnimationFrames : oni::FrameID {
         TWO = 2,
         FOUR = 4,
         FIVE = 5,
@@ -334,45 +335,11 @@ namespace oni {
     };
 
     struct MaterialTransition_Texture {
+        AnimationID animID{};
         NumAnimationFrames numFrames{NumAnimationFrames::TWO};
-        u8 nextFrame{0};
+        FrameID nextFrame{0};
         bool playing{true};
-        r64 timeElapsed{0.f};
-        r64 frameDuration{0.1f};
-        // TODO: LOL NO.
-        std::array<UV, enumCast(NumAnimationFrames::LAST)> frameUV{};
-
-        inline static MaterialTransition_Texture
-        make(NumAnimationFrames numFrames,
-             r32 fps) noexcept {
-            MaterialTransition_Texture result;
-            init(result, numFrames, fps);
-            return result;
-        }
-
-        inline static void
-        init(MaterialTransition_Texture &output,
-             NumAnimationFrames numFrames,
-             r32 fps) {
-            output.numFrames = numFrames;
-            output.frameDuration = 1.0 / fps;
-            output.nextFrame = 0;
-            output.timeElapsed = 0;
-
-            auto countFrame = enumCast(numFrames);
-            auto xOffset = 0.f;
-            auto xWidth = 1.f / countFrame;
-
-            //output.frameUV.resize(countFrame);
-            for (auto &&uv: output.frameUV) {
-                uv.values[0] = {xOffset, 0.f};
-                uv.values[1] = {xOffset, 1.f};
-                uv.values[2] = {xOffset + xWidth, 1.f};
-                uv.values[3] = {xOffset + xWidth, 0.f};
-
-                xOffset += xWidth;
-            }
-        }
+        TimeToLive ttl;
     };
 
     struct MaterialTransition_Def {
@@ -380,9 +347,9 @@ namespace oni {
         TimeToLive ttl;
 
         union {
-            MaterialTransition_Fade fade{};
+            MaterialTransition_Texture texture{};
+            MaterialTransition_Fade fade;
             MaterialTransition_Color color;
-            MaterialTransition_Texture texture;
         };
     };
 

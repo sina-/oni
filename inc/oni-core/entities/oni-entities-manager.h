@@ -361,7 +361,7 @@ namespace oni {
         }
 
         void
-        printEntityType(EntityID id);
+        printEntityType(EntityID id) const;
 
         bool
         valid(EntityID entityID);

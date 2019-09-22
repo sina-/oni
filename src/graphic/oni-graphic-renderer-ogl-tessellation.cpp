@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 
+#include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/graphic/buffer/oni-graphic-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-index-buffer.h>
 #include <oni-core/graphic/buffer/oni-graphic-vertex-array.h>
@@ -50,10 +51,12 @@ namespace oni {
         auto uvIndex_1 = glGetAttribLocation(program, "uv_1");
         auto uvIndex_2 = glGetAttribLocation(program, "uv_2");
         auto uvIndex_3 = glGetAttribLocation(program, "uv_3");
+        auto transformTypeIndex = glGetAttribLocation(program, "transformType");
 
         if (positionIndex == -1 || orntIndex == -1 || colorIndex == -1 ||
             samplerIDIndex == -1 || halfSizeIndex == -1 ||
             effectIndex == -1 ||
+            transformTypeIndex == -1 ||
             uvIndex_0 == -1 || uvIndex_1 == -1 || uvIndex_2 == -1 || uvIndex_3 == -1) {
             assert(false);
         }
@@ -142,6 +145,14 @@ namespace oni {
         uv_3.stride = vertexSize;
         uv_3.offset = reinterpret_cast<const oniGLvoid *>(offsetof(TessellationVertex, uv_3));
 
+        BufferStructure tt;
+        tt.index = static_cast<oniGLuint>(transformTypeIndex);
+        tt.componentCount = 1;
+        tt.componentType = GL_FLOAT;
+        tt.normalized = GL_FALSE;
+        tt.stride = vertexSize;
+        tt.offset = reinterpret_cast<const oniGLvoid *>(offsetof(TessellationVertex, transformType));
+
         std::vector<BufferStructure> bufferStructures;
         bufferStructures.push_back(sampler);
         bufferStructures.push_back(ornt);
@@ -153,6 +164,7 @@ namespace oni {
         bufferStructures.push_back(uv_1);
         bufferStructures.push_back(uv_2);
         bufferStructures.push_back(uv_3);
+        bufferStructures.push_back(tt);
 
         mVertexArray = std::make_unique<VertexArray>(bufferStructures, maxBufferSize);
 
@@ -238,6 +250,7 @@ namespace oni {
                 buffer->uv_2 = vec2{u1, v1};
                 buffer->uv_3 = vec2{u1, v0};
                 buffer->samplerID = samplerID;
+                buffer->transformType = enumCast(renderable.pt);
 
                 ++buffer;
                 mIndexCount += 1;
@@ -299,6 +312,7 @@ namespace oni {
             buffer->uv_2 = uv2;
             buffer->uv_3 = uv3;
             buffer->samplerID = samplerID;
+            buffer->transformType = enumCast(renderable.pt);
             ++buffer;
             mIndexCount += 1;
         }

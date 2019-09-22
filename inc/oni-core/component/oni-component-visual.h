@@ -373,29 +373,17 @@ namespace oni {
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
     enum class MaterialFinish_Type : oni::u8 {
         // NOTE: The order of the enums defines the order in which they are rendered!
+        // NOTE: For translucent and shinny entities since depth writes are disabled
+        // if an entity that is translucent but has higher z is rendered then a shinny
+        // entity with lower z is rendered it will still be drawn over the higher z
+        // entity!
 
         SOLID,
         TRANSLUCENT,
         SHINNY,
-        TRANSLUCENT_AND_SHINNY, // TODO: Can I merge these in a better way? Should I?
 
         LAST
     };
-
-//        struct MaterialFinish {
-//            union {
-//                common::r32 solidness;
-//                common::r32 translecency;
-//                common::r32 shinniness;
-//            };
-//            MaterialFinishType type;
-//
-//            auto
-//            typeID() const {
-//                return enumCast(type);
-//            }
-//        };
-//
 
     struct GrowOverTime {
         duration period{0.2f}; // NOTE: Grow every period

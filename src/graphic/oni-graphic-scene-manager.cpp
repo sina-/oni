@@ -19,10 +19,7 @@
 #include <oni-core/math/oni-math-z-layer-manager.h>
 #include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/math/oni-math-vec2.h>
-#include <GL/glew.h>
 
-
-#define DEBUG_Z 0
 
 namespace oni {
     SceneManager::SceneManager(const ScreenBounds &screenBounds,
@@ -87,6 +84,7 @@ namespace oni {
                          bool scale,
                          bool project) {
         spec.view = mat4::identity();
+        spec.proj = mat4::identity();
         if (project) {
             spec.proj = mProjectionMatrix;
         }
@@ -169,6 +167,8 @@ namespace oni {
                 renderable.ornt = &ornt;
                 renderable.scale = &scale;
                 renderable.skin = &skin;
+                // TODO: Read this value from the entity
+                renderable.pt = PrimitiveTransforms::DYNAMIC;
 
                 if (manager.has<MaterialTransition_List>(id)) {
                     const auto &transList = manager.get<MaterialTransition_List>(id);
@@ -203,6 +203,8 @@ namespace oni {
                 renderable.scale = &scale;
                 renderable.text = &text;
                 renderable.skin = &text.skin;
+                // TODO: Read this value from the entity
+                renderable.pt = PrimitiveTransforms::UI;
 
                 mRenderables[enumCast(MaterialFinish_Type::TRANSLUCENT)].push(renderable);
             }
@@ -224,7 +226,7 @@ namespace oni {
                 auto &r = const_cast<Renderable &> (mRenderables[i].top());
                 auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.ornt);
 
-                if (!isVisible(ePos.pos, *r.scale)) {
+                if (r.pt == PrimitiveTransforms::DYNAMIC && !isVisible(ePos.pos, *r.scale)) {
                     mRenderables[i].pop();
                     continue;
                 }
@@ -262,10 +264,6 @@ namespace oni {
             const auto &ph = view.get<WorldP3D_History>(id).pos;
             auto count = 0;
             for (auto &&p: ph) {
-#if DEBUG_Z
-                serverManager.printEntityType(id);
-                printf("%f\n", p.z);
-#endif
                 auto alpha = r32(count) / ph.size();
                 auto color = Color{};
                 color.set_rgba(1, 1, 1, alpha);

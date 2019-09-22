@@ -10,14 +10,15 @@
 
 namespace oni {
     enum class PrimitiveType : oni::u8 {
-        UNKNOWN,
-
         POINTS,
         LINES,
         TRIANGLES,
         TRIANGLE_STRIP,
+    };
 
-        LAST
+    enum class PrimitiveTransforms : oni::u8 {
+        DYNAMIC = 0,
+        UI = 1,
     };
 
     struct Renderable {
@@ -36,6 +37,7 @@ namespace oni {
         const WorldP3D *pos{};
         const Orientation *ornt{};
         const Scale *scale{};
+        PrimitiveTransforms pt{};
 
         const MaterialSkin *skin{};
         const MaterialText *text{};
@@ -57,7 +59,7 @@ namespace oni {
 
     class Renderer {
     protected:
-        explicit Renderer(TextureManager&);
+        explicit Renderer(TextureManager &);
 
         virtual ~Renderer();
 

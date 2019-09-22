@@ -4,11 +4,9 @@
 
 namespace oni {
     mat4::mat4() {
-        std::fill(elements.begin(), elements.end(), 0.0f);
     }
 
-    mat4::mat4(float diag) {
-        std::fill(elements.begin(), elements.end(), 0.0f);
+    mat4::mat4(r32 diag) {
         elements[0 + 0 * 4] = diag;
         elements[1 + 1 * 4] = diag;
         elements[2 + 2 * 4] = diag;
@@ -21,12 +19,12 @@ namespace oni {
     }
 
     mat4
-    mat4::orthographic(float left,
-                       float right,
-                       float bottom,
-                       float top,
-                       float near,
-                       float far) {
+    mat4::orthographic(r32 left,
+                       r32 right,
+                       r32 bottom,
+                       r32 top,
+                       r32 near,
+                       r32 far) {
         mat4 result(0.0f);
         result.elements[0 + 0 * 4] = 2.0f / (right - left);
         result.elements[1 + 1 * 4] = 2.0f / (top - bottom);
@@ -42,16 +40,16 @@ namespace oni {
     }
 
     mat4
-    mat4::perspective(float fov,
-                      float aspectRatio,
-                      float near,
-                      float far) {
+    mat4::perspective(r32 fov,
+                      r32 aspectRatio,
+                      r32 near,
+                      r32 far) {
         mat4 result(0.0f);
-        float q = 1.0f / tan(toRadians(0.5f * fov));
-        float a = 1 / (q * aspectRatio);
+        r32 q = 1.0f / tan(toRadians(0.5f * fov));
+        r32 a = 1 / (q * aspectRatio);
 
-        float b = (near + far) / (near - far);
-        float c = (2.0f * near * far) / (near - far);
+        r32 b = (near + far) / (near - far);
+        r32 c = (2.0f * near * far) / (near - far);
 
         result.elements[0 + 0 * 4] = a;
         result.elements[1 + 2 * 4] = q;
@@ -73,9 +71,9 @@ namespace oni {
     }
 
     mat4
-    mat4::translation(float x,
-                      float y,
-                      float z) {
+    mat4::translation(r32 x,
+                      r32 y,
+                      r32 z) {
         mat4 result(1.0f);
         result.elements[0 + 3 * 4] = x;
         result.elements[1 + 3 * 4] = y;
@@ -85,16 +83,16 @@ namespace oni {
     }
 
     mat4
-    mat4::rotation(float angle,
+    mat4::rotation(r32 angle,
                    const vec3 &axis) {
         mat4 result(1.0f);
-        float c = std::cos(angle);
-        float s = std::sin(angle);
-        float omc = 1.0f - c;
+        r32 c = std::cos(angle);
+        r32 s = std::sin(angle);
+        r32 omc = 1.0f - c;
 
-        float x = axis.x;
-        float y = axis.y;
-        float z = axis.z;
+        r32 x = axis.x;
+        r32 y = axis.y;
+        r32 z = axis.z;
 
         result.elements[0 + 0 * 4] = x * omc + c;
         result.elements[1 + 0 * 4] = y * x * omc + z * s;
@@ -130,10 +128,10 @@ namespace oni {
 
     mat4 &
     mat4::multiply(const mat4 &other) {
-        std::array<float, 4 * 4> result{};
+        std::array<r32, 4 * 4> result{};
         for (u8 i = 0; i < 4; i++) {
             for (u8 j = 0; j < 4; j++) {
-                float sum = 0.0f;
+                r32 sum = 0.0f;
                 for (u8 k = 0; k < 4; k++)
                     sum += elements[j + k * 4] * other.elements[k + i * 4];
                 result[j + i * 4] = sum;

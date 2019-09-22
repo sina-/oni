@@ -22,6 +22,7 @@ namespace oni {
         vec2 uv_1{0, 1};
         vec2 uv_2{1, 1};
         vec2 uv_3{1, 0};
+        r32 transformType{0.f};
     };
 
     struct StripVertex {

@@ -108,7 +108,7 @@ namespace oni {
         std::unique_ptr<FrameBuffer> mFrameBuffer{nullptr};
 
     private:
-        PrimitiveType mPrimitiveType{PrimitiveType::UNKNOWN};
+        PrimitiveType mPrimitiveType{};
 
         oniGLint mNextSamplerID{0};
 

@@ -212,7 +212,7 @@ namespace oni {
     }
 
     void
-    EntityManager::printEntityType(EntityID id) {
+    EntityManager::printEntityType(EntityID id) const {
         const auto &t = mRegistry->get<EntityType>(id);
         auto name = std::string();
         switch (t) {
@@ -303,7 +303,13 @@ namespace oni {
                 break;
             }
         }
-        std::cout << id << ", " << name << '\n';
+        std::cout << id << ", " << name;
+        if (mRegistry->has<WorldP3D>(id)) {
+            const auto &pos = mRegistry->get<WorldP3D>(id);
+            std::cout << " " << pos.value;
+        }
+
+        std::cout << "\n";
     }
 
     void

@@ -23,11 +23,6 @@ namespace oni {
                 result.dest = BlendMode::ONE;
                 break;
             }
-            case MaterialFinish_Type::TRANSLUCENT_AND_SHINNY: {
-                result.src = BlendMode::ONE;
-                result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
-                break;
-            }
             case MaterialFinish_Type::LAST:
             default: {
                 assert(false);
@@ -48,7 +43,6 @@ namespace oni {
             }
                 // TODO: Is this correct?
             case MaterialFinish_Type::TRANSLUCENT:
-            case MaterialFinish_Type::TRANSLUCENT_AND_SHINNY :
             case MaterialFinish_Type::SHINNY: {
                 result.depthRead = true;
                 result.depthWrite = false;

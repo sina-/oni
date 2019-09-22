@@ -11,7 +11,7 @@
 
 namespace oni {
     FontManager::FontManager(std::string font,
-                             unsigned char size,
+                             u8 size,
                              r32 gameWidth,
                              r32 gameHeight) {
         // NOTE: 4 means RGBA which also corresponds to OpenGL texture format GL_RGBA

@@ -55,7 +55,7 @@ namespace oni {
 
         while (enet_host_service(mEnetHost, &event, 0) > 0) {
 
-            char ip[16]{};
+            char ip[16];
             enet_address_get_host_ip(&event.peer->address, ip, 16);
 
             switch (event.type) {

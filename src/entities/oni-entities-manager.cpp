@@ -88,9 +88,6 @@ namespace oni {
     EntityID
     EntityManager::map(EntityID entityID) {
         auto result = mLoader->map(entityID);
-        if (result == entt::null) {
-            return 0;
-        }
         return result;
     }
 

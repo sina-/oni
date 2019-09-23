@@ -283,15 +283,6 @@ namespace oni {
         );
     }
 
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Tag_Static &) {}
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Tag_Dynamic &) {}
 
     template<class Archive>
     void

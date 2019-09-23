@@ -6,12 +6,6 @@ namespace oni {
     };
 
     /// Graphics
-    struct Tag_Static {
-    };
-
-    struct Tag_Dynamic {
-    };
-
     struct Tag_SplatOnDeath {
     };
 

@@ -308,7 +308,6 @@ namespace oni {
                manager.getSimMode() == SimMode::CLIENT);
 
         auto view = manager.createView<
-                Tag_Dynamic,
                 WorldP3D,
                 Orientation,
                 Scale,
@@ -442,8 +441,6 @@ namespace oni {
             auto &pos = manager.get<WorldP3D>(pair.a);
             auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
 
-            // NOTE: It is up to the client to decide what to do with this event, such as spawning particles, playing
-            // sound effects, etc.
             manager.enqueueEvent<Event_Collision>(pos, pair, pcPair);
         }
     }

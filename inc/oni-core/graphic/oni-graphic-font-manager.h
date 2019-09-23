@@ -32,7 +32,7 @@ namespace oni {
         initializeText(MaterialText &);
 
         void
-        updateText(const std::string &textContent,
+        updateText(std::string &&textContent,
                    MaterialText &text);
 
         size_t

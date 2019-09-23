@@ -86,12 +86,12 @@ namespace oni {
     }
 
     void
-    FontManager::updateText(const std::string &textContent,
+    FontManager::updateText(std::string &&textContent,
                             MaterialText &text) {
         if (textContent == text.textContent) {
             return;
         }
-        text.textContent = textContent;
+        text.textContent = std::move(textContent);
         text.height.clear();
         text.width.clear();
         text.offsetX.clear();

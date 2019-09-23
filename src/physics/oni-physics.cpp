@@ -261,7 +261,6 @@ namespace oni {
             auto &pos = view.get<WorldP3D>(id);
             auto &ornt = view.get<Orientation>(id);
             auto *body = manager.getEntityBody(id);
-            auto collisionPairs = std::unordered_set<EntityPair, EntityPairHasher>();
             // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
             // just apply user input to box2d representation of physical body without syncing
             // car dynamics with box2d physics, that way the next tick if the
@@ -282,7 +281,8 @@ namespace oni {
                         true);
                 car.isColliding = false;
             } else {
-                if (isColliding(body, collisionPairs)) {
+                auto c = isColliding(body);
+                if (c.colliding) {
                     car.velocity = vec2{body->GetLinearVelocity().x,
                                         body->GetLinearVelocity().y};
                     car.angularVelocity = body->GetAngularVelocity();
@@ -342,20 +342,33 @@ namespace oni {
         return mPhysicsWorld.get();
     }
 
-    bool
-    Physics::isColliding(b2Body *body,
-                         std::unordered_set<EntityPair, EntityPairHasher> &result) {
+    Physics::CollisionResult
+    Physics::isColliding(b2Body *body) {
+        auto result = Physics::CollisionResult{};
+        result.colliding = false;
         for (auto *ce = body->GetContactList(); ce; ce = ce->next) {
             auto *c = ce->contact;
             if (c->IsTouching()) {
                 auto a = body->GetEntityID();
                 auto b = ce->other->GetEntityID();
                 assert(a != b);
-                result.insert({a, b});
-                return true;
+                b2WorldManifold wm;
+                c->GetWorldManifold(&wm);
+
+                result.colliding = true;
+                result.pair.a = a;
+                result.pair.b = b;
+
+                result.pos.x = wm.points[0].x;
+                result.pos.y = wm.points[0].y;
+                if (c->GetManifold()->pointCount > 1) {
+                    result.pos.x = (result.pos.x + wm.points[1].x) / 2.f;
+                    result.pos.y = (result.pos.y + wm.points[1].y) / 2.f;
+                }
+                return result;
             }
         }
-        return false;
+        return result;
     }
 
     void
@@ -430,18 +443,17 @@ namespace oni {
                     PhysicalProperties>();
             for (auto &&id: view) {
                 auto *body = manager.getEntityBody(id);
-                isColliding(body, uniqueCollisions);
+                auto result = isColliding(body);
+                if (result.colliding && uniqueCollisions.find(result.pair) == uniqueCollisions.end()) {
+                    uniqueCollisions.emplace(result.pair);
+
+                    auto &propsA = manager.get<PhysicalProperties>(result.pair.a);
+                    auto &propsB = manager.get<PhysicalProperties>(result.pair.b);
+                    auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
+
+                    manager.enqueueEvent<Event_Collision>(result.pos, result.pair, pcPair);
+                }
             }
-        }
-
-        for (auto &&pair: uniqueCollisions) {
-            auto &propsA = manager.get<PhysicalProperties>(pair.a);
-            auto &propsB = manager.get<PhysicalProperties>(pair.b);
-            // TODO: This is wrong, I need to get the position of point of contact
-            auto &pos = manager.get<WorldP3D>(pair.a);
-            auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
-
-            manager.enqueueEvent<Event_Collision>(pos, pair, pcPair);
         }
     }
 }

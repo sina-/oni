@@ -68,10 +68,16 @@ namespace oni {
         getPhysicsWorld();
 
     private:
-        static bool
-        isColliding(b2Body *,
-                    std::unordered_set<EntityPair, EntityPairHasher> &
-        );
+        struct CollisionResult {
+            bool colliding{false};
+            EntityPair pair{};
+            WorldP3D pos{};
+            // Impulse?
+        };
+
+    private:
+        static CollisionResult
+        isColliding(b2Body *);
 
     private:
         std::unique_ptr<b2World> mPhysicsWorld{};

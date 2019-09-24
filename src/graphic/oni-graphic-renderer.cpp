@@ -89,12 +89,19 @@ namespace oni {
     bool
     operator<(const Renderable &left,
               const Renderable &right) {
-        return left.pos->z >= right.pos->z;
+        // NOTE: To keep rendering order stable over entities that have equal z values.
+        if (almost_Equal(left.pos->z, right.pos->z)) {
+            return left.id > right.id;
+        }
+        return left.pos->z > right.pos->z;
     }
 
     bool
     operator>(const Renderable &left,
               const Renderable &right) {
-        return left.pos->z <= right.pos->z;
+        if (almost_Equal(left.pos->z, right.pos->z)) {
+            return left.id < right.id;
+        }
+        return left.pos->z < right.pos->z;
     }
 }

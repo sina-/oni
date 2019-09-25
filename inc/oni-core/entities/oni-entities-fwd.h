@@ -11,8 +11,8 @@ namespace oni {
     struct DeletedEntity;
     struct EntityOperationPolicy;
     struct EntityContext;
+    struct EntityType;
 
-    enum class EntityType : u16;
     enum class SimMode : u8;
     enum class SnapshotType;
 }

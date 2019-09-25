@@ -27,30 +27,26 @@ namespace oni {
 
     void
     ZLayerManager::constructEntityLayers() {
-        mEntityZLayers[EntityType::BACKGROUND] = getNextZAtLayer(ZLayerDef::LAYER_0);
-        mEntityZLayers[EntityType::ROAD] = getNextZAtLayer(ZLayerDef::LAYER_0);
-        mEntityZLayers[EntityType::WALL] = getNextZAtLayer(ZLayerDef::LAYER_0);
+    }
 
-        mEntityZLayers[EntityType::CANVAS] = getNextZAtLayer(ZLayerDef::LAYER_1);
+    void
+    ZLayerManager::setZForEntity(const EntityType &t,
+                                 ZLayerDef def) {
+        auto layer = getNextZAtLayer(def);
+        mEntityZLayers.emplace(t.value, layer);
+    }
 
-        mEntityZLayers[EntityType::VEHICLE_TIRE_REAR] = getNextZAtLayer(ZLayerDef::LAYER_2);
-        mEntityZLayers[EntityType::VEHICLE_TIRE_FRONT] = mEntityZLayers[EntityType::VEHICLE_TIRE_REAR];
-        mEntityZLayers[EntityType::RACE_CAR] = getNextZAtLayer(ZLayerDef::LAYER_2);
-        mEntityZLayers[EntityType::VEHICLE] = mEntityZLayers[EntityType::RACE_CAR];
-
-        mEntityZLayers[EntityType::VEHICLE_GUN] = getNextZAtLayer(ZLayerDef::LAYER_2);
-
-        mEntityZLayers[EntityType::SMOKE_CLOUD] = getNextZAtLayer(ZLayerDef::LAYER_4);
-        mEntityZLayers[EntityType::TRAIL_PARTICLE] = getNextZAtLayer(ZLayerDef::LAYER_4);
-        mEntityZLayers[EntityType::SIMPLE_PARTICLE] = getNextZAtLayer(ZLayerDef::LAYER_4);
-
-        mEntityZLayers[EntityType::UI] = getNextZAtLayer(ZLayerDef::LAYER_8);
+    void
+    ZLayerManager::setZForEntityEqual(const EntityType &src,
+                                      const EntityType &dest) {
+        assert(mEntityZLayers.find(src.value) != mEntityZLayers.end());
+        mEntityZLayers[dest.value] = mEntityZLayers[src.value];
     }
 
     r32
     ZLayerManager::getZForEntity(EntityType type) const {
-        assert(mEntityZLayers.find(type) != mEntityZLayers.end());
-        return mEntityZLayers.at(type);
+        assert(mEntityZLayers.find(type.value) != mEntityZLayers.end());
+        return mEntityZLayers.at(type.value);
     }
 
     r32

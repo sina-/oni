@@ -51,16 +51,12 @@ namespace oni {
 
     void
     EntityManager::attach(EntityID parent,
-                          EntityID child,
-                          EntityType parentType,
-                          EntityType childType) {
+                          EntityID child) {
         auto &attachment = mRegistry->get<EntityAttachment>(parent);
         attachment.entities.emplace_back(child);
-        attachment.entityTypes.emplace_back(childType);
 
         auto &attachee = mRegistry->get<EntityAttachee>(child);
         attachee.entityID = parent;
-        attachee.entityType = parentType;
     }
 
     void
@@ -157,7 +153,7 @@ namespace oni {
     }
 
     EntityID
-    EntityManager::createEntity(EntityType type) {
+    EntityManager::createEntity(const EntityType &type) {
         assert(mSimMode == SimMode::SERVER || mSimMode == SimMode::CLIENT);
         auto id = mRegistry->create();
         if (mEntityOperationPolicy.track) {
@@ -166,6 +162,11 @@ namespace oni {
         }
         createComponent<EntityType>(id, type);
         return id;
+    }
+
+    EntityID
+    EntityManager::createEntity(const decltype(EntityType::value) &t) {
+        return createEntity(EntityType{t});
     }
 
     void
@@ -212,97 +213,15 @@ namespace oni {
     }
 
     void
+    EntityManager::registerEntityDebugName(const EntityType &t,
+                                           std::string &&name) {
+        mEntityDebugNameLookup.emplace(t.value, std::move(name));
+    }
+
+    void
     EntityManager::printEntityType(EntityID id) const {
         const auto &t = mRegistry->get<EntityType>(id);
-        auto name = std::string();
-        switch (t) {
-            case EntityType::BACKGROUND: {
-                name = "background";
-                break;
-            }
-            case EntityType::ROAD: {
-                name = "road";
-                break;
-            }
-            case EntityType::WALL: {
-                name = "wall";
-                break;
-            }
-            case EntityType::RACE_CAR: {
-                name = "race_car";
-                break;
-            }
-            case EntityType::VEHICLE: {
-                name = "vehicle";
-                break;
-            }
-            case EntityType::VEHICLE_GUN: {
-                name = "vehicle_gun";
-                break;
-            }
-            case EntityType::VEHICLE_TIRE_REAR: {
-                name = "vehicle_tire_rear";
-                break;
-            }
-            case EntityType::VEHICLE_TIRE_FRONT: {
-                name = "vehicle_tire_front";
-                break;
-            }
-            case EntityType::UI: {
-                name = "ui";
-                break;
-            }
-            case EntityType::CANVAS: {
-                name = "canvas";
-                break;
-            }
-            case EntityType::SIMPLE_SPRITE: {
-                name = "simple_sprite";
-                break;
-            }
-            case EntityType::SIMPLE_PARTICLE: {
-                name = "simple_particle";
-                break;
-            }
-            case EntityType::SIMPLE_BLAST_PARTICLE: {
-                name = "simple_blast_particle";
-                break;
-            }
-            case EntityType::SIMPLE_BLAST_ANIMATION: {
-                name = "simple_blast_animation";
-                break;
-            }
-            case EntityType::SIMPLE_ROCKET: {
-                name = "simple_rocket";
-                break;
-            }
-            case EntityType::TRAIL_PARTICLE: {
-                name = "trail_particle";
-                break;
-            }
-            case EntityType::TEXT: {
-                name = "text";
-                break;
-            }
-            case EntityType::WORLD_CHUNK: {
-                name = "world_chunk";
-                break;
-            }
-            case EntityType::DEBUG_WORLD_CHUNK: {
-                name = "debug_world_chunk";
-                break;
-            }
-            case EntityType::SMOKE_CLOUD: {
-                name = "smoke_cloud";
-                break;
-            }
-            case EntityType::UNKNOWN:
-            case EntityType::LAST:
-            default: {
-                assert(false);
-                break;
-            }
-        }
+        const auto name = mEntityDebugNameLookup.at(t.value);
         std::cout << id << ", " << name;
         if (mRegistry->has<WorldP3D>(id)) {
             const auto &pos = mRegistry->get<WorldP3D>(id);

@@ -180,30 +180,6 @@ namespace oni {
                 }
             }
         }
-
-        /// Update tires
-        // TODO: This is useless in Engine code. Input processing should be able to take care of this.
-        {
-            auto view = manager.createView<
-                    EntityAttachment,
-                    Car>();
-            for (auto &&id : view) {
-                const auto &attachments = view.get<EntityAttachment>(id);
-                const auto &car = view.get<Car>(id);
-                for (size i = 0; i < attachments.entities.size(); ++i) {
-                    if (attachments.entityTypes[i] == EntityType::VEHICLE_TIRE_FRONT) {
-                        auto &ornt = manager.get<Orientation>(attachments.entities[i]).value;
-
-                        // TODO: I shouldn't need to do this kinda of rotation transformation, x-1.0f + 90.0f.
-                        // There seems to be something wrong with the way tires are created in the beginning
-                        ornt = static_cast<r32>(car.steerAngle +
-                                                toRadians(90.0f));
-
-                        manager.markForNetSync(attachments.entities[i]);
-                    }
-                }
-            }
-        }
     }
 
     void

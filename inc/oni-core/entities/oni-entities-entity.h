@@ -7,38 +7,8 @@
 
 
 namespace oni {
-    // TODO: This should move to game
-    enum class EntityType : oni::u16 {
-        UNKNOWN,
-
-        BACKGROUND,
-        ROAD,
-        WALL,
-
-        RACE_CAR,
-        VEHICLE,
-        VEHICLE_GUN,
-        VEHICLE_TIRE_REAR,
-        VEHICLE_TIRE_FRONT,
-
-        UI,
-        CANVAS,
-
-        SIMPLE_SPRITE,
-        SIMPLE_PARTICLE,
-        SIMPLE_BLAST_PARTICLE,
-        SIMPLE_BLAST_ANIMATION,
-        SIMPLE_ROCKET,
-
-        TRAIL_PARTICLE,
-
-        TEXT,
-        WORLD_CHUNK,
-        DEBUG_WORLD_CHUNK,
-
-        SMOKE_CLOUD,
-
-        LAST
+    struct EntityType {
+        oni::u16 value;
     };
 
     enum class SimMode : oni::u8 {

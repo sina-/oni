@@ -15,16 +15,24 @@ namespace oni {
 
         explicit ZLayerManager(const ZLayer &);
 
-        r32
-        getZForEntity(EntityType) const;
+        void
+        setZForEntity(const EntityType &,
+                      ZLayerDef);
+
+        void
+        setZForEntityEqual(const EntityType &src,
+                           const EntityType &dest);
 
         r32
-        getNextZAtLayer(ZLayerDef);
+        getZForEntity(EntityType) const;
 
         ZLayer
         getZLayer() const;
 
     private:
+        r32
+        getNextZAtLayer(ZLayerDef);
+
         void
         constructEntityLayers();
 
@@ -35,6 +43,6 @@ namespace oni {
         ZLayer mZLayer{};
         ZLayer mZLayerTop{};
 
-        std::unordered_map<EntityType, r32> mEntityZLayers;
+        std::unordered_map<decltype(EntityType::value), r32> mEntityZLayers;
     };
 }

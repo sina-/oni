@@ -35,6 +35,7 @@ namespace oni {
         operator=(const EntityManager &) const = delete;
 
     public:
+        // TODO: These functions shouldn't be here
         void
         setWorldP3D(EntityID,
                     r32 x,
@@ -121,9 +122,7 @@ namespace oni {
 
         void
         attach(EntityID parent,
-               EntityID child,
-               EntityType parentType,
-               EntityType childType);
+               EntityID child);
 
         static void
         bindLifetime(const EntityContext &parent,
@@ -330,7 +329,10 @@ namespace oni {
         dispatchEventsAndFlush(EventDispatcherType type);
 
         EntityID
-        createEntity(EntityType);
+        createEntity(const EntityType &);
+
+        EntityID
+        createEntity(const decltype(EntityType::value) &);
 
         template<class Component, class... Args>
         Component &
@@ -359,6 +361,11 @@ namespace oni {
         assignTag(EntityID id) {
             mRegistry->assign<Tag>(id);
         }
+
+        // TODO: this one and printEntityType do not need to be part of engine
+        void
+        registerEntityDebugName(const EntityType &,
+                                std::string &&name);
 
         void
         printEntityType(EntityID id) const;
@@ -411,5 +418,6 @@ namespace oni {
 
         std::unordered_set<EntityID> mEntitiesToDelete{};
         std::vector<DeletedEntity> mDeletedEntities{};
+        std::unordered_map<decltype(EntityType::value), std::string> mEntityDebugNameLookup{};
     };
 }

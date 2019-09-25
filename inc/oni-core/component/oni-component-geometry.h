@@ -134,12 +134,10 @@ namespace oni {
 
     struct EntityAttachment {
         std::vector<EntityID> entities;
-        std::vector<EntityType> entityTypes;
     };
 
     struct EntityAttachee {
         EntityID entityID;
-        EntityType entityType;
     };
 
     struct Quad {

@@ -197,14 +197,21 @@ namespace oni {
     void
     serialize(Archive &archive,
               EntityAttachment &data) {
-        archive(data.entities, data.entityTypes);
+        archive(data.entities);
     }
 
     template<class Archive>
     void
     serialize(Archive &archive,
               EntityAttachee &data) {
-        archive(data.entityID, data.entityType);
+        archive(data.entityID);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              EntityType &data) {
+        archive(data.value);
     }
 
     template<class Archive>

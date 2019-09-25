@@ -11,7 +11,7 @@
 
 namespace oni {
     Client::Client() : Peer::Peer(nullptr, 1, 2, 0, 0) {
-        mTimer = std::make_unique<utils::Timer>();
+        mTimer = std::make_unique<Timer>();
     }
 
     Client::~Client() = default;

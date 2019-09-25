@@ -78,21 +78,21 @@ namespace oni {
         const r32 mTickS{1 / 60.0f};
 
     protected:
-        utils::Timer mSimTimer{};
-        utils::Timer mSimLoopTimer{};
+        Timer mSimTimer{};
+        Timer mSimLoopTimer{};
         u16 mSimUpdateCounter{0};
         r64 mSimMS{0.0f};
 
-        utils::Timer mPollTimer{};
-        utils::Timer mPollLoopTimer{};
+        Timer mPollTimer{};
+        Timer mPollLoopTimer{};
         u16 mPollUpdateCounter{0};
         r64 mPollMS{0.0f};
 
-        utils::Timer mRenderTimer{};
-        utils::Timer mRenderLoopTimer{};
+        Timer mRenderTimer{};
+        Timer mRenderLoopTimer{};
         u16 mRenderUpdateCounter{0};
         r64 mRenderMS{0.0f};
 
-        utils::Timer mGameLoopTimer{};
+        Timer mGameLoopTimer{};
     };
 }

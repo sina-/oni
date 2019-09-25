@@ -108,8 +108,8 @@ namespace oni {
         u64 mTotalDownload{}; // Number of bytes received
         u64 mTotalUpload{}; // Number of bytes sent
 
-        utils::Timer mDownloadTimer{};
-        utils::Timer mUploadTimer{};
+        Timer mDownloadTimer{};
+        Timer mUploadTimer{};
 
         r32 mDownloadBPS{};
         r32 mUploadBPS{};

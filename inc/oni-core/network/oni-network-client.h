@@ -52,6 +52,6 @@ namespace oni {
 
     private:
         ENetPeer *mEnetServer;
-        std::unique_ptr<utils::Timer> mTimer{};
+        std::unique_ptr<Timer> mTimer{};
     };
 }

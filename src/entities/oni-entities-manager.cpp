@@ -307,14 +307,14 @@ namespace oni {
             }
         }
         body->SetEntityID(id);
-        mEntityBodyMap.emplace(id, body);
+        createComponent<PhysicalBody>(id, body);
     }
 
     void
     EntityManager::removePhysicalBody(EntityID id) {
-        auto *body = getEntityBody(id);
-        mPhysicsWorld->DestroyBody(body);
-        assert(mEntityBodyMap.erase(id));
+        auto &body = get<PhysicalBody>(id);
+        mPhysicsWorld->DestroyBody(body.value);
+        removeComponent<PhysicalBody>(id);
     }
 
     void
@@ -409,13 +409,6 @@ namespace oni {
         color.set_g(green);
         color.set_b(blue);
         color.set_a(alpha);
-    }
-
-    b2Body *
-    EntityManager::getEntityBody(EntityID id) {
-        auto r = mEntityBodyMap.find(id);
-        assert(r != mEntityBodyMap.end());
-        return r->second;
     }
 
     SimMode

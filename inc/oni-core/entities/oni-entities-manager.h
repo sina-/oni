@@ -94,9 +94,6 @@ namespace oni {
         setText(EntityID,
                 std::string_view content);
 
-        b2Body *
-        getEntityBody(EntityID);
-
         Rand *
         getRand();
 
@@ -328,6 +325,20 @@ namespace oni {
         void
         dispatchEventsAndFlush(EventDispatcherType type);
 
+        template<class ...Component, class Func>
+        void
+        update(Func f,
+               duration32 d) {
+            auto view = createView<Component...>();
+            auto context = EntityTickContext{*this, 0, d};
+
+            for (auto &&id: view) {
+                context.id = id;
+                f(context, view.template get<Component>(id)...);
+            }
+        }
+
+    public:
         EntityID
         createEntity(const EntityType &);
 
@@ -346,6 +357,12 @@ namespace oni {
         void
         removeComponent(EntityID entityID) {
             mRegistry->remove<Component>(entityID);
+        }
+
+        template<class Component>
+        auto
+        componentID() {
+            return mRegistry->type<Component>();
         }
 
         template<class Component>
@@ -410,8 +427,6 @@ namespace oni {
     private:
         b2World *mPhysicsWorld;
         std::unique_ptr<Rand> mRand{};
-
-        std::unordered_map<EntityID, b2Body *> mEntityBodyMap{};
 
         SimMode mSimMode{SimMode::CLIENT};
         EntityOperationPolicy mEntityOperationPolicy{};

@@ -34,6 +34,7 @@ namespace oni {
     struct CarConfig;
     struct JetForce;
     struct PhysicalProperties;
+    struct PhysicalBody;
     struct TimeToLive;
     struct Velocity;
 

@@ -21,13 +21,16 @@ namespace oni {
     }
 
     void
-    Game::initRenderer() {
-    }
+    Game::initRenderer() { }
+
+    void
+    Game::initSystems() {}
 
     void
     Game::run() {
         initRenderer();
-        auto tickTime = std::chrono::microseconds(static_cast<u64>(mTickS * 1000 * 1000));
+        initSystems();
+        auto dt = std::chrono::microseconds(static_cast<u64>(mTickS * 1000 * 1000));
 
         while (!shouldTerminate()) {
             mGameLoopTimer.restart();
@@ -36,7 +39,7 @@ namespace oni {
             render();
             finish();
             auto elapsed = mGameLoopTimer.elapsed<std::chrono::microseconds>();
-            auto excess = tickTime - elapsed;
+            auto excess = dt - elapsed;
             std::this_thread::sleep_for(excess);
 
             // NOTE: Display at the end for consistent frame display rate

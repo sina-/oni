@@ -22,7 +22,8 @@ namespace oni {
     typedef u64 u32p;
     typedef u64 i32p;
     typedef u32 EntityID;
-    typedef r32 duration; // Duration in fraction of seconds
+    typedef r32 duration32; // Duration in fraction of seconds
+    typedef r64 duration64;
 
     typedef size AnimationID;
     typedef u8 FrameID;

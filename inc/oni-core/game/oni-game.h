@@ -26,6 +26,9 @@ namespace oni {
         initRenderer();
 
         virtual void
+        initSystems();
+
+        virtual void
         sim() final;
 
         virtual void

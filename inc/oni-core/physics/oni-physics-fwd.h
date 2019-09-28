@@ -2,4 +2,5 @@
 
 namespace oni {
     class Physics;
+    class System_TimeToLive;
 }

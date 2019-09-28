@@ -25,41 +25,19 @@ namespace oni {
         ~Physics();
 
         static void
-        processInput(EntityManager &,
-                     ClientDataManager &,
-                     std::unordered_map<EntityID, CarInput> &result);
-
-        static void
-        updateCars(EntityManager &,
-                   UserInputMap &input,
-                   r64 tickTime);
-
-        static void
         updateJetForce(EntityManager &,
-                       r64 tickTime);
+                       r64 dt);
 
         void
-        updatePhysWorld(r64 tickTime);
+        updatePhysWorld(r64 dt);
 
         static void
         updateCarCollision(EntityManager &,
-                           UserInputMap &input,
-                           r64 tickTime);
+                           r64 dt);
 
         static void
         updateCollision(EntityManager &,
-                        r64 tickTime);
-
-        static void
-        syncPosWithPhysWorld(EntityManager &);
-
-        static void
-        updateAge(EntityManager &,
-                  r64 tickTime);
-
-        static
-        void
-        updateResting(EntityManager &);
+                        r64 dt);
 
     public:
         // TODO: Not very happy about this exposure, but it is really the simplest solution right now and only

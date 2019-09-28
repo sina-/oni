@@ -1,10 +1,6 @@
 #pragma once
 
 namespace oni {
-    /// Audio
-    struct Tag_Audible {
-    };
-
     /// Graphics
     struct Tag_SplatOnDeath {
     };

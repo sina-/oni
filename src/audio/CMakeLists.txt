@@ -1,4 +1,4 @@
-add_library(oni-core-audio oni-audio-manager.cpp)
+add_library(oni-core-audio oni-audio-manager.cpp oni-audio-system-car-engine-pitch.cpp oni-audio-system-play-pause-sound.cpp)
 
 target_compile_features(oni-core-audio
         PUBLIC

@@ -290,12 +290,6 @@ namespace oni {
         );
     }
 
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Tag_Audible &) {}
-
     template<class Archive>
     void
     serialize(Archive &archive,

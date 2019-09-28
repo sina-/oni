@@ -34,21 +34,17 @@ namespace oni {
         void
         render();
 
+        // TODO: Maybe this should move to rac-client-scene-manager
         static void
-        updateSmokeEmitter(EntityManager &,
-                           r64 tickTime);
+        updateAfterMark(EntityTickContext &,
+                        AfterMark &,
+                        Orientation &,
+                        WorldP3D &);
 
         static void
-        updateAfterMark(EntityManager &,
-                        r64 tickTime);
-
-        static void
-        updateGrowthInTime(EntityManager &,
-                           r64 tickTime);
-
-        static void
-        updateTransitions(EntityManager &,
-                          r64 tickTime);
+        updateGrowthInTime(EntityTickContext &,
+                           GrowOverTime &,
+                           Scale &);
 
         void
         renderRaw(const WorldP3D pos,
@@ -108,6 +104,9 @@ namespace oni {
         const ScreenBounds &
         getScreenBounds() const;
 
+        ZLayerManager&
+        getZLayerManager();
+
         void
         resetCounters();
 
@@ -139,20 +138,6 @@ namespace oni {
 
 
     private:
-        static void
-        updateTextureAnimated(MaterialTransition_Texture &,
-                              r64 tickTime);
-
-        static void
-        updateTint(MaterialSkin &,
-                   MaterialTransition_Color,
-                   const TimeToLive &);
-
-        static void
-        updateFade(MaterialSkin &skin,
-                   MaterialTransition_Fade &,
-                   const TimeToLive &);
-
         void
         renderStrip(EntityManager &,
                     r32 viewWidth,

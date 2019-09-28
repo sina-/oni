@@ -139,8 +139,8 @@ namespace oni {
     };
 
     struct TimeToLive {
-        duration currentAge{0.f};
-        duration maxAge{1.f};
+        duration32 currentAge{0.f};
+        duration32 maxAge{1.f};
     };
 
     union Force {
@@ -168,5 +168,9 @@ namespace oni {
         bool disableCollision{false};
         PhysicalCategory physicalCategory{PhysicalCategory::UNKNOWN};
         BodyType bodyType{BodyType::UNKNOWN};
+    };
+
+    struct PhysicalBody {
+        b2Body *value;
     };
 }

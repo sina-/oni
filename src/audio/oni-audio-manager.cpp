@@ -43,49 +43,6 @@ namespace oni {
         mPlayerPos = playerPos;
         auto result = mSystem->update();
         ERRCHECK(result);
-
-        /// Engine pitch
-        {
-            auto view = manager.createView<
-                    Tag_Audible,
-                    Car,
-                    Sound,
-                    SoundPitch>();
-            for (auto &&id : view) {
-                auto &car = view.get<Car>(id);
-                auto &sound = view.get<Sound>(id);
-
-                auto &pitch = view.get<SoundPitch>(id);
-                pitch.value = static_cast< r32>(car.rpm) / 2000;
-            }
-        }
-
-        /// Play and Pause
-        {
-            auto view = manager.createView<
-                    Tag_Audible,
-                    WorldP3D,
-                    Sound>();
-            for (auto &&id : view) {
-                auto &pos = view.get<WorldP3D>(id).value;
-                auto &sound = view.get<Sound>(id);
-
-                auto &entityChannel = getOrCreateLooping3DChannel(sound, id);
-                auto distance = (pos - mPlayerPos.value).len();
-                if (distance < mMaxAudibleDistance) {
-                    if (manager.has<SoundPitch>(id)) {
-                        auto &pitch = manager.get<SoundPitch>(id);
-                        setPitch(*entityChannel.channel, pitch.value);
-                    }
-
-                    auto v = vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
-                    set3DPos(*entityChannel.channel, pos - mPlayerPos.value, v);
-                    unPause(*entityChannel.channel);
-                } else {
-                    pause(*entityChannel.channel);
-                }
-            }
-        }
     }
 
     void

@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_map>
 
+#include <oni-core/audio/oni-audio-fwd.h>
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/entities/oni-entities-entity.h>
@@ -35,7 +36,7 @@ namespace oni {
              const WorldP3D &playerPos);
 
         void
-        playCollisionSoundEffect(const Event_Collision&);
+        playCollisionSoundEffect(const Event_Collision &);
 
         void
         kill(EntityID);
@@ -54,6 +55,8 @@ namespace oni {
 
         void
         setMasterVolume(r32 volume);
+
+        friend System_PlayPauseSound;
 
     private:
         class FMODDeleter {
@@ -81,7 +84,7 @@ namespace oni {
         preLoadSounds();
 
         static CollisionSoundTag
-        createCollisionEffectID(const PhysicalCatPair&);
+        createCollisionEffectID(const PhysicalCatPair &);
 
         FMOD::Channel *
         createChannel(const Sound &);

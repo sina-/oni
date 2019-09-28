@@ -11,7 +11,9 @@ add_library(oni-core-graphic
         oni-graphic-renderer-ogl.cpp
         oni-graphic-renderer-ogl-tessellation.cpp
         oni-graphic-renderer-ogl-strip.cpp
-        oni-graphic-renderer-ogl-quad.cpp)
+        oni-graphic-renderer-ogl-quad.cpp
+        oni-graphic-system-grow-over-time.cpp
+        oni-graphic-system-material-transition.cpp)
 
 target_compile_features(oni-core-graphic
         PUBLIC
@@ -36,6 +38,7 @@ target_include_directories(oni-core-graphic
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/glfw/include>
         )
 
+# TODO: tweak bar should not be an engine dependency
 find_library(ANT_TWEAK_BAR AntTweakBar PATHS ${oni_SOURCE_DIR}/lib/anttweakbar/lib NO_DEFAULT_PATH)
 find_library(FREETYPE_GL freetype-gl PATHS ${oni_SOURCE_DIR}/lib/freetype-gl/bin NO_DEFAULT_PATH)
 find_library(FREETYPE_LIBRARY freetype PATHS ${oni_SOURCE_DIR}/lib/freetype2/build-cmake NO_DEFAULT_PATH)

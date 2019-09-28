@@ -8,9 +8,10 @@ namespace oni {
     class Renderer_OpenGL_Strip;
     class Renderer_OpenGL_Tessellation;
     class SceneManager;
+    class System_GrowOverTime;
+    class System_MaterialTransition;
     class TextureManager;
     class Window;
-
 
     struct Brush;
 }

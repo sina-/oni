@@ -79,6 +79,12 @@ namespace oni {
         EntityID id;
     };
 
+    struct EntityTickContext {
+        EntityManager &mng;
+        EntityID id{};
+        duration64 dt{};
+    };
+
     struct BindLifetimeParent {
         std::vector<EntityContext> children;
     };

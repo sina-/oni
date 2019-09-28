@@ -386,8 +386,8 @@ namespace oni {
     };
 
     struct GrowOverTime {
-        duration period{0.2f}; // NOTE: Grow every period
-        duration elapsed{0.f}; // NOTE: Since last growth
+        duration32 period{0.2f}; // NOTE: Grow every period
+        duration32 elapsed{0.f}; // NOTE: Since last growth
         r32 factor{0.1f}; // NOTE: add this much to current size
         Scale maxSize{1, 1};
     };

@@ -1,4 +1,9 @@
-add_library(oni-core-physics oni-physics.cpp oni-physics-car.cpp)
+add_library(oni-core-physics
+        oni-physics.cpp
+        oni-physics-car.cpp
+        oni-physics-system-time-to-live.cpp
+        oni-physics-system-splat-on-rest.cpp
+        oni-physics-system-sync-pos.cpp oni-physics-system-car.cpp oni-physics-system-car-input.cpp)
 
 target_compile_features(oni-core-physics
         PUBLIC

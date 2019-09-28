@@ -55,7 +55,7 @@ namespace oni {
      * @param ratio each game unit is worth this many texture pixels
      * @param operand input as world coordinate and outputs as local texture coordinates
      */
-    void
+    inline void
     worldToTextureCoordinate(const oni::WorldP3D &reference,
                              r32 ratio,
                              oni::WorldP3D &operand);

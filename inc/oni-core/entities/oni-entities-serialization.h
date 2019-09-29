@@ -41,7 +41,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               mat4 &mat4) {
-        archive(mat4.columns);
+        archive(mat4.elements);
     }
 
     template<class Archive>

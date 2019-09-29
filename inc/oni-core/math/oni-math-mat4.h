@@ -1,32 +1,19 @@
 #pragma once
 
-#include <algorithm>
-#include <array>
-
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/math/oni-math-function.h>
-#include <oni-core/math/oni-math-vec3.h>
-#include <oni-core/math/oni-math-vec4.h>
-
+#include <oni-core/math/oni-math-fwd.h>
 
 namespace oni {
     struct mat4 {
-        // https://stackoverflow.com/a/18177444
-        union {
-            // Column major ordering
-            std::array<r32, 4 * 4> elements{};
-            vec4 columns[4];
-        };
+        // Column major ordering
+        r32 elements[4 * 4]{};
 
         mat4();
 
         explicit mat4(r32 diag);
 
         const r32 *
-        getArray() const { return &elements.front(); };
-
-        vec3
-        getPosition();
+        getArray() const;
 
         static mat4
         identity();
@@ -95,9 +82,8 @@ namespace oni {
         mat4 &
         operator*=(const mat4 &other);
 
-        friend std::ostream &
-        operator<<(std::ostream &stream,
-                   const mat4 &);
+        void
+        print();
 
     };
 }

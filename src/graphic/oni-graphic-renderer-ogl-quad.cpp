@@ -1,5 +1,7 @@
 #include <oni-core/graphic/oni-graphic-renderer-ogl-quad.h>
 
+#include <cassert>
+
 #include <GL/glew.h>
 
 #include <oni-core/graphic/buffer/oni-graphic-buffer-data.h>
@@ -9,6 +11,7 @@
 #include <oni-core/graphic/oni-graphic-shader.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
+#include <oni-core/math/oni-math-function.h>
 
 
 namespace oni {

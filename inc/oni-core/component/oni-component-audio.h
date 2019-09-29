@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-#include <oni-core/math/oni-math-vec2.h>
-
-
 namespace oni {
     enum class SoundPlaybackState : oni::u8 {
         PLAY,

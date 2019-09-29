@@ -1,6 +1,7 @@
-#include <cmath>
-
 #include <oni-core/math/oni-math-vec2.h>
+
+#include <cmath>
+#include <cstdio>
 
 
 namespace oni {
@@ -93,12 +94,10 @@ namespace oni {
         return !(*this == other);
     }
 
-    std::ostream &
-    operator<<(std::ostream &stream,
-               const vec2 &vector) {
-        stream << "(" << vector.x << ", " << vector.y << ")";
-        return stream;
-    }
+    void
+    vec2::print() const {
+       printf("(%f, %f)\n", x, y) ;
+    };
 
     r32
     vec2::len() const {

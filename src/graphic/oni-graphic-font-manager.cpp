@@ -10,7 +10,7 @@
 
 
 namespace oni {
-    FontManager::FontManager(std::string font,
+    FontManager::FontManager(const std::string &font,
                              u8 size,
                              r32 gameWidth,
                              r32 gameHeight) {

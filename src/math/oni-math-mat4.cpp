@@ -1,10 +1,15 @@
 #include <oni-core/math/oni-math-mat4.h>
+
+#include <cstdio>
+
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/math/oni-math-function.h>
+#include <oni-core/math/oni-math-vec3.h>
+#include <oni-core/math/oni-math-vec4.h>
 
 
 namespace oni {
-    mat4::mat4() {
-    }
+    mat4::mat4() {}
 
     mat4::mat4(r32 diag) {
         elements[0 + 0 * 4] = diag;
@@ -16,6 +21,11 @@ namespace oni {
     mat4
     mat4::identity() {
         return mat4(1.0f);
+    }
+
+    const r32 *
+    mat4::getArray() const {
+        return &elements[0];
     }
 
     mat4
@@ -128,16 +138,19 @@ namespace oni {
 
     mat4 &
     mat4::multiply(const mat4 &other) {
-        std::array<r32, 4 * 4> result{};
+        r32 result[4 * 4];
         for (u8 i = 0; i < 4; i++) {
             for (u8 j = 0; j < 4; j++) {
                 r32 sum = 0.0f;
-                for (u8 k = 0; k < 4; k++)
+                for (u8 k = 0; k < 4; k++) {
                     sum += elements[j + k * 4] * other.elements[k + i * 4];
+                }
                 result[j + i * 4] = sum;
             }
         }
-        elements = result;
+        for (auto i = 0; i < 4 * 4; ++i) {
+            elements[i] = result[i];
+        }
         return *this;
     }
 
@@ -184,22 +197,27 @@ namespace oni {
         };
     }
 
-    vec3
-    mat4::getPosition() {
-        return vec3{columns[3].x, columns[3].y, columns[3].z};
-    }
-
-    std::ostream &
-    operator<<(std::ostream &stream,
-               const mat4 &other) {
-        stream << "|" << other.elements[0] << ", " << other.elements[1] << other.elements[2] << other.elements[3]
-               << "|";
-        stream << "|" << other.elements[4] << ", " << other.elements[5] << other.elements[6] << other.elements[7]
-               << "|";
-        stream << "|" << other.elements[8] << ", " << other.elements[9] << other.elements[10] << other.elements[11]
-               << "|";
-        stream << "|" << other.elements[12] << ", " << other.elements[13] << other.elements[14]
-               << other.elements[15] << "|";
-        return stream;
+    void
+    mat4::print() {
+        printf("| %f, %f, %f, %f |\n"
+               "| %f, %f, %f, %f |\n"
+               "| %f, %f, %f, %f |\n"
+               "| %f, %f, %f, %f |\n",
+               elements[0],
+               elements[1],
+               elements[2],
+               elements[3],
+               elements[4],
+               elements[5],
+               elements[6],
+               elements[7],
+               elements[8],
+               elements[9],
+               elements[10],
+               elements[11],
+               elements[12],
+               elements[13],
+               elements[14],
+               elements[15]);
     }
 }

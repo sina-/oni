@@ -1,5 +1,6 @@
 #include <oni-core/math/oni-math-intersects.h>
 
+#include <cmath>
 
 namespace oni {
     bool
@@ -17,8 +18,8 @@ namespace oni {
         auto firstSize = first.getSize();
         auto secondSize = second.getSize();
 
-        return (abs(firstCenterX - secondCenterX) * 2 < (firstSize.x + secondSize.x)) &&
-               (abs(firstCenterY - secondCenterY) * 2 < (firstSize.y + secondSize.y));
+        return (std::abs(firstCenterX - secondCenterX) * 2 < (firstSize.x + secondSize.x)) &&
+               (std::abs(firstCenterY - secondCenterY) * 2 < (firstSize.y + secondSize.y));
     }
 
     bool
@@ -28,8 +29,8 @@ namespace oni {
         auto firstCenterY = (first.A.y + first.C.y) / 2.0f;
         auto firstSize = first.getSize();
 
-        return (abs(firstCenterX - second.x) * 2 < (firstSize.x)) &&
-               (abs(firstCenterY - second.y) * 2 < (firstSize.y));
+        return (std::abs(firstCenterX - second.x) * 2 < (firstSize.x)) &&
+               (std::abs(firstCenterY - second.y) * 2 < (firstSize.y));
     }
 
     bool
@@ -42,8 +43,8 @@ namespace oni {
         auto firstCenterY = (first.A.y + first.C.y) / 2.0f;
         auto firstSize = first.getSize();
 
-        return (abs(firstCenterX - x) * 2 < (firstSize.x + lengthX)) &&
-               (abs(firstCenterY - y) * 2 < (firstSize.y + lengthY));
+        return (std::abs(firstCenterX - x) * 2 < (firstSize.x + lengthX)) &&
+               (std::abs(firstCenterY - y) * 2 < (firstSize.y + lengthY));
     }
 
     bool
@@ -52,8 +53,8 @@ namespace oni {
                r32 y,
                r32 lengthX,
                r32 lengthY) {
-        return (abs(first.x - x) * 2 < lengthX) &&
-               (abs(first.y - y) * 2 < lengthY);
+        return (std::abs(first.x - x) * 2 < lengthX) &&
+               (std::abs(first.y - y) * 2 < lengthY);
     }
 
     bool
@@ -62,8 +63,8 @@ namespace oni {
                r32 y,
                r32 lengthX,
                r32 lengthY) {
-        return (abs(first.x - x) * 2 < lengthX) &&
-               (abs(first.y - y) * 2 < lengthY);
+        return (std::abs(first.x - x) * 2 < lengthX) &&
+               (std::abs(first.y - y) * 2 < lengthY);
     }
 
     bool
@@ -73,7 +74,7 @@ namespace oni {
                r32 y,
                r32 lengthX,
                r32 lengthY) {
-        return (abs(pos.x - x) * 2 < lengthX + scale.x) &&
-               (abs(pos.y - y) * 2 < lengthY + scale.y);
+        return (std::abs(pos.x - x) * 2 < lengthX + scale.x) &&
+               (std::abs(pos.y - y) * 2 < lengthY + scale.y);
     }
 }

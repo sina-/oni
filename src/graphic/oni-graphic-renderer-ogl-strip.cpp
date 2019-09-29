@@ -1,5 +1,7 @@
 #include <oni-core/graphic/oni-graphic-renderer-ogl-strip.h>
 
+#include <cassert>
+
 #include <GL/glew.h>
 
 #include <oni-core/graphic/buffer/oni-graphic-buffer.h>

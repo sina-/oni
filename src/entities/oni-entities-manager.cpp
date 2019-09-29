@@ -222,13 +222,13 @@ namespace oni {
     EntityManager::printEntityType(EntityID id) const {
         const auto &t = mRegistry->get<EntityType>(id);
         const auto name = mEntityDebugNameLookup.at(t.value);
-        std::cout << id << ", " << name;
+        printf("%d, %s ", id, name.c_str());
         if (mRegistry->has<WorldP3D>(id)) {
             const auto &pos = mRegistry->get<WorldP3D>(id);
-            std::cout << " " << pos.value;
+            pos.value.print();
+        } else {
+            printf("\n");
         }
-
-        std::cout << "\n";
     }
 
     void

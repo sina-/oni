@@ -1,6 +1,7 @@
 #include <oni-core/graphic/oni-graphic-renderer-ogl.h>
 
 #include <cassert>
+#include <algorithm>
 
 #include <GL/glew.h>
 

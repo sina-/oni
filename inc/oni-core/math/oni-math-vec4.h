@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include <oni-core/common/oni-common-typedef.h>
 
 namespace oni {
@@ -62,9 +60,7 @@ namespace oni {
         bool
         operator!=(const vec4 &other);
 
-        friend std::ostream &
-        operator<<(std::ostream &stream,
-                   const vec4 &vector);
-
+        void
+        print() const;
     };
 }

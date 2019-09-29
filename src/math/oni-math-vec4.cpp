@@ -1,5 +1,6 @@
 #include <oni-core/math/oni-math-vec4.h>
 
+#include <cstdio>
 #include <oni-core/math/oni-math-vec3.h>
 
 namespace oni {
@@ -98,11 +99,8 @@ namespace oni {
         return !(*this == other);
     }
 
-    std::ostream &
-    operator<<(std::ostream &stream,
-               const vec4 &vector) {
-        stream << "(" << vector.x << ", " << vector.y << vector.z << ", " << vector.w << ", " << ")";
-        return stream;
-    }
-
+    void
+    vec4::print() const {
+        printf("(%f, %f, %f, %f)\n", x, y, z, w);
+    };
 }

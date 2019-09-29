@@ -1,6 +1,9 @@
 #include <oni-core/graphic/oni-graphic-renderer.h>
 
+#include <cassert>
+
 #include <oni-core/component/oni-component-visual.h>
+#include <oni-core/math/oni-math-function.h>
 
 
 namespace oni {

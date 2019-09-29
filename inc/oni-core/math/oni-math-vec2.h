@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include <oni-core/common/oni-common-typedef.h>
 
 namespace oni {
@@ -65,9 +63,7 @@ namespace oni {
         r32
         len() const;
 
-        friend std::ostream &
-        operator<<(std::ostream &stream,
-                   const vec2 &vector);
-
+        void
+        print() const;
     };
 }

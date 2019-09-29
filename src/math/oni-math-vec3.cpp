@@ -4,6 +4,7 @@
 
 #include <oni-core/math/oni-math-vec2.h>
 #include <oni-core/math/oni-math-function.h>
+#include <cstdio>
 
 
 namespace oni {
@@ -93,12 +94,10 @@ namespace oni {
         return !(*this == other);
     }
 
-    std::ostream &
-    operator<<(std::ostream &stream,
-               const vec3 &vector) {
-        stream << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
-        return stream;
-    }
+    void
+    vec3::print() const {
+        printf("(%f, %f, %f)\n", x, y, z) ;
+    };
 
     vec2
     vec3::getXY() const {

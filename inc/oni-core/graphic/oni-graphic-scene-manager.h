@@ -13,6 +13,7 @@
 #include <oni-core/graphic/oni-graphic-fwd.h>
 #include <oni-core/math/oni-math-mat4.h>
 #include <oni-core/math/oni-math-fwd.h>
+#include <oni-core/math/oni-math-function.h>
 
 class b2World;
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mutex>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,6 +14,7 @@
 #include <oni-core/entities/oni-entities-group.h>
 #include <oni-core/math/oni-math-fwd.h>
 #include <oni-core/game/oni-game-event.h>
+#include <oni-core/math/oni-math-function.h>
 
 
 class b2World;
@@ -147,8 +147,8 @@ namespace oni {
         template<class... ViewComponents>
         EntityView<EntityID, ViewComponents...>
         createViewWithLock() {
-            std::unique_lock<std::mutex> registryLock(mMutex);
-            return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
+//            std::unique_lock<std::mutex> registryLock(mMutex);
+//            return EntityView<EntityID, ViewComponents...>(*mRegistry, std::move(registryLock));
         }
 
         template<class... GroupComponents>
@@ -160,8 +160,8 @@ namespace oni {
         template<class... GroupComponents>
         EntityGroup<EntityID, GroupComponents...>
         createGroupWithLock() {
-            std::unique_lock<std::mutex> registryLock(mMutex);
-            return EntityView<EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
+//            std::unique_lock<std::mutex> registryLock(mMutex);
+//            return EntityView<EntityID, GroupComponents...>(*mRegistry, std::move(registryLock));
         }
 
         template<class Component>
@@ -267,10 +267,10 @@ namespace oni {
             }
         }
 
-        std::unique_lock<std::mutex>
-        scopedLock() {
-            return std::unique_lock<std::mutex>(mMutex);
-        }
+//        std::unique_lock<std::mutex>
+//        scopedLock() {
+//            return std::unique_lock<std::mutex>(mMutex);
+//        }
 
         void
         clearDeletedEntitiesList();
@@ -422,7 +422,7 @@ namespace oni {
         std::unique_ptr<entt::basic_registry<EntityID>> mRegistry{};
         std::unique_ptr<entt::basic_continuous_loader<EntityID>> mLoader{};
         std::array<std::unique_ptr<entt::dispatcher>, NumEventDispatcher> mDispatcher{};
-        mutable std::mutex mMutex{};
+//        mutable std::mutex mMutex{};
 
     private:
         b2World *mPhysicsWorld;

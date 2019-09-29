@@ -8,6 +8,7 @@
 
 #include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/graphic/oni-graphic-font-manager.h>
+#include <oni-core/math/oni-math-function.h>
 
 
 namespace oni {

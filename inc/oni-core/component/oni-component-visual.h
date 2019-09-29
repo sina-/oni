@@ -13,6 +13,7 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/graphic/oni-graphic-fwd.h>
+#include <oni-core/common/oni-common-const.h>
 
 
 namespace oni {

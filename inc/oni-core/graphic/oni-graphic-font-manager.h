@@ -1,9 +1,10 @@
 #pragma once
 
+#include <string>
+
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 #include <oni-core/component/oni-component-fwd.h>
 #include <oni-core/entities/oni-entities-fwd.h>
-#include <oni-core/math/oni-math-vec3.h>
 
 namespace ftgl {
     class texture_atlas_t;
@@ -16,7 +17,7 @@ namespace ftgl {
 namespace oni {
     class FontManager {
     public:
-        FontManager(std::string font,
+        FontManager(const std::string &font,
                     u8 size,
                     r32 gameWidth,
                     r32 gameHeight);

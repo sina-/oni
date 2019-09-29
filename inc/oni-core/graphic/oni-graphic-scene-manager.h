@@ -42,11 +42,6 @@ namespace oni {
                         Orientation &,
                         WorldP3D &);
 
-        static void
-        updateGrowthInTime(EntityTickContext &,
-                           GrowOverTime &,
-                           Scale &);
-
         void
         renderRaw(const WorldP3D pos,
                   const Color &color);

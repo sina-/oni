@@ -1,7 +1,7 @@
 #include <oni-core/graphic/oni-graphic-system.h>
 
 namespace oni {
-    System_GrowOverTime::System_GrowOverTime(EntityManager&em) : SystemTemplate(em) {}
+    System_GrowOverTime::System_GrowOverTime(EntityManager &em) : SystemTemplate(em) {}
 
     void
     System_GrowOverTime::update(EntityTickContext &etc,
@@ -41,5 +41,6 @@ namespace oni {
         for (auto &&id: mExpiredComponents) {
             mng.removeComponent<GrowOverTime>(id);
         }
+        mExpiredComponents.clear();
     }
 }

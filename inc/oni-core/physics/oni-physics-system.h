@@ -106,4 +106,68 @@ namespace oni {
         postUpdate(EntityManager &mng,
                    duration32 dt) override;
     };
+
+    class System_JetForce : public SystemTemplate<
+            JetForce,
+            Orientation,
+            PhysicalBody> {
+    public:
+        explicit System_JetForce(EntityManager &);
+
+    protected:
+        void
+        update(EntityTickContext &,
+               JetForce &,
+               Orientation &,
+               PhysicalBody &) override;
+
+        void
+        postUpdate(EntityManager &mng,
+                   duration32 dt) override;
+
+    private:
+        std::vector<EntityID> mExpiredForces{};
+    };
+
+    class System_CarCollision : public SystemTemplate<
+            Car,
+            PhysicalBody,
+            CarInput,
+            Orientation,
+            WorldP3D,
+            WorldP3D_History> {
+    public:
+        explicit System_CarCollision(EntityManager &);
+
+    protected:
+        void
+        update(EntityTickContext &,
+               Car &,
+               PhysicalBody &,
+               CarInput &,
+               Orientation &,
+               WorldP3D &,
+               WorldP3D_History &) override;
+
+        void
+        postUpdate(EntityManager &mng,
+                   duration32 dt) override;
+    };
+
+    class System_Collision : public SystemTemplate<
+            PhysicalBody,
+            WorldP3D> {
+    public:
+        explicit System_Collision(EntityManager &);
+
+    protected:
+        void
+        update(EntityTickContext &,
+               PhysicalBody&,
+               WorldP3D &) override;
+
+        void
+        postUpdate(EntityManager &mng,
+                   duration32 dt) override;
+    };
 }

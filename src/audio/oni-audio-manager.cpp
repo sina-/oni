@@ -38,8 +38,7 @@ namespace oni {
     }
 
     void
-    AudioManager::tick(EntityManager &manager,
-                       const WorldP3D &playerPos) {
+    AudioManager::tick(const WorldP3D &playerPos) {
         mPlayerPos = playerPos;
         auto result = mSystem->update();
         ERRCHECK(result);

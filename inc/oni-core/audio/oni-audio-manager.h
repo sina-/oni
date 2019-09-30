@@ -32,8 +32,7 @@ namespace oni {
         explicit AudioManager(AssetManager &);
 
         void
-        tick(EntityManager &,
-             const WorldP3D &playerPos);
+        tick(const WorldP3D &playerPos);
 
         void
         playCollisionSoundEffect(const Event_Collision &);

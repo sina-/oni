@@ -46,6 +46,12 @@ namespace oni {
         operator()(const EntityPair &) const noexcept;
     };
 
+    struct EntityPairEqual {
+        bool
+        operator()(const EntityPair &,
+                   const EntityPair &) const noexcept;
+    };
+
     struct EntityOperationPolicy {
         bool track{true};
         bool safe{false};

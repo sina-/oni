@@ -9,11 +9,3 @@ target_include_directories(oni-core-game
         PUBLIC
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
         )
-
-find_package(Threads REQUIRED)
-
-target_link_libraries(oni-core-game
-        PRIVATE
-        # /lib/x86_64-linux-gnu/libpthread.so.0: error adding symbols: DSO missing from command line
-        ${CMAKE_THREAD_LIBS_INIT}
-        )

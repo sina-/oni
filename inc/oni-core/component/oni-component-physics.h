@@ -121,7 +121,6 @@ namespace oni {
         r32 max{0.f};
     };
 
-
     union Velocity2D {
         struct {
             r32 x{0};
@@ -151,6 +150,14 @@ namespace oni {
         vec2 value;
     };
 
+    union Force2D {
+        struct {
+            r32 x{0};
+            r32 y{0};
+        };
+        vec2 value;
+    };
+
     struct JetForce {
         r32 fuze{0}; // How long, in seconds, it takes for the fuel to burn
         r32 force{0};
@@ -165,7 +172,7 @@ namespace oni {
         bool highPrecision{false};
         bool colliding{false};
         bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other
-        bool disableCollision{false};
+        bool isSensor{false};
         PhysicalCategory physicalCategory{PhysicalCategory::UNKNOWN};
         BodyType bodyType{BodyType::UNKNOWN};
     };

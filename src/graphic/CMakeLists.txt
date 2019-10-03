@@ -50,6 +50,7 @@ find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
+find_package(Threads REQUIRED)
 
 target_link_libraries(oni-core-graphic
         PRIVATE
@@ -71,6 +72,8 @@ target_link_libraries(oni-core-graphic
         oni-core-math
         oni-core-utils
         oni-core-entities
+        # Fixes: /lib/x86_64-linux-gnu/libpthread.so.0: error adding symbols: DSO missing from command line
+        ${CMAKE_THREAD_LIBS_INIT}
         )
 
 add_dependencies(oni-core-graphic

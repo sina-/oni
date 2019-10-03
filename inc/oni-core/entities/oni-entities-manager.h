@@ -15,6 +15,7 @@
 #include <oni-core/math/oni-math-fwd.h>
 #include <oni-core/game/oni-game-event.h>
 #include <oni-core/math/oni-math-function.h>
+#include <oni-core/game/oni-game-event-rate-limiter.h>
 
 
 class b2World;
@@ -302,12 +303,22 @@ namespace oni {
             mDispatcher[idx]->sink<Event>().template connect<Method>();
         }
 
+        template<class Event>
+        void
+        rateLimitEvent(EventDispatcherType type,
+                       const CoolDown &cd) {
+            mEventRateLimiter->registerEventCD<Event>(type, cd);
+        }
+
         template<class Event, class... Args>
         void
         enqueueEvent(Args &&...args) {
             // TODO: Inefficient, as not all the dispatchers are interested in all event types! But it works for now.
             for (auto i = 0; i < NumEventDispatcher; ++i) {
-                mDispatcher[i]->enqueue<Event>(std::forward<Args>(args)...);
+                auto type = EventDispatcherType(i);
+                if (mEventRateLimiter->canFire<Event>(type)) {
+                    mDispatcher[i]->enqueue<Event>(std::forward<Args>(args)...);
+                }
             }
         }
 
@@ -434,5 +445,6 @@ namespace oni {
         std::unordered_set<EntityID> mEntitiesToDelete{};
         std::vector<DeletedEntity> mDeletedEntities{};
         std::unordered_map<decltype(EntityType::value), std::string> mEntityDebugNameLookup{};
+        std::unique_ptr<EventRateLimiter> mEventRateLimiter;
     };
 }

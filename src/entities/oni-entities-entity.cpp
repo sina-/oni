@@ -3,23 +3,20 @@
 #include<oni-core/math/oni-math-function.h>
 
 namespace oni {
-    bool
-    operator==(const EntityPair &lhs,
-               const EntityPair &rhs) {
-        if (lhs.a == rhs.a && lhs.b == rhs.b) {
-            return true;
-        }
-        if (lhs.a == rhs.b && lhs.b == rhs.a) {
-            return true;
-        }
-        return false;
-    }
-
     u64
     EntityPairHasher::operator()(const EntityPair &pair) const noexcept {
+        static auto stdHash = std::hash<u64>();
         if (pair.a < pair.b) {
-            return pack_u32(pair.a, pair.b);
+            return stdHash(pack_u32(pair.a, pair.b));
         }
-        return pack_u32(pair.b, pair.a);
+        return stdHash(pack_u32(pair.b, pair.a));
+    }
+
+    bool
+    EntityPairEqual::operator()(const EntityPair &rhs,
+                                const EntityPair &lhs) const noexcept {
+        auto equalA = rhs.a == lhs.a && rhs.b == lhs.b;
+        auto equalB = rhs.a == lhs.b && rhs.b == lhs.a;
+        return equalA || equalB;
     }
 }

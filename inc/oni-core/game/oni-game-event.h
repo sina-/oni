@@ -1,10 +1,13 @@
 #pragma once
 
+#include <functional>
+
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/math/oni-math-function.h>
 
 
 namespace oni {
@@ -15,7 +18,7 @@ namespace oni {
         LAST
     };
 
-    constexpr auto NumEventDispatcher = static_cast<u8>(EventDispatcherType::LAST);
+    constexpr auto NumEventDispatcher = enumCast(EventDispatcherType::LAST);
 
     struct Event_SplatOnDeath {
         Event_SplatOnDeath() = default;

@@ -21,6 +21,7 @@ namespace oni {
             mDispatcher[i] = std::make_unique<entt::dispatcher>();
         }
         mRand = std::make_unique<Rand>(0, 0);
+        mEventRateLimiter = std::make_unique<EventRateLimiter>();
 
         switch (sMode) {
             case SimMode::CLIENT: {
@@ -255,6 +256,7 @@ namespace oni {
         fixtureDef.shape = &shape;
         fixtureDef.density = props.density;
         fixtureDef.friction = props.friction;
+        fixtureDef.isSensor = props.isSensor;
 
         switch (props.bodyType) {
             case BodyType::DYNAMIC : {
@@ -263,21 +265,10 @@ namespace oni {
                 bodyDef.type = b2_dynamicBody;
                 body = mPhysicsWorld->CreateBody(&bodyDef);
 
-                b2FixtureDef collisionSensor;
-                collisionSensor.isSensor = true;
-                collisionSensor.shape = &shape;
-                collisionSensor.density = props.density;
-                collisionSensor.friction = props.friction;
-
                 if (!props.collisionWithinCategory) {
-                    collisionSensor.filter.groupIndex = -static_cast<i16>(props.physicalCategory);
+                    fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCategory);
                 }
 
-                if (props.disableCollision) {
-                    fixtureDef.isSensor = true;
-                } else {
-                    body->CreateFixture(&collisionSensor);
-                }
                 body->CreateFixture(&fixtureDef);
                 break;
             }

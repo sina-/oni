@@ -169,5 +169,7 @@ namespace oni {
         void
         postUpdate(EntityManager &mng,
                    duration32 dt) override;
+    private:
+        std::unordered_set<EntityPair, EntityPairHasher, EntityPairEqual> mUniqueCollisions{};
     };
 }

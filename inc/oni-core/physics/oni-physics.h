@@ -22,7 +22,7 @@ namespace oni {
         bool colliding{false};
         EntityPair pair{};
         WorldP3D pos{};
-        // Impulse?
+        Force2D impulse{};
     };
 
     class Physics {

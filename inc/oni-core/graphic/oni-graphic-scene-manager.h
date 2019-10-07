@@ -24,8 +24,7 @@ namespace oni {
         SceneManager(const ScreenBounds &,
                      oni::AssetManager &,
                      ZLayerManager &,
-                     TextureManager &,
-                     b2World &);
+                     TextureManager &);
 
         ~SceneManager();
 
@@ -100,7 +99,7 @@ namespace oni {
         const ScreenBounds &
         getScreenBounds() const;
 
-        ZLayerManager&
+        ZLayerManager &
         getZLayerManager();
 
         void
@@ -174,7 +173,7 @@ namespace oni {
 
         TextureManager &mTextureManager;
         std::unique_ptr<DebugDrawBox2D> mDebugDrawBox2D{};
-        b2World &mPhysicsWorld;
+//        b2World &mPhysicsWorld;
 
         std::unique_ptr<Rand> mRand{};
 

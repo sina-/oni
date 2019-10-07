@@ -9,6 +9,8 @@
 
 class b2Body;
 
+class b2Contact;
+
 namespace oni {
     struct CarConfig {
         r64 gravity{9.81f};

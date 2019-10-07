@@ -25,12 +25,10 @@ namespace oni {
     SceneManager::SceneManager(const ScreenBounds &screenBounds,
                                AssetManager &assetManager,
                                ZLayerManager &zLayerManager,
-                               TextureManager &tm,
-                               b2World &physicsWorld) :
+                               TextureManager &tm) :
     // 64k vertices
             mMaxSpriteCount(64 * 1000),
             mScreenBounds(screenBounds),
-            mPhysicsWorld(physicsWorld),
             mTextureManager(tm),
             mZLayerManager(zLayerManager) {
 
@@ -137,7 +135,7 @@ namespace oni {
     void
     SceneManager::renderPhysicsDebugData() {
         mDebugDrawBox2D->Begin();
-        mPhysicsWorld.DrawDebugData();
+//        mPhysicsWorld.DrawDebugData();
         mDebugDrawBox2D->End();
     }
 

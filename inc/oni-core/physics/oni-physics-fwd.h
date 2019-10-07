@@ -1,6 +1,7 @@
 #pragma once
 
 namespace oni {
+    class CollisionListener;
     class Physics;
     class System_TimeToLive;
     class System_CarInput;

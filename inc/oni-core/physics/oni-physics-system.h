@@ -153,23 +153,4 @@ namespace oni {
         postUpdate(EntityManager &mng,
                    duration32 dt) override;
     };
-
-    class System_Collision : public SystemTemplate<
-            PhysicalBody,
-            WorldP3D> {
-    public:
-        explicit System_Collision(EntityManager &);
-
-    protected:
-        void
-        update(EntityTickContext &,
-               PhysicalBody&,
-               WorldP3D &) override;
-
-        void
-        postUpdate(EntityManager &mng,
-                   duration32 dt) override;
-    private:
-        std::unordered_set<EntityPair, EntityPairHasher, EntityPairEqual> mUniqueCollisions{};
-    };
 }

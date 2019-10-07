@@ -3,18 +3,20 @@
 #include <cmath>
 
 #include <Box2D/Dynamics/b2Body.h>
+#include <Box2D/Dynamics/Contacts/b2Contact.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 #include <Box2D/Dynamics/b2World.h>
 
 #include <oni-core/math/oni-math-rand.h>
 #include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/physics/oni-physics.h>
 
 
 namespace oni {
     EntityManager::EntityManager(SimMode sMode,
-                                 b2World *physicsWorld) : mSimMode(sMode),
-                                                          mPhysicsWorld(physicsWorld) {
+                                 Physics *p) : mSimMode(sMode),
+                                               mPhysics(p) {
         mRegistry = std::make_unique<entt::basic_registry<u32 >>();
         mLoader = std::make_unique<entt::basic_continuous_loader<EntityID>>(*mRegistry);
         for (auto i = 0; i < NumEventDispatcher; ++i) {
@@ -233,10 +235,21 @@ namespace oni {
     }
 
     void
+    EntityManager::printEntityType(const b2Body *body) {
+        auto id = body->GetEntityID();
+        auto *em = (EntityManager *) body->GetUserData();
+        em->printEntityType(id);
+    }
+
+    void
     EntityManager::createPhysics(EntityID id,
                                  const WorldP3D &pos,
                                  const vec2 &size,
                                  r32 ornt) {
+        if (!mPhysics) {
+            assert(false);
+            return;
+        }
         auto &props = get<PhysicalProperties>(id);
         auto shape = b2PolygonShape{};
         shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
@@ -263,7 +276,8 @@ namespace oni {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_dynamicBody;
-                body = mPhysicsWorld->CreateBody(&bodyDef);
+                body = mPhysics->getPhysicsWorld()->CreateBody(&bodyDef);
+                assert(body);
 
                 if (!props.collisionWithinCategory) {
                     fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCategory);
@@ -276,7 +290,8 @@ namespace oni {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_staticBody;
-                body = mPhysicsWorld->CreateBody(&bodyDef);
+                body = mPhysics->getPhysicsWorld()->CreateBody(&bodyDef);
+                assert(body);
                 body->CreateFixture(&shape, 0.f);
                 break;
             }
@@ -284,27 +299,35 @@ namespace oni {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_kinematicBody;
-                body = mPhysicsWorld->CreateBody(&bodyDef);
+                body = mPhysics->getPhysicsWorld()->CreateBody(&bodyDef);
+                assert(body);
                 body->CreateFixture(&fixtureDef);
                 break;
             }
-            case BodyType::UNKNOWN: {
-                assert(false);
-                break;
-            }
+            case BodyType::UNKNOWN:
             default: {
                 assert(false);
                 break;
             }
         }
-        body->SetEntityID(id);
-        createComponent<PhysicalBody>(id, body);
+
+        if (body) {
+            body->SetEntityID(id);
+            body->SetUserData(this);
+            createComponent<PhysicalBody>(id, body);
+        } else {
+            assert(false);
+        }
     }
 
     void
     EntityManager::removePhysicalBody(EntityID id) {
         auto &body = get<PhysicalBody>(id);
-        mPhysicsWorld->DestroyBody(body.value);
+        if (mPhysics) {
+            mPhysics->getPhysicsWorld()->DestroyBody(body.value);
+        } else {
+            assert(false);
+        }
         removeComponent<PhysicalBody>(id);
     }
 

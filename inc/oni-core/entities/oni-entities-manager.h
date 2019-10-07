@@ -16,17 +16,14 @@
 #include <oni-core/game/oni-game-event.h>
 #include <oni-core/math/oni-math-function.h>
 #include <oni-core/game/oni-game-event-rate-limiter.h>
+#include <oni-core/physics/oni-physics-fwd.h>
 
-
-class b2World;
-
-class b2Body;
 
 namespace oni {
     class EntityManager {
     public:
         EntityManager(SimMode sMode,
-                      b2World *);
+                      Physics *);
 
         ~EntityManager();
 
@@ -398,6 +395,9 @@ namespace oni {
         void
         printEntityType(EntityID id) const;
 
+        static void
+        printEntityType(const b2Body *);
+
         bool
         valid(EntityID entityID);
 
@@ -429,14 +429,19 @@ namespace oni {
         void
         destroyAndTrack(EntityID entityID);
 
+    public:
+        // TODO: Yeah this doesn't belong into this class and it is just a big mess.
+        Physics *mPhysics;
+
     private:
         std::unique_ptr<entt::basic_registry<EntityID>> mRegistry{};
         std::unique_ptr<entt::basic_continuous_loader<EntityID>> mLoader{};
+        // TODO: There is no need to bind this to registry.
+        // TODO: Do I even need to use entt for this?
         std::array<std::unique_ptr<entt::dispatcher>, NumEventDispatcher> mDispatcher{};
 //        mutable std::mutex mMutex{};
 
     private:
-        b2World *mPhysicsWorld;
         std::unique_ptr<Rand> mRand{};
 
         SimMode mSimMode{SimMode::CLIENT};

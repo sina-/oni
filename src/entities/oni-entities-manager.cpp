@@ -371,6 +371,17 @@ namespace oni {
     }
 
     void
+    EntityManager::setRandDirection(EntityID id,
+                                    r32 lowerX,
+                                    r32 lowerY,
+                                    r32 upperX,
+                                    r32 upperY) {
+        auto &dir = mRegistry->get<Direction>(id);
+        dir.x = mRand->next_r32(lowerX, upperX);
+        dir.y = mRand->next_r32(lowerY, upperY);
+    }
+
+    void
     EntityManager::setWorldP3D(EntityID id,
                                r32 x,
                                r32 y,

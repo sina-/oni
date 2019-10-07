@@ -27,6 +27,13 @@ namespace oni {
     }
 
     vec2 &
+    vec2::multiply(const r32 &other) {
+        x *= other;
+        y *= other;
+        return *this;
+    }
+
+    vec2 &
     vec2::divide(const vec2 &other) {
         x /= other.x;
         y /= other.y;
@@ -96,7 +103,7 @@ namespace oni {
 
     void
     vec2::print() const {
-       printf("(%f, %f)\n", x, y) ;
+        printf("(%f, %f)\n", x, y);
     };
 
     r32

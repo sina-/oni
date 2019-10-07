@@ -17,6 +17,9 @@ namespace oni {
         multiply(const vec2 &other);
 
         vec2 &
+        multiply(const r32 &other);
+
+        vec2 &
         divide(const vec2 &other);
 
         vec2 &

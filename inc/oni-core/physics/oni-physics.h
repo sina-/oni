@@ -24,7 +24,7 @@ namespace oni {
     struct Collision {
         EntityPair pair{};
         WorldP3D pos{};
-        Force2D impulse{};
+        Impulse2D impulse{};
         bool handled{false};
         EntityManager *em{}; // NOTE: Just for debugging
     };
@@ -67,10 +67,10 @@ namespace oni {
 
         static void
         _printCollisionDetail(const b2Contact *,
-                              const Force2D &);
+                              const Impulse2D &);
 
         static void
-        _printCollisionDetail(const Collision&);
+        _printCollisionDetail(const Collision &);
 
     private:
         friend EntityManager;

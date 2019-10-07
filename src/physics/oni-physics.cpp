@@ -62,15 +62,16 @@ namespace oni {
                     contact->GetWorldManifold(&wm);
 
                     for (u8 i = 0; i < impulse->count; ++i) {
-                        collision.impulse.x += impulse->normalImpulses[i] * wm.normal.x;
-                        collision.impulse.y += impulse->normalImpulses[i] * wm.normal.y;
+                        collision.impulse.value += impulse->normalImpulses[i];
                     }
                     if (impulse->count) {
-                        collision.impulse.x /= impulse->count;
-                        collision.impulse.y /= impulse->count;
+                        collision.impulse.value /= impulse->count;
                     }
 
-                    // Physics::_printCollisionDetail(contact, collision.impulse);
+                    collision.impulse.normal.x = wm.normal.x;
+                    collision.impulse.normal.y = wm.normal.y;
+
+                    Physics::_printCollisionDetail(contact, collision.impulse);
 
                     collision.pos.x = wm.points[0].x;
                     collision.pos.y = wm.points[0].y;
@@ -126,11 +127,10 @@ namespace oni {
                 _handleCarCollision(em, it->pair.b);
             }
 
-            auto impulseMagnitute = it->impulse.value.len();
             // TODO: Arbitary number!
-            if (impulseMagnitute >= 0.1f) {
-                Physics::_printCollisionDetail(*it);
-                em.enqueueEvent<Event_Collision>(it->pos, it->pair, pcPair);
+            if (it->impulse.value >= 0.1f) {
+//                Physics::_printCollisionDetail(*it);
+                em.enqueueEvent<Event_Collision>(it->pos, it->impulse, it->pair, pcPair);
             }
 
             it = mCollisionState->collisions.erase(it);
@@ -174,7 +174,7 @@ namespace oni {
 
     void
     Physics::_printCollisionDetail(const b2Contact *contact,
-                                   const Force2D &impulse) {
+                                   const Impulse2D &impulse) {
         auto *bodyA = contact->GetFixtureA()->GetBody();
         auto *bodyB = contact->GetFixtureA()->GetBody();
         auto c = Collision{};
@@ -191,8 +191,11 @@ namespace oni {
         collision.em->printEntityType(collision.pair.a);
         collision.em->printEntityType(collision.pair.b);
 
+        auto impulse = collision.impulse.normal;
+        impulse.multiply(collision.impulse.value);
+
         printf("Impulse vector: ");
-        collision.impulse.value.print();
+        impulse.print();
         printf("-------------------\n");
     }
 

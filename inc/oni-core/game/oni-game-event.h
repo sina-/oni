@@ -66,12 +66,15 @@ namespace oni {
         Event_Collision() = default;
 
         Event_Collision(const WorldP3D &pos,
+                        const Impulse2D &impulse,
                         const EntityPair &pair,
-                        const PhysicalCatPair &pcPair) : pos(pos), pair(pair), pcPair(pcPair) {}
+                        const PhysicalCatPair &pcPair) : pos(pos), pair(pair), pcPair(pcPair), impulse(impulse) {}
 
-        WorldP3D pos{};
+
         EntityPair pair{};
         PhysicalCatPair pcPair{};
+        WorldP3D pos{};
+        Impulse2D impulse{};
     };
 
     struct Event_SoundPlay {

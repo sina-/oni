@@ -99,7 +99,7 @@ namespace oni {
               Event_Collision &data) {
         // NOTE: EntityPair is not serialized as this is server specific, although I could send it to the client
         // and do a mapping prior to use if need be!
-        archive(data.pos, data.pcPair);
+        archive(data.pos, data.impulse, data.pcPair);
     }
 
     template<class Archive>
@@ -163,6 +163,20 @@ namespace oni {
     serialize(Archive &archive,
               WorldP2D &data) {
         archive(data.value);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Force2D &data) {
+        archive(data.value);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              Impulse2D &data) {
+        archive(data.normal, data.value);
     }
 
     template<class Archive>

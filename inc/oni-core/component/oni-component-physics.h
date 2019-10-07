@@ -160,6 +160,11 @@ namespace oni {
         };
     };
 
+    struct Impulse2D {
+        r32 value{};
+        vec2 normal{};
+    };
+
     struct JetForce {
         r32 fuze{0}; // How long, in seconds, it takes for the fuel to burn
         r32 force{0};

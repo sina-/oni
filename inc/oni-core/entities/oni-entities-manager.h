@@ -78,6 +78,13 @@ namespace oni {
         setDirectionFromOrientation(EntityID);
 
         void
+        setRandDirection(EntityID,
+                         r32 lowerX,
+                         r32 lowerY,
+                         r32 upperX,
+                         r32 upperY);
+
+        void
         setOrientation(EntityID,
                        r32 ornt);
 

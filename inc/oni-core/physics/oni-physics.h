@@ -18,11 +18,15 @@ class b2Body;
 
 class b2ContactImpulse;
 
+class b2WorldManifold;
+
 namespace oni {
     struct Collision {
         EntityPair pair{};
         WorldP3D pos{};
+        Force2D impulse{};
         bool handled{false};
+        EntityManager *em{}; // NOTE: Just for debugging
     };
 
     struct CollisionHasher {
@@ -61,13 +65,12 @@ namespace oni {
         updatePhysWorld(EntityManager &,
                         r64 dt);
 
-        // TODO: I now have struct PhysicalBody
-        static CollisionResult
-        isColliding(b2Body *);
-
         static void
         _printCollisionDetail(const b2Contact *,
-                              const b2ContactImpulse *);
+                              const Force2D &);
+
+        static void
+        _printCollisionDetail(const Collision&);
 
     private:
         friend EntityManager;
@@ -81,6 +84,10 @@ namespace oni {
     private:
         void
         _handleCollisions(EntityManager &);
+
+        void
+        _handleCarCollision(EntityManager &,
+                            EntityID);
 
     private:
         std::unique_ptr<b2World> mPhysicsWorld{};

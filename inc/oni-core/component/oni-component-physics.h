@@ -124,19 +124,19 @@ namespace oni {
     };
 
     union Velocity2D {
+        vec2 value{};
         struct {
-            r32 x{0};
-            r32 y{0};
+            r32 x;
+            r32 y;
         };
-        vec2 value;
     };
 
     union Acceleration2D {
+        vec2 value{};
         struct {
-            r32 x{0};
-            r32 y{0};
+            r32 x;
+            r32 y;
         };
-        vec2 value;
     };
 
     struct TimeToLive {
@@ -145,19 +145,19 @@ namespace oni {
     };
 
     union Force {
+        vec2 value{};
         struct {
-            r32 x{0};
-            r32 y{0};
+            r32 x;
+            r32 y;
         };
-        vec2 value;
     };
 
     union Force2D {
+        vec2 value{};
         struct {
-            r32 x{0};
-            r32 y{0};
+            r32 x;
+            r32 y;
         };
-        vec2 value;
     };
 
     struct JetForce {

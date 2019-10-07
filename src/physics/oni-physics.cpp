@@ -30,35 +30,21 @@ namespace oni {
     public:
         void
         BeginContact(b2Contact *c) override {
-            return;
-            auto *fixtureA = c->GetFixtureA();
-            auto *fixtureB = c->GetFixtureB();
-            auto a = fixtureA->GetBody()->GetEntityID();
-            auto b = fixtureB->GetBody()->GetEntityID();
-
-            void *ud = fixtureA->GetBody()->GetUserData();
-            if (ud) {
-                auto *em = static_cast<EntityManager *>(ud);
-                auto *cs = em->mPhysics->mCollisionState.get();
-                auto collision = Collision{};
-                collision.pair = {a, b};
-                if (cs->collisions.find(collision) == cs->collisions.end()) {
-                    b2WorldManifold wm;
-                    c->GetWorldManifold(&wm);
-                    collision.pos.x = wm.points[0].x;
-                    collision.pos.y = wm.points[0].y;
-                    if (c->GetManifold()->pointCount > 1) {
-                        collision.pos.x = (collision.pos.x + wm.points[1].x) / 2.f;
-                        collision.pos.y = (collision.pos.y + wm.points[1].y) / 2.f;
-                    }
-                    cs->collisions.emplace(collision);
-                }
-            }
         }
 
         void
         EndContact(b2Contact *contact) override {
-            return;
+        }
+
+        void
+        PreSolve(b2Contact *contact,
+                 const b2Manifold *oldManifold) override {
+        }
+
+        void
+        PostSolve(b2Contact *contact,
+                  const b2ContactImpulse *impulse) override {
+
             auto *fixtureA = contact->GetFixtureA();
             auto *fixtureB = contact->GetFixtureB();
             auto a = fixtureA->GetBody()->GetEntityID();
@@ -70,53 +56,25 @@ namespace oni {
                 auto *cs = em->mPhysics->mCollisionState.get();
                 auto collision = Collision{};
                 collision.pair = {a, b};
-                auto p = cs->collisions.find(collision);
-                if (p != cs->collisions.end()) {
-                    cs->collisions.erase(p);
-                } else {
-                    assert(false);
-                    /*
-                    auto pp = cs->collisions->find(collision);
-                    if (pp != cs->collisions->end()) {
-                    // TODO: This happens if a collision starts and ends in one tick of box2d. For now
-                    // I don't do anything and just ignore it, but maybe I should tag it and handle
-                    // it in a special way?
-                    cs->collisions->erase(pp);
-                    } else {
-                        assert(false);
-                    }
-                    */
-                }
-            }
-        }
-
-        void
-        PreSolve(b2Contact *contact,
-                 const b2Manifold *oldManifold) override {
-        }
-
-        void
-        PostSolve(b2Contact *c,
-                  const b2ContactImpulse *impulse) override {
-
-            auto *fixtureA = c->GetFixtureA();
-            auto *fixtureB = c->GetFixtureB();
-            auto a = fixtureA->GetBody()->GetEntityID();
-            auto b = fixtureB->GetBody()->GetEntityID();
-
-            void *ud = fixtureA->GetBody()->GetUserData();
-            if (ud) {
-                auto *em = static_cast<EntityManager *>(ud);
-                auto *cs = em->mPhysics->mCollisionState.get();
-                auto collision = Collision{};
-                collision.pair = {a, b};
                 if (cs->collisions.find(collision) == cs->collisions.end()) {
-                    Physics::_printCollisionDetail(c, impulse);
-                    b2WorldManifold wm;
-                    c->GetWorldManifold(&wm);
+                    collision.em = em;
+                    auto wm = b2WorldManifold{};
+                    contact->GetWorldManifold(&wm);
+
+                    for (u8 i = 0; i < impulse->count; ++i) {
+                        collision.impulse.x += impulse->normalImpulses[i] * wm.normal.x;
+                        collision.impulse.y += impulse->normalImpulses[i] * wm.normal.y;
+                    }
+                    if (impulse->count) {
+                        collision.impulse.x /= impulse->count;
+                        collision.impulse.y /= impulse->count;
+                    }
+
+                    // Physics::_printCollisionDetail(contact, collision.impulse);
+
                     collision.pos.x = wm.points[0].x;
                     collision.pos.y = wm.points[0].y;
-                    if (c->GetManifold()->pointCount > 1) {
+                    if (contact->GetManifold()->pointCount > 1) {
                         collision.pos.x = (collision.pos.x + wm.points[1].x) / 2.f;
                         collision.pos.y = (collision.pos.y + wm.points[1].y) / 2.f;
                     }
@@ -161,59 +119,85 @@ namespace oni {
             auto &propsA = em.get<PhysicalProperties>(it->pair.a);
             auto &propsB = em.get<PhysicalProperties>(it->pair.b);
             auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
+            if (pcPair.a == PhysicalCategory::RACE_CAR) {
+                _handleCarCollision(em, it->pair.a);
+            }
+            if (pcPair.b == PhysicalCategory::RACE_CAR) {
+                _handleCarCollision(em, it->pair.b);
+            }
 
-            em.enqueueEvent<Event_Collision>(it->pos, it->pair, pcPair);
+            auto impulseMagnitute = it->impulse.value.len();
+            // TODO: Arbitary number!
+            if (impulseMagnitute >= 0.1f) {
+                Physics::_printCollisionDetail(*it);
+                em.enqueueEvent<Event_Collision>(it->pos, it->pair, pcPair);
+            }
+
             it = mCollisionState->collisions.erase(it);
         }
     }
 
     void
-    Physics::_printCollisionDetail(const b2Contact *contact,
-                                   const b2ContactImpulse *impulse) {
-        printf("Entities in this collision: \n");
-        auto *bodyA = contact->GetFixtureA()->GetBody();
-        EntityManager::printEntityType(bodyA);
-
-        auto *bodyB = contact->GetFixtureB()->GetBody();
-        EntityManager::printEntityType(bodyB);
-
-        for (u8 i = 0; i < impulse->count; ++i) {
-            printf("%f\n", impulse->normalImpulses[i]);
+    Physics::_handleCarCollision(EntityManager &em,
+                                 EntityID id) {
+        auto &car = em.get<Car>(id);
+        auto &body = em.get<PhysicalBody>(id);
+        auto &ornt = em.get<Orientation>(id);
+        auto &pos = em.get<WorldP3D>(id);
+        auto &input = em.get<CarInput>(id);
+        auto &hist = em.get<WorldP3D_History>(id);
+        // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
+        // just apply user input to box2d representation of physical body without syncing
+        // car dynamics with box2d physics, that way the next tick if the
+        // car was ornt out of collision it will start sliding out and things will run smoothly according
+        // to car dynamics calculation. If the car is still ornt against other objects, it will be
+        // stuck as it was and I will skip dynamics and just sync it to  position and orientation
+        // from box2d. This greatly improves game feeling when there are collisions and
+        // solves lot of stickiness issues.
+        if (car.isColliding) {
+            auto dirX = std::cos(ornt.value);
+            auto dirY = 1 - dirX;
+            // TODO: Arbitrary multiplier, maybe it should be based on some value in carconfig?
+            // TODO: Test other type of forces if there is a combination of acceleration and steering to sides
+            body.value->ApplyForceToCenter(b2Vec2(dirX * input.throttle * 1.f, dirY * input.throttle * 1.f), true);
+            car.isColliding = false;
+        } else {
+            car.velocity = vec2{body.value->GetLinearVelocity().x,
+                                body.value->GetLinearVelocity().y};
+            car.angularVelocity = body.value->GetAngularVelocity();
+            pos.x = body.value->GetPosition().x;
+            pos.y = body.value->GetPosition().y;
+            ornt.value = body.value->GetAngle();
+            car.isColliding = true;
         }
+    }
+
+    void
+    Physics::_printCollisionDetail(const b2Contact *contact,
+                                   const Force2D &impulse) {
+        auto *bodyA = contact->GetFixtureA()->GetBody();
+        auto *bodyB = contact->GetFixtureA()->GetBody();
+        auto c = Collision{};
+        c.pair.a = bodyA->GetEntityID();
+        c.pair.b = bodyB->GetEntityID();
+        c.em = static_cast<EntityManager *>(bodyA->GetUserData());
+        c.impulse = impulse;
+        _printCollisionDetail(c);
+    }
+
+    void
+    Physics::_printCollisionDetail(const Collision &collision) {
+        printf("Entities in this collision: \n");
+        collision.em->printEntityType(collision.pair.a);
+        collision.em->printEntityType(collision.pair.b);
+
+        printf("Impulse vector: ");
+        collision.impulse.value.print();
         printf("-------------------\n");
     }
 
     b2World *
     Physics::getPhysicsWorld() {
         return mPhysicsWorld.get();
-    }
-
-    CollisionResult
-    Physics::isColliding(b2Body *body) {
-        auto result = CollisionResult{};
-        result.colliding = false;
-        for (auto *ce = body->GetContactList(); ce; ce = ce->next) {
-            auto *c = ce->contact;
-            if (c->IsTouching()) {
-                auto a = body->GetEntityID();
-                auto b = ce->other->GetEntityID();
-                assert(a != b);
-                b2WorldManifold wm;
-                c->GetWorldManifold(&wm);
-
-                result.colliding = true;
-                result.pair.a = a;
-                result.pair.b = b;
-
-                result.pos.x = wm.points[0].x;
-                result.pos.y = wm.points[0].y;
-                if (c->GetManifold()->pointCount > 1) {
-                    result.pos.x = (result.pos.x + wm.points[1].x) / 2.f;
-                    result.pos.y = (result.pos.y + wm.points[1].y) / 2.f;
-                }
-                return result;
-            }
-        }
-        return result;
     }
 }

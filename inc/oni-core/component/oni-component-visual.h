@@ -398,6 +398,9 @@ namespace oni {
         r32 size = 0.1f;
         r32 initialVMin = 1.f;
         r32 initialVMax = 2.f;
+        r32 acc = 0.f;
+        r32 orientMin = 0.f;
+        r32 orientMax = TWO_PI;
         u8 count = 1;
         GrowOverTime growth{};
     };

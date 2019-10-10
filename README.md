@@ -24,27 +24,33 @@ sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-9 1
 sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-9 100
 ```
 # Build the dependency sub-modules
+## Build AntTweakBar
+```
+cd lib/anttweakbar
+cd src
+make -j 12
+```
 ## Build GLFW
 ```
 cd lib/glfw
 mkdir build
 cd build
 cmake ..
-make
+make -j 12
 ```
 ## Build GLEW
 ```
 cd lib/glew
 cd auto
-make
+make -j 12
 cd ..
-make glew.lib
+make glew.lib -j 12
 ```
 ## Build Box2D
 ```
 cd lib/box2d
 ./premake gmake
-make -C Build
+make -C Build -j 12
 ```
 ## Build Enet
 ```
@@ -52,7 +58,7 @@ cd lib/enet
 mkdir build
 cd build
 cmake ..
-make
+make -j 12
 ```
 ## Build Freetype2
 ```
@@ -60,7 +66,7 @@ cd lib/freetype2
 mkdir build-cmake
 cd build-cmake
 cmake ..
-make
+make -j 12
 ```
 ## Build Freeimage
 ```

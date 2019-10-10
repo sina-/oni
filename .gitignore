@@ -36,3 +36,5 @@ cmake-build-release
 .idea
 lib/fmod/lib
 tags
+lib
+third-party

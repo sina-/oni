@@ -23,6 +23,7 @@ find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86
 target_link_libraries(oni-core-entities
         PUBLIC
         oni-core-math
+        oni-core-physics
         PRIVATE
         ${BOX2D_LIBRARY}
         )

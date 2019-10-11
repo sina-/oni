@@ -12,7 +12,7 @@ namespace oni {
 
         virtual ~Game();
 
-        virtual void
+        void
         run();
 
     protected:
@@ -27,21 +27,6 @@ namespace oni {
 
         virtual void
         initSystems();
-
-        virtual void
-        sim() final;
-
-        virtual void
-        render() final;
-
-        virtual void
-        display() final;
-
-        virtual void
-        poll() final;
-
-        virtual void
-        finish() final;
 
         virtual void
         _sim(r64 simTime) = 0;
@@ -75,6 +60,22 @@ namespace oni {
 
         virtual void
         showPT(i16) = 0;
+
+    private:
+        void
+        sim();
+
+        void
+        render();
+
+        void
+        display();
+
+        void
+        poll();
+
+        void
+        finish();
 
     private:
         // 60Hz

@@ -6,8 +6,6 @@
 #include <oni-core/io/oni-io-fwd.h>
 #include <oni-core/math/oni-math-fwd.h>
 
-typedef struct CTwBar TwBar;
-
 namespace oni {
     class ParticleEditorGame : public Game {
     public:
@@ -34,24 +32,6 @@ namespace oni {
         void
         _finish() override;
 
-        void
-        showFPS(i16 i161) override;
-
-        void
-        showSPS(i16 i161) override;
-
-        void
-        showPPS(i16 i161) override;
-
-        void
-        showRT(i16 i161) override;
-
-        void
-        showST(i16 i161) override;
-
-        void
-        showPT(i16 i161) override;
-
     protected:
         void
         initRenderer() override;
@@ -70,8 +50,6 @@ namespace oni {
         oni::ZLayerManager *mZLayerManager{};
         oni::Input *mInput{};
         oni::Window *mWindow{};
-
-        TwBar *mParticleDef{};
 
         bool mWindowReady{false};
     };

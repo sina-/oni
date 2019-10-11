@@ -61,7 +61,7 @@ namespace oni {
         // NOTE: any call to GLFW functions will fail with Segfault if GLFW is uninitialized
         // (initialization happens in Window). Also any call to GLFW functions will Segfault if they are
         // called from any thread other than one where glfwInit() is called.
-        mWindow = new oni::Window(*mInput, "Oni Particle Editor", 1600, 900);
+        mWindow = new oni::Window(*mInput, "Oni Particle Editor", WINDOW_WIDTH, WINDOW_HEIGHT);
         // NOTE: It requires OpenGL to be loaded to be able to load the texture atlas.
         mSceneManager = new oni::SceneManager(screenBounds,
                                               *mAssetManager,
@@ -82,9 +82,9 @@ namespace oni {
         TwInit(TW_OPENGL_CORE, nullptr);
         TwWindowSize(mWindow->getWidth(), mWindow->getHeight());
 
-        mParticleDef = TwNewBar("Particle");
+        auto particleBar = TwNewBar("Particle");
         oni::i32 barPos[2] = {10, 10};
-        TwSetParam(mParticleDef, nullptr, "position", TW_PARAM_INT32, 2, &barPos);
+        TwSetParam(particleBar, nullptr, "position", TW_PARAM_INT32, 2, &barPos);
     }
 
     bool
@@ -117,35 +117,5 @@ namespace oni {
     void
     ParticleEditorGame::_finish() {
         mInput->reset();
-    }
-
-    void
-    ParticleEditorGame::showFPS(i16 i161) {
-
-    }
-
-    void
-    ParticleEditorGame::showSPS(i16 i161) {
-
-    }
-
-    void
-    ParticleEditorGame::showPPS(i16 i161) {
-
-    }
-
-    void
-    ParticleEditorGame::showRT(i16 i161) {
-
-    }
-
-    void
-    ParticleEditorGame::showST(i16 i161) {
-
-    }
-
-    void
-    ParticleEditorGame::showPT(i16 i161) {
-
     }
 }

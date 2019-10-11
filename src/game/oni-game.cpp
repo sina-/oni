@@ -21,7 +21,7 @@ namespace oni {
     }
 
     void
-    Game::initRenderer() { }
+    Game::initRenderer() {}
 
     void
     Game::initSystems() {}
@@ -119,4 +119,22 @@ namespace oni {
     Game::display() {
         _display();
     }
+
+    void
+    Game::showFPS(i16) {}
+
+    void
+    Game::showSPS(i16) {}
+
+    void
+    Game::showPPS(i16) {}
+
+    void
+    Game::showRT(i16) {}
+
+    void
+    Game::showST(i16) {}
+
+    void
+    Game::showPT(i16) {}
 }

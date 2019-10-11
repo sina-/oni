@@ -44,22 +44,22 @@ namespace oni {
         _finish() = 0;
 
         virtual void
-        showFPS(i16) = 0;
+        showFPS(i16);
 
         virtual void
-        showSPS(i16) = 0;
+        showSPS(i16);
 
         virtual void
-        showPPS(i16) = 0;
+        showPPS(i16);
 
         virtual void
-        showRT(i16) = 0;
+        showRT(i16);
 
         virtual void
-        showST(i16) = 0;
+        showST(i16);
 
         virtual void
-        showPT(i16) = 0;
+        showPT(i16);
 
     private:
         void

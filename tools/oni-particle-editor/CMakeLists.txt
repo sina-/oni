@@ -45,7 +45,7 @@ add_dependencies(oni-particle-editor
 
 if (UNIX)
     add_custom_command(TARGET oni-particle-editor POST_BUILD
-            COMMAND ln -sf ${oni_SOURCE_DIR}/resources $<TARGET_FILE_DIR:oni-particle-editor>/oni-resources)
+            COMMAND ln -sfv ${oni_SOURCE_DIR}/resources $<TARGET_FILE_DIR:oni-particle-editor>/oni-resources)
 else ()
     # TODO: This solution requires manual re-build if shaders are updated
     # Copy the shaders from source tree to build tree

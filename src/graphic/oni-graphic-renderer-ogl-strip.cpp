@@ -25,9 +25,9 @@ namespace oni {
 
         oniGLsizei maxBufferSize{mPrimitiveSize * mMaxPrimitiveCount};
 
-        auto vertShader = std::string_view("resources/shaders/strip.vert");
+        auto vertShader = std::string_view("oni-resources/shaders/strip.vert");
         auto geomShader = std::string_view("");
-        auto fragShader = std::string_view("resources/shaders/strip.frag");
+        auto fragShader = std::string_view("oni-resources/shaders/strip.frag");
         mShader = std::make_unique<Shader>(vertShader,
                                            geomShader,
                                            fragShader);

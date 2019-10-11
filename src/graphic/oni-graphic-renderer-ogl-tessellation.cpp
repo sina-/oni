@@ -26,9 +26,9 @@ namespace oni {
 
         oniGLsizei maxBufferSize{primitiveSize * mMaxPrimitiveCount};
 
-        auto vertShader = std::string_view("resources/shaders/tessellation.vert");
-        auto geomShader = std::string_view("resources/shaders/tessellation.geom");
-        auto fragShader = std::string_view("resources/shaders/tessellation.frag");
+        auto vertShader = std::string_view("oni-resources/shaders/tessellation.vert");
+        auto geomShader = std::string_view("oni-resources/shaders/tessellation.geom");
+        auto fragShader = std::string_view("oni-resources/shaders/tessellation.frag");
         // TODO: Resources are not part of oni-core library! This structure as is not flexible, meaning
         // I am forcing the users to only depend on built-in shaders. I should think of a better way
         // to provide flexibility in type of shaders users can define and expect to just work by having buffer

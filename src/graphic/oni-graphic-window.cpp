@@ -11,6 +11,7 @@
 #include <oni-core/common/oni-common-define.h>
 #include <oni-core/io/oni-io-input.h>
 #include <oni-core/math/oni-math-function.h>
+#include <oni-core/component/oni-component-visual.h>
 
 
 namespace oni {
@@ -23,6 +24,8 @@ namespace oni {
 
         if (!glfwInit()) {
             assert(false);
+            printf("Failed to start.\n");
+            exit(1);
         }
 
 /*            common::i32 monitorCount{};
@@ -43,8 +46,11 @@ namespace oni {
         mHeight = gameHeight;
 
         if (!mWindow) {
-            glfwTerminate();
+            printf("Failed to start.\n");
             assert(false);
+
+            glfwTerminate();
+            exit(1);
         }
 
         glfwMakeContextCurrent(mWindow);
@@ -55,7 +61,9 @@ namespace oni {
 
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(&messageCallback, nullptr);
+        glDebugMessageCallback(&openGLErrorCallback, nullptr);
+
+        glfwSetErrorCallback(&glfwErrorCallback);
 
         printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
@@ -107,13 +115,19 @@ namespace oni {
     }
 
     void
-    Window::messageCallback(GLenum source,
-                            GLenum type,
-                            GLuint id,
-                            GLenum severity,
-                            GLsizei length,
-                            const GLchar *message,
-                            const void *userParam) {
+    Window::glfwErrorCallback(i32 error,
+                              const c8 *msg) {
+        printf("GLFW failed with error code: %d, and msg: %s", error, msg);
+    }
+
+    void
+    Window::openGLErrorCallback(GLenum source,
+                                GLenum type,
+                                GLuint id,
+                                GLenum severity,
+                                GLsizei length,
+                                const GLchar *message,
+                                const void *userParam) {
         UNUSED(id);
         UNUSED(length);
         UNUSED(userParam);
@@ -141,6 +155,11 @@ namespace oni {
     void
     Window::clear() const {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void
+    Window::setClear(const Color &color) const {
+        glClearColor(color.r_r32(), color.g_r32(), color.b_r32(), color.a_r32());
     }
 
     void

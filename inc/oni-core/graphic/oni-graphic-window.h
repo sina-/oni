@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include <oni-core/component/oni-component-fwd.h>
 #include <oni-core/common/oni-common-typedefs-graphic.h>
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/io/oni-io-fwd.h>
@@ -34,6 +35,9 @@ namespace oni {
 
         void
         clear() const;
+
+        void
+        setClear(const Color &) const;
 
         const i32 &
         getWidth() const;
@@ -86,13 +90,17 @@ namespace oni {
                           r64 y);
 
         static void
-        messageCallback(oniGLenum source,
-                        oniGLenum type,
-                        oniGLuint id,
-                        oniGLenum severity,
-                        oniGLsizei length,
-                        const oniGLchar *message,
-                        const void *userParam);
+        openGLErrorCallback(oniGLenum source,
+                            oniGLenum type,
+                            oniGLuint id,
+                            oniGLenum severity,
+                            oniGLsizei length,
+                            const oniGLchar *message,
+                            const void *userParam);
+
+        static void
+        glfwErrorCallback(i32 error,
+                          const c8 *msg);
 
     private:
         Input &mInput;

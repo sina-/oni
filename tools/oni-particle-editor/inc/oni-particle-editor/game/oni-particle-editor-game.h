@@ -11,7 +11,7 @@ namespace oni {
     public:
         ParticleEditorGame();
 
-        virtual ~ParticleEditorGame();
+        ~ParticleEditorGame() override;
 
     protected:
         bool

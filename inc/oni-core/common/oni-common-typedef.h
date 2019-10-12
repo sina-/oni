@@ -3,6 +3,7 @@
 #include <cstddef>
 
 namespace oni {
+    typedef char c8;
     typedef signed char i8;
     typedef unsigned char u8;
     typedef signed short int i16;

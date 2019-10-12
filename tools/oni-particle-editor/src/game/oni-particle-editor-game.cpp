@@ -70,6 +70,8 @@ namespace oni {
         setupTweakBar();
         mTextureManager->loadAssets();
 
+        mWindow->setClear({});
+
         mWindowReady = true;
     }
 

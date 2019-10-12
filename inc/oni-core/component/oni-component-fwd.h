@@ -19,6 +19,7 @@ namespace oni {
     union WorldP2D;
     union WorldP3D;
     union WorldP4D;
+    union Screen2D;
 
     struct AABB;
     struct EntityAttachee;

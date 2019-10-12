@@ -94,12 +94,15 @@ namespace oni {
         TwWindowSize(mWindow->getWidth(), mWindow->getHeight());
 
         auto particleBar = TwNewBar("ParticleBar");
-        TwDefine(" ParticleBar label='Particle' refresh=0.15 ");
-        TwDefine(" ParticleBar valueswidth=100 ");
+        TwDefine(" ParticleBar label='Particle' ");
+        TwDefine(" ParticleBar valueswidth=200 ");
+        TwDefine(" ParticleBar refresh=0.15 ");
+        TwDefine(" ParticleBar size='350 500' ");
+        TwDefine(" ParticleBar contained=true ");
 
         TwStructMember vec2Members[] = {
-                {"X", TW_TYPE_FLOAT, offsetof(vec2, x), " Step=1 "},
-                {"Y", TW_TYPE_FLOAT, offsetof(vec2, y), " Step=1 "},
+                {"X", TW_TYPE_FLOAT, offsetof(vec2, x), " Step=0.01 "},
+                {"Y", TW_TYPE_FLOAT, offsetof(vec2, y), " Step=0.01 "},
         };
         TwType TwVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), 0, 0);
 
@@ -144,6 +147,10 @@ namespace oni {
             mInforSideBar.mouseScreenPos.x = pos.x;
             mInforSideBar.mouseScreenPos.y = pos.y;
         }
+
+        auto mouseWorldP =  mSceneMng->unProject(mInforSideBar.mouseScreenPos);
+        mInforSideBar.mouseWorldPos.x = mouseWorldP.x;
+        mInforSideBar.mouseWorldPos.y = mouseWorldP.y;
     }
 
     void

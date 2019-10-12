@@ -102,6 +102,9 @@ namespace oni {
         ZLayerManager &
         getZLayerManager();
 
+        WorldP3D
+        unProject(const Screen2D &);
+
         void
         resetCounters();
 

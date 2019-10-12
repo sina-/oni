@@ -365,6 +365,30 @@ namespace oni {
         mCamera.z = 1 / distance;
     }
 
+    WorldP3D
+    SceneManager::unProject(const Screen2D &point) {
+        auto proj = mProjectionMatrix;
+        proj *= mat4::scale({mCamera.z, mCamera.z, 1.0f});
+        proj *= mat4::translation(-mCamera.x, -mCamera.y, 0.0f);
+        auto invProj = proj.inverse();
+
+        auto pos = vec4{};
+        // TODO: Have to get these values from Window system
+        static const r32 WIDTH = 1600.f;
+        static const r32 HEIGHT = 900.f;
+        pos.x = 2 * point.x / WIDTH - 1;
+        pos.y = 2 * point.y / HEIGHT - 1;
+        pos.z = 1.f;
+        pos.w = 1.f;
+
+        pos = invProj * pos;
+
+        auto result = WorldP3D{};
+        result.x = pos.x;
+        result.y = pos.y;
+        return result;
+    }
+
     u16
     SceneManager::getSpritesPerFrame() const {
         return mRenderedSpritesPerFrame;

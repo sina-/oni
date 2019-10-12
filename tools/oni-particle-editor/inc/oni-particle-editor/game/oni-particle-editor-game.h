@@ -46,8 +46,8 @@ namespace oni {
 
     private:
         struct InfoSideBar {
-            vec2 mouseScreenPos{};
-            vec2 mouseWorldPos{};
+            Screen2D mouseScreenPos{};
+            WorldP2D mouseWorldPos{};
         };
 
         InfoSideBar mInforSideBar{};

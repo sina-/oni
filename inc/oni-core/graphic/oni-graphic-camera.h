@@ -7,16 +7,16 @@
 
 namespace oni {
     struct ScreenBounds {
-        r32 xMin;
-        r32 xMax;
-        r32 yMin;
-        r32 yMax;
+        r32 xMin{};
+        r32 xMax{};
+        r32 yMin{};
+        r32 yMax{};
     };
 
     struct Camera {
-        r32 x;
-        r32 y;
-        r32 z;
+        r32 x{};
+        r32 y{};
+        r32 z{};
     };
 
     enum class ZLayerDef : oni::u8 {

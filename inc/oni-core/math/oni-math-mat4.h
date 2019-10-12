@@ -15,6 +15,12 @@ namespace oni {
         const r32 *
         getArray() const;
 
+        r32
+        determinant() const;
+
+        mat4
+        inverse() const;
+
         static mat4
         identity();
 
@@ -67,6 +73,9 @@ namespace oni {
         vec3
         multiply(const vec3 &other) const;
 
+        mat4 &
+        multiply(r32);
+
         friend mat4
         operator*(const mat4 &left,
                   const mat4 &right);
@@ -80,7 +89,13 @@ namespace oni {
                   const vec3 &right);
 
         mat4 &
+        operator*(r32);
+
+        mat4 &
         operator*=(const mat4 &other);
+
+        mat4 &
+        operator*=(r32);
 
         void
         print();

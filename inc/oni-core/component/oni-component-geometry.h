@@ -94,6 +94,14 @@ namespace oni {
         std::deque<WorldP3D> pos{};
     };
 
+    union Screen2D {
+        vec2 value{};
+        struct {
+            r32 x;
+            r32 y;
+        };
+    };
+
     union OriginP2D {
         vec2 value{};
         struct {

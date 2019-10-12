@@ -23,6 +23,132 @@ namespace oni {
         return mat4(1.0f);
     }
 
+    r32
+    mat4::determinant() const {
+        auto e11 = elements[0 + 0 * 4];
+        auto e12 = elements[1 + 0 * 4];
+        auto e13 = elements[2 + 0 * 4];
+        auto e14 = elements[3 + 0 * 4];
+
+        auto e21 = elements[0 + 1 * 4];
+        auto e22 = elements[1 + 1 * 4];
+        auto e23 = elements[2 + 1 * 4];
+        auto e24 = elements[3 + 1 * 4];
+
+        auto e31 = elements[0 + 2 * 4];
+        auto e32 = elements[1 + 2 * 4];
+        auto e33 = elements[2 + 2 * 4];
+        auto e34 = elements[3 + 2 * 4];
+
+        auto e41 = elements[0 + 3 * 4];
+        auto e42 = elements[1 + 3 * 4];
+        auto e43 = elements[2 + 3 * 4];
+        auto e44 = elements[3 + 3 * 4];
+
+        auto d1 = (e22 * e33 * e44) + (e23 * e34 * e42) + (e24 * e32 * e43);
+        d1 -= (e24 * e33 * e42) + (e23 * e32 * e44) + (e22 * e34 * e43);
+
+        auto d2 = (e12 * e33 * e44) + (e13 * e34 * e42) + (e14 * e32 * e43);
+        d2 -= (e14 * e33 * e42) + (e13 * e32 * e44) + (e12 * e34 * e43);
+
+        auto d3 = (e12 * e23 * e44) + (e13 * e24 * e42) + (e14 * e22 * e43);
+        d3 -= (e14 * e23 * e42) + (e13 * e22 * e44) + (e12 * e24 * e43);
+
+        auto d4 = (e12 * e23 * e34) + (e13 * e24 * e32) + (e14 * e22 * e33);
+        d4 -= (e14 * e23 * e32) + (e12 * e22 * e34) + (e12 * e24 * e33);
+
+        auto d = (e11 * d1) - (e21 * d2) + (e31 * d3) - (e41 * d4);
+        return d;
+    }
+
+    mat4
+    mat4::inverse() const {
+        auto det = determinant();
+        auto inverseD = 1.f;
+        if (det) {
+            inverseD = 1 / det;
+        } else {
+            return identity();
+        }
+
+        auto e11 = elements[0 + 0 * 4];
+        auto e12 = elements[1 + 0 * 4];
+        auto e13 = elements[2 + 0 * 4];
+        auto e14 = elements[3 + 0 * 4];
+
+        auto e21 = elements[0 + 1 * 4];
+        auto e22 = elements[1 + 1 * 4];
+        auto e23 = elements[2 + 1 * 4];
+        auto e24 = elements[3 + 1 * 4];
+
+        auto e31 = elements[0 + 2 * 4];
+        auto e32 = elements[1 + 2 * 4];
+        auto e33 = elements[2 + 2 * 4];
+        auto e34 = elements[3 + 2 * 4];
+
+        auto e41 = elements[0 + 3 * 4];
+        auto e42 = elements[1 + 3 * 4];
+        auto e43 = elements[2 + 3 * 4];
+        auto e44 = elements[3 + 3 * 4];
+
+        auto a11 = -e24 * e33 * e42 + e23 * e34 * e42 + e24 * e32 * e43 - e22 * e34 * e43 - e23 * e32 * e44 +
+                   e22 * e33 * e44;
+        auto a12 = e14 * e33 * e42 - e13 * e34 * e42 - e14 * e32 * e43 + e12 * e34 * e43 + e13 * e32 * e44 -
+                   e12 * e33 * e44;
+        auto a13 = -e14 * e23 * e42 + e13 * e24 * e42 + e14 * e22 * e43 - e12 * e24 * e43 - e13 * e22 * e44 +
+                   e12 * e23 * e44;
+        auto a14 = e14 * e23 * e32 - e13 * e24 * e32 - e14 * e22 * e33 + e12 * e24 * e33 + e13 * e22 * e34 -
+                   e12 * e23 * e34;
+        auto a21 = e24 * e33 * e41 - e23 * e34 * e41 - e24 * e31 * e43 + e21 * e34 * e43 + e23 * e31 * e44 -
+                   e21 * e33 * e44;
+        auto a22 = -e14 * e33 * e41 + e13 * e34 * e41 + e14 * e31 * e43 - e11 * e34 * e43 - e13 * e31 * e44 +
+                   e11 * e33 * e44;
+        auto a23 = e14 * e23 * e41 - e13 * e24 * e41 - e14 * e21 * e43 + e11 * e24 * e43 + e13 * e21 * e44 -
+                   e11 * e23 * e44;
+        auto a24 = -e14 * e23 * e31 + e13 * e24 * e31 + e14 * e21 * e33 - e11 * e24 * e33 - e13 * e21 * e34 +
+                   e11 * e23 * e34;
+        auto a31 = -e24 * e32 * e41 + e22 * e34 * e41 + e24 * e31 * e42 - e21 * e34 * e42 - e22 * e31 * e44 +
+                   e21 * e32 * e44;
+        auto a32 = e14 * e32 * e41 - e12 * e34 * e41 - e14 * e31 * e42 + e11 * e34 * e42 + e12 * e31 * e44 -
+                   e11 * e32 * e44;
+        auto a33 = -e14 * e22 * e41 + e12 * e24 * e41 + e14 * e21 * e42 - e11 * e24 * e42 - e12 * e21 * e44 +
+                   e11 * e22 * e44;
+        auto a34 = e14 * e22 * e31 - e12 * e24 * e31 - e14 * e21 * e32 + e11 * e24 * e32 + e12 * e21 * e34 -
+                   e11 * e22 * e34;
+        auto a41 = e23 * e32 * e41 - e22 * e33 * e41 - e23 * e31 * e42 + e21 * e33 * e42 + e22 * e31 * e43 -
+                   e21 * e32 * e43;
+        auto a42 = -e13 * e32 * e41 + e12 * e33 * e41 + e13 * e31 * e42 - e11 * e33 * e42 - e12 * e31 * e43 +
+                   e11 * e32 * e43;
+        auto a43 = e13 * e22 * e41 - e12 * e23 * e41 - e13 * e21 * e42 + e11 * e23 * e42 + e12 * e21 * e43 -
+                   e11 * e22 * e43;
+        auto a44 = -e13 * e22 * e31 + e12 * e23 * e31 + e13 * e21 * e32 - e11 * e23 * e32 - e12 * e21 * e33 +
+                   e11 * e22 * e33;
+
+        auto result = mat4();
+
+        result.elements[0 + 0 * 4] = a11;
+        result.elements[1 + 0 * 4] = a12;
+        result.elements[2 + 0 * 4] = a13;
+        result.elements[3 + 0 * 4] = a14;
+
+        result.elements[0 + 1 * 4] = a21;
+        result.elements[1 + 1 * 4] = a22;
+        result.elements[2 + 1 * 4] = a23;
+        result.elements[3 + 1 * 4] = a24;
+
+        result.elements[0 + 2 * 4] = a31;
+        result.elements[1 + 2 * 4] = a32;
+        result.elements[2 + 2 * 4] = a33;
+        result.elements[3 + 2 * 4] = a34;
+
+        result.elements[0 + 3 * 4] = a41;
+        result.elements[1 + 3 * 4] = a42;
+        result.elements[2 + 3 * 4] = a43;
+        result.elements[3 + 3 * 4] = a44;
+
+        return result * inverseD;
+    }
+
     const r32 *
     mat4::getArray() const {
         return &elements[0];
@@ -155,8 +281,26 @@ namespace oni {
     }
 
     mat4 &
+    mat4::multiply(r32 c) {
+        for (auto &&element : elements) {
+            element *= c;
+        }
+        return *this;
+    }
+
+    mat4 &
+    mat4::operator*(r32 c) {
+        return multiply(c);
+    }
+
+    mat4 &
     mat4::operator*=(const mat4 &other) {
         return multiply(other);
+    }
+
+    mat4 &
+    mat4::operator*=(r32 c) {
+        return multiply(c);
     }
 
     mat4

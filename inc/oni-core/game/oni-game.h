@@ -29,10 +29,10 @@ namespace oni {
         initSystems();
 
         virtual void
-        _sim(r64 simTime) = 0;
+        _sim(r64 dt) = 0;
 
         virtual void
-        _render(r64 simTime) = 0;
+        _render(r64 dt) = 0;
 
         virtual void
         _display() = 0;

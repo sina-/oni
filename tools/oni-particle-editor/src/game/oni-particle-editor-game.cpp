@@ -24,10 +24,12 @@
 
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
-        mAssetManager = new oni::AssetManager();
-        mTextureManager = new oni::TextureManager(*mAssetManager);
+        mAssetMng = new oni::AssetManager();
+        mTextureMng = new oni::TextureManager(*mAssetMng);
         mInput = new oni::Input();
-        mZLayerManager = new oni::ZLayerManager();
+        mZLayerMng = new oni::ZLayerManager();
+        mPhysics = new oni::Physics();
+        mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -63,12 +65,12 @@ namespace oni {
         // called from any thread other than one where glfwInit() is called.
         mWindow = new oni::Window(*mInput, "Oni Particle Editor", WINDOW_WIDTH, WINDOW_HEIGHT);
         // NOTE: It requires OpenGL to be loaded to be able to load the texture atlas.
-        mSceneManager = new oni::SceneManager(screenBounds,
-                                              *mAssetManager,
-                                              *mZLayerManager,
-                                              *mTextureManager);
+        mSceneMng = new oni::SceneManager(screenBounds,
+                                          *mAssetMng,
+                                          *mZLayerMng,
+                                          *mTextureMng);
         setupTweakBar();
-        mTextureManager->loadAssets();
+        mTextureMng->loadAssets();
 
         mWindow->setClear({});
 
@@ -77,6 +79,13 @@ namespace oni {
 
     void
     ParticleEditorGame::initSystems() {
+        mSystems.push_back(new oni::System_GrowOverTime(*mEntityMng));
+        mSystems.push_back(new oni::System_MaterialTransition(*mEntityMng));
+//        mSystems.push_back(
+//                new rac::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneManager, *mEntityLoader));
+//        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
+        mSystems.push_back(new oni::System_TimeToLive(*mEntityMng));
+        mSystems.push_back(new oni::System_SyncPos(*mEntityMng));
     }
 
     void
@@ -84,9 +93,20 @@ namespace oni {
         TwInit(TW_OPENGL_CORE, nullptr);
         TwWindowSize(mWindow->getWidth(), mWindow->getHeight());
 
-        auto particleBar = TwNewBar("Particle");
-        oni::i32 barPos[2] = {10, 10};
-        TwSetParam(particleBar, nullptr, "position", TW_PARAM_INT32, 2, &barPos);
+        auto particleBar = TwNewBar("ParticleBar");
+        TwDefine(" ParticleBar label='Particle' refresh=0.15 ");
+        TwDefine(" ParticleBar valueswidth=100 ");
+
+        TwStructMember vec2Members[] = {
+                {"X", TW_TYPE_FLOAT, offsetof(vec2, x), " Step=1 "},
+                {"Y", TW_TYPE_FLOAT, offsetof(vec2, y), " Step=1 "},
+        };
+        TwType TwVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), 0, 0);
+
+        {
+            TwAddVarRO(particleBar, "screen pos", TwVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
+            TwAddVarRO(particleBar, "world pos", TwVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
+        }
     }
 
     bool
@@ -95,13 +115,18 @@ namespace oni {
     }
 
     void
-    ParticleEditorGame::_sim(r64 simTime) {
-
+    ParticleEditorGame::_sim(r64 dt) {
+        for (auto &&system: mSystems) {
+            system->tick(dt);
+        }
     }
 
     void
-    ParticleEditorGame::_render(r64 simTime) {
+    ParticleEditorGame::_render(r64 dt) {
         mWindow->clear();
+
+        mSceneMng->submit(*mEntityMng);
+        mSceneMng->render();
 
         TwDraw();
     }
@@ -114,6 +139,11 @@ namespace oni {
     void
     ParticleEditorGame::_poll() {
         mWindow->tick(*mInput);
+
+        for (auto &&pos: mInput->getCursor()) {
+            mInforSideBar.mouseScreenPos.x = pos.x;
+            mInforSideBar.mouseScreenPos.y = pos.y;
+        }
     }
 
     void

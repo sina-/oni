@@ -1,10 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include <oni-core/game/oni-game.h>
-#include <oni-core/asset/oni-asset-fwd.h>
-#include <oni-core/graphic/oni-graphic-fwd.h>
-#include <oni-core/io/oni-io-fwd.h>
-#include <oni-core/math/oni-math-fwd.h>
+#include <oni-core/fwd.h>
+
+#include <oni-core/component/oni-component-geometry.h>
 
 namespace oni {
     class ParticleEditorGame : public Game {
@@ -18,10 +19,10 @@ namespace oni {
         shouldTerminate() override;
 
         void
-        _sim(r64 simTime) override;
+        _sim(r64 dt) override;
 
         void
-        _render(r64 simTime) override;
+        _render(r64 dt) override;
 
         void
         _display() override;
@@ -44,12 +45,23 @@ namespace oni {
         setupTweakBar();
 
     private:
-        oni::AssetManager *mAssetManager{};
-        oni::SceneManager *mSceneManager{};
-        oni::TextureManager *mTextureManager{};
-        oni::ZLayerManager *mZLayerManager{};
+        struct InfoSideBar {
+            vec2 mouseScreenPos{};
+            vec2 mouseWorldPos{};
+        };
+
+        InfoSideBar mInforSideBar{};
+
+    private:
+        oni::AssetManager *mAssetMng{};
+        oni::EntityManager *mEntityMng{};
         oni::Input *mInput{};
+        oni::Physics *mPhysics{};
+        std::vector<oni::System *> mSystems{};
+        oni::SceneManager *mSceneMng{};
+        oni::TextureManager *mTextureMng{};
         oni::Window *mWindow{};
+        oni::ZLayerManager *mZLayerMng{};
 
         bool mWindowReady{false};
     };

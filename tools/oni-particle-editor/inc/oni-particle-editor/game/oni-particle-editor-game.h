@@ -45,9 +45,17 @@ namespace oni {
         setupTweakBar();
 
     private:
+        enum EntityPreset : u16 {
+            SIMPLE_PARTICLE,
+
+            LAST
+        };
+
         struct InfoSideBar {
             Screen2D mouseScreenPos{};
             WorldP2D mouseWorldPos{};
+            bool createModeOn{true};
+            EntityPreset entityPreset{EntityPreset::SIMPLE_PARTICLE};
         };
 
         InfoSideBar mInforSideBar{};

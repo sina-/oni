@@ -91,6 +91,12 @@ namespace oni {
     const i32 &
     Input::getMouseButton() const { return mMouseButton; }
 
+    bool
+    Input::isMouseButtonPressed() const {
+        // TODO: I need a better abstraction over user input!
+        return mMouseButton > -1;
+    }
+
     void
     Input::addCursor(r64 x,
                      r64 y) {

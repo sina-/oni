@@ -71,6 +71,9 @@ namespace oni {
         const i32 &
         getMouseButton() const;
 
+        bool
+        isMouseButtonPressed() const;
+
     private:
         std::vector<oniKeyPress> mKeysPressed{};
         std::vector<oniKeyPress> mKeysReleased{};

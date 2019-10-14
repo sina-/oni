@@ -70,6 +70,8 @@ namespace oni {
                                           *mZLayerMng,
                                           *mTextureMng);
         setupTweakBar();
+
+        mAssetMng->setPath(oni::EntityAssetsPack::CLOUD_WHITE, "/tmp/1.png");
         mTextureMng->loadAssets();
 
         mWindow->setClear({});
@@ -81,6 +83,7 @@ namespace oni {
     ParticleEditorGame::initSystems() {
         mSystems.push_back(new oni::System_GrowOverTime(*mEntityMng));
         mSystems.push_back(new oni::System_MaterialTransition(*mEntityMng));
+        // TODO: Migrate these systems
 //        mSystems.push_back(
 //                new rac::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneManager, *mEntityLoader));
 //        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
@@ -104,12 +107,17 @@ namespace oni {
                 {"X", TW_TYPE_FLOAT, offsetof(vec2, x), " Step=0.01 "},
                 {"Y", TW_TYPE_FLOAT, offsetof(vec2, y), " Step=0.01 "},
         };
-        TwType TwVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), 0, 0);
+        TwType TwVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
-        {
-            TwAddVarRO(particleBar, "screen pos", TwVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
-            TwAddVarRO(particleBar, "world pos", TwVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
-        }
+        TwEnumVal entityPresetMap[] = {{EntityPreset::SIMPLE_PARTICLE, "SIMPLE_PARTICLE"},};
+        TwType TwEntityPreset;
+        TwEntityPreset = TwDefineEnum("EntityPreset", entityPresetMap, enumCast(EntityPreset::LAST));
+
+        TwAddVarRO(particleBar, "screen pos", TwVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
+        TwAddVarRO(particleBar, "world pos", TwVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
+        TwAddVarRW(particleBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
+                   " label='create entity' ");
+        TwAddVarRW(particleBar, "entity preset", TwEntityPreset, &mInforSideBar.entityPreset, nullptr);
     }
 
     bool
@@ -148,9 +156,47 @@ namespace oni {
             mInforSideBar.mouseScreenPos.y = pos.y;
         }
 
-        auto mouseWorldP =  mSceneMng->unProject(mInforSideBar.mouseScreenPos);
+        auto mouseWorldP = mSceneMng->unProject(mInforSideBar.mouseScreenPos);
         mInforSideBar.mouseWorldPos.x = mouseWorldP.x;
         mInforSideBar.mouseWorldPos.y = mouseWorldP.y;
+
+        if (mInput->isMouseButtonPressed()) {
+            if (mInforSideBar.createModeOn) {
+                switch (mInforSideBar.entityPreset) {
+                    case SIMPLE_PARTICLE: {
+                        // TODO: So this entity creation logic needs to be generalized
+                        auto id = mEntityMng->createEntity(enumCast(mInforSideBar.entityPreset));
+                        auto eap = EntityAssetsPack::CLOUD_WHITE;
+
+                        auto &pos = mEntityMng->createComponent<oni::WorldP3D>(id);
+                        pos.x = mouseWorldP.x;
+                        pos.y = mouseWorldP.y;
+                        mEntityMng->createComponent<oni::Direction>(id);
+                        mEntityMng->createComponent<oni::Orientation>(id);
+                        mEntityMng->createComponent<oni::Scale>(id);
+                        mEntityMng->createComponent<oni::GrowOverTime>(id);
+                        mEntityMng->createComponent<oni::TimeToLive>(id);
+                        mEntityMng->setRandTTL(id, 1, 2);
+                        auto &vel = mEntityMng->createComponent<oni::Velocity>(id);
+                        vel.current = 10;
+                        auto &acc = mEntityMng->createComponent<oni::Acceleration>(id);
+                        acc.current = 10;
+                        mEntityMng->createComponent<oni::EntityAssetsPack>(id, eap);
+
+                        mEntityMng->createComponent<oni::MaterialFinish_Type>(id, MaterialFinish_Type::SHINNY);
+                        auto &ms = mEntityMng->createComponent<oni::MaterialSkin>(id);
+                        ms.color = {};
+                        mTextureMng->initTexture(eap, ms.texture);
+
+                        break;
+                    }
+                    default: {
+                        assert(false);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     void

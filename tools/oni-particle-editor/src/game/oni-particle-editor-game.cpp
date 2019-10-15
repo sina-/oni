@@ -107,17 +107,44 @@ namespace oni {
                 {"X", TW_TYPE_FLOAT, offsetof(vec2, x), " Step=0.01 "},
                 {"Y", TW_TYPE_FLOAT, offsetof(vec2, y), " Step=0.01 "},
         };
-        TwType TwVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
+        auto TwCustomVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
         TwEnumVal entityPresetMap[] = {{EntityPreset::SIMPLE_PARTICLE, "SIMPLE_PARTICLE"},};
-        TwType TwEntityPreset;
-        TwEntityPreset = TwDefineEnum("EntityPreset", entityPresetMap, enumCast(EntityPreset::LAST));
+        auto TwCustomEntityPreset = TwDefineEnum("EntityPreset", entityPresetMap, enumCast(EntityPreset::LAST));
 
-        TwAddVarRO(particleBar, "screen pos", TwVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
-        TwAddVarRO(particleBar, "world pos", TwVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
+        TwStructMember growOverTimeMembers[] = {
+                {"period",  TW_TYPE_FLOAT, offsetof(GrowOverTime, period)},
+                {"elapsed", TW_TYPE_FLOAT, offsetof(GrowOverTime, elapsed)},
+                {"factor",  TW_TYPE_FLOAT, offsetof(GrowOverTime, factor)},
+                {"maxSize", TW_TYPE_DIR3F, offsetof(GrowOverTime, maxSize)}
+        };
+        auto TwCustomGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
+                                                   nullptr, nullptr);
+
+        TwEnumVal materialFinishType[] = {
+                {enumCast(MaterialFinish_Type::SOLID),       "SOLID"},
+                {enumCast(MaterialFinish_Type::TRANSLUCENT), "TRANSLUCENT"},
+                {enumCast(MaterialFinish_Type::SHINNY),      "SHINNY"},
+        };
+        auto TwCustomMaterialFinish_Type = TwDefineEnum("MaterialFinish_Type", materialFinishType,
+                                                        enumCast(MaterialFinish_Type::LAST));
+
+        TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
+        TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
         TwAddVarRW(particleBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
                    " label='create entity' ");
-        TwAddVarRW(particleBar, "entity preset", TwEntityPreset, &mInforSideBar.entityPreset, nullptr);
+        TwAddVarRW(particleBar, "entity preset", TwCustomEntityPreset, &mInforSideBar.entityPreset, nullptr);
+
+        // TODO: Actually I need ParticleEmitter instead of this
+        TwAddVarRW(particleBar, "dir", TW_TYPE_DIR3F, &mCurrentParticleConfig.dir, nullptr);
+        TwAddVarRW(particleBar, "ornt", TW_TYPE_FLOAT, &mCurrentParticleConfig.ornt, nullptr);
+        TwAddVarRW(particleBar, "scale", TW_TYPE_DIR3F, &mCurrentParticleConfig.scale, nullptr);
+        TwAddVarRW(particleBar, "grow", TwCustomGrowOverTime, &mCurrentParticleConfig.got, nullptr);
+        TwAddVarRW(particleBar, "ttl", TwCustomVec2, &mCurrentParticleConfig.ttl, nullptr);
+        TwAddVarRW(particleBar, "velocity", TwCustomVec2, &mCurrentParticleConfig.vel, nullptr);
+        TwAddVarRW(particleBar, "acc", TwCustomVec2, &mCurrentParticleConfig.acc, nullptr);
+        TwAddVarRW(particleBar, "finish", TwCustomMaterialFinish_Type, &mCurrentParticleConfig.mft, nullptr);
+
     }
 
     bool
@@ -166,24 +193,23 @@ namespace oni {
                     case SIMPLE_PARTICLE: {
                         // TODO: So this entity creation logic needs to be generalized
                         auto id = mEntityMng->createEntity(enumCast(mInforSideBar.entityPreset));
-                        auto eap = EntityAssetsPack::CLOUD_WHITE;
 
                         auto &pos = mEntityMng->createComponent<oni::WorldP3D>(id);
                         pos.x = mouseWorldP.x;
                         pos.y = mouseWorldP.y;
-                        mEntityMng->createComponent<oni::Direction>(id);
-                        mEntityMng->createComponent<oni::Orientation>(id);
-                        mEntityMng->createComponent<oni::Scale>(id);
-                        mEntityMng->createComponent<oni::GrowOverTime>(id);
-                        mEntityMng->createComponent<oni::TimeToLive>(id);
-                        mEntityMng->setRandTTL(id, 1, 2);
-                        auto &vel = mEntityMng->createComponent<oni::Velocity>(id);
-                        vel.current = 10;
-                        auto &acc = mEntityMng->createComponent<oni::Acceleration>(id);
-                        acc.current = 10;
+
+                        mEntityMng->createComponent<oni::Direction>(id, mCurrentParticleConfig.dir);
+                        mEntityMng->createComponent<oni::Orientation>(id, mCurrentParticleConfig.ornt);
+                        mEntityMng->createComponent<oni::Scale>(id, mCurrentParticleConfig.scale);
+                        mEntityMng->createComponent<oni::GrowOverTime>(id, mCurrentParticleConfig.got);
+                        mEntityMng->createComponent<oni::TimeToLive>(id, mCurrentParticleConfig.ttl);
+                        mEntityMng->createComponent<oni::Velocity>(id, mCurrentParticleConfig.vel);
+                        mEntityMng->createComponent<oni::Acceleration>(id, mCurrentParticleConfig.acc);
+                        // TODO: eap
+                        auto eap = EntityAssetsPack::CLOUD_WHITE;
                         mEntityMng->createComponent<oni::EntityAssetsPack>(id, eap);
 
-                        mEntityMng->createComponent<oni::MaterialFinish_Type>(id, MaterialFinish_Type::SHINNY);
+                        mEntityMng->createComponent<oni::MaterialFinish_Type>(id, mCurrentParticleConfig.mft);
                         auto &ms = mEntityMng->createComponent<oni::MaterialSkin>(id);
                         ms.color = {};
                         mTextureMng->initTexture(eap, ms.texture);

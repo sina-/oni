@@ -2,7 +2,7 @@ add_library(oni-core-entities
         oni-entities-serialization.cpp
         oni-entities-client-data-manager.cpp
         oni-entities-manager.cpp
-        oni-entities-entity.cpp)
+        oni-entities-entity.cpp oni-entities-factory.cpp parser/oni-entities-parser-particle-emitter.cpp)
 
 target_compile_features(oni-core-entities
         PUBLIC
@@ -16,6 +16,7 @@ target_include_directories(oni-core-entities
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
         PRIVATE
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/box2d>
+        $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/nlohmann-json/include>
         )
 
 find_library(BOX2D_LIBRARY Box2D PATHS ${oni_SOURCE_DIR}/lib/box2d/Build/bin/x86_64/Debug NO_DEFAULT_PATH)

@@ -172,12 +172,14 @@ namespace oni {
         auto path = mAssetManager.getAssetFilePath(tag);
 
         fif = FreeImage_GetFileType(path.data(), 0);
-        if (fif == FIF_UNKNOWN)
+        if (fif == FIF_UNKNOWN) {
             fif = FreeImage_GetFIFFromFilename(path.data());
+        }
         assert(fif != FIF_UNKNOWN);
 
-        if (FreeImage_FIFSupportsReading(fif))
+        if (FreeImage_FIFSupportsReading(fif)) {
             dib = FreeImage_Load(fif, path.data());
+        }
         assert(dib);
 
         auto colorType = FreeImage_GetColorType(dib);

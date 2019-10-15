@@ -25,3 +25,6 @@
 [submodule "lib/anttweakbar"]
 	path = lib/anttweakbar
 	url = git@github.com:sina-/anttweakbar.git
+[submodule "lib/nlohmann-json"]
+	path = lib/nlohmann-json
+	url = git@github.com:sina-/json

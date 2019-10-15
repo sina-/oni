@@ -6,6 +6,7 @@
 #include <oni-core/fwd.h>
 
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-visual.h>
 
 namespace oni {
     class ParticleEditorGame : public Game {
@@ -58,7 +59,20 @@ namespace oni {
             EntityPreset entityPreset{EntityPreset::SIMPLE_PARTICLE};
         };
 
+        struct ParticleConfig {
+            Direction dir{};
+            Orientation ornt{};
+            Scale scale{};
+            GrowOverTime got{};
+            TimeToLive ttl{};
+            Velocity vel{};
+            Acceleration acc{};
+            MaterialFinish_Type mft{};
+            EntityAssetsPack eap{};
+        };
+
         InfoSideBar mInforSideBar{};
+        ParticleConfig mCurrentParticleConfig{};
 
     private:
         oni::AssetManager *mAssetMng{};

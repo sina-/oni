@@ -357,8 +357,19 @@ namespace oni {
         EntityID
         createEntity(const EntityType &);
 
+        /**
+         * This overload could be used by the game code to define custom types using enums.
+         *
+         * For example you could define:
+         * enum class EntityTypeGame : EntityType_Storage {
+         *  PLAYER = 1,
+         *  FLYING_MOB = 2,
+         * };
+         *
+         * @return
+         */
         EntityID
-        createEntity(const decltype(EntityType::value) &);
+        createEntity(const EntityType_Storage &);
 
         template<class Component, class... Args>
         Component &

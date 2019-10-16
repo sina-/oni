@@ -2,7 +2,7 @@ add_library(oni-core-entities
         oni-entities-serialization.cpp
         oni-entities-client-data-manager.cpp
         oni-entities-manager.cpp
-        oni-entities-entity.cpp oni-entities-factory.cpp parser/oni-entities-parser-particle-emitter.cpp)
+        oni-entities-entity.cpp oni-entities-factory.cpp)
 
 target_compile_features(oni-core-entities
         PUBLIC

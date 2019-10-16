@@ -6,6 +6,7 @@
 #include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/entities/oni-entities-manager.h>
+#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 #include <oni-core/game/oni-game-event.h>
 #include <oni-core/graphic/oni-graphic-brush.h>
@@ -30,6 +31,7 @@ namespace oni {
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
+        mEntityFactory = new oni::EntityFactory({""});
     }
 
     ParticleEditorGame::~ParticleEditorGame() {

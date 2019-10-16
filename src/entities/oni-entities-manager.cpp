@@ -168,7 +168,7 @@ namespace oni {
     }
 
     EntityID
-    EntityManager::createEntity(const decltype(EntityType::value) &t) {
+    EntityManager::createEntity(const EntityType_Storage &t) {
         return createEntity(EntityType{t});
     }
 

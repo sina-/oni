@@ -11,6 +11,8 @@ namespace oni {
         oni::u16 value;
     };
 
+    using EntityType_Storage = decltype(EntityType::value);
+
     enum class SimMode : oni::u8 {
         UNKNOWN,
 

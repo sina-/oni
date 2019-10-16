@@ -4,6 +4,7 @@
 
 namespace oni {
     class ClientDataManager;
+    class EntityFactory;
     class EntityManager;
 
     struct BindLifetimeParent;
@@ -12,6 +13,8 @@ namespace oni {
     struct EntityOperationPolicy;
     struct EntityContext;
     struct EntityType;
+    struct EntityType_Name;
+    struct Component_Name;
 
     enum class SimMode : u8;
     enum class SnapshotType;

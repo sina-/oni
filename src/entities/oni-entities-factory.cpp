@@ -1,23 +1,40 @@
 #include <oni-core/entities/oni-entities-factory.h>
 
+// NOTE: For cereal to not throw exceptions and disable stupid noexcept constructor that throws in debug!
+#define JSON_NOEXCEPTION
+
 #include <fstream>
 #include <sstream>
 #include <nlohmann/json.hpp>
-#include <utility>
+#include <cereal/archives/json.hpp>
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 
+#define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                           \
+{                                                                                   \
+        ComponentFactory cf = [](EntityManager &em,                                 \
+                                 EntityID id,                                       \
+                                 cereal::JSONInputArchive &reader) {                \
+            auto &component = em.createComponent<COMPONENT_NAME>(id);               \
+            reader(component);                                                      \
+        };                                                                          \
+        factory->registerComponentFactory({#COMPONENT_NAME}, std::move(cf));        \
+}
+
 namespace oni {
-    void
-    EntityFactory::registerComponentFactory(const Component_Name &name,
-                                            componentFactory &&cb) {
-        assert(mComponentFactory.find(name.value) != mComponentFactory.end());
-        mComponentFactory.emplace(name.value, std::move(cb));
+    oni::EntityFactory::EntityFactory(FilePath fp) : mEntityResourcePath(std::move(fp)) {
+        COMPONENT_FACTORY_DEFINE(this, WorldP3D)
+        COMPONENT_FACTORY_DEFINE(this, WorldP2D)
+        COMPONENT_FACTORY_DEFINE(this, ParticleEmitter)
     }
 
-    oni::EntityFactory::EntityFactory(FilePath fp) : mEntityResourcePath(std::move(fp)) {
+    void
+    EntityFactory::registerComponentFactory(const Component_Name &name,
+                                            ComponentFactory &&cb) {
+        assert(mComponentFactory.find(name.value) == mComponentFactory.end());
+        mComponentFactory.emplace(name.value, std::move(cb));
     }
 
     void
@@ -55,7 +72,7 @@ namespace oni {
     }
 
     EntityID
-    oni::EntityFactory::createEntity(EntityManager &em,
+    oni::EntityFactory::createEntity(EntityManager &manager,
                                      const EntityType_Name &name) {
         auto entityType = getEntityType(name);
 
@@ -64,12 +81,24 @@ namespace oni {
             return EntityManager::nullEntity();
         }
 
-        auto id = em.createEntity(entityType);
-
         // TODO: Pre-load all the jsons
         std::ifstream jsonStream(fp.value);
-        auto root = nlohmann::json();
-        jsonStream >> root;
+        if (!jsonStream.is_open()) {
+            assert(false);
+            return EntityManager::nullEntity();
+        }
+
+        // TODO: Check for valid entityType?
+        // TODO: After having registry take care of entity name string to entity type lookup I can
+        // just add an overload to createEntity that receives EntityType_Name and returns and ID or nullEntity
+        // if mapping is missing! Solves so many issues.
+        auto id = manager.createEntity(entityType);
+
+        auto jsonString = std::string((std::istreambuf_iterator<char>(jsonStream)), std::istreambuf_iterator<char>());
+        //nlohmann::json root;
+        //jsonStream >> root;
+        //auto document = rapidjson::Document
+        auto root = nlohmann::json::parse(jsonString);
         auto components = root["components"];
         for (auto &&component: components) {
             if (component.is_object()) {
@@ -91,14 +120,15 @@ namespace oni {
                     // go to the place where registration happens :/ It would be much nicer if I can just
                     // do a go to definition and immediately see the parser
                     // and to avoid duplicating serialization functions I can use cereal
-//                    std::stringstream ss;
-//                    ss.str(value);
-//                    cereal::JSONInputArchive reader(ss);
-//                    mComponentFactory.at(hash)(em, reader);
-//
-//                    WorldP3D pe;
-//                    reader(pe);
-//                    em.createComponent<WorldP3D>(0, pe);
+                    auto factory = mComponentFactory.find(hash);
+                    if (factory != mComponentFactory.end()) {
+                        std::stringstream ss;
+                        ss.str(value);
+                        cereal::JSONInputArchive reader(ss);
+                        factory->second(manager, id, reader);
+                    } else {
+                        assert(false);
+                    }
 
                     //const auto & type = parseType<InvalidComponent>({key});
 
@@ -108,6 +138,7 @@ namespace oni {
                 }
             }
         }
+        return id;
     }
 
     // * create entity

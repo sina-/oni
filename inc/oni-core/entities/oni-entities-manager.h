@@ -405,7 +405,6 @@ namespace oni {
             mRegistry->assign<Tag>(id);
         }
 
-        // TODO: this one and printEntityType do not need to be part of engine
         void
         registerEntityDebugName(const EntityType &,
                                 std::string &&name);

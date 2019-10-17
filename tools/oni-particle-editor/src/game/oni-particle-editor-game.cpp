@@ -22,6 +22,14 @@
 #include <oni-core/physics/oni-physics-system.h>
 #include <oni-core/physics/oni-physics.h>
 
+enum class EntityTypeEditor : oni::EntityType_Storage {
+    PARTICLE_EMITTER
+};
+
+inline oni::EntityType
+getType(EntityTypeEditor et) {
+    return {oni::enumCast(et)};
+}
 
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
@@ -31,7 +39,9 @@ namespace oni {
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
-        mEntityFactory = new oni::EntityFactory({""});
+        mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"});
+
+        mEntityFactory->registerEntityType({"particle-emitter"}, getType(EntityTypeEditor::PARTICLE_EMITTER));
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -193,6 +203,7 @@ namespace oni {
             if (mInforSideBar.createModeOn) {
                 switch (mInforSideBar.entityPreset) {
                     case SIMPLE_PARTICLE: {
+                        mEntityFactory->createEntity(*mEntityMng, {"particle-emitter"});
                         // TODO: So this entity creation logic needs to be generalized
                         auto id = mEntityMng->createEntity(enumCast(mInforSideBar.entityPreset));
 

@@ -7,8 +7,10 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/fwd.h>
 #include <entt/core/hashed_string.hpp>
-#include <cereal/archives/json.hpp>
 
+namespace cereal {
+    class JSONInputArchive;
+}
 
 namespace oni {
     // TODO: don't I have something useful in IO? If not, should add one.
@@ -30,13 +32,15 @@ namespace oni {
         HashedString value;
     };
 
-    using componentFactory = std::function<
-            void(EntityManager &,
-                 cereal::JSONInputArchive &)>;
+    // TODO: Can I remove JSONInputArchive from the API?
+    using ComponentFactory = std::function<
+            void(EntityManager & ,
+                 EntityID,
+                 cereal::JSONInputArchive & )>;
 
     class EntityFactory {
     public:
-        explicit EntityFactory(FilePath );
+        explicit EntityFactory(FilePath);
 
         void
         registerEntityType(EntityType_Name,
@@ -44,7 +48,7 @@ namespace oni {
 
         void
         registerComponentFactory(const Component_Name &,
-                                 componentFactory &&);
+                                 ComponentFactory &&);
 
         EntityID
         createEntity(EntityManager &,
@@ -58,7 +62,9 @@ namespace oni {
         getEntityResourcePath(const EntityType_Name &);
 
     private:
-        std::map<HashedString::hash_type, componentFactory> mComponentFactory{};
+        std::map<HashedString::hash_type, ComponentFactory> mComponentFactory{};
+        // TODO: This should move to entity registry. We already have the concept of entity debug name which maps
+        // entity name string to an ID. This is the same thing almost.
         std::map<HashedString::hash_type, EntityType> mEntityNameLookup{};
         std::map<HashedString::hash_type, FilePath> mEntityResourcePathLookup{};
         FilePath mEntityResourcePath{};

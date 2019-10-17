@@ -8,7 +8,7 @@
 
 namespace oni {
     struct EntityType {
-        oni::u16 value;
+        u16 value;
     };
 
     using EntityType_Storage = decltype(EntityType::value);

@@ -1,21 +1,24 @@
 {
   "name": "particle-emitter",
   "components": {
-    "ParticleEmitter": {
-      "size": 1.0,
-      "initialVMin": 1.0,
-      "initialVMax": 2.0,
-      "acc": 0.0,
-      "orientMin": 0.0,
-      "orientMax": 6.28,
-      "count": 10,
-      "GrowOverTime": {
-        "period": 0.2,
-        "factor": 0.1,
-        "Scale": {
-          "x": 1,
-          "y": 1,
-          "z": 1
+    "dummy": {
+      "ParticleEmitter": {
+        "size": 1.0,
+        "initialVMin": 1.0,
+        "initialVMax": 2.0,
+        "acc": 0.0,
+        "orientMin": 0.0,
+        "orientMax": 6.28,
+        "count": 10,
+        "growth": {
+          "period": 0.4,
+          "elapsed": 0.0,
+          "factor": 0.1,
+          "maxSize":{
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
         }
       }
     }

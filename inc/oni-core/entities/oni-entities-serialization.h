@@ -69,7 +69,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               WorldP3D &pos) {
-        archive(pos.value);
+        archive(pos.x, pos.y, pos.z);
     }
 
     template<class Archive>
@@ -162,14 +162,14 @@ namespace oni {
     void
     serialize(Archive &archive,
               WorldP2D &data) {
-        archive(data.value);
+        archive(data.x, data.y);
     }
 
     template<class Archive>
     void
     serialize(Archive &archive,
               Force2D &data) {
-        archive(data.value);
+        archive(data.x, data.y);
     }
 
     template<class Archive>
@@ -183,7 +183,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               GrowOverTime &data) {
-        archive(data.maxSize, data.period, data.factor, data.elapsed);
+        archive(data.factor, data.period, data.elapsed, data.maxSize);
     }
 
     template<class Archive>
@@ -240,7 +240,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               Scale &data) {
-        archive(data.value);
+        archive(data.x, data.y, data.z);
     }
 
     template<class Archive>

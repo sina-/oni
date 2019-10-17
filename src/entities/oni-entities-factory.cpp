@@ -12,13 +12,14 @@
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 
+// NOTE: Call to make_nvp is important, otherwise order of the values in the json has to match that of struct
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                           \
 {                                                                                   \
         ComponentFactory cf = [](EntityManager &em,                                 \
                                  EntityID id,                                       \
                                  cereal::JSONInputArchive &reader) {                \
             auto &component = em.createComponent<COMPONENT_NAME>(id);               \
-            reader(component);                                                      \
+            reader(cereal::make_nvp(#COMPONENT_NAME, component));                   \
         };                                                                          \
         factory->registerComponentFactory({#COMPONENT_NAME}, std::move(cf));        \
 }
@@ -97,44 +98,73 @@ namespace oni {
         auto jsonString = std::string((std::istreambuf_iterator<char>(jsonStream)), std::istreambuf_iterator<char>());
         //nlohmann::json root;
         //jsonStream >> root;
-        //auto document = rapidjson::Document
-        auto root = nlohmann::json::parse(jsonString);
-        auto components = root["components"];
-        for (auto &&component: components) {
-            if (component.is_object()) {
-                for (auto&&[key, value]: component.items()) {
-                    auto hash = entt::hashed_string(key.c_str());
-                    // TODO: These two alternatives, both suck, and they don't fit into the engine
-                    // 1
+        auto document = rapidjson::Document();
+        if (document.Parse(jsonString.c_str()).HasParseError()) {
+            assert(false);
+            return EntityManager::nullEntity();
+        }
+
+        //auto root = nlohmann::json::parse(jsonString);
+        if (document.IsObject()) {
+            auto components = document.FindMember("components");
+            if (components != document.MemberEnd()) {
+                for (auto component = components->value.MemberBegin();
+                     component != components->value.MemberEnd(); ++component) {
+                    //auto components = root["components"];
+                    if (component->value.IsObject()) {
+                        auto buffer = rapidjson::StringBuffer{};
+                        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                        component->value.Accept(writer);
+                        auto value = buffer.GetString();
+
+                        auto key = component->value.FindMember("dummy")->value.MemberBegin()->name.GetString();
+                        auto hash = entt::hashed_string(key);
+                        {
+                            std::ostringstream ss;
+                            {
+                                cereal::JSONOutputArchive oa{ss};
+                                auto pe = ParticleEmitter{};
+                                oa(CEREAL_NVP(pe));
+                            }
+                            auto result = ss.str();
+                            printf("example:\n %s\n", result.c_str());
+                        }
+                        printf("value:\n %s\n", value);
+                        // TODO: These two alternatives, both suck, and they don't fit into the engine
+                        // 1
 //                   parseAndCreate<ParticleEmitter>(em, value, key);
-                    // 2
+                        // 2
 //                    if (key == "ParticleEmitter") {
 //                        auto pe = value.get<ParticleEmitter>();
 //                        em.createComponent<ParticleEmitter>(id, pe);
-                    // 3
-                    // create a map of string to function pointers where clients can register functions that
-                    // will create the component given a string which is probably better tha a giant
-                    // if else statement of string comparisons! since map will do a one hash and then
-                    // fast lookup to the exact function. The down side is the stupid register handler
-                    // pattern where you can't tell by looking at the caller what will happen, you have to
-                    // go to the place where registration happens :/ It would be much nicer if I can just
-                    // do a go to definition and immediately see the parser
-                    // and to avoid duplicating serialization functions I can use cereal
-                    auto factory = mComponentFactory.find(hash);
-                    if (factory != mComponentFactory.end()) {
-                        std::stringstream ss;
-                        ss.str(value);
-                        cereal::JSONInputArchive reader(ss);
-                        factory->second(manager, id, reader);
-                    } else {
-                        assert(false);
+                        // 3
+                        // create a map of string to function pointers where clients can register functions that
+                        // will create the component given a string which is probably better tha a giant
+                        // if else statement of string comparisons! since map will do a one hash and then
+                        // fast lookup to the exact function. The down side is the stupid register handler
+                        // pattern where you can't tell by looking at the caller what will happen, you have to
+                        // go to the place where registration happens :/ It would be much nicer if I can just
+                        // do a go to definition and immediately see the parser
+                        // and to avoid duplicating serialization functions I can use cereal
+                        auto factory = mComponentFactory.find(hash);
+                        if (factory != mComponentFactory.end()) {
+                            // TODO: so many stream and conversions, can't I just use the stream I get from rapidjson?
+                            std::stringstream ss;
+                            ss.str(value);
+                            cereal::JSONInputArchive reader(ss);
+                            // TODO: The issue with this right now is that if something is wrong in json I just get
+                            // an assert! What would happen in publish?
+                            factory->second(manager, id, reader);
+                        } else {
+                            assert(false);
+                        }
+
+                        //const auto & type = parseType<InvalidComponent>({key});
+
+                        // 4 polymorphism
+                        //createComponent({key}, value);
+
                     }
-
-                    //const auto & type = parseType<InvalidComponent>({key});
-
-                    // 4 polymorphism
-                    //createComponent({key}, value);
-
                 }
             }
         }

@@ -1,14 +1,14 @@
 {
   "name": "particle-emitter",
-  "components": {
-    "dummy": {
+  "components": [
+    {
       "ParticleEmitter": {
         "size": 1.0,
         "initialVMin": 1.0,
         "initialVMax": 2.0,
-        "acc": 0.0,
         "orientMin": 0.0,
         "orientMax": 6.28,
+        "acc": 0.0,
         "count": 10,
         "growth": {
           "period": 0.4,
@@ -21,6 +21,13 @@
           }
         }
       }
+    },
+    {
+      "WorldP3D": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
     }
-  }
+  ]
 }

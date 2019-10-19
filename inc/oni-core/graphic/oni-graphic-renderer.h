@@ -39,8 +39,8 @@ namespace oni {
         const Scale *scale{};
         PrimitiveTransforms pt{};
 
-        const MaterialSkin *skin{};
-        const MaterialText *text{};
+        const Material_Skin *skin{};
+        const Material_Text *text{};
         const MaterialTransition_Def *trans{};
     };
 
@@ -54,7 +54,7 @@ namespace oni {
 
         ///
 
-        MaterialFinish_Type finishType{};
+        Material_Finish_Enum finishType{};
     };
 
     class Renderer {
@@ -121,10 +121,10 @@ namespace oni {
 
     private:
         static BlendSpec
-        getBlendSpec(MaterialFinish_Type);
+        getBlendSpec(Material_Finish_Enum);
 
         static DepthSpec
-        getDepthSpec(MaterialFinish_Type);
+        getDepthSpec(Material_Finish_Enum);
 
     private:
         bool mBegun{false};

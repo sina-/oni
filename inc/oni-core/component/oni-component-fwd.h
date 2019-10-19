@@ -60,8 +60,8 @@ namespace oni {
     struct GrowOverTime;
     struct Image;
     struct MaterialDefinition;
-    struct MaterialSkin;
-    struct MaterialText;
+    struct Material_Skin;
+    struct Material_Text;
     struct MaterialTransition_Color;
     struct MaterialTransition_Fade;
     struct MaterialTransition_Texture;

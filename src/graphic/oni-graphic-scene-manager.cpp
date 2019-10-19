@@ -66,7 +66,7 @@ namespace oni {
         spec.renderTarget = nullptr;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
-        spec.finishType = MaterialFinish_Type::SOLID;
+        spec.finishType = Material_Finish_Enum::SOLID;
         setMVP(spec, true, false, true);
         begin(*mRendererTessellation, spec);
     }
@@ -123,7 +123,7 @@ namespace oni {
     SceneManager::prepareTexture(EntityManager &manager,
                                  EntityID id,
                                  EntityAssetsPack tag) {
-        auto &ms = manager.get<MaterialSkin>(id);
+        auto &ms = manager.get<Material_Skin>(id);
         mTextureManager.initTexture(tag, ms.texture);
     }
 
@@ -148,14 +148,14 @@ namespace oni {
                     WorldP3D,
                     Orientation,
                     Scale,
-                    MaterialSkin,
-                    MaterialFinish_Type>();
+                    Material_Skin,
+                    Material_Finish_Enum>();
             for (auto &&id: view) {
                 const auto &pos = view.get<WorldP3D>(id);
                 const auto &ornt = view.get<Orientation>(id);
                 const auto &scale = view.get<Scale>(id);
-                const auto &finish = view.get<MaterialFinish_Type>(id);
-                const auto &skin = view.get<MaterialSkin>(id);
+                const auto &finish = view.get<Material_Finish_Enum>(id);
+                const auto &skin = view.get<Material_Skin>(id);
 
                 auto renderable = Renderable{};
                 renderable.id = id;
@@ -185,12 +185,12 @@ namespace oni {
                     WorldP3D,
                     Orientation,
                     Scale,
-                    MaterialText>();
+                    Material_Text>();
             for (auto &&id: view) {
                 const auto &pos = view.get<WorldP3D>(id);
                 const auto &ornt = view.get<Orientation>(id);
                 const auto &scale = view.get<Scale>(id);
-                const auto &text = view.get<MaterialText>(id);
+                const auto &text = view.get<Material_Text>(id);
 
                 auto renderable = Renderable{};
                 renderable.id = id;
@@ -204,19 +204,19 @@ namespace oni {
                 // TODO: Read this value from the entity
                 renderable.pt = PrimitiveTransforms::UI;
 
-                mRenderables[enumCast(MaterialFinish_Type::TRANSLUCENT)].push(renderable);
+                mRenderables[enumCast(Material_Finish_Enum::TRANSLUCENT)].push(renderable);
             }
         }
     }
 
     void
     SceneManager::render() {
-        for (auto i = 0; i < enumCast(MaterialFinish_Type::LAST); ++i) {
+        for (auto i = 0; i < enumCast(Material_Finish_Enum::LAST); ++i) {
             RenderSpec spec;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
-            spec.finishType = static_cast<MaterialFinish_Type>(i);
+            spec.finishType = static_cast<Material_Finish_Enum>(i);
             setMVP(spec, true, true, true);
 
             begin(*mRendererTessellation, spec);
@@ -285,7 +285,7 @@ namespace oni {
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
         // TODO: I should probably take this as an argument
-        spec.finishType = MaterialFinish_Type::SOLID;
+        spec.finishType = Material_Finish_Enum::SOLID;
         setMVP(spec, destBounds, model);
 
         begin(*mRendererQuad, spec);
@@ -301,7 +301,7 @@ namespace oni {
                                   const mat4 *model) {
         RenderSpec spec;
         // TODO: I should probably take this as an argument
-        spec.finishType = MaterialFinish_Type::SOLID;
+        spec.finishType = Material_Finish_Enum::SOLID;
         spec.renderTarget = &dest;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
@@ -317,7 +317,7 @@ namespace oni {
                         Texture &back) {
         RenderSpec spec;
         // TODO: I should probably take this as an argument
-        spec.finishType = MaterialFinish_Type::SOLID;
+        spec.finishType = Material_Finish_Enum::SOLID;
         spec.renderTarget = &back;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;

@@ -2,6 +2,11 @@
   "name": "particle-emitter",
   "components": {
     "ParticleEmitter": {
+      "material": {
+        "finish": {
+          "name": "shinny"
+        }
+      },
       "size": 1.0,
       "initialVMin": 1.0,
       "initialVMax": 2.0,

@@ -419,7 +419,7 @@ namespace oni {
     void
     EntityManager::setText(EntityID id,
                            std::string_view content) {
-        auto &text = mRegistry->get<MaterialText>(id);
+        auto &text = mRegistry->get<Material_Text>(id);
         text.textContent = content;
     }
 

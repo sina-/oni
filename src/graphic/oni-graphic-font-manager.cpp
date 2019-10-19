@@ -80,14 +80,14 @@ namespace oni {
     FontManager::getTextureID() const { return mAtlas->id; }
 
     void
-    FontManager::initializeText(MaterialText &text) {
+    FontManager::initializeText(Material_Text &text) {
         text.textureID = mAtlas->id;
         assignGlyphs(text);
     }
 
     void
     FontManager::updateText(std::string &&textContent,
-                            MaterialText &text) {
+                            Material_Text &text) {
         if (textContent == text.textContent) {
             return;
         }
@@ -103,7 +103,7 @@ namespace oni {
     }
 
     void
-    FontManager::assignGlyphs(MaterialText &text) {
+    FontManager::assignGlyphs(Material_Text &text) {
         for (size i = 0; i < text.textContent.size(); ++i) {
             auto glyph = findGlyph(text.textContent[i]);
             if (glyph) {

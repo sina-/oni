@@ -30,11 +30,11 @@ namespace oni {
         operator=(FontManager &) = delete;
 
         void
-        initializeText(MaterialText &);
+        initializeText(Material_Text &);
 
         void
         updateText(std::string &&textContent,
-                   MaterialText &text);
+                   Material_Text &text);
 
         size_t
         getAtlasWidth() const;
@@ -62,7 +62,7 @@ namespace oni {
         findGlyph(const char &character) const;
 
         void
-        assignGlyphs(MaterialText &);
+        assignGlyphs(Material_Text &);
 
     private:
         // Wrap atlas and font with unique_ptr and pass the custom deleter

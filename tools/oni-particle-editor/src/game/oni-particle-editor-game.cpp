@@ -101,6 +101,7 @@ namespace oni {
 //        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
         mSystems.push_back(new oni::System_TimeToLive(*mEntityMng));
         mSystems.push_back(new oni::System_SyncPos(*mEntityMng));
+        mSystems.push_back(new oni::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneMng, *mEntityFactory));
     }
 
     void
@@ -121,7 +122,7 @@ namespace oni {
         };
         auto TwCustomVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
-        TwEnumVal entityPresetMap[] = {{EntityPreset::SIMPLE_PARTICLE, "SIMPLE_PARTICLE"},};
+        TwEnumVal entityPresetMap[] = {{EntityPreset::PARTICLE_EMITTER, "SIMPLE_PARTICLE"},};
         auto TwCustomEntityPreset = TwDefineEnum("EntityPreset", entityPresetMap, enumCast(EntityPreset::LAST));
 
         TwStructMember growOverTimeMembers[] = {
@@ -202,7 +203,8 @@ namespace oni {
         if (mInput->isMouseButtonPressed()) {
             if (mInforSideBar.createModeOn) {
                 switch (mInforSideBar.entityPreset) {
-                    case SIMPLE_PARTICLE: {
+                    // TODO: Probably you want to match this name to the json file name
+                    case PARTICLE_EMITTER: {
                         mEntityFactory->createEntity(*mEntityMng, {"particle-emitter"});
                         // TODO: So this entity creation logic needs to be generalized
                         auto id = mEntityMng->createEntity(enumCast(mInforSideBar.entityPreset));

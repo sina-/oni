@@ -47,7 +47,7 @@ namespace oni {
 
     private:
         enum EntityPreset : u16 {
-            SIMPLE_PARTICLE,
+            PARTICLE_EMITTER,
 
             LAST
         };
@@ -56,7 +56,7 @@ namespace oni {
             Screen2D mouseScreenPos{};
             WorldP2D mouseWorldPos{};
             bool createModeOn{true};
-            EntityPreset entityPreset{EntityPreset::SIMPLE_PARTICLE};
+            EntityPreset entityPreset{EntityPreset::PARTICLE_EMITTER};
         };
 
         struct ParticleConfig {

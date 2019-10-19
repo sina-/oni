@@ -52,4 +52,33 @@ namespace oni {
                    const TimeToLive &);
 
     };
+
+    class System_ParticleEmitter : public SystemTemplate<
+            ParticleEmitter,
+            WorldP3D,
+            // TODO: Probably the Orientation should be part of the particle emitter and not of the entity it
+            // is attached to
+            Orientation> {
+    public:
+        System_ParticleEmitter(EntityManager &tickEm,
+                               EntityManager &storageEm,
+                               SceneManager &,
+                               EntityFactory &);
+
+    protected:
+        void
+        update(EntityTickContext &context,
+               ParticleEmitter &,
+               WorldP3D &,
+               Orientation &) override;
+
+        void
+        postUpdate(EntityManager &mng,
+                   duration32 dt) override;
+
+    private:
+        EntityManager &mEntityManager;
+        SceneManager &mSceneManager;
+        EntityFactory &mEntityFactory;
+    };
 }

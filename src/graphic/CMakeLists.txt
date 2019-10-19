@@ -13,6 +13,7 @@ add_library(oni-core-graphic
         oni-graphic-renderer-ogl-strip.cpp
         oni-graphic-renderer-ogl-quad.cpp
         oni-graphic-system-grow-over-time.cpp
+        oni-graphic-system-particle-emitter.cpp
         oni-graphic-system-material-transition.cpp)
 
 target_compile_features(oni-core-graphic

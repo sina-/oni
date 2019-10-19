@@ -4,8 +4,7 @@
 #define JSON_NOEXCEPTION
 
 #include <fstream>
-#include <sstream>
-#include <nlohmann/json.hpp>
+#include <istream>
 #include <cereal/archives/json.hpp>
 
 #include <oni-core/component/oni-component-visual.h>
@@ -106,19 +105,26 @@ namespace oni {
         if (document.IsObject()) {
             auto components = document.FindMember("components");
             if (components != document.MemberEnd()) {
-                for (auto component = components->value.Begin(); component != components->value.End(); ++component) {
-                    if (component->IsObject()) {
+                for (auto component = components->value.MemberBegin();
+                     component != components->value.MemberEnd(); ++component) {
+                    if (component->value.IsObject()) {
+                        auto compoName = component->name.GetString();
+
                         rapidjson::StringBuffer compStringBuff;
                         rapidjson::Writer writer(compStringBuff);
-                        component->Accept(writer);
 
-                        auto compoName = component->MemberBegin()->name.GetString();
-                        printf("Creating component: %s\n", compoName);
+                        // NOTE: I need to recreate the object because rapidjson component splits up component name
+                        // and data but cereal expects a json object where the component name is the key for
+                        // the object in the form: {"Velocity": {"x": 1, "y": 1, "z": 1}}
+                        auto data = rapidjson::Value(rapidjson::kObjectType);
+                        data.AddMember(component->name.Move(), component->value.Move(), document.GetAllocator());
+                        data.Accept(writer);
+
                         auto hash = entt::hashed_string(compoName);
                         auto factory = mComponentFactory.find(hash);
                         if (factory != mComponentFactory.end()) {
                             // TODO: so many stream and conversions, can't I just use the stream I get from rapidjson?
-                            std::stringstream ss;
+                            std::istringstream ss;
                             ss.str(compStringBuff.GetString());
                             cereal::JSONInputArchive reader(ss);
                             // TODO: The issue with this right now is that if something is wrong in json I just get
@@ -127,6 +133,8 @@ namespace oni {
                         } else {
                             assert(false);
                         }
+                    } else {
+                        assert(false);
                     }
                 }
             }

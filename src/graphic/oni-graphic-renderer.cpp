@@ -12,21 +12,21 @@ namespace oni {
     Renderer::~Renderer() = default;
 
     Renderer::BlendSpec
-    Renderer::getBlendSpec(MaterialFinish_Type type) {
+    Renderer::getBlendSpec(Material_Finish_Enum type) {
         auto result = BlendSpec{};
         switch (type) {
-            case MaterialFinish_Type::SOLID:
-            case MaterialFinish_Type::TRANSLUCENT: {
+            case Material_Finish_Enum::SOLID:
+            case Material_Finish_Enum::TRANSLUCENT: {
                 result.src = BlendMode::ONE;
                 result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
                 break;
             }
-            case MaterialFinish_Type::SHINNY: {
+            case Material_Finish_Enum::SHINNY: {
                 result.src = BlendMode::ONE;
                 result.dest = BlendMode::ONE;
                 break;
             }
-            case MaterialFinish_Type::LAST:
+            case Material_Finish_Enum::LAST:
             default: {
                 assert(false);
                 break;
@@ -36,22 +36,22 @@ namespace oni {
     }
 
     Renderer::DepthSpec
-    Renderer::getDepthSpec(MaterialFinish_Type type) {
+    Renderer::getDepthSpec(Material_Finish_Enum type) {
         auto result = DepthSpec{};
         switch (type) {
-            case MaterialFinish_Type::SOLID: {
+            case Material_Finish_Enum::SOLID: {
                 result.depthRead = true;
                 result.depthWrite = true;
                 break;
             }
                 // TODO: Is this correct?
-            case MaterialFinish_Type::TRANSLUCENT:
-            case MaterialFinish_Type::SHINNY: {
+            case Material_Finish_Enum::TRANSLUCENT:
+            case Material_Finish_Enum::SHINNY: {
                 result.depthRead = true;
                 result.depthWrite = false;
                 break;
             }
-            case MaterialFinish_Type::LAST:
+            case Material_Finish_Enum::LAST:
             default: {
                 assert(false);
                 break;

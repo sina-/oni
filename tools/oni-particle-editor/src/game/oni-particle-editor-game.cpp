@@ -41,7 +41,8 @@ namespace oni {
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
         mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"});
 
-        mEntityFactory->registerEntityType({"particle-emitter"}, getType(EntityTypeEditor::PARTICLE_EMITTER));
+        mEntityFactory->registerEntityType({HashedString("particle-emitter")},
+                                           getType(EntityTypeEditor::PARTICLE_EMITTER));
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -122,7 +123,7 @@ namespace oni {
         };
         auto TwCustomVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
-        TwEnumVal entityPresetMap[] = {{EntityPreset::PARTICLE_EMITTER, "SIMPLE_PARTICLE"},};
+        TwEnumVal entityPresetMap[] = {{EntityPreset::PARTICLE_EMITTER, "PARTICLE_EMITTER"},};
         auto TwCustomEntityPreset = TwDefineEnum("EntityPreset", entityPresetMap, enumCast(EntityPreset::LAST));
 
         TwStructMember growOverTimeMembers[] = {
@@ -135,12 +136,12 @@ namespace oni {
                                                    nullptr, nullptr);
 
         TwEnumVal materialFinishType[] = {
-                {enumCast(MaterialFinish_Type::SOLID),       "SOLID"},
-                {enumCast(MaterialFinish_Type::TRANSLUCENT), "TRANSLUCENT"},
-                {enumCast(MaterialFinish_Type::SHINNY),      "SHINNY"},
+                {static_cast<int>(MF_SOLID.idx),       MF_SOLID.name()},
+                {static_cast<int>(MF_TRANSLUCENT.idx), MF_TRANSLUCENT.name()},
+                {static_cast<int>(MF_SHINNY.idx),      MF_SHINNY.name()},
         };
         auto TwCustomMaterialFinish_Type = TwDefineEnum("MaterialFinish_Type", materialFinishType,
-                                                        enumCast(MaterialFinish_Type::LAST));
+                                                        _Material_Finish_Enum.count());
 
         TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
@@ -205,30 +206,7 @@ namespace oni {
                 switch (mInforSideBar.entityPreset) {
                     // TODO: Probably you want to match this name to the json file name
                     case PARTICLE_EMITTER: {
-                        mEntityFactory->createEntity(*mEntityMng, {"particle-emitter"});
-                        // TODO: So this entity creation logic needs to be generalized
-                        auto id = mEntityMng->createEntity(enumCast(mInforSideBar.entityPreset));
-
-                        auto &pos = mEntityMng->createComponent<oni::WorldP3D>(id);
-                        pos.x = mouseWorldP.x;
-                        pos.y = mouseWorldP.y;
-
-                        mEntityMng->createComponent<oni::Direction>(id, mCurrentParticleConfig.dir);
-                        mEntityMng->createComponent<oni::Orientation>(id, mCurrentParticleConfig.ornt);
-                        mEntityMng->createComponent<oni::Scale>(id, mCurrentParticleConfig.scale);
-                        mEntityMng->createComponent<oni::GrowOverTime>(id, mCurrentParticleConfig.got);
-                        mEntityMng->createComponent<oni::TimeToLive>(id, mCurrentParticleConfig.ttl);
-                        mEntityMng->createComponent<oni::Velocity>(id, mCurrentParticleConfig.vel);
-                        mEntityMng->createComponent<oni::Acceleration>(id, mCurrentParticleConfig.acc);
-                        // TODO: eap
-                        auto eap = EntityAssetsPack::CLOUD_WHITE;
-                        mEntityMng->createComponent<oni::EntityAssetsPack>(id, eap);
-
-                        mEntityMng->createComponent<oni::MaterialFinish_Type>(id, mCurrentParticleConfig.mft);
-                        auto &ms = mEntityMng->createComponent<oni::MaterialSkin>(id);
-                        ms.color = {};
-                        mTextureMng->initTexture(eap, ms.texture);
-
+                        mEntityFactory->createEntity(*mEntityMng, {HashedString("particle-emitter")});
                         break;
                     }
                     default: {

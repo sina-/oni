@@ -189,14 +189,6 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              ParticleEmitter &data) {
-        archive(data.size, data.initialVMin, data.initialVMax, data.acc, data.orientMin, data.orientMax, data.count,
-                data.growth);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
               MaterialTransition_Fade &data) {
         archive(data.fadeFunc, data.factor);
     }

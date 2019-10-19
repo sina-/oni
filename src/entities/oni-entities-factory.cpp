@@ -20,7 +20,8 @@
             auto &component = em.createComponent<COMPONENT_NAME>(id);               \
             reader(cereal::make_nvp(#COMPONENT_NAME, component));                   \
         };                                                                          \
-        factory->registerComponentFactory({#COMPONENT_NAME}, std::move(cf));        \
+        auto componentName = Component_Name{HashedString(#COMPONENT_NAME)};         \
+        factory->registerComponentFactory(componentName, std::move(cf));            \
 }
 
 namespace oni {
@@ -33,26 +34,26 @@ namespace oni {
     void
     EntityFactory::registerComponentFactory(const Component_Name &name,
                                             ComponentFactory &&cb) {
-        assert(mComponentFactory.find(name.value) == mComponentFactory.end());
-        mComponentFactory.emplace(name.value, std::move(cb));
+        assert(mComponentFactory.find(name.value.hash) == mComponentFactory.end());
+        mComponentFactory.emplace(name.value.hash, std::move(cb));
     }
 
     void
-    EntityFactory::registerEntityType(EntityType_Name name,
+    EntityFactory::registerEntityType(const EntityType_Name& name,
                                       EntityType et) {
         // TODO: Not too sure about char * lifetime of HashedString!
-        mEntityNameLookup.emplace(name.value, et);
+        mEntityNameLookup.emplace(name.value.hash, et);
 
         auto path = FilePath{};
         path.value.append(mEntityResourcePath.value);
-        path.value.append(name.value.data());
+        path.value.append(name.value.data);
         path.value.append(".json");
-        mEntityResourcePathLookup.emplace(name.value, std::move(path));
+        mEntityResourcePathLookup.emplace(name.value.hash, std::move(path));
     }
 
     EntityType
     EntityFactory::getEntityType(const EntityType_Name &name) {
-        auto type = mEntityNameLookup.find(name.value);
+        auto type = mEntityNameLookup.find(name.value.hash);
         if (type != mEntityNameLookup.end()) {
             return type->second;
         }
@@ -62,7 +63,7 @@ namespace oni {
 
     const FilePath &
     EntityFactory::getEntityResourcePath(const EntityType_Name &name) {
-        auto path = mEntityResourcePathLookup.find(name.value);
+        auto path = mEntityResourcePathLookup.find(name.value.hash);
         if (path != mEntityResourcePathLookup.end()) {
             return path->second;
         }
@@ -120,7 +121,7 @@ namespace oni {
                         data.AddMember(component->name.Move(), component->value.Move(), document.GetAllocator());
                         data.Accept(writer);
 
-                        auto hash = entt::hashed_string(compoName);
+                        auto hash = hashString(compoName);
                         auto factory = mComponentFactory.find(hash);
                         if (factory != mComponentFactory.end()) {
                             // TODO: so many stream and conversions, can't I just use the stream I get from rapidjson?

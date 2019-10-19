@@ -22,7 +22,7 @@ namespace oni {
         std::vector<EntityID> mExpiredComponents{};
     };
 
-    class System_MaterialTransition : public SystemTemplate<MaterialTransition_List, MaterialSkin> {
+    class System_MaterialTransition : public SystemTemplate<MaterialTransition_List, Material_Skin> {
     public:
         explicit System_MaterialTransition(EntityManager &);
 
@@ -34,7 +34,7 @@ namespace oni {
         void
         update(EntityTickContext &context,
                MaterialTransition_List &,
-               MaterialSkin &) override;
+               Material_Skin &) override;
 
     private:
         static void
@@ -42,12 +42,12 @@ namespace oni {
                               r64 dt);
 
         static void
-        updateTint(MaterialSkin &,
+        updateTint(Material_Skin &,
                    MaterialTransition_Color,
                    const TimeToLive &);
 
         static void
-        updateFade(MaterialSkin &skin,
+        updateFade(Material_Skin &skin,
                    MaterialTransition_Fade &,
                    const TimeToLive &);
 

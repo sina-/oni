@@ -27,6 +27,7 @@ void main() {
     // Default texture, id = 1
     else if (effect == 1) {
         mapOutputToTexture();
+        // TODO: I could still use the color to apply tinting on texture!
     }
     // Fade, id = 2
     else if (effect == 2) {

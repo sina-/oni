@@ -46,6 +46,7 @@ namespace oni {
         setupTweakBar();
 
     private:
+        // TODO: How about struct EntityPreset { EntityType type; const char* name;}? This reduce name duplication
         enum EntityPreset : u16 {
             PARTICLE_EMITTER,
 
@@ -67,7 +68,7 @@ namespace oni {
             TimeToLive ttl{};
             Velocity vel{};
             Acceleration acc{};
-            MaterialFinish_Type mft{};
+            __Material_Finish mft{};
             EntityAssetsPack eap{};
         };
 

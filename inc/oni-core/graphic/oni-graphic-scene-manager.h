@@ -196,6 +196,6 @@ namespace oni {
         ZLayerManager &mZLayerManager;
 
         using RenderableQueue = std::priority_queue<Renderable>;
-        std::array<RenderableQueue, enumCast(MaterialFinish_Type::LAST)> mRenderables{};
+        std::array<RenderableQueue, enumCast(Material_Finish_Enum::LAST)> mRenderables{};
     };
 }

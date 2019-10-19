@@ -16,7 +16,7 @@ namespace oni {
     }
 
     void
-    System_MaterialTransition::updateTint(MaterialSkin &skin,
+    System_MaterialTransition::updateTint(Material_Skin &skin,
                                           MaterialTransition_Color mtc,
                                           const TimeToLive &ttl) {
         // TODO: Very accurate and slow calculations, I don't need the accuracy but it can be faster!
@@ -36,7 +36,7 @@ namespace oni {
     }
 
     void
-    System_MaterialTransition::updateFade(MaterialSkin &skin,
+    System_MaterialTransition::updateFade(Material_Skin &skin,
                                           MaterialTransition_Fade &fade,
                                           const TimeToLive &ttl) {
         auto targetAlpha = 1.f;
@@ -66,7 +66,7 @@ namespace oni {
     void
     System_MaterialTransition::update(EntityTickContext &etc,
                                       MaterialTransition_List &mtl,
-                                      MaterialSkin &ms) {
+                                      Material_Skin &ms) {
         if (mtl.ended) {
             return;
         }

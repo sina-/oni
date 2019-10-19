@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <cassert>
 
 #include <oni-core/math/oni-math-vec2.h>
 #include <oni-core/math/oni-math-vec3.h>
@@ -14,6 +15,8 @@
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/graphic/oni-graphic-fwd.h>
 #include <oni-core/common/oni-common-const.h>
+#include <oni-core/util/oni-util-hash.h>
+#include <oni-core/util/oni-util-enum.h>
 
 
 namespace oni {
@@ -214,6 +217,12 @@ namespace oni {
         }
 
         u32 value{255u};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(value);
+        }
     };
 
     enum class BrushType : oni::u8 {
@@ -293,12 +302,19 @@ namespace oni {
         EntityContext attachee;
     };
 
-    struct MaterialSkin {
+    struct Material_Skin {
         Texture texture{};
         Color color{};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            // TODO: Complete this
+            archive(color);
+        }
     };
 
-    struct MaterialText {
+    struct Material_Text {
         r32 xGameScaleDenom{1.f};
         r32 yGameScaleDenom{1.f};
         r32 fontSize{1.f};
@@ -311,13 +327,15 @@ namespace oni {
         std::vector<r32> advanceX{};
         std::vector<r32> advanceY{};
         std::vector<vec4> uv{};
-        MaterialSkin skin{}; // TODO: only the color is used for now, but for ease of use with Renderable I have skin, but when MaterialText is merged with the rest I can remove this field.
+        Material_Skin skin{}; // TODO: only the color is used for now, but for ease of use with Renderable I have skin, but when MaterialText is merged with the rest I can remove this field.
     };
 
+    // TODO: All these ENUMS needs UNKNOWN since I'm reading them from files.
     enum class MaterialTransition_Type : oni::u8 {
         TEXTURE = 0,
         FADE = 1,
         TINT = 2,
+        NONE = 3,
     };
 
     enum class FadeFunc : oni::u8 {
@@ -372,7 +390,7 @@ namespace oni {
     // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
     // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
-    enum class MaterialFinish_Type : oni::u8 {
+    enum class Material_Finish_Enum : oni::u8 {
         // NOTE: The order of the enums defines the order in which they are rendered!
         // NOTE: For translucent and shinny entities since depth writes are disabled
         // if an entity that is translucent but has higher z is rendered then a shinny
@@ -386,6 +404,68 @@ namespace oni {
         LAST
     };
 
+    struct __Material_Finish : public Enum {
+    };
+
+    // TODO: Love to make a Enums constexpr friendly so I won't need this
+    static auto _Material_Finish_Enum = Enums<__Material_Finish, 3>{
+            Enum{0, HashedString("solid")},
+            Enum{1, HashedString("translucent")},
+            Enum{2, HashedString("shinny")},
+    };
+
+    static auto MF_SOLID = _Material_Finish_Enum("solid");
+    static auto MF_TRANSLUCENT = _Material_Finish_Enum("translucent");
+    static auto MF_SHINNY = _Material_Finish_Enum("shinny");
+
+/*
+    struct Material_Finish {
+        Material_Finish_Enum id{};
+        HashedString name{};
+
+        template<class Archive>
+        void
+        save(Archive &archive) const {
+            archive(name);
+        }
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            archive(name);
+
+            static const auto solid = HashedString("solid").hash;
+            static const auto translucent = HashedString("translucent").hash;
+            static const auto shinny = HashedString("shinny").hash;
+
+            if (name.hash == solid) {
+                id = Material_Finish_Enum::SOLID;
+            } else if (name.hash == translucent) {
+                id = Material_Finish_Enum::TRANSLUCENT;
+            } else if (name.hash == shinny) {
+                id = Material_Finish_Enum::SHINNY;
+            } else {
+                assert(false);
+                id = Material_Finish_Enum::SOLID;
+            }
+        }
+    };
+*/
+
+    struct Material_Definition {
+        // Material_Skin skin{};
+        __Material_Finish finish{MF_SOLID};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(
+//                    skin,
+                    finish);
+            assert(_Material_Finish_Enum.valid(finish));
+        }
+    };
+
     struct GrowOverTime {
         duration32 period{0.2f}; // NOTE: Grow every period
         duration32 elapsed{0.f}; // NOTE: Since last growth
@@ -395,6 +475,8 @@ namespace oni {
 
     struct ParticleEmitter {
         EntityAssetsPack tag{};
+
+        Material_Definition material{};
         r32 size = 0.1f;
         r32 initialVMin = 1.f;
         r32 initialVMax = 2.f;
@@ -403,6 +485,21 @@ namespace oni {
         r32 orientMax = TWO_PI;
         u8 count = 1;
         GrowOverTime growth{};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(
+                    material,
+                    size,
+                    initialVMin,
+                    initialVMax,
+                    acc,
+                    orientMin,
+                    orientMax,
+                    count,
+                    growth);
+        }
     };
 
     struct AfterMark {

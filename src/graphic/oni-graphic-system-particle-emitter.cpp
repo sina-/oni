@@ -38,6 +38,11 @@ namespace oni {
             auto &acc = mEntityManager.get<oni::Acceleration>(pID);
             acc.current = emitter.acc;
 
+            auto &md = mEntityManager.get<oni::Material_Definition>(pID);
+            md.finish = emitter.material.finish;
+            md.skin.color = emitter.material.skin.color;
+            md.skin.texture.image.path = emitter.material.skin.texture.image.path;
+
             // TODO:
             // mEntityLoader.initializeEntityAssets(mEntityManager, pID);
         }

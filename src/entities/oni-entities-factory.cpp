@@ -34,8 +34,9 @@ namespace oni {
         COMPONENT_FACTORY_DEFINE(this, GrowOverTime)
         COMPONENT_FACTORY_DEFINE(this, Velocity)
         COMPONENT_FACTORY_DEFINE(this, Acceleration)
-        
+
         COMPONENT_FACTORY_DEFINE(this, ParticleEmitter)
+        COMPONENT_FACTORY_DEFINE(this, Material_Definition)
     }
 
     void

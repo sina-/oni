@@ -116,11 +116,23 @@ namespace oni {
     struct Velocity {
         r32 current{0.f};
         r32 max{0.f};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(current, max);
+        }
     };
 
     struct Acceleration {
         r32 current{0.f};
         r32 max{0.f};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(current, max);
+        }
     };
 
     union Velocity2D {
@@ -129,6 +141,12 @@ namespace oni {
             r32 x;
             r32 y;
         };
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(x, y);
+        }
     };
 
     union Acceleration2D {
@@ -137,19 +155,38 @@ namespace oni {
             r32 x;
             r32 y;
         };
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(x, y);
+        }
     };
 
     struct TimeToLive {
         duration32 currentAge{0.f};
         duration32 maxAge{1.f};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(currentAge, maxAge);
+        }
     };
 
+    // TODO: Redundant
     union Force {
         vec2 value{};
         struct {
             r32 x;
             r32 y;
         };
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(x, y);
+        }
     };
 
     union Force2D {
@@ -158,16 +195,34 @@ namespace oni {
             r32 x;
             r32 y;
         };
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(x, y);
+        }
     };
 
     struct Impulse2D {
         r32 value{};
         vec2 normal{};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(value, normal);
+        }
     };
 
     struct JetForce {
         r32 fuze{0}; // How long, in seconds, it takes for the fuel to burn
         r32 force{0};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(fuze, force);
+        }
     };
 
     struct PhysicalProperties {

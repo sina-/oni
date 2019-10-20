@@ -43,6 +43,11 @@ namespace oni {
         }
     };
 
+    struct EnumVal {
+        int value;
+        const char *name;
+    };
+
     template<class T, size N>
     struct Enums {
         T values[N];
@@ -56,15 +61,29 @@ namespace oni {
             return invalidEnum;
         }
 
+        const auto *
+        array() const {
+            static EnumVal result[N];
+            for (size i = 0; i < count(); ++i) {
+                result[i].value = values[i].idx;
+                result[i].name = values[i].name();
+            }
+            return &result;
+        }
+
         size
-        count() {
+        count() const {
             return sizeof(values) / sizeof(T);
         }
 
         const auto &
         get(size id) const {
-            assert(id < values.size());
-            return values[id];
+            if (id < values.size()) {
+                return values[id];
+            }
+
+            assert(false);
+            return getInvalidEnum();
         }
 
         const auto &

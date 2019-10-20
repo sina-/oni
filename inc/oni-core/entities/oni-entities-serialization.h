@@ -68,13 +68,6 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              WorldP3D &pos) {
-        archive(pos.x, pos.y, pos.z);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
               Sound &data) {
         archive(data.group, data.tag);
     }
@@ -158,33 +151,6 @@ namespace oni {
         archive(data.pos);
     }
 
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              WorldP2D &data) {
-        archive(data.x, data.y);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Force2D &data) {
-        archive(data.x, data.y);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Impulse2D &data) {
-        archive(data.normal, data.value);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              GrowOverTime &data) {
-        archive(data.factor, data.period, data.elapsed, data.maxSize);
-    }
 
     template<class Archive>
     void
@@ -219,20 +185,6 @@ namespace oni {
     serialize(Archive &archive,
               EntityType &data) {
         archive(data.value);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Orientation &data) {
-        archive(data.value);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Scale &data) {
-        archive(data.x, data.y, data.z);
     }
 
     template<class Archive>

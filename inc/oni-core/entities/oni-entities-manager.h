@@ -17,6 +17,7 @@
 #include <oni-core/math/oni-math-function.h>
 #include <oni-core/game/oni-game-event-rate-limiter.h>
 #include <oni-core/physics/oni-physics-fwd.h>
+#include <map>
 
 
 namespace oni {
@@ -357,6 +358,9 @@ namespace oni {
         EntityID
         createEntity(const EntityType &);
 
+        EntityID
+        createEntity(const EntityType_Name &);
+
         /**
          * This overload could be used by the game code to define custom types using enums.
          *
@@ -464,6 +468,7 @@ namespace oni {
         SimMode mSimMode{SimMode::CLIENT};
         EntityOperationPolicy mEntityOperationPolicy{};
 
+        std::map<Hash, std::string> mEntityNames{};
         std::unordered_set<EntityID> mEntitiesToDelete{};
         std::vector<DeletedEntity> mDeletedEntities{};
         std::unordered_map<decltype(EntityType::value), std::string> mEntityDebugNameLookup{};

@@ -41,8 +41,10 @@ namespace oni {
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
         mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"});
 
-        mEntityFactory->registerEntityType({HashedString("particle-emitter")},
-                                           getType(EntityTypeEditor::PARTICLE_EMITTER));
+        // TODO: I shouldn't need to do this. I should just pass a file path of all the relevant entities and the
+        // factory should go through all the files and register them.
+        mEntityFactory->registerEntityType({HashedString("particle-emitter")});
+        mEntityFactory->registerEntityType({HashedString("simple-particle")});
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -97,8 +99,7 @@ namespace oni {
         mSystems.push_back(new oni::System_GrowOverTime(*mEntityMng));
         mSystems.push_back(new oni::System_MaterialTransition(*mEntityMng));
         // TODO: Migrate these systems
-//        mSystems.push_back(
-//                new rac::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneManager, *mEntityLoader));
+        mSystems.push_back(new oni::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneMng, *mEntityFactory));
 //        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
         mSystems.push_back(new oni::System_TimeToLive(*mEntityMng));
         mSystems.push_back(new oni::System_SyncPos(*mEntityMng));
@@ -132,16 +133,12 @@ namespace oni {
                 {"factor",  TW_TYPE_FLOAT, offsetof(GrowOverTime, factor)},
                 {"maxSize", TW_TYPE_DIR3F, offsetof(GrowOverTime, maxSize)}
         };
-        auto TwCustomGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
-                                                   nullptr, nullptr);
+        auto TwGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
+                                             nullptr, nullptr);
 
-        TwEnumVal materialFinishType[] = {
-                {static_cast<int>(MF_SOLID.idx),       MF_SOLID.name()},
-                {static_cast<int>(MF_TRANSLUCENT.idx), MF_TRANSLUCENT.name()},
-                {static_cast<int>(MF_SHINNY.idx),      MF_SHINNY.name()},
-        };
-        auto TwCustomMaterialFinish_Type = TwDefineEnum("MaterialFinish_Type", materialFinishType,
-                                                        _Material_Finish_Enum.count());
+        auto TwMaterial_Finish_Enum = TwDefineEnum("Material_Finish_Enum",
+                                                   reinterpret_cast<const TwEnumVal *>(_Material_Finish_Enum.array()),
+                                                   _Material_Finish_Enum.count());
 
         TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
@@ -153,11 +150,11 @@ namespace oni {
         TwAddVarRW(particleBar, "dir", TW_TYPE_DIR3F, &mCurrentParticleConfig.dir, nullptr);
         TwAddVarRW(particleBar, "ornt", TW_TYPE_FLOAT, &mCurrentParticleConfig.ornt, nullptr);
         TwAddVarRW(particleBar, "scale", TW_TYPE_DIR3F, &mCurrentParticleConfig.scale, nullptr);
-        TwAddVarRW(particleBar, "grow", TwCustomGrowOverTime, &mCurrentParticleConfig.got, nullptr);
+        TwAddVarRW(particleBar, "grow", TwGrowOverTime, &mCurrentParticleConfig.got, nullptr);
         TwAddVarRW(particleBar, "ttl", TwCustomVec2, &mCurrentParticleConfig.ttl, nullptr);
         TwAddVarRW(particleBar, "velocity", TwCustomVec2, &mCurrentParticleConfig.vel, nullptr);
         TwAddVarRW(particleBar, "acc", TwCustomVec2, &mCurrentParticleConfig.acc, nullptr);
-        TwAddVarRW(particleBar, "finish", TwCustomMaterialFinish_Type, &mCurrentParticleConfig.mft, nullptr);
+        TwAddVarRW(particleBar, "finish", TwMaterial_Finish_Enum, &mCurrentParticleConfig.mft, nullptr);
 
     }
 

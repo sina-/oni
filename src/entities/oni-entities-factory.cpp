@@ -11,7 +11,7 @@
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 
-// NOTE: Call to make_nvp is important, otherwise order of the values in the json has to match that of struct
+// NOTE: Call to cereal::make_nvp is important, otherwise order of the values in the json has to match that of struct
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                           \
 {                                                                                   \
         ComponentFactory cf = [](EntityManager &em,                                 \

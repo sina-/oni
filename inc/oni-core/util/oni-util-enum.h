@@ -12,13 +12,15 @@ namespace oni {
         void
         save(Archive &archive) const {
             // NOTE: idx is not serialized
-            archive(string.data);
+            const auto &name = string.data;
+            archive(name);
         }
 
         template<class Archive>
         void
         load(Archive &archive) {
-            archive(string.data);
+            auto &name = string.data;
+            archive(name);
             string.hash = hashString(string.data);
         }
 

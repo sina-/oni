@@ -14,7 +14,9 @@
             "a": 1.0
           },
           "texture": {
-            "image": "cloud_white"
+            "image": {
+              "name": "cloud_white"
+            }
           }
         }
       },

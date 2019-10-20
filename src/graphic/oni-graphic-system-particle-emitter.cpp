@@ -41,7 +41,7 @@ namespace oni {
             auto &md = mEntityManager.get<oni::Material_Definition>(pID);
             md.finish = emitter.material.finish;
             md.skin.color = emitter.material.skin.color;
-            md.skin.texture.image.path = emitter.material.skin.texture.image.path;
+            md.skin.texture.image.name = emitter.material.skin.texture.image.name;
 
             // TODO:
             // mEntityLoader.initializeEntityAssets(mEntityManager, pID);

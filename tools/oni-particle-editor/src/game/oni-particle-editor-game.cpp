@@ -33,7 +33,7 @@ getType(EntityTypeEditor et) {
 
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
-        mAssetMng = new oni::AssetManager();
+        mAssetMng = new oni::AssetManager({"oni-resources/textures/"});
         mTextureMng = new oni::TextureManager(*mAssetMng);
         mInput = new oni::Input();
         mZLayerMng = new oni::ZLayerManager();
@@ -86,7 +86,6 @@ namespace oni {
                                           *mTextureMng);
         setupTweakBar();
 
-        mAssetMng->setPath(oni::EntityAssetsPack::CLOUD_WHITE, "/tmp/1.png");
         mTextureMng->loadAssets();
 
         mWindow->setClear({});

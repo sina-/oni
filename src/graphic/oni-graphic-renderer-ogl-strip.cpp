@@ -144,7 +144,8 @@ namespace oni {
         auto buffer = static_cast<StripVertex *>(mBuffer);
 
         i32 samplerID = -1;
-        if (!texture.image.path.empty()) {
+        // TODO: This is not a good way to check for valid texture :/
+        if (texture.image.width && texture.image.height) {
             samplerID = getSamplerID(texture.id);
         }
 

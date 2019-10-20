@@ -8,4 +8,6 @@ target_compile_features(oni-core-asset
 target_include_directories(oni-core-asset
         PUBLIC
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
+        PRIVATE
+        $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
         )

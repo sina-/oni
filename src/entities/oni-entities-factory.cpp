@@ -11,14 +11,13 @@
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 
-// NOTE: Call to cereal::make_nvp is important, otherwise order of the values in the json has to match that of struct
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                           \
 {                                                                                   \
         ComponentFactory cf = [](EntityManager &em,                                 \
                                  EntityID id,                                       \
                                  cereal::JSONInputArchive &reader) {                \
             auto &component = em.createComponent<COMPONENT_NAME>(id);               \
-            reader(cereal::make_nvp(#COMPONENT_NAME, component));                   \
+            reader(component);                                                      \
         };                                                                          \
         auto componentName = Component_Name{HashedString(#COMPONENT_NAME)};         \
         factory->registerComponentFactory(componentName, std::move(cf));            \
@@ -26,6 +25,11 @@
 
 namespace oni {
     oni::EntityFactory::EntityFactory(FilePath fp) : mEntityResourcePath(std::move(fp)) {
+        // TODO: Same thing happens in AssetManager, can I move this to a single location?
+        if (mEntityResourcePath.value.back() != '/') {
+            mEntityResourcePath.value.append("/");
+        }
+
         COMPONENT_FACTORY_DEFINE(this, WorldP3D)
         COMPONENT_FACTORY_DEFINE(this, WorldP2D)
         COMPONENT_FACTORY_DEFINE(this, Direction)
@@ -130,6 +134,8 @@ namespace oni {
                         assert(false);
                     }
                 }
+            } else {
+                assert(false);
             }
         } else {
             assert(false);

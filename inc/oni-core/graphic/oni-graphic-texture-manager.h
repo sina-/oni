@@ -55,23 +55,19 @@ namespace oni {
                               const vec3 &brushTexturePos);
 
         void
-        loadOrGetImage(EntityAssetsPack tag,
-                       Image &image);
-
-        const Texture &
-        getTexture(EntityAssetsPack tag);
+        getImage(const ImageName &,
+                 Image &);
 
         void
-        initTexture(EntityAssetsPack tag,
-                    Texture &texture);
+        initTexture(Texture &texture);
 
         void
-        createTexture(Texture &texture,
-                      EntityAssetsPack tag);
+        createTexture(Texture &,
+                      const ImageName &);
 
         void
         loadFromTextureID(Texture &,
-                          EntityAssetsPack tag);
+                          const ImageName &);
 
         static void
         loadFromTextureID(Texture &,
@@ -108,14 +104,19 @@ namespace oni {
                  r32 fps);
 
     private:
-        bool
-        isTextureLoaded(EntityAssetsPack) const;
+        void
+        loadImage(const ImageName &);
 
         void
-        loadTextureToCache(EntityAssetsPack tag);
+        getImage(ImageNameHash,
+                 Image &);
 
-        bool
-        isImageLoaded(EntityAssetsPack) const;
+        void
+        loadTextureToCache(ImageNameHash);
+
+        void
+        createTexture(Texture &,
+                      ImageNameHash);
 
         static void
         bind(oniGLuint textureID);
@@ -125,9 +126,9 @@ namespace oni {
              Texture &);
 
     private:
-        std::map<EntityAssetsPack, Texture> mTextureMap{};
-        std::map<EntityAssetsPack, Image> mImageMap{};
-        std::map<EntityAssetsPack, std::vector<u8>> mImageDataMap{};
+        std::map<ImageNameHash, Texture> mTextureMap{};
+        std::map<ImageNameHash, Image> mImageMap{};
+        std::map<ImageNameHash, std::vector<u8>> mImageDataMap{};
         const u8 mElementsInRGBA{4};
         oni::AssetManager &mAssetManager;
 

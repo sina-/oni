@@ -39,6 +39,14 @@ namespace oni {
     TextureManager::~TextureManager() = default;
 
     void
+    TextureManager::loadAssets() {
+        for (auto &&imageName: mAssetManager.knownImages()) {
+            loadImage(imageName);
+            loadTextureToCache(imageName.value.hash);
+        }
+    }
+
+    void
     TextureManager::bindRange(oniGLuint first,
                               const std::vector<oniGLuint> &textures) {
         if (!textures.empty()) {
@@ -48,11 +56,11 @@ namespace oni {
 
     void
     TextureManager::loadFromTextureID(Texture &texture,
-                                      EntityAssetsPack tag) {
+                                      const ImageName &name) {
         auto numTextureElements = 4;
         auto textureSize = size(texture.image.height * texture.image.width * numTextureElements);
         assert(textureSize);
-        auto &storage = mImageDataMap[tag];
+        auto &storage = mImageDataMap[name.value.hash];
         storage.resize(textureSize);
         glBindTexture(GL_TEXTURE_2D, texture.id);
         glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize,
@@ -75,7 +83,7 @@ namespace oni {
 
     void
     TextureManager::createTexture(Texture &texture,
-                                  EntityAssetsPack tag) {
+                                  ImageNameHash hash) {
         glGenTextures(1, &texture.id);
 
         assert(texture.id);
@@ -94,10 +102,9 @@ namespace oni {
         assert(texture.image.height > 0);
 
         auto data = (u8 *) nullptr;
-        if (tag != EntityAssetsPack::GENERATED) {
-            assert(mImageDataMap.find(tag) != mImageDataMap.end());
-            auto &storage = mImageDataMap[tag];
-            data = storage.data();
+        auto imageData = mImageDataMap.find(hash);
+        if (imageData != mImageDataMap.end()) {
+            data = imageData->second.data();
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
@@ -107,25 +114,20 @@ namespace oni {
         texture.type = type;
         texture.uv = {vec2{0, 0}, vec2{0, 1}, vec2{1, 1}, vec2{1, 0}};
         unbind();
-    }
 
-    const Texture &
-    TextureManager::getTexture(EntityAssetsPack tag) {
-        assert(tag != EntityAssetsPack::UNKNOWN);
-        assert(tag != EntityAssetsPack::LAST);
-        const auto it = mTextureMap.find(tag);
-        if (it == mTextureMap.end()) {
-            assert(false);
-        }
-        return it->second;
     }
 
     void
-    TextureManager::initTexture(EntityAssetsPack tag,
-                                Texture &texture) {
-        assert(tag != EntityAssetsPack::UNKNOWN);
-        assert(tag != EntityAssetsPack::LAST);
-        const auto it = mTextureMap.find(tag);
+    TextureManager::createTexture(Texture &texture,
+                                  const ImageName &name) {
+        createTexture(texture, name.value.hash);
+    }
+
+    void
+    TextureManager::initTexture(Texture &texture) {
+        assert(texture.image.name.value.hash);
+        assert(!texture.image.name.value.data.empty());
+        const auto it = mTextureMap.find(texture.image.name.value.hash);
         if (it == mTextureMap.end()) {
             // NOTE: Did you forget to call loadAssets()?
             assert(false);
@@ -136,49 +138,60 @@ namespace oni {
     }
 
     void
-    TextureManager::loadAssets() {
-        for (auto &&tag: mAssetManager.knownTags()) {
-            loadTextureToCache(tag);
-        }
-    }
-
-    void
-    TextureManager::loadTextureToCache(EntityAssetsPack tag) {
-        assert(tag != EntityAssetsPack::UNKNOWN);
-        assert(tag != EntityAssetsPack::LAST);
-        auto it = mTextureMap.find(tag);
+    TextureManager::loadTextureToCache(ImageNameHash hash) {
+        auto it = mTextureMap.find(hash);
         if (it != mTextureMap.end()) {
             assert(false);
             return;
         }
 
         auto texture = Texture{};
-        loadOrGetImage(tag, texture.image);
-        createTexture(texture, tag);
-        mTextureMap.insert({tag, texture});
+        getImage(hash, texture.image);
+        createTexture(texture, hash);
+        mTextureMap.emplace(hash, texture);
     }
 
     void
-    TextureManager::loadOrGetImage(EntityAssetsPack tag,
-                                   Image &image) {
-        assert(tag != EntityAssetsPack::UNKNOWN);
-        if (isImageLoaded(tag)) {
-            image = mImageMap[tag];
+    TextureManager::getImage(ImageNameHash hash,
+                             Image &image) {
+        assert(hash);
+
+        auto img = mImageMap.find(hash);
+        if (img != mImageMap.end()) {
+            image = img->second;
+        } else {
+            assert(false);
+        }
+    }
+
+    void
+    TextureManager::getImage(const ImageName &name,
+                             Image &image) {
+        getImage(name.value.hash, image);
+    }
+
+    void
+    TextureManager::loadImage(const ImageName &name) {
+        assert(!name.value.data.empty());
+        auto image = mImageMap.find(name.value.hash);
+        if (image != mImageMap.end()) {
+            assert(false);
+            return;
         }
 
         FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
         FIBITMAP *dib = nullptr;
 
-        auto path = mAssetManager.getAssetFilePath(tag);
+        auto path = mAssetManager.getAssetFilePath(name);
 
-        fif = FreeImage_GetFileType(path.data(), 0);
+        fif = FreeImage_GetFileType(path.value.data(), 0);
         if (fif == FIF_UNKNOWN) {
-            fif = FreeImage_GetFIFFromFilename(path.data());
+            fif = FreeImage_GetFIFFromFilename(path.value.data());
         }
         assert(fif != FIF_UNKNOWN);
 
         if (FreeImage_FIFSupportsReading(fif)) {
-            dib = FreeImage_Load(fif, path.data());
+            dib = FreeImage_Load(fif, path.value.data());
         }
         assert(dib);
 
@@ -186,8 +199,8 @@ namespace oni {
         // NOTE: This is the only type supported
         assert(colorType == FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA || colorType == FREE_IMAGE_COLOR_TYPE::FIC_RGB);
 
-        auto width = static_cast<oniGLsizei>(FreeImage_GetWidth(dib));
-        auto height = static_cast<oniGLsizei >(FreeImage_GetHeight(dib));
+        auto width = static_cast<u32>(FreeImage_GetWidth(dib));
+        auto height = static_cast<u32 >(FreeImage_GetHeight(dib));
 
         assert(width);
         assert(height);
@@ -198,10 +211,8 @@ namespace oni {
         auto bits = FreeImage_GetBits(dib);
         assert(bits);
 
-        image.height = height;
-        image.width = width;
-        image.path = path;
-        auto &storage = mImageDataMap[tag];
+        mImageMap.emplace(name.value.hash, Image{name, width, height});
+        auto &storage = mImageDataMap[name.value.hash];
         storage.resize(width * height * mElementsInRGBA, 0);
 
         for (size i = 0; i < storage.size(); ++i) {
@@ -427,16 +438,6 @@ namespace oni {
     void
     TextureManager::copy(const Texture &src,
                          Texture &dest) {
-    }
-
-    bool
-    TextureManager::isTextureLoaded(EntityAssetsPack tag) const {
-        return mTextureMap.find(tag) != mTextureMap.end();
-    }
-
-    bool
-    TextureManager::isImageLoaded(EntityAssetsPack tag) const {
-        return mImageMap.find(tag) != mImageMap.end();
     }
 
     void

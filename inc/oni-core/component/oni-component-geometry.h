@@ -57,7 +57,9 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(x, y, z);
+            archive("x", x);
+            archive("y", y);
+            archive("z", z);
         }
     };
 
@@ -86,7 +88,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(x, y);
+            archive("x", x);
+            archive("y", y);
         }
     };
 
@@ -137,7 +140,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(value);
+            archive("value", value);
         }
     };
 
@@ -151,7 +154,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(x, y);
+            archive("x", x);
+            archive("y", y);
         }
     };
 
@@ -166,7 +170,9 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(x, y, z);
+            archive("x", x);
+            archive("y", y);
+            archive("z", z);
         }
     };
 

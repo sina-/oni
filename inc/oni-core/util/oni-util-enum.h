@@ -12,15 +12,13 @@ namespace oni {
         void
         save(Archive &archive) const {
             // NOTE: idx is not serialized
-            const auto &name = string.data;
-            archive(name);
+            archive("name", string.data);
         }
 
         template<class Archive>
         void
         load(Archive &archive) {
-            auto &name = string.data;
-            archive(name);
+            archive("name", string.data);
             string.hash = hashString(string.data);
         }
 
@@ -39,7 +37,7 @@ namespace oni {
             return string.hash != other.hash;
         }
 
-        auto
+        const c8 *
         name() const {
             return string.data.c_str();
         }
@@ -119,12 +117,6 @@ namespace oni {
         const T &
         operator()(const c8 *name) const {
             return get(name);
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(values);
         }
     };
 }

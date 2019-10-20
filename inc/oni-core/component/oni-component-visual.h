@@ -200,29 +200,33 @@ namespace oni {
         }
     };
 
+    struct ImageName {
+        HashedString value{};
+    };
+
     struct Image {
-        u16 width{};
-        u16 height{};
         // TODO: This will be massive memory waste for all the particles that have texture!
         // TODO: As it is now this will be the key value that will connect real textures to everything else
         // in a way this is replacing EntityAssetPack enum! There might be a value in separating the ID that
         // defines a texture and the path, at least that way I don't store all the std::strings on every
         // entity hmmm...
-        std::string path{};
+        // std::string path{};
+        // NOTE: This should ideally be a small string identifier of the image
+        ImageName name{};
+
+        u32 width{};
+        u32 height{};
 
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(path);
+            archive("name", name.value.data);
         }
     };
 
     struct UV {
         std::array<vec2, 4> values{vec2{0.f, 0.f}, vec2{0.f, 1.f},
                                    vec2{1.f, 1.f}, vec2{1.f, 0.f}};
-    };
-
-    struct TextureName : public Enum {
     };
 
     struct Texture {
@@ -241,7 +245,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(image.path);
+            archive("image", image);
         }
     };
 
@@ -341,8 +345,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            // TODO: Complete this
-            archive(color, texture);
+            archive("color", color);
+            archive("texture", texture);
         }
     };
 
@@ -411,15 +415,15 @@ namespace oni {
             // assert(Enums.valid(type));
             switch (type) {
                 case MaterialTransition_Type::TEXTURE: {
-                    archive(texture);
+                    archive("texture", texture);
                     break;
                 }
                 case MaterialTransition_Type::FADE: {
-                    archive(fade);
+                    archive("fade", fade);
                     break;
                 }
                 case MaterialTransition_Type::TINT: {
-                    archive(color);
+                    archive("color", color);
                     break;
                 }
                 case MaterialTransition_Type::NONE:
@@ -511,7 +515,8 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(finish, skin);
+            archive("finish", finish);
+            archive("skin", skin);
             assert(_Material_Finish_Enum.valid(finish));
         }
     };
@@ -525,7 +530,10 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(period, elapsed, factor, maxSize);
+            archive("period", period);
+            archive("elapsed", elapsed);
+            archive("factor", factor);
+            archive("maxSize", maxSize);
         }
     };
 
@@ -545,16 +553,15 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(
-                    material,
-                    size,
-                    initialVMin,
-                    initialVMax,
-                    orientMin,
-                    orientMax,
-                    acc,
-                    count,
-                    growth);
+            archive("material", material);
+            archive("size", size);
+            archive("initialVMin", initialVMin);
+            archive("initialVMax", initialVMax);
+            archive("orientMin", orientMin);
+            archive("orientMax", orientMax);
+            archive("acc", acc);
+            archive("count", count);
+            archive("growth", growth);
         }
     };
 

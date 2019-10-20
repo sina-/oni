@@ -82,11 +82,6 @@ namespace oni {
         isVisible(const WorldP3D &,
                   const Scale &);
 
-        void
-        prepareTexture(EntityManager &manager,
-                       EntityID id,
-                       EntityAssetsPack tag);
-
         u16
         getSpritesPerFrame() const;
 

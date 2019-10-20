@@ -10,17 +10,13 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/fwd.h>
 #include <oni-core/util/oni-util-hash.h>
+#include <oni-core/util/oni-util-file.h>
 
 namespace cereal {
     class JSONInputArchive;
 }
 
 namespace oni {
-    // TODO: don't I have something useful in IO? If not, should add one.
-    struct FilePath {
-        std::string value;
-    };
-
     struct InvalidComponent {
     };
 

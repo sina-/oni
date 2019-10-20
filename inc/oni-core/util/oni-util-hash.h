@@ -11,10 +11,17 @@ namespace oni {
         return func(value);
     }
 
+    template<size N>
+    static constexpr Hash
+    hashString(const c8 (&value)[N]) {
+        std::hash<const c8 (&)[N]> func;
+        return func(value);
+    }
+
     // TODO: I really need to do something about all these std::strings that are allocating memory in runtime
     // the general concept of constexpr hashing should help with most of these allocations.
     static Hash
-    hashString(const char *value) {
+    hashString(const c8 *value) {
         auto string = std::string(value);
         return hashString(string);
     }
@@ -31,6 +38,10 @@ namespace oni {
         explicit HashedString(const c8 *value) noexcept: data(value), hash(hashString(data)) {}
 
         explicit HashedString(std::string &&value) noexcept: data(std::move(value)), hash(hashString(data)) {}
+
+        template<std::size_t N>
+        constexpr
+        HashedString(const c8 (&value)[N]) noexcept;
 
 //        explicit HashedString(std::string_view value) noexcept: data(value), hash(hashString(data)) {}
 

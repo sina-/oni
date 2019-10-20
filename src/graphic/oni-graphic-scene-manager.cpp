@@ -120,14 +120,6 @@ namespace oni {
     }
 
     void
-    SceneManager::prepareTexture(EntityManager &manager,
-                                 EntityID id,
-                                 EntityAssetsPack tag) {
-        auto &ms = manager.get<Material_Skin>(id);
-        mTextureManager.initTexture(tag, ms.texture);
-    }
-
-    void
     SceneManager::end(Renderer &renderer2D) {
         renderer2D.end();
     }

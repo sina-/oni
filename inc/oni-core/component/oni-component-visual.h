@@ -414,10 +414,6 @@ namespace oni {
             Enum{2, HashedString("shinny")},
     };
 
-    static auto MF_SOLID = _Material_Finish_Enum("solid");
-    static auto MF_TRANSLUCENT = _Material_Finish_Enum("translucent");
-    static auto MF_SHINNY = _Material_Finish_Enum("shinny");
-
 /*
     struct Material_Finish {
         Material_Finish_Enum id{};
@@ -454,7 +450,7 @@ namespace oni {
 
     struct Material_Definition {
         // Material_Skin skin{};
-        __Material_Finish finish{MF_SOLID};
+        __Material_Finish finish{_Material_Finish_Enum.get("solid")};
 
         template<class Archive>
         void
@@ -471,20 +467,26 @@ namespace oni {
         duration32 elapsed{0.f}; // NOTE: Since last growth
         r32 factor{0.1f}; // NOTE: add this much to current size
         Scale maxSize{1, 1, 1};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(period, elapsed, factor, maxSize);
+        }
     };
 
     struct ParticleEmitter {
-        EntityAssetsPack tag{};
-
         Material_Definition material{};
         r32 size = 0.1f;
         r32 initialVMin = 1.f;
         r32 initialVMax = 2.f;
-        r32 acc = 0.f;
         r32 orientMin = 0.f;
         r32 orientMax = TWO_PI;
+        r32 acc = 0.f;
         u8 count = 1;
         GrowOverTime growth{};
+
+        EntityAssetsPack tag{};
 
         template<class Archive>
         void
@@ -494,9 +496,9 @@ namespace oni {
                     size,
                     initialVMin,
                     initialVMax,
-                    acc,
                     orientMin,
                     orientMax,
+                    acc,
                     count,
                     growth);
         }

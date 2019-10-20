@@ -15,8 +15,7 @@ namespace oni {
     void
     System_ParticleEmitter::update(oni::EntityTickContext &etc,
                                    oni::ParticleEmitter &emitter,
-                                   oni::WorldP3D &pos,
-                                   oni::Orientation &ornt) {
+                                   oni::WorldP3D &pos) {
         if (!mSceneManager.isVisible(pos)) {
             return;
         }
@@ -30,7 +29,7 @@ namespace oni {
             mEntityManager.setRandOrientation(pID, emitter.orientMin, emitter.orientMax);
             mEntityManager.setDirectionFromOrientation(pID);
             // TODO: Tag is not part of the emitter json deserialization.
-            mEntityManager.setEntityAssetsPack(pID, emitter.tag);
+            // mEntityManager.setEntityAssetsPack(pID, emitter.tag);
             mEntityManager.setRandVelocity(pID, emitter.initialVMin, emitter.initialVMax);
 
             auto &growth = mEntityManager.get<oni::GrowOverTime>(pID);

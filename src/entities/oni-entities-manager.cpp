@@ -10,6 +10,7 @@
 
 #include <oni-core/math/oni-math-rand.h>
 #include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-factory.h>
 #include <oni-core/physics/oni-physics.h>
 
 
@@ -164,6 +165,23 @@ namespace oni {
             assignTag<Tag_NetworkSyncEntity>(id);
         }
         createComponent<EntityType>(id, type);
+        return id;
+    }
+
+    EntityID
+    EntityManager::createEntity(const EntityType_Name &name) {
+        assert(mSimMode == SimMode::SERVER || mSimMode == SimMode::CLIENT);
+        auto id = mRegistry->create();
+        if (mEntityOperationPolicy.track) {
+            assert(mSimMode == SimMode::SERVER);
+            assignTag<Tag_NetworkSyncEntity>(id);
+        }
+        // NOTE: Entity name is mostly used for debugging so we keep a cache around to avoid storing one std::string
+        // per entity!
+        mEntityNames.emplace(name.value.hash, name.value.data);
+        const auto &cachedName = mEntityNames[name.value.hash];
+
+        createComponent<EntityName>(id, cachedName.c_str());
         return id;
     }
 

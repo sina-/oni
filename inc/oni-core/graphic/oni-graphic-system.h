@@ -55,10 +55,7 @@ namespace oni {
 
     class System_ParticleEmitter : public SystemTemplate<
             ParticleEmitter,
-            WorldP3D,
-            // TODO: Probably the Orientation should be part of the particle emitter and not of the entity it
-            // is attached to
-            Orientation> {
+            WorldP3D> {
     public:
         System_ParticleEmitter(EntityManager &tickEm,
                                EntityManager &storageEm,
@@ -69,8 +66,7 @@ namespace oni {
         void
         update(EntityTickContext &context,
                ParticleEmitter &,
-               WorldP3D &,
-               Orientation &) override;
+               WorldP3D &) override;
 
         void
         postUpdate(EntityManager &mng,

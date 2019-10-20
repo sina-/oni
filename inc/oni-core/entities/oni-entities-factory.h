@@ -33,9 +33,8 @@ namespace oni {
         HashedString value;
     };
 
-    struct EntityTypeMap {
-        EntityType id{};
-        EntityType_Name name{};
+    struct EntityName {
+        std::string_view value;
     };
 
     // TODO: Can I remove JSONInputArchive from the API?
@@ -49,8 +48,7 @@ namespace oni {
         explicit EntityFactory(FilePath);
 
         void
-        registerEntityType(const EntityType_Name&,
-                           EntityType);
+        registerEntityType(const EntityType_Name &);
 
         void
         registerComponentFactory(const Component_Name &,
@@ -61,17 +59,11 @@ namespace oni {
                      const EntityType_Name &);
 
     private:
-        EntityType
-        getEntityType(const EntityType_Name &);
-
         const FilePath &
         getEntityResourcePath(const EntityType_Name &);
 
     private:
         std::map<Hash, ComponentFactory> mComponentFactory{};
-        // TODO: This should move to entity registry. We already have the concept of entity debug name which maps
-        // entity name string to an ID. This is the same thing almost.
-        std::map<Hash, EntityType> mEntityNameLookup{};
         std::map<Hash, FilePath> mEntityResourcePathLookup{};
         FilePath mEntityResourcePath{};
     };

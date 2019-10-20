@@ -12,6 +12,7 @@ namespace oni {
     struct DeletedEntity;
     struct EntityOperationPolicy;
     struct EntityContext;
+    struct EntityName;
     struct EntityType;
     struct EntityType_Name;
     struct Component_Name;

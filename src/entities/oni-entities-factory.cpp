@@ -28,6 +28,13 @@ namespace oni {
     oni::EntityFactory::EntityFactory(FilePath fp) : mEntityResourcePath(std::move(fp)) {
         COMPONENT_FACTORY_DEFINE(this, WorldP3D)
         COMPONENT_FACTORY_DEFINE(this, WorldP2D)
+        COMPONENT_FACTORY_DEFINE(this, Direction)
+        COMPONENT_FACTORY_DEFINE(this, Orientation)
+        COMPONENT_FACTORY_DEFINE(this, Scale)
+        COMPONENT_FACTORY_DEFINE(this, GrowOverTime)
+        COMPONENT_FACTORY_DEFINE(this, Velocity)
+        COMPONENT_FACTORY_DEFINE(this, Acceleration)
+        
         COMPONENT_FACTORY_DEFINE(this, ParticleEmitter)
     }
 
@@ -39,26 +46,12 @@ namespace oni {
     }
 
     void
-    EntityFactory::registerEntityType(const EntityType_Name& name,
-                                      EntityType et) {
-        // TODO: Not too sure about char * lifetime of HashedString!
-        mEntityNameLookup.emplace(name.value.hash, et);
-
+    EntityFactory::registerEntityType(const EntityType_Name &name) {
         auto path = FilePath{};
         path.value.append(mEntityResourcePath.value);
         path.value.append(name.value.data);
         path.value.append(".json");
         mEntityResourcePathLookup.emplace(name.value.hash, std::move(path));
-    }
-
-    EntityType
-    EntityFactory::getEntityType(const EntityType_Name &name) {
-        auto type = mEntityNameLookup.find(name.value.hash);
-        if (type != mEntityNameLookup.end()) {
-            return type->second;
-        }
-        assert(false);
-        return {};
     }
 
     const FilePath &
@@ -75,8 +68,6 @@ namespace oni {
     EntityID
     oni::EntityFactory::createEntity(EntityManager &manager,
                                      const EntityType_Name &name) {
-        auto entityType = getEntityType(name);
-
         auto fp = getEntityResourcePath(name);
         if (fp.value.empty()) {
             return EntityManager::nullEntity();
@@ -93,7 +84,7 @@ namespace oni {
         // TODO: After having registry take care of entity name string to entity type lookup I can
         // just add an overload to createEntity that receives EntityType_Name and returns and ID or nullEntity
         // if mapping is missing! Solves so many issues.
-        auto id = manager.createEntity(entityType);
+        auto id = manager.createEntity(name);
 
         auto jsonString = std::string((std::istreambuf_iterator<char>(jsonStream)), std::istreambuf_iterator<char>());
 

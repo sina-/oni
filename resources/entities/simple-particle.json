@@ -13,9 +13,7 @@
           "a": 1.0
         },
         "texture": {
-          "image": {
-            "path": "/tmp/1.png"
-          }
+          "image": "cloud_white"
         }
       }
     },

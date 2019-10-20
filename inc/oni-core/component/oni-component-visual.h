@@ -204,6 +204,10 @@ namespace oni {
         u16 width{};
         u16 height{};
         // TODO: This will be massive memory waste for all the particles that have texture!
+        // TODO: As it is now this will be the key value that will connect real textures to everything else
+        // in a way this is replacing EntityAssetPack enum! There might be a value in separating the ID that
+        // defines a texture and the path, at least that way I don't store all the std::strings on every
+        // entity hmmm...
         std::string path{};
 
         template<class Archive>
@@ -218,11 +222,15 @@ namespace oni {
                                    vec2{1.f, 1.f}, vec2{1.f, 0.f}};
     };
 
+    struct TextureName : public Enum {
+    };
+
     struct Texture {
         Image image{};
         // TODO: NOOooooooooooooooooooo what is this.
         bool clear{false};
         oniGLuint id{0};
+        // TODO: Remove these ogl dependent stuff and use engine enums
         // GL_BGRA          0x80E1
         oniGLenum format{0x80E1};
         // GL_UNSIGNED_BYTE 0x1401
@@ -233,7 +241,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(image);
+            archive(image.path);
         }
     };
 
@@ -394,6 +402,30 @@ namespace oni {
             MaterialTransition_Fade fade;
             MaterialTransition_Color color;
         };
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            // NOTE: Taken from: https://old.reddit.com/r/programming/comments/1i3qi9/cereal_a_c11_library_for_serialization_binary_xml/cb10q08/
+            archive(type, ttl);
+            // assert(Enums.valid(type));
+            switch (type) {
+                case MaterialTransition_Type::TEXTURE: {
+                    archive(texture);
+                    break;
+                }
+                case MaterialTransition_Type::FADE: {
+                    archive(fade);
+                    break;
+                }
+                case MaterialTransition_Type::TINT: {
+                    archive(color);
+                    break;
+                }
+                case MaterialTransition_Type::NONE:
+                    break;
+            }
+        }
     };
 
     enum class MaterialTransition_EndBehavior : oni::u8 {

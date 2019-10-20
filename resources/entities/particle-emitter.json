@@ -5,6 +5,19 @@
       "material": {
         "finish": {
           "name": "shinny"
+        },
+        "skin": {
+          "color": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+          },
+          "texture": {
+            "image": {
+              "path": "/tmp/1.png"
+            }
+          }
         }
       },
       "size": 1.0,

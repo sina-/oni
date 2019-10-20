@@ -20,43 +20,6 @@
 
 
 namespace oni {
-    struct Image {
-        u16 width{};
-        u16 height{};
-        std::string_view path{};
-    };
-
-    enum class NumAnimationFrames : oni::FrameID {
-        TWO = 2,
-        FOUR = 4,
-        FIVE = 5,
-        TEN = 10,
-        TWENTY = 20,
-        TWENTYFIVE = 25,
-        FIFTY = 50,
-
-        LAST
-    };
-
-    struct UV {
-        std::array<vec2, 4> values{vec2{0.f, 0.f}, vec2{0.f, 1.f},
-                                   vec2{1.f, 1.f}, vec2{1.f, 0.f}};
-    };
-
-    struct Texture {
-        // TODO: Can I move this out? Textures are massive because of it
-        Image image{};
-        // TODO: NOOooooooooooooooooooo what is this.
-        bool clear{false};
-        oniGLuint id{0};
-        // GL_BGRA          0x80E1
-        oniGLenum format{0x80E1};
-        // GL_UNSIGNED_BYTE 0x1401
-        // GL_FLOAT         0x1406
-        oniGLenum type{0x1401};
-        UV uv{};
-    };
-
     struct Color {
         u8
         r() const {
@@ -220,8 +183,57 @@ namespace oni {
 
         template<class Archive>
         void
+        save(Archive &archive) const {
+            auto r = r_r32();
+            auto g = r_r32();
+            auto b = r_r32();
+            auto a = r_r32();
+            archive(r, g, b, a);
+        }
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            auto color = vec4();
+            archive(color.x, color.y, color.z, color.w);
+            set_rgba(color.x, color.y, color.z, color.w);
+        }
+    };
+
+    struct Image {
+        u16 width{};
+        u16 height{};
+        // TODO: This will be massive memory waste for all the particles that have texture!
+        std::string path{};
+
+        template<class Archive>
+        void
         serialize(Archive &archive) {
-            archive(value);
+            archive(path);
+        }
+    };
+
+    struct UV {
+        std::array<vec2, 4> values{vec2{0.f, 0.f}, vec2{0.f, 1.f},
+                                   vec2{1.f, 1.f}, vec2{1.f, 0.f}};
+    };
+
+    struct Texture {
+        Image image{};
+        // TODO: NOOooooooooooooooooooo what is this.
+        bool clear{false};
+        oniGLuint id{0};
+        // GL_BGRA          0x80E1
+        oniGLenum format{0x80E1};
+        // GL_UNSIGNED_BYTE 0x1401
+        // GL_FLOAT         0x1406
+        oniGLenum type{0x1401};
+        UV uv{};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(image);
         }
     };
 
@@ -229,6 +241,18 @@ namespace oni {
         COLOR,
         TEXTURE,
         TEXTURE_TAG,
+    };
+
+    enum class NumAnimationFrames : oni::FrameID {
+        TWO = 2,
+        FOUR = 4,
+        FIVE = 5,
+        TEN = 10,
+        TWENTY = 20,
+        TWENTYFIVE = 25,
+        FIFTY = 50,
+
+        LAST
     };
 
     // TODO: Probably should be merged with ParticleEmitter with the goal of generic enough Particle Emitter
@@ -303,14 +327,14 @@ namespace oni {
     };
 
     struct Material_Skin {
-        Texture texture{};
         Color color{};
+        Texture texture{};
 
         template<class Archive>
         void
         serialize(Archive &archive) {
             // TODO: Complete this
-            archive(color);
+            archive(color, texture);
         }
     };
 
@@ -449,15 +473,13 @@ namespace oni {
 */
 
     struct Material_Definition {
-        // Material_Skin skin{};
         __Material_Finish finish{_Material_Finish_Enum.get("solid")};
+        Material_Skin skin{};
 
         template<class Archive>
         void
         serialize(Archive &archive) {
-            archive(
-//                    skin,
-                    finish);
+            archive(finish, skin);
             assert(_Material_Finish_Enum.valid(finish));
         }
     };

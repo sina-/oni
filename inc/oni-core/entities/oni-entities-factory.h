@@ -41,7 +41,7 @@ namespace oni {
 
     class EntityFactory {
     public:
-        explicit EntityFactory(FilePath);
+        explicit EntityFactory(FilePath, TextureManager&);
 
         void
         registerEntityType(const EntityType_Name &);
@@ -58,9 +58,15 @@ namespace oni {
         const FilePath &
         getEntityResourcePath(const EntityType_Name &);
 
+        void
+        postProcess(EntityManager &,
+                    EntityID);
+
     private:
         std::map<Hash, ComponentFactory> mComponentFactory{};
         std::map<Hash, FilePath> mEntityResourcePathLookup{};
         FilePath mEntityResourcePath{};
+
+        TextureManager &mTextureManager;
     };
 }

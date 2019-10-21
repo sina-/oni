@@ -478,39 +478,118 @@ namespace oni {
             Enum{2, HashedString("shinny")},
     };
 
-/*
+
+    // TODO: DO I really want to complicate traditional enum usage for this much complexity?
+    // What am I gaining by this? Just a mapping of int to string? I could also do this you know:
     struct Material_Finish {
-        Material_Finish_Enum id{};
-        HashedString name{};
+        Material_Finish_Enum value;
 
         template<class Archive>
         void
         save(Archive &archive) const {
-            archive(name);
+            switch (value) {
+                case Material_Finish_Enum::SOLID: {
+                    archive("solid");
+                    break;
+                }
+                case Material_Finish_Enum::TRANSLUCENT: {
+                    archive("translucent");
+                    break;
+                }
+                case Material_Finish_Enum::SHINNY : {
+                    archive("shinny");
+                    break;
+                }
+                default : {
+                    archive("solid");
+                    assert(false);
+                }
+            }
         }
 
         template<class Archive>
         void
         load(Archive &archive) {
-            archive(name);
+            auto string = HashedString();
+            archive(string.data);
+            string.hash = hashString(string.data);
 
-            static const auto solid = HashedString("solid").hash;
-            static const auto translucent = HashedString("translucent").hash;
-            static const auto shinny = HashedString("shinny").hash;
-
-            if (name.hash == solid) {
-                id = Material_Finish_Enum::SOLID;
-            } else if (name.hash == translucent) {
-                id = Material_Finish_Enum::TRANSLUCENT;
-            } else if (name.hash == shinny) {
-                id = Material_Finish_Enum::SHINNY;
+            const auto solid = HashedString("solid");
+            const auto translucent = HashedString("translucent");
+            const auto shinny = HashedString("shinny");
+            if (string == solid) {
+                value = Material_Finish_Enum::SOLID;
+            } else if (string == translucent) {
+                value = Material_Finish_Enum::TRANSLUCENT;
+            } else if (string == shinny) {
+                value = Material_Finish_Enum::SHINNY;
             } else {
                 assert(false);
-                id = Material_Finish_Enum::SOLID;
+                value = Material_Finish_Enum::SOLID;
             }
         }
     };
-*/
+
+    // TODO: How do I deal with iteration in this setup?
+    struct Material_Finish_Enum_INH : public Enum {
+        ENUM_DEFINE(Material_Finish_Enum_INH, 0, SOLID)
+
+        ENUM_DEFINE(Material_Finish_Enum_INH, 1, TRANSLUCENT)
+
+        ENUM_DEFINE(Material_Finish_Enum_INH, 2, SHINNY)
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            auto name = HashedString();
+            archive(name);
+
+            if (SOLID() == name) {
+                *this = SOLID();
+            } else if (TRANSLUCENT() == name) {
+                *this = TRANSLUCENT();
+            } else if (SHINNY() == name) {
+                *this = TRANSLUCENT();
+            } else {
+                assert(false);
+                *this = SOLID();
+            }
+        }
+    };
+
+    struct Material_Finish_Enum_BARE {
+        Enum value;
+
+        ENUM_DEFINE(Material_Finish_Enum_BARE, 0, SOLID)
+
+        ENUM_DEFINE(Material_Finish_Enum_BARE, 1, TRANSLUCENT)
+
+        ENUM_DEFINE(Material_Finish_Enum_BARE, 2, SHINNY)
+
+        template<class Archive>
+        void
+        save(Archive &archive) {
+            archive(value.string);
+        }
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            auto name = HashedString();
+            archive(name);
+
+            if (SOLID().value == name) {
+                *this = SOLID();
+            } else if (TRANSLUCENT().value == name) {
+                *this = TRANSLUCENT();
+            } else if (SHINNY().value == name) {
+                *this = TRANSLUCENT();
+            } else {
+                assert(false);
+                *this = SOLID();
+            }
+        }
+    };
 
     struct Material_Definition {
         __Material_Finish finish{_Material_Finish_Enum.get("solid")};
@@ -521,7 +600,6 @@ namespace oni {
         serialize(Archive &archive) {
             archive("finish", finish);
             archive("skin", skin);
-            assert(_Material_Finish_Enum.valid(finish));
         }
     };
 

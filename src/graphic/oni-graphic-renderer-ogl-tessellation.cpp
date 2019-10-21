@@ -201,8 +201,13 @@ namespace oni {
         auto effectID = 0.f;
         auto color = Color{};
 
-        const auto *skin = renderable.skin;
+        const auto *def = renderable.materialDef;
+        if (!def) {
+            assert(false);
+            return;
+        }
         const auto *text = renderable.text;
+        const auto *skin = &def->skin;
 
         auto *buffer = static_cast<TessellationVertex *>(mBuffer);
 
@@ -243,7 +248,7 @@ namespace oni {
                 buffer->ornt = renderable.ornt->value;
                 buffer->effect = effectID;
                 buffer->halfSize = vec2{halfGlyphX, halfGlyphY};
-                buffer->color = renderable.skin->color.rgba();
+                buffer->color = skin->color.rgba();
                 buffer->color.w = 0;
                 buffer->uv_0 = vec2{u0, v0};
                 buffer->uv_1 = vec2{u0, v1};

@@ -76,7 +76,20 @@ namespace oni {
             return sizeof(values) / sizeof(T);
         }
 
-        const auto &
+        // TODO: This should not be necessary. Each Enum already has idx but it is always 0 atm, once that is fixed
+        // remove this.
+        size
+        getIndex(const T &value) {
+            for (auto &&v: values) {
+                if (v.string.hash == value.string.hash) {
+                    return v.idx;
+                }
+            }
+            assert(false);
+            return 0;
+        }
+
+        const T &
         get(size id) const {
             if (id < values.size()) {
                 return values[id];
@@ -86,7 +99,7 @@ namespace oni {
             return getInvalidEnum();
         }
 
-        const auto &
+        const T &
         get(const c8 *name) const {
             auto hash = hashString(name);
             for (auto &&e: values) {
@@ -98,7 +111,7 @@ namespace oni {
             return getInvalidEnum();
         }
 
-        const auto &
+        const T &
         get(const HashedString &name) const {
             for (auto &&e: values) {
                 if (e == name) {

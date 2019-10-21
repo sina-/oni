@@ -31,7 +31,6 @@ namespace oni {
                   const Renderable &right);
 
         EntityID id{};
-        EntityType type{};
         const EntityManager *manager{};
 
         const WorldP3D *pos{};
@@ -39,7 +38,7 @@ namespace oni {
         const Scale *scale{};
         PrimitiveTransforms pt{};
 
-        const Material_Skin *skin{};
+        const Material_Definition *materialDef{};
         const Material_Text *text{};
         const MaterialTransition_Def *trans{};
     };

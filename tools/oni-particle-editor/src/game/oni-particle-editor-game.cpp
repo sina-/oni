@@ -39,7 +39,7 @@ namespace oni {
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
-        mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"});
+        mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"}, *mTextureMng);
 
         // TODO: I shouldn't need to do this. I should just pass a file path of all the relevant entities and the
         // factory should go through all the files and register them.
@@ -202,6 +202,8 @@ namespace oni {
                 switch (mInforSideBar.entityPreset) {
                     // TODO: Probably you want to match this name to the json file name
                     case PARTICLE_EMITTER: {
+                        // TODO: SO I need another overload of this function, as close as possible to json, that
+                        // accepts what particle editor has to offer for creating entities!
                         mEntityFactory->createEntity(*mEntityMng, {HashedString("particle-emitter")});
                         break;
                     }

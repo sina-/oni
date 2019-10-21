@@ -136,27 +136,24 @@ namespace oni {
         {
             // TODO: The following code includes everything, even the particles will be sorted, which might be over-kill
             auto view = manager.createView<
-                    EntityType,
                     WorldP3D,
                     Orientation,
                     Scale,
-                    Material_Skin,
-                    Material_Finish_Enum>();
+                    Material_Definition
+                                          >();
             for (auto &&id: view) {
                 const auto &pos = view.get<WorldP3D>(id);
                 const auto &ornt = view.get<Orientation>(id);
                 const auto &scale = view.get<Scale>(id);
-                const auto &finish = view.get<Material_Finish_Enum>(id);
-                const auto &skin = view.get<Material_Skin>(id);
+                const auto &def = view.get<Material_Definition>(id);
 
                 auto renderable = Renderable{};
                 renderable.id = id;
-                renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
                 renderable.manager = &manager;
                 renderable.pos = &pos;
                 renderable.ornt = &ornt;
                 renderable.scale = &scale;
-                renderable.skin = &skin;
+                renderable.materialDef = &def;
                 // TODO: Read this value from the entity
                 renderable.pt = PrimitiveTransforms::DYNAMIC;
 
@@ -165,15 +162,17 @@ namespace oni {
                     const auto &trans = transList.transitions[transList.activeTransIdx];
                     renderable.trans = &trans;
                 }
+
+                // TODO: Well, this sucks, def.finish.idx should be the value to use here :/
+                auto idx = _Material_Finish_Enum.getIndex(def.finish);
                 // TODO: Now that I distinguish between opaque and translucent objects I should draw the
                 // opaque objects front to back to avoid over draw
-                mRenderables[enumCast(finish)].push(renderable);
+                mRenderables[idx].push(renderable);
             }
         }
 
         {
             auto view = manager.createView<
-                    EntityType,
                     WorldP3D,
                     Orientation,
                     Scale,
@@ -186,13 +185,15 @@ namespace oni {
 
                 auto renderable = Renderable{};
                 renderable.id = id;
-                renderable.type = view.get<EntityType>(id); // NOTE: Just for debug
                 renderable.manager = &manager;
                 renderable.pos = &pos;
                 renderable.ornt = &ornt;
                 renderable.scale = &scale;
                 renderable.text = &text;
-                renderable.skin = &text.skin;
+                // TODO: Yeah I broke text rendering, need to to do the refactoring I had to do a while back to
+                // unify text and other entity rendering so I can have Material_Definition as part of text as well.
+                // Maybe even a union instead type for Material_Definition so I can be flexible.
+                // renderable.def = &text.skin;
                 // TODO: Read this value from the entity
                 renderable.pt = PrimitiveTransforms::UI;
 

@@ -221,6 +221,10 @@ namespace oni {
         void
         serialize(Archive &archive) {
             archive("name", name.value.data);
+            // TODO: Not super effective! How can I avoid this and rely on HashedString serialization methods
+            // only to handle this? I by pass the HashedString type by calling directly into data, although
+            // I do that to avoid having to require one more level in the json of specifying the name!
+            name.value.hash = hashString(name.value.data);
         }
     };
 

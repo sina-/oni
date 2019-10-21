@@ -28,8 +28,6 @@ namespace oni {
             mEntityManager.setScale(pID, emitter.size, emitter.size);
             mEntityManager.setRandOrientation(pID, emitter.orientMin, emitter.orientMax);
             mEntityManager.setDirectionFromOrientation(pID);
-            // TODO: Tag is not part of the emitter json deserialization.
-            // mEntityManager.setEntityAssetsPack(pID, emitter.tag);
             mEntityManager.setRandVelocity(pID, emitter.initialVMin, emitter.initialVMax);
 
             auto &growth = mEntityManager.get<oni::GrowOverTime>(pID);
@@ -42,9 +40,6 @@ namespace oni {
             md.finish = emitter.material.finish;
             md.skin.color = emitter.material.skin.color;
             md.skin.texture.image.name = emitter.material.skin.texture.image.name;
-
-            // TODO:
-            // mEntityLoader.initializeEntityAssets(mEntityManager, pID);
         }
     }
 

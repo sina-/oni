@@ -10,6 +10,8 @@
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/oni-entities-serialization.h>
+#include <oni-core/graphic/oni-graphic-texture-manager.h>
+
 
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                           \
 {                                                                                   \
@@ -24,7 +26,9 @@
 }
 
 namespace oni {
-    oni::EntityFactory::EntityFactory(FilePath fp) : mEntityResourcePath(std::move(fp)) {
+    oni::EntityFactory::EntityFactory(FilePath fp,
+                                      TextureManager &tm) : mEntityResourcePath(std::move(fp)),
+                                                            mTextureManager(tm) {
         // TODO: Same thing happens in AssetManager, can I move this to a single location?
         if (mEntityResourcePath.value.back() != '/') {
             mEntityResourcePath.value.append("/");
@@ -127,6 +131,8 @@ namespace oni {
                             // TODO: The issue with this right now is that if something is wrong in json I just get
                             // an assert! What would happen in publish?
                             factory->second(manager, id, reader);
+
+                            postProcess(manager, id);
                         } else {
                             assert(false);
                         }
@@ -141,5 +147,14 @@ namespace oni {
             assert(false);
         }
         return id;
+    }
+
+    void
+    EntityFactory::postProcess(EntityManager &em,
+                               EntityID id) {
+        if (em.has<Material_Definition>(id)) {
+            auto &def = em.get<Material_Definition>(id);
+            mTextureManager.initTexture(def.skin.texture);
+        }
     }
 }

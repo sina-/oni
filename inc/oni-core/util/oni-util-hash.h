@@ -51,6 +51,11 @@ namespace oni {
 //        template<std::size_t N>
 //        HashedString(const c8 (&value)[N]) noexcept: data(value), hash(hashString(data)) {}
 
+        bool
+        operator==(const HashedString &other) const {
+            return hash == other.hash;
+        }
+
         template<class Archive>
         void
         save(Archive &archive) const {

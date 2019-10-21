@@ -4,6 +4,12 @@
 #include <oni-core/util/oni-util-hash.h>
 
 namespace oni {
+#define ENUM_DEFINE(ENUM, ID, VALUE)            \
+    static ENUM                                 \
+    VALUE() {                                   \
+        return {ID, HashedString(#VALUE)};      \
+    }
+
     struct Enum {
         size idx{};
         HashedString string{};

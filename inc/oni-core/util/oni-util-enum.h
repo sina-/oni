@@ -2,6 +2,18 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/util/oni-util-hash.h>
+#include <oni-core/math/oni-math-function.h>
+
+/* Criteria for a better enum type:
+ * 1) minimal macro and template use
+ * 2) simple io from and to string
+ * 3) possibility to iterate over
+ * 4) header only
+ * 5) storage should require 32-bit
+ * 6) ::ENUM_NAME or something quite similar should be available on the enum
+ * 7) easy to use in if statements
+ */
+
 
 namespace oni {
 #define ENUM_DEFINE(ENUM, ID, VALUE)            \

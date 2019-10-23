@@ -454,32 +454,45 @@ namespace oni {
     // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
     // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
-    enum class Material_Finish_Enum : oni::u8 {
+    struct Material_Finish_Enum : public Enum_Base<Material_Finish_Enum> {
+        Material_Finish_Enum() : Enum_Base() {
+            static bool init = true;
+            if (init) {
+                count = enumCast(member::LAST);
+                map = new HashedString[count];
+                map[0] = HashedString("SOLID");
+                map[1] = HashedString("TRANSLUCENT");
+                map[2] = HashedString("SHINNY");
+                init = false;
+            }
+        }
+
+        explicit Material_Finish_Enum(int id) : Enum_Base{id} {}
+
         // NOTE: The order of the enums defines the order in which they are rendered!
         // NOTE: For translucent and shinny entities since depth writes are disabled
         // if an entity that is translucent but has higher z is rendered then a shinny
         // entity with lower z is rendered it will still be drawn over the higher z
         // entity!
+        enum member {
+            SOLID,
+            TRANSLUCENT,
+            SHINNY,
 
-        SOLID,
-        TRANSLUCENT,
-        SHINNY,
+            LAST
+        };
 
-        LAST
+        Material_Finish_Enum
+        operator=(member other) const {
+            return Material_Finish_Enum{other};
+        }
     };
-
-    struct __Material_Finish : public Enum {
-    };
-
-    // TODO: Love to make a Enums constexpr friendly so I won't need this
-    static auto _Material_Finish_Enum = Enums<__Material_Finish, 3>{
-            Enum{0, HashedString("solid")},
-            Enum{1, HashedString("translucent")},
-            Enum{2, HashedString("shinny")},
-    };
+    namespace {
+        static const Material_Finish_Enum _INIT_Material_Finish_Enum{};
+    }
 
     struct Material_Definition {
-        __Material_Finish finish{_Material_Finish_Enum.get("solid")};
+        Material_Finish_Enum finish{Material_Finish_Enum::SHINNY};
         Material_Skin skin{};
 
         template<class Archive>

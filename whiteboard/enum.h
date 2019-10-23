@@ -455,6 +455,55 @@ namespace test_d {
 
 }
 
+namespace test_e {
+#if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 9 || defined(_MSC_VER)
+#define ENUM_TO_STRING_SUPPORTED 1
+#else
+#define ENUM_TO_STRING_SUPPORTED 0
+#endif
+
+    constexpr std::string_view
+    removeSuffixFrom(std::string_view name,
+                     size i) noexcept {
+        name.remove_suffix(i);
+        return name;
+    }
+
+    constexpr std::string_view
+    removePrefixFrom(std::string_view name,
+                     size i) noexcept {
+        name.remove_prefix(i);
+        return name;
+    }
+
+    template<typename E>
+    using is_scoped_enum = std::integral_constant<bool, std::is_enum_v<E> && !std::is_convertible_v<E, int>>;
+
+    template<auto v>
+    constexpr std::string_view
+    enumToStr() {
+        static_assert(std::is_enum_v<decltype(v)>, "only enum should be used");
+#if defined(ENUM_TO_STRING_SUPPORTED) && ENUM_TO_STRING_SUPPORTED
+#  if defined(__clang__) || defined(__GNUC__)
+        constexpr auto name = std::string_view(__PRETTY_FUNCTION__);
+#  elif defined(_MSC_VER)
+        // TODO: Test this
+    constexpr auto name = pretty_name({__FUNCSIG__, sizeof(__FUNCSIG__) - 17});
+#  endif
+        if constexpr (is_scoped_enum<decltype(v)>::value) {
+            auto clean = removePrefixFrom(name, 40);
+            return removeSuffixFrom(clean, 1);// Remove trailing ] in the name
+        } else {
+            auto clean = removePrefixFrom(name, 34);
+            return removeSuffixFrom(clean, 1);// Remove trailing ] in the name
+        }
+#else
+        static_assert(std::false_type::value, "you need __PRETTY_FUNCTION__ or similar support to print enum strings");
+    return std::string_view{};
+#endif
+    }
+}
+
 namespace test_x {
     namespace {
         template<class T>

@@ -16,138 +16,118 @@
 
 
 namespace oni {
-#define ENUM_DEFINE(ENUM, ID, VALUE)            \
-    static ENUM                                 \
-    VALUE() {                                   \
-        return {ID, HashedString(#VALUE)};      \
+    namespace { // NOTE: Anonymous namespace so that I can define static members in the header without linker errors
+        template<class T>
+        struct Enum_Base {
+            int id{};
+
+            bool
+            operator==(int other) const {
+                return other == id;
+            }
+
+            template<class Archive>
+            void
+            save(Archive &archive) {
+                archive(map[id].string.data);
+            }
+
+            template<class Archive>
+            void
+            load(Archive &archive) {
+                auto string = std::string();
+                archive(string);
+                auto hash = hashString(string);
+                for (size i = 0; i < count; ++i) {
+                    if (hash == map[i].hash) {
+                        id = i;
+                        return;
+                    }
+                }
+                assert(false);
+                id = 0;
+            }
+
+            static const char *
+            name(int id) {
+                if (id < count) {
+                    return map[id].data.c_str();
+                } else {
+                    assert(false);
+                    return "";
+                }
+            }
+
+            template<class Tuple>
+            static const auto *
+            array() {
+                static Tuple result[count];
+                for (size i = 0; i < count; ++i) {
+                    result[i].Value = i;
+                    result[i].Label = name(i);
+                }
+                return &result;
+            }
+
+        protected:
+            static HashedString *map;
+            static int count;
+        };
+
+        template<class T>
+        HashedString *Enum_Base<T>::map;
+
+        template<class T>
+        int Enum_Base<T>::count;
     }
 
-    struct Enum {
-        size idx{};
-        HashedString string{};
+    /// ===============================================================================================
 
-        template<class Archive>
-        void
-        save(Archive &archive) const {
-            // NOTE: idx is not serialized
-            archive("name", string.data);
+#if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 9 || defined(_MSC_VER)
+#define ENUM_TO_STRING_SUPPORTED 1
+#else
+#define ENUM_TO_STRING_SUPPORTED 0
+#endif
+
+    constexpr std::string_view
+    removeSuffixFrom(std::string_view name,
+                     size i) noexcept {
+        name.remove_suffix(i);
+        return name;
+    }
+
+    constexpr std::string_view
+    removePrefixFrom(std::string_view name,
+                     size i) noexcept {
+        name.remove_prefix(i);
+        return name;
+    }
+
+    template<typename E>
+    using is_scoped_enum = std::integral_constant<bool, std::is_enum_v<E> && !std::is_convertible_v<E, int>>;
+
+    template<auto v>
+    constexpr std::string_view
+    enumToStr() {
+        static_assert(std::is_enum_v<decltype(v)>, "only enum should be used");
+#if defined(ENUM_TO_STRING_SUPPORTED) && ENUM_TO_STRING_SUPPORTED
+#  if defined(__clang__) || defined(__GNUC__)
+        constexpr auto name = std::string_view(__PRETTY_FUNCTION__);
+#  elif defined(_MSC_VER)
+        // TODO: Test this
+    constexpr auto name = pretty_name({__FUNCSIG__, sizeof(__FUNCSIG__) - 17});
+#  endif
+        if constexpr (is_scoped_enum<decltype(v)>::value) {
+            auto clean = removePrefixFrom(name, 40);
+            return removeSuffixFrom(clean, 1);// Remove trailing ] in the name
+        } else {
+            auto clean = removePrefixFrom(name, 34);
+            return removeSuffixFrom(clean, 1);// Remove trailing ] in the name
         }
+#else
+        static_assert(std::false_type::value, "you need __PRETTY_FUNCTION__ or similar support to print enum strings");
+    return std::string_view{};
+#endif
+    }
 
-        template<class Archive>
-        void
-        load(Archive &archive) {
-            archive("name", string.data);
-            string.hash = hashString(string.data);
-        }
-
-        bool
-        operator==(const Enum &other) const {
-            return string.hash == other.string.hash;
-        }
-
-        bool
-        operator==(const HashedString &other) const {
-            return string.hash == other.hash;
-        }
-
-        bool
-        operator!=(const HashedString &other) const {
-            return string.hash != other.hash;
-        }
-
-        const c8 *
-        name() const {
-            return string.data.c_str();
-        }
-    };
-
-    struct EnumVal {
-        int value;
-        const char *name;
-    };
-
-    template<class T, size N>
-    struct Enums {
-        T values[N];
-
-        template<class ...V>
-        Enums(V...v) : values{v...} {}
-
-        static const auto &
-        getInvalidEnum() {
-            static auto invalidEnum = T{0, HashedString("__INVALID__")};
-            return invalidEnum;
-        }
-
-        const auto *
-        array() const {
-            static EnumVal result[N];
-            for (size i = 0; i < count(); ++i) {
-                result[i].value = values[i].idx;
-                result[i].name = values[i].name();
-            }
-            return &result;
-        }
-
-        size
-        count() const {
-            return sizeof(values) / sizeof(T);
-        }
-
-        // TODO: This should not be necessary. Each Enum already has idx but it is always 0 atm, once that is fixed
-        // remove this.
-        size
-        getIndex(const T &value) {
-            for (auto &&v: values) {
-                if (v.string.hash == value.string.hash) {
-                    return v.idx;
-                }
-            }
-            assert(false);
-            return 0;
-        }
-
-        const T &
-        get(size id) const {
-            if (id < values.size()) {
-                return values[id];
-            }
-
-            assert(false);
-            return getInvalidEnum();
-        }
-
-        const T &
-        get(const c8 *name) const {
-            auto hash = hashString(name);
-            for (auto &&e: values) {
-                if (e.string.hash == hash) {
-                    return e;
-                }
-            }
-            assert(false);
-            return getInvalidEnum();
-        }
-
-        const T &
-        get(const HashedString &name) const {
-            for (auto &&e: values) {
-                if (e == name) {
-                    return e;
-                }
-            }
-            assert(false);
-            return getInvalidEnum();
-        }
-
-        bool
-        valid(const T &v) const {
-            return get(v.string).string.hash != getInvalidEnum().string.hash;
-        }
-
-        const T &
-        operator()(const c8 *name) const {
-            return get(name);
-        }
-    };
 }

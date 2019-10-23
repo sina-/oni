@@ -136,8 +136,8 @@ namespace oni {
                                              nullptr, nullptr);
 
         auto TwMaterial_Finish_Enum = TwDefineEnum("Material_Finish_Enum",
-                                                   reinterpret_cast<const TwEnumVal *>(_Material_Finish_Enum.array()),
-                                                   _Material_Finish_Enum.count());
+                                                   Material_Finish_Enum::array<TwEnumVal>(),
+                                                   Material_Finish_Enum::LAST);
 
         TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");

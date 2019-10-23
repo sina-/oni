@@ -504,6 +504,334 @@ namespace test_e {
     }
 }
 
+namespace test_f {
+    using size = size_t;
+    using Hash = size;
+    using c8 = char;
+
+#if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 9 || defined(_MSC_VER)
+#define ENUM_TO_STRING_SUPPORTED 1
+#else
+#define ENUM_TO_STRING_SUPPORTED 0
+#endif
+
+    constexpr std::string_view
+    removeSuffixFrom(std::string_view name,
+                     size i) noexcept {
+        name.remove_suffix(i);
+        return name;
+    }
+
+    constexpr std::string_view
+    removePrefixFrom(std::string_view name,
+                     size i) noexcept {
+        name.remove_prefix(i);
+        return name;
+    }
+
+    template<typename E>
+    using is_scoped_enum = std::integral_constant<bool, std::is_enum_v<E> && !std::is_convertible_v<E, int>>;
+
+    template<auto v>
+    constexpr std::string_view
+    enumToStr() {
+        static_assert(std::is_enum_v<decltype(v)>, "only enum should be used");
+#if defined(ENUM_TO_STRING_SUPPORTED) && ENUM_TO_STRING_SUPPORTED
+#  if defined(__clang__) || defined(__GNUC__)
+        constexpr auto name = std::string_view(__PRETTY_FUNCTION__);
+#  elif defined(_MSC_VER)
+        // TODO: Test this
+    constexpr auto name = pretty_name({__FUNCSIG__, sizeof(__FUNCSIG__) - 17});
+#  endif
+        if constexpr (is_scoped_enum<decltype(v)>::value) {
+            auto clean = removePrefixFrom(name, 41 + 5 + 5);
+            return removeSuffixFrom(clean, 1);// Remove trailing ] in the name
+        } else {
+            auto clean = removePrefixFrom(name, 34 + 5 + 5);
+            return removeSuffixFrom(clean, 1);// Remove trailing ] in the name
+        }
+#else
+        static_assert(std::false_type::value, "you need __PRETTY_FUNCTION__ or similar support to print enum strings");
+    return std::string_view{};
+#endif
+    }
+
+    /// ===============================================================================================
+
+    template<class T>
+    constexpr std::underlying_type_t<T>
+    enumCast(T value) noexcept {
+        return static_cast<std::underlying_type_t<T>>(value);
+    }
+
+    static Hash
+    hashString(const std::string &value) {
+        static std::hash<std::string> func;
+        return func(value);
+    }
+
+    template<size N>
+    static constexpr Hash
+    hashString(const c8 (&value)[N]) {
+        std::hash<const c8 (&)[N]> func;
+        return func(value);
+    }
+
+    // TODO: I really need to do something about all these std::strings that are allocating memory in runtime
+    // the general concept of constexpr hashing should help with most of these allocations.
+    static Hash
+    hashString(const c8 *value) {
+        auto string = std::string(value);
+        return hashString(string);
+    }
+
+    struct HashedString {
+        std::string data{};
+        Hash hash{};
+
+        HashedString() = default;
+
+        // TODO: It would be nice to has a constexpr constructor for this one!
+        // TODO: The base of issue is that I want my HashedString to support constexpr chars and
+        // runtime chars! Right now this only supports runtime chars.
+        explicit HashedString(const c8 *value) noexcept: data(value), hash(hashString(data)) {}
+
+        explicit HashedString(std::string &&value) noexcept: data(std::move(value)), hash(hashString(data)) {}
+
+        template<std::size_t N>
+        constexpr
+        HashedString(const c8 (&value)[N]) noexcept;
+
+
+        explicit HashedString(std::string_view value) noexcept: data(value), hash(hashString(data)) {}
+
+        // TODO: Hmmm don't really want to create one constructor per N and include this massive header in
+        // every fucking place!
+        // NOTE: This matches {"random-string"} type of initializer-list
+//        template<std::size_t N>
+//        HashedString(const c8 (&value)[N]) noexcept: data(value), hash(hashString(data)) {}
+
+        bool
+        operator==(const HashedString &other) const {
+            return hash == other.hash;
+        }
+
+        template<class Archive>
+        void
+        save(Archive &archive) const {
+            // NOTE: hash is not serialized!
+            archive(data);
+        }
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            archive(data);
+            hash = hashString(data);
+        }
+    };
+
+    template<class ENUM, auto t>
+    struct wrapper {
+        void
+        operator()(HashedString *map,
+                   size i) const {
+            constexpr auto e = static_cast<ENUM>(t);
+            constexpr auto string = enumToStr<e>();
+            map[i] = HashedString(string);
+        }
+    };
+
+
+    template<template<class ENUM, int> class WRAPPER, class ENUM, std::size_t... I>
+    void
+    caller_impl(HashedString *map,
+                std::index_sequence<I...>) {
+        int t[] = {0, ((void) WRAPPER<ENUM, I>()(map, I), 1)...};
+        (void) t;
+    }
+
+    template<template<class ENUM, int> class WRAPPER, class ENUM, std::size_t N, typename Indices = std::make_index_sequence<N>>
+    void
+    call_times(HashedString *map) {
+        caller_impl<WRAPPER, ENUM>(map, Indices());
+    }
+
+
+    namespace { // NOTE: Anonymous namespace so that I can define static members in the header without linker errors
+        template<class T, class ENUM>
+        struct Enum_Base {
+            int id{};
+
+            explicit Enum_Base(int id_) : Enum_Base() { id = id_; }
+
+            Enum_Base() {
+                static bool init = true;
+                if (init) {
+                    count = enumCast(ENUM::_LAST);
+                    map = new HashedString[count];
+
+                    constexpr auto t = enumCast(ENUM::_LAST);
+                    call_times<wrapper, ENUM, t>(map);
+                    init = false;
+                }
+            }
+
+            bool
+            operator==(int other) const {
+                return other == id;
+            }
+
+            ENUM
+            operator=(int other) const {
+                return static_cast<ENUM>(other);
+            }
+
+//            Enum_Base
+//            operator=(ENUM other) const {
+//                return Enum_Base(enumCast(other));
+//            }
+
+            template<class Archive>
+            void
+            save(Archive &archive) {
+                archive(map[id].string.data);
+            }
+
+            template<class Archive>
+            void
+            load(Archive &archive) {
+                auto string = std::string();
+                archive(string);
+                auto hash = hashString(string);
+                for (size i = 0; i < count; ++i) {
+                    if (hash == map[i].hash) {
+                        id = i;
+                        return;
+                    }
+                }
+                assert(false);
+                id = 0;
+            }
+
+            static const char *
+            name(int id) {
+                if (id < count) {
+                    return map[id].data.c_str();
+                } else {
+                    assert(false);
+                    return "";
+                }
+            }
+
+            template<class Tuple>
+            static const auto *
+            array() {
+                static Tuple result[count];
+                for (size i = 0; i < count; ++i) {
+                    result[i].Value = i;
+                    result[i].Label = name(i);
+                }
+                return &result;
+            }
+
+        protected:
+            static HashedString *map;
+            static int count;
+        };
+
+        template<class T, class ENUM>
+        HashedString *Enum_Base<T, ENUM>::map;
+
+        template<class T, class ENUM>
+        int Enum_Base<T, ENUM>::count;
+    }
+
+    enum class _Enum {
+        SOLID,
+        TRANSLUCENT,
+        SHINNY,
+
+        _LAST
+    };
+
+
+    struct Enum : public Enum_Base<Enum, _Enum> {
+        Enum() = default;
+
+        explicit Enum(int id_) : Enum_Base() { id = id_; }
+
+        enum _ {
+            SOLID,
+            TRANSLUCENT,
+            SHINNY,
+
+            _LAST
+        };
+
+        Enum(_ id_) : Enum_Base() { id = id_; }
+
+        Enum
+        operator=(const _ &other) const {
+            return Enum{other};
+        }
+    };
+    namespace {
+        static const Enum _INIT_Enum{};
+    }
+
+#define DEFINE_ENUM(NAME, ...)                                                  \
+enum class _INTERNAL_##NAME {                                                   \
+        __VA_ARGS__                                                             \
+        , _LAST                                                                 \
+        };                                                                      \
+        struct NAME : public Enum_Base<NAME, _INTERNAL_##NAME > {               \
+        NAME() = default;                                                       \
+        explicit NAME(int id_) : Enum_Base() {id = id_;}                        \
+        enum _ {                                                                \
+           __VA_ARGS__                                                          \
+           , _LAST                                                              \
+        };                                                                      \
+        NAME(_ id_) : Enum_Base() { id = id_; }                                 \
+        NAME                                                                    \
+        operator=(const _&other) const {                                        \
+           return NAME{other};                                                  \
+        }                                                                       \
+        };                                                                      \
+        namespace {                                                             \
+            static const NAME _INIT_##NAME{};                                   \
+        }
+
+    DEFINE_ENUM(WOW, RED, BLUE)
+
+
+    inline void
+    test() {
+        WOW c = WOW::RED;
+        auto a = Enum{0};
+        if (a == Enum::SOLID) {
+            printf("YES\n");
+        }
+
+        for (int i = 0; i < Enum::_LAST; ++i) {
+            printf("%s\n", Enum::name(i));
+        }
+        Enum b = Enum::SOLID;
+        if (b == Enum::SOLID) {
+            printf("YES3\n");
+        }
+        if (b == Enum::SHINNY) {
+            printf("WTF\n");
+        }
+    }
+
+    /*
+     * Issues:
+     * Doesn't support numbered enums well: enum OOPS {FOO = 1, BAR = 1000};
+     * Names of enum class are in again
+     */
+}
+
 namespace test_x {
     namespace {
         template<class T>

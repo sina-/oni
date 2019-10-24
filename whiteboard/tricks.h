@@ -14,12 +14,16 @@ namespace constexpr_str_len {
 }
 
 namespace tail {
-    template<typename ENUM, typename ... args>
+    template<class T>
     void
-    initialize(const ENUM value,
+    initialize() {}
+
+    template<typename T, typename ... args>
+    void
+    initialize(const T value,
                const char *name,
                args ... tail) {
-        enum_values < ENUM >.emplace(value, name);
-        initialize<ENUM>(tail ...);
+        enum_values < T >.emplace(value, name);
+        initialize<T>(tail ...);
     }
 }

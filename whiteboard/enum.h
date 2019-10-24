@@ -832,6 +832,326 @@ enum class _INTERNAL_##NAME {                                                   
      */
 }
 
+namespace test_g {
+    using size = std::size_t;
+    using c8 = char;
+    using Hash = unsigned long long;
+//
+//template<size N>
+//static constexpr Hash
+//hashString(const c8 (&value)[N]) {
+//    constexpr std::hash<const c8 (&)[N]> func;
+//    return func(value);
+//}
+
+// TODO: I really need to do something about all these std::strings that are allocating memory in runtime
+// the general concept of constexpr hashing should help with most of these allocations.
+//static Hash
+//hashString(const c8 *value) {
+//    auto string = std::string(value);
+//    return hashString(string);
+//}
+    static constexpr std::uint64_t offset = 14695981039346656037ull;
+    static constexpr std::uint64_t prime = 1099511628211ull;
+
+    struct HashedString {
+        std::string_view data{};
+        Hash hash{};
+
+        constexpr HashedString() = default;
+
+        constexpr HashedString(std::string_view data_,
+                               Hash hash_) noexcept: data(data_), hash(hash_) {}
+
+//    constexpr
+//    HashedString &
+//    operator=(const HashedString &other) noexcept = default;
+
+        // TODO: The base of issue is that I want my HashedString to support constexpr chars and
+        // runtime chars! Right now this only supports runtime chars.
+//    explicit HashedString(const c8 *value) noexcept: data(value), hash(hashString(data)) {}
+//
+//    explicit HashedString(std::string &&value) noexcept: data(std::move(value)), hash(hashString(data)) {}
+
+        template<std::size_t N>
+        explicit constexpr
+        HashedString(const c8 (&value)[N]) noexcept {
+            data = value;
+            hash = _getHash(value);
+        }
+
+        template<std::size_t N>
+        static constexpr
+        HashedString
+        make(const c8 (&value)[N]) noexcept {
+            return {value, _getHash(value)};
+        }
+
+        HashedString
+        static constexpr
+        make(std::string_view value) noexcept {
+            return {value.data(), _getHash(value)};
+        }
+
+        constexpr
+        const c8 *
+        c_str() const {
+            return data.data();
+        }
+
+
+//        explicit HashedString(std::string_view value) noexcept: data(value), hash(hashString(data)) {}
+
+        // TODO: Hmmm don't really want to create one constructor per N and include this massive header in
+        // every fucking place!
+        // NOTE: This matches {"random-string"} type of initializer-list
+//        template<std::size_t N>
+//        HashedString(const c8 (&value)[N]) noexcept: data(value), hash(hashString(data)) {}
+
+        bool
+        operator==(const HashedString &other) const {
+            return hash == other.hash;
+        }
+        // TODO: Have to think about this, I can't just load a string as this class doesn't own any string data at the moment!
+        // maybe after I have the string storage system?
+//
+//    template<class Archive>
+//    void
+//    save(Archive &archive) const {
+//        // NOTE: hash is not serialized!
+//        archive(data);
+//    }
+//
+//    template<class Archive>
+//    void
+//    load(Archive &archive) {
+//        archive(data);
+//        hash = _helper<>(data.data());
+//    }
+
+    private:
+        // Fowler–Noll–Vo hash
+        static constexpr Hash
+        _hash(Hash partial,
+              const c8 current) {
+            return (partial ^ current) * prime;
+        }
+
+        template<std::size_t N>
+        static constexpr Hash
+        _getHash(const c8 (&value)[N]) {
+            auto result = offset;
+            for (Hash i = 0; i < N; ++i) {
+                result = _hash(result, value[i]);
+            }
+            return result;
+        }
+
+        static constexpr Hash
+        _getHash(std::string_view value) {
+            auto result = offset;
+            for (auto &&v : value) {
+                result = _hash(result, v);
+            }
+            // Because string_view is not null terminated!
+            return _hash(result, '\0');
+        }
+
+//    static constexpr Hash
+//    helper(Hash partial,
+//           const c8 *curr) noexcept {
+//        return curr[0] == 0 ? partial : helper(_hash(partial, curr[0]), curr + 1);
+//    }
+    };
+
+    using ENUM = HashedString;
+
+    template<size n, class _child>
+    struct EnumBase {
+        size id{0};
+        HashedString name{"__INVALID__"};
+
+//            typedef EnumBase *iterator;
+//            typedef const EnumBase *const_iterator;
+
+        constexpr
+        EnumBase(size id_,
+                 HashedString name_) noexcept : id(id_), name(name_) {}
+
+        static constexpr
+        auto
+        begin() {
+            return map.begin() + 1;
+        }
+
+        static constexpr
+        auto
+        end() {
+            return map.end();
+        }
+
+    protected:
+        constexpr
+        EnumBase() = default;
+
+        constexpr explicit EnumBase(std::array<HashedString, n> &&map_) {
+            map[0] = invalid;
+            for (size i = 0; i < map_.size(); ++i) {
+                map[i + 1] = map_[i];
+            }
+        }
+
+        template<size N>
+        constexpr
+        EnumBase(const HashedString (&v)[N]) noexcept {
+        }
+
+        constexpr
+        EnumBase(std::initializer_list<std::string_view> map_) {
+            map[0] = invalid;
+            auto *begin = map_.begin();
+            for (size i = 0; i < map_.size(); ++i) {
+                map[i + 1] = HashedString::make(*begin);
+                ++begin;
+            }
+        }
+
+        template<size N, class Child>
+        static constexpr
+        Child
+        make(const c8 (&name)[N]) {
+            return assignID<Child>(Child{0, HashedString::make(name)});
+        }
+
+//            constexpr
+//            explicit EnumBase(std::initializer_list<HashedString> map_) {
+//                map = map_;
+//            }
+
+//            template<class ... T>
+//            void
+//            init(T...m) {
+//                map[]
+//                { m... };
+//            }
+
+//            template<class HString>
+//            void
+//            init(const int i) {}
+//
+//            template<class HString, class ... Args>
+//            constexpr void
+//            init(const int i,
+//                 const HString value,
+//                 Args ... tail) {
+//                map[i] = value;
+//                init<HString>(i + 1, tail ...);
+//            }
+
+    private:
+        template<class Child>
+        static constexpr
+        Child
+        assignID(Child result) noexcept {
+            result.id = _findID(result.name.hash);
+            if (result.id == 0) {
+                result.name = invalid;
+            }
+            return result;
+        }
+
+        static constexpr
+        size
+        _findID(const Hash value) {
+
+            for (size i = 0; i < n; ++i) {
+                // TODO: This is not constexpr :/ and I if constexpr is invalid
+                if (map[i].hash == value) {
+                    return i;
+                }
+            }
+            assert(false);
+            return 0;
+        }
+
+    private:
+        static inline std::array<HashedString, n + 1> map;
+        static inline HashedString invalid = HashedString("__INVALID__");
+    };
+
+    namespace detail {
+        class INIT;
+    }
+
+    struct Test : public EnumBase<3, Test> {
+    public:
+        constexpr
+        Test(size id_,
+             HashedString name_) noexcept : EnumBase(id_, name_) {}
+
+        template<size N>
+        static constexpr Test
+        make(const c8 (&name)[N]) {
+            return EnumBase::make<N, Test>(name);
+        }
+
+    protected:
+        friend detail::INIT;
+
+        constexpr Test() : EnumBase({{"FOO"},
+                                     {"BAR"},
+                                     {"ZOO"}}) {}
+
+    };
+
+    namespace detail {
+        class INIT {
+            inline static Test _a = {};
+        };
+    }
+
+#define ENUM_DEF(NAME, COUNT, ...)                                                                                  \
+    namespace _detail {class INIT_##NAME ;}                                                                         \
+    struct NAME : public EnumBase<COUNT, NAME> {                                                                    \
+    public:                                                                                                         \
+       constexpr NAME(size id_, HashedString name_) noexcept : EnumBase(id_, name_) {}                              \
+                                                                                                                    \
+       template<size N>                                                                                             \
+       static constexpr NAME                                                                                        \
+       make(const c8 (&name)[N]) { return EnumBase::make<N, NAME>(name); }                                          \
+                                                                                                                    \
+    protected:                                                                                                      \
+    friend _detail::INIT_##NAME;                                                                                    \
+    constexpr NAME() : EnumBase({ __VA_ARGS__ }) {}                                                                 \
+    };                                                                                                              \
+    namespace _detail { class INIT_##NAME { inline static NAME _STORAGE_FOR_##NAME = {}; };}                        \
+
+    ENUM_DEF(What_A_Nice_Enum, 3, { "one" }, { "two" }, { "three" })
+
+    void testtt {
+        for (auto I = oni::Test::begin(); I != oni::Test::end(); ++I) {
+            printf("%s\n", I->data.data());
+        }
+
+        auto a = oni::Test::make("BAR");
+        printf("a id is %lu, data: %s\n", a.id, a.name.c_str());
+
+        auto b = oni::Test::make("FOO");
+        printf("b id is %lu, data: %s\n", b.id, b.name.c_str());
+
+        auto c = test::What_A_Nice_Enum::make("two");
+        printf("c id is %lu, data: %s\n", c.id, c.name.c_str());
+
+        auto d = oni::Test::make("what");
+        printf("d id is %lu, data: %s\n", d.id, d.name.c_str());
+    };
+// TODO:
+// 1) initialization is bullshit with the friend class and shit
+// 2) value() function can return invalid data, I can't do compile-time check at the moment :( But maybe I don't want
+// to? either compiling will be slow or run-time! But I guess I won't compile everything but I wil run every init
+// doing run-time so might be better off with compile time?
+}
+
 namespace test_x {
     namespace {
         template<class T>

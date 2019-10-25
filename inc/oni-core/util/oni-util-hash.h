@@ -1,73 +1,84 @@
 #pragma once
 
-#include <functional>
+#include <string_view>
+
+#include <oni-core/common/oni-common-typedef.h>
 
 namespace oni {
     using Hash = size;
 
-    static Hash
-    hashString(const std::string &value) {
-        static std::hash<std::string> func;
-        return func(value);
-    }
-
-    template<size N>
-    static constexpr Hash
-    hashString(const c8 (&value)[N]) {
-        std::hash<const c8 (&)[N]> func;
-        return func(value);
-    }
-
-    // TODO: I really need to do something about all these std::strings that are allocating memory in runtime
-    // the general concept of constexpr hashing should help with most of these allocations.
-    static Hash
-    hashString(const c8 *value) {
-        auto string = std::string(value);
-        return hashString(string);
-    }
-
     struct HashedString {
-        std::string data{};
+        std::string_view str{};
         Hash hash{};
 
-        HashedString() = default;
+        static inline constexpr u64 offset = 14695981039346656037ull;
+        static inline constexpr u64 prime = 1099511628211ull;
 
-        // TODO: It would be nice to has a constexpr constructor for this one!
-        // TODO: The base of issue is that I want my HashedString to support constexpr chars and
-        // runtime chars! Right now this only supports runtime chars.
-        explicit HashedString(const c8 *value) noexcept: data(value), hash(hashString(data)) {}
+        constexpr HashedString() = default;
 
-        explicit HashedString(std::string &&value) noexcept: data(std::move(value)), hash(hashString(data)) {}
+        constexpr HashedString(std::string_view data_,
+                               Hash hash_) noexcept: str(data_), hash(hash_) {}
 
-        template<std::size_t N>
-        constexpr
-        HashedString(const c8 (&value)[N]) noexcept;
+        template<size N>
+        explicit constexpr
+        HashedString(const c8 (&value)[N]) noexcept {
+            str = value;
+            hash = _getHash(value);
+        }
 
-//        explicit HashedString(std::string_view value) noexcept: data(value), hash(hashString(data)) {}
+        explicit
+        HashedString(std::string_view value) noexcept {
+            str = value;
+            hash = _getHash(str);
+        }
 
-        // TODO: Hmmm don't really want to create one constructor per N and include this massive header in
-        // every fucking place!
-        // NOTE: This matches {"random-string"} type of initializer-list
-//        template<std::size_t N>
-//        HashedString(const c8 (&value)[N]) noexcept: data(value), hash(hashString(data)) {}
+        static constexpr HashedString
+        view(const std::string &value) noexcept {
+            return {value.data(), _getHash(value)};
+        }
+
+        bool
+        operator!=(const HashedString &other) const {
+            return hash != other.hash;
+        }
 
         bool
         operator==(const HashedString &other) const {
             return hash == other.hash;
         }
 
-        template<class Archive>
-        void
-        save(Archive &archive) const {
-            // NOTE: hash is not serialized!
-            archive(data);
+        bool
+        valid() const {
+            return hash != 0 && !str.empty();
         }
 
-        template<class Archive>
-        void
-        load(Archive &archive) {
-            archive(data);
-            hash = hashString(data);
+    private:
+        static constexpr Hash
+        _hash(Hash partial,
+              const c8 current) {
+            // Fowler-Noll-Vo hashing
+            return (partial ^ current) * prime;
+        }
+
+        template<size N>
+        static constexpr Hash
+        _getHash(const c8 (&value)[N]) {
+            auto result = offset;
+            for (Hash i = 0; i < N; ++i) {
+                result = _hash(result, value[i]);
+            }
+            return result;
+        }
+
+        static constexpr Hash
+        _getHash(std::string_view value) {
+            auto result = offset;
+            for (auto &&v : value) {
+                result = _hash(result, v);
+            }
+            // Because string_view is not null terminated!
+            return _hash(result, '\0');
         }
     };
+
 }

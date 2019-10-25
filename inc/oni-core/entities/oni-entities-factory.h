@@ -20,8 +20,8 @@ namespace oni {
     struct InvalidComponent {
     };
 
+    // TODO: How about the life time of these strings? :(
     struct Component_Name {
-        //std::string value;
         HashedString value;
     };
 

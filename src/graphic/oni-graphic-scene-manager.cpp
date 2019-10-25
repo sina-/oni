@@ -66,7 +66,7 @@ namespace oni {
         spec.renderTarget = nullptr;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
-        spec.finishType = Material_Finish_Enum::SOLID;
+        spec.finishType = Material_Finish::fromString("solid");
         setMVP(spec, true, false, true);
         begin(*mRendererTessellation, spec);
     }
@@ -163,11 +163,9 @@ namespace oni {
                     renderable.trans = &trans;
                 }
 
-                // TODO: Well, this sucks, def.finish.idx should be the value to use here :/
-                auto idx = _Material_Finish_Enum.getIndex(def.finish);
                 // TODO: Now that I distinguish between opaque and translucent objects I should draw the
                 // opaque objects front to back to avoid over draw
-                mRenderables[idx].push(renderable);
+                mRenderables[def.finish.id].push(renderable);
             }
         }
 
@@ -197,28 +195,28 @@ namespace oni {
                 // TODO: Read this value from the entity
                 renderable.pt = PrimitiveTransforms::UI;
 
-                mRenderables[enumCast(Material_Finish_Enum::TRANSLUCENT)].push(renderable);
+                mRenderables[Material_Finish::fromString("translucent").id].push(renderable);
             }
         }
     }
 
     void
     SceneManager::render() {
-        for (auto i = 0; i < enumCast(Material_Finish_Enum::LAST); ++i) {
+        for (auto iter = Material_Finish::begin(); iter != Material_Finish::end(); ++iter) {
             RenderSpec spec;
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
-            spec.finishType = static_cast<Material_Finish_Enum>(i);
+            spec.finishType = *iter;
             setMVP(spec, true, true, true);
 
             begin(*mRendererTessellation, spec);
-            while (!mRenderables[i].empty()) {
-                auto &r = const_cast<Renderable &> (mRenderables[i].top());
+            while (!mRenderables[iter->id].empty()) {
+                auto &r = const_cast<Renderable &> (mRenderables[iter->id].top());
                 auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.ornt);
 
                 if (r.pt == PrimitiveTransforms::DYNAMIC && !isVisible(ePos.pos, *r.scale)) {
-                    mRenderables[i].pop();
+                    mRenderables[iter->id].pop();
                     continue;
                 }
 
@@ -229,7 +227,7 @@ namespace oni {
 
                 mRendererTessellation->submit(r);
 
-                mRenderables[i].pop();
+                mRenderables[iter->id].pop();
 
                 ++mRenderedSpritesPerFrame;
             }
@@ -278,7 +276,7 @@ namespace oni {
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
         // TODO: I should probably take this as an argument
-        spec.finishType = Material_Finish_Enum::SOLID;
+        spec.finishType = Material_Finish::fromString("solid");
         setMVP(spec, destBounds, model);
 
         begin(*mRendererQuad, spec);
@@ -294,7 +292,7 @@ namespace oni {
                                   const mat4 *model) {
         RenderSpec spec;
         // TODO: I should probably take this as an argument
-        spec.finishType = Material_Finish_Enum::SOLID;
+        spec.finishType = Material_Finish::fromString("solid");
         spec.renderTarget = &dest;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
@@ -310,7 +308,7 @@ namespace oni {
                         Texture &back) {
         RenderSpec spec;
         // TODO: I should probably take this as an argument
-        spec.finishType = Material_Finish_Enum::SOLID;
+        spec.finishType = Material_Finish::fromString("solid");
         spec.renderTarget = &back;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;

@@ -12,50 +12,37 @@ namespace oni {
     Renderer::~Renderer() = default;
 
     Renderer::BlendSpec
-    Renderer::getBlendSpec(Material_Finish_Enum type) {
+    Renderer::getBlendSpec(Material_Finish type) {
         auto result = BlendSpec{};
-        switch (type) {
-            case Material_Finish_Enum::SOLID:
-            case Material_Finish_Enum::TRANSLUCENT: {
-                result.src = BlendMode::ONE;
-                result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
-                break;
-            }
-            case Material_Finish_Enum::SHINNY: {
-                result.src = BlendMode::ONE;
-                result.dest = BlendMode::ONE;
-                break;
-            }
-            case Material_Finish_Enum::LAST:
-            default: {
-                assert(false);
-                break;
-            }
+        if (type == Material_Finish::fromString("solid") ||
+            type == Material_Finish::fromString("translucent")) {
+            result.src = BlendMode::ONE;
+            result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
+        } else if (type == Material_Finish::fromString("shinny")) {
+            result.src = BlendMode::ONE;
+            result.dest = BlendMode::ONE;
+        } else {
+            assert(false);
+            result.src = BlendMode::ONE;
+            result.dest = BlendMode::ONE;
         }
         return result;
     }
 
     Renderer::DepthSpec
-    Renderer::getDepthSpec(Material_Finish_Enum type) {
+    Renderer::getDepthSpec(Material_Finish type) {
         auto result = DepthSpec{};
-        switch (type) {
-            case Material_Finish_Enum::SOLID: {
-                result.depthRead = true;
-                result.depthWrite = true;
-                break;
-            }
-                // TODO: Is this correct?
-            case Material_Finish_Enum::TRANSLUCENT:
-            case Material_Finish_Enum::SHINNY: {
-                result.depthRead = true;
-                result.depthWrite = false;
-                break;
-            }
-            case Material_Finish_Enum::LAST:
-            default: {
-                assert(false);
-                break;
-            }
+        if (type == Material_Finish::fromString("solid")) {
+            result.depthRead = true;
+            result.depthWrite = true;
+        } else if (type == Material_Finish::fromString("translucent") ||
+                   type == Material_Finish::fromString("shinny")) {
+            result.depthRead = true;
+            result.depthWrite = false;
+        } else {
+            assert(false);
+            result.depthRead = true;
+            result.depthWrite = true;
         }
         return result;
     }

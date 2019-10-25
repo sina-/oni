@@ -25,11 +25,11 @@ namespace oni {
         const FilePath &
         getAssetFilePath(const ImageName &name);
 
-        std::vector<ImageName>
+        std::vector<const ImageName*>
         knownImages();
 
     private:
-        void indexImages();
+        void _indexImages();
 
     private:
         std::map<Sound_Tag, std::string> mSoundAssetPath{};

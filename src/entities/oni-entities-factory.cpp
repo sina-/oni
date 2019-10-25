@@ -58,7 +58,7 @@ namespace oni {
     EntityFactory::registerEntityType(const EntityType_Name &name) {
         auto path = FilePath{};
         path.value.append(mEntityResourcePath.value);
-        path.value.append(name.value.data);
+        path.value.append(name.value.str);
         path.value.append(".json");
         mEntityResourcePathLookup.emplace(name.value.hash, std::move(path));
     }
@@ -121,8 +121,8 @@ namespace oni {
                         data.AddMember(component->name.Move(), component->value.Move(), document.GetAllocator());
                         data.Accept(writer);
 
-                        auto hash = hashString(compoName);
-                        auto factory = mComponentFactory.find(hash);
+                        auto hashedString = HashedString(compoName);
+                        auto factory = mComponentFactory.find(hashedString.hash);
                         if (factory != mComponentFactory.end()) {
                             // TODO: so many stream and conversions, can't I just use the stream I get from rapidjson?
                             std::istringstream ss;

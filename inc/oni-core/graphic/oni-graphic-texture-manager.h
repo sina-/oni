@@ -105,25 +105,25 @@ namespace oni {
 
     private:
         void
-        loadImage(const ImageName &);
+        _loadImage(const ImageName &);
 
         void
-        getImage(ImageNameHash,
-                 Image &);
+        _getImage(ImageNameHash,
+                  Image &);
 
         void
-        loadTextureToCache(ImageNameHash);
+        _loadTextureToCache(ImageNameHash);
 
         void
-        createTexture(Texture &,
-                      ImageNameHash);
+        _createTexture(Texture &,
+                       ImageNameHash);
 
         static void
-        bind(oniGLuint textureID);
+        _bind(oniGLuint textureID);
 
         static void
-        copy(const Texture &,
-             Texture &);
+        _copy(const Texture &,
+              Texture &);
 
     private:
         std::map<ImageNameHash, Texture> mTextureMap{};

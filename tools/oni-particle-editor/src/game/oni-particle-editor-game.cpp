@@ -135,9 +135,9 @@ namespace oni {
         auto TwGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
                                              nullptr, nullptr);
 
-        auto TwMaterial_Finish_Enum = TwDefineEnum("Material_Finish_Enum",
-                                                   Material_Finish_Enum::array<TwEnumVal>(),
-                                                   Material_Finish_Enum::LAST);
+        auto TwMaterial_Finish = TwDefineEnum("Material_Finish",
+                                                   Material_Finish::array<TwEnumVal>(),
+                                                   Material_Finish::size());
 
         TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
@@ -153,7 +153,7 @@ namespace oni {
         TwAddVarRW(particleBar, "ttl", TwCustomVec2, &mCurrentParticleConfig.ttl, nullptr);
         TwAddVarRW(particleBar, "velocity", TwCustomVec2, &mCurrentParticleConfig.vel, nullptr);
         TwAddVarRW(particleBar, "acc", TwCustomVec2, &mCurrentParticleConfig.acc, nullptr);
-        TwAddVarRW(particleBar, "finish", TwMaterial_Finish_Enum, &mCurrentParticleConfig.mft, nullptr);
+        TwAddVarRW(particleBar, "finish", TwMaterial_Finish, &mCurrentParticleConfig.mft, nullptr);
 
     }
 

@@ -53,7 +53,7 @@ namespace oni {
 
         ///
 
-        Material_Finish_Enum finishType{};
+        Material_Finish finishType = Material_Finish::fromString("solid");
     };
 
     class Renderer {
@@ -120,10 +120,10 @@ namespace oni {
 
     private:
         static BlendSpec
-        getBlendSpec(Material_Finish_Enum);
+        getBlendSpec(Material_Finish);
 
         static DepthSpec
-        getDepthSpec(Material_Finish_Enum);
+        getDepthSpec(Material_Finish);
 
     private:
         bool mBegun{false};

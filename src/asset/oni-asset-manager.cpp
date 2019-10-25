@@ -13,11 +13,11 @@ namespace oni {
             mImageIndexFilePath.value.append("/");
         }
 
-        indexImages();
+        _indexImages();
     }
 
     void
-    AssetManager::indexImages() {
+    AssetManager::_indexImages() {
         auto jsonPath = mImageIndexFilePath.value;
         // TODO: accept index.json value as param
         std::ifstream jsonStream(jsonPath.append("index.json"));
@@ -80,12 +80,12 @@ namespace oni {
         mSoundAssetPath.emplace(tag, path);
     }
 
-    std::vector<ImageName>
+    std::vector<const ImageName *>
     AssetManager::knownImages() {
         // TODO: You can use a view instead of the full copy
-        auto names = std::vector<ImageName>();
+        auto names = std::vector<const ImageName *>();
         for (auto &&name: mImageNameLookup) {
-            names.emplace_back(name.second);
+            names.emplace_back(&name.second);
         }
 
         return names;

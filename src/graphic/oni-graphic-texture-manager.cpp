@@ -41,8 +41,8 @@ namespace oni {
     void
     TextureManager::loadAssets() {
         for (auto &&imageName: mAssetManager.knownImages()) {
-            loadImage(imageName);
-            loadTextureToCache(imageName.value.hash);
+            _loadImage(*imageName);
+            _loadTextureToCache(imageName->value.hash);
         }
     }
 
@@ -82,8 +82,8 @@ namespace oni {
     }
 
     void
-    TextureManager::createTexture(Texture &texture,
-                                  ImageNameHash hash) {
+    TextureManager::_createTexture(Texture &texture,
+                                   ImageNameHash hash) {
         glGenTextures(1, &texture.id);
 
         assert(texture.id);
@@ -93,7 +93,7 @@ namespace oni {
         oniGLenum format = GL_BGRA;
         oniGLenum type = GL_UNSIGNED_BYTE;
 
-        bind(texture.id);
+        _bind(texture.id);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -120,13 +120,14 @@ namespace oni {
     void
     TextureManager::createTexture(Texture &texture,
                                   const ImageName &name) {
-        createTexture(texture, name.value.hash);
+        _createTexture(texture, name.value.hash);
     }
 
     void
     TextureManager::initTexture(Texture &texture) {
+        // TODO: OH GAWD
         assert(texture.image.name.value.hash);
-        assert(!texture.image.name.value.data.empty());
+        assert(!texture.image.name.value.str.empty());
         const auto it = mTextureMap.find(texture.image.name.value.hash);
         if (it == mTextureMap.end()) {
             // NOTE: Did you forget to call loadAssets()?
@@ -138,7 +139,7 @@ namespace oni {
     }
 
     void
-    TextureManager::loadTextureToCache(ImageNameHash hash) {
+    TextureManager::_loadTextureToCache(ImageNameHash hash) {
         auto it = mTextureMap.find(hash);
         if (it != mTextureMap.end()) {
             assert(false);
@@ -146,14 +147,14 @@ namespace oni {
         }
 
         auto texture = Texture{};
-        getImage(hash, texture.image);
-        createTexture(texture, hash);
+        _getImage(hash, texture.image);
+        _createTexture(texture, hash);
         mTextureMap.emplace(hash, texture);
     }
 
     void
-    TextureManager::getImage(ImageNameHash hash,
-                             Image &image) {
+    TextureManager::_getImage(ImageNameHash hash,
+                              Image &image) {
         assert(hash);
 
         auto img = mImageMap.find(hash);
@@ -167,12 +168,12 @@ namespace oni {
     void
     TextureManager::getImage(const ImageName &name,
                              Image &image) {
-        getImage(name.value.hash, image);
+        _getImage(name.value.hash, image);
     }
 
     void
-    TextureManager::loadImage(const ImageName &name) {
-        assert(!name.value.data.empty());
+    TextureManager::_loadImage(const ImageName &name) {
+        assert(name.value.valid());
         auto image = mImageMap.find(name.value.hash);
         if (image != mImageMap.end()) {
             assert(false);
@@ -211,7 +212,13 @@ namespace oni {
         auto bits = FreeImage_GetBits(dib);
         assert(bits);
 
-        mImageMap.emplace(name.value.hash, Image{name, width, height});
+        // TODO: This is assuming the storage for ImageName.value will stick around for duration of the app lifetime!
+        // but I don't like the current pattern of how I handle HashedStrings at all.
+        auto _image = Image{};
+        _image.width = width;
+        _image.height = height;
+        _image.name = name;
+        mImageMap.emplace(name.value.hash, _image);
         auto &storage = mImageDataMap[name.value.hash];
         storage.resize(width * height * mElementsInRGBA, 0);
 
@@ -421,7 +428,7 @@ namespace oni {
         oniGLenum format = fontManager.getAtlasColorFormat();
         oniGLenum type = fontManager.getAtlasColorType();
 
-        bind(textureID);
+        _bind(textureID);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -436,12 +443,12 @@ namespace oni {
     }
 
     void
-    TextureManager::copy(const Texture &src,
-                         Texture &dest) {
+    TextureManager::_copy(const Texture &,
+                          Texture &) {
     }
 
     void
-    TextureManager::bind(oniGLuint textureID) {
+    TextureManager::_bind(oniGLuint textureID) {
         glBindTexture(GL_TEXTURE_2D, textureID);
     }
 
@@ -462,7 +469,7 @@ namespace oni {
         oniGLenum format = GL_BGRA;
         oniGLenum type = GL_UNSIGNED_BYTE;
 
-        bind(textureID);
+        _bind(textureID);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

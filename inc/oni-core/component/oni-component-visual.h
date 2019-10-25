@@ -210,8 +210,9 @@ namespace oni {
         // in a way this is replacing EntityAssetPack enum! There might be a value in separating the ID that
         // defines a texture and the path, at least that way I don't store all the std::strings on every
         // entity hmmm...
-        // std::string path{};
-        // NOTE: This should ideally be a small string identifier of the image
+        // TODO: Yeah this needs to be removed :/
+        std::string _storage{};
+
         ImageName name{};
 
         u32 width{};
@@ -219,12 +220,15 @@ namespace oni {
 
         template<class Archive>
         void
-        serialize(Archive &archive) {
-            archive("name", name.value.data);
-            // TODO: Not super effective! How can I avoid this and rely on HashedString serialization methods
-            // only to handle this? I by pass the HashedString type by calling directly into data, although
-            // I do that to avoid having to require one more level in the json of specifying the name!
-            name.value.hash = hashString(name.value.data);
+        save(Archive &archive) const {
+            archive("name", name.value.str);
+        }
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            archive("name", _storage);
+            name.value = HashedString(_storage);
         }
     };
 
@@ -454,45 +458,10 @@ namespace oni {
     // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
     // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
-    struct Material_Finish_Enum : public Enum_Base<Material_Finish_Enum> {
-        Material_Finish_Enum() : Enum_Base() {
-            static bool init = true;
-            if (init) {
-                count = enumCast(member::LAST);
-                map = new HashedString[count];
-                map[0] = HashedString("SOLID");
-                map[1] = HashedString("TRANSLUCENT");
-                map[2] = HashedString("SHINNY");
-                init = false;
-            }
-        }
-
-        explicit Material_Finish_Enum(int id) : Enum_Base{id} {}
-
-        // NOTE: The order of the enums defines the order in which they are rendered!
-        // NOTE: For translucent and shinny entities since depth writes are disabled
-        // if an entity that is translucent but has higher z is rendered then a shinny
-        // entity with lower z is rendered it will still be drawn over the higher z
-        // entity!
-        enum member {
-            SOLID,
-            TRANSLUCENT,
-            SHINNY,
-
-            LAST
-        };
-
-        Material_Finish_Enum
-        operator=(member other) const {
-            return Material_Finish_Enum{other};
-        }
-    };
-    namespace {
-        static const Material_Finish_Enum _INIT_Material_Finish_Enum{};
-    }
+    ONI_ENUM_DEF(Material_Finish, 3, { 0, "solid" }, { 1, "translucent" }, { 2, "shinny" })
 
     struct Material_Definition {
-        Material_Finish_Enum finish{Material_Finish_Enum::SHINNY};
+        Material_Finish finish{Material_Finish::fromString("solid")};
         Material_Skin skin{};
 
         template<class Archive>

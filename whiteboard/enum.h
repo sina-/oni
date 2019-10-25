@@ -211,12 +211,12 @@ namespace test_b {
     }
 
     // TODO: How do I deal with iteration in this setup?
-    struct Material_Finish_Enum_INH : public Enum {
-        ENUM_DEFINE(Material_Finish_Enum_INH, 0, SOLID)
+    struct Material_Finish_INH : public Enum {
+        ENUM_DEFINE(Material_Finish_INH, 0, SOLID)
 
-        ENUM_DEFINE(Material_Finish_Enum_INH, 1, TRANSLUCENT)
+        ENUM_DEFINE(Material_Finish_INH, 1, TRANSLUCENT)
 
-        ENUM_DEFINE(Material_Finish_Enum_INH, 2, SHINNY)
+        ENUM_DEFINE(Material_Finish_INH, 2, SHINNY)
 
         template<class Archive>
         void
@@ -237,14 +237,14 @@ namespace test_b {
         }
     };
 
-    struct Material_Finish_Enum_BARE {
+    struct Material_Finish_BARE {
         Enum value;
 
-        ENUM_DEFINE(Material_Finish_Enum_BARE, 0, SOLID)
+        ENUM_DEFINE(Material_Finish_BARE, 0, SOLID)
 
-        ENUM_DEFINE(Material_Finish_Enum_BARE, 1, TRANSLUCENT)
+        ENUM_DEFINE(Material_Finish_BARE, 1, TRANSLUCENT)
 
-        ENUM_DEFINE(Material_Finish_Enum_BARE, 2, SHINNY)
+        ENUM_DEFINE(Material_Finish_BARE, 2, SHINNY)
 
         template<class Archive>
         void
@@ -273,7 +273,7 @@ namespace test_b {
 }
 
 namespace test_c {
-    enum class Material_Finish_Enum {
+    enum class Material_Finish {
         // NOTE: The order of the enums defines the order in which they are rendered!
         // NOTE: For translucent and shinny entities since depth writes are disabled
         // if an entity that is translucent but has higher z is rendered then a shinny
@@ -290,21 +290,21 @@ namespace test_c {
     // TODO: DO I really want to complicate traditional enum usage for this much complexity?
     // What am I gaining by this? Just a mapping of int to string? I could also do this you know:
     struct Material_Finish {
-        Material_Finish_Enum value;
+        Material_Finish value;
 
         template<class Archive>
         void
         save(Archive &archive) const {
             switch (value) {
-                case Material_Finish_Enum::SOLID: {
+                case Material_Finish::SOLID: {
                     archive("solid");
                     break;
                 }
-                case Material_Finish_Enum::TRANSLUCENT: {
+                case Material_Finish::TRANSLUCENT: {
                     archive("translucent");
                     break;
                 }
-                case Material_Finish_Enum::SHINNY : {
+                case Material_Finish::SHINNY : {
                     archive("shinny");
                     break;
                 }
@@ -326,14 +326,14 @@ namespace test_c {
             const auto translucent = HashedString("translucent");
             const auto shinny = HashedString("shinny");
             if (string == solid) {
-                value = Material_Finish_Enum::SOLID;
+                value = Material_Finish::SOLID;
             } else if (string == translucent) {
-                value = Material_Finish_Enum::TRANSLUCENT;
+                value = Material_Finish::TRANSLUCENT;
             } else if (string == shinny) {
-                value = Material_Finish_Enum::SHINNY;
+                value = Material_Finish::SHINNY;
             } else {
                 assert(false);
-                value = Material_Finish_Enum::SOLID;
+                value = Material_Finish::SOLID;
             }
         }
     };
@@ -430,7 +430,7 @@ namespace test_d {
         }
     };
 
-    enum class Material_Finish_Enum {
+    enum class Material_Finish {
         // NOTE: The order of the enums defines the order in which they are rendered!
         // NOTE: For translucent and shinny entities since depth writes are disabled
         // if an entity that is translucent but has higher z is rendered then a shinny
@@ -447,7 +447,7 @@ namespace test_d {
     struct __Material_Finish : public Enum {
     };
 
-    static auto _Material_Finish_Enum = Enums<__Material_Finish, 3>{
+    static auto _Material_Finish = Enums<__Material_Finish, 3>{
             Enum{0, HashedString("solid")},
             Enum{1, HashedString("translucent")},
             Enum{2, HashedString("shinny")},

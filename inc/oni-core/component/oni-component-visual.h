@@ -461,7 +461,7 @@ namespace oni {
     ONI_ENUM_DEF(Material_Finish, 3, { 0, "solid" }, { 1, "translucent" }, { 2, "shinny" })
 
     struct Material_Definition {
-        Material_Finish finish{Material_Finish::fromString("solid")};
+        Material_Finish finish{Material_Finish::get("solid")};
         Material_Skin skin{};
 
         template<class Archive>

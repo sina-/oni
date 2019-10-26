@@ -21,20 +21,21 @@ namespace oni {
 
         template<size N>
         explicit constexpr
-        HashedString(const c8 (&value)[N]) noexcept {
-            str = value;
-            hash = _getHash(value);
-        }
+        HashedString(const c8 (&value)[N]) noexcept: str(value), hash(get(value)) {}
 
+        // TODO: Can this be constexpr?
         explicit
-        HashedString(std::string_view value) noexcept {
-            str = value;
-            hash = _getHash(str);
+        HashedString(std::string_view value) noexcept : str(value), hash(_runtimeHash(str)) {}
+
+        inline static HashedString
+        view(const std::string &value) noexcept {
+            return {value.data(), _runtimeHash(value)};
         }
 
-        static constexpr HashedString
-        view(const std::string &value) noexcept {
-            return {value.data(), _getHash(value)};
+        template<size N>
+        inline static constexpr Hash
+        get(const c8 (&value)[N]) noexcept {
+            return _staticHash(offset, value);
         }
 
         bool
@@ -53,25 +54,21 @@ namespace oni {
         }
 
     private:
-        static constexpr Hash
-        _hash(Hash partial,
+        inline static constexpr Hash
+        _hash(const Hash partial,
               const c8 current) {
             // Fowler-Noll-Vo hashing
             return (partial ^ current) * prime;
         }
 
-        template<size N>
-        static constexpr Hash
-        _getHash(const c8 (&value)[N]) {
-            auto result = offset;
-            for (Hash i = 0; i < N; ++i) {
-                result = _hash(result, value[i]);
-            }
-            return result;
+        inline static constexpr Hash
+        _staticHash(Hash partial,
+                    const c8 *current) {
+            return current[0] == 0 ? partial : _staticHash(_hash(partial, current[0]), current + 1);
         }
 
-        static constexpr Hash
-        _getHash(std::string_view value) {
+        inline static Hash
+        _runtimeHash(std::string_view value) {
             auto result = offset;
             for (auto &&v : value) {
                 result = _hash(result, v);

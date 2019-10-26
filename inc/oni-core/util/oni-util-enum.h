@@ -21,7 +21,7 @@
        constexpr NAME(oni::i32 id_, oni::HashedString name_) noexcept : EnumBase(id_, name_) {}                     \
     private:                                                                                                        \
         friend _detail_##NAME::INIT_##NAME;                                                                         \
-        friend std::array<NAME, COUNT>;                                                                             \
+        friend std::array<NAME, COUNT + 1>;                                                                         \
         constexpr NAME() noexcept {}                                                                                \
         constexpr NAME(bool) noexcept: EnumBase({ __VA_ARGS__ }) {}                                                 \
         };                                                                                                          \
@@ -50,39 +50,39 @@ namespace oni {
                  HashedString name_) noexcept : id(id_), name(name_) {}
 
         template<i32 N>
-        static constexpr _child
-        fromString(const c8 (&name_)[N]) {
-            auto result = _child{0, HashedString(name_)};
-            _init(result);
-            return result;
+        inline static constexpr _child
+        get(const c8 (&name_)[N]) {
+            return _find(HashedString::get(name_), begin());
         }
 
-        constexpr bool
+        // TODO: provide non-constexpr version of get()
+
+        inline constexpr bool
         operator==(const EnumBase &other) const {
             return other.id == id && other.name == name;
         }
 
-        constexpr bool
+        inline constexpr bool
         operator!=(const EnumBase &other) const {
             return other.id != id || other.name != name;
         }
 
-        constexpr bool
+        inline constexpr bool
         isValid() const {
             return id != 0 && name != invalid;
         }
 
-        static auto
+        inline static constexpr auto
         begin() {
-            return childStorage.begin();
+            return storage.begin() + 1;
         }
 
-        static constexpr auto
+        inline static constexpr auto
         end() {
-            return childStorage.end();
+            return storage.end();
         }
 
-        static constexpr i32
+        inline static constexpr i32
         size() {
             return n;
         }
@@ -106,7 +106,7 @@ namespace oni {
     protected:
         struct _KeyValRaw {
             i32 id{0};
-            std::string_view str{};
+            std::string_view str{"__INVALID__"};
         };
 
         constexpr
@@ -122,25 +122,16 @@ namespace oni {
             for (i32 i = 0; i < n; ++i) {
                 storage[i + 1].name = HashedString(iter->str);
                 storage[i + 1].id = iter->id;
-                // TODO: this is basically what std::span is supposed to do.
-                childStorage[i] = _child{storage[i + 1].id, storage[i + 1].name};
                 ++iter;
             }
         }
 
     private:
-        static constexpr void
-        _init(_child &result) {
-            for (i32 i = 1; i < n; ++i) {
-                if (storage[i].name == result.name) {
-                    result.name = storage[i].name;
-                    result.id = storage[i].id;
-                    return;
-                }
-            }
-            assert(false);
-            result.id = 0;
-            result.name = invalid;
+        inline static constexpr const _child &
+        _find(const Hash hash,
+              const _child *candidate) {
+            return (candidate->name.hash == hash) ? (*candidate) :
+                   (candidate == end() ? invalidEnum : _find(hash, candidate + 1));
         }
 
         constexpr void
@@ -158,8 +149,8 @@ namespace oni {
         }
 
     private:
-        static inline std::array<KeyVal, n + 1> storage;
-        static inline std::array<_child, n> childStorage;
+        static inline std::array<_child, n + 1> storage;
         static inline HashedString invalid = HashedString("__INVALID__");
+        static inline _child invalidEnum = {0, invalid};
     };
 }

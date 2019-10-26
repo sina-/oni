@@ -68,7 +68,7 @@ namespace oni {
             TimeToLive ttl{};
             Velocity vel{};
             Acceleration acc{};
-            Material_Finish mft{Material_Finish::fromString("solid")};
+            Material_Finish mft{Material_Finish::get("solid")};
             EntityAssetsPack eap{};
         };
 

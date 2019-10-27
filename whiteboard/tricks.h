@@ -27,3 +27,15 @@ namespace tail {
         initialize<T>(tail ...);
     }
 }
+
+namespace string_view_to_array {
+    template <std::size_t N>
+    struct static_string {
+        template<std::size_t... I>
+        constexpr
+        static_string(std::string_view str,
+                      std::index_sequence<I...>) noexcept : chars{{str[I]...}} {}
+
+        const std::array<char, N> chars;
+    }
+}

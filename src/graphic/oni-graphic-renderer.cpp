@@ -14,11 +14,13 @@ namespace oni {
     Renderer::BlendSpec
     Renderer::getBlendSpec(Material_Finish type) {
         auto result = BlendSpec{};
-        if (type == Material_Finish::get("solid") ||
-            type == Material_Finish::get("translucent")) {
+        auto constexpr solid = Material_Finish_GET("solid");
+        auto constexpr shinny = Material_Finish_GET("shinny");
+        auto constexpr translucent = Material_Finish_GET("translucent");
+        if (type == solid || type == translucent) {
             result.src = BlendMode::ONE;
             result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
-        } else if (type == Material_Finish::get("shinny")) {
+        } else if (type == shinny) {
             result.src = BlendMode::ONE;
             result.dest = BlendMode::ONE;
         } else {
@@ -31,12 +33,15 @@ namespace oni {
 
     Renderer::DepthSpec
     Renderer::getDepthSpec(Material_Finish type) {
+        auto constexpr solid = Material_Finish_GET("solid");
+        auto constexpr shinny = Material_Finish_GET("shinny");
+        auto constexpr translucent = Material_Finish_GET("translucent");
         auto result = DepthSpec{};
-        if (type == Material_Finish::get("solid")) {
+        if (type == solid) {
             result.depthRead = true;
             result.depthWrite = true;
-        } else if (type == Material_Finish::get("translucent") ||
-                   type == Material_Finish::get("shinny")) {
+        } else if (type == translucent ||
+                   type == shinny) {
             result.depthRead = true;
             result.depthWrite = false;
         } else {

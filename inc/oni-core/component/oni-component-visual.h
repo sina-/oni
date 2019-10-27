@@ -458,10 +458,10 @@ namespace oni {
     // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
     // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
-    ONI_ENUM_DEF(Material_Finish, 3, { 0, "solid" }, { 1, "translucent" }, { 2, "shinny" })
+    ONI_ENUM_DEF(Material_Finish, { 0, "solid" }, { 1, "translucent" }, { 2, "shinny" })
 
     struct Material_Definition {
-        Material_Finish finish{Material_Finish::get("solid")};
+        Material_Finish finish{};
         Material_Skin skin{};
 
         template<class Archive>

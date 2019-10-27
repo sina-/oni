@@ -20,7 +20,7 @@ namespace oni {
                                Hash hash_) noexcept: str(data_), hash(hash_) {}
 
         template<size N>
-        explicit constexpr
+        inline constexpr
         HashedString(const c8 (&value)[N]) noexcept: str(value), hash(get(value)) {}
 
         // TODO: Can this be constexpr?
@@ -77,5 +77,4 @@ namespace oni {
             return _hash(result, '\0');
         }
     };
-
 }

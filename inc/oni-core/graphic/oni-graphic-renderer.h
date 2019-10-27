@@ -53,7 +53,7 @@ namespace oni {
 
         ///
 
-        Material_Finish finishType = Material_Finish::get("solid");
+        Material_Finish finishType{};
     };
 
     class Renderer {

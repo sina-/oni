@@ -14,143 +14,123 @@
  * 7) easy to use in if statements
  */
 
-#define ONI_ENUM_DEF(NAME, COUNT, ...)                                                                              \
-    namespace _detail_##NAME {class INIT_##NAME ;}                                                                  \
-    struct NAME : public oni::EnumBase<COUNT, NAME> {                                                               \
-    public:                                                                                                         \
-       constexpr NAME(oni::i32 id_, oni::HashedString name_) noexcept : EnumBase(id_, name_) {}                     \
-    private:                                                                                                        \
-        friend _detail_##NAME::INIT_##NAME;                                                                         \
-        friend std::array<NAME, COUNT + 1>;                                                                         \
-        constexpr NAME() noexcept {}                                                                                \
-        constexpr NAME(bool) noexcept: EnumBase({ __VA_ARGS__ }) {}                                                 \
-        };                                                                                                          \
-        namespace _detail_##NAME { class INIT_##NAME { inline static NAME _STORAGE_FOR_##NAME = {true}; };}
 
+#define CONCAT(A, B) A ## B
+
+#define ONI_ENUM_DEF(NAME, ...)                                                                                                         \
+    namespace detail{ namespace {inline static const constexpr oni::detail::Enum storage_##NAME [] = { __VA_ARGS__};}} \
+    struct NAME : public oni::detail::EnumBase<                                                                        \
+            sizeof(detail::storage_##NAME) / sizeof(oni::detail::Enum), detail::storage_##NAME> {                      \
+       inline constexpr NAME() : EnumBase(0, detail::storage_##NAME[0].name) {}                                        \
+       inline constexpr NAME(oni::i32 id_, const oni::HashedString &name_) : EnumBase(id_, name_) {}                   \
+       inline constexpr NAME(const oni::detail::Enum& value_) : EnumBase(value_.id, value_.name) {}                    \
+    };                                                                                                                 \
+    template<oni::i32 n>                                                                                               \
+    inline static constexpr NAME                                                                                       \
+    CONCAT(NAME, _GET)(const oni::c8 (&name_)[n]) { return NAME::_convert<NAME>(NAME::_get(name_)); }
 
 namespace oni {
-// TODO:
-// 1) initialization is bullshit with the friend class and shit
-// 2) fromString() function can return invalid data, I can't do compile-time check at the moment :( But maybe I don't want
-// to? either compiling will be slow or run-time! But I guess I won't compile everything but I wil run every init
-// doing run-time so might be better off with compile time?
-// 3) Users of this need to use fromString() to get an instance, even for values that are known at compile time! :/
-    template<i32 n, class _child>
-    struct EnumBase {
-        i32 id{0};
-        HashedString name{"__INVALID__"};
-
-        struct KeyVal {
-            i32 id{0};
-            HashedString name{"__INVALID__"};
+    namespace detail {
+        struct Enum {
+            oni::i32 id;
+            oni::HashedString name;
         };
 
-        constexpr
-        EnumBase(i32 id_,
-                 HashedString name_) noexcept : id(id_), name(name_) {}
+        template<oni::i32 N, auto v>
+        struct EnumBase {
+            oni::i32 id;
+            oni::HashedString name;
 
-        template<i32 N>
-        inline static constexpr _child
-        get(const c8 (&name_)[N]) {
-            return _find(HashedString::get(name_), begin());
-        }
+            inline constexpr
+            EnumBase(oni::i32 id_,
+                     oni::HashedString name_) noexcept : id(id_), name(name_) {}
 
-        // TODO: provide non-constexpr version of get()
-
-        inline constexpr bool
-        operator==(const EnumBase &other) const {
-            return other.id == id && other.name == name;
-        }
-
-        inline constexpr bool
-        operator!=(const EnumBase &other) const {
-            return other.id != id || other.name != name;
-        }
-
-        inline constexpr bool
-        isValid() const {
-            return id != 0 && name != invalid;
-        }
-
-        inline static constexpr auto
-        begin() {
-            return storage.begin() + 1;
-        }
-
-        inline static constexpr auto
-        end() {
-            return storage.end();
-        }
-
-        inline static constexpr i32
-        size() {
-            return n;
-        }
-
-        template<class Archive>
-        void
-        save(Archive &archive) const {
-            archive(name.str);
-        }
-
-        template<class Archive>
-        void
-        load(Archive &archive) {
-            std::string buffer{};
-            archive(buffer);
-            name = HashedString::view(buffer);
-            // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
-            _init(name.hash);
-        }
-
-    protected:
-        struct _KeyValRaw {
-            i32 id{0};
-            std::string_view str{"__INVALID__"};
-        };
-
-        constexpr
-        EnumBase() = default;
-
-        constexpr
-        EnumBase(std::initializer_list<_KeyValRaw> map_) {
-            assert(map_.size() <= n);
-
-            storage[0].name = invalid;
-            storage[0].id = 0;
-            auto *iter = map_.begin();
-            for (i32 i = 0; i < n; ++i) {
-                storage[i + 1].name = HashedString(iter->str);
-                storage[i + 1].id = iter->id;
-                ++iter;
+            inline static constexpr auto
+            begin() {
+                return storage;
             }
-        }
 
-    private:
-        inline static constexpr const _child &
-        _find(const Hash hash,
-              const _child *candidate) {
-            return (candidate->name.hash == hash) ? (*candidate) :
-                   (candidate == end() ? invalidEnum : _find(hash, candidate + 1));
-        }
+            inline static constexpr auto
+            end() {
+                return storage + N;
+            }
 
-        constexpr void
-        _init(const Hash hash) {
-            for (i32 i = 1; i < n; ++i) {
-                if (storage[i].name.hash == hash) {
-                    name = storage[i].name;
-                    id = storage[i].id;
-                    return;
+            inline constexpr bool
+            operator==(const EnumBase &other) const {
+                return other.id == id && other.name == name;
+            }
+
+            inline constexpr bool
+            operator!=(const EnumBase &other) const {
+                return other.id != id || other.name != name;
+            }
+
+            inline static constexpr oni::i32
+            size() {
+                return N;
+            }
+
+            template<class Archive>
+            void
+            save(Archive &archive) const {
+                archive("name", name.str);
+            }
+
+            template<class Archive>
+            void
+            load(Archive &archive) {
+                std::string buffer{};
+                archive("name", buffer);
+                name = oni::HashedString::view(buffer);
+                // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
+                _runtimeInit(name.hash);
+            }
+
+            template<oni::i32 n>
+            static inline constexpr Enum
+            _get(const oni::c8 (&name_)[n]) {
+                return _find(oni::HashedString::get(name_), 0, storage);
+            }
+
+            template<class T>
+            inline static constexpr T
+            _convert(const Enum &value) {
+                return T(value.id, value.name);
+            }
+
+        private:
+            // TODO: How can I make this better, the diagnosis error is misleading
+            inline static constexpr Enum
+            _notFound() {
+                throw std::logic_error("Invalid value specified for the enum");
+                return INVALID;
+            }
+
+            inline static constexpr Enum
+            _find(const oni::Hash hash,
+                  oni::i32 i,
+                  const Enum *candidate) {
+                return (candidate->name.hash == hash) ? *candidate :
+                       ((i == N) ? _notFound() : _find(hash, i + 1, candidate + 1));
+            }
+
+            void
+            _runtimeInit(const oni::Hash hash) {
+                for (oni::i32 i = 0; i < N; ++i) {
+                    if (storage[i].name.hash == hash) {
+                        name = storage[i].name;
+                        id = storage[i].id;
+                        return;
+                    }
                 }
+                assert(false);
+                id = 0;
+                name = INVALID.name;
             }
-            assert(false);
-            id = 0;
-            name = invalid;
-        }
 
-    private:
-        static inline std::array<_child, n + 1> storage;
-        static inline HashedString invalid = HashedString("__INVALID__");
-        static inline _child invalidEnum = {0, invalid};
-    };
+        private:
+            static inline const constexpr Enum *storage = v;
+            static inline const constexpr Enum INVALID = {0, oni::HashedString("__INVALID__")};
+        };
+    }
 }

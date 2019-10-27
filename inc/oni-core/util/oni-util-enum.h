@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/util/oni-util-hash.h>
 #include <oni-core/math/oni-math-function.h>
@@ -84,6 +86,16 @@ namespace oni {
                 name = oni::HashedString::view(buffer);
                 // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
                 _runtimeInit(name.hash);
+            }
+
+            template<class Out, class Child, class Adaptor>
+            static inline Out *
+            array(Adaptor adaptor) {
+                static auto result = std::array<Out, N>();
+                for (oni::i32 i = 0; i < N; ++i) {
+                    result[i] = adaptor(storage[i]);
+                }
+                return result.data();
             }
 
             template<oni::i32 n>

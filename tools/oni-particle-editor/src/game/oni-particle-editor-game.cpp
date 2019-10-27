@@ -135,9 +135,12 @@ namespace oni {
         auto TwGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
                                              nullptr, nullptr);
 
+        auto adaptor = [](const Material_Finish &mf) -> TwEnumVal {
+            return {mf.id, mf.name.str.data()};
+        };
         auto TwMaterial_Finish = TwDefineEnum("Material_Finish",
-                                                   Material_Finish::array<TwEnumVal>(),
-                                                   Material_Finish::size());
+                                              Material_Finish::array<TwEnumVal, Material_Finish>(adaptor),
+                                              Material_Finish::size());
 
         TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");

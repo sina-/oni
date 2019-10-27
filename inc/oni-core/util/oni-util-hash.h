@@ -71,10 +71,12 @@ namespace oni {
         _runtimeHash(std::string_view value) {
             auto result = offset;
             for (auto &&v : value) {
+                if (v == 0) {
+                    return result;
+                }
                 result = _hash(result, v);
             }
-            // Because string_view is not null terminated!
-            return _hash(result, '\0');
+            return result;
         }
     };
 }

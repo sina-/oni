@@ -22,29 +22,22 @@
 #include <oni-core/physics/oni-physics-system.h>
 #include <oni-core/physics/oni-physics.h>
 
-enum class EntityTypeEditor : oni::EntityType_Storage {
-    PARTICLE_EMITTER
-};
-
-inline oni::EntityType
-getType(EntityTypeEditor et) {
-    return {oni::enumCast(et)};
-}
 
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
-        mAssetMng = new oni::AssetManager({"oni-resources/textures/"});
-        mTextureMng = new oni::TextureManager(*mAssetMng);
+        mAssetFilesIdx = new oni::AssetFilesIndex(ImageIndexFilePath{"oni-resources/textures/"});
+        mTextureMng = new oni::TextureManager(*mAssetFilesIdx);
         mInput = new oni::Input();
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
         mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"}, *mTextureMng);
 
+        constexpr auto test = HashedString("WHAT");
         // TODO: I shouldn't need to do this. I should just pass a file path of all the relevant entities and the
         // factory should go through all the files and register them.
-        mEntityFactory->registerEntityType({HashedString("particle-emitter")});
-        mEntityFactory->registerEntityType({HashedString("simple-particle")});
+        mEntityFactory->registerEntityType(EntityType_Name{"particle-emitter"});
+        mEntityFactory->registerEntityType(EntityType_Name{"simple-particle"});
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -81,12 +74,12 @@ namespace oni {
         mWindow = new oni::Window(*mInput, "Oni Particle Editor", WINDOW_WIDTH, WINDOW_HEIGHT);
         // NOTE: It requires OpenGL to be loaded to be able to load the texture atlas.
         mSceneMng = new oni::SceneManager(screenBounds,
-                                          *mAssetMng,
+                                          *mAssetFilesIdx,
                                           *mZLayerMng,
                                           *mTextureMng);
         setupTweakBar();
 
-        mTextureMng->loadAssets();
+        mTextureMng->cacheAllAssets();
 
         mWindow->setClear({});
 
@@ -207,7 +200,8 @@ namespace oni {
                     case PARTICLE_EMITTER: {
                         // TODO: SO I need another overload of this function, as close as possible to json, that
                         // accepts what particle editor has to offer for creating entities!
-                        mEntityFactory->createEntity(*mEntityMng, {HashedString("particle-emitter")});
+                        constexpr auto particleEmitter = EntityType_Name{"particle-emitter"};
+                        mEntityFactory->createEntity(*mEntityMng, particleEmitter);
                         break;
                     }
                     default: {

@@ -12,7 +12,7 @@
 
 
 namespace oni {
-    TextureManager::TextureManager(AssetManager &assetManager) : mAssetManager(assetManager) {
+    TextureManager::TextureManager(AssetFilesIndex &assetManager) : mAssetManager(assetManager) {
         mAnimationUVs.resize(enumCast(NumAnimationFrames::LAST));
         size numFrames = 0;
         for (auto &&uvs: mAnimationUVs) {
@@ -39,10 +39,11 @@ namespace oni {
     TextureManager::~TextureManager() = default;
 
     void
-    TextureManager::loadAssets() {
-        for (auto &&imageName: mAssetManager.knownImages()) {
-            _loadImage(*imageName);
-            _loadTextureToCache(imageName->value.hash);
+    TextureManager::cacheAllAssets() {
+        for (auto iter = mAssetManager.imageAssetsBegin(); iter != mAssetManager.imageAssetsEnd(); ++iter) {
+            const auto &imageAsset = iter->second;
+            _cacheImage(imageAsset);
+            _cacheTexture(imageAsset.name);
         }
     }
 
@@ -55,35 +56,7 @@ namespace oni {
     }
 
     void
-    TextureManager::loadFromTextureID(Texture &texture,
-                                      const ImageName &name) {
-        auto numTextureElements = 4;
-        auto textureSize = size(texture.image.height * texture.image.width * numTextureElements);
-        assert(textureSize);
-        auto &storage = mImageDataMap[name.value.hash];
-        storage.resize(textureSize);
-        glBindTexture(GL_TEXTURE_2D, texture.id);
-        glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize,
-                          storage.data());
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    void
-    TextureManager::loadFromTextureID(Texture &texture,
-                                      std::vector<u8> &data) {
-        auto numTextureElements = 4;
-        auto textureSize = size(texture.image.height * texture.image.width * numTextureElements);
-        assert(textureSize);
-        data.resize(textureSize);
-        glBindTexture(GL_TEXTURE_2D, texture.id);
-        glGetTextureImage(texture.id, 0, texture.format, texture.type, textureSize, data.data());
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-    }
-
-    void
-    TextureManager::_createTexture(Texture &texture,
-                                   ImageNameHash hash) {
+    TextureManager::_initTexture(Texture &texture) {
         glGenTextures(1, &texture.id);
 
         assert(texture.id);
@@ -102,9 +75,13 @@ namespace oni {
         assert(texture.image.height > 0);
 
         auto data = (u8 *) nullptr;
-        auto imageData = mImageDataMap.find(hash);
-        if (imageData != mImageDataMap.end()) {
-            data = imageData->second.data();
+        if (texture.image.name != Image::GENERATED) {
+            auto imageData = mImageDataMap.find(texture.image.name);
+            if (imageData == mImageDataMap.end()) {
+                assert(false);
+            } else {
+                data = imageData->second.data();
+            }
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
@@ -118,17 +95,15 @@ namespace oni {
     }
 
     void
-    TextureManager::createTexture(Texture &texture,
-                                  const ImageName &name) {
-        _createTexture(texture, name.value.hash);
+    TextureManager::initBlankTexture(Texture &texture) {
+        _initTexture(texture);
     }
 
     void
     TextureManager::initTexture(Texture &texture) {
-        // TODO: OH GAWD
-        assert(texture.image.name.value.hash);
-        assert(!texture.image.name.value.str.empty());
-        const auto it = mTextureMap.find(texture.image.name.value.hash);
+        assert(texture.image.name.hash.value);
+        assert(!texture.image.name.str.empty());
+        const auto it = mTextureMap.find(texture.image.name.hash);
         if (it == mTextureMap.end()) {
             // NOTE: Did you forget to call loadAssets()?
             assert(false);
@@ -139,25 +114,24 @@ namespace oni {
     }
 
     void
-    TextureManager::_loadTextureToCache(ImageNameHash hash) {
-        auto it = mTextureMap.find(hash);
-        if (it != mTextureMap.end()) {
+    TextureManager::_cacheTexture(const AssetName &name) {
+        auto newElement = mTextureMap.emplace(name.hash, Texture{});
+        if (!newElement.second) {
             assert(false);
             return;
         }
+        auto texture = newElement.first;
 
-        auto texture = Texture{};
-        _getImage(hash, texture.image);
-        _createTexture(texture, hash);
-        mTextureMap.emplace(hash, texture);
+        _initImage(name, texture->second.image);
+        _initTexture(texture->second);
     }
 
     void
-    TextureManager::_getImage(ImageNameHash hash,
-                              Image &image) {
-        assert(hash);
+    TextureManager::_initImage(const AssetName &name,
+                               Image &image) {
+        assert(name.hash.value);
 
-        auto img = mImageMap.find(hash);
+        auto img = mImageMap.find(name.hash);
         if (img != mImageMap.end()) {
             image = img->second;
         } else {
@@ -166,15 +140,11 @@ namespace oni {
     }
 
     void
-    TextureManager::getImage(const ImageName &name,
-                             Image &image) {
-        _getImage(name.value.hash, image);
-    }
-
-    void
-    TextureManager::_loadImage(const ImageName &name) {
-        assert(name.value.valid());
-        auto image = mImageMap.find(name.value.hash);
+    TextureManager::_cacheImage(const ImageAsset &asset) {
+        assert(asset.name.hash.value);
+        assert(!asset.name.str.empty());
+        assert(!asset.path.value.empty());
+        auto image = mImageMap.find(asset.name.hash);
         if (image != mImageMap.end()) {
             assert(false);
             return;
@@ -183,16 +153,16 @@ namespace oni {
         FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
         FIBITMAP *dib = nullptr;
 
-        auto path = mAssetManager.getAssetFilePath(name);
+        const auto path = asset.path.value.c_str();
 
-        fif = FreeImage_GetFileType(path.value.data(), 0);
+        fif = FreeImage_GetFileType(path, 0);
         if (fif == FIF_UNKNOWN) {
-            fif = FreeImage_GetFIFFromFilename(path.value.data());
+            fif = FreeImage_GetFIFFromFilename(path);
         }
         assert(fif != FIF_UNKNOWN);
 
         if (FreeImage_FIFSupportsReading(fif)) {
-            dib = FreeImage_Load(fif, path.value.data());
+            dib = FreeImage_Load(fif, path);
         }
         assert(dib);
 
@@ -212,14 +182,12 @@ namespace oni {
         auto bits = FreeImage_GetBits(dib);
         assert(bits);
 
-        // TODO: This is assuming the storage for ImageName.value will stick around for duration of the app lifetime!
-        // but I don't like the current pattern of how I handle HashedStrings at all.
         auto _image = Image{};
         _image.width = width;
         _image.height = height;
-        _image.name = name;
-        mImageMap.emplace(name.value.hash, _image);
-        auto &storage = mImageDataMap[name.value.hash];
+        _image.name = asset.name; // NOTE: this will point name.str to point at what AssetFilesIndex holds
+        mImageMap.emplace(asset.name.hash, _image);
+        auto &storage = mImageDataMap[asset.name];
         storage.resize(width * height * mElementsInRGBA, 0);
 
         for (size i = 0; i < storage.size(); ++i) {
@@ -443,11 +411,6 @@ namespace oni {
     }
 
     void
-    TextureManager::_copy(const Texture &,
-                          Texture &) {
-    }
-
-    void
     TextureManager::_bind(oniGLuint textureID) {
         glBindTexture(GL_TEXTURE_2D, textureID);
     }
@@ -455,39 +418,6 @@ namespace oni {
     void
     TextureManager::unbind() {
         glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    void
-    TextureManager::loadFromData(Texture &texture,
-                                 const std::vector<u8> &data) {
-        oniGLuint textureID = 0;
-        glGenTextures(1, &textureID);
-
-        assert(textureID);
-
-        oniGLint internalFormat = GL_RGBA;
-        oniGLenum format = GL_BGRA;
-        oniGLenum type = GL_UNSIGNED_BYTE;
-
-        _bind(textureID);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, texture.image.width, texture.image.height, 0, format, type,
-                     data.data());
-
-        unbind();
-
-        texture.id = textureID;
-        texture.format = format;
-        texture.type = type;
-        texture.uv = {};
-    }
-
-    size_t
-    TextureManager::numLoadedTexture() const {
-        return mTextureMap.size();
     }
 
     const UV &

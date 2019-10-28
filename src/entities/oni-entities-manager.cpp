@@ -176,12 +176,8 @@ namespace oni {
             assert(mSimMode == SimMode::SERVER);
             assignTag<Tag_NetworkSyncEntity>(id);
         }
-        // NOTE: Entity name is mostly used for debugging so we keep a cache around to avoid storing one std::string
-        // per entity!
-        mEntityNames.emplace(name.value.hash, name.value.str);
-        const auto &cachedName = mEntityNames[name.value.hash];
 
-        createComponent<EntityName>(id, cachedName.c_str());
+        createComponent<EntityName>(id, name);
         return id;
     }
 

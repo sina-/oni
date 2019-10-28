@@ -29,7 +29,7 @@ namespace FMOD {
 namespace oni {
     class AudioManager {
     public:
-        explicit AudioManager(AssetManager &);
+        explicit AudioManager(AssetFilesIndex &);
 
         void
         tick(const WorldP3D &playerPos);
@@ -125,7 +125,7 @@ namespace oni {
         pause(FMOD::Channel &);
 
     private:
-        AssetManager &mAssetManager;
+        AssetFilesIndex &mAssetManager;
         std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
 
         std::unordered_map<ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroup;

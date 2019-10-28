@@ -12,7 +12,7 @@
 #define ERRCHECK(_result) assert((_result) == FMOD_OK)
 
 namespace oni {
-    AudioManager::AudioManager(AssetManager &assetManager) : mAssetManager(assetManager) {
+    AudioManager::AudioManager(AssetFilesIndex &assetManager) : mAssetManager(assetManager) {
         mMaxAudibleDistance = 150.f;
         mMaxNumberOfChannels = 1024;
 

@@ -76,7 +76,7 @@ namespace oni {
         ParticleConfig mCurrentParticleConfig{};
 
     private:
-        oni::AssetManager *mAssetMng{};
+        oni::AssetFilesIndex *mAssetFilesIdx{};
         oni::EntityManager *mEntityMng{};
         oni::Input *mInput{};
         oni::Physics *mPhysics{};

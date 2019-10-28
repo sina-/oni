@@ -17,7 +17,7 @@
 #include <oni-core/math/oni-math-function.h>
 #include <oni-core/game/oni-game-event-rate-limiter.h>
 #include <oni-core/physics/oni-physics-fwd.h>
-#include <map>
+#include <oni-core/entities/oni-entities-structure.h>
 
 
 namespace oni {
@@ -361,6 +361,7 @@ namespace oni {
         EntityID
         createEntity(const EntityType_Name &);
 
+        // TODO: Kill this shit now that I have EntityType_Name as the identifier of an entity
         /**
          * This overload could be used by the game code to define custom types using enums.
          *
@@ -468,9 +469,9 @@ namespace oni {
         SimMode mSimMode{SimMode::CLIENT};
         EntityOperationPolicy mEntityOperationPolicy{};
 
-        std::map<Hash, std::string> mEntityNames{};
         std::unordered_set<EntityID> mEntitiesToDelete{};
         std::vector<DeletedEntity> mDeletedEntities{};
+        // TODO: I shouldn't be needing this after the changes to entity name
         std::unordered_map<decltype(EntityType::value), std::string> mEntityDebugNameLookup{};
         std::unique_ptr<EventRateLimiter> mEventRateLimiter;
     };

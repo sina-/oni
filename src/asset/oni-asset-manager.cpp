@@ -6,18 +6,20 @@
 #include <cereal/external/rapidjson/document.h>
 
 namespace oni {
-    AssetManager::AssetManager(const ImageIndexFilePath &imagePath) {
+    AssetFilesIndex::AssetFilesIndex(const ImageIndexFilePath &imagePath) {
         mImageIndexFilePath = imagePath;
         // TODO: Make this portable to other platforms
         if (mImageIndexFilePath.value.back() != '/') {
             mImageIndexFilePath.value.append("/");
         }
 
+        // TODO better split this up from the constructor and give the user possibility of loading these files
+        // when they think it is the good time.
         _indexImages();
     }
 
     void
-    AssetManager::_indexImages() {
+    AssetFilesIndex::_indexImages() {
         auto jsonPath = mImageIndexFilePath.value;
         // TODO: accept index.json value as param
         std::ifstream jsonStream(jsonPath.append("index.json"));
@@ -41,11 +43,15 @@ namespace oni {
                     if (texture->value.IsString()) {
                         auto name = texture->name.GetString();
                         auto path = texture->value.GetString();
-                        auto nameHash = HashedString(name);
+                        auto nameHash = HashedString::makeFromCStr(name);
                         auto fullPath = mImageIndexFilePath.value;
                         fullPath.append(path);
-                        mImageNameLookup.emplace(nameHash.hash, ImageName{nameHash});
-                        mImageNameToPath.emplace(nameHash.hash, FilePath{fullPath});
+                        auto image = mImageAssetMap.find(nameHash.hash);
+                        if (image != mImageAssetMap.end()) {
+                            assert(false);
+                            continue;
+                        }
+                        mImageAssetMap.emplace(nameHash.hash, ImageAsset{FilePath{fullPath}, nameHash});
                     } else {
                         assert(false);
                     }
@@ -59,35 +65,14 @@ namespace oni {
     }
 
     const std::string &
-    AssetManager::getAssetFilePath(Sound_Tag tag) {
+    AssetFilesIndex::getAssetFilePath(Sound_Tag tag) {
         const auto &result = mSoundAssetPath[tag];
         return result;
     }
 
-    const FilePath &
-    AssetManager::getAssetFilePath(const ImageName &name) {
-        auto path = mImageNameToPath.find(name.value.hash);
-        if (path == mImageNameToPath.end()) {
-            assert(false);
-            return INVALID_FILE_PATH;
-        }
-        return path->second;
-    }
-
     void
-    AssetManager::setPath(Sound_Tag tag,
-                          std::string_view path) {
+    AssetFilesIndex::setPath(Sound_Tag tag,
+                             std::string_view path) {
         mSoundAssetPath.emplace(tag, path);
-    }
-
-    std::vector<const ImageName *>
-    AssetManager::knownImages() {
-        // TODO: You can use a view instead of the full copy
-        auto names = std::vector<const ImageName *>();
-        for (auto &&name: mImageNameLookup) {
-            names.emplace_back(&name.second);
-        }
-
-        return names;
     }
 }

@@ -13,16 +13,16 @@
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 
 
-#define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                           \
-{                                                                                   \
-        ComponentFactory cf = [](EntityManager &em,                                 \
-                                 EntityID id,                                       \
-                                 cereal::JSONInputArchive &reader) {                \
-            auto &component = em.createComponent<COMPONENT_NAME>(id);               \
-            reader(component);                                                      \
-        };                                                                          \
-        auto componentName = Component_Name{HashedString(#COMPONENT_NAME)};         \
-        factory->registerComponentFactory(componentName, std::move(cf));            \
+#define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
+{                                                                                       \
+        ComponentFactory cf = [](EntityManager &em,                                     \
+                                 EntityID id,                                           \
+                                 cereal::JSONInputArchive &reader) {                    \
+            auto &component = em.createComponent<COMPONENT_NAME>(id);                   \
+            reader(component);                                                          \
+        };                                                                              \
+        constexpr auto componentName = Component_Name{#COMPONENT_NAME};                 \
+        factory->registerComponentFactory(componentName, std::move(cf));                \
 }
 
 namespace oni {
@@ -50,22 +50,22 @@ namespace oni {
     void
     EntityFactory::registerComponentFactory(const Component_Name &name,
                                             ComponentFactory &&cb) {
-        assert(mComponentFactory.find(name.value.hash) == mComponentFactory.end());
-        mComponentFactory.emplace(name.value.hash, std::move(cb));
+        assert(mComponentFactory.find(name.hash) == mComponentFactory.end());
+        mComponentFactory.emplace(name.hash, std::move(cb));
     }
 
     void
     EntityFactory::registerEntityType(const EntityType_Name &name) {
         auto path = FilePath{};
         path.value.append(mEntityResourcePath.value);
-        path.value.append(name.value.str);
+        path.value.append(name.str);
         path.value.append(".json");
-        mEntityResourcePathLookup.emplace(name.value.hash, std::move(path));
+        mEntityResourcePathLookup.emplace(name, std::move(path));
     }
 
     const FilePath &
     EntityFactory::getEntityResourcePath(const EntityType_Name &name) {
-        auto path = mEntityResourcePathLookup.find(name.value.hash);
+        auto path = mEntityResourcePathLookup.find(name);
         if (path != mEntityResourcePathLookup.end()) {
             return path->second;
         }
@@ -121,8 +121,8 @@ namespace oni {
                         data.AddMember(component->name.Move(), component->value.Move(), document.GetAllocator());
                         data.Accept(writer);
 
-                        auto hashedString = HashedString(compoName);
-                        auto factory = mComponentFactory.find(hashedString.hash);
+                        auto hash = HashedString::makeHashFromCString(compoName);
+                        auto factory = mComponentFactory.find(hash);
                         if (factory != mComponentFactory.end()) {
                             // TODO: so many stream and conversions, can't I just use the stream I get from rapidjson?
                             std::istringstream ss;

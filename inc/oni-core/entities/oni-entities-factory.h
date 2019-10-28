@@ -6,33 +6,18 @@
 
 #include <entt/core/hashed_string.hpp>
 
-#include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/fwd.h>
-#include <oni-core/util/oni-util-hash.h>
 #include <oni-core/util/oni-util-file.h>
+#include <oni-core/util/oni-util-hash.h>
 
 namespace cereal {
     class JSONInputArchive;
 }
 
 namespace oni {
-    struct InvalidComponent {
-    };
-
-    // TODO: How about the life time of these strings? :(
-    struct Component_Name {
-        HashedString value;
-    };
-
-    struct EntityType_Name {
-        HashedString value;
-    };
-
-    struct EntityName {
-        std::string_view value;
-    };
-
     // TODO: Can I remove JSONInputArchive from the API?
     using ComponentFactory = std::function<
             void(EntityManager &,
@@ -41,7 +26,8 @@ namespace oni {
 
     class EntityFactory {
     public:
-        explicit EntityFactory(FilePath, TextureManager&);
+        explicit EntityFactory(FilePath,
+                               TextureManager &);
 
         void
         registerEntityType(const EntityType_Name &);
@@ -63,8 +49,8 @@ namespace oni {
                     EntityID);
 
     private:
-        std::map<Hash, ComponentFactory> mComponentFactory{};
-        std::map<Hash, FilePath> mEntityResourcePathLookup{};
+        std::unordered_map<Hash, ComponentFactory> mComponentFactory{};
+        std::unordered_map<EntityType_Name, FilePath> mEntityResourcePathLookup{};
         FilePath mEntityResourcePath{};
 
         TextureManager &mTextureManager;

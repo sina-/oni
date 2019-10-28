@@ -23,7 +23,7 @@
 
 namespace oni {
     SceneManager::SceneManager(const ScreenBounds &screenBounds,
-                               AssetManager &assetManager,
+                               AssetFilesIndex &assetManager,
                                ZLayerManager &zLayerManager,
                                TextureManager &tm) :
     // 64k vertices

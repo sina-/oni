@@ -88,12 +88,16 @@ namespace oni {
                 _runtimeInit(name.hash);
             }
 
-            template<class Out, class Child, class Adaptor>
+            template<class Out, class Adaptor>
             static inline Out *
-            array(Adaptor adaptor) {
+            adapt(Adaptor adaptor) {
+                static bool init = true;
                 static auto result = std::array<Out, N>();
-                for (oni::i32 i = 0; i < N; ++i) {
-                    result[i] = adaptor(storage[i]);
+                if (init) {
+                    for (oni::i32 i = 0; i < N; ++i) {
+                        result[i] = adaptor(storage[i]);
+                    }
+                    init = false;
                 }
                 return result.data();
             }

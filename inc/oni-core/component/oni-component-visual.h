@@ -458,6 +458,12 @@ namespace oni {
     // and SHINNY could turn into MaterialGloss_Type: SHINNY, MATT, or maybe even just MaterialGloss with a
     // float definning how shinny it is. Although I have to keep in mind for shinny entities I do switch the
     // blend function so it can't just be a range of values, it has to be a Type hmmm...
+
+    // NOTE: The order of the enums defines the order in which they are rendered!
+    // NOTE: For translucent and shinny entities since depth writes are disabled
+    // if an entity that is translucent but has higher z is rendered then a shinny
+    // entity with lower z is rendered it will still be drawn over the higher z
+    // entity!
     ONI_ENUM_DEF(Material_Finish, { 0, "solid" }, { 1, "translucent" }, { 2, "shinny" })
 
     struct Material_Definition {

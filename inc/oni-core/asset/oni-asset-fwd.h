@@ -1,5 +1,9 @@
 #pragma once
 
 namespace oni {
-    class AssetManager;
+    class AssetFilesIndex;
+
+    struct ImageAsset;
+    struct SoundAsset;
+    struct AssetName;
 }

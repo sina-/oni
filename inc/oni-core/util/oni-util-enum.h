@@ -83,9 +83,9 @@ namespace oni {
             load(Archive &archive) {
                 std::string buffer{};
                 archive("name", buffer);
-                name = oni::HashedString::view(buffer);
+                auto hash_ = oni::HashedString::makeHashFromCString(buffer.data());
                 // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
-                _runtimeInit(name.hash);
+                _runtimeInit(hash_);
             }
 
             template<class Out, class Adaptor>
@@ -105,7 +105,7 @@ namespace oni {
             template<oni::i32 n>
             static inline constexpr Enum
             _get(const oni::c8 (&name_)[n]) {
-                return _find(oni::HashedString::get(name_), 0, storage);
+                return _find(oni::HashedString::makeHashFromLiteral(name_), 0, storage);
             }
 
             template<class T>
@@ -146,7 +146,7 @@ namespace oni {
 
         private:
             static inline const constexpr Enum *storage = v;
-            static inline const constexpr Enum INVALID = {0, oni::HashedString("__INVALID__")};
+            static inline const constexpr Enum INVALID = {0, "__INVALID__"};
         };
     }
 }

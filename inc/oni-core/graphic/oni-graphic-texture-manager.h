@@ -1,21 +1,18 @@
 #pragma once
 
-#include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/asset/oni-asset-fwd.h>
+#include <oni-core/graphic/oni-graphic-fwd.h>
 
 
 namespace oni {
-
-    class FontManager;
-
     class TextureManager {
     public:
-        explicit TextureManager(oni::AssetManager &);
+        explicit TextureManager(oni::AssetFilesIndex &);
 
         ~TextureManager();
 
@@ -55,27 +52,10 @@ namespace oni {
                               const vec3 &brushTexturePos);
 
         void
-        getImage(const ImageName &,
-                 Image &);
+        initTexture(Texture &);
 
         void
-        initTexture(Texture &texture);
-
-        void
-        createTexture(Texture &,
-                      const ImageName &);
-
-        void
-        loadFromTextureID(Texture &,
-                          const ImageName &);
-
-        static void
-        loadFromTextureID(Texture &,
-                          std::vector<u8> &data);
-
-        static void
-        loadFromData(Texture &,
-                     const std::vector<u8> &data);
+        initBlankTexture(Texture &);
 
         // TODO: This function doesnt need to be here, I need a new proc-gen class to handle random
         // data generations of all types
@@ -88,11 +68,8 @@ namespace oni {
         static oniGLuint
         load(const FontManager &fontManager);
 
-        size_t
-        numLoadedTexture() const;
-
         void
-        loadAssets();
+        cacheAllAssets();
 
         const UV &
         getUV(AnimationID,
@@ -105,32 +82,27 @@ namespace oni {
 
     private:
         void
-        _loadImage(const ImageName &);
+        _cacheImage(const ImageAsset &asset);
 
         void
-        _getImage(ImageNameHash,
-                  Image &);
+        _initImage(const AssetName &,
+                   Image &);
 
         void
-        _loadTextureToCache(ImageNameHash);
+        _cacheTexture(const AssetName &);
 
         void
-        _createTexture(Texture &,
-                       ImageNameHash);
+        _initTexture(Texture &);
 
         static void
         _bind(oniGLuint textureID);
 
-        static void
-        _copy(const Texture &,
-              Texture &);
-
     private:
-        std::map<ImageNameHash, Texture> mTextureMap{};
-        std::map<ImageNameHash, Image> mImageMap{};
-        std::map<ImageNameHash, std::vector<u8>> mImageDataMap{};
+        std::unordered_map<Hash, Texture> mTextureMap{};
+        std::unordered_map<Hash, Image> mImageMap{};
+        std::unordered_map<AssetName, std::vector<u8>> mImageDataMap{};
         const u8 mElementsInRGBA{4};
-        oni::AssetManager &mAssetManager;
+        oni::AssetFilesIndex &mAssetManager;
 
         std::vector<std::vector<UV>> mAnimationUVs{};
     };

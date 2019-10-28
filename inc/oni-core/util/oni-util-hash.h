@@ -1,41 +1,111 @@
 #pragma once
 
 #include <string_view>
+#include <unordered_map>
 
 #include <oni-core/common/oni-common-typedef.h>
+#include <oni-core/util/oni-util-structure.h>
+
+#define DEFINE_STD_HASH_FUNCTIONS(CHILD)                    \
+namespace std {                                             \
+    template<>                                              \
+    class hash<CHILD> {                                     \
+    public:                                                 \
+        constexpr size_t                                    \
+        operator()(CHILD const &hs) const {                 \
+            return hs.hash.value;                           \
+        }                                                   \
+                                                            \
+        constexpr bool                                      \
+        operator()(const CHILD &lhs,                        \
+                   const CHILD &rhs) const {                \
+            return lhs.hash == rhs.hash;                    \
+        }};                                                 \
+}
 
 namespace oni {
-    using Hash = size;
+    namespace detail {
+        inline static constexpr u64 offset = 14695981039346656037ull;
+        inline static constexpr u64 prime = 1099511628211ull;
+
+        inline static std::unordered_map<Hash, std::string> knownStringStorage = {};
+    }
+
+    struct StringLiteral {
+        // This has to be implicit so it won't collide with other implicit stiring literal constructor
+        // to support constexpr construction of both:
+        // 1) constexpr HashedString hashed = {"fooooo"};
+        // 2) constexpr auto hashed = HashedString("foooo");
+        constexpr StringLiteral(const c8 *curr) noexcept: str{curr} {}
+
+        const c8 *str;
+    };
 
     struct HashedString {
         std::string_view str{};
         Hash hash{};
-
-        static inline constexpr u64 offset = 14695981039346656037ull;
-        static inline constexpr u64 prime = 1099511628211ull;
 
         constexpr HashedString() = default;
 
         constexpr HashedString(std::string_view data_,
                                Hash hash_) noexcept: str(data_), hash(hash_) {}
 
+        /**
+         *  This version does not own the string. The use case in mind is string literals
+         */
         template<size N>
         inline constexpr
-        HashedString(const c8 (&value)[N]) noexcept: str(value), hash(get(value)) {}
+        HashedString(const c8 (&value)[N]) noexcept: str(value), hash(makeHashFromLiteral(value)) {}
 
-        // TODO: Can this be constexpr?
-        explicit
-        HashedString(std::string_view value) noexcept : str(value), hash(_runtimeHash(str)) {}
-
+        /**
+         * This version stores the str in internal storage
+         */
         inline static HashedString
-        view(const std::string &value) noexcept {
-            return {value.data(), _runtimeHash(value)};
+        makeFromStr(std::string &&value) {
+            auto result = HashedString{};
+            result.hash = _runtimeHash(value.data());
+            auto knownStr = detail::knownStringStorage.find(result.hash);
+            if (knownStr == detail::knownStringStorage.end()) {
+                // TODO: The wording of emplace makes it not very obvious as if this will cause yet another construction
+                // of the string :/
+                auto storageStr = detail::knownStringStorage.emplace(result.hash, std::move(value)).first;
+                result.str = {storageStr->second.data(), storageStr->second.size()};
+            } else {
+                result.str = {knownStr->second.data(), knownStr->second.size()};
+                // TODO: Not sure how else I can make sure the original is invalid :/
+                value.clear();
+            }
+            return result;
+        }
+
+        // TODO: I couldn't get the constructors for HashedString(std::string&&) and HashedString(const char*)
+        //  work peacefully with
+        //  constexpr string literal version of this code. So here we are with two factory functions that makes
+        //  the intent explicit. Maybe I will keep it like this, but it might worth revisiting it in the future
+        //  and trying to find a nicer interface.
+        inline static HashedString
+        makeFromCStr(const c8 *value) {
+            auto result = HashedString{};
+            result.hash = _runtimeHash(value);
+            auto knownStr = detail::knownStringStorage.find(result.hash);
+            if (knownStr == detail::knownStringStorage.end()) {
+                auto storageStr = detail::knownStringStorage.emplace(result.hash, value).first;
+                result.str = {storageStr->second.data(), storageStr->second.size()};
+            } else {
+                result.str = {knownStr->second.data(), knownStr->second.size()};
+            }
+            return result;
+        }
+
+        inline static Hash
+        makeHashFromCString(StringLiteral value) noexcept {
+            return _runtimeHash(value.str);
         }
 
         template<size N>
         inline static constexpr Hash
-        get(const c8 (&value)[N]) noexcept {
-            return _staticHash(offset, value);
+        makeHashFromLiteral(const c8 (&value)[N]) noexcept {
+            return _staticHash(Hash{detail::offset}, value);
         }
 
         bool
@@ -50,7 +120,7 @@ namespace oni {
 
         bool
         valid() const {
-            return hash != 0 && !str.empty();
+            return hash.value != 0 && !str.empty();
         }
 
     private:
@@ -58,7 +128,7 @@ namespace oni {
         _hash(const Hash partial,
               const c8 current) {
             // Fowler-Noll-Vo hashing
-            return (partial ^ current) * prime;
+            return Hash{(partial.value ^ current) * detail::prime};
         }
 
         inline static constexpr Hash
@@ -69,7 +139,7 @@ namespace oni {
 
         inline static Hash
         _runtimeHash(std::string_view value) {
-            auto result = offset;
+            auto result = Hash{detail::offset};
             for (auto &&v : value) {
                 if (v == 0) {
                     return result;
@@ -80,3 +150,5 @@ namespace oni {
         }
     };
 }
+
+DEFINE_STD_HASH_FUNCTIONS(oni::HashedString)

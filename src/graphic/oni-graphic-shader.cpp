@@ -14,8 +14,8 @@ namespace oni {
         auto vertex = glCreateShader(GL_VERTEX_SHADER);
         auto fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-        auto vertSource = read_file(mVertPath);
-        auto fragSource = read_file(mFragPath);
+        auto vertSource = readFile(mVertPath);
+        auto fragSource = readFile(mFragPath);
 
         auto vertSourceChar = vertSource.c_str();
         auto fragSourceChar = fragSource.c_str();
@@ -45,7 +45,7 @@ namespace oni {
         bool doGeometryShading = !geomPath.empty();
         if (doGeometryShading) {
             geometry = glCreateShader(GL_GEOMETRY_SHADER);
-            auto geomSource = read_file(mGeomPath);
+            auto geomSource = readFile(mGeomPath);
             auto geomSourceChar = geomSource.c_str();
             glShaderSource(geometry, 1, &geomSourceChar, nullptr);
             glCompileShader(geometry);

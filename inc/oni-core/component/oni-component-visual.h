@@ -17,6 +17,7 @@
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/util/oni-util-hash.h>
 #include <oni-core/util/oni-util-enum.h>
+#include <oni-core/asset/oni-asset-structure.h>
 
 
 namespace oni {
@@ -200,20 +201,8 @@ namespace oni {
         }
     };
 
-    struct ImageName {
-        HashedString value{};
-    };
-
     struct Image {
-        // TODO: This will be massive memory waste for all the particles that have texture!
-        // TODO: As it is now this will be the key value that will connect real textures to everything else
-        // in a way this is replacing EntityAssetPack enum! There might be a value in separating the ID that
-        // defines a texture and the path, at least that way I don't store all the std::strings on every
-        // entity hmmm...
-        // TODO: Yeah this needs to be removed :/
-        std::string _storage{};
-
-        ImageName name{};
+        AssetName name{};
 
         u32 width{};
         u32 height{};
@@ -221,15 +210,18 @@ namespace oni {
         template<class Archive>
         void
         save(Archive &archive) const {
-            archive("name", name.value.str);
+            archive("name", name.hash);
         }
 
         template<class Archive>
         void
         load(Archive &archive) {
-            archive("name", _storage);
-            name.value = HashedString(_storage);
+            auto name_ = std::string();
+            archive("name", name_);
+            name = {HashedString::makeFromStr(std::move(name_))};
         }
+
+        inline static constexpr auto GENERATED = AssetName{"__GENERATED__"};
     };
 
     struct UV {

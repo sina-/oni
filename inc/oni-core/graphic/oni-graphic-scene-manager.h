@@ -22,7 +22,7 @@ namespace oni {
     public:
         // TODO: Getting quite big, I can split it into, SceneRenderer, SceneUpdater, and SceneManager
         SceneManager(const ScreenBounds &,
-                     oni::AssetManager &,
+                     oni::AssetFilesIndex &,
                      ZLayerManager &,
                      TextureManager &);
 

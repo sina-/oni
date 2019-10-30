@@ -1,4 +1,4 @@
-#include <oni-core/entities/oni-entities-factory-server.h>
+#include <oni-core/entities/factory/server/oni-entities-factory-server.h>
 
 #include <oni-core/entities/oni-entities-manager.h>
 

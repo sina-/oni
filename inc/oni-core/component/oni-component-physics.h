@@ -120,12 +120,47 @@ namespace oni {
 
         template<class Archive>
         void
-        serialize(Archive &archive) {}
+        serialize(Archive &archive) {
+            // NOTE: Values are not named like most types since I don't need to read them from json. Serialization is
+            // only used for networking.
+            archive(velocityAbsolute,
+                    angularVelocity,
+                    steer,
+                    steerAngle,
+                    inertia,
+                    wheelBase,
+                    axleWeightRatioFront,
+                    axleWeightRatioRear,
+                    rpm,
+                    maxVelocityAbsolute,
+                    slipAngleFront,
+                    slipAngleRear,
+                    velocity,
+                    velocityLocal,
+                    acceleration,
+                    accelerationLocal,
+                    accelerating,
+                    slippingFront,
+                    slippingRear,
+                    smoothSteer,
+                    safeSteer,
+                    distanceFromCamera,
+                    isColliding);
+        }
     };
 
-    ONI_ENUM_DEF(BodyType, { 0, "Unknown" }, { 1, "Static" }, { 2, "Kinematic" }, { 3, "Dynamic" })
+    ONI_ENUM_DEF(BodyType,
+                 { 0, "Unknown" },
+                 { 1, "Static" },
+                 { 2, "Kinematic" },
+                 { 3, "Dynamic" })
 
-    ONI_ENUM_DEF(PhysicalCategory, { 0, "Unknown" }, { 1, "Vehicle" }, { 2, "RaceCar" }, { 3, "Rocket" }, { 4, "Wall" },
+    ONI_ENUM_DEF(PhysicalCategory,
+                 { 0, "Unknown" },
+                 { 1, "Vehicle" },
+                 { 2, "RaceCar" },
+                 { 3, "Rocket" },
+                 { 4, "Wall" },
                  { 5, "Projectile" })
 
     struct PhysicalCatPair {

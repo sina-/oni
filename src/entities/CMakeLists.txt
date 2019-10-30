@@ -4,7 +4,7 @@ add_library(oni-core-entities
         oni-entities-manager.cpp
         oni-entities-entity.cpp
         oni-entities-factory.cpp
-        oni-entities-factory-client.cpp oni-entities-factory-server.cpp)
+        )
 
 target_compile_features(oni-core-entities
         PUBLIC
@@ -26,11 +26,6 @@ target_link_libraries(oni-core-entities
         PUBLIC
         oni-core-math
         oni-core-physics
-        # TODO: I rather not have this dependencies, once I have figured out how entities
-        # are initliazed for sync'ed and local types, then it would be obvoius if I have
-        # to delay full initialization or not and then decide if this lib needs all these
-        # dependencies to fully initialize entities
-        oni-core-graphic
         PRIVATE
         ${BOX2D_LIBRARY}
         )

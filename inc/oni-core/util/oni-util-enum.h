@@ -72,10 +72,16 @@ namespace oni {
                 return N;
             }
 
+            // NOTE: Implicit so that this class can be used in switch statements
+            inline constexpr operator i32() const {
+                return id;
+            }
+
             template<class Archive>
             void
             save(Archive &archive) const {
-                archive("name", name.str);
+                // TODO: Not super happy about this, would it allocate?
+                archive("name", std::string(name.str));
             }
 
             template<class Archive>

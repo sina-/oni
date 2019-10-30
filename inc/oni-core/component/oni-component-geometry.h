@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/math/oni-math-vec2.h>
 #include <oni-core/math/oni-math-vec3.h>
 #include <oni-core/math/oni-math-vec4.h>

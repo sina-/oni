@@ -143,7 +143,7 @@ namespace oni {
     TextureManager::_cacheImage(const ImageAsset &asset) {
         assert(asset.name.hash.value);
         assert(!asset.name.str.empty());
-        assert(!asset.path.value.empty());
+        assert(!asset.path.path.empty());
         auto image = mImageMap.find(asset.name.hash);
         if (image != mImageMap.end()) {
             assert(false);
@@ -153,7 +153,7 @@ namespace oni {
         FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
         FIBITMAP *dib = nullptr;
 
-        const auto path = asset.path.value.c_str();
+        const auto path = asset.path.path.c_str();
 
         fif = FreeImage_GetFileType(path, 0);
         if (fif == FIF_UNKNOWN) {

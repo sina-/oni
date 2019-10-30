@@ -83,10 +83,9 @@ namespace oni {
     };
 
     class System_SplatOnRest : public SystemTemplate<
-            Tag_SplatOnRest,
+            SplatOnRest,
             PhysicalBody,
             Scale,
-            EntityAssetsPack,
             WorldP3D,
             Orientation> {
     public:
@@ -95,10 +94,9 @@ namespace oni {
     protected:
         void
         update(EntityTickContext &,
-               Tag_SplatOnRest &,
+               SplatOnRest &,
                PhysicalBody &,
                Scale &,
-               EntityAssetsPack &,
                WorldP3D &,
                Orientation &) override;
 

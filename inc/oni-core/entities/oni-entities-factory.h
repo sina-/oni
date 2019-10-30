@@ -1,17 +1,12 @@
 #pragma once
 
-#include <string>
 #include <functional>
-#include <map>
-
-#include <entt/core/hashed_string.hpp>
+#include <unordered_map>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-entity.h>
 #include <oni-core/entities/oni-entities-structure.h>
-#include <oni-core/fwd.h>
-#include <oni-core/util/oni-util-file.h>
 #include <oni-core/util/oni-util-hash.h>
+#include <oni-core/util/oni-util-structure.h>
 
 namespace cereal {
     class JSONInputArchive;
@@ -26,33 +21,47 @@ namespace oni {
 
     class EntityFactory {
     public:
-        explicit EntityFactory(FilePath,
-                               TextureManager &);
+        explicit EntityFactory(EntityDefDirPath &&);
+
+        // TODO: Similar to Assets, I should just pass an index file to retrieve all the entity types. Or even
+        // better is to just set the top directory and let the factory traverse and index all the types??
+        void
+        registerEntityType_Canon(const EntityName &name);
 
         void
-        registerEntityType(const EntityType_Name &);
+        registerEntityType_Extra(const EntityName &name);
 
         void
         registerComponentFactory(const Component_Name &,
                                  ComponentFactory &&);
 
         EntityID
-        createEntity(EntityManager &,
-                     const EntityType_Name &);
-
-    private:
-        const FilePath &
-        getEntityResourcePath(const EntityType_Name &);
+        createEntity_Canon(EntityManager &,
+                           const EntityName &);
 
         void
-        postProcess(EntityManager &,
-                    EntityID);
+        createEntityExtras(EntityManager &mainEm,
+                           EntityManager &supportEm,
+                           EntityID,
+                           const EntityName &);
+
+    protected:
+        const EntityDefDirPath &
+        _getEntityPath_Canon(const EntityName &name);
+
+        const EntityDefDirPath &
+        _getEntityPath_Extra(const EntityName &name);
+
+        virtual void
+        _postProcess(EntityManager &,
+                     EntityID);
+
+    protected:
+        EntityDefDirPath mEntityResourcePath{};
 
     private:
         std::unordered_map<Hash, ComponentFactory> mComponentFactory{};
-        std::unordered_map<EntityType_Name, FilePath> mEntityResourcePathLookup{};
-        FilePath mEntityResourcePath{};
-
-        TextureManager &mTextureManager;
+        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Canon{};
+        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Extra{};
     };
 }

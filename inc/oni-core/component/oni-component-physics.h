@@ -1,10 +1,11 @@
 #pragma once
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/math/oni-math-vec3.h>
 #include <oni-core/math/oni-math-vec2.h>
 #include <cmath>
+#include <oni-core/util/oni-util-enum.h>
 
 
 class b2Body;
@@ -38,6 +39,35 @@ namespace oni {
 
         r64 gearRatio{2.7f};
         r64 differentialRatio{3.4f};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive("gravity", gravity);
+            archive("mass", mass);
+            archive("inertialScale", inertialScale);
+            archive("halfWidth", halfWidth);
+            archive("cgToFront", cgToFront);
+            archive("cgToRear", cgToRear);
+            archive("cgToFrontAxle", cgToFrontAxle);
+            archive("cgToRearAxle", cgToRearAxle);
+            archive("cgHeight", cgHeight);
+            archive("wheelRadius", wheelRadius);
+            archive("wheelWidth", wheelWidth);
+            archive("tireGrip", tireGrip);
+            archive("lockGrip", lockGrip);
+            archive("engineForce", engineForce);
+            archive("brakeForce", brakeForce);
+            archive("eBrakeForce", eBrakeForce);
+            archive("weightTransfer", weightTransfer);
+            archive("maxSteer", maxSteer);
+            archive("cornerStiffnessFront", cornerStiffnessFront);
+            archive("cornerStiffnessRear", cornerStiffnessRear);
+            archive("airResist", airResist);
+            archive("rollResist", rollResist);
+            archive("gearRatio", gearRatio);
+            archive("differentialRatio", differentialRatio);
+        }
     };
 
     struct Car {
@@ -86,27 +116,17 @@ namespace oni {
                                    std::sqrt(c.rollResist * c.rollResist + 4 * c.airResist * c.engineForce)) /
                                   (-2 * c.airResist);
         }
+
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {}
     };
 
-    enum class BodyType : oni::u8 {
-        UNKNOWN = 0,
-        STATIC = 1,
-        KINEMATIC = 2,
-        DYNAMIC = 3,
-    };
+    ONI_ENUM_DEF(BodyType, { 0, "Unknown" }, { 1, "Static" }, { 2, "Kinematic" }, { 3, "Dynamic" })
 
-    enum class PhysicalCategory : oni::u8 {
-        UNKNOWN,
-
-        GENERIC,
-        VEHICLE,
-        RACE_CAR,
-        ROCKET,
-        WALL,
-        PROJECTILE,
-
-        LAST
-    };
+    ONI_ENUM_DEF(PhysicalCategory, { 0, "Unknown" }, { 1, "Vehicle" }, { 2, "RaceCar" }, { 3, "Rocket" }, { 4, "Wall" },
+                 { 5, "Projectile" })
 
     struct PhysicalCatPair {
         PhysicalCategory a{};
@@ -232,11 +252,27 @@ namespace oni {
         r32 friction{1.f};
         r32 gravityScale{1.f};
         bool highPrecision{false};
-        bool colliding{false};
         bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other
         bool isSensor{false};
-        PhysicalCategory physicalCategory{PhysicalCategory::UNKNOWN};
-        BodyType bodyType{BodyType::UNKNOWN};
+        BodyType bodyType{};
+        PhysicalCategory physicalCategory{};
+
+        bool colliding{false};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive("linearDamping", linearDamping);
+            archive("angularDamping", angularDamping);
+            archive("density", density);
+            archive("friction", friction);
+            archive("gravityScale", gravityScale);
+            archive("highPrecision", highPrecision);
+            archive("collisionWithinCategory", collisionWithinCategory);
+            archive("isSensor", isSensor);
+            archive("bodyType", bodyType);
+            archive("physicalCategory", physicalCategory);
+        }
     };
 
     struct PhysicalBody {

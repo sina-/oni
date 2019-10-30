@@ -6,7 +6,7 @@
 #include <oni-core/component/oni-component-audio.h>
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/math/oni-math-function.h>
 
 
@@ -26,15 +26,21 @@ namespace oni {
         Event_SplatOnDeath(const WorldP3D &pos,
                            const Scale &scale,
                            const Orientation &ornt,
-                           const EntityAssetsPack &tag,
+                           const Material_Definition &md,
                            std::function<void()> func
-        ) : pos(pos), scale(scale), tag(tag), ornt(ornt), callback(std::move(func)) {}
+        ) : pos(pos), scale(scale), md(md), ornt(ornt), callback(std::move(func)) {}
 
         WorldP3D pos{};
         Scale scale{};
         Orientation ornt{};
-        EntityAssetsPack tag{};
+        Material_Definition md{};
         std::function<void()> callback{};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive(pos, scale, ornt, md);
+        }
     };
 
     struct Event_SplatOnRest {
@@ -43,14 +49,14 @@ namespace oni {
         Event_SplatOnRest(const WorldP3D &pos,
                           const Scale &scale,
                           const Orientation &ornt,
-                          const EntityAssetsPack &tag,
+                          const Material_Definition &md,
                           std::function<void()> func
-        ) : pos(pos), scale(scale), tag(tag), ornt(ornt), callback(std::move(func)) {}
+        ) : pos(pos), scale(scale), md(md), ornt(ornt), callback(std::move(func)) {}
 
         WorldP3D pos{};
         Scale scale{};
         Orientation ornt{};
-        EntityAssetsPack tag{};
+        Material_Definition md{};
         std::function<void()> callback{};
     };
 

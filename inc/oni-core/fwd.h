@@ -11,3 +11,4 @@
 #include <oni-core/network/oni-network-fwd.h>
 #include <oni-core/physics/oni-physics-fwd.h>
 #include <oni-core/system/oni-system-fwd.h>
+#include <oni-core/util/oni-util-fwd.h>

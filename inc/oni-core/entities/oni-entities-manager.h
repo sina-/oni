@@ -9,7 +9,7 @@
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-tag.h>
 #include <oni-core/component/oni-component-visual.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/entities/oni-entities-view.h>
 #include <oni-core/entities/oni-entities-group.h>
 #include <oni-core/math/oni-math-fwd.h>
@@ -45,10 +45,6 @@ namespace oni {
         setScale(EntityID,
                  r32 x,
                  r32 y);
-
-        void
-        setEntityAssetsPack(EntityID,
-                            EntityAssetsPack);
 
         void
         setColor(EntityID,
@@ -90,11 +86,7 @@ namespace oni {
                        r32 ornt);
 
         void
-        createPhysics(
-                EntityID,
-                const WorldP3D &worldPos,
-                const vec2 &size,
-                const r32 ornt);
+        createPhysics(EntityID);
 
         void
         setText(EntityID,
@@ -356,25 +348,7 @@ namespace oni {
 
     public:
         EntityID
-        createEntity(const EntityType &);
-
-        EntityID
-        createEntity(const EntityType_Name &);
-
-        // TODO: Kill this shit now that I have EntityType_Name as the identifier of an entity
-        /**
-         * This overload could be used by the game code to define custom types using enums.
-         *
-         * For example you could define:
-         * enum class EntityTypeGame : EntityType_Storage {
-         *  PLAYER = 1,
-         *  FLYING_MOB = 2,
-         * };
-         *
-         * @return
-         */
-        EntityID
-        createEntity(const EntityType_Storage &);
+        createEntity(const EntityName &);
 
         template<class Component, class... Args>
         Component &
@@ -409,10 +383,6 @@ namespace oni {
         assignTag(EntityID id) {
             mRegistry->assign<Tag>(id);
         }
-
-        void
-        registerEntityDebugName(const EntityType &,
-                                std::string &&name);
 
         void
         printEntityType(EntityID id) const;
@@ -471,8 +441,6 @@ namespace oni {
 
         std::unordered_set<EntityID> mEntitiesToDelete{};
         std::vector<DeletedEntity> mDeletedEntities{};
-        // TODO: I shouldn't be needing this after the changes to entity name
-        std::unordered_map<decltype(EntityType::value), std::string> mEntityDebugNameLookup{};
         std::unique_ptr<EventRateLimiter> mEventRateLimiter;
     };
 }

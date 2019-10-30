@@ -13,14 +13,7 @@
 namespace oni {
     class AssetFilesIndex {
     public:
-        explicit AssetFilesIndex(const ImageIndexFilePath &);
-
-        void
-        setPath(Sound_Tag,
-                std::string_view);
-
-        const std::string &
-        getAssetFilePath(Sound_Tag);
+        explicit AssetFilesIndex(ImageIndexFilePath &&);
 
         auto
         imageAssetsBegin() const {

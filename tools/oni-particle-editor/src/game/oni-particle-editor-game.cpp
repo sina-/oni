@@ -6,7 +6,7 @@
 #include <oni-core/asset/oni-asset-manager.h>
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/entities/oni-entities-factory.h>
+#include <oni-core/entities/oni-entities-factory-client.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 #include <oni-core/game/oni-game-event.h>
 #include <oni-core/graphic/oni-graphic-brush.h>
@@ -25,19 +25,19 @@
 
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
-        mAssetFilesIdx = new oni::AssetFilesIndex(ImageIndexFilePath{"oni-resources/textures/"});
+        mAssetFilesIdx = new AssetFilesIndex({{"oni-resources/textures", "index.json"}});
         mTextureMng = new oni::TextureManager(*mAssetFilesIdx);
         mInput = new oni::Input();
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
-        mEntityFactory = new oni::EntityFactory({"oni-resources/entities/"}, *mTextureMng);
+        mEntityFactory = new oni::EntityFactory_Client({"oni-resources/entities/", ""}, *mTextureMng);
 
         constexpr auto test = HashedString("WHAT");
         // TODO: I shouldn't need to do this. I should just pass a file path of all the relevant entities and the
         // factory should go through all the files and register them.
-        mEntityFactory->registerEntityType(EntityType_Name{"particle-emitter"});
-        mEntityFactory->registerEntityType(EntityType_Name{"simple-particle"});
+        mEntityFactory->registerEntityType_Canon({"particle-emitter"});
+        mEntityFactory->registerEntityType_Canon({"simple-particle"});
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -200,8 +200,8 @@ namespace oni {
                     case PARTICLE_EMITTER: {
                         // TODO: SO I need another overload of this function, as close as possible to json, that
                         // accepts what particle editor has to offer for creating entities!
-                        constexpr auto particleEmitter = EntityType_Name{"particle-emitter"};
-                        mEntityFactory->createEntity(*mEntityMng, particleEmitter);
+                        constexpr auto particleEmitter = EntityName{"particle-emitter"};
+                        mEntityFactory->createEntity_Canon(*mEntityMng, particleEmitter);
                         break;
                     }
                     default: {

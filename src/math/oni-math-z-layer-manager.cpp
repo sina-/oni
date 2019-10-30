@@ -17,36 +17,40 @@ namespace oni {
         mZLayer[ZLayerDef::LAYER_9] = mZLayer[ZLayerDef::LAYER_8] + mMajorLayerDelta;
 
         mZLayerTop = mZLayer;
-
-        constructEntityLayers();
     }
 
-    ZLayerManager::ZLayerManager(const ZLayer &zLayer) : mZLayer(zLayer) {
-        constructEntityLayers();
-    }
+    ZLayerManager::ZLayerManager(const ZLayer &zLayer) : mZLayer(zLayer) {}
 
     void
-    ZLayerManager::constructEntityLayers() {
-    }
-
-    void
-    ZLayerManager::setZForEntity(const EntityType &t,
+    ZLayerManager::setZForEntity(const EntityName &name,
                                  ZLayerDef def) {
         auto layer = getNextZAtLayer(def);
-        mEntityZLayers.emplace(t.value, layer);
+        auto result = mEntityZLayers.emplace(name.hash, layer);
+        if (!result.second) {
+            assert(false);
+        }
     }
 
     void
-    ZLayerManager::setZForEntityEqual(const EntityType &src,
-                                      const EntityType &dest) {
-        assert(mEntityZLayers.find(src.value) != mEntityZLayers.end());
-        mEntityZLayers[dest.value] = mEntityZLayers[src.value];
+    ZLayerManager::setZForEntityEqual(const EntityName &src,
+                                      const EntityName &dest) {
+        auto layer = mEntityZLayers.find(src.hash);
+        if (layer != mEntityZLayers.end()) {
+            auto result = mEntityZLayers.emplace(dest.hash, layer->second);
+            if (!result.second) {
+                assert(false);
+            }
+        }
     }
 
     r32
-    ZLayerManager::getZForEntity(EntityType type) const {
-        assert(mEntityZLayers.find(type.value) != mEntityZLayers.end());
-        return mEntityZLayers.at(type.value);
+    ZLayerManager::getZForEntity(EntityName type) const {
+        auto layer = mEntityZLayers.find(type.hash);
+        if (layer != mEntityZLayers.end()) {
+            return layer->second;
+        }
+        assert(false);
+        return 0.f;
     }
 
     r32

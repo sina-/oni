@@ -278,7 +278,7 @@ namespace oni {
     struct BrushTrail {
         bool initialized{false};
         bool active{true};
-        Texture texture{};
+        Image image{};
         r32 mass{1.f};
         r32 width{0.4f};
         Direction ornt{};

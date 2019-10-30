@@ -120,10 +120,11 @@ namespace oni {
             auto &propsA = em.get<PhysicalProperties>(it->pair.a);
             auto &propsB = em.get<PhysicalProperties>(it->pair.b);
             auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
-            if (pcPair.a == PhysicalCategory::RACE_CAR) {
+            constexpr auto raceCar = PhysicalCategory_GET("RaceCar");
+            if (pcPair.a == raceCar) {
                 _handleCarCollision(em, it->pair.a);
             }
-            if (pcPair.b == PhysicalCategory::RACE_CAR) {
+            if (pcPair.b == raceCar) {
                 _handleCarCollision(em, it->pair.b);
             }
 

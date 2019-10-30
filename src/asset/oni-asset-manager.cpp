@@ -6,12 +6,8 @@
 #include <cereal/external/rapidjson/document.h>
 
 namespace oni {
-    AssetFilesIndex::AssetFilesIndex(const ImageIndexFilePath &imagePath) {
-        mImageIndexFilePath = imagePath;
-        // TODO: Make this portable to other platforms
-        if (mImageIndexFilePath.value.back() != '/') {
-            mImageIndexFilePath.value.append("/");
-        }
+    AssetFilesIndex::AssetFilesIndex(ImageIndexFilePath &&imagePath) {
+        mImageIndexFilePath = std::move(imagePath);
 
         // TODO better split this up from the constructor and give the user possibility of loading these files
         // when they think it is the good time.
@@ -20,9 +16,7 @@ namespace oni {
 
     void
     AssetFilesIndex::_indexImages() {
-        auto jsonPath = mImageIndexFilePath.value;
-        // TODO: accept index.json value as param
-        std::ifstream jsonStream(jsonPath.append("index.json"));
+        std::ifstream jsonStream(mImageIndexFilePath.getFullPath());
         if (!jsonStream.is_open()) {
             assert(false);
             return;
@@ -42,16 +36,15 @@ namespace oni {
                 for (auto texture = textures->value.MemberBegin(); texture != textures->value.MemberEnd(); ++texture) {
                     if (texture->value.IsString()) {
                         auto name = texture->name.GetString();
-                        auto path = texture->value.GetString();
+                        auto relativeFileAndPath = texture->value.GetString();
+                        auto filePath = FilePath{mImageIndexFilePath.path.data(), relativeFileAndPath};
                         auto nameHash = HashedString::makeFromCStr(name);
-                        auto fullPath = mImageIndexFilePath.value;
-                        fullPath.append(path);
                         auto image = mImageAssetMap.find(nameHash.hash);
                         if (image != mImageAssetMap.end()) {
                             assert(false);
                             continue;
                         }
-                        mImageAssetMap.emplace(nameHash.hash, ImageAsset{FilePath{fullPath}, nameHash});
+                        mImageAssetMap.emplace(nameHash.hash, ImageAsset{filePath, nameHash});
                     } else {
                         assert(false);
                     }
@@ -62,17 +55,5 @@ namespace oni {
         } else {
             assert(false);
         }
-    }
-
-    const std::string &
-    AssetFilesIndex::getAssetFilePath(Sound_Tag tag) {
-        const auto &result = mSoundAssetPath[tag];
-        return result;
-    }
-
-    void
-    AssetFilesIndex::setPath(Sound_Tag tag,
-                             std::string_view path) {
-        mSoundAssetPath.emplace(tag, path);
     }
 }

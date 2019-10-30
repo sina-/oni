@@ -123,6 +123,22 @@ namespace oni {
             return hash.value != 0 && !str.empty();
         }
 
+        template<class Archive>
+        void
+        save(Archive &archive) const {
+            archive("name", str);
+        }
+
+        template<class Archive>
+        void
+        load(Archive &archive) {
+            std::string buffer{};
+            archive("name", buffer);
+            auto result = makeFromStr(std::move(buffer));
+            hash = result.hash;
+            str = result.str;
+        }
+
     private:
         inline static constexpr Hash
         _hash(const Hash partial,

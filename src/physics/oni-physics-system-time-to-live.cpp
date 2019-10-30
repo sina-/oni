@@ -11,17 +11,17 @@ namespace oni {
                               TimeToLive &ttl) {
         ttl.currentAge += etc.dt;
         if (ttl.currentAge > ttl.maxAge) {
-            if (etc.mng.has<Tag_SplatOnDeath>(etc.id)) {
+            if (etc.mng.has<SplatOnDeath>(etc.id)) {
                 auto &pos = etc.mng.get<WorldP3D>(etc.id);
                 auto &size = etc.mng.get<Scale>(etc.id);
-                auto &tag = etc.mng.get<EntityAssetsPack>(etc.id);
+                auto &sod = etc.mng.get<SplatOnDeath>(etc.id);
                 auto &ornt = etc.mng.get<Orientation>(etc.id);
 
                 auto callback = [&etc]() {
                     etc.mng.deleteEntity(etc.id);
                 };
 
-                etc.mng.enqueueEvent<Event_SplatOnDeath>(pos, size, ornt, tag, std::move(callback));
+                etc.mng.enqueueEvent<Event_SplatOnDeath>(pos, size, ornt, sod.md, std::move(callback));
             } else {
                 etc.mng.markForDeletion(etc.id);
             }

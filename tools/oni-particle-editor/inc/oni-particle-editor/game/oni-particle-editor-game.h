@@ -85,7 +85,7 @@ namespace oni {
         oni::TextureManager *mTextureMng{};
         oni::Window *mWindow{};
         oni::ZLayerManager *mZLayerMng{};
-        oni::EntityFactory *mEntityFactory{};
+        oni::EntityFactory_Client *mEntityFactory{};
 
         bool mWindowReady{false};
     };

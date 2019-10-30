@@ -292,7 +292,7 @@ namespace oni {
     };
 
     // TODO: Game code
-    enum class EntityAssetsPack : oni::u32 {
+    enum class __EntityAssetsPack : oni::u32 {
         UNKNOWN,
 
         RACE_CAR_DEFAULT,
@@ -497,8 +497,6 @@ namespace oni {
         u8 count = 1;
         GrowOverTime growth{};
 
-        EntityAssetsPack tag{};
-
         template<class Archive>
         void
         serialize(Archive &archive) {
@@ -517,9 +515,21 @@ namespace oni {
     struct AfterMark {
         Scale scale{1, 1};
         BrushType type{BrushType::COLOR};
-        union {
-            EntityAssetsPack tag = {};
-            Color color;
-        };
+        Material_Definition material{};
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            // TODO: Is this complete?
+            archive(material);
+        }
+    };
+
+    struct SplatOnDeath {
+        Material_Definition md{};
+    };
+
+    struct SplatOnRest {
+        Material_Definition md{};
     };
 }

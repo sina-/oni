@@ -9,8 +9,9 @@
 #include <Box2D/Dynamics/b2World.h>
 
 #include <oni-core/math/oni-math-rand.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/entities/oni-entities-factory.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/physics/oni-physics.h>
 
 
@@ -123,8 +124,8 @@ namespace oni {
 
     void
     EntityManager::destroyAndTrack(EntityID id) {
-        auto type = mRegistry->get<EntityType>(id);
-        mDeletedEntities.push_back({id, type});
+        auto name = mRegistry->get<EntityName>(id);
+        mDeletedEntities.push_back({id, name});
         mRegistry->destroy(id);
     }
 
@@ -157,33 +158,15 @@ namespace oni {
     }
 
     EntityID
-    EntityManager::createEntity(const EntityType &type) {
+    EntityManager::createEntity(const EntityName &name) {
         assert(mSimMode == SimMode::SERVER || mSimMode == SimMode::CLIENT);
         auto id = mRegistry->create();
         if (mEntityOperationPolicy.track) {
             assert(mSimMode == SimMode::SERVER);
             assignTag<Tag_NetworkSyncEntity>(id);
         }
-        createComponent<EntityType>(id, type);
-        return id;
-    }
-
-    EntityID
-    EntityManager::createEntity(const EntityType_Name &name) {
-        assert(mSimMode == SimMode::SERVER || mSimMode == SimMode::CLIENT);
-        auto id = mRegistry->create();
-        if (mEntityOperationPolicy.track) {
-            assert(mSimMode == SimMode::SERVER);
-            assignTag<Tag_NetworkSyncEntity>(id);
-        }
-
         createComponent<EntityName>(id, name);
         return id;
-    }
-
-    EntityID
-    EntityManager::createEntity(const EntityType_Storage &t) {
-        return createEntity(EntityType{t});
     }
 
     void
@@ -230,16 +213,9 @@ namespace oni {
     }
 
     void
-    EntityManager::registerEntityDebugName(const EntityType &t,
-                                           std::string &&name) {
-        mEntityDebugNameLookup.emplace(t.value, std::move(name));
-    }
-
-    void
     EntityManager::printEntityType(EntityID id) const {
-        const auto &t = mRegistry->get<EntityType>(id);
-        const auto name = mEntityDebugNameLookup.at(t.value);
-        printf("%d, %s ", id, name.c_str());
+        const auto &name = mRegistry->get<EntityName>(id);
+        printf("%d, %s ", id, name.str.data());
         if (mRegistry->has<WorldP3D>(id)) {
             const auto &pos = mRegistry->get<WorldP3D>(id);
             pos.value.print();
@@ -256,14 +232,15 @@ namespace oni {
     }
 
     void
-    EntityManager::createPhysics(EntityID id,
-                                 const WorldP3D &pos,
-                                 const vec2 &size,
-                                 r32 ornt) {
+    EntityManager::createPhysics(EntityID id) {
         if (!mPhysics) {
             assert(false);
             return;
         }
+        const auto &size = mRegistry->get<Scale>(id);
+        const auto &pos = mRegistry->get<WorldP3D>(id);
+        const auto &ornt = mRegistry->get<Orientation>(id);
+
         auto &props = get<PhysicalProperties>(id);
         auto shape = b2PolygonShape{};
         shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
@@ -273,7 +250,7 @@ namespace oni {
 
         b2BodyDef bodyDef;
         bodyDef.bullet = props.highPrecision;
-        bodyDef.angle = ornt;
+        bodyDef.angle = ornt.value;
         bodyDef.linearDamping = props.linearDamping;
         bodyDef.angularDamping = props.angularDamping;
         bodyDef.gravityScale = props.gravityScale;
@@ -294,7 +271,7 @@ namespace oni {
                 assert(body);
 
                 if (!props.collisionWithinCategory) {
-                    fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCategory);
+                    fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCategory.id);
                 }
 
                 body->CreateFixture(&fixtureDef);
@@ -413,14 +390,6 @@ namespace oni {
         auto &scale = mRegistry->get<Scale>(id);
         scale.x = x;
         scale.y = y;
-    }
-
-    void
-    EntityManager::setEntityAssetsPack(EntityID id,
-                                       EntityAssetsPack tag) {
-
-        auto &ep = mRegistry->get<EntityAssetsPack>(id);
-        ep = tag;
     }
 
     void

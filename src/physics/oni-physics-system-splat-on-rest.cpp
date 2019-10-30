@@ -9,10 +9,9 @@ namespace oni {
 
     void
     System_SplatOnRest::update(EntityTickContext &etc,
-                               Tag_SplatOnRest &,
+                               SplatOnRest &sor,
                                PhysicalBody &body,
                                Scale &scale,
-                               EntityAssetsPack &eap,
                                WorldP3D &pos,
                                Orientation &ornt) {
         if (!body.value->IsAwake()) {
@@ -21,7 +20,7 @@ namespace oni {
             };
             // TODO: This will create copy for all. Good place for profiling and optimization as these entities
             // are often particles
-            etc.mng.enqueueEvent<Event_SplatOnRest>(pos, scale, ornt, eap, std::move(callback));
+            etc.mng.enqueueEvent<Event_SplatOnRest>(pos, scale, ornt, sor.md, std::move(callback));
         }
 
     }

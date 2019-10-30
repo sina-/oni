@@ -10,7 +10,7 @@
 #include <cereal/types/map.hpp>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/network/oni-network-packet.h>
 #include <oni-core/component/oni-component-visual.h>
@@ -112,20 +112,6 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              Event_SplatOnDeath &data) {
-        archive(data.pos, data.scale, data.tag);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              DeletedEntity &data) {
-        archive(data.id, data.type);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
               Rectangle &data) {
         archive(data.A, data.B, data.C, data.D);
     }
@@ -162,13 +148,6 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              AfterMark &data) {
-        archive(data.tag);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
               EntityAttachment &data) {
         archive(data.entities);
     }
@@ -178,13 +157,6 @@ namespace oni {
     serialize(Archive &archive,
               EntityAttachee &data) {
         archive(data.entityID);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              EntityType &data) {
-        archive(data.value);
     }
 
     template<class Archive>

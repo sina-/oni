@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include <oni-core/component/oni-component-visual.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/graphic/oni-graphic-camera.h>
 #include <oni-core/math/oni-math-fwd.h>
 
@@ -16,15 +16,15 @@ namespace oni {
         explicit ZLayerManager(const ZLayer &);
 
         void
-        setZForEntity(const EntityType &,
+        setZForEntity(const EntityName &,
                       ZLayerDef);
 
         void
-        setZForEntityEqual(const EntityType &src,
-                           const EntityType &dest);
+        setZForEntityEqual(const EntityName &src,
+                           const EntityName &dest);
 
         r32
-        getZForEntity(EntityType) const;
+        getZForEntity(EntityName) const;
 
         ZLayer
         getZLayer() const;
@@ -33,9 +33,6 @@ namespace oni {
         r32
         getNextZAtLayer(ZLayerDef);
 
-        void
-        constructEntityLayers();
-
     private:
         const r32 mMajorLayerDelta{0.1f};
         const r32 mMinorLayerDelta{0.001f};
@@ -43,6 +40,6 @@ namespace oni {
         ZLayer mZLayer{};
         ZLayer mZLayerTop{};
 
-        std::unordered_map<decltype(EntityType::value), r32> mEntityZLayers;
+        std::unordered_map<Hash, r32> mEntityZLayers;
     };
 }

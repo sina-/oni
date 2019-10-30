@@ -35,5 +35,11 @@ namespace oni {
 
     struct SoundPitch {
         r32 value = 1.f;
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+            archive("value", value);
+        }
     };
 }

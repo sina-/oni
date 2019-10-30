@@ -48,7 +48,6 @@ namespace oni {
     enum class NumAnimationFrames : oni::u8;
     enum class MaterialTransition_EndBehavior : oni::u8;
     enum class BrushType : oni::u8;
-    enum class EntityAssetsPack : oni::u32;
     enum class MaterialTransition_Type : oni::u8;
     enum class FadeFunc : oni::u8;
 

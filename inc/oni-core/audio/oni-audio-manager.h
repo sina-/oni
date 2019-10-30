@@ -8,7 +8,7 @@
 #include <oni-core/audio/oni-audio-fwd.h>
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/component/oni-component-audio.h>
-#include <oni-core/entities/oni-entities-entity.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/entities/oni-entities-fwd.h>
 #include <oni-core/game/oni-game-fwd.h>
 #include <oni-core/component/oni-component-physics.h>

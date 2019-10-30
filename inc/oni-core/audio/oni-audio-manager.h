@@ -70,7 +70,7 @@ namespace oni {
             operator()(FMOD::ChannelGroup *channel) const;
         };
 
-        using CollisionSoundTag = u8p;
+        using CollisionSoundTag = u32p;
         using EntitySoundTag = u32p;
 
         struct EntityChannel {

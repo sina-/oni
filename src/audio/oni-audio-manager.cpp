@@ -46,7 +46,7 @@ namespace oni {
 
     void
     AudioManager::playCollisionSoundEffect(const Event_Collision &event) {
-        static_assert(sizeof(event.pcPair.a) == sizeof(u8), "Hashing will fail due to size mismatch");
+        static_assert(sizeof(event.pcPair.a.id) == sizeof(i32), "Hashing will fail due to size mismatch");
         auto collisionTag = createCollisionEffectID(event.pcPair);
         auto distance = mPlayerPos.value - event.pos.value;
         auto soundTag = mCollisionEffects[collisionTag];
@@ -58,14 +58,14 @@ namespace oni {
 
     AudioManager::CollisionSoundTag
     AudioManager::createCollisionEffectID(const PhysicalCatPair &pcp) {
-        auto a = enumCast(pcp.a);
-        auto b = enumCast(pcp.b);
+        auto a = pcp.a.id;
+        auto b = pcp.b.id;
 
         if (a > b) {
             std::swap(a, b); // Assuming soundEffect for A->B collision is same as B->A
         }
 
-        auto soundID = pack_u8(a, b);
+        auto soundID = pack_i32(a, b);
         return soundID;
     }
 

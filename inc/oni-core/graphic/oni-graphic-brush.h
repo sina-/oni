@@ -9,7 +9,7 @@ namespace oni {
         ~Brush() {}
 
         BrushType type{BrushType::COLOR};
-        Material_Definition md{};
+        Material_Definition material{};
         const Quad *shape_Quad{};
         const mat4 *model{}; // NOTE: Optional model transformation matrix if the quad is untransformed
     };

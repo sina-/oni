@@ -246,7 +246,7 @@ namespace oni {
         shape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
         // NOTE: This is non-owning pointer. physicsWorld owns it.
-        b2Body *body{};
+        b2Body *body = nullptr;
 
         b2BodyDef bodyDef;
         bodyDef.bullet = props.highPrecision;
@@ -263,7 +263,7 @@ namespace oni {
         fixtureDef.isSensor = props.isSensor;
 
         switch (props.bodyType) {
-            case BodyType::DYNAMIC : {
+            case BodyType_GET("Dynamic") : {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_dynamicBody;
@@ -277,7 +277,7 @@ namespace oni {
                 body->CreateFixture(&fixtureDef);
                 break;
             }
-            case BodyType::STATIC: {
+            case BodyType_GET("Static"): {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_staticBody;
@@ -286,7 +286,7 @@ namespace oni {
                 body->CreateFixture(&shape, 0.f);
                 break;
             }
-            case BodyType::KINEMATIC: {
+            case BodyType_GET("Kinematic"): {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_kinematicBody;
@@ -295,7 +295,6 @@ namespace oni {
                 body->CreateFixture(&fixtureDef);
                 break;
             }
-            case BodyType::UNKNOWN:
             default: {
                 assert(false);
                 break;

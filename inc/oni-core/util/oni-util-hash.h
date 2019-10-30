@@ -126,7 +126,8 @@ namespace oni {
         template<class Archive>
         void
         save(Archive &archive) const {
-            archive("name", str);
+            // TODO: Not super happy about this, would it allocate?
+            archive("name", std::string(str));
         }
 
         template<class Archive>

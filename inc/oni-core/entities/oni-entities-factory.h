@@ -32,7 +32,7 @@ namespace oni {
         registerEntityType_Extra(const EntityName &name);
 
         void
-        registerComponentFactory(const Component_Name &,
+        registerComponentFactory(const ComponentName &,
                                  ComponentFactory &&);
 
         EntityID

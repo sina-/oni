@@ -6,10 +6,11 @@
 #include <oni-core/entities/oni-entities-fwd.h>
 #include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/util/oni-util-hash.h>
+#include <oni-core/util/oni-util-enum.h>
 
 
 namespace oni {
-    struct Component_Name : public HashedString {
+    struct ComponentName : public HashedString {
     };
 
     struct EntityName : public HashedString {
@@ -103,5 +104,5 @@ namespace oni {
     };
 }
 
-DEFINE_STD_HASH_FUNCTIONS(oni::Component_Name)
+DEFINE_STD_HASH_FUNCTIONS(oni::ComponentName)
 DEFINE_STD_HASH_FUNCTIONS(oni::EntityName)

@@ -263,7 +263,7 @@ namespace oni {
         fixtureDef.isSensor = props.isSensor;
 
         switch (props.bodyType) {
-            case BodyType_GET("Dynamic") : {
+            case BodyType::GET("Dynamic") : {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_dynamicBody;
@@ -277,7 +277,7 @@ namespace oni {
                 body->CreateFixture(&fixtureDef);
                 break;
             }
-            case BodyType_GET("Static"): {
+            case BodyType::GET("Static"): {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_staticBody;
@@ -286,7 +286,7 @@ namespace oni {
                 body->CreateFixture(&shape, 0.f);
                 break;
             }
-            case BodyType_GET("Kinematic"): {
+            case BodyType::GET("Kinematic"): {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_kinematicBody;

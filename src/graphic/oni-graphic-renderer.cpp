@@ -14,9 +14,9 @@ namespace oni {
     Renderer::BlendSpec
     Renderer::getBlendSpec(Material_Finish type) {
         auto result = BlendSpec{};
-        auto constexpr solid = Material_Finish_GET("solid");
-        auto constexpr shinny = Material_Finish_GET("shinny");
-        auto constexpr translucent = Material_Finish_GET("translucent");
+        auto constexpr solid = Material_Finish::GET("solid");
+        auto constexpr shinny = Material_Finish::GET("shinny");
+        auto constexpr translucent = Material_Finish::GET("translucent");
         if (type == solid || type == translucent) {
             result.src = BlendMode::ONE;
             result.dest = BlendMode::ONE_MINUS_SRC_ALPHA;
@@ -33,9 +33,9 @@ namespace oni {
 
     Renderer::DepthSpec
     Renderer::getDepthSpec(Material_Finish type) {
-        auto constexpr solid = Material_Finish_GET("solid");
-        auto constexpr shinny = Material_Finish_GET("shinny");
-        auto constexpr translucent = Material_Finish_GET("translucent");
+        auto constexpr solid = Material_Finish::GET("solid");
+        auto constexpr shinny = Material_Finish::GET("shinny");
+        auto constexpr translucent = Material_Finish::GET("translucent");
         auto result = DepthSpec{};
         if (type == solid) {
             result.depthRead = true;

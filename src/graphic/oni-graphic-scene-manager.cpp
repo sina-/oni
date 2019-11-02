@@ -66,7 +66,7 @@ namespace oni {
         spec.renderTarget = nullptr;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
-        spec.finishType = Material_Finish_GET("solid");
+        spec.finishType = Material_Finish::GET("solid");
         setMVP(spec, true, false, true);
         begin(*mRendererTessellation, spec);
     }
@@ -195,7 +195,7 @@ namespace oni {
                 // TODO: Read this value from the entity
                 renderable.pt = PrimitiveTransforms::UI;
 
-                mRenderables[Material_Finish_GET("translucent").id].push(renderable);
+                mRenderables[Material_Finish::GET("translucent").id].push(renderable);
             }
         }
     }
@@ -207,7 +207,7 @@ namespace oni {
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
-            spec.finishType = *iter;
+            spec.finishType = {*iter};
             setMVP(spec, true, true, true);
 
             begin(*mRendererTessellation, spec);
@@ -276,7 +276,7 @@ namespace oni {
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
         // TODO: I should probably take this as an argument
-        spec.finishType = Material_Finish_GET("solid");
+        spec.finishType = Material_Finish::GET("solid");
         setMVP(spec, destBounds, model);
 
         begin(*mRendererQuad, spec);
@@ -292,7 +292,7 @@ namespace oni {
                                   const mat4 *model) {
         RenderSpec spec;
         // TODO: I should probably take this as an argument
-        spec.finishType = Material_Finish_GET("solid");
+        spec.finishType = Material_Finish::GET("solid");
         spec.renderTarget = &dest;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
@@ -308,7 +308,7 @@ namespace oni {
                         Texture &back) {
         RenderSpec spec;
         // TODO: I should probably take this as an argument
-        spec.finishType = Material_Finish_GET("solid");
+        spec.finishType = Material_Finish::GET("solid");
         spec.renderTarget = &back;
         spec.screenSize = getScreenSize();
         spec.zoom = mCamera.z;
@@ -461,22 +461,19 @@ namespace oni {
                                   WorldP3D &pos) {
         assert(etc.mng.getSimMode() == SimMode::CLIENT ||
                etc.mng.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
+
         auto transformed = applyParentTransforms(etc.mng, etc.id, pos, ornt);
         Brush brush;
         auto quad = Quad{};
         auto model = createTransformation(transformed.pos, transformed.ornt, mark.scale);
         switch (mark.type) {
             case BrushType::COLOR: {
-                brush.color = &mark.color;
+                brush.material = mark.material;
                 break;
             }
             case BrushType::TEXTURE: {
                 // TODO: Implement
                 assert(false);
-                break;
-            }
-            case BrushType::TEXTURE_TAG: {
-                brush.tag = mark.tag;
                 break;
             }
             default: {

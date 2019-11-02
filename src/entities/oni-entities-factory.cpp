@@ -10,6 +10,7 @@
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-manager.h>
+#include <oni-core/util/oni-util-enum.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
@@ -20,7 +21,7 @@
             auto &component = em.createComponent<COMPONENT_NAME>(id);                   \
             reader(component);                                                          \
         };                                                                              \
-        constexpr auto componentName = Component_Name{#COMPONENT_NAME};                 \
+        constexpr auto componentName = ComponentName{#COMPONENT_NAME};                  \
         factory->registerComponentFactory(componentName, std::move(cf));                \
 }
 
@@ -98,7 +99,7 @@ namespace oni {
     }
 
     void
-    EntityFactory::registerComponentFactory(const Component_Name &name,
+    EntityFactory::registerComponentFactory(const ComponentName &name,
                                             ComponentFactory &&cb) {
         assert(mComponentFactory.find(name.hash) == mComponentFactory.end());
         mComponentFactory.emplace(name.hash, std::move(cb));

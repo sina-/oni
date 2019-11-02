@@ -45,10 +45,7 @@ namespace oni {
         std::string_view str{};
         Hash hash{};
 
-        constexpr HashedString() = default;
-
-        constexpr HashedString(std::string_view data_,
-                               Hash hash_) noexcept: str(data_), hash(hash_) {}
+        inline constexpr HashedString() = default;
 
         /**
          *  This version does not own the string. The use case in mind is string literals

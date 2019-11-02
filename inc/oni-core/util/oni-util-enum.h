@@ -17,36 +17,27 @@
  */
 
 
-#define CONCAT(A, B) A ## B
-
-#define ONI_ENUM_DEF(NAME, ...)                                                                                                         \
-    namespace detail{ namespace {inline static const constexpr oni::detail::Enum storage_##NAME [] = { __VA_ARGS__};}} \
-    struct NAME : public oni::detail::EnumBase<                                                                        \
-            sizeof(detail::storage_##NAME) / sizeof(oni::detail::Enum), detail::storage_##NAME> {                      \
-       inline constexpr NAME() : EnumBase(0, detail::storage_##NAME[0].name) {}                                        \
-       inline constexpr NAME(oni::i32 id_, const oni::HashedString &name_) : EnumBase(id_, name_) {}                   \
-       inline constexpr NAME(const oni::detail::Enum& value_) : EnumBase(value_.id, value_.name) {}                    \
-    };                                                                                                                 \
-    template<oni::i32 n>                                                                                               \
-    inline static constexpr NAME                                                                                       \
-    CONCAT(NAME, _GET)(const oni::c8 (&name_)[n]) { return NAME::_convert<NAME>(NAME::_get(name_)); }
+#define ONI_ENUM_DEF(NAME, ...)                                                                                         \
+    namespace detail{ namespace {inline static const constexpr oni::Enum storage_##NAME [] = { __VA_ARGS__};}}          \
+    struct NAME : public oni::detail::EnumBase<                                                                         \
+            sizeof(detail::storage_##NAME) / sizeof(oni::Enum), detail::storage_##NAME> {                               \
+       template<oni::i32 n>                                                                                             \
+       inline static constexpr                                                                                          \
+       NAME GET(const oni::c8 (&name)[n])                                                                               \
+       { return {_get(name)};}                                                                                          \
+       inline constexpr bool operator==(const oni::HashedString &other) const { return other.hash == name.hash; }       \
+       inline constexpr bool operator!=(const oni::HashedString &other) const { return other.hash != name.hash; }       \
+};
 
 namespace oni {
+    struct Enum {
+        oni::i32 id{};
+        oni::HashedString name{};
+    };
+
     namespace detail {
-        struct Enum {
-            oni::i32 id;
-            oni::HashedString name;
-        };
-
         template<oni::i32 N, auto v>
-        struct EnumBase {
-            oni::i32 id;
-            oni::HashedString name;
-
-            inline constexpr
-            EnumBase(oni::i32 id_,
-                     oni::HashedString name_) noexcept : id(id_), name(name_) {}
-
+        struct EnumBase : public Enum {
             inline static constexpr auto
             begin() {
                 return storage;
@@ -108,16 +99,11 @@ namespace oni {
                 return result.data();
             }
 
+        protected:
             template<oni::i32 n>
             static inline constexpr Enum
             _get(const oni::c8 (&name_)[n]) {
                 return _find(oni::HashedString::makeHashFromLiteral(name_), 0, storage);
-            }
-
-            template<class T>
-            inline static constexpr T
-            _convert(const Enum &value) {
-                return T(value.id, value.name);
             }
 
         private:
@@ -146,7 +132,7 @@ namespace oni {
                     }
                 }
                 assert(false);
-                id = 0;
+                id = INVALID.id;
                 name = INVALID.name;
             }
 
@@ -155,4 +141,21 @@ namespace oni {
             static inline const constexpr Enum INVALID = {0, "__INVALID__"};
         };
     }
+}
+
+namespace std {
+    template<>
+    class hash<oni::Enum> {
+    public:
+        constexpr size_t
+        operator()(oni::Enum const &hs) const {
+            return hs.name.hash.value;
+        }
+
+        constexpr bool
+        operator()(const oni::Enum &lhs,
+                   const oni::Enum &rhs) const {
+            return lhs.name.hash == rhs.name.hash;
+        }
+    };
 }

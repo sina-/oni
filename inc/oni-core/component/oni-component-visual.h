@@ -253,7 +253,6 @@ namespace oni {
     enum class BrushType : oni::u8 {
         COLOR,
         TEXTURE,
-        TEXTURE_TAG,
     };
 
     enum class NumAnimationFrames : oni::FrameID {
@@ -521,8 +520,7 @@ namespace oni {
         template<class Archive>
         void
         serialize(Archive &archive) {
-            // TODO: Is this complete?
-            archive(material);
+            archive(material, type);
         }
     };
 

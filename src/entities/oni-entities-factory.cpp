@@ -199,10 +199,10 @@ namespace oni {
     }
 
     void
-    EntityFactory::createEntityExtras(EntityManager &mainEm,
-                                      EntityManager &supportEm,
-                                      EntityID id,
-                                      const EntityName &name) {
+    EntityFactory::createEntity_Extras(EntityManager &mainEm,
+                                       EntityManager &supportEm,
+                                       EntityID id,
+                                       const EntityName &name) {
         auto fp = _getEntityPath_Extra(name);
         if (fp.path.empty()) {
             return;

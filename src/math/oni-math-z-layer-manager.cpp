@@ -22,8 +22,8 @@ namespace oni {
     ZLayerManager::ZLayerManager(const ZLayer &zLayer) : mZLayer(zLayer) {}
 
     void
-    ZLayerManager::setZForEntity(const EntityName &name,
-                                 ZLayerDef def) {
+    ZLayerManager::registerZ(const EntityName &name,
+                             ZLayerDef def) {
         auto layer = getNextZAtLayer(def);
         auto result = mEntityZLayers.emplace(name.hash, layer);
         if (!result.second) {
@@ -32,8 +32,8 @@ namespace oni {
     }
 
     void
-    ZLayerManager::setZForEntityEqual(const EntityName &src,
-                                      const EntityName &dest) {
+    ZLayerManager::registerEqualZ(const EntityName &src,
+                                  const EntityName &dest) {
         auto layer = mEntityZLayers.find(src.hash);
         if (layer != mEntityZLayers.end()) {
             auto result = mEntityZLayers.emplace(dest.hash, layer->second);

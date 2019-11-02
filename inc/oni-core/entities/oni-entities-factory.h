@@ -40,10 +40,10 @@ namespace oni {
                            const EntityName &);
 
         void
-        createEntityExtras(EntityManager &mainEm,
-                           EntityManager &supportEm,
-                           EntityID,
-                           const EntityName &);
+        createEntity_Extras(EntityManager &mainEm,
+                            EntityManager &supportEm,
+                            EntityID id,
+                            const EntityName &name);
 
     protected:
         const EntityDefDirPath &

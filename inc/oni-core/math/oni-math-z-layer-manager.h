@@ -16,12 +16,12 @@ namespace oni {
         explicit ZLayerManager(const ZLayer &);
 
         void
-        setZForEntity(const EntityName &,
-                      ZLayerDef);
+        registerZ(const EntityName &name,
+                  ZLayerDef def);
 
         void
-        setZForEntityEqual(const EntityName &src,
-                           const EntityName &dest);
+        registerEqualZ(const EntityName &src,
+                       const EntityName &dest);
 
         r32
         getZForEntity(EntityName) const;

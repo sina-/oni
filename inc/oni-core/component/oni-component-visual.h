@@ -364,6 +364,11 @@ namespace oni {
         std::vector<r32> advanceY{};
         std::vector<vec4> uv{};
         Material_Skin skin{}; // TODO: only the color is used for now, but for ease of use with Renderable I have skin, but when MaterialText is merged with the rest I can remove this field.
+
+        template<class Archive>
+        void
+        serialize(Archive &archive) {
+        }
     };
 
     // TODO: All these ENUMS needs UNKNOWN since I'm reading them from files.

@@ -202,7 +202,7 @@ namespace oni {
     };
 
     struct Image {
-        AssetName name{};
+        ImageName name{};
 
         u32 width{};
         u32 height{};
@@ -222,7 +222,7 @@ namespace oni {
             name = {HashedString::makeFromStr(std::move(name_))};
         }
 
-        inline static constexpr auto GENERATED = AssetName{"__GENERATED__"};
+        inline static constexpr auto GENERATED = ImageName{"__GENERATED__"};
     };
 
     struct UV {

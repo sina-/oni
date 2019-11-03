@@ -40,7 +40,7 @@ namespace oni {
         validSound(const SoundName &) const;
 
         bool
-        validImage(const AssetName&) const;
+        validImage(const ImageName&) const;
 
     private:
         void

@@ -21,7 +21,7 @@ namespace oni {
     }
 
     bool
-    AssetFilesIndex::validImage(const AssetName &name) const {
+    AssetFilesIndex::validImage(const ImageName &name) const {
         return mImageAssetMap.find(name.hash) != mImageAssetMap.end();
     }
 
@@ -60,7 +60,7 @@ namespace oni {
 
     void
     AssetFilesIndex::_indexSounds() {
-        auto maybeDoc = readJson(mImageIndexFilePath);
+        auto maybeDoc = readJson(mSoundIndexFilePath);
         if (!maybeDoc.has_value()) {
             assert(false);
             return;

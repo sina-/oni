@@ -1,6 +1,7 @@
 #pragma once
 
 #include <oni-core/util/oni-util-enum.h>
+#include <oni-core/asset/oni-asset-structure.h>
 
 namespace oni {
     enum class SoundPlaybackState : oni::u8 {
@@ -17,8 +18,6 @@ namespace oni {
 
         LAST
     };
-
-    using SoundName = HashedString;
 
     struct Sound {
         SoundName name = {};

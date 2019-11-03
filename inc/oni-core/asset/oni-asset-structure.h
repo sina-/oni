@@ -5,23 +5,17 @@
 #include <oni-core/util/oni-util-hash.h>
 
 namespace oni {
-    // TODO: It is a mess, what is an AssetName? What is ImageAsset? What is SoundName? Why textures
-    // use Image.AssetName as the user facing identifier? And How can I make sure users can use an
-    // Enum to pre-define the known types?
-    struct AssetName : public HashedString {
-    };
+    using ImageName = HashedString;
+    using SoundName = HashedString;
 
-    struct Asset {
+    struct ImageAsset {
         FilePath path{};
-        AssetName name{};
+        ImageName name{};
     };
 
-    struct ImageAsset : public Asset {
-    };
-
-    struct SoundAsset : public Asset {
+    struct SoundAsset {
+        FilePath path{};
+        SoundName name{};
     };
 }
-
-DEFINE_STD_HASH_FUNCTIONS(oni::AssetName)
 

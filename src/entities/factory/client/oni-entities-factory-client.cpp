@@ -21,7 +21,7 @@ namespace oni {
             auto &mf = em.get<Material_Definition>(id);
             mTextureMng.initTexture(mf.skin.texture);
         }
-        if(em.has<Material_Text>(id)) {
+        if (em.has<Material_Text>(id)) {
             auto &mt = em.get<Material_Text>(id);
             mFontMng.initializeText(mt);
         }

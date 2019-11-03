@@ -1,16 +1,11 @@
 #include <oni-core/entities/oni-entities-factory.h>
 
-// NOTE: For cereal to not throw exceptions and disable stupid noexcept constructor that throws in debug!
-#define JSON_NOEXCEPTION
-
 #include <cassert>
-#include <fstream>
-#include <istream>
-#include <cereal/archives/json.hpp>
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/util/oni-util-enum.h>
+#include <oni-core/json/oni-json.h>
 #include <oni-core/entities/oni-entities-serialization.h>
 
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
@@ -26,34 +21,12 @@
 }
 
 namespace {
-    std::optional<rapidjson::Document>
-    _readJson(const oni::EntityDefDirPath &fp) {
-        // TODO: Pre-load all the jsons
-        std::ifstream jsonStream(fp.path);
-        if (!jsonStream.is_open()) {
-            return {};
-        }
-
-        auto jsonString = std::string((std::istreambuf_iterator<char>(jsonStream)), std::istreambuf_iterator<char>());
-
-        auto document = rapidjson::Document();
-        if (document.Parse(jsonString.c_str()).HasParseError()) {
-            return {};
-        }
-
-        if (!document.IsObject()) {
-            return {};
-        }
-
-        return document;
-    }
-
     bool
     _createComponent(std::unordered_map<oni::Hash, oni::ComponentFactory> &factoryMap,
                      oni::EntityManager &manager,
                      oni::EntityID id,
                      rapidjson::Document &document,
-                     rapidjson::Document::MemberIterator component) {
+                     const rapidjson::Document::MemberIterator &component) {
         auto compoName = component->name.GetString();
 
         rapidjson::StringBuffer compStringBuff;
@@ -163,7 +136,7 @@ namespace oni {
             return EntityManager::nullEntity();
         }
 
-        auto maybeDoc = _readJson(fp);
+        auto maybeDoc = readJson(fp);
         if (!maybeDoc.has_value()) {
             assert(false);
             return EntityManager::nullEntity();
@@ -208,7 +181,7 @@ namespace oni {
             return;
         }
 
-        auto maybeDoc = _readJson(fp);
+        auto maybeDoc = readJson(fp);
         if (!maybeDoc.has_value()) {
             assert(false);
             return;

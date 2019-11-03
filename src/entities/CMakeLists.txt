@@ -28,4 +28,5 @@ target_link_libraries(oni-core-entities
         oni-core-physics
         PRIVATE
         ${BOX2D_LIBRARY}
+        oni-core-json
         )

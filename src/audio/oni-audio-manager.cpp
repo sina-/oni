@@ -33,8 +33,8 @@ namespace oni {
         result = mSystem->update();
         ERRCHECK(result);
 
-        loadChannels();
-        preLoadSounds();
+        _loadChannels();
+        _preLoadSounds();
     }
 
     void
@@ -47,17 +47,34 @@ namespace oni {
     void
     AudioManager::playCollisionSoundEffect(const Event_Collision &event) {
         static_assert(sizeof(event.pcPair.a.id) == sizeof(i32), "Hashing will fail due to size mismatch");
-        auto collisionTag = createCollisionEffectID(event.pcPair);
+        auto collisionTag = _createCollisionEffectID(event.pcPair);
         auto distance = mPlayerPos.value - event.pos.value;
         auto soundTag = mCollisionEffects[collisionTag];
-        assert(soundTag);
+        assert(soundTag.hash.value);
         auto sound = Sound{soundTag, ChannelGroup::EFFECT};
         auto pitch = SoundPitch{1.f};
         playOneShot(sound, pitch, distance);
     }
 
+    void
+    AudioManager::_preLoadSounds() {
+        for (auto iter = mAssetManager.soundAssetsBegin(); iter != mAssetManager.soundAssetsEnd(); ++iter) {
+            const auto &soundAsset = iter->second;
+            _loadSound(soundAsset);
+        }
+
+        // TODO:
+//        for (auto i = enumCast(PhysicalCategory::UNKNOWN);
+//             i < enumCast(PhysicalCategory::LAST);
+//             ++i) {
+//            auto id = _createCollisionEffectID({PhysicalCategory::ROCKET,
+//                                                static_cast<PhysicalCategory >(i)});
+//            mCollisionEffects[id] = Sound_Tag::COLLISION_ROCKET_UNKNOWN;
+//        }
+    }
+
     AudioManager::CollisionSoundTag
-    AudioManager::createCollisionEffectID(const PhysicalCatPair &pcp) {
+    AudioManager::_createCollisionEffectID(const PhysicalCatPair &pcp) {
         auto a = pcp.a.id;
         auto b = pcp.b.id;
 
@@ -70,7 +87,7 @@ namespace oni {
     }
 
     void
-    AudioManager::loadChannels() {
+    AudioManager::_loadChannels() {
         FMOD::ChannelGroup *group{nullptr};
         auto result = mSystem->createChannelGroup("effectsChannel", &group);
         ERRCHECK(result);
@@ -94,27 +111,6 @@ namespace oni {
     }
 
     void
-    AudioManager::preLoadSounds() {
-        // TODO: The sound must have been loaded using the asset packet instead of just going through all the
-        // sound types and shotgun loading all
-        for (auto i = enumCast(Sound_Tag::UNKNOWN) + 1;
-             i < enumCast(Sound_Tag::LAST);
-             ++i) {
-            auto tag = static_cast<Sound_Tag>(i);
-            auto path = mAssetManager.getAssetFilePath(tag);
-            loadSound(tag, path);
-        }
-
-        for (auto i = enumCast(PhysicalCategory::UNKNOWN);
-             i < enumCast(PhysicalCategory::LAST);
-             ++i) {
-            auto id = createCollisionEffectID({PhysicalCategory::ROCKET,
-                                               static_cast<PhysicalCategory >(i)});
-            mCollisionEffects[id] = Sound_Tag::COLLISION_ROCKET_UNKNOWN;
-        }
-    }
-
-    void
     AudioManager::kill(EntityID entityID) {
         for (auto it = mLoopingChannels.begin(); it != mLoopingChannels.end();) {
             if (it->second.entityID == entityID) {
@@ -128,40 +124,35 @@ namespace oni {
     }
 
     void
-    AudioManager::loadSound(Sound_Tag tag,
-                            std::string_view filePath) {
-//            if (mSounds[tag]) {
-//                return;
-//            }
-
+    AudioManager::_loadSound(const SoundAsset &asset) {
         FMOD::Sound *sound{};
-        auto result = mSystem->createSound(filePath.data(), FMOD_DEFAULT, nullptr, &sound);
+        auto result = mSystem->createSound(asset.path.getFullPath().data(), FMOD_DEFAULT, nullptr, &sound);
         ERRCHECK(result);
         assert(sound);
 
         std::unique_ptr<FMOD::Sound, FMODDeleter> value(sound);
-        mSounds.insert({tag, std::move(value)});
+        mSounds.emplace(asset.name.hash, std::move(value));
     }
 
     FMOD::Channel *
-    AudioManager::createChannel(const Sound &sound) {
+    AudioManager::_createChannel(const Sound &sound) {
         assert(mChannelGroup[sound.group]);
         auto *group = mChannelGroup[sound.group].get();
         assert(group);
-        assert(mSounds[sound.tag]);
+        assert(mSounds[sound.name.hash]);
 
         FMOD::Channel *channel{nullptr};
         auto paused = true;
-        auto result = mSystem->playSound(mSounds[sound.tag].get(), group, paused, &channel);
+        auto result = mSystem->playSound(mSounds[sound.name.hash].get(), group, paused, &channel);
         ERRCHECK(result);
 
         return channel;
     }
 
     FMOD::ChannelGroup *
-    AudioManager::getChannelGroup(ChannelGroup channelGroup) {
-        assert(mChannelGroup[channelGroup]);
-        auto *group = mChannelGroup[channelGroup].get();
+    AudioManager::_getChannelGroup(ChannelGroup cg) {
+        assert(mChannelGroup[cg]);
+        auto *group = mChannelGroup[cg].get();
         assert(group);
         return group;
     }
@@ -170,19 +161,19 @@ namespace oni {
     AudioManager::playOneShot(const Sound &sound,
                               const SoundPitch &pitch,
                               const vec3 &distance) {
-        auto *channel = createChannel(sound);
+        auto *channel = _createChannel(sound);
         assert(channel);
 
         auto result = channel->setMode(FMOD_3D);
         ERRCHECK(result);
 
-        setPitch(*channel, pitch.value);
+        _setPitch(*channel, pitch.value);
 
         // TODO: Does this matter?
         vec3 velocity{1.f, 1.f, 0.f};
-        set3DPos(*channel, distance, velocity);
+        _set3DPos(*channel, distance, velocity);
 
-        unPause(*channel);
+        _unPause(*channel);
     }
 
     static FMOD_RESULT
@@ -207,20 +198,22 @@ namespace oni {
     }
 
     AudioManager::EntitySoundTag
-    AudioManager::createEntitySoundID(Sound_Tag tag,
-                                      EntityID id) {
-        auto result = pack_u32(enumCast(tag), id);
-        return result;
+    AudioManager::_createEntitySoundID(SoundName,
+                                       EntityID id) {
+        // TODO: FIX THIS
+        assert(false);
+        //auto result = pack_u32(enumCast(tag), id);
+        return id;
     }
 
     AudioManager::EntityChannel &
-    AudioManager::getOrCreateLooping3DChannel(const Sound &sound,
-                                              EntityID entityID) {
-        auto id = createEntitySoundID(sound.tag, entityID);
+    AudioManager::_getOrCreateLooping3DChannel(const Sound &sound,
+                                               EntityID entityID) {
+        auto id = _createEntitySoundID(sound.name, entityID);
         if (mLoopingChannels.find(id) == mLoopingChannels.end()) {
             EntityChannel entityChannel;
             entityChannel.entityID = entityID;
-            entityChannel.channel = createChannel(sound);
+            entityChannel.channel = _createChannel(sound);
             entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
 
             mLoopingChannels[id] = entityChannel;
@@ -229,8 +222,8 @@ namespace oni {
     }
 
     void
-    AudioManager::setPitch(FMOD::Channel &channel,
-                           r32 pitch) {
+    AudioManager::_setPitch(FMOD::Channel &channel,
+                            r32 pitch) {
         if (pitch > 256) {
             pitch = 256;
         }
@@ -239,7 +232,7 @@ namespace oni {
     }
 
     bool
-    AudioManager::isPaused(FMOD::Channel &channel) {
+    AudioManager::_isPaused(FMOD::Channel &channel) {
         bool paused{false};
         auto result = channel.getPaused(&paused);
         ERRCHECK(result);
@@ -247,13 +240,13 @@ namespace oni {
     }
 
     void
-    AudioManager::unPause(FMOD::Channel &channel) {
+    AudioManager::_unPause(FMOD::Channel &channel) {
         auto result = channel.setPaused(false);
         ERRCHECK(result);
     }
 
     void
-    AudioManager::pause(FMOD::Channel &channel) {
+    AudioManager::_pause(FMOD::Channel &channel) {
         auto result = channel.setPaused(true);
         ERRCHECK(result);
     }
@@ -276,9 +269,9 @@ namespace oni {
     }
 
     void
-    AudioManager::set3DPos(FMOD::Channel &channel,
-                           const vec3 &pos,
-                           const vec3 &velocity) {
+    AudioManager::_set3DPos(FMOD::Channel &channel,
+                            const vec3 &pos,
+                            const vec3 &velocity) {
         FMOD_VECTOR fPos;
         fPos.x = pos.x;
         fPos.y = pos.y;
@@ -295,17 +288,11 @@ namespace oni {
         ERRCHECK(result);
     }
 
-    r32
-    AudioManager::getChannelGroupVolume(ChannelGroup channelGroup) {
-        auto result = mChannelVolume[channelGroup];
-        return result;
-    }
-
     void
     AudioManager::setChannelGroupVolume(ChannelGroup channelGroup,
                                         r32 volume) {
         auto effectiveVolume = volume * mMasterVolume;
-        auto *group = getChannelGroup(channelGroup);
+        auto *group = _getChannelGroup(channelGroup);
         auto result = group->setVolume(effectiveVolume);
         ERRCHECK(result);
         mChannelVolume[channelGroup] = volume;

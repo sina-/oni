@@ -23,12 +23,12 @@ namespace oni {
     struct Event_SplatOnDeath {
         Event_SplatOnDeath() = default;
 
-        Event_SplatOnDeath(const WorldP3D &pos,
-                           const Scale &scale,
-                           const Orientation &ornt,
-                           const Material_Definition &md,
-                           std::function<void()> func
-        ) : pos(pos), scale(scale), md(md), ornt(ornt), callback(std::move(func)) {}
+        Event_SplatOnDeath(const WorldP3D &pos_,
+                           const Scale &scale_,
+                           const Orientation &ornt_,
+                           const Material_Definition &md_,
+                           std::function<void()> func_
+        ) : pos(pos_), scale(scale_), md(md_), ornt(ornt_), callback(std::move(func_)) {}
 
         WorldP3D pos{};
         Scale scale{};
@@ -46,12 +46,12 @@ namespace oni {
     struct Event_SplatOnRest {
         Event_SplatOnRest() = default;
 
-        Event_SplatOnRest(const WorldP3D &pos,
-                          const Scale &scale,
-                          const Orientation &ornt,
-                          const Material_Definition &md,
-                          std::function<void()> func
-        ) : pos(pos), scale(scale), md(md), ornt(ornt), callback(std::move(func)) {}
+        Event_SplatOnRest(const WorldP3D &pos_,
+                          const Scale &scale_,
+                          const Orientation &ornt_,
+                          const Material_Definition &md_,
+                          std::function<void()> func_
+        ) : pos(pos_), scale(scale_), md(md_), ornt(ornt_), callback(std::move(func_)) {}
 
         WorldP3D pos{};
         Scale scale{};
@@ -71,10 +71,10 @@ namespace oni {
     struct Event_Collision {
         Event_Collision() = default;
 
-        Event_Collision(const WorldP3D &pos,
-                        const Impulse2D &impulse,
-                        const EntityPair &pair,
-                        const PhysicalCatPair &pcPair) : pos(pos), pair(pair), pcPair(pcPair), impulse(impulse) {}
+        Event_Collision(const WorldP3D &pos_,
+                        const Impulse2D &impulse_,
+                        const EntityPair &pair_,
+                        const PhysicalCatPair &pcPair_) : pos(pos_), pair(pair_), pcPair(pcPair_), impulse(impulse_) {}
 
 
         EntityPair pair{};
@@ -86,11 +86,11 @@ namespace oni {
     struct Event_SoundPlay {
         Event_SoundPlay() = default;
 
-        Event_SoundPlay(const WorldP3D &pos,
-                        const Sound_Tag &soundTag) : pos(pos), tag(soundTag) {}
+        Event_SoundPlay(const WorldP3D &pos_,
+                        const SoundName &name_) : pos(pos_), name(name_) {}
 
         WorldP3D pos{};
-        Sound_Tag tag{};
+        SoundName name{};
     };
 
     struct Event_EntityDeath {

@@ -5,6 +5,9 @@
 #include <oni-core/util/oni-util-hash.h>
 
 namespace oni {
+    // TODO: It is a mess, what is an AssetName? What is ImageAsset? What is SoundName? Why textures
+    // use Image.AssetName as the user facing identifier? And How can I make sure users can use an
+    // Enum to pre-define the known types?
     struct AssetName : public HashedString {
     };
 
@@ -13,13 +16,10 @@ namespace oni {
         AssetName name{};
     };
 
-    struct
-    ImageAsset : public Asset {
+    struct ImageAsset : public Asset {
     };
 
-    struct
-
-    SoundAsset : public Asset {
+    struct SoundAsset : public Asset {
     };
 }
 

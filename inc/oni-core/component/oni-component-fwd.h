@@ -6,7 +6,6 @@ namespace oni {
     /// Audio
     enum class ChannelGroup : oni::u8;
     enum class SoundPlaybackState : oni::u8;
-    enum class Sound_Tag : oni::u32;
 
     struct Sound;
     struct SoundPitch;

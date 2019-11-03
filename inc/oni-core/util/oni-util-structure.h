@@ -49,15 +49,18 @@ namespace oni {
         }
 
         std::string
-        getFullPath() {
+        getFullPath() const {
             return path + name;
         }
     };
 
-    static const FilePath INVALID_FILE_PATH = FilePath{"__INVALID_FILE_PATH__", "__INVALID_FILE_NAME__"};
+    static inline const FilePath INVALID_FILE_PATH = FilePath{"__INVALID_FILE_PATH__", "__INVALID_FILE_NAME__"};
 
     struct ImageIndexFilePath : public FilePath {
         // NOTE: Path to the index.json, this file lists the all known image names and image filenames
+    };
+
+    struct SoundIndexFilePath : public FilePath {
     };
 
     struct EntityDefDirPath : public FilePath {

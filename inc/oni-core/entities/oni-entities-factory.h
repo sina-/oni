@@ -15,9 +15,9 @@ namespace cereal {
 namespace oni {
     // TODO: Can I remove JSONInputArchive from the API?
     using ComponentFactory = std::function<
-            void(EntityManager &,
+            void(EntityManager & ,
                  EntityID,
-                 cereal::JSONInputArchive &)>;
+                 cereal::JSONInputArchive & )>;
 
     class EntityFactory {
     public:

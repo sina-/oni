@@ -9,26 +9,6 @@ namespace oni {
         FADE_OUT,
     };
 
-    ONI_ENUM_DEF(SoundTag,
-                 { 0, "Unknown" },
-                 { 1, "Rocket_Launch" },
-                 { 2, "Rocket_Burn" },
-                 { 3, "Engine_Idle" },
-                 { 4, "Collision_Rocket_Unknown" }
-    );
-
-    enum class Sound_Tag : oni::u32 {
-        UNKNOWN,
-
-        ROCKET_LAUNCH,
-        ROCKET_BURN,
-        ENGINE_IDLE,
-
-        COLLISION_ROCKET_UNKNOWN,
-
-        LAST
-    };
-
     enum class ChannelGroup : oni::u8 {
         UNKNOWN,
 
@@ -38,8 +18,10 @@ namespace oni {
         LAST
     };
 
+    using SoundName = HashedString;
+
     struct Sound {
-        Sound_Tag tag = Sound_Tag::UNKNOWN;
+        SoundName name = {};
         ChannelGroup group = ChannelGroup::UNKNOWN;
     };
 

@@ -10,4 +10,5 @@ target_include_directories(oni-core-asset
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
         PRIVATE
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/lib/cereal>
+        oni-core-json
         )

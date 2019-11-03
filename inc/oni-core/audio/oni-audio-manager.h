@@ -49,9 +49,6 @@ namespace oni {
         setChannelGroupVolume(ChannelGroup,
                               r32 volume);
 
-        r32
-        getChannelGroupVolume(ChannelGroup);
-
         void
         setMasterVolume(r32 volume);
 
@@ -80,58 +77,57 @@ namespace oni {
 
     private:
         void
-        preLoadSounds();
+        _preLoadSounds();
 
         static CollisionSoundTag
-        createCollisionEffectID(const PhysicalCatPair &);
+        _createCollisionEffectID(const PhysicalCatPair &);
 
         FMOD::Channel *
-        createChannel(const Sound &);
+        _createChannel(const Sound &);
 
         FMOD::ChannelGroup *
-        getChannelGroup(ChannelGroup);
+        _getChannelGroup(ChannelGroup);
 
         void
-        loadSound(Sound_Tag,
-                  std::string_view);
+        _loadSound(const SoundAsset &);
 
         void
-        loadChannels();
+        _loadChannels();
 
         static EntitySoundTag
-        createEntitySoundID(Sound_Tag,
-                            EntityID);
+        _createEntitySoundID(SoundName,
+                             EntityID);
 
         AudioManager::EntityChannel &
-        getOrCreateLooping3DChannel(const Sound &,
-                                    EntityID);
+        _getOrCreateLooping3DChannel(const Sound &,
+                                     EntityID);
 
         void
-        setPitch(FMOD::Channel &,
-                 r32 pitch);
+        _setPitch(FMOD::Channel &,
+                  r32 pitch);
 
         void
-        set3DPos(FMOD::Channel &,
-                 const vec3 &pos,
-                 const vec3 &velocity);
+        _set3DPos(FMOD::Channel &,
+                  const vec3 &pos,
+                  const vec3 &velocity);
 
         bool
-        isPaused(FMOD::Channel &);
+        _isPaused(FMOD::Channel &);
 
         void
-        unPause(FMOD::Channel &);
+        _unPause(FMOD::Channel &);
 
         void
-        pause(FMOD::Channel &);
+        _pause(FMOD::Channel &);
 
     private:
         AssetFilesIndex &mAssetManager;
         std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
 
         std::unordered_map<ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroup;
-        std::unordered_map<Sound_Tag, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
+        std::unordered_map<Hash, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
         std::unordered_map<AudioManager::EntitySoundTag, EntityChannel> mLoopingChannels;
-        std::unordered_map<AudioManager::CollisionSoundTag, Sound_Tag> mCollisionEffects;
+        std::unordered_map<AudioManager::CollisionSoundTag, SoundName> mCollisionEffects;
         std::unordered_map<ChannelGroup, r32> mChannelVolume;
 
         r32 mMasterVolume{1.f};

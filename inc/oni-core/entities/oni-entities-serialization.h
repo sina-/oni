@@ -69,7 +69,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               Sound &data) {
-        archive(data.group, data.tag);
+        archive(data.group, data.name);
     }
 
     template<class Archive>
@@ -106,7 +106,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               Event_SoundPlay &data) {
-        archive(data.pos, data.tag);
+        archive(data.pos, data.name);
     }
 
     template<class Archive>

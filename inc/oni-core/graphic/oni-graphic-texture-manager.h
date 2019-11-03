@@ -101,6 +101,7 @@ namespace oni {
         std::unordered_map<Hash, Texture> mTextureMap{};
         std::unordered_map<Hash, Image> mImageMap{};
         std::unordered_map<AssetName, std::vector<u8>> mImageDataMap{};
+
         const u8 mElementsInRGBA{4};
         oni::AssetFilesIndex &mAssetManager;
 

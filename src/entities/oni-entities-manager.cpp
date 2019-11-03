@@ -201,7 +201,7 @@ namespace oni {
             // TODO: Clean up the texture in video-memory or tag it stale or something if I end up having a asset manager
         }
 
-        if (mRegistry->has<Sound_Tag>(id)) {
+        if (mRegistry->has<Sound>(id)) {
             // TODO: Same as texture, audio system needs to free the resource or let its resource manager at least know about this
         }
 

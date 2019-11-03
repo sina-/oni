@@ -13,7 +13,18 @@
 namespace oni {
     class AssetFilesIndex {
     public:
-        explicit AssetFilesIndex(ImageIndexFilePath &&);
+        explicit AssetFilesIndex(ImageIndexFilePath &&,
+                                 SoundIndexFilePath &&);
+
+        auto
+        soundAssetsBegin() const {
+            return mSoundAssetMap.cbegin();
+        }
+
+        auto
+        soundAssetsEnd() const {
+            return mSoundAssetMap.cend();
+        }
 
         auto
         imageAssetsBegin() const {
@@ -25,13 +36,23 @@ namespace oni {
             return mImageAssetMap.cend();
         }
 
+        bool
+        validSound(const SoundName &) const;
+
+        bool
+        validImage(const AssetName&) const;
+
     private:
         void
         _indexImages();
 
+        void
+        _indexSounds();
+
     private:
-        std::unordered_map<Sound_Tag, std::string> mSoundAssetPath{};
+        std::unordered_map<Hash, SoundAsset> mSoundAssetMap{};
         std::unordered_map<Hash, ImageAsset> mImageAssetMap{};
         ImageIndexFilePath mImageIndexFilePath{};
+        SoundIndexFilePath mSoundIndexFilePath{};
     };
 }

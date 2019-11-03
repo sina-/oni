@@ -5,5 +5,4 @@ namespace oni {
 
     struct ImageAsset;
     struct SoundAsset;
-    struct AssetName;
 }

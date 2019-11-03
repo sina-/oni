@@ -114,7 +114,7 @@ namespace oni {
     }
 
     void
-    TextureManager::_cacheTexture(const AssetName &name) {
+    TextureManager::_cacheTexture(const ImageName &name) {
         auto newElement = mTextureMap.emplace(name.hash, Texture{});
         if (!newElement.second) {
             assert(false);
@@ -127,7 +127,7 @@ namespace oni {
     }
 
     void
-    TextureManager::_initImage(const AssetName &name,
+    TextureManager::_initImage(const ImageName &name,
                                Image &image) {
         assert(name.hash.value);
 

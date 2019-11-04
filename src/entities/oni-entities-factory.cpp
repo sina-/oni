@@ -131,11 +131,6 @@ namespace oni {
     oni::EntityFactory::createEntity_Canon(EntityManager &manager,
                                            const EntityName &name) {
         auto fp = _getEntityPath_Canon(name);
-        if (fp.path.empty()) {
-            assert(false);
-            return EntityManager::nullEntity();
-        }
-
         auto maybeDoc = readJson(fp);
         if (!maybeDoc.has_value()) {
             assert(false);

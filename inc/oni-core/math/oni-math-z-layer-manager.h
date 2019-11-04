@@ -13,25 +13,20 @@ namespace oni {
     public:
         ZLayerManager();
 
-        explicit ZLayerManager(const ZLayer &);
+        void
+        setZ(const EntityName &name,
+             ZLayerDef def);
 
         void
-        registerZ(const EntityName &name,
-                  ZLayerDef def);
-
-        void
-        registerEqualZ(const EntityName &src,
-                       const EntityName &dest);
+        setEqualZ(const EntityName &src,
+                  const EntityName &dest);
 
         r32
-        getZForEntity(EntityName) const;
-
-        ZLayer
-        getZLayer() const;
+        getZForEntity(const EntityName&) const;
 
     private:
         r32
-        getNextZAtLayer(ZLayerDef);
+        _getNextZAtLayer(ZLayerDef);
 
     private:
         const r32 mMajorLayerDelta{0.1f};

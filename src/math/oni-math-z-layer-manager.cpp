@@ -19,12 +19,10 @@ namespace oni {
         mZLayerTop = mZLayer;
     }
 
-    ZLayerManager::ZLayerManager(const ZLayer &zLayer) : mZLayer(zLayer) {}
-
     void
-    ZLayerManager::registerZ(const EntityName &name,
-                             ZLayerDef def) {
-        auto layer = getNextZAtLayer(def);
+    ZLayerManager::setZ(const EntityName &name,
+                        ZLayerDef def) {
+        auto layer = _getNextZAtLayer(def);
         auto result = mEntityZLayers.emplace(name.hash, layer);
         if (!result.second) {
             assert(false);
@@ -32,8 +30,8 @@ namespace oni {
     }
 
     void
-    ZLayerManager::registerEqualZ(const EntityName &src,
-                                  const EntityName &dest) {
+    ZLayerManager::setEqualZ(const EntityName &src,
+                             const EntityName &dest) {
         auto layer = mEntityZLayers.find(src.hash);
         if (layer != mEntityZLayers.end()) {
             auto result = mEntityZLayers.emplace(dest.hash, layer->second);
@@ -44,8 +42,8 @@ namespace oni {
     }
 
     r32
-    ZLayerManager::getZForEntity(EntityName type) const {
-        auto layer = mEntityZLayers.find(type.hash);
+    ZLayerManager::getZForEntity(const EntityName &name) const {
+        auto layer = mEntityZLayers.find(name.hash);
         if (layer != mEntityZLayers.end()) {
             return layer->second;
         }
@@ -54,7 +52,7 @@ namespace oni {
     }
 
     r32
-    ZLayerManager::getNextZAtLayer(ZLayerDef layer) {
+    ZLayerManager::_getNextZAtLayer(ZLayerDef layer) {
         assert(layer >= ZLayerDef::LAYER_0 &&
                layer <= ZLayerDef::LAYER_9);
 
@@ -66,8 +64,4 @@ namespace oni {
         return currentTop;
     }
 
-    ZLayer
-    ZLayerManager::getZLayer() const {
-        return mZLayer;
-    }
 }

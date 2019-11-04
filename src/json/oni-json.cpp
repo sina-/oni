@@ -3,9 +3,15 @@
 #include <fstream>
 #include <istream>
 
+#include <cereal/external/rapidjson/error/en.h>
+
 namespace oni {
     std::optional<rapidjson::Document>
     readJson(const oni::FilePath &fp) {
+        if (fp.path.empty()) {
+            return {};
+        }
+
         // TODO: Pre-load all the jsons
         std::ifstream jsonStream(fp.getFullPath());
         if (!jsonStream.is_open()) {
@@ -15,11 +21,16 @@ namespace oni {
         auto jsonString = std::string((std::istreambuf_iterator<char>(jsonStream)), std::istreambuf_iterator<char>());
 
         auto document = rapidjson::Document();
-        if (document.Parse(jsonString.c_str()).HasParseError()) {
+        auto &parsedDoc = document.Parse(jsonString.data());
+        if (parsedDoc.HasParseError()) {
+            printf("JSON parse error: %s Position: %zu \n",
+                   rapidjson::GetParseError_En(parsedDoc.GetParseError()),
+                   parsedDoc.GetErrorOffset());
             return {};
         }
 
         if (!document.IsObject()) {
+            printf("JSON is not an object\n");
             return {};
         }
 

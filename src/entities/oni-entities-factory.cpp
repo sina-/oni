@@ -7,6 +7,7 @@
 #include <oni-core/util/oni-util-enum.h>
 #include <oni-core/json/oni-json.h>
 #include <oni-core/entities/oni-entities-serialization.h>
+#include <oni-core/io/oni-io-input-structure.h>
 
 #define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
 {                                                                                       \
@@ -66,6 +67,11 @@ namespace oni {
         COMPONENT_FACTORY_DEFINE(this, GrowOverTime)
         COMPONENT_FACTORY_DEFINE(this, Velocity)
         COMPONENT_FACTORY_DEFINE(this, Acceleration)
+
+        COMPONENT_FACTORY_DEFINE(this, PhysicalProperties)
+        COMPONENT_FACTORY_DEFINE(this, CarInput)
+        COMPONENT_FACTORY_DEFINE(this, Car)
+        COMPONENT_FACTORY_DEFINE(this, CarConfig)
 
         COMPONENT_FACTORY_DEFINE(this, ParticleEmitter)
         COMPONENT_FACTORY_DEFINE(this, Material_Definition)
@@ -151,9 +157,7 @@ namespace oni {
             for (auto component = components->value.MemberBegin();
                  component != components->value.MemberEnd(); ++component) {
                 if (component->value.IsObject()) {
-                    if (_createComponent(mComponentFactory, manager, id, document, component)) {
-                        _postProcess(manager, id);
-                    } else {
+                    if (!_createComponent(mComponentFactory, manager, id, document, component)) {
                         assert(false);
                     }
                 } else {
@@ -163,6 +167,7 @@ namespace oni {
         } else {
             assert(false);
         }
+        _postProcess(manager, id);
         return id;
     }
 
@@ -188,9 +193,7 @@ namespace oni {
             for (auto component = components->value.MemberBegin();
                  component != components->value.MemberEnd(); ++component) {
                 if (component->value.IsObject()) {
-                    if (_createComponent(mComponentFactory, supportEm, id, document, component)) {
-                        _postProcess(supportEm, id);
-                    } else {
+                    if (!_createComponent(mComponentFactory, supportEm, id, document, component)) {
                         assert(false);
                     }
                 } else {
@@ -200,6 +203,8 @@ namespace oni {
         } else {
             assert(false);
         }
+
+        _postProcess(supportEm, id);
 
         // TODO: Crazy idea, I could have a simple schema for this shit. Something like item path that looks like
         //  entities.entity.name: string. And pass that to a reader that returns the right item :h

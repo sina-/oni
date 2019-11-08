@@ -123,29 +123,30 @@ namespace oni {
         serialize(Archive &archive) {
             // NOTE: Values are not named like most types since I don't need to read them from json. Serialization is
             // only used for networking.
-            archive(velocityAbsolute,
-                    angularVelocity,
-                    steer,
-                    steerAngle,
-                    inertia,
-                    wheelBase,
-                    axleWeightRatioFront,
-                    axleWeightRatioRear,
-                    rpm,
-                    maxVelocityAbsolute,
-                    slipAngleFront,
-                    slipAngleRear,
-                    velocity,
-                    velocityLocal,
-                    acceleration,
-                    accelerationLocal,
-                    accelerating,
-                    slippingFront,
-                    slippingRear,
-                    smoothSteer,
-                    safeSteer,
-                    distanceFromCamera,
-                    isColliding);
+            // TODO: Well this doesn't work, I need to split networking and serialization from json
+//            archive(velocityAbsolute,
+//                    angularVelocity,
+//                    steer,
+//                    steerAngle,
+//                    inertia,
+//                    wheelBase,
+//                    axleWeightRatioFront,
+//                    axleWeightRatioRear,
+//                    rpm,
+//                    maxVelocityAbsolute,
+//                    slipAngleFront,
+//                    slipAngleRear,
+//                    velocity,
+//                    velocityLocal,
+//                    acceleration,
+//                    accelerationLocal,
+//                    accelerating,
+//                    slippingFront,
+//                    slippingRear,
+//                    smoothSteer,
+//                    safeSteer,
+//                    distanceFromCamera,
+//                    isColliding);
         }
     };
 
@@ -288,10 +289,10 @@ namespace oni {
         r32 friction{1.f};
         r32 gravityScale{1.f};
         bool highPrecision{false};
-        bool collisionWithinCategory{false}; // Determines if instances of this object can collide with each other
+        bool collisionWithinCat{false}; // Determines if instances of this object can collide with each other
         bool isSensor{false};
         BodyType bodyType{};
-        PhysicalCategory physicalCategory{};
+        PhysicalCategory physicalCat{};
 
         bool colliding{false};
 
@@ -304,10 +305,10 @@ namespace oni {
             archive("friction", friction);
             archive("gravityScale", gravityScale);
             archive("highPrecision", highPrecision);
-            archive("collisionWithinCategory", collisionWithinCategory);
+            archive("collisionWithinCat", collisionWithinCat);
             archive("isSensor", isSensor);
             archive("bodyType", bodyType);
-            archive("physicalCategory", physicalCategory);
+            archive("physicalCat", physicalCat);
         }
     };
 

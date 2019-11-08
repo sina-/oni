@@ -153,16 +153,16 @@ namespace oni {
         FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
         FIBITMAP *dib = nullptr;
 
-        const auto path = asset.path.path.c_str();
+        const auto path = asset.path.getFullPath();
 
-        fif = FreeImage_GetFileType(path, 0);
+        fif = FreeImage_GetFileType(path.data(), 0);
         if (fif == FIF_UNKNOWN) {
-            fif = FreeImage_GetFIFFromFilename(path);
+            fif = FreeImage_GetFIFFromFilename(path.data());
         }
         assert(fif != FIF_UNKNOWN);
 
         if (FreeImage_FIFSupportsReading(fif)) {
-            dib = FreeImage_Load(fif, path);
+            dib = FreeImage_Load(fif, path.data());
         }
         assert(dib);
 

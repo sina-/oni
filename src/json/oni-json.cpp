@@ -9,12 +9,14 @@ namespace oni {
     std::optional<rapidjson::Document>
     readJson(const oni::FilePath &fp) {
         if (fp.path.empty()) {
+            assert(false);
             return {};
         }
 
         // TODO: Pre-load all the jsons
         std::ifstream jsonStream(fp.getFullPath());
         if (!jsonStream.is_open()) {
+            assert(false);
             return {};
         }
 
@@ -26,11 +28,13 @@ namespace oni {
             printf("JSON parse error: %s Position: %zu \n",
                    rapidjson::GetParseError_En(parsedDoc.GetParseError()),
                    parsedDoc.GetErrorOffset());
+            assert(false);
             return {};
         }
 
         if (!document.IsObject()) {
             printf("JSON is not an object\n");
+            assert(false);
             return {};
         }
 

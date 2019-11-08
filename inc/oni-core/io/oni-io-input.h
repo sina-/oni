@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <oni-core/io/oni-io-input-data.h>
+#include <oni-core/io/oni-io-input-structure.h>
 #include <oni-core/component/oni-component-geometry.h>
 
 

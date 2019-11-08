@@ -1,5 +1,5 @@
 #include <oni-core/physics/oni-physics-car.h>
-#include <oni-core/io/oni-io-input-data.h>
+#include <oni-core/io/oni-io-input-structure.h>
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/math/oni-math-function.h>
 

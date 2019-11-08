@@ -119,7 +119,7 @@ namespace oni {
         for (auto it = mCollisionState->collisions.begin(); it != mCollisionState->collisions.end();) {
             auto &propsA = em.get<PhysicalProperties>(it->pair.a);
             auto &propsB = em.get<PhysicalProperties>(it->pair.b);
-            auto pcPair = PhysicalCatPair{propsA.physicalCategory, propsB.physicalCategory};
+            auto pcPair = PhysicalCatPair{propsA.physicalCat, propsB.physicalCat};
             constexpr auto raceCar = PhysicalCategory::GET("RaceCar");
             if (pcPair.a == raceCar) {
                 _handleCarCollision(em, it->pair.a);

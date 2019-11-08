@@ -1,6 +1,6 @@
 #include <oni-core/physics/oni-physics-system.h>
 
-#include <oni-core/io/oni-io-input-data.h>
+#include <oni-core/io/oni-io-input-structure.h>
 #include <oni-core/entities/oni-entities-client-data-manager.h>
 
 #include <GLFW/glfw3.h>

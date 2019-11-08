@@ -270,8 +270,8 @@ namespace oni {
                 body = mPhysics->getPhysicsWorld()->CreateBody(&bodyDef);
                 assert(body);
 
-                if (!props.collisionWithinCategory) {
-                    fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCategory.id);
+                if (!props.collisionWithinCat) {
+                    fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCat.id);
                 }
 
                 body->CreateFixture(&fixtureDef);

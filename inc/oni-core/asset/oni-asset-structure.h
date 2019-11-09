@@ -5,8 +5,12 @@
 #include <oni-core/util/oni-util-hash.h>
 
 namespace oni {
-    using ImageName = HashedString;
-    using SoundName = HashedString;
+    struct ImageName : public HashedString {
+
+    };
+
+    struct SoundName : public HashedString {
+    };
 
     struct ImageAsset {
         FilePath path{};

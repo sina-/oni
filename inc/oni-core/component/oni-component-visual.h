@@ -181,24 +181,6 @@ namespace oni {
         }
 
         u32 value{255u};
-
-        template<class Archive>
-        void
-        save(Archive &archive) const {
-            auto r = r_r32();
-            auto g = r_r32();
-            auto b = r_r32();
-            auto a = r_r32();
-            archive(r, g, b, a);
-        }
-
-        template<class Archive>
-        void
-        load(Archive &archive) {
-            auto color = vec4();
-            archive(color.x, color.y, color.z, color.w);
-            set_rgba(color.x, color.y, color.z, color.w);
-        }
     };
 
     struct Image {
@@ -206,21 +188,6 @@ namespace oni {
 
         u32 width{};
         u32 height{};
-
-        template<class Archive>
-        void
-        save(Archive &archive) const {
-            // TODO: Not super happy about this, would it allocate?
-            archive("name", std::string(name.str));
-        }
-
-        template<class Archive>
-        void
-        load(Archive &archive) {
-            auto name_ = std::string();
-            archive("name", name_);
-            name = {HashedString::makeFromStr(std::move(name_))};
-        }
 
         inline static constexpr auto GENERATED = ImageName{"__GENERATED__"};
     };
@@ -242,12 +209,6 @@ namespace oni {
         // GL_FLOAT         0x1406
         oniGLenum type{0x1401};
         UV uv{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("image", image);
-        }
     };
 
     enum class BrushType : oni::u8 {
@@ -341,13 +302,6 @@ namespace oni {
     struct Material_Skin {
         Color color{};
         Texture texture{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("color", color);
-            archive("texture", texture);
-        }
     };
 
     struct Material_Text {
@@ -466,13 +420,6 @@ namespace oni {
     struct Material_Definition {
         Material_Finish finish{};
         Material_Skin skin{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("finish", finish);
-            archive("skin", skin);
-        }
     };
 
     struct GrowOverTime {
@@ -480,15 +427,6 @@ namespace oni {
         duration32 elapsed{0.f}; // NOTE: Since last growth
         r32 factor{0.1f}; // NOTE: add this much to current size
         Scale maxSize{1, 1, 1};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("period", period);
-            archive("elapsed", elapsed);
-            archive("factor", factor);
-            archive("maxSize", maxSize);
-        }
     };
 
     struct ParticleEmitter {
@@ -501,32 +439,12 @@ namespace oni {
         r32 acc = 0.f;
         u8 count = 1;
         GrowOverTime growth{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("material", material);
-            archive("size", size);
-            archive("initialVMin", initialVMin);
-            archive("initialVMax", initialVMax);
-            archive("orientMin", orientMin);
-            archive("orientMax", orientMax);
-            archive("acc", acc);
-            archive("count", count);
-            archive("growth", growth);
-        }
     };
 
     struct AfterMark {
         Scale scale{1, 1};
         BrushType type{BrushType::COLOR};
         Material_Definition material{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(material, type);
-        }
     };
 
     struct SplatOnDeath {

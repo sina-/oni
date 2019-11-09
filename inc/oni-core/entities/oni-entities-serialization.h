@@ -10,19 +10,85 @@
 #include <cereal/types/map.hpp>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-structure.h>
-#include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/network/oni-network-packet.h>
-#include <oni-core/component/oni-component-visual.h>
-#include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-audio.h>
+#include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/component/oni-component-visual.h>
+#include <oni-core/entities/oni-entities-manager.h>
+#include <oni-core/entities/oni-entities-serialization-hashed-string.h>
+#include <oni-core/entities/oni-entities-structure.h>
 #include <oni-core/game/oni-game-event.h>
+#include <oni-core/network/oni-network-packet.h>
 
 
 namespace oni {
-    // TODO: These all non engine components needs to move to game
     // NOTE: These functions can't be defined in serialization.cpp since that would make them invisible to users in
     // other compilation units such as server.cpp
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              mat4 &data) {
+        archive(data.elements);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              vec2 &data) {
+        archive(data.x, data.y);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              vec3 &data) {
+        archive(data.x, data.y, data.z);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              vec4 &data) {
+        archive(data.x, data.y, data.z, data.w);
+    }
+
+    template<class Archive>
+    void
+    save(Archive &archive,
+         const EntityName &data) {
+        oni::saveHashedString(archive, 0, data);
+    }
+
+    template<class Archive>
+    void
+    load(Archive &archive,
+         EntityName &data) {
+        oni::loadHashedString(archive, 0, data);
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              WorldP3D &data) {
+        archive(data.x);
+        archive(data.y);
+        archive(data.z);
+    }
+
+    template<class Archive>
+    void
+    save(Archive &archive,
+         const PhysicalCategory &data) {
+        saveEnum(archive, 0, data);
+    }
+
+    template<class Archive>
+    void
+    load(Archive &archive,
+         PhysicalCategory &data) {
+        loadEnum(archive, 0, data);
+    }
+
     template<class Archive>
     void
     serialize(Archive &archive,
@@ -40,36 +106,8 @@ namespace oni {
     template<class Archive>
     void
     serialize(Archive &archive,
-              mat4 &mat4) {
-        archive(mat4.elements);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              vec2 &vec2) {
-        archive(vec2.x, vec2.y);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              vec3 &vec3) {
-        archive(vec3.x, vec3.y, vec3.z);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              vec4 &vec4) {
-        archive(vec4.x, vec4.y, vec4.z, vec4.w);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Sound &data) {
-        archive(data.group, data.name);
+              Impulse2D &data) {
+        archive(data.value, data.normal);
     }
 
     template<class Archive>
@@ -104,59 +142,18 @@ namespace oni {
 
     template<class Archive>
     void
-    serialize(Archive &archive,
-              Event_SoundPlay &data) {
-        archive(data.pos, data.name);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Rectangle &data) {
-        archive(data.A, data.B, data.C, data.D);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              Point &data) {
-        archive(data);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              CoolDown &data) {
-        archive(data.current, data.initial);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              WorldP3D_History &data) {
+    save(Archive &archive,
+         const Event_SoundPlay &data) {
+        saveHashedString(archive, 0, data.name);
         archive(data.pos);
     }
 
-
     template<class Archive>
     void
-    serialize(Archive &archive,
-              MaterialTransition_Fade &data) {
-        archive(data.fadeFunc, data.factor);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              EntityAttachment &data) {
-        archive(data.entities);
-    }
-
-    template<class Archive>
-    void
-    serialize(Archive &archive,
-              EntityAttachee &data) {
-        archive(data.entityID);
+    load(Archive &archive,
+         Event_SoundPlay &data) {
+        loadHashedString(archive, 0, data.name);
+        archive(data.pos);
     }
 
     template<class ...Components>

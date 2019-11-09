@@ -10,6 +10,7 @@ namespace oni {
         FADE_OUT,
     };
 
+    // TODO: Use the new ENUM
     enum class ChannelGroup : oni::u8 {
         UNKNOWN,
 
@@ -26,11 +27,5 @@ namespace oni {
 
     struct SoundPitch {
         r32 value = 1.f;
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("value", value);
-        }
     };
 }

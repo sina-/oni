@@ -2,6 +2,7 @@
 
 #include <string_view>
 #include <unordered_map>
+#include <cassert>
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/util/oni-util-structure.h>
@@ -120,22 +121,17 @@ namespace oni {
             return hash.value != 0 && !str.empty();
         }
 
-        template<class Archive>
-        void
-        save(Archive &archive) const {
-            // TODO: Not super happy about this, would it allocate?
-            archive("name", std::string(str));
-        }
-
-        template<class Archive>
-        void
-        load(Archive &archive) {
-            std::string buffer{};
-            archive("name", buffer);
-            auto result = makeFromStr(std::move(buffer));
-            hash = result.hash;
-            str = result.str;
-        }
+//        const std::string &
+//        getStr() const {
+//            auto iter = detail::knownStringStorage.find(hash);
+//            if (iter != detail::knownStringStorage.end()) {
+//                return iter->second;
+//            } else {
+//                assert(false);
+//                static auto invalid = std::string();
+//                return invalid;
+//            }
+//        }
 
     private:
         inline static constexpr Hash

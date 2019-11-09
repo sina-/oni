@@ -53,14 +53,6 @@ namespace oni {
             r32 y;
             r32 z;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("x", x);
-            archive("y", y);
-            archive("z", z);
-        }
     };
 
     union WorldP4D {
@@ -83,13 +75,6 @@ namespace oni {
         WorldP3D
         to3D(r32 z) const {
             return WorldP3D{value.x, value.y, z};
-        }
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("x", x);
-            archive("y", y);
         }
     };
 
@@ -136,12 +121,6 @@ namespace oni {
 
     struct Orientation {
         r32 value{0.f}; // radians
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("value", value);
-        }
     };
 
     union Direction {
@@ -150,13 +129,6 @@ namespace oni {
             r32 x;
             r32 y;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("x", x);
-            archive("y", y);
-        }
     };
 
     union Scale {
@@ -166,14 +138,6 @@ namespace oni {
             r32 y;
             r32 z;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("x", x);
-            archive("y", y);
-            archive("z", z);
-        }
     };
 
     struct EntityAttachment {

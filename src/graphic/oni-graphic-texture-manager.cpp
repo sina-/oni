@@ -76,7 +76,7 @@ namespace oni {
 
         auto data = (u8 *) nullptr;
         if (texture.image.name != Image::GENERATED) {
-            auto imageData = mImageDataMap.find(texture.image.name);
+            auto imageData = mImageDataMap.find(texture.image.name.hash);
             if (imageData == mImageDataMap.end()) {
                 assert(false);
             } else {
@@ -187,7 +187,7 @@ namespace oni {
         _image.height = height;
         _image.name = asset.name; // NOTE: this will point name.str to point at what AssetFilesIndex holds
         mImageMap.emplace(asset.name.hash, _image);
-        auto &storage = mImageDataMap[asset.name];
+        auto &storage = mImageDataMap[asset.name.hash];
         storage.resize(width * height * mElementsInRGBA, 0);
 
         for (size i = 0; i < storage.size(); ++i) {

@@ -13,5 +13,16 @@ namespace oni {
         if (manager.has<PhysicalProperties>(id)) {
             manager.createPhysics(id);
         }
+
+        if (manager.has<Car>(id)) {
+            if (manager.has<CarConfig>(id)) {
+                const auto &config = manager.get<CarConfig>(id);
+                auto &car = manager.get<Car>(id);
+                car.applyConfiguration(config);
+            } else {
+                assert(false);
+            }
+
+        }
     }
 }

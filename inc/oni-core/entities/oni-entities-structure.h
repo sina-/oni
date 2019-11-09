@@ -13,6 +13,8 @@ namespace oni {
     struct ComponentName : public HashedString {
     };
 
+    // TODO: Did I settel down with ingeratance and not "using EntityName = HashedString"?
+    // ImageName and SoundName have using ... = HashedString
     struct EntityName : public HashedString {
     };
 

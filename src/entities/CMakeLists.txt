@@ -1,5 +1,4 @@
 add_library(oni-core-entities
-        oni-entities-serialization.cpp
         oni-entities-client-data-manager.cpp
         oni-entities-manager.cpp
         oni-entities-entity.cpp

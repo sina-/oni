@@ -1,7 +1,6 @@
 #include <oni-core/math/oni-math-function.h>
 
 #include <oni-core/component/oni-component-geometry.h>
-#include <oni-core/math/oni-math-vec2.h>
 
 
 namespace oni {

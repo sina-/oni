@@ -226,7 +226,6 @@ namespace oni {
                  SnapshotType snapshotType) {
             switch (snapshotType) {
                 case SnapshotType::ONLY_COMPONENTS: {
-                    // TODO: Rather not have this class know about specific components!
                     {
                         auto view = mRegistry->view<Tag_NetworkSyncComponent>();
                         if (!view.empty()) {
@@ -255,10 +254,6 @@ namespace oni {
                     mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(archive);
                     break;
                 }
-/*                    case components::SnapshotType::REMOVE_NON_EXISTING_ENTITIES: {
-                        mRegistry->snapshot().entities(archive).template component<>(archive,);
-                        break;
-                    }*/
                 default: {
                     assert(false);
                 }

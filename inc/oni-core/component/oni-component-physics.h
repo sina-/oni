@@ -39,35 +39,6 @@ namespace oni {
 
         r64 gearRatio{2.7f};
         r64 differentialRatio{3.4f};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("gravity", gravity);
-            archive("mass", mass);
-            archive("inertialScale", inertialScale);
-            archive("halfWidth", halfWidth);
-            archive("cgToFront", cgToFront);
-            archive("cgToRear", cgToRear);
-            archive("cgToFrontAxle", cgToFrontAxle);
-            archive("cgToRearAxle", cgToRearAxle);
-            archive("cgHeight", cgHeight);
-            archive("wheelRadius", wheelRadius);
-            archive("wheelWidth", wheelWidth);
-            archive("tireGrip", tireGrip);
-            archive("lockGrip", lockGrip);
-            archive("engineForce", engineForce);
-            archive("brakeForce", brakeForce);
-            archive("eBrakeForce", eBrakeForce);
-            archive("weightTransfer", weightTransfer);
-            archive("maxSteer", maxSteer);
-            archive("cornerStiffnessFront", cornerStiffnessFront);
-            archive("cornerStiffnessRear", cornerStiffnessRear);
-            archive("airResist", airResist);
-            archive("rollResist", rollResist);
-            archive("gearRatio", gearRatio);
-            archive("differentialRatio", differentialRatio);
-        }
     };
 
     struct Car {
@@ -101,8 +72,6 @@ namespace oni {
 
         bool isColliding{false};
 
-        Car() = default;
-
         void
         applyConfiguration(const CarConfig &c) {
             inertia = c.mass * c.inertialScale;
@@ -116,38 +85,6 @@ namespace oni {
                                    std::sqrt(c.rollResist * c.rollResist + 4 * c.airResist * c.engineForce)) /
                                   (-2 * c.airResist);
         }
-
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            // NOTE: Values are not named like most types since I don't need to read them from json. Serialization is
-            // only used for networking.
-            // TODO: Well this doesn't work, I need to split networking and serialization from json
-//            archive(velocityAbsolute,
-//                    angularVelocity,
-//                    steer,
-//                    steerAngle,
-//                    inertia,
-//                    wheelBase,
-//                    axleWeightRatioFront,
-//                    axleWeightRatioRear,
-//                    rpm,
-//                    maxVelocityAbsolute,
-//                    slipAngleFront,
-//                    slipAngleRear,
-//                    velocity,
-//                    velocityLocal,
-//                    acceleration,
-//                    accelerationLocal,
-//                    accelerating,
-//                    slippingFront,
-//                    slippingRear,
-//                    smoothSteer,
-//                    safeSteer,
-//                    distanceFromCamera,
-//                    isColliding);
-        }
     };
 
     ONI_ENUM_DEF(BodyType,
@@ -156,7 +93,7 @@ namespace oni {
                  { 2, "Kinematic" },
                  { 3, "Dynamic" })
 
-     // TODO: This is fucking dumb to be in engine!
+    // TODO: This is fucking dumb to be in engine!
     ONI_ENUM_DEF(PhysicalCategory,
                  { 0, "Unknown" },
                  { 1, "Vehicle" },
@@ -173,23 +110,11 @@ namespace oni {
     struct Velocity {
         r32 current{0.f};
         r32 max{0.f};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(current, max);
-        }
     };
 
     struct Acceleration {
         r32 current{0.f};
         r32 max{0.f};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(current, max);
-        }
     };
 
     union Velocity2D {
@@ -198,12 +123,6 @@ namespace oni {
             r32 x;
             r32 y;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(x, y);
-        }
     };
 
     union Acceleration2D {
@@ -212,23 +131,11 @@ namespace oni {
             r32 x;
             r32 y;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(x, y);
-        }
     };
 
     struct TimeToLive {
         duration32 currentAge{0.f};
         duration32 maxAge{1.f};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(currentAge, maxAge);
-        }
     };
 
     // TODO: Redundant
@@ -238,12 +145,6 @@ namespace oni {
             r32 x;
             r32 y;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(x, y);
-        }
     };
 
     union Force2D {
@@ -252,34 +153,16 @@ namespace oni {
             r32 x;
             r32 y;
         };
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(x, y);
-        }
     };
 
     struct Impulse2D {
         r32 value{};
         vec2 normal{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(value, normal);
-        }
     };
 
     struct JetForce {
         r32 fuze{0}; // How long, in seconds, it takes for the fuel to burn
         r32 force{0};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive(fuze, force);
-        }
     };
 
     struct PhysicalProperties {
@@ -296,20 +179,6 @@ namespace oni {
 
         bool colliding{false};
 
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("linearDamping", linearDamping);
-            archive("angularDamping", angularDamping);
-            archive("density", density);
-            archive("friction", friction);
-            archive("gravityScale", gravityScale);
-            archive("highPrecision", highPrecision);
-            archive("collisionWithinCat", collisionWithinCat);
-            archive("isSensor", isSensor);
-            archive("bodyType", bodyType);
-            archive("physicalCat", physicalCat);
-        }
     };
 
     struct PhysicalBody {

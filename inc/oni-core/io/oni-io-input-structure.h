@@ -13,10 +13,5 @@ namespace oni {
         r32 eBrake{0.f};
 
         bool nitro{false};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-        }
     };
 }

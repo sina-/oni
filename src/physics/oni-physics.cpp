@@ -146,7 +146,6 @@ namespace oni {
         auto &ornt = em.get<Orientation>(id);
         auto &pos = em.get<WorldP3D>(id);
         auto &input = em.get<CarInput>(id);
-        auto &hist = em.get<WorldP3D_History>(id);
         // NOTE: If the car was in collision previous tick, that is what isColliding is tracking,
         // just apply user input to box2d representation of physical body without syncing
         // car dynamics with box2d physics, that way the next tick if the

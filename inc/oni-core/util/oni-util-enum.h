@@ -68,23 +68,6 @@ namespace oni {
                 return id;
             }
 
-            template<class Archive>
-            void
-            save(Archive &archive) const {
-                // TODO: Not super happy about this, would it allocate?
-                archive("name", std::string(name.str));
-            }
-
-            template<class Archive>
-            void
-            load(Archive &archive) {
-                std::string buffer{};
-                archive("name", buffer);
-                auto hash_ = oni::HashedString::makeHashFromCString(buffer.data());
-                // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
-                _runtimeInit(hash_);
-            }
-
             template<class Out, class Adaptor>
             static inline Out *
             adapt(Adaptor adaptor) {
@@ -97,6 +80,21 @@ namespace oni {
                     init = false;
                 }
                 return result.data();
+            }
+
+            // TODO: Not super sure about this exposed here. Do another pass on the interface
+            void
+            _runtimeInit(const oni::Hash hash) {
+                for (oni::i32 i = 0; i < N; ++i) {
+                    if (storage[i].name.hash == hash) {
+                        name = storage[i].name;
+                        id = storage[i].id;
+                        return;
+                    }
+                }
+                assert(false);
+                id = INVALID.id;
+                name = INVALID.name;
             }
 
         protected:
@@ -120,20 +118,6 @@ namespace oni {
                   const Enum *candidate) {
                 return (candidate->name.hash == hash) ? *candidate :
                        ((i == N) ? _notFound() : _find(hash, i + 1, candidate + 1));
-            }
-
-            void
-            _runtimeInit(const oni::Hash hash) {
-                for (oni::i32 i = 0; i < N; ++i) {
-                    if (storage[i].name.hash == hash) {
-                        name = storage[i].name;
-                        id = storage[i].id;
-                        return;
-                    }
-                }
-                assert(false);
-                id = INVALID.id;
-                name = INVALID.name;
             }
 
         private:

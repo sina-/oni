@@ -100,7 +100,7 @@ namespace oni {
     private:
         std::unordered_map<Hash, Texture> mTextureMap{};
         std::unordered_map<Hash, Image> mImageMap{};
-        std::unordered_map<ImageName, std::vector<u8>> mImageDataMap{};
+        std::unordered_map<Hash, std::vector<u8>> mImageDataMap{};
 
         const u8 mElementsInRGBA{4};
         oni::AssetFilesIndex &mAssetManager;

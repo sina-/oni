@@ -351,6 +351,7 @@ namespace oni {
 
         COMPONENT_FACTORY_DEFINE(this, ParticleEmitter)
         COMPONENT_FACTORY_DEFINE(this, Material_Definition)
+        COMPONENT_FACTORY_DEFINE(this, Material_Text)
     }
 
     void
@@ -394,6 +395,7 @@ namespace oni {
         if (path != mEntityPathMap_Canon.end()) {
             return path->second;
         }
+        assert(false);
         static auto empty = EntityDefDirPath{};
         return empty;
     }
@@ -488,7 +490,7 @@ namespace oni {
                 if (entity->value.IsObject()) {
                     auto entityNameObj = entity->value.FindMember("name");
                     if (entityNameObj->value.IsString()) {
-                        auto entityName = entityNameObj->name.GetString();
+                        auto entityName = entityNameObj->value.GetString();
                         auto _id = createEntity_Canon(supportEm, {EntityName::makeFromCStr(entityName)});
                         if (_id == EntityManager::nullEntity()) {
                             assert(false);

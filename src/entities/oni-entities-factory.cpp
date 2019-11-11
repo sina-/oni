@@ -46,6 +46,8 @@ namespace {
 }
 
 namespace oni {
+    // TODO: Should I move these into another file that specifies these are only meant for json serialization?
+    // Just like the way I specify network serialization
     template<class Archive>
     void
     serialize(Archive &archive,
@@ -444,6 +446,40 @@ namespace oni {
             assert(false);
         }
         _postProcess(manager, id);
+
+        auto entities = document.FindMember("entities");
+        if (entities != document.MemberEnd()) {
+            for (auto entity = entities->value.MemberBegin();
+                 entity != entities->value.MemberEnd(); ++entity) {
+                if (entity->value.IsObject()) {
+                    auto entityNameObj = entity->value.FindMember("name");
+                    if (entityNameObj->value.IsString()) {
+                        auto entityName = entityNameObj->value.GetString();
+                        auto _id = createEntity_Canon(manager, {EntityName::makeFromCStr(entityName)});
+                        if (_id == EntityManager::nullEntity()) {
+                            assert(false);
+                        }
+
+                        // TODO:
+//                        auto attachedObj = entity->value.FindMember("attached");
+//                        if (attachedObj->value.IsObject()) {
+//                            auto attached = attachedObj->value.GetObject();
+//                            if (bindLifetime) {
+//                                oni::EntityManager::bindLifetime({&manager, id}, {&supportEm, _id});
+//                            }
+//                        }
+//                        else {
+//                            assert(false);
+//                        }
+                    } else {
+                        assert(false);
+                    }
+                } else {
+                    assert(false);
+                }
+            }
+        }
+
         return id;
     }
 
@@ -503,6 +539,8 @@ namespace oni {
                             if (bindLifetime) {
                                 oni::EntityManager::bindLifetime({&mainEm, id}, {&supportEm, _id});
                             }
+                        } else {
+                            assert(false);
                         }
                     } else {
                         assert(false);

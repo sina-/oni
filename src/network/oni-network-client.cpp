@@ -6,7 +6,7 @@
 #include <oni-core/io/oni-io-input.h>
 #include <oni-core/util/oni-util-timer.h>
 #include <oni-core/network/oni-network-packet.h>
-#include <oni-core/entities/oni-entities-serialization.h>
+#include <oni-core/entities/oni-entities-serialization-network.h>
 
 
 namespace oni {

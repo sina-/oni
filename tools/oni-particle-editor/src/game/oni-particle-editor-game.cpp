@@ -7,7 +7,7 @@
 #include <oni-core/common/oni-common-const.h>
 #include <oni-core/entities/oni-entities-manager.h>
 #include <oni-core/entities/factory/client/oni-entities-factory-client.h>
-#include <oni-core/entities/oni-entities-serialization.h>
+#include <oni-core/entities/oni-entities-serialization-network.h>
 #include <oni-core/game/oni-game-event.h>
 #include <oni-core/graphic/oni-graphic-brush.h>
 #include <oni-core/graphic/oni-graphic-debug-draw-box2d.h>

@@ -12,25 +12,28 @@ namespace cereal {
     class JSONInputArchive;
 }
 
-#define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
-{                                                                                       \
-        ComponentFactory cf = [](EntityManager &em,                                     \
-                                 EntityID id,                                           \
-                                 cereal::JSONInputArchive &reader) {                    \
-            auto &component = em.createComponent<COMPONENT_NAME>(id);                   \
-            reader(component);                                                          \
-        };                                                                              \
-        constexpr auto componentName = ComponentName{#COMPONENT_NAME};                  \
-        factory->registerComponentFactory(componentName, std::move(cf));                \
-}
 
 namespace oni {
     // TODO: Can I remove JSONInputArchive from the API?
     using ComponentFactory = std::function<
-            void(EntityManager & ,
-                 EntityID,
-                 cereal::JSONInputArchive & )>;
+            void(oni::EntityManager &,
+                 oni::EntityID,
+                 cereal::JSONInputArchive &)>;
+}
 
+#define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
+{                                                                                       \
+        oni::ComponentFactory cf = [](oni::EntityManager &em,                           \
+                                 oni::EntityID id,                                      \
+                                 cereal::JSONInputArchive &reader) {                    \
+            auto &component = em.createComponent<COMPONENT_NAME>(id);                   \
+            reader(component);                                                          \
+        };                                                                              \
+        constexpr auto componentName = oni::ComponentName{#COMPONENT_NAME};             \
+        factory->registerComponentFactory(componentName, std::move(cf));                \
+}
+
+namespace oni {
     class EntityFactory {
     public:
         explicit EntityFactory(EntityDefDirPath &&);

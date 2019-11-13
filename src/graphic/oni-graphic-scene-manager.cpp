@@ -225,6 +225,8 @@ namespace oni {
                 r.pos = &ePos.pos;
                 r.ornt = &ePos.ornt;
 
+                assert(almost_Less(r.pos->z, 1.f));
+
                 mRendererTessellation->submit(r);
 
                 mRenderables[iter->id].pop();
@@ -430,6 +432,7 @@ namespace oni {
         auto transformation = mat4::identity();
         auto result = WorldP3DAndOrientation{childPos, childOrientation};
         auto numParents = size{};
+        auto childZ = childPos.z;
 
         while (manager.has<EntityAttachee>(child)) {
             const auto &parent = manager.get<EntityAttachee>(child);
@@ -451,6 +454,8 @@ namespace oni {
 
             assert(numParents < 20);
         }
+        // NOTE: Child z is not effected by the parents
+        result.pos.z = childZ;
         return result;
     }
 

@@ -57,6 +57,12 @@ namespace oni {
     void
     EntityManager::attach(EntityID parent,
                           EntityID child) {
+        if (!has<EntityAttachment>(parent)) {
+            createComponent<EntityAttachment>(parent);
+        }
+        if (!has<EntityAttachee>(child)) {
+            createComponent<EntityAttachee>(child);
+        }
         auto &attachment = mRegistry->get<EntityAttachment>(parent);
         attachment.entities.emplace_back(child);
 

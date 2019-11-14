@@ -141,11 +141,15 @@ namespace oni {
     };
 
     struct EntityAttachment {
-        std::vector<EntityID> entities;
+        std::vector<EntityManager *> mngs{};
+        std::vector<EntityID> entities{};
     };
 
     struct EntityAttachee {
-        EntityID entityID;
+        // NOTE: I can't use EntityContext because if this is to be serialized over network Entt can't update
+        // EntityID inside an struct! :/
+        EntityManager *mng{};
+        EntityID id{};
     };
 
     struct Quad {

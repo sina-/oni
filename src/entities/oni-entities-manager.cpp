@@ -55,19 +55,21 @@ namespace oni {
     }
 
     void
-    EntityManager::attach(EntityID parent,
-                          EntityID child) {
-        if (!has<EntityAttachment>(parent)) {
-            createComponent<EntityAttachment>(parent);
+    EntityManager::attach(const EntityContext &parent,
+                          const EntityContext &child) {
+        if (!parent.mng->has<EntityAttachment>(parent.id)) {
+            parent.mng->createComponent<EntityAttachment>(parent.id);
         }
-        if (!has<EntityAttachee>(child)) {
-            createComponent<EntityAttachee>(child);
+        if (!child.mng->has<EntityAttachee>(child.id)) {
+            child.mng->createComponent<EntityAttachee>(child.id);
         }
-        auto &attachment = mRegistry->get<EntityAttachment>(parent);
-        attachment.entities.emplace_back(child);
+        auto &attachment = parent.mng->get<EntityAttachment>(parent.id);
+        attachment.entities.emplace_back(child.id);
+        attachment.mngs.emplace_back(child.mng);
 
-        auto &attachee = mRegistry->get<EntityAttachee>(child);
-        attachee.entityID = parent;
+        auto &attachee = child.mng->get<EntityAttachee>(child.id);
+        attachee.id = parent.id;
+        attachee.mng = parent.mng;
     }
 
     void
@@ -188,8 +190,8 @@ namespace oni {
         }
 
         if (mRegistry->has<EntityAttachment>(id)) {
-            for (auto &&childID: mRegistry->get<EntityAttachment>(id).entities) {
-                deleteEntity(childID, policy);
+            for (auto &&child: mRegistry->get<EntityAttachment>(id).entities) {
+                deleteEntity(child, policy);
             }
         }
 

@@ -58,6 +58,44 @@ namespace {
             assert(false);
         }
     }
+
+    void
+    _tryAttach(oni::EntityManager &parentEm,
+               oni::EntityManager &childEm,
+               oni::EntityID parentID,
+               oni::EntityID childID,
+               const rapidjson::Document::MemberIterator &data) {
+        auto attached = data->value.FindMember("attached");
+        if (attached != data->value.MemberEnd()) {
+            if (attached->value.IsObject()) {
+                auto attachedObj = attached->value.GetObject();
+                oni::EntityManager::attach({&parentEm, parentID}, {&childEm, childID});
+
+                auto pos = _readComponent<oni::WorldP3D>(attached->value);
+                parentEm.setWorldP3D(childID, pos.x, pos.y, pos.z);
+            } else {
+                assert(false);
+            }
+        }
+    }
+
+    void
+    _tryBindLifeTime(
+            oni::EntityManager &parentEm,
+            oni::EntityManager &childEm,
+            oni::EntityID parentID,
+            oni::EntityID childID,
+            const rapidjson::Document::MemberIterator &data) {
+        auto bindLifetimeObj = data->value.FindMember("bind-lifetime");
+        if (bindLifetimeObj->value.IsBool()) {
+            auto bindLifetime = bindLifetimeObj->value.GetBool();
+            if (bindLifetime) {
+                oni::EntityManager::bindLifetime({&parentEm, parentID}, {&childEm, childID});
+            }
+        } else {
+            assert(false);
+        }
+    }
 }
 
 namespace oni {
@@ -186,18 +224,7 @@ namespace oni {
                             assert(false);
                         }
 
-                        auto attached = entity->value.FindMember("attached");
-                        if (attached != entity->value.MemberEnd()) {
-                            if (attached->value.IsObject()) {
-                                auto attachedObj = attached->value.GetObject();
-                                manager.attach(parentID, childID);
-
-                                auto pos = _readComponent<WorldP3D>(attached->value);
-                                manager.setWorldP3D(childID, pos.x, pos.y, pos.z);
-                            } else {
-                                assert(false);
-                            }
-                        }
+                        _tryAttach(manager, manager, parentID, childID, entity);
                     } else {
                         assert(false);
                     }
@@ -211,9 +238,9 @@ namespace oni {
     }
 
     void
-    EntityFactory::createEntity_Extras(EntityManager &mainEm,
-                                       EntityManager &supportEm,
-                                       EntityID id,
+    EntityFactory::createEntity_Extras(EntityManager &parentEm,
+                                       EntityManager &childEm,
+                                       EntityID parentID,
                                        const EntityName &name) {
         auto fp = _getEntityPath_Extra(name);
         if (fp.path.empty()) {
@@ -232,7 +259,7 @@ namespace oni {
             for (auto component = components->value.MemberBegin();
                  component != components->value.MemberEnd(); ++component) {
                 if (component->value.IsObject()) {
-                    _createComponent(mComponentFactory, mainEm, id, document, component);
+                    _createComponent(mComponentFactory, parentEm, parentID, document, component);
                 } else {
                     assert(false);
                 }
@@ -241,7 +268,7 @@ namespace oni {
             assert(false);
         }
 
-        _postProcess(mainEm, id);
+        _postProcess(parentEm, parentID);
 
         // TODO: Crazy idea, I could have a simple schema for this shit. Something like item path that looks like
         //  entities.entity.name: string. And pass that to a reader that returns the right item :h
@@ -254,21 +281,14 @@ namespace oni {
                     auto entityNameObj = entity->value.FindMember("name");
                     if (entityNameObj->value.IsString()) {
                         auto entityName = entityNameObj->value.GetString();
-                        auto _id = createEntity_Canon(supportEm, {EntityName::makeFromCStr(entityName)});
-                        if (_id == EntityManager::nullEntity()) {
+                        auto childID = createEntity_Canon(childEm, {EntityName::makeFromCStr(entityName)});
+                        if (childID == EntityManager::nullEntity()) {
                             assert(false);
                             return;
                         }
+                        _tryBindLifeTime(parentEm, childEm, parentID, childID, entity);
+                        _tryAttach(parentEm, childEm, parentID, childID, entity);
 
-                        auto bindLifetimeObj = entity->value.FindMember("bind-lifetime");
-                        if (bindLifetimeObj->value.IsBool()) {
-                            auto bindLifetime = bindLifetimeObj->value.GetBool();
-                            if (bindLifetime) {
-                                oni::EntityManager::bindLifetime({&mainEm, id}, {&supportEm, _id});
-                            }
-                        } else {
-                            assert(false);
-                        }
                     } else {
                         assert(false);
                     }

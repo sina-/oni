@@ -124,8 +124,7 @@ namespace oni {
 
         // TODO: Move somewhere else
         static SceneManager::WorldP3DAndOrientation
-        applyParentTransforms(const EntityManager &manager,
-                              EntityID child,
+        applyParentTransforms(const EntityContext &context,
                               const WorldP3D &pos,
                               const Orientation &ornt);
 

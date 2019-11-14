@@ -213,7 +213,8 @@ namespace oni {
             begin(*mRendererTessellation, spec);
             while (!mRenderables[iter->id].empty()) {
                 auto &r = const_cast<Renderable &> (mRenderables[iter->id].top());
-                auto ePos = applyParentTransforms(*r.manager, r.id, *r.pos, *r.ornt);
+                // TODO: Well can I not const_cast?
+                auto ePos = applyParentTransforms({const_cast<EntityManager *>(r.manager), r.id}, *r.pos, *r.ornt);
 
                 if (r.pt == PrimitiveTransforms::DYNAMIC && !isVisible(ePos.pos, *r.scale)) {
                     mRenderables[iter->id].pop();
@@ -425,8 +426,7 @@ namespace oni {
     }
 
     SceneManager::WorldP3DAndOrientation
-    SceneManager::applyParentTransforms(const EntityManager &manager,
-                                        EntityID child,
+    SceneManager::applyParentTransforms(const EntityContext &context,
                                         const WorldP3D &childPos,
                                         const Orientation &childOrientation) {
         auto transformation = mat4::identity();
@@ -434,10 +434,13 @@ namespace oni {
         auto numParents = size{};
         auto childZ = childPos.z;
 
-        while (manager.has<EntityAttachee>(child)) {
-            const auto &parent = manager.get<EntityAttachee>(child);
-            const auto &parentPos = manager.get<WorldP3D>(parent.entityID);
-            const auto &parentOrientation = manager.get<Orientation>(parent.entityID);
+        auto node = context;
+        while (node.mng->has<EntityAttachee>(node.id)) {
+            auto &ea = node.mng->get<EntityAttachee>(node.id);
+            node = {ea.mng, ea.id};
+
+            const auto &parentPos = node.mng->get<WorldP3D>(node.id);
+            const auto &parentOrientation = node.mng->get<Orientation>(node.id);
 
             // TODO: Scaling is ignored because it is used to store the size of the object, so even non-scaled
             // objects have scaling matrix larger than identity matrix, so if I use the parent scaling
@@ -449,11 +452,14 @@ namespace oni {
             result.pos.value = transformation * result.pos.value;
             result.ornt.value += parentOrientation.value;
 
-            child = parent.entityID;
             ++numParents;
 
-            assert(numParents < 20);
+            if (numParents > 20) {
+                assert(false);
+                break;
+            }
         }
+
         // NOTE: Child z is not effected by the parents
         result.pos.z = childZ;
         return result;
@@ -467,7 +473,7 @@ namespace oni {
         assert(etc.mng.getSimMode() == SimMode::CLIENT ||
                etc.mng.getSimMode() == SimMode::CLIENT_SIDE_SERVER);
 
-        auto transformed = applyParentTransforms(etc.mng, etc.id, pos, ornt);
+        auto transformed = applyParentTransforms({&etc.mng, etc.id}, pos, ornt);
         Brush brush;
         auto quad = Quad{};
         auto model = createTransformation(transformed.pos, transformed.ornt, mark.scale);

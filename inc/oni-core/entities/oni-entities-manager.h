@@ -115,9 +115,9 @@ namespace oni {
         deleteEntity(EntityID,
                      const EntityOperationPolicy &);
 
-        void
-        attach(EntityID parent,
-               EntityID child);
+        static void
+        attach(const EntityContext &parent,
+               const EntityContext &child);
 
         static void
         bindLifetime(const EntityContext &parent,

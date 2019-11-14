@@ -43,13 +43,6 @@ namespace oni {
     struct DeletedEntity {
         EntityID id{};
         EntityName name{};
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-            archive("id", id);
-            archive("name", name);
-        }
     };
 
     struct EntityPair {

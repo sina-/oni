@@ -56,14 +56,30 @@ namespace oni {
     void
     save(Archive &archive,
          const EntityName &data) {
-        oni::saveHashedString(archive, 0, data);
+        saveHashedString(archive, 0, data);
     }
 
     template<class Archive>
     void
     load(Archive &archive,
          EntityName &data) {
-        oni::loadHashedString(archive, 0, data);
+        loadHashedString(archive, 0, data);
+    }
+
+    template<class Archive>
+    void
+    save(Archive &archive,
+         const DeletedEntity &data) {
+        archive(data.id);
+        saveHashedString(archive, 0, data.name);
+    }
+
+    template<class Archive>
+    void
+    load(Archive &archive,
+         DeletedEntity &data) {
+        archive(data.id);
+        loadHashedString(archive, 0, data.name);
     }
 
     template<class Archive>

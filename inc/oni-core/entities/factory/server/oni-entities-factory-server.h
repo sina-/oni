@@ -5,7 +5,7 @@
 namespace oni {
     class EntityFactory_Server : public EntityFactory {
     public:
-        EntityFactory_Server(EntityDefDirPath &&);
+        explicit EntityFactory_Server(EntityDefDirPath &&);
 
     protected:
         void

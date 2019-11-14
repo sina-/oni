@@ -12,7 +12,7 @@ namespace oni {
                              FontManager &,
                              TextureManager &);
 
-    private:
+    protected:
         void
         _postProcess(EntityManager &,
                      EntityID) override;

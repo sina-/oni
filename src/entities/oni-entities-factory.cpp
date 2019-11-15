@@ -60,13 +60,48 @@ namespace {
     }
 
     void
+    _createComponents(std::unordered_map<oni::Hash, oni::ComponentFactory> &factoryMap,
+                      oni::EntityManager &em,
+                      oni::EntityID id,
+                      rapidjson::Document &doc,
+                      const rapidjson::Document::MemberIterator &components) {
+        for (auto component = components->value.MemberBegin();
+             component != components->value.MemberEnd(); ++component) {
+            if (component->value.IsObject()) {
+                _createComponent(factoryMap, em, id, doc, component);
+            } else {
+                assert(false);
+            }
+        }
+    }
+
+    void
+    _createComponents_Primary(std::unordered_map<oni::Hash, oni::ComponentFactory> &factoryMap,
+                              oni::EntityManager &em,
+                              oni::EntityID id,
+                              rapidjson::Document &doc) {
+        auto primary = doc.FindMember("primary");
+        if (primary != doc.MemberEnd()) {
+            auto components = primary->value.FindMember("components");
+            if (components != primary->value.MemberEnd()) {
+                _createComponents(factoryMap, em, id, doc, components);
+            } else {
+                assert(false);
+            }
+        } else {
+            assert(false);
+        }
+    }
+
+
+    void
     _tryAttach(oni::EntityManager &parentEm,
                oni::EntityManager &childEm,
                oni::EntityID parentID,
                oni::EntityID childID,
-               const rapidjson::Document::MemberIterator &data) {
-        auto attached = data->value.FindMember("attached");
-        if (attached != data->value.MemberEnd()) {
+               const rapidjson::Document::MemberIterator &iter) {
+        auto attached = iter->value.FindMember("attached");
+        if (attached != iter->value.MemberEnd()) {
             if (attached->value.IsObject()) {
                 auto attachedObj = attached->value.GetObject();
                 oni::EntityManager::attach({&parentEm, parentID}, {&childEm, childID});
@@ -85,15 +120,54 @@ namespace {
             oni::EntityManager &childEm,
             oni::EntityID parentID,
             oni::EntityID childID,
-            const rapidjson::Document::MemberIterator &data) {
-        auto bindLifetimeObj = data->value.FindMember("bind-lifetime");
-        if (bindLifetimeObj->value.IsBool()) {
-            auto bindLifetime = bindLifetimeObj->value.GetBool();
-            if (bindLifetime) {
-                oni::EntityManager::bindLifetime({&parentEm, parentID}, {&childEm, childID});
+            const rapidjson::Document::MemberIterator &iter) {
+        auto bindLifetimeObj = iter->value.FindMember("bind-lifetime");
+        if (bindLifetimeObj != iter->value.MemberEnd()) {
+            if (bindLifetimeObj->value.IsBool()) {
+                auto bindLifetime = bindLifetimeObj->value.GetBool();
+                if (bindLifetime) {
+                    oni::EntityManager::bindLifetime({&parentEm, parentID}, {&childEm, childID});
+                }
+            } else {
+                assert(false);
             }
-        } else {
-            assert(false);
+        }
+    }
+
+    void
+    _createEntity_Secondary(oni::EntityFactory &factory,
+                            oni::EntityManager &primaryEm,
+                            oni::EntityManager &secondaryEm,
+                            oni::EntityID parentID,
+                            rapidjson::Document &doc) {
+        // TODO: Crazy idea, I could have a simple schema for this shit. Something like item path that looks like
+        //  entities.entity.name: string. And pass that to a reader that returns the right item :h
+        // TODO: This shit needs testing!
+        auto entities = doc.FindMember("secondary");
+        if (entities != doc.MemberEnd()) {
+            for (auto entity = entities->value.MemberBegin();
+                 entity != entities->value.MemberEnd(); ++entity) {
+                if (entity->value.IsObject()) {
+                    auto entityNameObj = entity->value.FindMember("name");
+                    if (entityNameObj->value.IsString()) {
+                        auto entityName = entityNameObj->value.GetString();
+                        // NOTE: If secondary entity requires entities as well, those will always will be
+                        // created in the secondary entity registry.
+                        auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm,
+                                                                    {oni::EntityName::makeFromCStr(entityName)});
+                        if (childID == oni::EntityManager::nullEntity()) {
+                            assert(false);
+                            continue;
+                        }
+                        _tryBindLifeTime(primaryEm, secondaryEm, parentID, childID, entity);
+                        _tryAttach(primaryEm, secondaryEm, parentID, childID, entity);
+                    } else {
+                        assert(false);
+                    }
+                } else {
+                    assert(false);
+                }
+            }
         }
     }
 }
@@ -156,7 +230,7 @@ namespace oni {
                                 EntityID id) {}
 
     const EntityDefDirPath &
-    EntityFactory::_getEntityPath_Canon(const EntityName &name) {
+    EntityFactory::_getEntityPath_Primary(const EntityName &name) {
         auto path = mEntityPathMap_Canon.find(name);
         if (path != mEntityPathMap_Canon.end()) {
             return path->second;
@@ -167,7 +241,7 @@ namespace oni {
     }
 
     const EntityDefDirPath &
-    EntityFactory::_getEntityPath_Extra(const EntityName &name) {
+    EntityFactory::_getEntityPath_Secondary(const EntityName &name) {
         auto path = mEntityPathMap_Extra.find(name);
         if (path != mEntityPathMap_Extra.end()) {
             return path->second;
@@ -178,71 +252,31 @@ namespace oni {
     }
 
     EntityID
-    oni::EntityFactory::createEntity_Canon(EntityManager &manager,
-                                           const EntityName &name) {
-        auto fp = _getEntityPath_Canon(name);
+    EntityFactory::createEntity_Primary(EntityManager &primaryEm,
+                                        EntityManager &secondaryEm,
+                                        const EntityName &name) {
+        auto fp = _getEntityPath_Primary(name);
+        auto parentID = primaryEm.createEntity(name);
         auto maybeDoc = readJson(fp);
         if (!maybeDoc.has_value()) {
             assert(false);
             return EntityManager::nullEntity();
         }
-        auto document = std::move(maybeDoc.value());
+        auto doc = std::move(maybeDoc.value());
 
-        // TODO: Check for valid entityType?
-        // TODO: After having registry take care of entity name string to entity type lookup I can
-        // just add an overload to createEntity that receives EntityType_Name and returns and ID or nullEntity
-        // if mapping is missing! Solves so many issues.
-        // HMMM WHAT IS A VALID ENTITY NAME? If there is a file matching the requested name, then it must be
-        // valid! Not sure if I need to care more than that :/
-        auto parentID = manager.createEntity(name);
-
-        auto components = document.FindMember("components");
-        if (components != document.MemberEnd()) {
-            for (auto component = components->value.MemberBegin();
-                 component != components->value.MemberEnd(); ++component) {
-                if (component->value.IsObject()) {
-                    _createComponent(mComponentFactory, manager, parentID, document, component);
-                } else {
-                    assert(false);
-                }
-            }
-        } else {
-            assert(false);
-        }
-        _postProcess(manager, parentID);
-
-        auto entities = document.FindMember("entities");
-        if (entities != document.MemberEnd()) {
-            for (auto entity = entities->value.MemberBegin();
-                 entity != entities->value.MemberEnd(); ++entity) {
-                if (entity->value.IsObject()) {
-                    auto entityNameObj = entity->value.FindMember("name");
-                    if (entityNameObj->value.IsString()) {
-                        auto entityName = entityNameObj->value.GetString();
-                        auto childID = createEntity_Canon(manager, {EntityName::makeFromCStr(entityName)});
-                        if (childID == EntityManager::nullEntity()) {
-                            assert(false);
-                        }
-
-                        _tryAttach(manager, manager, parentID, childID, entity);
-                    } else {
-                        assert(false);
-                    }
-                } else {
-                    assert(false);
-                }
-            }
-        }
+        _createComponents_Primary(mComponentFactory, primaryEm, parentID, doc);
+        _postProcess(primaryEm, parentID);
+        _createEntity_Secondary(*this, primaryEm, secondaryEm, parentID, doc);
 
         return parentID;
     }
 
     void
-    EntityFactory::createEntity_Extras(EntityManager &parentEm,
-                                       EntityManager &childEm,
-                                       EntityID parentID,
-                                       const EntityName &name) {
-        auto fp = _getEntityPath_Extra(name);
+    EntityFactory::createEntity_Secondary(EntityManager &primaryEm,
+                                          EntityManager &secondaryEm,
+                                          EntityID parentID,
+                                          const EntityName &name) {
+        auto fp = _getEntityPath_Secondary(name);
         if (fp.path.empty()) {
             return;
         }
@@ -252,50 +286,10 @@ namespace oni {
             assert(false);
             return;
         }
-        auto document = std::move(maybeDoc.value());
+        auto doc = std::move(maybeDoc.value());
 
-        auto components = document.FindMember("components");
-        if (components != document.MemberEnd()) {
-            for (auto component = components->value.MemberBegin();
-                 component != components->value.MemberEnd(); ++component) {
-                if (component->value.IsObject()) {
-                    _createComponent(mComponentFactory, parentEm, parentID, document, component);
-                } else {
-                    assert(false);
-                }
-            }
-        } else {
-            assert(false);
-        }
-
-        _postProcess(parentEm, parentID);
-
-        // TODO: Crazy idea, I could have a simple schema for this shit. Something like item path that looks like
-        //  entities.entity.name: string. And pass that to a reader that returns the right item :h
-        // TODO: This shit needs testing!
-        auto entities = document.FindMember("entities");
-        if (entities != document.MemberEnd()) {
-            for (auto entity = entities->value.MemberBegin();
-                 entity != entities->value.MemberEnd(); ++entity) {
-                if (entity->value.IsObject()) {
-                    auto entityNameObj = entity->value.FindMember("name");
-                    if (entityNameObj->value.IsString()) {
-                        auto entityName = entityNameObj->value.GetString();
-                        auto childID = createEntity_Canon(childEm, {EntityName::makeFromCStr(entityName)});
-                        if (childID == EntityManager::nullEntity()) {
-                            assert(false);
-                            return;
-                        }
-                        _tryBindLifeTime(parentEm, childEm, parentID, childID, entity);
-                        _tryAttach(parentEm, childEm, parentID, childID, entity);
-
-                    } else {
-                        assert(false);
-                    }
-                } else {
-                    assert(false);
-                }
-            }
-        }
+        _createComponents_Primary(mComponentFactory, primaryEm, parentID, doc);
+        _postProcess(primaryEm, parentID);
+        _createEntity_Secondary(*this, primaryEm, secondaryEm, parentID, doc);
     }
 }

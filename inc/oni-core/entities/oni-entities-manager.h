@@ -388,7 +388,7 @@ namespace oni {
         bool
         valid(EntityID entityID);
 
-        static inline auto
+        static constexpr inline auto
         nullEntity() {
             return entt::null;
         }

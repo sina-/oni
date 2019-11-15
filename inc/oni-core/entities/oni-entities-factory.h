@@ -51,21 +51,22 @@ namespace oni {
                                  ComponentFactory &&);
 
         EntityID
-        createEntity_Canon(EntityManager &,
-                           const EntityName &);
+        createEntity_Primary(EntityManager &primaryEm,
+                             EntityManager &secondaryEm,
+                             const EntityName &name);
 
         void
-        createEntity_Extras(EntityManager &mainEm,
-                            EntityManager &supportEm,
-                            EntityID id,
-                            const EntityName &name);
+        createEntity_Secondary(EntityManager &primaryEm,
+                               EntityManager &secondaryEm,
+                               EntityID parentID,
+                               const EntityName &name);
 
     protected:
         const EntityDefDirPath &
-        _getEntityPath_Canon(const EntityName &name);
+        _getEntityPath_Primary(const EntityName &name);
 
         const EntityDefDirPath &
-        _getEntityPath_Extra(const EntityName &name);
+        _getEntityPath_Secondary(const EntityName &name);
 
         virtual void
         _postProcess(EntityManager &,

@@ -9,6 +9,8 @@
 #include <oni-core/json/oni-json.h>
 #include <oni-core/io/oni-io-input-structure.h>
 #include <oni-core/entities/oni-entities-serialization-json.h>
+#include <oni-core/graphic/oni-graphic-camera.h>
+#include <oni-core/math/oni-math-z-layer-manager.h>
 
 
 namespace {
@@ -142,7 +144,6 @@ namespace {
                             rapidjson::Document &doc) {
         // TODO: Crazy idea, I could have a simple schema for this shit. Something like item path that looks like
         //  entities.entity.name: string. And pass that to a reader that returns the right item :h
-        // TODO: This shit needs testing!
         auto entities = doc.FindMember("secondary");
         if (entities != doc.MemberEnd()) {
             for (auto entity = entities->value.MemberBegin();
@@ -173,15 +174,19 @@ namespace {
 }
 
 namespace oni {
-    oni::EntityFactory::EntityFactory(EntityDefDirPath &&fp) : mEntityResourcePath(std::move(fp)) {
+    oni::EntityFactory::EntityFactory(EntityDefDirPath &&fp,
+                                      ZLayerManager &zLayer) : mEntityResourcePath(std::move(fp)),
+                                                               mZLayerManager(zLayer) {
         COMPONENT_FACTORY_DEFINE(this, WorldP3D)
         COMPONENT_FACTORY_DEFINE(this, WorldP2D)
+        COMPONENT_FACTORY_DEFINE(this, ZLayer)
         COMPONENT_FACTORY_DEFINE(this, Direction)
         COMPONENT_FACTORY_DEFINE(this, Orientation)
         COMPONENT_FACTORY_DEFINE(this, Scale)
         COMPONENT_FACTORY_DEFINE(this, GrowOverTime)
         COMPONENT_FACTORY_DEFINE(this, Velocity)
         COMPONENT_FACTORY_DEFINE(this, Acceleration)
+
         COMPONENT_FACTORY_DEFINE(this, SoundPitch)
 
         COMPONENT_FACTORY_DEFINE(this, PhysicalProperties)
@@ -207,7 +212,7 @@ namespace oni {
         //  index the content.
         auto path = EntityDefDirPath{};
         path.path.append(mEntityResourcePath.path);
-        path.path.append("canon/");
+        path.path.append("primary/");
         path.path.append(name.str);
         path.path.append(".json");
         auto result = mEntityPathMap_Canon.emplace(name, std::move(path));
@@ -218,7 +223,7 @@ namespace oni {
     EntityFactory::registerEntityType_Extra(const EntityName &name) {
         auto path = EntityDefDirPath{};
         path.path.append(mEntityResourcePath.path);
-        path.path.append("extra/");
+        path.path.append("secondary/");
         path.path.append(name.str);
         path.path.append(".json");
         auto result = mEntityPathMap_Extra.emplace(name, std::move(path));
@@ -227,7 +232,13 @@ namespace oni {
 
     void
     EntityFactory::_postProcess(EntityManager &em,
-                                EntityID id) {}
+                                EntityID id) {
+        if (em.has<ZLayer>(id)) {
+            auto &zLayer = em.get<ZLayer>(id);
+            auto &pos = em.get<WorldP3D>(id);
+            pos.z = mZLayerManager.getZAt(zLayer);
+        }
+    }
 
     const EntityDefDirPath &
     EntityFactory::_getEntityPath_Primary(const EntityName &name) {

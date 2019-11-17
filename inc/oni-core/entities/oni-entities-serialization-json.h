@@ -3,6 +3,7 @@
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/component/oni-component-physics.h>
 #include <oni-core/component/oni-component-geometry.h>
+#include <oni-core/graphic/oni-graphic-camera.h>
 #include <oni-core/component/oni-component-audio.h>
 
 
@@ -292,4 +293,17 @@ namespace oni {
               CarInput &data) {
     }
 
+    template<class Archive>
+    void
+    save(Archive &archive,
+         const ZLayer &data) {
+        saveEnum(archive, "value", data);
+    }
+
+    template<class Archive>
+    void
+    load(Archive &archive,
+         ZLayer &data) {
+        loadEnum(archive, "value", data);
+    }
 }

@@ -4,9 +4,10 @@
 #include <unordered_map>
 
 #include <oni-core/common/oni-common-typedef.h>
-#include <oni-core/entities/oni-entities-structure.h>
-#include <oni-core/util/oni-util-hash.h>
+#include <oni-core/math/oni-math-fwd.h>
+#include <oni-core/util/oni-util-fwd.h>
 #include <oni-core/util/oni-util-structure.h>
+#include <oni-core/entities/oni-entities-structure.h>
 
 namespace cereal {
     class JSONInputArchive;
@@ -36,7 +37,8 @@ namespace oni {
 namespace oni {
     class EntityFactory {
     public:
-        explicit EntityFactory(EntityDefDirPath &&);
+        explicit EntityFactory(EntityDefDirPath &&,
+                               ZLayerManager &);
 
         // TODO: Similar to Assets, I should just pass an index file to retrieve all the entity types. Or even
         // better is to just set the top directory and let the factory traverse and index all the types??
@@ -79,5 +81,7 @@ namespace oni {
         std::unordered_map<Hash, ComponentFactory> mComponentFactory{};
         std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Canon{};
         std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Extra{};
+
+        ZLayerManager &mZLayerManager;
     };
 }

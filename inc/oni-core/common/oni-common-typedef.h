@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstddef>
-
 namespace oni {
     typedef char c8;
     typedef signed char i8;
@@ -13,8 +11,7 @@ namespace oni {
     typedef signed long int i64;
     typedef unsigned long int u64;
 
-    typedef std::size_t size;
-    //using size = decltype(sizeof(1));
+    using size = decltype(sizeof(0));
     typedef float r32;
     typedef double r64;
 

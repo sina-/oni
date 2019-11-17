@@ -25,8 +25,9 @@ namespace oni {
         auto document = rapidjson::Document();
         auto &parsedDoc = document.Parse(jsonString.data());
         if (parsedDoc.HasParseError()) {
-            printf("JSON parse error: %s Position: %zu \n",
+            printf("JSON parse error: %s file: %s position: %zu \n",
                    rapidjson::GetParseError_En(parsedDoc.GetParseError()),
+                   fp.getFullPath().data(),
                    parsedDoc.GetErrorOffset());
             assert(false);
             return {};

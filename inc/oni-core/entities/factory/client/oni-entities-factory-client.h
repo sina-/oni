@@ -10,7 +10,8 @@ namespace oni {
     public:
         EntityFactory_Client(EntityDefDirPath &&,
                              FontManager &,
-                             TextureManager &);
+                             TextureManager &,
+                             ZLayerManager&);
 
     protected:
         void

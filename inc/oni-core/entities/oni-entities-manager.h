@@ -42,6 +42,11 @@ namespace oni {
                     r32 z);
 
         void
+        setWorldP3D(EntityID,
+                    r32 x,
+                    r32 y);
+
+        void
         setScale(EntityID,
                  r32 x,
                  r32 y);

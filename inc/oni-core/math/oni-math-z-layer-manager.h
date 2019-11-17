@@ -13,28 +13,17 @@ namespace oni {
     public:
         ZLayerManager();
 
-        void
-        setZ(const EntityName &name,
-             ZLayerDef def);
-
-        void
-        setEqualZ(const EntityName &src,
-                  const EntityName &dest);
+        r32
+        getZAt(const ZLayer &) const;
 
         r32
-        getZForEntity(const EntityName&) const;
+        getNextZAtLayer(const ZLayer &);
 
     private:
-        r32
-        _getNextZAtLayer(ZLayerDef);
+        static inline constexpr r32 mMajorLayerDelta{0.1f};
+        static inline constexpr r32 mMinorLayerDelta{0.001f};
 
-    private:
-        const r32 mMajorLayerDelta{0.1f};
-        const r32 mMinorLayerDelta{0.001f};
-
-        ZLayer mZLayer{};
-        ZLayer mZLayerTop{};
-
-        std::unordered_map<Hash, r32> mEntityZLayers;
+        std::array<ZLayer::type, ZLayer::size()> mZLayer{};
+        std::array<ZLayer::type, ZLayer::size()> mZLayerTop{};
     };
 }

@@ -391,6 +391,15 @@ namespace oni {
     }
 
     void
+    EntityManager::setWorldP3D(EntityID id,
+                               r32 x,
+                               r32 y) {
+        auto &pos = mRegistry->get<WorldP3D>(id);
+        pos.x = x;
+        pos.y = y;
+    }
+
+    void
     EntityManager::setScale(EntityID id,
                             r32 x,
                             r32 y) {

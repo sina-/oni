@@ -33,6 +33,8 @@ namespace oni {
     struct Enum {
         oni::i32 id{};
         oni::HashedString name{};
+
+        using type = decltype(id);
     };
 
     namespace detail {

@@ -8,9 +8,10 @@
 namespace oni {
     EntityFactory_Client::EntityFactory_Client(EntityDefDirPath &&fp,
                                                FontManager &fm,
-                                               TextureManager &tm) : EntityFactory(std::move(fp)),
-                                                                     mFontMng(fm),
-                                                                     mTextureMng(tm) {
+                                               TextureManager &tm,
+                                               ZLayerManager &zm) : EntityFactory(std::move(fp), zm),
+                                                                    mFontMng(fm),
+                                                                    mTextureMng(tm) {
         mEntityResourcePath.descendInto("client");
     }
 
@@ -38,5 +39,7 @@ namespace oni {
                 attachment.mngs.emplace_back(&em);
             }
         }
+
+        EntityFactory::_postProcess(em, id);
     }
 }

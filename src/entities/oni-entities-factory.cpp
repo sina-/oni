@@ -109,7 +109,8 @@ namespace {
                 oni::EntityManager::attach({&parentEm, parentID}, {&childEm, childID});
 
                 auto pos = _readComponent<oni::WorldP3D>(attached->value);
-                parentEm.setWorldP3D(childID, pos.x, pos.y, pos.z);
+                pos.value.print();
+                childEm.setWorldP3D(childID, pos.x, pos.y, pos.z);
             } else {
                 assert(false);
             }

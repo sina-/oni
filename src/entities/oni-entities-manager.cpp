@@ -75,10 +75,17 @@ namespace oni {
     void
     EntityManager::bindLifetime(const EntityContext &parent,
                                 const EntityContext &child) {
-        auto &blp = parent.mng->createComponent<BindLifetimeParent>(parent.id);
+        if (!parent.mng->has<BindLifetimeParent>(parent.id)) {
+            parent.mng->createComponent<BindLifetimeParent>(parent.id);
+        }
+        if (!child.mng->has<BindLifetimeChild>(child.id)) {
+            child.mng->createComponent<BindLifetimeChild>(child.id);
+        }
+
+        auto &blp = parent.mng->get<BindLifetimeParent>(parent.id);
         blp.children.emplace_back(child);
 
-        auto &blc = child.mng->createComponent<BindLifetimeChild>(child.id);
+        auto &blc = child.mng->get<BindLifetimeChild>(child.id);
         blc.parent = parent;
     }
 

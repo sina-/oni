@@ -10,7 +10,6 @@ namespace oni {
         FADE_OUT,
     };
 
-    // TODO: Use the new ENUM
     enum class ChannelGroup : oni::u8 {
         UNKNOWN,
 

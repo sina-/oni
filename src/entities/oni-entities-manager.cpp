@@ -286,6 +286,8 @@ namespace oni {
                 assert(body);
 
                 if (!props.collisionWithinCat) {
+                    assert(props.physicalCat.id < std::numeric_limits<i16>::max());
+                    assert(props.physicalCat.id > std::numeric_limits<i16>::min());
                     fixtureDef.filter.groupIndex = -static_cast<i16>(props.physicalCat.id);
                 }
 

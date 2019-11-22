@@ -63,6 +63,8 @@ namespace oni {
                                EntityID parentID,
                                const EntityName &name);
 
+        std::function<EntityName(const Hash &)> mEntityNameFactory{};
+
     protected:
         const EntityDefDirPath &
         _getEntityPath_Primary(const EntityName &name);

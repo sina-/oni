@@ -109,7 +109,6 @@ namespace {
                 oni::EntityManager::attach({&parentEm, parentID}, {&childEm, childID});
 
                 auto pos = _readComponent<oni::WorldP3D>(attached->value);
-                pos.value.print();
                 childEm.setWorldP3D(childID, pos.x, pos.y, pos.z);
             } else {
                 assert(false);
@@ -153,10 +152,26 @@ namespace {
                     auto entityNameObj = entity->value.FindMember("name");
                     if (entityNameObj->value.IsString()) {
                         auto entityName = entityNameObj->value.GetString();
+                        auto value = rapidjson::Value{};
+                        value.AddMember("value", rapidjson::Value(entityName, doc.GetAllocator()).Move(),
+                                        doc.GetAllocator());
+                        auto entityNameJson = rapidjson::Value{};
+                        entityNameJson.AddMember("EntityName",
+                                                 value.Move(),
+                                                 doc.GetAllocator());
+                        //auto entityEnum = factory.mEntityNameFactory(hashedEntityName);
+                        // TODO: Almost there! I just need to do what I did for COMPONENT_FACTORY_DEFINE
+                        // so the user is the one that defines the factory for the component. It would
+                        // be nice to make the component factory only read the component
+                        // and return it, then I can use it for both purposes but I don't see how if at all
+                        // possible
+                        // LOL Actually I can, I just need to save the reader and createComponent separatly
+                        // in the same macro so that I can just use the reader part here!
+                        auto entityEnum = _readComponent<oni::EntityName>(entityNameJson);
+
                         // NOTE: If secondary entity requires entities as well, those will always will be
                         // created in the secondary entity registry.
-                        auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm,
-                                                                    {oni::EntityName::makeFromCStr(entityName)});
+                        auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm, entityEnum);
                         if (childID == oni::EntityManager::nullEntity()) {
                             assert(false);
                             continue;
@@ -178,6 +193,7 @@ namespace oni {
     oni::EntityFactory::EntityFactory(EntityDefDirPath &&fp,
                                       ZLayerManager &zLayer) : mEntityResourcePath(std::move(fp)),
                                                                mZLayerManager(zLayer) {
+        // TODO: This is really dependent on the user, remove it.
         COMPONENT_FACTORY_DEFINE(this, WorldP3D)
         COMPONENT_FACTORY_DEFINE(this, WorldP2D)
         COMPONENT_FACTORY_DEFINE(this, ZLayer)
@@ -190,14 +206,10 @@ namespace oni {
 
         COMPONENT_FACTORY_DEFINE(this, SoundPitch)
 
-        COMPONENT_FACTORY_DEFINE(this, PhysicalProperties)
         COMPONENT_FACTORY_DEFINE(this, CarInput)
         COMPONENT_FACTORY_DEFINE(this, Car)
         COMPONENT_FACTORY_DEFINE(this, CarConfig)
 
-        COMPONENT_FACTORY_DEFINE(this, ParticleEmitter)
-        COMPONENT_FACTORY_DEFINE(this, Material_Definition)
-        COMPONENT_FACTORY_DEFINE(this, Material_Text)
     }
 
     void
@@ -214,7 +226,7 @@ namespace oni {
         auto path = EntityDefDirPath{};
         path.path.append(mEntityResourcePath.path);
         path.path.append("primary/");
-        path.path.append(name.str);
+        path.path.append(name.name.str);
         path.path.append(".json");
         auto result = mEntityPathMap_Canon.emplace(name, std::move(path));
         assert(result.second);
@@ -225,7 +237,7 @@ namespace oni {
         auto path = EntityDefDirPath{};
         path.path.append(mEntityResourcePath.path);
         path.path.append("secondary/");
-        path.path.append(name.str);
+        path.path.append(name.name.str);
         path.path.append(".json");
         auto result = mEntityPathMap_Extra.emplace(name, std::move(path));
         assert(result.second);

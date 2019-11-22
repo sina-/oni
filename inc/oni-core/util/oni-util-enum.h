@@ -17,29 +17,40 @@
  */
 
 
-#define ONI_ENUM_DEF(NAME, ...)                                                                                         \
-    namespace detail{ namespace {inline static const constexpr oni::Enum storage_##NAME [] = { __VA_ARGS__};}}          \
+#define ONI_ENUM_DEF_WITH_BASE(NAME, BASE, ...)                                                                                   \
+    namespace detail{ namespace {inline static const constexpr BASE storage_##NAME [] = { __VA_ARGS__};}}               \
     struct NAME : public oni::detail::EnumBase<                                                                         \
-            sizeof(detail::storage_##NAME) / sizeof(oni::Enum), detail::storage_##NAME> {                               \
+            sizeof(detail::storage_##NAME) / sizeof(BASE), BASE, detail::storage_##NAME> {                              \
        template<oni::i32 n>                                                                                             \
        inline static constexpr                                                                                          \
        NAME GET(const oni::c8 (&name)[n])                                                                               \
        { return {_get(name)};}                                                                                          \
-       inline constexpr bool operator==(const oni::HashedString &other) const { return other.hash == name.hash; }       \
-       inline constexpr bool operator!=(const oni::HashedString &other) const { return other.hash != name.hash; }       \
 };
+
+#define ONI_ENUM_DEF(NAME, ...) ONI_ENUM_DEF_WITH_BASE(NAME, oni::Enum, __VA_ARGS__ )
+
 
 namespace oni {
     struct Enum {
-        oni::i32 id{};
+        oni::i32 id{0};
         oni::HashedString name{};
+
+        inline constexpr bool
+        operator==(const Enum &other) const {
+            return other.id == id && other.name == name;
+        }
+
+        inline constexpr bool
+        operator!=(const Enum &other) const {
+            return other.id != id || other.name != name;
+        }
 
         using type = decltype(id);
     };
 
     namespace detail {
-        template<oni::i32 N, auto v>
-        struct EnumBase : public Enum {
+        template<oni::i32 N, class BASE, auto v>
+        struct EnumBase : public BASE {
             inline static constexpr auto
             begin() {
                 return storage;
@@ -50,14 +61,26 @@ namespace oni {
                 return storage + N;
             }
 
+            // NOTE: It is possible to have duplicate ids but different names!
             inline constexpr bool
-            operator==(const EnumBase &other) const {
-                return other.id == id && other.name == name;
+            operator==(const BASE &other) const {
+                return other.id == BASE::id && other.name == BASE::name;
             }
 
             inline constexpr bool
-            operator!=(const EnumBase &other) const {
-                return other.id != id || other.name != name;
+            operator!=(const BASE &other) const {
+                return other.id != BASE::id || other.name != BASE::name;
+            }
+
+            // NOTE: It is possible to have duplicate ids but different names!
+            inline constexpr bool
+            operator==(const HashedString &other) const {
+                return other.hash == BASE::name.hash;
+            }
+
+            inline constexpr bool
+            operator!=(const HashedString &other) const {
+                return other.hash != BASE::name.hash;
             }
 
             inline static constexpr oni::i32
@@ -66,9 +89,12 @@ namespace oni {
             }
 
             // NOTE: Implicit so that this class can be used in switch statements
-            inline constexpr operator i32() const {
-                return id;
-            }
+            // TODO: Sad I can't really have it like this. With this one, you could compare two different
+            // enums based on id! even though those ids have nothing to do with each other. Which beats the
+            // whole point of type system with my enum design.
+//            inline constexpr operator i32() const {
+//                return BASE::id;
+//            }
 
             template<class Out, class Adaptor>
             static inline Out *
@@ -89,42 +115,47 @@ namespace oni {
             _runtimeInit(const oni::Hash hash) {
                 for (oni::i32 i = 0; i < N; ++i) {
                     if (storage[i].name.hash == hash) {
-                        name = storage[i].name;
-                        id = storage[i].id;
+                        BASE::name = storage[i].name;
+                        BASE::id = storage[i].id;
                         return;
                     }
                 }
                 assert(false);
-                id = INVALID.id;
-                name = INVALID.name;
+                BASE::id = INVALID.id;
+                BASE::name = INVALID.name;
+            }
+
+            inline static constexpr BASE
+            make(const Hash &value) {
+                return _find(value, 0, storage);
             }
 
         protected:
             template<oni::i32 n>
-            static inline constexpr Enum
+            static inline constexpr BASE
             _get(const oni::c8 (&name_)[n]) {
                 return _find(oni::HashedString::makeHashFromLiteral(name_), 0, storage);
             }
 
         private:
             // TODO: How can I make this better, the diagnosis error is misleading
-            inline static constexpr Enum
+            inline static constexpr BASE
             _notFound() {
                 throw std::logic_error("Invalid value specified for the enum");
                 return INVALID;
             }
 
-            inline static constexpr Enum
+            inline static constexpr BASE
             _find(const oni::Hash hash,
                   oni::i32 i,
-                  const Enum *candidate) {
+                  const BASE *candidate) {
                 return (candidate->name.hash == hash) ? *candidate :
                        ((i == N) ? _notFound() : _find(hash, i + 1, candidate + 1));
             }
 
         private:
-            static inline const constexpr Enum *storage = v;
-            static inline const constexpr Enum INVALID = {0, "__INVALID__"};
+            static inline const constexpr BASE *storage = v;
+            static inline const constexpr BASE INVALID = {0, "__INVALID__"};
         };
     }
 }

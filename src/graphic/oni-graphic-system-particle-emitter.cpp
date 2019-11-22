@@ -21,8 +21,7 @@ namespace oni {
         }
 
         for (oni::u8 i = 0; i < emitter.count; ++i) {
-            constexpr auto entityName = EntityName{"simple-particle"};
-            auto pID = mEntityFactory.createEntity_Primary(mEntityManager, mEntityManager, entityName);
+            auto pID = mEntityFactory.createEntity_Primary(mEntityManager, mEntityManager, emitter.particle);
             // TODO: I can't just use pos.z as often these particles render over other objects and this will
             // cause z-fighting, I should ask the layer manager for a z value at least!
             mEntityManager.setWorldP3D(pID, pos.x, pos.y, pos.z);

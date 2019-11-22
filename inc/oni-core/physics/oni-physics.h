@@ -83,7 +83,7 @@ namespace oni {
 
     private:
         void
-        _handleCollisions(EntityManager &);
+        _handleCollisions();
 
         void
         _handleCarCollision(EntityManager &,

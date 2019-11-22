@@ -230,7 +230,7 @@ namespace oni {
     void
     EntityManager::printEntityType(EntityID id) const {
         const auto &name = mRegistry->get<EntityName>(id);
-        printf("%d, %s ", id, name.str.data());
+        printf("%d, %s ", id, name.name.str.data());
         if (mRegistry->has<WorldP3D>(id)) {
             const auto &pos = mRegistry->get<WorldP3D>(id);
             pos.value.print();
@@ -277,8 +277,8 @@ namespace oni {
         fixtureDef.friction = props.friction;
         fixtureDef.isSensor = props.isSensor;
 
-        switch (props.bodyType) {
-            case BodyType::GET("Dynamic") : {
+        switch (props.bodyType.id) {
+            case BodyType::GET("Dynamic").id : {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_dynamicBody;
@@ -294,7 +294,7 @@ namespace oni {
                 body->CreateFixture(&fixtureDef);
                 break;
             }
-            case BodyType::GET("Static"): {
+            case BodyType::GET("Static").id: {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_staticBody;
@@ -303,7 +303,7 @@ namespace oni {
                 body->CreateFixture(&shape, 0.f);
                 break;
             }
-            case BodyType::GET("Kinematic"): {
+            case BodyType::GET("Kinematic").id: {
                 bodyDef.position.x = pos.x;
                 bodyDef.position.y = pos.y;
                 bodyDef.type = b2_kinematicBody;

@@ -430,6 +430,7 @@ namespace oni {
     };
 
     struct ParticleEmitter {
+        EntityName particle{};
         Material_Definition material{};
         r32 size = 0.1f;
         r32 initialVMin = 1.f;

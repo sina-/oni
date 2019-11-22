@@ -5,37 +5,37 @@
 
 namespace oni {
     ZLayerManager::ZLayerManager() {
-        mZLayer[ZLayer::GET("LAYER_0")] = 0.f;
-        mZLayer[ZLayer::GET("LAYER_1")] = mZLayer[ZLayer::GET("LAYER_0")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_2")] = mZLayer[ZLayer::GET("LAYER_1")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_3")] = mZLayer[ZLayer::GET("LAYER_2")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_4")] = mZLayer[ZLayer::GET("LAYER_3")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_5")] = mZLayer[ZLayer::GET("LAYER_4")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_6")] = mZLayer[ZLayer::GET("LAYER_5")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_7")] = mZLayer[ZLayer::GET("LAYER_6")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_8")] = mZLayer[ZLayer::GET("LAYER_7")] + mMajorLayerDelta;
-        mZLayer[ZLayer::GET("LAYER_9")] = mZLayer[ZLayer::GET("LAYER_8")] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_0").id] = 0.f;
+        mZLayer[ZLayer::GET("LAYER_1").id] = mZLayer[ZLayer::GET("LAYER_0").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_2").id] = mZLayer[ZLayer::GET("LAYER_1").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_3").id] = mZLayer[ZLayer::GET("LAYER_2").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_4").id] = mZLayer[ZLayer::GET("LAYER_3").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_5").id] = mZLayer[ZLayer::GET("LAYER_4").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_6").id] = mZLayer[ZLayer::GET("LAYER_5").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_7").id] = mZLayer[ZLayer::GET("LAYER_6").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_8").id] = mZLayer[ZLayer::GET("LAYER_7").id] + mMajorLayerDelta;
+        mZLayer[ZLayer::GET("LAYER_9").id] = mZLayer[ZLayer::GET("LAYER_8").id] + mMajorLayerDelta;
 
         mZLayerTop = mZLayer;
     }
 
     r32
     ZLayerManager::getZAt(const ZLayer &layer) const {
-        assert(layer >= ZLayer::GET("LAYER_0") &&
-               layer <= ZLayer::GET("LAYER_9"));
-        return mZLayer[layer];
+        assert(layer.id >= ZLayer::GET("LAYER_0").id &&
+               layer.id <= ZLayer::GET("LAYER_9").id);
+        return mZLayer[layer.id];
     }
 
     r32
     ZLayerManager::getNextZAtLayer(const ZLayer &layer) {
-        assert(layer >= ZLayer::GET("LAYER_0") &&
-               layer <= ZLayer::GET("LAYER_9"));
+        assert(layer.id >= ZLayer::GET("LAYER_0").id &&
+               layer.id <= ZLayer::GET("LAYER_9").id);
 
-        auto currentTop = mZLayerTop[layer];
+        auto currentTop = mZLayerTop[layer.id];
 
-        assert(currentTop + mMinorLayerDelta < mZLayer[layer] + mMajorLayerDelta);
+        assert(currentTop + mMinorLayerDelta < mZLayer[layer.id] + mMajorLayerDelta);
 
-        mZLayerTop[layer] = currentTop + mMinorLayerDelta;
+        mZLayerTop[layer.id] = currentTop + mMinorLayerDelta;
         return currentTop;
     }
 

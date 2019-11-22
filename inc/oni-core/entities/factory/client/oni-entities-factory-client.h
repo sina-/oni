@@ -11,7 +11,7 @@ namespace oni {
         EntityFactory_Client(EntityDefDirPath &&,
                              FontManager &,
                              TextureManager &,
-                             ZLayerManager&);
+                             ZLayerManager &);
 
     protected:
         void

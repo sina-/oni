@@ -15,7 +15,7 @@ namespace oni {
 
     // TODO: Did I settel down with ingeratance and not "using EntityName = HashedString"?
     // ImageName and SoundName have using ... = HashedString
-    struct EntityName : public HashedString {
+    struct EntityName : public Enum {
     };
 
     // TODO: Can I expose EnumBase and inherit from it so that users can define an enum for the entity name
@@ -100,4 +100,21 @@ namespace oni {
 }
 
 DEFINE_STD_HASH_FUNCTIONS(oni::ComponentName)
-DEFINE_STD_HASH_FUNCTIONS(oni::EntityName)
+
+namespace std {
+    template<>
+    class hash<oni::EntityName> {
+    public:
+        constexpr size_t
+        operator()(oni::EntityName const &hs) const {
+            return hs.name.hash.value;
+        }
+
+        constexpr bool
+        operator()(const oni::EntityName &lhs,
+                   const oni::EntityName &rhs) const {
+            return lhs.name.hash == rhs.name.hash;
+        }
+    };
+}
+

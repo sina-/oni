@@ -41,28 +41,4 @@ namespace oni {
         data.hash = result.hash;
         data.str = result.str;
     }
-
-    template<class Archive, class ENUM>
-    void
-    loadEnum(Archive &archive,
-             std::string_view name,
-             ENUM &data) {
-        std::string buffer{};
-        if (name.empty()) {
-            archive(buffer);
-        } else {
-            archive(name.data(), buffer);
-        }
-        auto hash_ = oni::HashedString::makeHashFromCString(buffer.data());
-        // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
-        data._runtimeInit(hash_);
-    }
-
-    template<class Archive, class ENUM>
-    void
-    saveEnum(Archive &archive,
-             std::string_view name,
-             ENUM &data) {
-        saveHashedString(archive, name, data.name);
-    }
 }

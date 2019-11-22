@@ -2,7 +2,7 @@
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/util/oni-util-file.h>
-#include <oni-core/util/oni-util-hash.h>
+#include <oni-core/util/oni-util-enum.h>
 
 namespace oni {
     struct ImageName : public HashedString {

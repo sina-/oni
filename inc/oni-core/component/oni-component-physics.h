@@ -93,14 +93,9 @@ namespace oni {
                  { 2, "Kinematic" },
                  { 3, "Dynamic" })
 
-    // TODO: This is fucking dumb to be in engine!
-    ONI_ENUM_DEF(PhysicalCategory,
-                 { 0, "Unknown" },
-                 { 1, "Vehicle" },
-                 { 2, "RaceCar" },
-                 { 3, "Rocket" },
-                 { 4, "Wall" },
-                 { 5, "Projectile" })
+
+    struct PhysicalCategory : public Enum {
+    };
 
     struct PhysicalCatPair {
         PhysicalCategory a{};

@@ -5,7 +5,36 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/graphic/oni-graphic-camera.h>
 #include <oni-core/component/oni-component-audio.h>
+#include <oni-core/entities/oni-entities-serialization-hashed-string.h>
+#include <oni-core/io/oni-io-input-structure.h>
 
+namespace oni {
+    template<class Archive, class ENUM>
+    void
+    loadEnum(Archive &archive,
+             std::string_view name,
+             ENUM &data) {
+        if (name.empty()) {
+            assert(false);
+            return;
+        }
+
+        std::string buffer{};
+        archive(name.data(), buffer);
+        auto hash_ = oni::HashedString::makeHashFromCString(buffer.data());
+        // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
+        data._runtimeInit(hash_);
+    }
+
+    // NOTE: This version is for json
+    template<class Archive, class ENUM>
+    void
+    saveEnum(Archive &archive,
+             std::string_view name,
+             ENUM &data) {
+        saveHashedString(archive, name, data.name);
+    }
+}
 
 namespace oni {
     template<class Archive>
@@ -176,6 +205,8 @@ namespace oni {
     void
     serialize(Archive &archive,
               ParticleEmitter &data) {
+        // TODO:
+//        archive("particle", data.particle);
         archive("material", data.material);
         archive("size", data.size);
         archive("initialVMin", data.initialVMin);
@@ -259,20 +290,6 @@ namespace oni {
 
     template<class Archive>
     void
-    save(Archive &archive,
-         const PhysicalCategory &data) {
-        saveEnum(archive, "name", data);
-    }
-
-    template<class Archive>
-    void
-    load(Archive &archive,
-         PhysicalCategory &data) {
-        loadEnum(archive, "name", data);
-    }
-
-    template<class Archive>
-    void
     serialize(Archive &archive,
               PhysicalProperties &data) {
         archive("linearDamping", data.linearDamping);
@@ -297,7 +314,7 @@ namespace oni {
     void
     save(Archive &archive,
          const ZLayer &data) {
-        saveEnum(archive, "value", data);
+        saveHashedString(archive, "value", data.name);
     }
 
     template<class Archive>
@@ -305,5 +322,8 @@ namespace oni {
     load(Archive &archive,
          ZLayer &data) {
         loadEnum(archive, "value", data);
+        auto buffer = ZLayer{};
+        oni::loadEnum(archive, "value", buffer);
+        data = buffer;
     }
 }

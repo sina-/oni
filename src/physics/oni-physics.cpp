@@ -111,20 +111,24 @@ namespace oni {
         // for a given entity id an maintains an internal mapping between them without leaking the
         // implementation to outside.
         mPhysicsWorld->Step(dt, 6, 2);
-        _handleCollisions(em);
+        _handleCollisions();
     }
 
     void
-    Physics::_handleCollisions(EntityManager &em) {
+    Physics::_handleCollisions() {
         for (auto it = mCollisionState->collisions.begin(); it != mCollisionState->collisions.end();) {
+            if (!it->em) {
+                assert(false);
+                return;
+            }
+            auto &em = *it->em;
             auto &propsA = em.get<PhysicalProperties>(it->pair.a);
             auto &propsB = em.get<PhysicalProperties>(it->pair.b);
             auto pcPair = PhysicalCatPair{propsA.physicalCat, propsB.physicalCat};
-            constexpr auto raceCar = PhysicalCategory::GET("RaceCar");
-            if (pcPair.a == raceCar) {
+            if (em.has<Car>(it->pair.a)) {
                 _handleCarCollision(em, it->pair.a);
             }
-            if (pcPair.b == raceCar) {
+            if (em.has<Car>(it->pair.b)) {
                 _handleCarCollision(em, it->pair.b);
             }
 

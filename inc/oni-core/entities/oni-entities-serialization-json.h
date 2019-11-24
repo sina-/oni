@@ -21,9 +21,9 @@ namespace oni {
 
         std::string buffer{};
         archive(name.data(), buffer);
-        auto hash_ = oni::HashedString::makeHashFromCString(buffer.data());
-        // NOTE: After _init() hash will point to static storage so buffer is safe to go out of scope
-        data._runtimeInit(hash_);
+        auto hash = oni::HashedString::makeHashFromCString(buffer.data());
+        // NOTE: After initialization hash will point to static storage so buffer is safe to go out of scope
+        data.runtimeInit(hash);
     }
 
     // NOTE: This version is for json
@@ -171,6 +171,14 @@ namespace oni {
 
     template<class Archive>
     void
+    serialize(Archive &archive,
+              Material_Text &data) {
+        // TODO:
+        assert(false);
+    }
+
+    template<class Archive>
+    void
     save(Archive &archive,
          const Material_Finish &data) {
         saveEnum(archive, "name", data);
@@ -205,8 +213,7 @@ namespace oni {
     void
     serialize(Archive &archive,
               ParticleEmitter &data) {
-        // TODO:
-//        archive("particle", data.particle);
+        archive("particle", data.particle);
         archive("material", data.material);
         archive("size", data.size);
         archive("initialVMin", data.initialVMin);

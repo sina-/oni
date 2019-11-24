@@ -14,6 +14,18 @@
 
 
 namespace {
+    static oni::EntityManager *
+    _getTempEntityManager() {
+        static auto em = new oni::EntityManager(oni::SimMode::SERVER, nullptr);
+        return em;
+    }
+
+    oni::EntityID
+    _getTempEntityID(oni::EntityManager *em) {
+        static auto id = em->createEntity();
+        return id;
+    }
+
     template<class C>
     C
     _readComponent(rapidjson::Value &data) {
@@ -30,7 +42,7 @@ namespace {
     }
 
     void
-    _createComponent(std::unordered_map<oni::Hash, oni::ComponentFactory> &factoryMap,
+    _createComponent(const oni::ComponentFactoryMap &factoryMap,
                      oni::EntityManager &manager,
                      oni::EntityID id,
                      rapidjson::Document &document,
@@ -61,8 +73,21 @@ namespace {
         }
     }
 
+    template<class C>
+    C
+    _readComponent(const oni::ComponentFactoryMap &factoryMap,
+                   rapidjson::Document &doc,
+                   const rapidjson::Document::MemberIterator &component) {
+        auto *em = _getTempEntityManager();
+        auto id = _getTempEntityID(em);
+        _createComponent(factoryMap, *em, id, doc, component);
+        auto result = em->get<C>(id);
+        em->removeComponent<C>(id);
+        return result;
+    }
+
     void
-    _createComponents(std::unordered_map<oni::Hash, oni::ComponentFactory> &factoryMap,
+    _createComponents(const oni::ComponentFactoryMap &factoryMap,
                       oni::EntityManager &em,
                       oni::EntityID id,
                       rapidjson::Document &doc,
@@ -78,7 +103,7 @@ namespace {
     }
 
     void
-    _createComponents_Primary(std::unordered_map<oni::Hash, oni::ComponentFactory> &factoryMap,
+    _createComponents_Primary(const oni::ComponentFactoryMap &factoryMap,
                               oni::EntityManager &em,
                               oni::EntityID id,
                               rapidjson::Document &doc) {
@@ -151,27 +176,22 @@ namespace {
                 if (entity->value.IsObject()) {
                     auto entityNameObj = entity->value.FindMember("name");
                     if (entityNameObj->value.IsString()) {
-                        auto entityName = entityNameObj->value.GetString();
-                        auto value = rapidjson::Value{};
-                        value.AddMember("value", rapidjson::Value(entityName, doc.GetAllocator()).Move(),
+                        // TODO: LOL so much bullshit to create the json structs wtf.
+                        auto entityNameStr = entityNameObj->value.GetString();
+                        auto value = rapidjson::Value(rapidjson::kObjectType);
+                        value.AddMember("value", rapidjson::Value(entityNameStr, doc.GetAllocator()).Move(),
                                         doc.GetAllocator());
-                        auto entityNameJson = rapidjson::Value{};
+                        auto entityNameJson = rapidjson::Value(rapidjson::kObjectType);
                         entityNameJson.AddMember("EntityName",
                                                  value.Move(),
                                                  doc.GetAllocator());
-                        //auto entityEnum = factory.mEntityNameFactory(hashedEntityName);
-                        // TODO: Almost there! I just need to do what I did for COMPONENT_FACTORY_DEFINE
-                        // so the user is the one that defines the factory for the component. It would
-                        // be nice to make the component factory only read the component
-                        // and return it, then I can use it for both purposes but I don't see how if at all
-                        // possible
-                        // LOL Actually I can, I just need to save the reader and createComponent separatly
-                        // in the same macro so that I can just use the reader part here!
-                        auto entityEnum = _readComponent<oni::EntityName>(entityNameJson);
 
+                        auto entityName = _readComponent<oni::EntityName>(factory.getFactoryMap(), doc,
+                                                                          entityNameJson.MemberBegin());
                         // NOTE: If secondary entity requires entities as well, those will always will be
                         // created in the secondary entity registry.
-                        auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm, entityEnum);
+                        auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm, entityName);
+
                         if (childID == oni::EntityManager::nullEntity()) {
                             assert(false);
                             continue;
@@ -194,22 +214,21 @@ namespace oni {
                                       ZLayerManager &zLayer) : mEntityResourcePath(std::move(fp)),
                                                                mZLayerManager(zLayer) {
         // TODO: This is really dependent on the user, remove it.
-        COMPONENT_FACTORY_DEFINE(this, WorldP3D)
-        COMPONENT_FACTORY_DEFINE(this, WorldP2D)
-        COMPONENT_FACTORY_DEFINE(this, ZLayer)
-        COMPONENT_FACTORY_DEFINE(this, Direction)
-        COMPONENT_FACTORY_DEFINE(this, Orientation)
-        COMPONENT_FACTORY_DEFINE(this, Scale)
-        COMPONENT_FACTORY_DEFINE(this, GrowOverTime)
-        COMPONENT_FACTORY_DEFINE(this, Velocity)
-        COMPONENT_FACTORY_DEFINE(this, Acceleration)
+        COMPONENT_FACTORY_DEFINE(this, oni, WorldP3D)
+        COMPONENT_FACTORY_DEFINE(this, oni, WorldP2D)
+        COMPONENT_FACTORY_DEFINE(this, oni, ZLayer)
+        COMPONENT_FACTORY_DEFINE(this, oni, Direction)
+        COMPONENT_FACTORY_DEFINE(this, oni, Orientation)
+        COMPONENT_FACTORY_DEFINE(this, oni, Scale)
+        COMPONENT_FACTORY_DEFINE(this, oni, GrowOverTime)
+        COMPONENT_FACTORY_DEFINE(this, oni, Velocity)
+        COMPONENT_FACTORY_DEFINE(this, oni, Acceleration)
 
-        COMPONENT_FACTORY_DEFINE(this, SoundPitch)
+        COMPONENT_FACTORY_DEFINE(this, oni, SoundPitch)
 
-        COMPONENT_FACTORY_DEFINE(this, CarInput)
-        COMPONENT_FACTORY_DEFINE(this, Car)
-        COMPONENT_FACTORY_DEFINE(this, CarConfig)
-
+        COMPONENT_FACTORY_DEFINE(this, oni, CarInput)
+        COMPONENT_FACTORY_DEFINE(this, oni, Car)
+        COMPONENT_FACTORY_DEFINE(this, oni, CarConfig)
     }
 
     void
@@ -241,6 +260,11 @@ namespace oni {
         path.path.append(".json");
         auto result = mEntityPathMap_Extra.emplace(name, std::move(path));
         assert(result.second);
+    }
+
+    const ComponentFactoryMap &
+    EntityFactory::getFactoryMap() const {
+        return mComponentFactory;
     }
 
     void

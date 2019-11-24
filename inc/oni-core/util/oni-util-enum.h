@@ -110,9 +110,8 @@ namespace oni {
                 return result.data();
             }
 
-            // TODO: Not super sure about this exposed here. Do another pass on the interface
             void
-            _runtimeInit(const oni::Hash hash) {
+            runtimeInit(const oni::Hash hash) {
                 for (oni::i32 i = 0; i < N; ++i) {
                     if (storage[i].name.hash == hash) {
                         BASE::name = storage[i].name;
@@ -125,10 +124,10 @@ namespace oni {
                 BASE::name = INVALID.name;
             }
 
-            inline static constexpr BASE
-            make(const Hash &value) {
-                return _find(value, 0, storage);
-            }
+//            inline static constexpr BASE
+//            make(const Hash &value) {
+//                return _find(value, 0, storage);
+//            }
 
         protected:
             template<oni::i32 n>

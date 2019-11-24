@@ -13,16 +13,8 @@ namespace oni {
     struct ComponentName : public HashedString {
     };
 
-    // TODO: Did I settel down with ingeratance and not "using EntityName = HashedString"?
-    // ImageName and SoundName have using ... = HashedString
     struct EntityName : public Enum {
     };
-
-    // TODO: Can I expose EnumBase and inherit from it so that users can define an enum for the entity name
-    // if they want? :h
-//    struct EntityName_ : public EnumBase {
-//
-//    };
 
     enum class SimMode : u8 {
         UNKNOWN,

@@ -252,48 +252,6 @@ namespace oni {
         std::vector<Quad> quads{};
     };
 
-    // TODO: Game code
-    enum class __EntityAssetsPack : oni::u32 {
-        UNKNOWN,
-
-        RACE_CAR_DEFAULT,
-        RACE_CAR_TIRE_DEFAULT,
-        RACE_CAR_TIRE_WITH_TRAIL,
-        VEHICLE_GUN_DEFAULT,
-        VEHICLE_DEFAULT,
-        ROCKET_DEFAULT,
-        ROCKET_TRAIL_DEFAULT,
-
-        WALL_VERTICAL,
-        WALL_HORIZONTAL,
-
-        ROAD_DEFAULT,
-
-        EXPLOSION_DEFAULT,
-        BLAST_ANIMATION_DEFAULT,
-        BLAST_PARTICLE_DEFAULT,
-
-        // TODO: I probably want to split the variations into another enum.
-
-        CLOUD_BLACK,
-        CLOUD_WHITE,
-
-        ROCKET_FLAME_DEFAULT,
-
-        SMOKE_BLACK,
-        SMOKE_WHITE,
-
-        BACKGROUND_DEFAULT,
-        BACKGROUND_DEBUG,
-
-        CANVAS_DEFAULT,
-
-        TEXT_DEFAULT,
-
-        GENERATED,
-
-        LAST
-    };
 
     struct TextAttachment {
         EntityContext attachee;
@@ -318,11 +276,6 @@ namespace oni {
         std::vector<r32> advanceY{};
         std::vector<vec4> uv{};
         Material_Skin skin{}; // TODO: only the color is used for now, but for ease of use with Renderable I have skin, but when MaterialText is merged with the rest I can remove this field.
-
-        template<class Archive>
-        void
-        serialize(Archive &archive) {
-        }
     };
 
     // TODO: All these ENUMS needs UNKNOWN since I'm reading them from files.

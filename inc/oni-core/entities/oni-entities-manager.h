@@ -348,6 +348,9 @@ namespace oni {
 
     public:
         EntityID
+        createEntity();
+
+        EntityID
         createEntity(const EntityName &);
 
         template<class Component, class... Args>

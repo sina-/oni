@@ -20,14 +20,19 @@ namespace oni {
             void(oni::EntityManager &,
                  oni::EntityID,
                  cereal::JSONInputArchive &)>;
+    using ComponentFactoryMap = std::unordered_map<Hash, ComponentFactory>;
+
+    template<class C>
+    using ComponentReader = std::function<
+            C(cereal::JSONInputArchive &)>;
 }
 
-#define COMPONENT_FACTORY_DEFINE(factory, COMPONENT_NAME)                               \
+#define COMPONENT_FACTORY_DEFINE(factory, NAMESPACE, COMPONENT_NAME)                    \
 {                                                                                       \
         oni::ComponentFactory cf = [](oni::EntityManager &em,                           \
                                  oni::EntityID id,                                      \
                                  cereal::JSONInputArchive &reader) {                    \
-            auto &component = em.createComponent<COMPONENT_NAME>(id);                   \
+            auto &component = em.createComponent<NAMESPACE::COMPONENT_NAME>(id);        \
             reader(component);                                                          \
         };                                                                              \
         constexpr auto componentName = oni::ComponentName{#COMPONENT_NAME};             \
@@ -63,7 +68,8 @@ namespace oni {
                                EntityID parentID,
                                const EntityName &name);
 
-        std::function<EntityName(const Hash &)> mEntityNameFactory{};
+        const ComponentFactoryMap &
+        getFactoryMap() const;
 
     protected:
         const EntityDefDirPath &

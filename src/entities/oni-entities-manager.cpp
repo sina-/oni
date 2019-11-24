@@ -173,6 +173,11 @@ namespace oni {
     }
 
     EntityID
+    EntityManager::createEntity() {
+        return mRegistry->create();
+    }
+
+    EntityID
     EntityManager::createEntity(const EntityName &name) {
         assert(mSimMode == SimMode::SERVER || mSimMode == SimMode::CLIENT);
         auto id = mRegistry->create();

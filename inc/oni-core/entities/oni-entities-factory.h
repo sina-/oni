@@ -42,16 +42,10 @@ namespace oni {
 namespace oni {
     class EntityFactory {
     public:
-        explicit EntityFactory(EntityDefDirPath &&,
-                               ZLayerManager &);
-
-        // TODO: Similar to Assets, I should just pass an index file to retrieve all the entity types. Or even
-        // better is to just set the top directory and let the factory traverse and index all the types??
-        void
-        registerEntityType_Canon(const EntityName &name);
+        explicit EntityFactory(ZLayerManager &);
 
         void
-        registerEntityType_Extra(const EntityName &name);
+        indexEntities(EntityDefDirPath &&fp);
 
         void
         registerComponentFactory(const ComponentName &,
@@ -82,13 +76,10 @@ namespace oni {
         _postProcess(EntityManager &,
                      EntityID);
 
-    protected:
-        EntityDefDirPath mEntityResourcePath{};
-
     private:
         std::unordered_map<Hash, ComponentFactory> mComponentFactory{};
-        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Canon{};
-        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Extra{};
+        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Primary{};
+        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Secondary{};
 
         ZLayerManager &mZLayerManager;
     };

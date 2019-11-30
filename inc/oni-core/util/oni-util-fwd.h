@@ -2,4 +2,5 @@
 
 namespace oni {
     struct EntityDefDirPath;
+    struct FilePath;
 }

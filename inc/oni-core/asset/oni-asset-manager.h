@@ -52,7 +52,7 @@ namespace oni {
     private:
         std::unordered_map<Hash, SoundAsset> mSoundAssetMap{};
         std::unordered_map<Hash, ImageAsset> mImageAssetMap{};
-        ImageIndexFilePath mImageIndexFilePath{};
-        SoundIndexFilePath mSoundIndexFilePath{};
+        ImageIndexFilePath mImagesParentDir{};
+        SoundIndexFilePath mAudioParentDir{};
     };
 }

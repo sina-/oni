@@ -9,3 +9,7 @@ target_include_directories(oni-core-utils
         PUBLIC
         $<BUILD_INTERFACE:${oni_SOURCE_DIR}/inc>
         )
+
+target_link_libraries(
+        oni-core-utils
+        stdc++fs)

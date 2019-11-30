@@ -8,12 +8,14 @@ set(oni_SOURCE_DIR ${oni-particle-editor_SOURCE_DIR}/../..)
 
 subdirs(${oni_SOURCE_DIR}/src/asset)
 subdirs(${oni_SOURCE_DIR}/src/entities)
-subdirs(${oni_SOURCE_DIR}/src/graphic)
+subdirs(${oni_SOURCE_DIR}/src/entities/factory/client)
 subdirs(${oni_SOURCE_DIR}/src/game)
-subdirs(${oni_SOURCE_DIR}/src/utils)
-subdirs(${oni_SOURCE_DIR}/src/physics)
-subdirs(${oni_SOURCE_DIR}/src/math)
+subdirs(${oni_SOURCE_DIR}/src/graphic)
 subdirs(${oni_SOURCE_DIR}/src/io)
+subdirs(${oni_SOURCE_DIR}/src/json)
+subdirs(${oni_SOURCE_DIR}/src/math)
+subdirs(${oni_SOURCE_DIR}/src/physics)
+subdirs(${oni_SOURCE_DIR}/src/utils)
 
 subdirs(${oni-particle-editor_SOURCE_DIR}/src)
 

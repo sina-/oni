@@ -8,6 +8,8 @@
 #include <oni-core/component/oni-component-geometry.h>
 #include <oni-core/component/oni-component-visual.h>
 
+#include <oni-particle-editor/entities/oni-particle-editor-entities-fwd.h>
+
 namespace oni {
     class ParticleEditorGame : public Game {
     public:
@@ -69,7 +71,6 @@ namespace oni {
             Velocity vel{};
             Acceleration acc{};
             Material_Finish mft{};
-            EntityAssetsPack eap{};
         };
 
         InfoSideBar mInforSideBar{};
@@ -85,7 +86,8 @@ namespace oni {
         oni::TextureManager *mTextureMng{};
         oni::Window *mWindow{};
         oni::ZLayerManager *mZLayerMng{};
-        oni::EntityFactory_Client *mEntityFactory{};
+        oni::EntityFactory_ParticleEditor *mEntityFactory{};
+        oni::FontManager *mFontMng{};
 
         bool mWindowReady{false};
     };

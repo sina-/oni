@@ -174,7 +174,7 @@ namespace oni {
     serialize(Archive &archive,
               Material_Text &data) {
         // TODO:
-        assert(false);
+        // assert(false);
     }
 
     template<class Archive>

@@ -57,7 +57,7 @@ namespace oni {
     struct CoolDown;
     struct GrowOverTime;
     struct Image;
-    struct MaterialDefinition;
+    struct Material_Definition;
     struct Material_Skin;
     struct Material_Text;
     struct MaterialTransition_Color;

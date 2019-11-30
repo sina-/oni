@@ -1,1 +1,2 @@
 subdirs(game)
+subdirs(entities)

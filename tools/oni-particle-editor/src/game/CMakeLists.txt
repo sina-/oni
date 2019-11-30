@@ -25,8 +25,10 @@ target_link_libraries(oni-particle-editor-game
         oni-core-io
         oni-core-physics
         oni-core-utils
+        oni-core-entities-factory-client
         PRIVATE
         ${ANT_TWEAK_BAR}
+        oni-particle-editor-entities-factory
         )
 
 add_dependencies(oni-particle-editor-game
@@ -39,4 +41,6 @@ add_dependencies(oni-particle-editor-game
         oni-core-io
         oni-core-physics
         oni-core-utils
+        oni-core-entities-factory-client
+        oni-particle-editor-entities-factory
         )

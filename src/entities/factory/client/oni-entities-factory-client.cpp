@@ -3,16 +3,15 @@
 #include <oni-core/graphic/oni-graphic-texture-manager.h>
 #include <oni-core/graphic/oni-graphic-font-manager.h>
 #include <oni-core/entities/oni-entities-manager.h>
+#include <oni-core/util/oni-util-file.h>
 
 
 namespace oni {
-    EntityFactory_Client::EntityFactory_Client(EntityDefDirPath &&fp,
-                                               FontManager &fm,
+    EntityFactory_Client::EntityFactory_Client(FontManager &fm,
                                                TextureManager &tm,
-                                               ZLayerManager &zm) : EntityFactory(std::move(fp), zm),
+                                               ZLayerManager &zm) : EntityFactory(zm),
                                                                     mFontMng(fm),
                                                                     mTextureMng(tm) {
-        mEntityResourcePath.descendInto("client");
     }
 
     void

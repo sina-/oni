@@ -18,7 +18,7 @@
 
 
 #define ONI_ENUM_DEF_WITH_BASE(NAME, BASE, ...)                                                                                   \
-    namespace detail{ namespace {inline static const constexpr BASE storage_##NAME [] = { __VA_ARGS__};}}               \
+    namespace detail{ inline constexpr BASE storage_##NAME [] = { __VA_ARGS__};}                                        \
     struct NAME : public oni::detail::EnumBase<                                                                         \
             sizeof(detail::storage_##NAME) / sizeof(BASE), BASE, detail::storage_##NAME> {                              \
        template<oni::i32 n>                                                                                             \
@@ -98,7 +98,7 @@ namespace oni {
 
             template<class Out, class Adaptor>
             static inline Out *
-            adapt(Adaptor adaptor) {
+            adapt(const Adaptor &adaptor) {
                 static bool init = true;
                 static auto result = std::array<Out, N>();
                 if (init) {

@@ -17,7 +17,16 @@ namespace oni {
         // NOTE: 4 means RGBA which also corresponds to OpenGL texture format GL_RGBA
         // TODO: freetype can't handle depth 4 and it is buggy so I have to stick to 3
         mAtlas = ftgl::texture_atlas_new(512, 512, 3);
+        if (!mAtlas) {
+            assert(false);
+            return;
+        }
+
         mFont = ftgl::texture_font_new_from_file(mAtlas, size, font.c_str());
+        if (!mFont) {
+            assert(false);
+            return;
+        }
 
         mGameWidth = gameWidth;
         mGameHeight = gameHeight;

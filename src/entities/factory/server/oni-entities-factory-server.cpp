@@ -6,7 +6,6 @@ namespace oni {
     oni::EntityFactory_Server::EntityFactory_Server(EntityDefDirPath &&fp,
                                                     ZLayerManager &zLayerMng) : EntityFactory(std::move(fp),
                                                                                               zLayerMng) {
-        fp.descendInto("server");
     }
 
     void

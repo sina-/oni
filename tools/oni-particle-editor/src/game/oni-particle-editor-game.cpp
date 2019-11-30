@@ -22,22 +22,18 @@
 #include <oni-core/physics/oni-physics-system.h>
 #include <oni-core/physics/oni-physics.h>
 
+#include <oni-particle-editor/entities/oni-particle-editor-entities-structure.h>
+#include <oni-particle-editor/entities/oni-particle-editor-entities-factory.h>
 
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
-        mAssetFilesIdx = new AssetFilesIndex({{"oni-resources/textures", "index.json"}});
+        mAssetFilesIdx = new AssetFilesIndex({{"oni-resources/textures"}},
+                                             {{"oni-resources/audio", "index", ".wav"}});
         mTextureMng = new oni::TextureManager(*mAssetFilesIdx);
         mInput = new oni::Input();
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
-        mEntityFactory = new oni::EntityFactory_Client({"oni-resources/entities/", ""}, *mTextureMng);
-
-        constexpr auto test = HashedString("WHAT");
-        // TODO: I shouldn't need to do this. I should just pass a file path of all the relevant entities and the
-        // factory should go through all the files and register them.
-        mEntityFactory->registerEntityType_Canon({"particle-emitter"});
-        mEntityFactory->registerEntityType_Canon({"simple-particle"});
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -57,6 +53,7 @@ namespace oni {
                 GAME_WIDTH * 0.5f;
         const r32 HALF_GAME_HEIGHT = GAME_HEIGHT * 0.5f;
 
+        // TODO:
         const u16 WINDOW_WIDTH = 1600;
         const u16 WINDOW_HEIGHT = 900;
 
@@ -82,6 +79,15 @@ namespace oni {
         mTextureMng->cacheAllAssets();
 
         mWindow->setClear({});
+
+        mFontMng = new oni::FontManager("oni-resources/fonts/FreeSans.ttf", 24,
+                                        oni::r32(WINDOW_WIDTH) / GAME_WIDTH,
+                                        oni::r32(WINDOW_HEIGHT) / GAME_HEIGHT);
+
+        mEntityFactory = new EntityFactory_ParticleEditor(*mFontMng,
+                                                          *mTextureMng,
+                                                          *mZLayerMng);
+        mEntityFactory->indexEntities({{"oni-resources/entities/client"}});
 
         mWindowReady = true;
     }
@@ -128,7 +134,7 @@ namespace oni {
         auto TwGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
                                              nullptr, nullptr);
 
-        auto adaptor = [](const Material_Finish &mf) -> TwEnumVal {
+        auto adaptor = [](const Enum &mf) -> TwEnumVal {
             return {mf.id, mf.name.str.data()};
         };
         auto TwMaterial_Finish = TwDefineEnum("Material_Finish",
@@ -200,8 +206,8 @@ namespace oni {
                     case PARTICLE_EMITTER: {
                         // TODO: SO I need another overload of this function, as close as possible to json, that
                         // accepts what particle editor has to offer for creating entities!
-                        constexpr auto particleEmitter = EntityName{"particle-emitter"};
-                        mEntityFactory->createEntity_Canon(*mEntityMng, particleEmitter);
+                        constexpr auto particleEmitter = EntityNameEditor::GET("particle-emitter");
+                        mEntityFactory->createEntity_Primary(*mEntityMng, *mEntityMng, particleEmitter);
                         break;
                     }
                     default: {

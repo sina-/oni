@@ -8,8 +8,7 @@
 namespace oni {
     class EntityFactory_Client : public EntityFactory {
     public:
-        EntityFactory_Client(EntityDefDirPath &&,
-                             FontManager &,
+        EntityFactory_Client(FontManager &,
                              TextureManager &,
                              ZLayerManager &);
 

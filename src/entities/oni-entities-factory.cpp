@@ -86,6 +86,23 @@ namespace {
         return result;
     }
 
+    oni::EntityName
+    _readEntityName(const oni::c8 *strValue,
+                    oni::EntityFactory &factory,
+                    rapidjson::Document &doc) {
+        // TODO: LOL so much bullshit to create the json structs wtf.
+        auto value = rapidjson::Value(rapidjson::kObjectType);
+        value.AddMember("value", rapidjson::Value(strValue, doc.GetAllocator()).Move(),
+                        doc.GetAllocator());
+        auto entityNameJson = rapidjson::Value(rapidjson::kObjectType);
+        entityNameJson.AddMember("EntityName",
+                                 value.Move(),
+                                 doc.GetAllocator());
+        auto entityName = _readComponent<oni::EntityName>(factory.getFactoryMap(), doc,
+                                                          entityNameJson.MemberBegin());
+        return entityName;
+    }
+
     void
     _createComponents(const oni::ComponentFactoryMap &factoryMap,
                       oni::EntityManager &em,
@@ -176,18 +193,8 @@ namespace {
                 if (entity->value.IsObject()) {
                     auto entityNameObj = entity->value.FindMember("name");
                     if (entityNameObj->value.IsString()) {
-                        // TODO: LOL so much bullshit to create the json structs wtf.
                         auto entityNameStr = entityNameObj->value.GetString();
-                        auto value = rapidjson::Value(rapidjson::kObjectType);
-                        value.AddMember("value", rapidjson::Value(entityNameStr, doc.GetAllocator()).Move(),
-                                        doc.GetAllocator());
-                        auto entityNameJson = rapidjson::Value(rapidjson::kObjectType);
-                        entityNameJson.AddMember("EntityName",
-                                                 value.Move(),
-                                                 doc.GetAllocator());
-
-                        auto entityName = _readComponent<oni::EntityName>(factory.getFactoryMap(), doc,
-                                                                          entityNameJson.MemberBegin());
+                        auto entityName = _readEntityName(entityNameStr, factory, doc);
                         // NOTE: If secondary entity requires entities as well, those will always will be
                         // created in the secondary entity registry.
                         auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm, entityName);
@@ -210,9 +217,7 @@ namespace {
 }
 
 namespace oni {
-    oni::EntityFactory::EntityFactory(EntityDefDirPath &&fp,
-                                      ZLayerManager &zLayer) : mEntityResourcePath(std::move(fp)),
-                                                               mZLayerManager(zLayer) {
+    oni::EntityFactory::EntityFactory(ZLayerManager &zLayer) : mZLayerManager(zLayer) {
         // TODO: This is really dependent on the user, remove it.
         COMPONENT_FACTORY_DEFINE(this, oni, WorldP3D)
         COMPONENT_FACTORY_DEFINE(this, oni, WorldP2D)
@@ -232,34 +237,34 @@ namespace oni {
     }
 
     void
+    EntityFactory::indexEntities(EntityDefDirPath &&fp) {
+        auto primaryDir = fp;
+        primaryDir.descendInto("primary");
+        auto primaryEntities = parseDirectoryTree(primaryDir);
+
+        auto doc = rapidjson::Document();
+        for (auto &&file: primaryEntities) {
+            auto entityName = _readEntityName(file.name.data(), *this, doc);
+            auto result = mEntityPathMap_Primary.emplace(entityName, EntityDefDirPath{file});
+            assert(result.second);
+        }
+
+        auto secondaryDir = fp;
+        secondaryDir.descendInto("secondary");
+        auto secondaryEntities = parseDirectoryTree(secondaryDir);
+
+        for (auto &&file: secondaryEntities) {
+            auto entityName = _readEntityName(file.name.data(), *this, doc);
+            auto result = mEntityPathMap_Secondary.emplace(entityName, EntityDefDirPath{file});
+            assert(result.second);
+        }
+    }
+
+    void
     EntityFactory::registerComponentFactory(const ComponentName &name,
                                             ComponentFactory &&cb) {
         assert(mComponentFactory.find(name.hash) == mComponentFactory.end());
         mComponentFactory.emplace(name.hash, std::move(cb));
-    }
-
-    void
-    EntityFactory::registerEntityType_Canon(const EntityName &name) {
-        // TODO: Redundent work, I should just pass the path to canon entity json files and let the class
-        //  index the content.
-        auto path = EntityDefDirPath{};
-        path.path.append(mEntityResourcePath.path);
-        path.path.append("primary/");
-        path.path.append(name.name.str);
-        path.path.append(".json");
-        auto result = mEntityPathMap_Canon.emplace(name, std::move(path));
-        assert(result.second);
-    }
-
-    void
-    EntityFactory::registerEntityType_Extra(const EntityName &name) {
-        auto path = EntityDefDirPath{};
-        path.path.append(mEntityResourcePath.path);
-        path.path.append("secondary/");
-        path.path.append(name.name.str);
-        path.path.append(".json");
-        auto result = mEntityPathMap_Extra.emplace(name, std::move(path));
-        assert(result.second);
     }
 
     const ComponentFactoryMap &
@@ -279,8 +284,8 @@ namespace oni {
 
     const EntityDefDirPath &
     EntityFactory::_getEntityPath_Primary(const EntityName &name) {
-        auto path = mEntityPathMap_Canon.find(name);
-        if (path != mEntityPathMap_Canon.end()) {
+        auto path = mEntityPathMap_Primary.find(name);
+        if (path != mEntityPathMap_Primary.end()) {
             return path->second;
         }
         assert(false);
@@ -290,8 +295,8 @@ namespace oni {
 
     const EntityDefDirPath &
     EntityFactory::_getEntityPath_Secondary(const EntityName &name) {
-        auto path = mEntityPathMap_Extra.find(name);
-        if (path != mEntityPathMap_Extra.end()) {
+        auto path = mEntityPathMap_Secondary.find(name);
+        if (path != mEntityPathMap_Secondary.end()) {
             return path->second;
         }
         assert(false);

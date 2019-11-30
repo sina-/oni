@@ -1,0 +1,1 @@
+test that the storage for an enum defined in a header but included in multiple TU has the same address and is only initialized once

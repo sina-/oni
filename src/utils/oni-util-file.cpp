@@ -38,7 +38,6 @@ namespace oni {
                 }
             }
         }
-        assert(!result.empty());
         return result;
     }
 }

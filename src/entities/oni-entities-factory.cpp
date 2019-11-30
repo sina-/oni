@@ -137,7 +137,6 @@ namespace {
         }
     }
 
-
     void
     _tryAttach(oni::EntityManager &parentEm,
                oni::EntityManager &childEm,

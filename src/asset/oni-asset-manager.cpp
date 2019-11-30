@@ -30,16 +30,11 @@ namespace oni {
         auto textures = parseDirectoryTree(mImagesParentDir);
         for (auto &&texture : textures) {
             if (texture.extension == ".png") {
-                auto name = texture.name;
+                auto name = texture.getFullPath();
                 auto nameHash = HashedString::makeFromCStr(name.data());
-                auto image = mImageAssetMap.find(nameHash.hash);
-                if (image != mImageAssetMap.end()) {
-                    assert(false);
-                    continue;
-                }
-                mImageAssetMap.emplace(nameHash.hash, ImageAsset{texture, nameHash});
+                auto result = mImageAssetMap.emplace(nameHash.hash, ImageAsset{texture, nameHash});
+                assert(result.second);
             } else {
-                assert(false);
             }
         }
     }

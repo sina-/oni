@@ -15,7 +15,7 @@
           },
           "texture": {
             "image": {
-              "name": "cloud-white"
+              "name": "oni-resources/textures/cloud-white.png"
             }
           }
         }

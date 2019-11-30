@@ -3,9 +3,7 @@
 #include <oni-core/entities/oni-entities-manager.h>
 
 namespace oni {
-    oni::EntityFactory_Server::EntityFactory_Server(EntityDefDirPath &&fp,
-                                                    ZLayerManager &zLayerMng) : EntityFactory(std::move(fp),
-                                                                                              zLayerMng) {
+    oni::EntityFactory_Server::EntityFactory_Server(ZLayerManager &zLayerMng) : EntityFactory(zLayerMng) {
     }
 
     void

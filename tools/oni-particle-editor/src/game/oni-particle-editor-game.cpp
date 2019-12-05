@@ -116,14 +116,19 @@ namespace oni {
         TwDefine(" ParticleBar size='350 500' ");
         TwDefine(" ParticleBar contained=true ");
 
+        auto adaptor = [](const Enum &mf) -> TwEnumVal {
+            return {mf.id, mf.name.str.data()};
+        };
+
         TwStructMember vec2Members[] = {
                 {"X", TW_TYPE_FLOAT, offsetof(vec2, x), " Step=0.01 "},
                 {"Y", TW_TYPE_FLOAT, offsetof(vec2, y), " Step=0.01 "},
         };
         auto TwCustomVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
-        TwEnumVal entityPresetMap[] = {{EntityPreset::PARTICLE_EMITTER, "PARTICLE_EMITTER"},};
-        auto TwCustomEntityPreset = TwDefineEnum("EntityPreset", entityPresetMap, enumCast(EntityPreset::LAST));
+        auto TwCustomEntityPreset = TwDefineEnum("EntityName",
+                                                 EntityNameEditor::adapt<TwEnumVal>(adaptor),
+                                                 EntityNameEditor::size());
 
         TwStructMember growOverTimeMembers[] = {
                 {"period",  TW_TYPE_FLOAT, offsetof(GrowOverTime, period)},
@@ -133,10 +138,6 @@ namespace oni {
         };
         auto TwGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
                                              nullptr, nullptr);
-
-        auto adaptor = [](const Enum &mf) -> TwEnumVal {
-            return {mf.id, mf.name.str.data()};
-        };
         auto TwMaterial_Finish = TwDefineEnum("Material_Finish",
                                               Material_Finish::adapt<TwEnumVal>(adaptor),
                                               Material_Finish::size());
@@ -145,7 +146,7 @@ namespace oni {
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
         TwAddVarRW(particleBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
                    " label='create entity' ");
-        TwAddVarRW(particleBar, "entity preset", TwCustomEntityPreset, &mInforSideBar.entityPreset, nullptr);
+        TwAddVarRW(particleBar, "entity", TwCustomEntityPreset, &mInforSideBar.entityName, nullptr);
 
         // TODO: Actually I need ParticleEmitter instead of this
         TwAddVarRW(particleBar, "dir", TW_TYPE_DIR3F, &mCurrentParticleConfig.dir, nullptr);
@@ -188,7 +189,7 @@ namespace oni {
 
     void
     ParticleEditorGame::_poll() {
-        mWindow->tick(*mInput);
+        Window::tick(*mInput);
 
         for (auto &&pos: mInput->getCursor()) {
             mInforSideBar.mouseScreenPos.x = pos.x;
@@ -201,19 +202,10 @@ namespace oni {
 
         if (mInput->isMouseButtonPressed()) {
             if (mInforSideBar.createModeOn) {
-                switch (mInforSideBar.entityPreset) {
-                    // TODO: Probably you want to match this name to the json file name
-                    case PARTICLE_EMITTER: {
-                        // TODO: SO I need another overload of this function, as close as possible to json, that
-                        // accepts what particle editor has to offer for creating entities!
-                        constexpr auto particleEmitter = EntityNameEditor::GET("particle-emitter");
-                        mEntityFactory->createEntity_Primary(*mEntityMng, *mEntityMng, particleEmitter);
-                        break;
-                    }
-                    default: {
-                        assert(false);
-                        break;
-                    }
+                if (mInforSideBar.entityName.valid()) {
+                    mEntityFactory->createEntity_Primary(*mEntityMng, *mEntityMng, mInforSideBar.entityName);
+                } else {
+                    assert(false);
                 }
             }
         }

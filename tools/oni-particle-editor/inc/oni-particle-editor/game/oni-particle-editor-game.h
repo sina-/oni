@@ -9,6 +9,7 @@
 #include <oni-core/component/oni-component-visual.h>
 
 #include <oni-particle-editor/entities/oni-particle-editor-entities-fwd.h>
+#include <oni-particle-editor/entities/oni-particle-editor-entities-structure.h>
 
 namespace oni {
     class ParticleEditorGame : public Game {
@@ -48,18 +49,11 @@ namespace oni {
         setupTweakBar();
 
     private:
-        // TODO: How about struct EntityPreset { EntityType type; const char* name;}? This reduce name duplication
-        enum EntityPreset : u16 {
-            PARTICLE_EMITTER,
-
-            LAST
-        };
-
         struct InfoSideBar {
             Screen2D mouseScreenPos{};
             WorldP2D mouseWorldPos{};
             bool createModeOn{true};
-            EntityPreset entityPreset{EntityPreset::PARTICLE_EMITTER};
+            EntityNameEditor entityName{EntityNameEditor::GET("particle-emitter")};
         };
 
         struct ParticleConfig {

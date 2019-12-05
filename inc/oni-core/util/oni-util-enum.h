@@ -61,6 +61,11 @@ namespace oni {
                 return storage + N;
             }
 
+            inline bool
+            valid() {
+                return BASE::name != INVALID.name;
+            }
+
             // NOTE: It is possible to have duplicate ids but different names!
             inline constexpr bool
             operator==(const BASE &other) const {
@@ -119,7 +124,6 @@ namespace oni {
                         return;
                     }
                 }
-                assert(false);
                 BASE::id = INVALID.id;
                 BASE::name = INVALID.name;
             }

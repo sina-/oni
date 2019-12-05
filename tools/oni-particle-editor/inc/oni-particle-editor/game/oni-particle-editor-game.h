@@ -53,22 +53,21 @@ namespace oni {
             Screen2D mouseScreenPos{};
             WorldP2D mouseWorldPos{};
             bool createModeOn{true};
-            EntityNameEditor entityName{EntityNameEditor::GET("particle-emitter")};
         };
 
-        struct ParticleConfig {
-            Direction dir{};
-            Orientation ornt{};
-            Scale scale{};
-            GrowOverTime got{};
-            TimeToLive ttl{};
-            Velocity vel{};
-            Acceleration acc{};
-            Material_Finish mft{};
-        };
-
+//        struct ParticleConfig {
+//            Direction dir{};
+//            Orientation ornt{};
+//            Scale scale{};
+//            GrowOverTime got{};
+//            TimeToLive ttl{};
+//            Velocity vel{};
+//            Acceleration acc{};
+//            Material_Finish mft{};
+//        };
+//
         InfoSideBar mInforSideBar{};
-        ParticleConfig mCurrentParticleConfig{};
+        ParticleEmitter mParticleEmitter{};
 
     private:
         oni::AssetFilesIndex *mAssetFilesIdx{};

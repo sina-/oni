@@ -93,6 +93,14 @@ namespace oni {
                 return N;
             }
 
+            inline static BASE
+            at(oni::i32 i) {
+                if (i >= 0 && i < N) {
+                    return storage[i];
+                }
+                return INVALID;
+            }
+
             // NOTE: Implicit so that this class can be used in switch statements
             // TODO: Sad I can't really have it like this. With this one, you could compare two different
             // enums based on id! even though those ids have nothing to do with each other. Which beats the

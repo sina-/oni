@@ -382,6 +382,9 @@ namespace oni {
         Scale maxSize{1, 1, 1};
     };
 
+    // TODO: This is an odd case of a component. In reality this data describes multiple components.
+    // When an entity is created with this component this data will be used to initialize the components of the entity.
+    // Now maybe that is fine, but something to think about
     struct ParticleEmitter {
         EntityName particle{};
         Material_Definition material{};

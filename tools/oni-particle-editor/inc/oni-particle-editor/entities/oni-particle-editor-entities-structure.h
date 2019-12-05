@@ -4,6 +4,5 @@
 
 namespace oni {
     ONI_ENUM_DEF_WITH_BASE(EntityNameEditor, EntityName,
-                           { 0, "particle-emitter" },
-                           { 1, "simple-particle" })
+                           { 0, "simple-particle" })
 }

@@ -96,12 +96,13 @@ namespace oni {
     ParticleEditorGame::initSystems() {
         mSystems.push_back(new oni::System_GrowOverTime(*mEntityMng));
         mSystems.push_back(new oni::System_MaterialTransition(*mEntityMng));
-        // TODO: Migrate these systems
         mSystems.push_back(new oni::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneMng, *mEntityFactory));
-//        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
         mSystems.push_back(new oni::System_TimeToLive(*mEntityMng));
         mSystems.push_back(new oni::System_SyncPos(*mEntityMng));
         mSystems.push_back(new oni::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneMng, *mEntityFactory));
+
+        // TODO: Migrate these systems
+//        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
     }
 
     void
@@ -126,37 +127,43 @@ namespace oni {
         };
         auto TwCustomVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
-        auto TwCustomEntityPreset = TwDefineEnum("EntityName",
-                                                 EntityNameEditor::adapt<TwEnumVal>(adaptor),
-                                                 EntityNameEditor::size());
+        auto EntityName_TW = TwDefineEnum("EntityName",
+                                          EntityNameEditor::adapt<TwEnumVal>(adaptor),
+                                          EntityNameEditor::size());
 
-        TwStructMember growOverTimeMembers[] = {
+        TwStructMember GrowOverTime_TW_Members[] = {
                 {"period",  TW_TYPE_FLOAT, offsetof(GrowOverTime, period)},
                 {"elapsed", TW_TYPE_FLOAT, offsetof(GrowOverTime, elapsed)},
                 {"factor",  TW_TYPE_FLOAT, offsetof(GrowOverTime, factor)},
                 {"maxSize", TW_TYPE_DIR3F, offsetof(GrowOverTime, maxSize)}
         };
-        auto TwGrowOverTime = TwDefineStruct("GrowOverTime", growOverTimeMembers, 4, sizeof(GrowOverTime),
-                                             nullptr, nullptr);
-        auto TwMaterial_Finish = TwDefineEnum("Material_Finish",
-                                              Material_Finish::adapt<TwEnumVal>(adaptor),
-                                              Material_Finish::size());
+        auto GrowOverTime_TW = TwDefineStruct("GrowOverTime", GrowOverTime_TW_Members, 4, sizeof(GrowOverTime),
+                                              nullptr, nullptr);
+        auto Material_Finish_TW = TwDefineEnum("Material_Finish",
+                                               Material_Finish::adapt<TwEnumVal>(adaptor),
+                                               Material_Finish::size());
+
+        TwStructMember Material_Definition_TW_Members[] = {
+                {"finish", Material_Finish_TW, offsetof(Material_Definition, finish)},
+        };
+        auto Material_Definition_TW = TwDefineStruct("Material_Definision", Material_Definition_TW_Members, 1,
+                                                     sizeof(Material_Definition),
+                                                     nullptr, nullptr);
 
         TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
         TwAddVarRW(particleBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
                    " label='create entity' ");
-        TwAddVarRW(particleBar, "entity", TwCustomEntityPreset, &mInforSideBar.entityName, nullptr);
 
-        // TODO: Actually I need ParticleEmitter instead of this
-        TwAddVarRW(particleBar, "dir", TW_TYPE_DIR3F, &mCurrentParticleConfig.dir, nullptr);
-        TwAddVarRW(particleBar, "ornt", TW_TYPE_FLOAT, &mCurrentParticleConfig.ornt, nullptr);
-        TwAddVarRW(particleBar, "scale", TW_TYPE_DIR3F, &mCurrentParticleConfig.scale, nullptr);
-        TwAddVarRW(particleBar, "grow", TwGrowOverTime, &mCurrentParticleConfig.got, nullptr);
-        TwAddVarRW(particleBar, "ttl", TwCustomVec2, &mCurrentParticleConfig.ttl, nullptr);
-        TwAddVarRW(particleBar, "velocity", TwCustomVec2, &mCurrentParticleConfig.vel, nullptr);
-        TwAddVarRW(particleBar, "acc", TwCustomVec2, &mCurrentParticleConfig.acc, nullptr);
-        TwAddVarRW(particleBar, "finish", TwMaterial_Finish, &mCurrentParticleConfig.mft, nullptr);
+        TwAddVarRW(particleBar, "entity", EntityName_TW, &mParticleEmitter.particle, nullptr);
+        TwAddVarRW(particleBar, "orientMin", TW_TYPE_FLOAT, &mParticleEmitter.orientMin, nullptr);
+        TwAddVarRW(particleBar, "orientMax", TW_TYPE_FLOAT, &mParticleEmitter.orientMax, nullptr);
+        TwAddVarRW(particleBar, "size", TW_TYPE_DIR3F, &mParticleEmitter.size, nullptr);
+        TwAddVarRW(particleBar, "growth", GrowOverTime_TW, &mParticleEmitter.growth, nullptr);
+        TwAddVarRW(particleBar, "initialVMin", TW_TYPE_FLOAT, &mParticleEmitter.initialVMin, nullptr);
+        TwAddVarRW(particleBar, "initialVMax", TW_TYPE_FLOAT, &mParticleEmitter.initialVMax, nullptr);
+        TwAddVarRW(particleBar, "acc", TW_TYPE_FLOAT, &mParticleEmitter.acc, nullptr);
+        TwAddVarRW(particleBar, "material", Material_Definition_TW, &mParticleEmitter.material, nullptr);
 
     }
 
@@ -200,13 +207,15 @@ namespace oni {
         mInforSideBar.mouseWorldPos.x = mouseWorldP.x;
         mInforSideBar.mouseWorldPos.y = mouseWorldP.y;
 
+        mParticleEmitter.particle = EntityNameEditor::at(mParticleEmitter.particle.id);
+
         if (mInput->isMouseButtonPressed()) {
             if (mInforSideBar.createModeOn) {
-                if (mInforSideBar.entityName.valid()) {
-                    mEntityFactory->createEntity_Primary(*mEntityMng, *mEntityMng, mInforSideBar.entityName);
-                } else {
-                    assert(false);
-                }
+                // TODO: This is kinda about how the pattern goes, UI is just components with values.
+                // How to proceed from this?
+                auto id = mEntityMng->createEntity();
+                mEntityMng->createComponent<ParticleEmitter>(id, mParticleEmitter);
+                mEntityMng->createComponent<WorldP3D>(id, mInforSideBar.mouseWorldPos.to3D(0.5));
             }
         }
     }

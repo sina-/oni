@@ -53,6 +53,7 @@ namespace oni {
             Screen2D mouseScreenPos{};
             WorldP2D mouseWorldPos{};
             bool createModeOn{true};
+            bool save{false};
         };
 
 //        struct ParticleConfig {
@@ -68,6 +69,7 @@ namespace oni {
 //
         InfoSideBar mInforSideBar{};
         ParticleEmitter mParticleEmitter{};
+        EntityID mEmitterID{};
 
     private:
         oni::AssetFilesIndex *mAssetFilesIdx{};

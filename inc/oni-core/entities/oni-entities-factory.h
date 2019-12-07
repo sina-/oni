@@ -56,11 +56,19 @@ namespace oni {
                              EntityManager &secondaryEm,
                              const EntityName &name);
 
+        // TODO: Secondary entity could be client side components of a server entity, or it could be other entities
+        // attached to primary entity. But they both go through the same interface and that is a bit confusing.
+        // Editor might have even harder time separating these two
         void
         createEntity_Secondary(EntityManager &primaryEm,
                                EntityManager &secondaryEm,
                                EntityID parentID,
                                const EntityName &name);
+
+        void
+        saveEntity_Primary(EntityManager &,
+                           EntityID,
+                           const EntityName &);
 
         const ComponentFactoryMap &
         getFactoryMap() const;

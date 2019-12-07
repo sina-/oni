@@ -34,6 +34,7 @@ namespace oni {
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
+        mEmitterID = EntityManager::nullEntity();
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -100,9 +101,7 @@ namespace oni {
         mSystems.push_back(new oni::System_TimeToLive(*mEntityMng));
         mSystems.push_back(new oni::System_SyncPos(*mEntityMng));
         mSystems.push_back(new oni::System_ParticleEmitter(*mEntityMng, *mEntityMng, *mSceneMng, *mEntityFactory));
-
-        // TODO: Migrate these systems
-//        mSystems.push_back(new rac::System_PositionAndVelocity(*mEntityMng));
+        mSystems.push_back(new oni::System_PositionAndVelocity(*mEntityMng));
     }
 
     void
@@ -154,8 +153,10 @@ namespace oni {
         TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
         TwAddVarRW(particleBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
                    " label='create entity' ");
+        TwAddVarRW(particleBar, "save entity", TW_TYPE_BOOL8, &mInforSideBar.save,
+                   " label='save entity' ");
 
-        TwAddVarRW(particleBar, "entity", EntityName_TW, &mParticleEmitter.particle, nullptr);
+        TwAddVarRW(particleBar, "particle", EntityName_TW, &mParticleEmitter.particle, nullptr);
         TwAddVarRW(particleBar, "orientMin", TW_TYPE_FLOAT, &mParticleEmitter.orientMin, nullptr);
         TwAddVarRW(particleBar, "orientMax", TW_TYPE_FLOAT, &mParticleEmitter.orientMax, nullptr);
         TwAddVarRW(particleBar, "size", TW_TYPE_DIR3F, &mParticleEmitter.size, nullptr);
@@ -210,12 +211,29 @@ namespace oni {
         mParticleEmitter.particle = EntityNameEditor::at(mParticleEmitter.particle.id);
 
         if (mInput->isMouseButtonPressed()) {
-            if (mInforSideBar.createModeOn) {
+            // TODO: Find a better way to specify editing area?
+            if (mInforSideBar.createModeOn && mInforSideBar.mouseScreenPos.x > 450) {
                 // TODO: This is kinda about how the pattern goes, UI is just components with values.
-                // How to proceed from this?
-                auto id = mEntityMng->createEntity();
-                mEntityMng->createComponent<ParticleEmitter>(id, mParticleEmitter);
-                mEntityMng->createComponent<WorldP3D>(id, mInforSideBar.mouseWorldPos.to3D(0.5));
+                // How to proceed from this? Notice that this has no dependency to JSON! Is that good? Or bad?
+                // Would it help if it did?
+                // Well, I probably need to write the part where this data is serialized from entity registry
+                // to json, that should help a bit decide how the intermediate stage of the entity looks like.
+                // EntityFactory probably should have a function that, just like its sibling, saveEntity()
+                // where I can give it an entity id and it dumps it into a json from which it can
+                // recreate it.
+                // Notice there is a slight difference between when an entity is created from json and when it is
+                // written to json from editor. When it is created json works as a template, values are defaults,
+                // but when it is written it is more specific than a generic template, some values are actual values
+                // that the game will use, but pos for example, still is a template. Unless I am editing a pre-saved
+                // entity.
+                if (mEmitterID != EntityManager::nullEntity()) {
+                    mEntityMng->reset();
+                }
+                mEmitterID = mEntityMng->createEntity();
+                mEntityMng->createComponent<ParticleEmitter>(mEmitterID, mParticleEmitter);
+                mEntityMng->createComponent<WorldP3D>(mEmitterID, mInforSideBar.mouseWorldPos.to3D(0.5));
+            } else if (mInforSideBar.save && mEmitterID != EntityManager::nullEntity()) {
+                mEntityFactory->saveEntity_Primary(*mEntityMng, mEmitterID, {});
             }
         }
     }

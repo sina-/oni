@@ -344,4 +344,11 @@ namespace oni {
         _postProcess(primaryEm, parentID);
         _createEntity_Secondary(*this, primaryEm, secondaryEm, parentID, doc);
     }
+
+    void
+    EntityFactory::saveEntity_Primary(EntityManager &em,
+                                      EntityID id,
+                                      const EntityName &name) {
+
+    }
 }

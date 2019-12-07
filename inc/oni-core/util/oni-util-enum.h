@@ -18,9 +18,9 @@
 
 
 #define ONI_ENUM_DEF_WITH_BASE(NAME, BASE, ...)                                                                                   \
-    namespace detail{ inline constexpr BASE storage_##NAME [] = { __VA_ARGS__};}                                        \
-    struct NAME : public oni::detail::EnumBase<                                                                         \
-            sizeof(detail::storage_##NAME) / sizeof(BASE), BASE, detail::storage_##NAME> {                              \
+    namespace oni_detail{ inline constexpr BASE storage_##NAME [] = { __VA_ARGS__};}                                        \
+    struct NAME : public oni::oni_detail::EnumBase<                                                                         \
+            sizeof(oni_detail::storage_##NAME) / sizeof(BASE), BASE, oni_detail::storage_##NAME> {                              \
        template<oni::i32 n>                                                                                             \
        inline static constexpr                                                                                          \
        NAME GET(const oni::c8 (&name)[n])                                                                               \
@@ -48,7 +48,7 @@ namespace oni {
         using type = decltype(id);
     };
 
-    namespace detail {
+    namespace oni_detail {
         template<oni::i32 N, class BASE, auto v>
         struct EnumBase : public BASE {
             inline static constexpr auto

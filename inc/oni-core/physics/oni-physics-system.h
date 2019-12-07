@@ -151,4 +151,23 @@ namespace oni {
         postUpdate(EntityManager &mng,
                    duration32 dt) override;
     };
+
+    class System_PositionAndVelocity
+            : public SystemTemplate<Velocity, Acceleration, WorldP3D, Direction> {
+    public:
+        explicit System_PositionAndVelocity(oni::EntityManager &);
+
+    protected:
+        void
+        update(EntityTickContext &,
+               Velocity &,
+               Acceleration &,
+               WorldP3D &,
+               Direction &) override;
+
+        void
+        postUpdate(EntityManager &mng,
+                   duration32 dt) override;
+    };
+
 }

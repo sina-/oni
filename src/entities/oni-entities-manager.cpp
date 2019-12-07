@@ -233,6 +233,11 @@ namespace oni {
     }
 
     void
+    EntityManager::reset() {
+        mRegistry->reset();
+    }
+
+    void
     EntityManager::printEntityType(EntityID id) const {
         const auto &name = mRegistry->get<EntityName>(id);
         printf("%d, %s ", id, name.name.str.data());

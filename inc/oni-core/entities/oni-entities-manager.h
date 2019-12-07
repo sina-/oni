@@ -120,6 +120,9 @@ namespace oni {
         deleteEntity(EntityID,
                      const EntityOperationPolicy &);
 
+        void
+        reset();
+
         static void
         attach(const EntityContext &parent,
                const EntityContext &child);

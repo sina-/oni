@@ -3,7 +3,12 @@ add_library(oni-core-physics
         oni-physics-car.cpp
         oni-physics-system-time-to-live.cpp
         oni-physics-system-splat-on-rest.cpp
-        oni-physics-system-sync-pos.cpp oni-physics-system-car.cpp oni-physics-system-car-input.cpp oni-physics-system-jet-force.cpp oni-physics-car-collision.cpp)
+        oni-physics-system-sync-pos.cpp
+        oni-physics-system-car.cpp
+        oni-physics-system-car-input.cpp
+        oni-physics-system-jet-force.cpp
+        oni-physics-system-position.cpp
+        oni-physics-car-collision.cpp)
 
 target_compile_features(oni-core-physics
         PUBLIC

@@ -52,18 +52,18 @@ namespace oni {
                                  ComponentFactory &&);
 
         EntityID
-        createEntity_Primary(EntityManager &primaryEm,
-                             EntityManager &secondaryEm,
-                             const EntityName &name);
+        createEntity_Local(EntityManager &primaryEm,
+                           EntityManager &secondaryEm,
+                           const EntityName &name);
 
         // TODO: Secondary entity could be client side components of a server entity, or it could be other entities
         // attached to primary entity. But they both go through the same interface and that is a bit confusing.
         // Editor might have even harder time separating these two
         void
-        createEntity_Secondary(EntityManager &primaryEm,
-                               EntityManager &secondaryEm,
-                               EntityID parentID,
-                               const EntityName &name);
+        createEntity_Remote(EntityManager &primaryEm,
+                            EntityManager &secondaryEm,
+                            EntityID parentID,
+                            const EntityName &name);
 
         void
         saveEntity_Primary(EntityManager &,
@@ -75,10 +75,7 @@ namespace oni {
 
     protected:
         const EntityDefDirPath &
-        _getEntityPath_Primary(const EntityName &name);
-
-        const EntityDefDirPath &
-        _getEntityPath_Secondary(const EntityName &name);
+        _getEntityPath(const EntityName &);
 
         virtual void
         _postProcess(EntityManager &,
@@ -86,8 +83,7 @@ namespace oni {
 
     private:
         std::unordered_map<Hash, ComponentFactory> mComponentFactory{};
-        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Primary{};
-        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap_Secondary{};
+        std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap{};
 
         ZLayerManager &mZLayerManager;
     };

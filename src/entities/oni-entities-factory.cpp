@@ -14,7 +14,7 @@
 
 
 namespace {
-    static oni::EntityManager *
+    oni::EntityManager *
     _getTempEntityManager() {
         static auto em = new oni::EntityManager(oni::SimMode::SERVER, nullptr);
         return em;
@@ -105,32 +105,19 @@ namespace {
 
     void
     _createComponents(const oni::ComponentFactoryMap &factoryMap,
+                      std::string_view key,
                       oni::EntityManager &em,
                       oni::EntityID id,
-                      rapidjson::Document &doc,
-                      const rapidjson::Document::MemberIterator &components) {
-        for (auto component = components->value.MemberBegin();
-             component != components->value.MemberEnd(); ++component) {
-            if (component->value.IsObject()) {
-                _createComponent(factoryMap, em, id, doc, component);
-            } else {
-                assert(false);
-            }
-        }
-    }
-
-    void
-    _createComponents_Primary(const oni::ComponentFactoryMap &factoryMap,
-                              oni::EntityManager &em,
-                              oni::EntityID id,
-                              rapidjson::Document &doc) {
-        auto primary = doc.FindMember("primary");
-        if (primary != doc.MemberEnd()) {
-            auto components = primary->value.FindMember("components");
-            if (components != primary->value.MemberEnd()) {
-                _createComponents(factoryMap, em, id, doc, components);
-            } else {
-                assert(false);
+                      rapidjson::Document &doc) {
+        auto components = doc.FindMember(key.data());
+        if (components != doc.MemberEnd()) {
+            for (auto component = components->value.MemberBegin();
+                 component != components->value.MemberEnd(); ++component) {
+                if (component->value.IsObject()) {
+                    _createComponent(factoryMap, em, id, doc, component);
+                } else {
+                    assert(false);
+                }
             }
         } else {
             assert(false);
@@ -178,14 +165,15 @@ namespace {
     }
 
     void
-    _createEntity_Secondary(oni::EntityFactory &factory,
-                            oni::EntityManager &primaryEm,
-                            oni::EntityManager &secondaryEm,
-                            oni::EntityID parentID,
-                            rapidjson::Document &doc) {
+    _createEntity_Attachments(oni::EntityFactory &factory,
+                              std::string_view key,
+                              oni::EntityManager &primaryEm,
+                              oni::EntityManager &secondaryEm,
+                              oni::EntityID parentID,
+                              rapidjson::Document &doc) {
         // TODO: Crazy idea, I could have a simple schema for this shit. Something like item path that looks like
         //  entities.entity.name: string. And pass that to a reader that returns the right item :h
-        auto entities = doc.FindMember("secondary");
+        auto entities = doc.FindMember(key.data());
         if (entities != doc.MemberEnd()) {
             for (auto entity = entities->value.MemberBegin();
                  entity != entities->value.MemberEnd(); ++entity) {
@@ -196,7 +184,7 @@ namespace {
                         auto entityName = _readEntityName(entityNameStr, factory, doc);
                         // NOTE: If secondary entity requires entities as well, those will always will be
                         // created in the secondary entity registry.
-                        auto childID = factory.createEntity_Primary(secondaryEm, secondaryEm, entityName);
+                        auto childID = factory.createEntity_Local(secondaryEm, secondaryEm, entityName);
 
                         if (childID == oni::EntityManager::nullEntity()) {
                             assert(false);
@@ -237,24 +225,12 @@ namespace oni {
 
     void
     EntityFactory::indexEntities(EntityDefDirPath &&fp) {
-        auto primaryDir = fp;
-        primaryDir.descendInto("primary");
-        auto primaryEntities = parseDirectoryTree(primaryDir);
+        auto entities = parseDirectoryTree(fp);
 
         auto doc = rapidjson::Document();
-        for (auto &&file: primaryEntities) {
+        for (auto &&file: entities) {
             auto entityName = _readEntityName(file.name.data(), *this, doc);
-            auto result = mEntityPathMap_Primary.emplace(entityName, EntityDefDirPath{file});
-            assert(result.second);
-        }
-
-        auto secondaryDir = fp;
-        secondaryDir.descendInto("secondary");
-        auto secondaryEntities = parseDirectoryTree(secondaryDir);
-
-        for (auto &&file: secondaryEntities) {
-            auto entityName = _readEntityName(file.name.data(), *this, doc);
-            auto result = mEntityPathMap_Secondary.emplace(entityName, EntityDefDirPath{file});
+            auto result = mEntityPathMap.emplace(entityName, EntityDefDirPath{file});
             assert(result.second);
         }
     }
@@ -282,20 +258,9 @@ namespace oni {
     }
 
     const EntityDefDirPath &
-    EntityFactory::_getEntityPath_Primary(const EntityName &name) {
-        auto path = mEntityPathMap_Primary.find(name);
-        if (path != mEntityPathMap_Primary.end()) {
-            return path->second;
-        }
-        assert(false);
-        static auto empty = EntityDefDirPath{};
-        return empty;
-    }
-
-    const EntityDefDirPath &
-    EntityFactory::_getEntityPath_Secondary(const EntityName &name) {
-        auto path = mEntityPathMap_Secondary.find(name);
-        if (path != mEntityPathMap_Secondary.end()) {
+    EntityFactory::_getEntityPath(const EntityName &name) {
+        auto path = mEntityPathMap.find(name);
+        if (path != mEntityPathMap.end()) {
             return path->second;
         }
         assert(false);
@@ -304,10 +269,10 @@ namespace oni {
     }
 
     EntityID
-    EntityFactory::createEntity_Primary(EntityManager &primaryEm,
-                                        EntityManager &secondaryEm,
-                                        const EntityName &name) {
-        auto fp = _getEntityPath_Primary(name);
+    EntityFactory::createEntity_Local(EntityManager &primaryEm,
+                                      EntityManager &secondaryEm,
+                                      const EntityName &name) {
+        auto fp = _getEntityPath(name);
         auto parentID = primaryEm.createEntity(name);
         auto maybeDoc = readJson(fp);
         if (!maybeDoc.has_value()) {
@@ -316,19 +281,19 @@ namespace oni {
         }
         auto doc = std::move(maybeDoc.value());
 
-        _createComponents_Primary(mComponentFactory, primaryEm, parentID, doc);
+        _createComponents(mComponentFactory, "components-local", primaryEm, parentID, doc);
         _postProcess(primaryEm, parentID);
-        _createEntity_Secondary(*this, primaryEm, secondaryEm, parentID, doc);
+        _createEntity_Attachments(*this, "attachments-local", primaryEm, secondaryEm, parentID, doc);
 
         return parentID;
     }
 
     void
-    EntityFactory::createEntity_Secondary(EntityManager &primaryEm,
-                                          EntityManager &secondaryEm,
-                                          EntityID parentID,
-                                          const EntityName &name) {
-        auto fp = _getEntityPath_Secondary(name);
+    EntityFactory::createEntity_Remote(EntityManager &primaryEm,
+                                       EntityManager &secondaryEm,
+                                       EntityID parentID,
+                                       const EntityName &name) {
+        auto fp = _getEntityPath(name);
         if (fp.path.empty()) {
             return;
         }
@@ -340,9 +305,9 @@ namespace oni {
         }
         auto doc = std::move(maybeDoc.value());
 
-        _createComponents_Primary(mComponentFactory, primaryEm, parentID, doc);
+        _createComponents(mComponentFactory, "components-remote", primaryEm, parentID, doc);
         _postProcess(primaryEm, parentID);
-        _createEntity_Secondary(*this, primaryEm, secondaryEm, parentID, doc);
+        _createEntity_Attachments(*this, "attachments-remote", primaryEm, secondaryEm, parentID, doc);
     }
 
     void

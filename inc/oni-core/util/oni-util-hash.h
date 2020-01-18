@@ -106,12 +106,12 @@ namespace oni {
             return _staticHash(Hash{detail::offset}, value);
         }
 
-        bool
+        inline constexpr bool
         operator!=(const HashedString &other) const {
             return hash != other.hash;
         }
 
-        bool
+        inline constexpr bool
         operator==(const HashedString &other) const {
             return hash == other.hash;
         }

@@ -250,6 +250,13 @@ namespace cereal
         return *self;
       }
 
+      template <class Type> inline
+      ArchiveType & operator()(const char*name,  Type && arg )
+      {
+          process( make_nvp(name, std::forward<Type>( arg )) );
+          return *self;
+      }
+
       /*! @name Boost Transition Layer
           Functionality that mirrors the syntax for Boost.  This is useful if you are transitioning
           a large project from Boost to cereal.  The preferred interface for cereal is using operator(). */

@@ -32,7 +32,12 @@ namespace oni {
     saveEnum(Archive &archive,
              std::string_view name,
              ENUM &data) {
-        saveHashedString(archive, name, data.name);
+        if (name.empty()) {
+            assert(false);
+            return;
+        }
+        auto buffer = std::string(data.name.str);
+        archive(name.data(), buffer);
     }
 }
 

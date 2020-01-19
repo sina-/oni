@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cassert>
 
 #include <oni-core/common/oni-common-typedef.h>
 
@@ -49,14 +50,29 @@ namespace oni {
 
         void
         fixupPath() {
-            if (path.back() != '/') {
+            if (!path.empty() && path.back() != '/') {
                 path.append("/");
+            }
+            if (extension.front() == '.') {
+                extension.erase(extension.cbegin());
             }
         }
 
         std::string
         getFullPath() const {
-            return path + name + extension;
+            auto result = std::string();
+            if(!path.empty()) {
+                result.append(path);
+            }
+            if(!name.empty()) {
+                result.append(name);
+            }
+            if(!extension.empty()) {
+                result.append(".");
+                result.append(extension);
+            }
+            assert(!result.empty());
+            return result;
         }
     };
 

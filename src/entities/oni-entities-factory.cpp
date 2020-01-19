@@ -42,12 +42,13 @@ namespace {
     }
 
     void
-    _createComponent(const oni::ComponentFactoryMap &factoryMap,
-                     oni::EntityManager &manager,
-                     oni::EntityID id,
-                     rapidjson::Document &document,
-                     const rapidjson::Document::MemberIterator &component) {
+    _readComponent(const oni::ComponentReaderMap &readerMap,
+                   oni::EntityManager &manager,
+                   oni::EntityID id,
+                   rapidjson::Document &document,
+                   const rapidjson::Document::MemberIterator &component) {
         auto compoName = component->name.GetString();
+        auto hash = oni::HashedString::makeHashFromCString(compoName);
 
         rapidjson::StringBuffer compStringBuff;
         rapidjson::Writer writer(compStringBuff);
@@ -59,9 +60,8 @@ namespace {
         data.AddMember(component->name.Move(), component->value.Move(), document.GetAllocator());
         data.Accept(writer);
 
-        auto hash = oni::HashedString::makeHashFromCString(compoName);
-        auto factory = factoryMap.find(hash);
-        if (factory != factoryMap.end()) {
+        auto factory = readerMap.find(hash);
+        if (factory != readerMap.end()) {
             // TODO: so many stream and conversions, can't I just use the stream I get from rapidjson?
             std::istringstream ss(compStringBuff.GetString());
             cereal::JSONInputArchive reader(ss);
@@ -73,14 +73,31 @@ namespace {
         }
     }
 
+    void
+    _writeComponent(const oni::ComponentWriterMap &writerMap,
+                    const oni::EntityManager &manager,
+                    oni::EntityID id,
+                    std::string_view compoName,
+                    std::stringstream &ss) {
+        auto hash = oni::HashedString::makeHashFromCString(compoName.data());
+        auto factory = writerMap.find(hash);
+
+        if (factory != writerMap.end()) {
+            cereal::JSONOutputArchive writer(ss);
+            factory->second(manager, id, writer);
+        } else {
+            assert(false);
+        }
+    }
+
     template<class C>
     C
-    _readComponent(const oni::ComponentFactoryMap &factoryMap,
+    _readComponent(const oni::ComponentReaderMap &readerMap,
                    rapidjson::Document &doc,
                    const rapidjson::Document::MemberIterator &component) {
         auto *em = _getTempEntityManager();
         auto id = _getTempEntityID(em);
-        _createComponent(factoryMap, *em, id, doc, component);
+        _readComponent(readerMap, *em, id, doc, component);
         auto result = em->get<C>(id);
         em->removeComponent<C>(id);
         return result;
@@ -104,17 +121,39 @@ namespace {
     }
 
     void
-    _createComponents(const oni::ComponentFactoryMap &factoryMap,
-                      std::string_view key,
-                      oni::EntityManager &em,
-                      oni::EntityID id,
-                      rapidjson::Document &doc) {
+    _readComponents(const oni::ComponentReaderMap &readerMap,
+                    std::string_view key,
+                    oni::EntityManager &em,
+                    oni::EntityID id,
+                    rapidjson::Document &doc) {
         auto components = doc.FindMember(key.data());
         if (components != doc.MemberEnd()) {
             for (auto component = components->value.MemberBegin();
                  component != components->value.MemberEnd(); ++component) {
                 if (component->value.IsObject()) {
-                    _createComponent(factoryMap, em, id, doc, component);
+                    _readComponent(readerMap, em, id, doc, component);
+                } else {
+                    assert(false);
+                }
+            }
+        } else {
+            assert(false);
+        }
+    }
+
+    void
+    _writeComponents(const oni::ComponentWriterMap &writerMap,
+                     std::string_view key,
+                     const oni::EntityManager &em,
+                     oni::EntityID id,
+                     const rapidjson::Document &doc,
+                     std::stringstream &ss) {
+        auto components = doc.FindMember(key.data());
+        if (components != doc.MemberEnd()) {
+            for (auto component = components->value.MemberBegin();
+                 component != components->value.MemberEnd(); ++component) {
+                if (component->value.IsObject()) {
+                    _writeComponent(writerMap, em, id, component->name.GetString(), ss);
                 } else {
                     assert(false);
                 }
@@ -184,7 +223,7 @@ namespace {
                         auto entityName = _readEntityName(entityNameStr, factory, doc);
                         // NOTE: If secondary entity requires entities as well, those will always will be
                         // created in the secondary entity registry.
-                        auto childID = factory.createEntity_Local(secondaryEm, secondaryEm, entityName);
+                        auto childID = factory.readEntity_Local(secondaryEm, secondaryEm, entityName);
 
                         if (childID == oni::EntityManager::nullEntity()) {
                             assert(false);
@@ -227,8 +266,8 @@ namespace oni {
     EntityFactory::indexEntities(EntityDefDirPath &&fp) {
         auto entities = parseDirectoryTree(fp);
 
-        auto doc = rapidjson::Document();
         for (auto &&file: entities) {
+            auto doc = rapidjson::Document();
             auto entityName = _readEntityName(file.name.data(), *this, doc);
             auto result = mEntityPathMap.emplace(entityName, EntityDefDirPath{file});
             assert(result.second);
@@ -236,15 +275,22 @@ namespace oni {
     }
 
     void
-    EntityFactory::registerComponentFactory(const ComponentName &name,
-                                            ComponentFactory &&cb) {
-        assert(mComponentFactory.find(name.hash) == mComponentFactory.end());
-        mComponentFactory.emplace(name.hash, std::move(cb));
+    EntityFactory::registerComponentReader(const ComponentName &name,
+                                           ComponentReader &&cr) {
+        auto result = mComponentReader.emplace(name.hash, std::move(cr));
+        assert(result.second);
     }
 
-    const ComponentFactoryMap &
+    void
+    EntityFactory::registerComponentWriter(const ComponentName &name,
+                                           ComponentWriter &&cw) {
+        auto result = mComponentWriter.emplace(name.hash, std::move(cw));
+        assert(result.second);
+    }
+
+    const ComponentReaderMap &
     EntityFactory::getFactoryMap() const {
-        return mComponentFactory;
+        return mComponentReader;
     }
 
     void
@@ -269,9 +315,9 @@ namespace oni {
     }
 
     EntityID
-    EntityFactory::createEntity_Local(EntityManager &primaryEm,
-                                      EntityManager &secondaryEm,
-                                      const EntityName &name) {
+    EntityFactory::readEntity_Local(EntityManager &primaryEm,
+                                    EntityManager &secondaryEm,
+                                    const EntityName &name) {
         auto fp = _getEntityPath(name);
         auto parentID = primaryEm.createEntity(name);
         auto maybeDoc = readJson(fp);
@@ -281,7 +327,7 @@ namespace oni {
         }
         auto doc = std::move(maybeDoc.value());
 
-        _createComponents(mComponentFactory, "components-local", primaryEm, parentID, doc);
+        _readComponents(mComponentReader, "components-local", primaryEm, parentID, doc);
         _postProcess(primaryEm, parentID);
         _createEntity_Attachments(*this, "attachments-local", primaryEm, secondaryEm, parentID, doc);
 
@@ -289,10 +335,10 @@ namespace oni {
     }
 
     void
-    EntityFactory::createEntity_Remote(EntityManager &primaryEm,
-                                       EntityManager &secondaryEm,
-                                       EntityID parentID,
-                                       const EntityName &name) {
+    EntityFactory::readEntity_Remote(EntityManager &primaryEm,
+                                     EntityManager &secondaryEm,
+                                     EntityID parentID,
+                                     const EntityName &name) {
         auto fp = _getEntityPath(name);
         if (fp.path.empty()) {
             return;
@@ -305,15 +351,25 @@ namespace oni {
         }
         auto doc = std::move(maybeDoc.value());
 
-        _createComponents(mComponentFactory, "components-remote", primaryEm, parentID, doc);
+        _readComponents(mComponentReader, "components-remote", primaryEm, parentID, doc);
         _postProcess(primaryEm, parentID);
         _createEntity_Attachments(*this, "attachments-remote", primaryEm, secondaryEm, parentID, doc);
     }
 
     void
-    EntityFactory::saveEntity_Primary(EntityManager &em,
-                                      EntityID id,
-                                      const EntityName &name) {
+    EntityFactory::writeEntity_Local(const EntityManager &primaryEm,
+                                     EntityID id,
+                                     const EntityName &name) {
+        auto fp = _getEntityPath(name);
+        auto maybeDoc = readJson(fp);
+        if (!maybeDoc.has_value()) {
+            assert(false);
+            return;
+        }
+        auto doc = std::move(maybeDoc.value());
 
+        auto ss = std::stringstream();
+        _writeComponents(mComponentWriter, "components-local", primaryEm, id, doc, ss);
+        writeFile(FilePath("", "test", "json"), ss);
     }
 }

@@ -19,6 +19,17 @@ namespace oni {
         return content;
     }
 
+    void
+    writeFile(const FilePath &fp,
+              const std::stringstream &ss) {
+        std::ofstream ofs(fp.getFullPath().data());
+        if (!ofs.bad()) {
+            ofs << ss.rdbuf();
+        } else {
+            assert(false);
+        }
+    }
+
     std::vector<FilePath>
     parseDirectoryTree(const FilePath &fp) {
         auto result = std::vector<FilePath>();

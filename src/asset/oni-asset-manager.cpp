@@ -29,7 +29,7 @@ namespace oni {
     AssetFilesIndex::_indexImages() {
         auto textures = parseDirectoryTree(mImagesParentDir);
         for (auto &&texture : textures) {
-            if (texture.extension == ".png") {
+            if (texture.extension == "png") {
                 auto name = texture.getFullPath();
                 auto nameHash = HashedString::makeFromCStr(name.data());
                 auto result = mImageAssetMap.emplace(nameHash.hash, ImageAsset{texture, nameHash});

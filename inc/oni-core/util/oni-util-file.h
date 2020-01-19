@@ -12,4 +12,8 @@ namespace oni {
     // TODO: I don't really need a FilePath, but Directory path
     std::vector<FilePath>
     parseDirectoryTree(const FilePath &);
+
+    void
+    writeFile(const FilePath &,
+              const std::stringstream &);
 }

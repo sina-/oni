@@ -41,4 +41,19 @@ namespace oni {
 
         return document;
     }
+
+    void
+    writeJson(const oni::FilePath &fp,
+              const rapidjson::Document &doc) {
+        rapidjson::StringBuffer compStringBuff;
+        rapidjson::Writer writer(compStringBuff);
+
+        doc.Accept(writer);
+
+        std::istringstream ss(compStringBuff.GetString());
+
+        std::ofstream output(fp.getFullPath(), std::ios::binary);
+
+        output << ss.rdbuf();
+    }
 }

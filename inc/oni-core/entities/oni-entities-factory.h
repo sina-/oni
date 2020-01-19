@@ -11,32 +11,44 @@
 
 namespace cereal {
     class JSONInputArchive;
+
+    class JSONOutputArchive;
 }
 
 
 namespace oni {
     // TODO: Can I remove JSONInputArchive from the API?
-    using ComponentFactory = std::function<
+    using ComponentReader = std::function<
             void(oni::EntityManager &,
                  oni::EntityID,
                  cereal::JSONInputArchive &)>;
-    using ComponentFactoryMap = std::unordered_map<Hash, ComponentFactory>;
+    using ComponentReaderMap = std::unordered_map<Hash, ComponentReader>;
 
-    template<class C>
-    using ComponentReader = std::function<
-            C(cereal::JSONInputArchive &)>;
+    using ComponentWriter = std::function<
+            void(const oni::EntityManager &,
+                 oni::EntityID,
+                 cereal::JSONOutputArchive &)>;
+    using ComponentWriterMap = std::unordered_map<Hash, ComponentWriter>;
 }
 
 #define COMPONENT_FACTORY_DEFINE(factory, NAMESPACE, COMPONENT_NAME)                    \
 {                                                                                       \
-        oni::ComponentFactory cf = [](oni::EntityManager &em,                           \
+        oni::ComponentReader cr = [](oni::EntityManager &em,                            \
                                  oni::EntityID id,                                      \
                                  cereal::JSONInputArchive &reader) {                    \
             auto &component = em.createComponent<NAMESPACE::COMPONENT_NAME>(id);        \
             reader(component);                                                          \
         };                                                                              \
         constexpr auto componentName = oni::ComponentName{#COMPONENT_NAME};             \
-        factory->registerComponentFactory(componentName, std::move(cf));                \
+        factory->registerComponentReader(componentName, std::move(cr));                 \
+                                                                                        \
+        oni::ComponentWriter cw = [](const oni::EntityManager &em,                      \
+                                 oni::EntityID id,                                      \
+                                 cereal::JSONOutputArchive &writer) {                   \
+            const auto &component = em.get<NAMESPACE::COMPONENT_NAME>(id);              \
+            writer(#COMPONENT_NAME, component);                                         \
+        };                                                                              \
+        factory->registerComponentWriter(componentName, std::move(cw));                 \
 }
 
 namespace oni {
@@ -48,29 +60,33 @@ namespace oni {
         indexEntities(EntityDefDirPath &&fp);
 
         void
-        registerComponentFactory(const ComponentName &,
-                                 ComponentFactory &&);
+        registerComponentReader(const ComponentName &,
+                                ComponentReader &&);
+
+        void
+        registerComponentWriter(const ComponentName &,
+                                ComponentWriter &&);
 
         EntityID
-        createEntity_Local(EntityManager &primaryEm,
-                           EntityManager &secondaryEm,
-                           const EntityName &name);
+        readEntity_Local(EntityManager &primaryEm,
+                         EntityManager &secondaryEm,
+                         const EntityName &name);
 
         // TODO: Secondary entity could be client side components of a server entity, or it could be other entities
         // attached to primary entity. But they both go through the same interface and that is a bit confusing.
         // Editor might have even harder time separating these two
         void
-        createEntity_Remote(EntityManager &primaryEm,
-                            EntityManager &secondaryEm,
-                            EntityID parentID,
-                            const EntityName &name);
+        readEntity_Remote(EntityManager &primaryEm,
+                          EntityManager &secondaryEm,
+                          EntityID parentID,
+                          const EntityName &name);
 
         void
-        saveEntity_Primary(EntityManager &,
-                           EntityID,
-                           const EntityName &);
+        writeEntity_Local(const EntityManager &,
+                          EntityID,
+                          const EntityName &);
 
-        const ComponentFactoryMap &
+        const ComponentReaderMap &
         getFactoryMap() const;
 
     protected:
@@ -82,7 +98,8 @@ namespace oni {
                      EntityID);
 
     private:
-        std::unordered_map<Hash, ComponentFactory> mComponentFactory{};
+        std::unordered_map<Hash, ComponentReader> mComponentReader{};
+        std::unordered_map<Hash, ComponentWriter> mComponentWriter{};
         std::unordered_map<EntityName, EntityDefDirPath> mEntityPathMap{};
 
         ZLayerManager &mZLayerManager;

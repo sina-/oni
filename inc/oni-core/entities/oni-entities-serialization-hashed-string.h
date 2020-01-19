@@ -14,12 +14,12 @@ namespace oni {
         // TODO: Get the binarydata working so I don't have to create a new std string for each call!
 //        auto dataBuffer = cereal::BinaryData(data.str.data(), data.str.size());
 //        printf("size for %s : %lu\n", data.str.data(), data.str.size());
-        auto dataBuffer = std::string(data.str);
+        auto buffer = std::string(data.str);
         if (name.empty()) {
-            archive(dataBuffer);
+            archive(buffer);
         } else {
-            auto nameBuffer = cereal::BinaryData(name.data(), name.size());
-            archive(nameBuffer, dataBuffer);
+            // auto nameBuffer = cereal::BinaryData(name.data(), name.size());
+            archive(name.data(), buffer);
         }
     }
 

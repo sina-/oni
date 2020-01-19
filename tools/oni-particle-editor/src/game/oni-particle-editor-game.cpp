@@ -28,7 +28,7 @@
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
         mAssetFilesIdx = new AssetFilesIndex({{"oni-resources/textures"}},
-                                             {{"oni-resources/audio", "index", ".wav"}});
+                                             {{"oni-resources/audio", "index", "wav"}});
         mTextureMng = new oni::TextureManager(*mAssetFilesIdx);
         mInput = new oni::Input();
         mZLayerMng = new oni::ZLayerManager();
@@ -233,7 +233,7 @@ namespace oni {
                 mEntityMng->createComponent<ParticleEmitter>(mEmitterID, mParticleEmitter);
                 mEntityMng->createComponent<WorldP3D>(mEmitterID, mInforSideBar.mouseWorldPos.to3D(0.5));
             } else if (mInforSideBar.save && mEmitterID != EntityManager::nullEntity()) {
-                mEntityFactory->saveEntity_Primary(*mEntityMng, mEmitterID, {});
+                mEntityFactory->writeEntity_Local(*mEntityMng, mEmitterID, EntityNameEditor::GET("particle-emitter"));
             }
         }
     }

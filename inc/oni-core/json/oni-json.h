@@ -10,5 +10,9 @@
 
 namespace oni {
     std::optional<rapidjson::Document>
-    readJson(const oni::FilePath &fp);
+    readJson(const oni::FilePath &);
+
+    void
+    writeJson(const oni::FilePath &,
+              const rapidjson::Document&);
 }

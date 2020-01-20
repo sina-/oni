@@ -46,7 +46,8 @@ namespace oni {
     writeJson(const oni::FilePath &fp,
               const rapidjson::Document &doc) {
         rapidjson::StringBuffer compStringBuff;
-        rapidjson::Writer writer(compStringBuff);
+        rapidjson::PrettyWriter writer(compStringBuff);
+        writer.SetIndent(' ', 2);
 
         doc.Accept(writer);
 

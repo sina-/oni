@@ -11,6 +11,7 @@
 #include <oni-core/entities/oni-entities-serialization-json.h>
 #include <oni-core/graphic/oni-graphic-camera.h>
 #include <oni-core/math/oni-math-z-layer-manager.h>
+#include <cereal/external/rapidjson/error/en.h>
 
 
 namespace {
@@ -82,8 +83,11 @@ namespace {
         auto hash = oni::HashedString::makeHashFromCString(compoName.data());
         auto factory = writerMap.find(hash);
 
+        static auto options = cereal::JSONOutputArchive::Options(4,
+                                                                 cereal::JSONOutputArchive::Options::IndentChar::space,
+                                                                 2);
         if (factory != writerMap.end()) {
-            cereal::JSONOutputArchive writer(ss);
+            cereal::JSONOutputArchive writer(ss, options);
             factory->second(manager, id, writer);
         } else {
             assert(false);
@@ -147,13 +151,26 @@ namespace {
                      const oni::EntityManager &em,
                      oni::EntityID id,
                      const rapidjson::Document &doc,
-                     std::stringstream &ss) {
+                     rapidjson::Document &result) {
         auto components = doc.FindMember(key.data());
         if (components != doc.MemberEnd()) {
             for (auto component = components->value.MemberBegin();
                  component != components->value.MemberEnd(); ++component) {
                 if (component->value.IsObject()) {
+                    auto ss = std::stringstream();
                     _writeComponent(writerMap, em, id, component->name.GetString(), ss);
+
+                    auto componentDoc = rapidjson::Document(&result.GetAllocator());
+                    auto componentString = std::string(ss.str());
+                    if (componentDoc.Parse(componentString.data()).HasParseError()) {
+                        printf("JSON parse error: %s file: position: %zu \n",
+                               rapidjson::GetParseError_En(componentDoc.GetParseError()),
+                               componentDoc.GetErrorOffset());
+                        assert(false);
+                        return;
+                    }
+                    result["components-local"].PushBack(componentDoc, result.GetAllocator());
+
                 } else {
                     assert(false);
                 }
@@ -368,8 +385,16 @@ namespace oni {
         }
         auto doc = std::move(maybeDoc.value());
 
-        auto ss = std::stringstream();
-        _writeComponents(mComponentWriter, "components-local", primaryEm, id, doc, ss);
-        writeFile(FilePath("", "test", "json"), ss);
+        auto result = rapidjson::Document();
+        result.SetObject();
+
+        result.AddMember("name", rapidjson::Value(rapidjson::kStringType).Move(), result.GetAllocator());
+        result["name"] = rapidjson::StringRef(name.name.str.data());
+
+        result.AddMember("components-local", rapidjson::Value(rapidjson::kArrayType).Move(), result.GetAllocator());
+        _writeComponents(mComponentWriter, "components-local", primaryEm, id, doc, result);
+
+        auto outputFP = FilePath("", "test", "json");
+        writeJson(outputFP, result);
     }
 }

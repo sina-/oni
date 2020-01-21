@@ -132,13 +132,22 @@ namespace {
                     rapidjson::Document &doc) {
         auto components = doc.FindMember(key.data());
         if (components != doc.MemberEnd()) {
-            for (auto component = components->value.MemberBegin();
-                 component != components->value.MemberEnd(); ++component) {
-                if (component->value.IsObject()) {
-                    _readComponent(readerMap, em, id, doc, component);
-                } else {
+            for (auto &&component = components->value.Begin();
+                 component != components->value.End(); ++component) {
+
+                if (!component->IsObject()) {
                     assert(false);
+                    continue;
                 }
+
+                auto componentIter = component->MemberBegin();
+                // Only expect on element here
+                if (componentIter + 1 != component->MemberEnd()) {
+                    assert(false);
+                    continue;
+                }
+
+                _readComponent(readerMap, em, id, doc, componentIter);
             }
         } else {
             assert(false);
@@ -154,26 +163,34 @@ namespace {
                      rapidjson::Document &result) {
         auto components = doc.FindMember(key.data());
         if (components != doc.MemberEnd()) {
-            for (auto component = components->value.MemberBegin();
-                 component != components->value.MemberEnd(); ++component) {
-                if (component->value.IsObject()) {
-                    auto ss = std::stringstream();
-                    _writeComponent(writerMap, em, id, component->name.GetString(), ss);
+            for (auto component = components->value.Begin();
+                 component != components->value.End(); ++component) {
 
-                    auto componentDoc = rapidjson::Document(&result.GetAllocator());
-                    auto componentString = std::string(ss.str());
-                    if (componentDoc.Parse(componentString.data()).HasParseError()) {
-                        printf("JSON parse error: %s file: position: %zu \n",
-                               rapidjson::GetParseError_En(componentDoc.GetParseError()),
-                               componentDoc.GetErrorOffset());
-                        assert(false);
-                        return;
-                    }
-                    result["components-local"].PushBack(componentDoc, result.GetAllocator());
-
-                } else {
+                if (!component->IsObject()) {
                     assert(false);
+                    continue;
                 }
+
+                auto componentIter = component->MemberBegin();
+                // Only expect on element here
+                if (componentIter + 1 != component->MemberEnd()) {
+                    assert(false);
+                    continue;
+                }
+
+                auto ss = std::stringstream();
+                _writeComponent(writerMap, em, id, componentIter->name.GetString(), ss);
+
+                auto componentDoc = rapidjson::Document(&result.GetAllocator());
+                auto componentString = std::string(ss.str());
+                if (componentDoc.Parse(componentString.data()).HasParseError()) {
+                    printf("JSON parse error: %s file: position: %zu \n",
+                           rapidjson::GetParseError_En(componentDoc.GetParseError()),
+                           componentDoc.GetErrorOffset());
+                    assert(false);
+                    return;
+                }
+                result["components-local"].PushBack(componentDoc, result.GetAllocator());
             }
         } else {
             assert(false);
@@ -240,7 +257,7 @@ namespace {
                         auto entityName = _readEntityName(entityNameStr, factory, doc);
                         // NOTE: If secondary entity requires entities as well, those will always will be
                         // created in the secondary entity registry.
-                        auto childID = factory.readEntity_Local(secondaryEm, secondaryEm, entityName);
+                        auto childID = factory.loadEntity_Local(secondaryEm, secondaryEm, entityName);
 
                         if (childID == oni::EntityManager::nullEntity()) {
                             assert(false);
@@ -332,7 +349,7 @@ namespace oni {
     }
 
     EntityID
-    EntityFactory::readEntity_Local(EntityManager &primaryEm,
+    EntityFactory::loadEntity_Local(EntityManager &primaryEm,
                                     EntityManager &secondaryEm,
                                     const EntityName &name) {
         auto fp = _getEntityPath(name);
@@ -352,7 +369,7 @@ namespace oni {
     }
 
     void
-    EntityFactory::readEntity_Remote(EntityManager &primaryEm,
+    EntityFactory::loadEntity_Remote(EntityManager &primaryEm,
                                      EntityManager &secondaryEm,
                                      EntityID parentID,
                                      const EntityName &name) {
@@ -374,9 +391,9 @@ namespace oni {
     }
 
     void
-    EntityFactory::writeEntity_Local(const EntityManager &primaryEm,
-                                     EntityID id,
-                                     const EntityName &name) {
+    EntityFactory::saveEntity_Local(const EntityManager &primaryEm,
+                                    EntityID id,
+                                    const EntityName &name) {
         auto fp = _getEntityPath(name);
         auto maybeDoc = readJson(fp);
         if (!maybeDoc.has_value()) {

@@ -1,51 +1,54 @@
 {
   "name": "particle-emitter",
-
-  "components-local": {
-    "ParticleEmitter": {
-      "particle": {
-        "value": "simple-particle"
-      },
-      "material": {
-        "finish": {
-          "name": "shinny"
+  "components-local": [
+    {
+      "ParticleEmitter": {
+        "particle": {
+          "value": "simple-particle"
         },
-        "skin": {
-          "color": {
-            "r": 1.0,
-            "g": 1.0,
-            "b": 1.0,
-            "a": 1.0
+        "material": {
+          "finish": {
+            "name": "shinny"
           },
-          "texture": {
-            "image": {
-              "name": "oni-resources/textures/cloud-white.png"
+          "skin": {
+            "color": {
+              "r": 1.0,
+              "g": 1.0,
+              "b": 1.0,
+              "a": 1.0
+            },
+            "texture": {
+              "image": {
+                "name": "oni-resources/textures/cloud-white.png"
+              }
             }
           }
-        }
-      },
-      "size": 1.0,
-      "initialVMin": 1.0,
-      "initialVMax": 2.0,
-      "orientMin": 0.0,
-      "orientMax": 6.28,
-      "acc": 0.0,
-      "count": 10,
-      "growth": {
-        "period": 0.4,
-        "elapsed": 0.0,
-        "factor": 0.1,
-        "maxSize":{
-          "x": 1.0,
-          "y": 1.0,
-          "z": 1.0
+        },
+        "size": 1.0,
+        "initialVMin": 1.0,
+        "initialVMax": 2.0,
+        "orientMin": 0.0,
+        "orientMax": 6.28,
+        "acc": 0.0,
+        "count": 10,
+        "growth": {
+          "period": 0.4,
+          "elapsed": 0.0,
+          "factor": 0.1,
+          "maxSize":{
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
         }
       }
     },
-    "WorldP3D": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
+    {
+      "WorldP3D": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
     }
-  }
+  ]
 }

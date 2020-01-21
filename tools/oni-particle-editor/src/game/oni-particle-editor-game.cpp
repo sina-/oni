@@ -233,7 +233,7 @@ namespace oni {
                 mEntityMng->createComponent<ParticleEmitter>(mEmitterID, mParticleEmitter);
                 mEntityMng->createComponent<WorldP3D>(mEmitterID, mInforSideBar.mouseWorldPos.to3D(0.5));
             } else if (mInforSideBar.save && mEmitterID != EntityManager::nullEntity()) {
-                mEntityFactory->writeEntity_Local(*mEntityMng, mEmitterID, EntityNameEditor::GET("particle-emitter"));
+                mEntityFactory->saveEntity_Local(*mEntityMng, mEmitterID, EntityNameEditor::GET("particle-emitter"));
             }
         }
     }

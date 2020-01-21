@@ -68,7 +68,7 @@ namespace oni {
                                 ComponentWriter &&);
 
         EntityID
-        readEntity_Local(EntityManager &primaryEm,
+        loadEntity_Local(EntityManager &primaryEm,
                          EntityManager &secondaryEm,
                          const EntityName &name);
 
@@ -76,15 +76,15 @@ namespace oni {
         // attached to primary entity. But they both go through the same interface and that is a bit confusing.
         // Editor might have even harder time separating these two
         void
-        readEntity_Remote(EntityManager &primaryEm,
+        loadEntity_Remote(EntityManager &primaryEm,
                           EntityManager &secondaryEm,
                           EntityID parentID,
                           const EntityName &name);
 
         void
-        writeEntity_Local(const EntityManager &,
-                          EntityID,
-                          const EntityName &);
+        saveEntity_Local(const EntityManager &,
+                         EntityID,
+                         const EntityName &);
 
         const ComponentReaderMap &
         getFactoryMap() const;

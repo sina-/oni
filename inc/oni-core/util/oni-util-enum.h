@@ -134,6 +134,7 @@ namespace oni {
                 }
                 BASE::id = INVALID.id;
                 BASE::name = INVALID.name;
+                assert(false);
             }
 
 //            inline static constexpr BASE

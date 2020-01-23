@@ -288,6 +288,14 @@ namespace oni {
 
     template<class Archive>
     void
+    serialize(Archive &archive,
+              JetForce &data) {
+        archive("fuze", data.fuze);
+        archive("force", data.force);
+    }
+
+    template<class Archive>
+    void
     save(Archive &archive,
          const BodyType &data) {
         saveEnum(archive, "name", data);

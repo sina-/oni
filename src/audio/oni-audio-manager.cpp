@@ -49,9 +49,12 @@ namespace oni {
         static_assert(sizeof(event.pcPair.a.id) == sizeof(i32), "Hashing will fail due to size mismatch");
         auto collisionTag = _createCollisionEffectID(event.pcPair);
         auto distance = mPlayerPos.value - event.pos.value;
-        auto soundTag = mCollisionEffects[collisionTag];
-        assert(soundTag.hash.value);
-        auto sound = Sound{soundTag, ChannelGroup::EFFECT};
+        auto soundTag = mCollisionEffects.find(collisionTag);
+        if (soundTag == mCollisionEffects.end()) {
+            assert(false);
+            return;
+        }
+        auto sound = Sound{soundTag->second, ChannelGroup::EFFECT};
         auto pitch = SoundPitch{1.f};
         playOneShot(sound, pitch, distance);
     }
@@ -136,14 +139,22 @@ namespace oni {
 
     FMOD::Channel *
     AudioManager::_createChannel(const Sound &sound) {
-        assert(mChannelGroup[sound.group]);
-        auto *group = mChannelGroup[sound.group].get();
-        assert(group);
-        assert(mSounds[sound.name.hash]);
+        auto group = mChannelGroup.find(sound.group);
+        if (group == mChannelGroup.end()) {
+            assert(false);
+            return nullptr;
+        }
 
-        FMOD::Channel *channel{nullptr};
+        auto soundToPlay = mSounds.find(sound.name.hash);
+        if (soundToPlay == mSounds.end()) {
+            assert(false);
+            return nullptr;
+        }
+
+        FMOD::Channel *channel{};
         auto paused = true;
-        auto result = mSystem->playSound(mSounds[sound.name.hash].get(), group, paused, &channel);
+        auto result = mSystem->playSound(soundToPlay->second.get(), group->second.get(), paused, &channel);
+
         ERRCHECK(result);
 
         return channel;
@@ -151,10 +162,12 @@ namespace oni {
 
     FMOD::ChannelGroup *
     AudioManager::_getChannelGroup(ChannelGroup cg) {
-        assert(mChannelGroup[cg]);
-        auto *group = mChannelGroup[cg].get();
-        assert(group);
-        return group;
+        auto group = mChannelGroup.find(cg);
+        if (group == mChannelGroup.end()) {
+            assert(false);
+            return nullptr;
+        }
+        return group->second.get();
     }
 
     void
@@ -162,7 +175,10 @@ namespace oni {
                               const SoundPitch &pitch,
                               const vec3 &distance) {
         auto *channel = _createChannel(sound);
-        assert(channel);
+        if (!channel) {
+            assert(false);
+            return;
+        }
 
         auto result = channel->setMode(FMOD_3D);
         ERRCHECK(result);

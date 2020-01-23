@@ -30,9 +30,9 @@ namespace oni {
         auto textures = parseDirectoryTree(mImagesParentDir);
         for (auto &&texture : textures) {
             if (texture.extension == "png") {
-                auto name = texture.getFullPath();
-                auto nameHash = HashedString::makeFromCStr(name.data());
-                auto result = mImageAssetMap.emplace(nameHash.hash, ImageAsset{texture, nameHash});
+                auto fullPath = texture.getFullPath();
+                auto pathHashed = HashedString::makeFromCStr(fullPath.data());
+                auto result = mImageAssetMap.emplace(pathHashed.hash, ImageAsset{texture, pathHashed});
                 assert(result.second);
             } else {
             }
@@ -41,10 +41,15 @@ namespace oni {
 
     void
     AssetFilesIndex::_indexSounds() {
-        // TODO:
-//        auto audios = parseDirectoryTree(mAudioParentDir);
-//        for (auto &&audio: audios) {
-//
-//        }
+        auto sounds = parseDirectoryTree(mAudioParentDir);
+        for (auto &&soundFile : sounds) {
+            if (soundFile.extension == "wav") {
+                auto fullPath = soundFile.getFullPath();
+                auto pathHashed = HashedString::makeFromCStr(fullPath.data());
+                auto result = mSoundAssetMap.emplace(pathHashed.hash, SoundAsset{soundFile, pathHashed});
+                assert(result.second);
+            } else {
+            }
+        }
     }
 }

@@ -339,6 +339,8 @@ namespace oni {
 
     const EntityDefDirPath &
     EntityFactory::_getEntityPath(const EntityName &name) {
+        assert(name.id);
+        assert(name.name.hash.value);
         auto path = mEntityPathMap.find(name);
         if (path != mEntityPathMap.end()) {
             return path->second;

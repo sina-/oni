@@ -17,14 +17,16 @@
  */
 
 
-#define ONI_ENUM_DEF_WITH_BASE(NAME, BASE, ...)                                                                                   \
-    namespace oni_detail{ inline constexpr BASE storage_##NAME [] = { __VA_ARGS__};}                                        \
-    struct NAME : public oni::oni_detail::EnumBase<                                                                         \
-            sizeof(oni_detail::storage_##NAME) / sizeof(BASE), BASE, oni_detail::storage_##NAME> {                              \
+#define ONI_ENUM_DEF_WITH_BASE(NAME, BASE, ...)                                                                         \
+    namespace oni_detail{ inline constexpr BASE storage_##NAME [] = { __VA_ARGS__};}                                    \
+    struct NAME : public oni::oni_detail::EnumBase<                                                                     \
+            sizeof(oni_detail::storage_##NAME) / sizeof(BASE), BASE, oni_detail::storage_##NAME> {                      \
        template<oni::i32 n>                                                                                             \
        inline static constexpr                                                                                          \
        NAME GET(const oni::c8 (&name)[n])                                                                               \
        { return {_get(name)};}                                                                                          \
+       inline static constexpr const NAME* begin() { return static_cast<const NAME*>(_begin()); }                       \
+       inline static constexpr const NAME* end() { return static_cast<const NAME*>(_end()); }                           \
 };
 
 #define ONI_ENUM_DEF(NAME, ...) ONI_ENUM_DEF_WITH_BASE(NAME, oni::Enum, __VA_ARGS__ )
@@ -51,16 +53,6 @@ namespace oni {
     namespace oni_detail {
         template<oni::i32 N, class BASE, auto v>
         struct EnumBase : public BASE {
-            inline static constexpr auto
-            begin() {
-                return storage;
-            }
-
-            inline static constexpr auto
-            end() {
-                return storage + N;
-            }
-
             inline bool
             valid() {
                 return BASE::name != INVALID.name;
@@ -148,6 +140,17 @@ namespace oni {
             _get(const oni::c8 (&name_)[n]) {
                 return _find(oni::HashedString::makeHashFromLiteral(name_), 0, storage);
             }
+
+            inline static constexpr auto
+            _begin() {
+                return storage;
+            }
+
+            inline static constexpr auto
+            _end() {
+                return storage + N;
+            }
+
 
         private:
             // TODO: How can I make this better, the diagnosis error is misleading

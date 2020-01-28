@@ -4,7 +4,6 @@
 
 namespace oni {
     /// Audio
-    enum class ChannelGroup : oni::u8;
     enum class SoundPlaybackState : oni::u8;
 
     struct Sound;

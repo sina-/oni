@@ -10,19 +10,19 @@ namespace oni {
     System_PlayPauseSound::update(EntityTickContext &etc,
                                   Sound &sound,
                                   WorldP3D &pos) {
-        auto &entityChannel = mAudioMng._getOrCreateLooping3DChannel(sound, etc.id);
+        auto *entityChannel = mAudioMng._getOrCreateLooping3DChannel(sound, etc.id);
         auto distance = (pos.value - mAudioMng.mPlayerPos.value).len();
         if (distance < mAudioMng.mMaxAudibleDistance) {
             if (etc.mng.has<SoundPitch>(etc.id)) {
                 auto &pitch = etc.mng.get<SoundPitch>(etc.id);
-                mAudioMng._setPitch(*entityChannel.channel, pitch.value);
+                mAudioMng._setPitch(*entityChannel->channel, pitch.value);
             }
 
             auto v = vec3{1.f, 0.f, 0.f}; // TODO: Does it matter if this is accurate?
-            mAudioMng._set3DPos(*entityChannel.channel, pos.value - mAudioMng.mPlayerPos.value, v);
-            mAudioMng._unPause(*entityChannel.channel);
+            mAudioMng._set3DPos(*entityChannel->channel, pos.value - mAudioMng.mPlayerPos.value, v);
+            mAudioMng._unPause(*entityChannel->channel);
         } else {
-            mAudioMng._pause(*entityChannel.channel);
+            mAudioMng._pause(*entityChannel->channel);
         }
     }
 

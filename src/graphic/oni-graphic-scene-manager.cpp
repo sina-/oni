@@ -207,7 +207,7 @@ namespace oni {
             spec.renderTarget = nullptr;
             spec.screenSize = getScreenSize();
             spec.zoom = mCamera.z;
-            spec.finishType = {*iter};
+            spec.finishType = *iter;
             setMVP(spec, true, true, true);
 
             begin(*mRendererTessellation, spec);

@@ -244,7 +244,7 @@ namespace oni {
     save(Archive &archive,
          const Sound &data) {
         saveHashedString(archive, "name", data.name);
-        archive("group", data.group);
+        saveEnum(archive, "group", data.group);
     }
 
     template<class Archive>
@@ -252,7 +252,7 @@ namespace oni {
     load(Archive &archive,
          Sound &data) {
         loadHashedString(archive, "name", data.name);
-        archive("group", data.group);
+        loadEnum(archive, "group", data.group);
     }
 
     template<class Archive>

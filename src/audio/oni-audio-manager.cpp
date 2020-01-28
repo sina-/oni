@@ -54,7 +54,7 @@ namespace oni {
             assert(false);
             return;
         }
-        auto sound = Sound{soundTag->second, ChannelGroup::EFFECT};
+        auto sound = Sound{soundTag->second, ChannelGroup::GET("effect")};
         auto pitch = SoundPitch{1.f};
         playOneShot(sound, pitch, distance);
     }
@@ -96,28 +96,26 @@ namespace oni {
         ERRCHECK(result);
         auto effectsGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
         effectsGroup->setVolume(1.f);
-        mChannelGroup[ChannelGroup::EFFECT] = std::move(effectsGroup);
+        mChannelGroup[ChannelGroup::GET("effect").id] = std::move(effectsGroup);
         group = nullptr;
 
         result = mSystem->createChannelGroup("musicChannel", &group);
         ERRCHECK(result);
         auto musicGroup = std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>(group, FMODDeleter());
         musicGroup->setVolume(1.f);
-        mChannelGroup[ChannelGroup::MUSIC] = std::move(musicGroup);
+        mChannelGroup[ChannelGroup::GET("music").id] = std::move(musicGroup);
         group = nullptr;
 
-        for (auto i = enumCast(ChannelGroup::UNKNOWN) + 1;
-             i < enumCast(ChannelGroup::LAST); ++i) {
-            auto channelGroup = static_cast<ChannelGroup>(i);
-            setChannelGroupVolume(channelGroup, 1.f);
+        for (auto channelGroup = ChannelGroup::begin() + 1; channelGroup != ChannelGroup::end(); ++channelGroup) {
+            setChannelGroupVolume(*channelGroup, 1.f);
         }
     }
 
     void
     AudioManager::kill(EntityID entityID) {
         for (auto it = mLoopingChannels.begin(); it != mLoopingChannels.end();) {
-            if (it->second.entityID == entityID) {
-                auto result = it->second.channel->stop();
+            if (it->entityID == entityID) {
+                auto result = it->channel->stop();
                 ERRCHECK(result);
                 it = mLoopingChannels.erase(it);
             } else {
@@ -139,11 +137,11 @@ namespace oni {
 
     FMOD::Channel *
     AudioManager::_createChannel(const Sound &sound) {
-        auto group = mChannelGroup.find(sound.group);
-        if (group == mChannelGroup.end()) {
+        if (sound.group.id < 0 || sound.group.id > ChannelGroup::size()) {
             assert(false);
             return nullptr;
         }
+        auto *group = mChannelGroup[sound.group.id].get();
 
         auto soundToPlay = mSounds.find(sound.name.hash);
         if (soundToPlay == mSounds.end()) {
@@ -153,7 +151,7 @@ namespace oni {
 
         FMOD::Channel *channel{};
         auto paused = true;
-        auto result = mSystem->playSound(soundToPlay->second.get(), group->second.get(), paused, &channel);
+        auto result = mSystem->playSound(soundToPlay->second.get(), group, paused, &channel);
 
         ERRCHECK(result);
 
@@ -162,12 +160,13 @@ namespace oni {
 
     FMOD::ChannelGroup *
     AudioManager::_getChannelGroup(ChannelGroup cg) {
-        auto group = mChannelGroup.find(cg);
-        if (group == mChannelGroup.end()) {
+        if (cg.id < 0 || cg.id > ChannelGroup::size()) {
             assert(false);
             return nullptr;
         }
-        return group->second.get();
+        auto *group = mChannelGroup[cg.id].get();
+        assert(group);
+        return group;
     }
 
     void
@@ -213,28 +212,34 @@ namespace oni {
         return FMOD_OK;
     }
 
-    AudioManager::EntitySoundTag
-    AudioManager::_createEntitySoundID(SoundName,
-                                       EntityID id) {
-        // TODO: FIX THIS
-        assert(false);
-        //auto result = pack_u32(enumCast(tag), id);
-        return id;
-    }
-
-    AudioManager::EntityChannel &
+    AudioManager::EntityChannel *
     AudioManager::_getOrCreateLooping3DChannel(const Sound &sound,
                                                EntityID entityID) {
-        auto id = _createEntitySoundID(sound.name, entityID);
-        if (mLoopingChannels.find(id) == mLoopingChannels.end()) {
-            EntityChannel entityChannel;
-            entityChannel.entityID = entityID;
-            entityChannel.channel = _createChannel(sound);
-            entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
-
-            mLoopingChannels[id] = entityChannel;
+        if (!sound.name.valid()) {
+            assert(false);
+            return nullptr;
         }
-        return mLoopingChannels[id];
+
+        if (entityID == EntityManager::nullEntity()) {
+            assert(false);
+            return nullptr;
+        }
+
+        for (auto it = mLoopingChannels.begin(); it != mLoopingChannels.end();) {
+            if (it->entityID == entityID && it->name == sound.name) {
+                return &(*it);
+            } else {
+                ++it;
+            }
+        }
+
+        EntityChannel entityChannel;
+        entityChannel.entityID = entityID;
+        entityChannel.name = sound.name;
+        entityChannel.channel = _createChannel(sound);
+        entityChannel.channel->setMode(FMOD_LOOP_NORMAL | FMOD_3D);
+        mLoopingChannels.push_back(entityChannel);
+        return &mLoopingChannels.back();
     }
 
     void
@@ -305,13 +310,19 @@ namespace oni {
     }
 
     void
+    AudioManager::_updateChannelVolume(ChannelGroup cg) {
+        auto channelVolume = mChannelVolume[cg.id];
+        setChannelGroupVolume(cg, channelVolume);
+    }
+
+    void
     AudioManager::setChannelGroupVolume(ChannelGroup channelGroup,
                                         r32 volume) {
         auto effectiveVolume = volume * mMasterVolume;
         auto *group = _getChannelGroup(channelGroup);
         auto result = group->setVolume(effectiveVolume);
         ERRCHECK(result);
-        mChannelVolume[channelGroup] = volume;
+        mChannelVolume[channelGroup.id] = volume;
     }
 
     void
@@ -320,10 +331,9 @@ namespace oni {
         assert(almost_Less(volume, 1.f));
         mMasterVolume = volume;
 
-        for (auto i = enumCast(ChannelGroup::UNKNOWN) + 1;
-             i < enumCast(ChannelGroup::LAST); ++i) {
-            auto channelGroup = static_cast<ChannelGroup>(i);
-            setChannelGroupVolume(channelGroup, volume);
+        for (auto iter = ChannelGroup::begin() + 1;
+             iter < ChannelGroup::end(); ++iter) {
+            _updateChannelVolume(*iter);
         }
     }
 }

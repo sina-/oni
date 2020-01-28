@@ -10,18 +10,11 @@ namespace oni {
         FADE_OUT,
     };
 
-    enum class ChannelGroup : oni::u8 {
-        UNKNOWN,
-
-        MUSIC,
-        EFFECT,
-
-        LAST
-    };
+    ONI_ENUM_DEF(ChannelGroup, {0, "unknown"}, {1, "music"}, {2, "effect"})
 
     struct Sound {
         SoundName name = {};
-        ChannelGroup group = ChannelGroup::UNKNOWN;
+        ChannelGroup group = ChannelGroup::GET("unknown");
     };
 
     struct SoundPitch {

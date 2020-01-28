@@ -52,6 +52,7 @@ namespace oni {
         void
         setMasterVolume(r32 volume);
 
+        // TODO: NO
         friend System_PlayPauseSound;
 
     private:
@@ -68,10 +69,10 @@ namespace oni {
         };
 
         using CollisionSoundTag = u32p;
-        using EntitySoundTag = u32p;
 
         struct EntityChannel {
             EntityID entityID{0};
+            SoundName name{};
             FMOD::Channel *channel{nullptr};
         };
 
@@ -94,15 +95,11 @@ namespace oni {
         void
         _loadChannels();
 
-        static EntitySoundTag
-        _createEntitySoundID(SoundName,
-                             EntityID);
-
-        AudioManager::EntityChannel &
+        AudioManager::EntityChannel *
         _getOrCreateLooping3DChannel(const Sound &,
                                      EntityID);
 
-        void
+        static void
         _setPitch(FMOD::Channel &,
                   r32 pitch);
 
@@ -111,24 +108,27 @@ namespace oni {
                   const vec3 &pos,
                   const vec3 &velocity);
 
-        bool
+        static bool
         _isPaused(FMOD::Channel &);
 
-        void
+        static void
         _unPause(FMOD::Channel &);
 
-        void
+        static void
         _pause(FMOD::Channel &);
+
+        void
+        _updateChannelVolume(ChannelGroup);
 
     private:
         AssetFilesIndex &mAssetManager;
-        std::unique_ptr<FMOD::System, FMODDeleter> mSystem;
+        std::unique_ptr<FMOD::System, FMODDeleter> mSystem{};
 
-        std::unordered_map<ChannelGroup, std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>> mChannelGroup;
-        std::unordered_map<Hash, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds;
-        std::unordered_map<AudioManager::EntitySoundTag, EntityChannel> mLoopingChannels;
-        std::unordered_map<AudioManager::CollisionSoundTag, SoundName> mCollisionEffects;
-        std::unordered_map<ChannelGroup, r32> mChannelVolume;
+        std::array<std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>, ChannelGroup::size()> mChannelGroup{};
+        std::unordered_map<Hash, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds{};
+        std::vector<EntityChannel> mLoopingChannels{};
+        std::unordered_map<AudioManager::CollisionSoundTag, SoundName> mCollisionEffects{};
+        std::array<r32, ChannelGroup::size()> mChannelVolume{};
 
         r32 mMasterVolume{1.f};
 

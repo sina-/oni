@@ -34,7 +34,8 @@ namespace oni {
         operator=(const EntityManager &) const = delete;
 
     public:
-        // TODO: These functions shouldn't be here
+        // TODO: These functions shouldn't be here, mostly helper functions that could live separatley from
+        // entity manager
         void
         setWorldP3D(EntityID,
                     r32 x,

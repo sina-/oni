@@ -235,6 +235,7 @@ namespace oni {
         r64 initial{0.2f};
     };
 
+    // TODO: This is not used in the engine, move it to game code
     struct BrushTrail {
         bool initialized{false};
         bool active{true};

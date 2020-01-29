@@ -103,6 +103,10 @@ namespace oni {
     TextureManager::initTexture(Texture &texture) {
         assert(texture.image.name.hash.value);
         assert(!texture.image.name.str.empty());
+        if(texture.image.name == Image::GENERATED) {
+            return;
+        }
+
         const auto it = mTextureMap.find(texture.image.name.hash);
         if (it == mTextureMap.end()) {
             // NOTE: Did you forget to call loadAssets()?

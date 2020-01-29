@@ -346,4 +346,13 @@ namespace oni {
         oni::loadEnum(archive, "value", buffer);
         data = buffer;
     }
+
+    template<class Archive>
+    void
+    serialize(Archive &archive,
+              BrushTrail &data) {
+        archive("image", data.image);
+        archive("mass", data.mass);
+        archive("width", data.width);
+    }
 }

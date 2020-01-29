@@ -25,22 +25,6 @@ namespace oni {
             auto &mt = em.get<Material_Text>(id);
             mFontMng.initializeText(mt);
         }
-        // TODO: There is a still a bug here, if there are no client side components to be added the
-        // these won't be correctly initialized, because _postProcess wont be called.
-        // I should move these to deserialize method of registry
-        // after I also move all the entity initialization of client side components there as well.
-        // That is the code that I run in the main loop of sim() to check for new entities and the
-        // ones that are not initialized and manually initialize the client side of the entity!
-        if (em.has<EntityAttachee>(id)) {
-            auto &attachee = em.get<EntityAttachee>(id);
-            attachee.mng = &em;
-        }
-        if (em.has<EntityAttachment>(id)) {
-            auto &attachment = em.get<EntityAttachment>(id);
-            for (auto &&e: attachment.entities) {
-                attachment.mngs.emplace_back(&em);
-            }
-        }
 
         EntityFactory::_postProcess(em, id);
     }

@@ -264,6 +264,9 @@ namespace {
                             continue;
                         }
                         _tryBindLifeTime(primaryEm, secondaryEm, parentID, childID, entity);
+                        // TODO: There is an issue here, if primary registyr is client-server-registry and it
+                        // already has entities with EntityAttachment component this will not work! Meaning
+                        // I can't just append to the list new entities created on the client side.
                         _tryAttach(primaryEm, secondaryEm, parentID, childID, entity);
                     } else {
                         assert(false);

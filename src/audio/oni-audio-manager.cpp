@@ -39,24 +39,10 @@ namespace oni {
 
     void
     AudioManager::tick(const WorldP3D &playerPos) {
+        // TODO: Do I need this?
         mPlayerPos = playerPos;
         auto result = mSystem->update();
         ERRCHECK(result);
-    }
-
-    void
-    AudioManager::playCollisionSoundEffect(const Event_Collision &event) {
-        static_assert(sizeof(event.pcPair.a.id) == sizeof(i32), "Hashing will fail due to size mismatch");
-        auto collisionTag = _createCollisionEffectID(event.pcPair);
-        auto distance = mPlayerPos.value - event.pos.value;
-        auto soundTag = mCollisionEffects.find(collisionTag);
-        if (soundTag == mCollisionEffects.end()) {
-            assert(false);
-            return;
-        }
-        auto sound = Sound{soundTag->second, ChannelGroup::GET("effect")};
-        auto pitch = SoundPitch{1.f};
-        playOneShot(sound, pitch, distance);
     }
 
     void
@@ -65,28 +51,6 @@ namespace oni {
             const auto &soundAsset = iter->second;
             _loadSound(soundAsset);
         }
-
-        // TODO:
-//        for (auto i = enumCast(PhysicalCategory::UNKNOWN);
-//             i < enumCast(PhysicalCategory::LAST);
-//             ++i) {
-//            auto id = _createCollisionEffectID({PhysicalCategory::ROCKET,
-//                                                static_cast<PhysicalCategory >(i)});
-//            mCollisionEffects[id] = Sound_Tag::COLLISION_ROCKET_UNKNOWN;
-//        }
-    }
-
-    AudioManager::CollisionSoundTag
-    AudioManager::_createCollisionEffectID(const PhysicalCatPair &pcp) {
-        auto a = pcp.a.id;
-        auto b = pcp.b.id;
-
-        if (a > b) {
-            std::swap(a, b); // Assuming soundEffect for A->B collision is same as B->A
-        }
-
-        auto soundID = pack_i32(a, b);
-        return soundID;
     }
 
     void

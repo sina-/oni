@@ -16,6 +16,17 @@
  * 7) easy to use in if statements
  */
 
+/*
+ * Current issues:
+ * 1) Renaming and enum string is a pain in the ass
+ * 2) GET function is slow down compilation. It requires calculating the hash for every string lookup
+ *
+ * Improvements:
+ * 1) Can I merge the concept of enum class with what I have? I once tried auto generating strings from
+ * enum values, but that will still be slow to compile, probably not as slow as this one. Maybe I can
+ * even define the string and the enum at the same time... hmmm..
+ */
+
 
 #define ONI_ENUM_DEF_WITH_BASE(NAME, BASE, ...)                                                                         \
     namespace oni_detail{ inline constexpr BASE storage_##NAME [] = { __VA_ARGS__};}                                    \

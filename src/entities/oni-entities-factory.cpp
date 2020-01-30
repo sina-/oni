@@ -267,6 +267,21 @@ namespace {
                         // TODO: There is an issue here, if primary registyr is client-server-registry and it
                         // already has entities with EntityAttachment component this will not work! Meaning
                         // I can't just append to the list new entities created on the client side.
+                        // Alternatives:
+                        // 1) Shadow attachment component, tryAttach can check if the primaryEm already has
+                        // attachment component, if it does and primary != secondary then it will create
+                        // a new component in the primary registry called shadow attachment, and append
+                        // the parent-child into the list. Renderer then has to also consider shadow attachment
+                        // and apply the transforms just like attachments.
+                        // 2) Shadow entity. Meaning client never creates components on the server registry, but
+                        // always creates a shadow entity with life-time equal to that of server entity and all
+                        // the client side components on it.
+                        // PRO CONS:
+                        // 1) I will have the same issue with any other component that both server and client share
+                        // for an entity, and then I have to always introduce the same component but with a different
+                        // name just to avoid collision. And systems need to double check for two components.
+                        // 2) Systems can not work the way they do today, for example renderer needs to have
+                        // all the components in the same registry for efficient looping
                         _tryAttach(primaryEm, secondaryEm, parentID, childID, entity);
                     } else {
                         assert(false);

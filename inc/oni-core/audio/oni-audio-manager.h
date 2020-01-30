@@ -35,9 +35,6 @@ namespace oni {
         tick(const WorldP3D &playerPos);
 
         void
-        playCollisionSoundEffect(const Event_Collision &);
-
-        void
         kill(EntityID);
 
         void
@@ -68,8 +65,6 @@ namespace oni {
             operator()(FMOD::ChannelGroup *channel) const;
         };
 
-        using CollisionSoundTag = u32p;
-
         struct EntityChannel {
             EntityID entityID{0};
             SoundName name{};
@@ -79,9 +74,6 @@ namespace oni {
     private:
         void
         _preLoadSounds();
-
-        static CollisionSoundTag
-        _createCollisionEffectID(const PhysicalCatPair &);
 
         FMOD::Channel *
         _createChannel(const Sound &);
@@ -127,7 +119,6 @@ namespace oni {
         std::array<std::unique_ptr<FMOD::ChannelGroup, FMODDeleter>, ChannelGroup::size()> mChannelGroup{};
         std::unordered_map<Hash, std::unique_ptr<FMOD::Sound, FMODDeleter>> mSounds{};
         std::vector<EntityChannel> mLoopingChannels{};
-        std::unordered_map<AudioManager::CollisionSoundTag, SoundName> mCollisionEffects{};
         std::array<r32, ChannelGroup::size()> mChannelVolume{};
 
         r32 mMasterVolume{1.f};

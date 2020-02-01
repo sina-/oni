@@ -276,12 +276,17 @@ namespace {
                         // 2) Shadow entity. Meaning client never creates components on the server registry, but
                         // always creates a shadow entity with life-time equal to that of server entity and all
                         // the client side components on it.
+                        // 3) Always use shadow attachment if primary != secondary
                         // PRO CONS:
                         // 1) I will have the same issue with any other component that both server and client share
                         // for an entity, and then I have to always introduce the same component but with a different
                         // name just to avoid collision. And systems need to double check for two components.
+                        // Also if an entity on server side gets an attachment after it's intial creation,
+                        // it will over-ride the client side component. In a way, this is true for any
+                        // component that client adds that server might as as well... hmmm, this is annoying.
                         // 2) Systems can not work the way they do today, for example renderer needs to have
                         // all the components in the same registry for efficient looping
+                        // 3) Some of the cons of number 1
                         _tryAttach(primaryEm, secondaryEm, parentID, childID, entity);
                     } else {
                         assert(false);

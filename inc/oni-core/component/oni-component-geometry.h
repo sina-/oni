@@ -145,6 +145,11 @@ namespace oni {
         std::vector<EntityID> entities{};
     };
 
+    struct EntityAttachmentShadow : public EntityAttachment {
+        // NOTE: Used by the client to track client side attachments of an entity. It is a new type to avoid
+        // conflict with server side component of the same type.
+    };
+
     struct EntityAttachee {
         // NOTE: I can't use EntityContext because if this is to be serialized over network Entt can't update
         // EntityID inside an struct! :/

@@ -57,16 +57,28 @@ namespace oni {
     void
     EntityManager::attach(const EntityContext &parent,
                           const EntityContext &child) {
-        if (!parent.mng->has<EntityAttachment>(parent.id)) {
-            parent.mng->createComponent<EntityAttachment>(parent.id);
+        // TODO: Implicit that this is the case for when client entity is attached to server entity.
+        // Maybe I can have two methods, attach and attach as a shadow, and in attach I just assert
+        // that we are using the same manager.
+        if (parent.mng != child.mng) {
+            if (!parent.mng->has<EntityAttachmentShadow>(parent.id)) {
+                parent.mng->createComponent<EntityAttachmentShadow>(parent.id);
+            }
+            auto &attachment = parent.mng->get<EntityAttachmentShadow>(parent.id);
+            attachment.entities.emplace_back(child.id);
+            attachment.mngs.emplace_back(child.mng);
+        } else {
+            if (!parent.mng->has<EntityAttachment>(parent.id)) {
+                parent.mng->createComponent<EntityAttachment>(parent.id);
+            }
+            auto &attachment = parent.mng->get<EntityAttachment>(parent.id);
+            attachment.entities.emplace_back(child.id);
+            attachment.mngs.emplace_back(child.mng);
         }
+
         if (!child.mng->has<EntityAttachee>(child.id)) {
             child.mng->createComponent<EntityAttachee>(child.id);
         }
-        auto &attachment = parent.mng->get<EntityAttachment>(parent.id);
-        attachment.entities.emplace_back(child.id);
-        attachment.mngs.emplace_back(child.mng);
-
         auto &attachee = child.mng->get<EntityAttachee>(child.id);
         attachee.id = parent.id;
         attachee.mng = parent.mng;
@@ -87,6 +99,29 @@ namespace oni {
 
         auto &blc = child.mng->get<BindLifetimeChild>(child.id);
         blc.parent = parent;
+    }
+
+    void
+    EntityManager::fixupAttachments() {
+        {
+            auto view = createView<EntityAttachment>();
+            for (auto &&entity: view) {
+                auto &attachment = view.get<EntityAttachment>(entity);
+                if (attachment.entities.size() != attachment.mngs.size()) {
+                    attachment.mngs.clear();
+                    for (auto &&id: attachment.entities) {
+                        attachment.mngs.push_back(this);
+                    }
+                }
+            }
+        }
+        {
+            auto view = createView<EntityAttachee>();
+            for (auto &&entity: view) {
+                auto &attachee = view.get<EntityAttachee>(entity);
+                attachee.mng = this;
+            }
+        }
     }
 
     size_t

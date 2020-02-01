@@ -227,6 +227,10 @@ namespace oni {
                     assert(false);
                 }
             }
+
+            // TODO: Is this the only way to handle the missing registry references? Maybe this is systemic issue with
+            // the design of client and server registries.
+            fixupAttachments();
         }
 
         template<class Archive, class ...ArchiveComponents>
@@ -235,27 +239,23 @@ namespace oni {
                  SnapshotType snapshotType) {
             switch (snapshotType) {
                 case SnapshotType::ONLY_COMPONENTS: {
-                    {
-                        auto view = mRegistry->view<Tag_NetworkSyncComponent>();
-                        if (!view.empty()) {
-                            mRegistry->snapshot().template component<ArchiveComponents...>(archive,
-                                                                                           view.begin(),
-                                                                                           view.end());
-                            mRegistry->reset<Tag_NetworkSyncComponent>();
-                        }
+                    auto view = mRegistry->view<Tag_NetworkSyncComponent>();
+                    if (!view.empty()) {
+                        mRegistry->snapshot().template component<ArchiveComponents...>(archive,
+                                                                                       view.begin(),
+                                                                                       view.end());
+                        mRegistry->reset<Tag_NetworkSyncComponent>();
                     }
                     break;
                 }
                 case SnapshotType::ONLY_NEW_ENTITIES: {
-                    {
-                        auto view = mRegistry->view<Tag_NetworkSyncEntity>();
-                        if (!view.empty()) {
-                            mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
-                                    archive,
-                                    view.begin(),
-                                    view.end());
-                            mRegistry->reset<Tag_NetworkSyncEntity>();
-                        }
+                    auto view = mRegistry->view<Tag_NetworkSyncEntity>();
+                    if (!view.empty()) {
+                        mRegistry->snapshot().entities(archive).template component<ArchiveComponents...>(
+                                archive,
+                                view.begin(),
+                                view.end());
+                        mRegistry->reset<Tag_NetworkSyncEntity>();
                     }
                     break;
                 }
@@ -268,6 +268,9 @@ namespace oni {
                 }
             }
         }
+
+        void
+        fixupAttachments();
 
 //        std::unique_lock<std::mutex>
 //        scopedLock() {

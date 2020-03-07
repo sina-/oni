@@ -25,12 +25,17 @@ sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-9 100
 ```
 # Build the dependency sub-modules
 ## Build AntTweakBar
+Linux
 ```
 cd lib/anttweakbar
 cd src
 make -j 12
 ```
+Windows
+Use the solution file in `oni/lib/anttweakbar/src/AntTweakBar_VS2012.sln` and run `Debug`, this should generate the binaries under `oni/lib/anttweakbar/lib/debug`.
+
 ## Build GLFW
+Linux
 ```
 cd lib/glfw
 mkdir build
@@ -38,7 +43,10 @@ cd build
 cmake ..
 make -j 12
 ```
+Windows
+Open the CMake project from visual studio under `oni/lib/glfw/` then `Build -> Build All`. By default this should build the binaries for `x64-Debug` under `oni/lib/glfw/out/build/x64-Debug/src`
 ## Build GLEW
+Linux
 ```
 cd lib/glew
 cd auto
@@ -46,12 +54,21 @@ make -j 12
 cd ..
 make glew.lib -j 12
 ```
+Windows
+No action needed, pre-built binaries are bundled with the submodule under `oni/lib/glew/win/lib/Release/x64`
 ## Build Box2D
+Linux
 ```
 cd lib/box2d
 ./premake gmake
 make -C Build -j 12
 ```
+Windows
+```
+cd lib/box2d
+./premake.exe vs2019
+```
+Open the solution from visual studio and then `Build -> Build Solution`
 ## Build Enet
 ```
 cd lib/enet

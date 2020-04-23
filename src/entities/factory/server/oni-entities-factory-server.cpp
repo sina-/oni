@@ -1,25 +1,9 @@
 #include <oni-core/entities/factory/server/oni-entities-factory-server.h>
 
 #include <oni-core/entities/oni-entities-manager.h>
-#include <oni-core/entities/oni-entities-serialization-json.h>
-#include <oni-core/json/oni-json.h>
-#include <oni-core/math/oni-math-z-layer-manager.h>
 
 namespace oni {
-    oni::EntityFactory_Server::EntityFactory_Server(ZLayerManager &zLayerMng) : EntityFactory(zLayerMng) {
-        COMPONENT_FACTORY_DEFINE(this, oni, Acceleration)
-        COMPONENT_FACTORY_DEFINE(this, oni, Car)
-        COMPONENT_FACTORY_DEFINE(this, oni, CarConfig)
-        COMPONENT_FACTORY_DEFINE(this, oni, CarInput)
-        COMPONENT_FACTORY_DEFINE(this, oni, Direction)
-        COMPONENT_FACTORY_DEFINE(this, oni, GrowOverTime)
-        COMPONENT_FACTORY_DEFINE(this, oni, Orientation)
-        COMPONENT_FACTORY_DEFINE(this, oni, Scale)
-        COMPONENT_FACTORY_DEFINE(this, oni, Velocity)
-        COMPONENT_FACTORY_DEFINE(this, oni, WorldP2D)
-        COMPONENT_FACTORY_DEFINE(this, oni, WorldP3D)
-        COMPONENT_FACTORY_DEFINE(this, oni, ZLayer)
-    }
+    oni::EntityFactory_Server::EntityFactory_Server(ZLayerManager &zLayerMng) : EntityFactory(zLayerMng) {}
 
     void
     EntityFactory_Server::_postProcess(EntityManager &manager,

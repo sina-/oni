@@ -1,6 +1,7 @@
 #include <oni-core/entities/oni-entities-factory.h>
 
 #include <cassert>
+#include <cereal/external/rapidjson/error/en.h>
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-manager.h>
@@ -11,7 +12,6 @@
 #include <oni-core/entities/oni-entities-serialization-json.h>
 #include <oni-core/graphic/oni-graphic-camera.h>
 #include <oni-core/math/oni-math-z-layer-manager.h>
-#include <cereal/external/rapidjson/error/en.h>
 
 
 namespace {
@@ -300,24 +300,7 @@ namespace {
 }
 
 namespace oni {
-    oni::EntityFactory::EntityFactory(ZLayerManager &zLayer) : mZLayerManager(zLayer) {
-        // TODO: This is really dependent on the user, remove it.
-        COMPONENT_FACTORY_DEFINE(this, oni, WorldP3D)
-        COMPONENT_FACTORY_DEFINE(this, oni, WorldP2D)
-        COMPONENT_FACTORY_DEFINE(this, oni, ZLayer)
-        COMPONENT_FACTORY_DEFINE(this, oni, Direction)
-        COMPONENT_FACTORY_DEFINE(this, oni, Orientation)
-        COMPONENT_FACTORY_DEFINE(this, oni, Scale)
-        COMPONENT_FACTORY_DEFINE(this, oni, GrowOverTime)
-        COMPONENT_FACTORY_DEFINE(this, oni, Velocity)
-        COMPONENT_FACTORY_DEFINE(this, oni, Acceleration)
-
-        COMPONENT_FACTORY_DEFINE(this, oni, SoundPitch)
-
-        COMPONENT_FACTORY_DEFINE(this, oni, CarInput)
-        COMPONENT_FACTORY_DEFINE(this, oni, Car)
-        COMPONENT_FACTORY_DEFINE(this, oni, CarConfig)
-    }
+    oni::EntityFactory::EntityFactory(ZLayerManager &zLayer) : mZLayerManager(zLayer) {}
 
     void
     EntityFactory::indexEntities(EntityDefDirPath &&fp) {

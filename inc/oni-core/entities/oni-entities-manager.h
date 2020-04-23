@@ -269,9 +269,6 @@ namespace oni {
             }
         }
 
-        void
-        fixupAttachments();
-
 //        std::unique_lock<std::mutex>
 //        scopedLock() {
 //            return std::unique_lock<std::mutex>(mMutex);
@@ -430,6 +427,9 @@ namespace oni {
 
         void
         destroyAndTrack(EntityID entityID);
+
+        void
+        fixupAttachments();
 
     public:
         // TODO: Yeah this doesn't belong into this class and it is just a big mess.

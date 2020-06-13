@@ -200,6 +200,9 @@ namespace oni {
                 ++mInforSideBar.particleCount;
             }
         }
+
+        // NOTE: This is needed because AntTweakBar can only update the id field not the HashedString.
+        mInforSideBar.entityName = EntityNameEditor::at(mInforSideBar.entityName.id);
     }
 
     void

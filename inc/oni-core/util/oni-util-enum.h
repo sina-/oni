@@ -41,6 +41,7 @@
        { return {_get(name)};}                                                                                          \
        inline static constexpr const NAME* begin() { return static_cast<const NAME*>(_begin()); }                       \
        inline static constexpr const NAME* end() { return static_cast<const NAME*>(_end()); }                           \
+       inline static constexpr NAME at(oni::i32 id) { return {_find(id, 0, oni_detail::storage_##NAME)}; }              \
 };
 
 #define ONI_ENUM_DEF(NAME, ...) ONI_ENUM_DEF_WITH_BASE(NAME, oni::Enum, __VA_ARGS__ )
@@ -128,17 +129,6 @@ namespace oni {
             }
 
 
-            // TODO: I don't like this, this assumes the IDs start from 0 and index is equal to enum.id all the way.
-            // I could support that with a look-up table though.
-            inline static BASE
-            at(oni::i32 i) {
-                if (i >= 0 && i < N) {
-                    return storage[i];
-                }
-                assert(false);
-                return INVALID;
-            }
-
             // NOTE: Implicit so that this class can be used in switch statements
             // TODO: Sad I can't really have it like this. With this one, you could compare two different
             // enums based on id! even though those ids have nothing to do with each other. Which beats the
@@ -190,6 +180,14 @@ namespace oni {
             inline static constexpr auto
             _end() {
                 return storage + N;
+            }
+
+            inline static constexpr const BASE
+            _find(oni::i32 id,
+                  oni::i32 i,
+                  const BASE *candidate) {
+                return (candidate->id == id) ? *candidate :
+                       ((i == N) ? _notFound() : _find(id, i + 1, candidate + 1));
             }
 
 

@@ -44,6 +44,9 @@ namespace oni {
         void
         initSystems() override;
 
+        void
+        showFPS(i16) override;
+
     private:
         void
         setupTweakBar();
@@ -54,22 +57,13 @@ namespace oni {
             WorldP2D mouseWorldPos{};
             bool createModeOn{true};
             bool save{false};
+            bool reset{false};
+            u32 particleCount{};
+            u32 fps{};
+            EntityNameEditor entityName{EntityNameEditor::GET("particle-emitter")};
         };
 
-//        struct ParticleConfig {
-//            Direction dir{};
-//            Orientation ornt{};
-//            Scale scale{};
-//            GrowOverTime got{};
-//            TimeToLive ttl{};
-//            Velocity vel{};
-//            Acceleration acc{};
-//            Material_Finish mft{};
-//        };
-//
         InfoSideBar mInforSideBar{};
-        ParticleEmitter mParticleEmitter{};
-        EntityID mEmitterID{};
 
     private:
         oni::AssetFilesIndex *mAssetFilesIdx{};

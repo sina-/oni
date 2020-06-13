@@ -5,5 +5,7 @@
 namespace oni {
     ONI_ENUM_DEF_WITH_BASE(EntityNameEditor, EntityName,
                            { 1, "simple-particle" },
-                           { 2, "particle-emitter" })
+                           { 2, "particle-emitter" },
+                           { 3, "ui-pane" }
+                           )
 }

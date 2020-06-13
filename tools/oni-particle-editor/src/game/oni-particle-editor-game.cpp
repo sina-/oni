@@ -25,6 +25,13 @@
 #include <oni-particle-editor/entities/oni-particle-editor-entities-structure.h>
 #include <oni-particle-editor/entities/oni-particle-editor-entities-factory.h>
 
+namespace {
+    oni::EntityID
+    findHotEntity(const oni::WorldP2D &mosPos) {
+        return oni::EntityManager::nullEntity();
+    }
+}
+
 namespace oni {
     ParticleEditorGame::ParticleEditorGame() {
         mAssetFilesIdx = new AssetFilesIndex({{"oni-resources/textures"}},
@@ -34,7 +41,6 @@ namespace oni {
         mZLayerMng = new oni::ZLayerManager();
         mPhysics = new oni::Physics();
         mEntityMng = new oni::EntityManager(SimMode::CLIENT, mPhysics);
-        mEmitterID = EntityManager::nullEntity();
     }
 
     ParticleEditorGame::~ParticleEditorGame() {
@@ -126,7 +132,7 @@ namespace oni {
         };
         auto TwCustomVec2 = TwDefineStruct("VEC2", vec2Members, 2, sizeof(vec2), nullptr, nullptr);
 
-        auto EntityName_TW = TwDefineEnum("EntityName",
+        auto TW_EntityName = TwDefineEnum("EntityName",
                                           EntityNameEditor::adapt<TwEnumVal>(adaptor),
                                           EntityNameEditor::size());
 
@@ -136,16 +142,16 @@ namespace oni {
                 {"factor",  TW_TYPE_FLOAT, offsetof(GrowOverTime, factor)},
                 {"maxSize", TW_TYPE_DIR3F, offsetof(GrowOverTime, maxSize)}
         };
-        auto GrowOverTime_TW = TwDefineStruct("GrowOverTime", GrowOverTime_TW_Members, 4, sizeof(GrowOverTime),
+        auto TW_GrowOverTime = TwDefineStruct("GrowOverTime", GrowOverTime_TW_Members, 4, sizeof(GrowOverTime),
                                               nullptr, nullptr);
-        auto Material_Finish_TW = TwDefineEnum("Material_Finish",
+        auto TW_Material_Finish = TwDefineEnum("Material_Finish",
                                                Material_Finish::adapt<TwEnumVal>(adaptor),
                                                Material_Finish::size());
 
         TwStructMember Material_Definition_TW_Members[] = {
-                {"finish", Material_Finish_TW, offsetof(Material_Definition, finish)},
+                {"finish", TW_Material_Finish, offsetof(Material_Definition, finish)},
         };
-        auto Material_Definition_TW = TwDefineStruct("Material_Definision", Material_Definition_TW_Members, 1,
+        auto TW_Material_Definition = TwDefineStruct("Material_Definition", Material_Definition_TW_Members, 1,
                                                      sizeof(Material_Definition),
                                                      nullptr, nullptr);
 
@@ -155,16 +161,22 @@ namespace oni {
                    " label='create entity' ");
         TwAddVarRW(particleBar, "save entity", TW_TYPE_BOOL8, &mInforSideBar.save,
                    " label='save entity' ");
+        TwAddVarRW(particleBar, "reset", TW_TYPE_BOOL8, &mInforSideBar.reset, " label='reset' ");
+        TwAddVarRO(particleBar, "particle count", TW_TYPE_UINT32, &mInforSideBar.particleCount,
+                   " label='particle count' ");
+        TwAddVarRO(particleBar, "fps", TW_TYPE_UINT32, &mInforSideBar.fps,
+                   " label='fps' ");
+        TwAddVarRW(particleBar, "entity name", TW_EntityName, &mInforSideBar.entityName, " label='entity name' ");
 
-        TwAddVarRW(particleBar, "particle", EntityName_TW, &mParticleEmitter.particle, nullptr);
-        TwAddVarRW(particleBar, "orientMin", TW_TYPE_FLOAT, &mParticleEmitter.orientMin, nullptr);
-        TwAddVarRW(particleBar, "orientMax", TW_TYPE_FLOAT, &mParticleEmitter.orientMax, nullptr);
-        TwAddVarRW(particleBar, "size", TW_TYPE_DIR3F, &mParticleEmitter.size, nullptr);
-        TwAddVarRW(particleBar, "growth", GrowOverTime_TW, &mParticleEmitter.growth, nullptr);
-        TwAddVarRW(particleBar, "initialVMin", TW_TYPE_FLOAT, &mParticleEmitter.initialVMin, nullptr);
-        TwAddVarRW(particleBar, "initialVMax", TW_TYPE_FLOAT, &mParticleEmitter.initialVMax, nullptr);
-        TwAddVarRW(particleBar, "acc", TW_TYPE_FLOAT, &mParticleEmitter.acc, nullptr);
-        TwAddVarRW(particleBar, "material", Material_Definition_TW, &mParticleEmitter.material, nullptr);
+//        TwAddVarRW(particleBar, "particle", TW_EntityName, &mParticleEmitter.particle, nullptr);
+//        TwAddVarRW(particleBar, "orientMin", TW_TYPE_FLOAT, &mParticleEmitter.orientMin, nullptr);
+//        TwAddVarRW(particleBar, "orientMax", TW_TYPE_FLOAT, &mParticleEmitter.orientMax, nullptr);
+//        TwAddVarRW(particleBar, "size", TW_TYPE_DIR3F, &mParticleEmitter.size, nullptr);
+//        TwAddVarRW(particleBar, "growth", TW_GrowOverTime, &mParticleEmitter.growth, nullptr);
+//        TwAddVarRW(particleBar, "initialVMin", TW_TYPE_FLOAT, &mParticleEmitter.initialVMin, nullptr);
+//        TwAddVarRW(particleBar, "initialVMax", TW_TYPE_FLOAT, &mParticleEmitter.initialVMax, nullptr);
+//        TwAddVarRW(particleBar, "acc", TW_TYPE_FLOAT, &mParticleEmitter.acc, nullptr);
+//        TwAddVarRW(particleBar, "material", TW_Material_Definition, &mParticleEmitter.material, nullptr);
 
     }
 
@@ -177,6 +189,16 @@ namespace oni {
     ParticleEditorGame::_sim(r64 dt) {
         for (auto &&system: mSystems) {
             system->tick(dt);
+        }
+
+        auto view = mEntityMng->createView<EntityName>();
+        mInforSideBar.particleCount = 0;
+        for (auto &&id: view) {
+            auto entityName = view.get<EntityName>(id);
+            constexpr auto particle = EntityNameEditor::GET("simple-particle");
+            if (entityName == particle) {
+                ++mInforSideBar.particleCount;
+            }
         }
     }
 
@@ -208,34 +230,38 @@ namespace oni {
         mInforSideBar.mouseWorldPos.x = mouseWorldP.x;
         mInforSideBar.mouseWorldPos.y = mouseWorldP.y;
 
-        // TODO: Why the hell do I need to do this? The UI to choose particle type is actually dumb since it also shows
-        // particle emitter itself!
-        mParticleEmitter.particle = EntityNameEditor::GET("simple-particle");
+        EntityID hotEntity = findHotEntity(mInforSideBar.mouseWorldPos);
 
         if (mInput->isMouseButtonPressed()) {
             // TODO: Find a better way to specify editing area?
             if (mInforSideBar.createModeOn && mInforSideBar.mouseScreenPos.x > 450) {
-                // TODO: This is kinda about how the pattern goes, UI is just components with values.
-                // How to proceed from this? Notice that this has no dependency to JSON! Is that good? Or bad?
-                // Would it help if it did?
-                // Well, I probably need to write the part where this data is serialized from entity registry
-                // to json, that should help a bit decide how the intermediate stage of the entity looks like.
-                // EntityFactory probably should have a function that, just like its sibling, saveEntity()
-                // where I can give it an entity id and it dumps it into a json from which it can
-                // recreate it.
-                // Notice there is a slight difference between when an entity is created from json and when it is
-                // written to json from editor. When it is created json works as a template, values are defaults,
-                // but when it is written it is more specific than a generic template, some values are actual values
-                // that the game will use, but pos for example, still is a template. Unless I am editing a pre-saved
-                // entity.
-                if (mEmitterID != EntityManager::nullEntity()) {
+                if (mInforSideBar.reset) {
                     mEntityMng->reset();
+                } else {
+                    // TODO: This is kinda about how the pattern goes, UI is just components with values.
+                    // How to proceed from this? Notice that this has no dependency to JSON! Is that good? Or bad?
+                    // Would it help if it did?
+                    // Well, I probably need to write the part where this data is serialized from entity registry
+                    // to json, that should help a bit decide how the intermediate stage of the entity looks like.
+                    // EntityFactory probably should have a function that, just like its sibling, saveEntity()
+                    // where I can give it an entity id and it dumps it into a json from which it can
+                    // recreate it.
+                    // Notice there is a slight difference between when an entity is created from json and when it is
+                    // written to json from editor. When it is created json works as a template, values are defaults,
+                    // but when it is written it is more specific than a generic template, some values are actual values
+                    // that the game will use, but pos for example, still is a template. Unless I am editing a pre-saved
+                    // entity.
+
+
+                    // TODO: Editor is basically a smart-json editor. Depending on the type of entity selected editor
+                    // will open the correct JSON and automatically give a UI where you can edit the values on
+                    // the fly! and when done, save button will write back the data to disk. That's it.
+                    hotEntity = mEntityFactory->loadEntity_Local(*mEntityMng, *mEntityMng, mInforSideBar.entityName);
+                    auto &pos = mEntityMng->get<WorldP3D>(hotEntity);
+                    pos = mInforSideBar.mouseWorldPos.to3D(0.5);
                 }
-                mEmitterID = mEntityMng->createEntity();
-                mEntityMng->createComponent<ParticleEmitter>(mEmitterID, mParticleEmitter);
-                mEntityMng->createComponent<WorldP3D>(mEmitterID, mInforSideBar.mouseWorldPos.to3D(0.5));
-            } else if (mInforSideBar.save && mEmitterID != EntityManager::nullEntity()) {
-                mEntityFactory->saveEntity_Local(*mEntityMng, mEmitterID, EntityNameEditor::GET("particle-emitter"));
+            } else if (mInforSideBar.save && hotEntity != EntityManager::nullEntity()) {
+                mEntityFactory->saveEntity_Local(*mEntityMng, hotEntity, mEntityMng->get<EntityNameEditor>(hotEntity));
             }
         }
     }
@@ -243,5 +269,10 @@ namespace oni {
     void
     ParticleEditorGame::_finish() {
         mInput->reset();
+    }
+
+    void
+    ParticleEditorGame::showFPS(i16 fps) {
+        mInforSideBar.fps = fps;
     }
 }

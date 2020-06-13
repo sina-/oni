@@ -11,6 +11,8 @@
 #include <oni-particle-editor/entities/oni-particle-editor-entities-fwd.h>
 #include <oni-particle-editor/entities/oni-particle-editor-entities-structure.h>
 
+typedef struct CTwBar TwBar;
+
 namespace oni {
     class ParticleEditorGame : public Game {
     public:
@@ -79,5 +81,7 @@ namespace oni {
         oni::FontManager *mFontMng{};
 
         bool mWindowReady{false};
+
+        TwBar* mEntityBar;
     };
 }

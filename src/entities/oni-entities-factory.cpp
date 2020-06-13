@@ -310,6 +310,7 @@ namespace oni {
             auto doc = rapidjson::Document();
             auto entityName = _readEntityName(file.name.data(), *this, doc);
             auto result = mEntityPathMap.emplace(entityName, EntityDefDirPath{file});
+            printf("Indexed entity: %s\n", entityName.debugData().c_str());
             assert(result.second);
         }
     }
@@ -347,6 +348,7 @@ namespace oni {
     EntityFactory::_getEntityPath(const EntityName &name) {
         assert(name.id);
         assert(name.name.hash.value);
+        printf("Finding entity: %s\n", name.debugData().c_str());
         auto path = mEntityPathMap.find(name);
         if (path != mEntityPathMap.end()) {
             return path->second;

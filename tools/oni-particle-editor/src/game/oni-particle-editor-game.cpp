@@ -115,7 +115,7 @@ namespace oni {
         TwInit(TW_OPENGL_CORE, nullptr);
         TwWindowSize(mWindow->getWidth(), mWindow->getHeight());
 
-        auto particleBar = TwNewBar("ParticleBar");
+        mEntityBar = TwNewBar("ParticleBar");
         TwDefine(" ParticleBar label='Particle' ");
         TwDefine(" ParticleBar valueswidth=200 ");
         TwDefine(" ParticleBar refresh=0.15 ");
@@ -155,18 +155,18 @@ namespace oni {
                                                      sizeof(Material_Definition),
                                                      nullptr, nullptr);
 
-        TwAddVarRO(particleBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
-        TwAddVarRO(particleBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
-        TwAddVarRW(particleBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
+        TwAddVarRO(mEntityBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
+        TwAddVarRO(mEntityBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
+        TwAddVarRW(mEntityBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
                    " label='create entity' ");
-        TwAddVarRW(particleBar, "save entity", TW_TYPE_BOOL8, &mInforSideBar.save,
+        TwAddVarRW(mEntityBar, "save entity", TW_TYPE_BOOL8, &mInforSideBar.save,
                    " label='save entity' ");
-        TwAddVarRW(particleBar, "reset", TW_TYPE_BOOL8, &mInforSideBar.reset, " label='reset' ");
-        TwAddVarRO(particleBar, "particle count", TW_TYPE_UINT32, &mInforSideBar.particleCount,
+        TwAddVarRW(mEntityBar, "reset", TW_TYPE_BOOL8, &mInforSideBar.reset, " label='reset' ");
+        TwAddVarRO(mEntityBar, "particle count", TW_TYPE_UINT32, &mInforSideBar.particleCount,
                    " label='particle count' ");
-        TwAddVarRO(particleBar, "fps", TW_TYPE_UINT32, &mInforSideBar.fps,
+        TwAddVarRO(mEntityBar, "fps", TW_TYPE_UINT32, &mInforSideBar.fps,
                    " label='fps' ");
-        TwAddVarRW(particleBar, "entity name", TW_EntityName, &mInforSideBar.entityName, " label='entity name' ");
+        TwAddVarRW(mEntityBar, "entity name", TW_EntityName, &mInforSideBar.entityName, " label='entity name' ");
 
 //        TwAddVarRW(particleBar, "particle", TW_EntityName, &mParticleEmitter.particle, nullptr);
 //        TwAddVarRW(particleBar, "orientMin", TW_TYPE_FLOAT, &mParticleEmitter.orientMin, nullptr);
@@ -259,6 +259,13 @@ namespace oni {
                     hotEntity = mEntityFactory->loadEntity_Local(*mEntityMng, *mEntityMng, mInforSideBar.entityName);
                     auto &pos = mEntityMng->get<WorldP3D>(hotEntity);
                     pos = mInforSideBar.mouseWorldPos.to3D(0.5);
+
+                    static int count = 0;
+                    count++;
+                    std::string name =(std::string("test") + std::to_string(count));
+                    std::string label = std::string(" label='") + name + std::string("' ");
+                    TwAddVarRO(mEntityBar, name.c_str(), TW_TYPE_UINT32,
+                               &mInforSideBar.fps, label.c_str());
                 }
             } else if (mInforSideBar.save && hotEntity != EntityManager::nullEntity()) {
                 mEntityFactory->saveEntity_Local(*mEntityMng, hotEntity, mEntityMng->get<EntityNameEditor>(hotEntity));

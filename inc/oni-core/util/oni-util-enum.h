@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <sstream>
 
 #include <oni-core/common/oni-common-typedef.h>
 #include <oni-core/util/oni-util-hash.h>
@@ -20,6 +21,8 @@
  * Current issues:
  * 1) Renaming and enum string is a pain in the ass
  * 2) GET function is slow down compilation. It requires calculating the hash for every string lookup
+ * 3) What is the point of ID? Hash is ID enough! Usage-wise it is confusing, should users stick to
+ * ID field or use hash? ID values could include duplicates, which is confusing. Can I just drop ID field?
  *
  * Improvements:
  * 1) Can I merge the concept of enum class with what I have? I once tried auto generating strings from
@@ -48,17 +51,38 @@ namespace oni {
         oni::i32 id{0};
         oni::HashedString name{};
 
+        using type = decltype(id);
+
         inline constexpr bool
         operator==(const Enum &other) const {
-            return other.id == id && other.name == name;
+            if (other.name == name) {
+                assert(other.id == id);
+                return true;
+            }
+            return false;
         }
 
         inline constexpr bool
         operator!=(const Enum &other) const {
-            return other.id != id || other.name != name;
+            if (other.name == name) {
+                assert(other.id == id);
+                return false;
+            }
+            return true;
         }
 
-        using type = decltype(id);
+
+        inline std::string
+        debugData() const {
+            std::ostringstream buffer;
+            buffer << "Name: ";
+            buffer << name.str;
+            buffer << ", id: ";
+            buffer << id;
+            buffer << ", hash: ";
+            buffer << name.hash.value;
+            return buffer.str();
+        }
     };
 
     namespace oni_detail {
@@ -69,15 +93,22 @@ namespace oni {
                 return BASE::name != INVALID.name;
             }
 
-            // NOTE: It is possible to have duplicate ids but different names!
             inline constexpr bool
             operator==(const BASE &other) const {
-                return other.id == BASE::id && other.name == BASE::name;
+                if (other.name == BASE::name) {
+                    assert(other.id == BASE::id);
+                    return true;
+                }
+                return false;
             }
 
             inline constexpr bool
             operator!=(const BASE &other) const {
-                return other.id != BASE::id || other.name != BASE::name;
+                if (other.name == BASE::name) {
+                    assert(other.id == BASE::id);
+                    return false;
+                }
+                return true;
             }
 
             // NOTE: It is possible to have duplicate ids but different names!
@@ -98,6 +129,7 @@ namespace oni {
 
 
             // TODO: I don't like this, this assumes the IDs start from 0 and index is equal to enum.id all the way.
+            // I could support that with a look-up table though.
             inline static BASE
             at(oni::i32 i) {
                 if (i >= 0 && i < N) {
@@ -119,14 +151,14 @@ namespace oni {
             static inline Out *
             adapt(const Adaptor &adaptor) {
                 static bool init = true;
-                static auto result = std::array<Out, N>();
+                static Out result[N];
                 if (init) {
                     for (oni::i32 i = 0; i < N; ++i) {
                         result[i] = adaptor(storage[i]);
                     }
                     init = false;
                 }
-                return result.data();
+                return result;
             }
 
             void
@@ -142,11 +174,6 @@ namespace oni {
                 BASE::name = INVALID.name;
                 assert(false);
             }
-
-//            inline static constexpr BASE
-//            make(const Hash &value) {
-//                return _find(value, 0, storage);
-//            }
 
         protected:
             template<oni::i32 n>
@@ -201,7 +228,7 @@ namespace std {
         constexpr bool
         operator()(const oni::Enum &lhs,
                    const oni::Enum &rhs) const {
-            return lhs.name.hash == rhs.name.hash;
+            return lhs.name.hash.value == rhs.name.hash.value;
         }
     };
 }

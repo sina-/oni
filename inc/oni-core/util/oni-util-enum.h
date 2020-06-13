@@ -96,11 +96,14 @@ namespace oni {
                 return N;
             }
 
+
+            // TODO: I don't like this, this assumes the IDs start from 0 and index is equal to enum.id all the way.
             inline static BASE
             at(oni::i32 i) {
                 if (i >= 0 && i < N) {
                     return storage[i];
                 }
+                assert(false);
                 return INVALID;
             }
 

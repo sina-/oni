@@ -208,7 +208,9 @@ namespace oni {
         mInforSideBar.mouseWorldPos.x = mouseWorldP.x;
         mInforSideBar.mouseWorldPos.y = mouseWorldP.y;
 
-        mParticleEmitter.particle = EntityNameEditor::at(mParticleEmitter.particle.id);
+        // TODO: Why the hell do I need to do this? The UI to choose particle type is actually dumb since it also shows
+        // particle emitter itself!
+        mParticleEmitter.particle = EntityNameEditor::GET("simple-particle");
 
         if (mInput->isMouseButtonPressed()) {
             // TODO: Find a better way to specify editing area?

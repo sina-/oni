@@ -59,20 +59,29 @@ namespace oni {
         getScrollDirectionY() const;
 
         void
-        setMouseButton(i32 button);
+        setMosButtonPressed(i32 button);
+
+        void
+        setMosButtonReleased(i32 button);
 
         void
         addCursor(r64 x,
                   r64 y);
 
-        const std::vector<WorldP2D> &
+        const std::vector<Screen2D> &
         getCursor() const;
 
-        const i32 &
-        getMouseButton() const;
+        i32
+        getMosButtonPressed() const;
+
+        i32
+        getMosButtonReleased() const;
 
         bool
-        isMouseButtonPressed() const;
+        isMosButtonPressed() const;
+
+        bool
+        isMosButtonReleased() const;
 
     private:
         std::vector<oniKeyPress> mKeysPressed{};
@@ -81,7 +90,8 @@ namespace oni {
         std::vector<ScrollDirection> mScrollDirectionX{};
         std::vector<ScrollDirection> mScrollDirectionY{};
 
-        i32 mMouseButton{-1};
-        std::vector<WorldP2D> mCursorPos{};
+        i32 mMosButtonPressed{-1};
+        i32 mMosButtonReleased{-1};
+        std::vector<Screen2D> mCursorPos{};
     };
 }

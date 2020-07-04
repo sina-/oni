@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cereal/external/rapidjson/error/en.h>
+#include <cereal/external/rapidjson/meta.h>
 
 #include <oni-core/component/oni-component-visual.h>
 #include <oni-core/entities/oni-entities-manager.h>

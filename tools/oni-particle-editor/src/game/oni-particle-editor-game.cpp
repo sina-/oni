@@ -30,6 +30,22 @@ namespace {
     findHotEntity(const oni::WorldP2D &mosPos) {
         return oni::EntityManager::nullEntity();
     }
+
+    void
+    createWindow(const oni::WorldP3D &mosPos) {
+        printf("pos: %f, %f\n", mosPos.x, mosPos.y);
+    }
+
+    void
+    updateLatestMosPos(
+            const oni::SceneManager &sceneManager,
+            const oni::Input &input,
+            oni::WorldP3D &mosPos) {
+        for (auto &&pos: input.getCursor()) {
+            mosPos = sceneManager.unProject(pos);
+            mosPos.z = 1.f;
+        }
+    }
 }
 
 namespace oni {
@@ -81,7 +97,7 @@ namespace oni {
                                           *mAssetFilesIdx,
                                           *mZLayerMng,
                                           *mTextureMng);
-        setupTweakBar();
+        // setupTweakBar();
 
         mTextureMng->cacheAllAssets();
 
@@ -155,18 +171,18 @@ namespace oni {
                                                      sizeof(Material_Definition),
                                                      nullptr, nullptr);
 
-        TwAddVarRO(mEntityBar, "screen pos", TwCustomVec2, &mInforSideBar.mouseScreenPos, " label='screen pos' ");
-        TwAddVarRO(mEntityBar, "world pos", TwCustomVec2, &mInforSideBar.mouseWorldPos, " label='world pos' ");
-        TwAddVarRW(mEntityBar, "create entity", TW_TYPE_BOOL8, &mInforSideBar.createModeOn,
+        TwAddVarRO(mEntityBar, "screen pos", TwCustomVec2, &mInfoSideBar.mouseScreenPos, " label='screen pos' ");
+        TwAddVarRO(mEntityBar, "world pos", TwCustomVec2, &mInfoSideBar.mouseWorldPos, " label='world pos' ");
+        TwAddVarRW(mEntityBar, "create entity", TW_TYPE_BOOL8, &mInfoSideBar.createModeOn,
                    " label='create entity' ");
-        TwAddVarRW(mEntityBar, "save entity", TW_TYPE_BOOL8, &mInforSideBar.save,
+        TwAddVarRW(mEntityBar, "save entity", TW_TYPE_BOOL8, &mInfoSideBar.save,
                    " label='save entity' ");
-        TwAddVarRW(mEntityBar, "reset", TW_TYPE_BOOL8, &mInforSideBar.reset, " label='reset' ");
-        TwAddVarRO(mEntityBar, "particle count", TW_TYPE_UINT32, &mInforSideBar.particleCount,
+        TwAddVarRW(mEntityBar, "reset", TW_TYPE_BOOL8, &mInfoSideBar.reset, " label='reset' ");
+        TwAddVarRO(mEntityBar, "particle count", TW_TYPE_UINT32, &mInfoSideBar.particleCount,
                    " label='particle count' ");
-        TwAddVarRO(mEntityBar, "fps", TW_TYPE_UINT32, &mInforSideBar.fps,
+        TwAddVarRO(mEntityBar, "fps", TW_TYPE_UINT32, &mInfoSideBar.fps,
                    " label='fps' ");
-        TwAddVarRW(mEntityBar, "entity name", TW_EntityName, &mInforSideBar.entityName, " label='entity name' ");
+        TwAddVarRW(mEntityBar, "entity name", TW_EntityName, &mInfoSideBar.entityName, " label='entity name' ");
 
 //        TwAddVarRW(particleBar, "particle", TW_EntityName, &mParticleEmitter.particle, nullptr);
 //        TwAddVarRW(particleBar, "orientMin", TW_TYPE_FLOAT, &mParticleEmitter.orientMin, nullptr);
@@ -191,6 +207,7 @@ namespace oni {
             system->tick(dt);
         }
 
+#if 0
         auto view = mEntityMng->createView<EntityName>();
         mInforSideBar.particleCount = 0;
         for (auto &&id: view) {
@@ -203,6 +220,7 @@ namespace oni {
 
         // NOTE: This is needed because AntTweakBar can only update the id field not the HashedString.
         mInforSideBar.entityName = EntityNameEditor::at(mInforSideBar.entityName.id);
+#endif
     }
 
     void
@@ -212,7 +230,9 @@ namespace oni {
         mSceneMng->submit(*mEntityMng);
         mSceneMng->render();
 
+#if 0
         TwDraw();
+#endif
     }
 
     void
@@ -223,7 +243,9 @@ namespace oni {
     void
     ParticleEditorGame::_poll() {
         Window::tick(*mInput);
+        updateLatestMosPos(*mSceneMng, *mInput, mLatestMosPos);
 
+#if 0
         for (auto &&pos: mInput->getCursor()) {
             mInforSideBar.mouseScreenPos.x = pos.x;
             mInforSideBar.mouseScreenPos.y = pos.y;
@@ -232,14 +254,19 @@ namespace oni {
         auto mouseWorldP = mSceneMng->unProject(mInforSideBar.mouseScreenPos);
         mInforSideBar.mouseWorldPos.x = mouseWorldP.x;
         mInforSideBar.mouseWorldPos.y = mouseWorldP.y;
+#endif
 
-        EntityID hotEntity = findHotEntity(mInforSideBar.mouseWorldPos);
+        EntityID hotEntity = findHotEntity(mInfoSideBar.mouseWorldPos);
 
-        if (mInput->isMouseButtonPressed()) {
+        if (mInput->isMosButtonReleased() && mClickLimiter.tryFire()) {
+            createWindow(mLatestMosPos);
+
             // TODO: Find a better way to specify editing area?
-            if (mInforSideBar.createModeOn && mInforSideBar.mouseScreenPos.x > 450) {
-                if (mInforSideBar.reset) {
-                    mEntityMng->reset();
+            if (mInfoSideBar.createModeOn && mInfoSideBar.mouseScreenPos.x > 450) {
+
+                mEntityMng->reset();
+
+                if (mInfoSideBar.reset) {
                 } else {
                     // TODO: This is kinda about how the pattern goes, UI is just components with values.
                     // How to proceed from this? Notice that this has no dependency to JSON! Is that good? Or bad?
@@ -259,18 +286,18 @@ namespace oni {
                     // TODO: Editor is basically a smart-json editor. Depending on the type of entity selected editor
                     // will open the correct JSON and automatically give a UI where you can edit the values on
                     // the fly! and when done, save button will write back the data to disk. That's it.
-                    hotEntity = mEntityFactory->loadEntity_Local(*mEntityMng, *mEntityMng, mInforSideBar.entityName);
+                    hotEntity = mEntityFactory->loadEntity_Local(*mEntityMng, *mEntityMng, mInfoSideBar.entityName);
                     auto &pos = mEntityMng->get<WorldP3D>(hotEntity);
-                    pos = mInforSideBar.mouseWorldPos.to3D(0.5);
+                    pos = mInfoSideBar.mouseWorldPos.to3D(0.5);
 
                     static int count = 0;
                     count++;
-                    std::string name =(std::string("test") + std::to_string(count));
+                    std::string name = (std::string("test") + std::to_string(count));
                     std::string label = std::string(" label='") + name + std::string("' ");
                     TwAddVarRO(mEntityBar, name.c_str(), TW_TYPE_UINT32,
-                               &mInforSideBar.fps, label.c_str());
+                               &mInfoSideBar.fps, label.c_str());
                 }
-            } else if (mInforSideBar.save && hotEntity != EntityManager::nullEntity()) {
+            } else if (mInfoSideBar.save && hotEntity != EntityManager::nullEntity()) {
                 mEntityFactory->saveEntity_Local(*mEntityMng, hotEntity, mEntityMng->get<EntityNameEditor>(hotEntity));
             }
         }
@@ -283,6 +310,6 @@ namespace oni {
 
     void
     ParticleEditorGame::showFPS(i16 fps) {
-        mInforSideBar.fps = fps;
+        mInfoSideBar.fps = fps;
     }
 }

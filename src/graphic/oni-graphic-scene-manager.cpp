@@ -360,7 +360,7 @@ namespace oni {
     }
 
     WorldP3D
-    SceneManager::unProject(const Screen2D &point) {
+    SceneManager::unProject(const Screen2D &point) const {
         auto proj = mProjectionMatrix;
         proj *= mat4::scale({mCamera.z, mCamera.z, 1.0f});
         proj *= mat4::translation(-mCamera.x, -mCamera.y, 0.0f);

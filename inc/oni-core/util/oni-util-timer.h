@@ -38,4 +38,23 @@ namespace oni {
     private:
         std::chrono::steady_clock::time_point mStartTime{};
     };
+
+    class RateLimiter {
+    public:
+        explicit RateLimiter(r32 rate) : mRate(rate) {}
+
+        bool
+        tryFire() {
+            if (mTimer.elapsedInSeconds() > mRate) {
+                mTimer.restart();
+                return true;
+            }
+            return false;
+            return mTimer.elapsedInSeconds() > mRate;
+        }
+
+    private:
+        r32 mRate = 0.f;
+        Timer mTimer = {};
+    };
 }

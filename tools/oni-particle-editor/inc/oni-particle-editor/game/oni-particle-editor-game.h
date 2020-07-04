@@ -65,7 +65,9 @@ namespace oni {
             EntityNameEditor entityName{EntityNameEditor::GET("particle-emitter")};
         };
 
-        InfoSideBar mInforSideBar{};
+        InfoSideBar mInfoSideBar{};
+        WorldP3D mLatestMosPos{};
+        RateLimiter mClickLimiter{0.2f};
 
     private:
         oni::AssetFilesIndex *mAssetFilesIdx{};
@@ -82,6 +84,6 @@ namespace oni {
 
         bool mWindowReady{false};
 
-        TwBar* mEntityBar;
+        TwBar *mEntityBar;
     };
 }

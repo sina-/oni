@@ -200,12 +200,14 @@ namespace oni {
                           i32 mods) {
         UNUSED(mods);
         TwEventMouseButtonGLFW(button, action);
+
         auto thiz = getThisFromGLFWWindow(window);
         if (action == GLFW_PRESS) {
-            thiz->mInput.setMouseButton(button);
+            thiz->mInput.setMosButtonPressed(button);
         }
         if (action == GLFW_RELEASE) {
-            thiz->mInput.setMouseButton(GLFW_KEY_UNKNOWN);
+            thiz->mInput.setMosButtonReleased(button);
+            thiz->mInput.setMosButtonPressed(-1);
         }
     }
 

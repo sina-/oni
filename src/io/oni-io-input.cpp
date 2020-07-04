@@ -28,6 +28,7 @@ namespace oni {
         mScrollDirectionX.clear();
         mScrollDirectionY.clear();
         mCursorPos.clear();
+        mMosButtonReleased = -1;
     }
 
     bool
@@ -86,15 +87,33 @@ namespace oni {
     }
 
     void
-    Input::setMouseButton(i32 button) { mMouseButton = button; }
+    Input::setMosButtonPressed(i32 button) {
+        mMosButtonPressed = button;
+    }
 
-    const i32 &
-    Input::getMouseButton() const { return mMouseButton; }
+    void
+    Input::setMosButtonReleased(i32 button) {
+        mMosButtonReleased = button;
+    }
+
+    i32
+    Input::getMosButtonPressed() const {
+        return mMosButtonPressed;
+    }
+
+    i32
+    Input::getMosButtonReleased() const {
+        return mMosButtonReleased;
+    }
 
     bool
-    Input::isMouseButtonPressed() const {
-        // TODO: I need a better abstraction over user input!
-        return mMouseButton > -1;
+    Input::isMosButtonPressed() const {
+        return mMosButtonPressed > -1;
+    }
+
+    bool
+    Input::isMosButtonReleased() const {
+        return mMosButtonReleased > -1;
     }
 
     void
@@ -103,7 +122,7 @@ namespace oni {
         mCursorPos.push_back({r32(x), r32(y)});
     }
 
-    const std::vector<WorldP2D> &
+    const std::vector<Screen2D> &
     Input::getCursor() const {
         return mCursorPos;
     }

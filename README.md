@@ -1,3 +1,8 @@
+# Summary
+Oni is an open-source game engine build from ground up using ECS and modern C++ mainly focused on building 2D multiplayer games, and it is easily extendible to 3D. The development is driven by the needs of a game I am developing using the engine. The API is undergoing rapid changes as I explore new techniques, but I'm hoping to get to a stable 1.0 API at some point, and as a result there isn't much documentation around the engine code at this point. However there is an example particle-editor (https://github.com/sina-/oni/tree/master/tools/oni-particle-editor) included that show cases the minimum setup needed to get the engine up and running. 
+
+The following is the list of depenedncies needed to compile the engine.
+
 # Linux Debian/Ubuntu
 ```
 sudo apt install gcc-8 		 \

@@ -21,6 +21,7 @@ namespace oni {
             // TODO: To avoid modulo operator see: https://arxiv.org/pdf/1805.10941.pdf
             // I think it will be: auto result = lowerBoundInclusive + ((n * d) >> 64); 
             // Although I would need a 128 bit uint to hold the intermediate results. 
+            // Example: https://github.com/colmmacc/s2n/blob/7ad9240c8b9ade0cc3a403a732ba9f1289934abd/utils/s2n_random.c#L483
             auto result = lowerBoundInclusive + (n % d);
             return result;
         }

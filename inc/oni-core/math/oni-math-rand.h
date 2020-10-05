@@ -18,6 +18,9 @@ namespace oni {
             assert(upperBoundExclusive > lowerBoundInclusive);
             auto n = next_u64();
             auto d = upperBoundExclusive - lowerBoundInclusive;
+            // TODO: To avoid modulo operator see: https://arxiv.org/pdf/1805.10941.pdf
+            // I think it will be: auto result = lowerBoundInclusive + ((n * d) >> 64); 
+            // Although I would need a 128 bit uint to hold the intermediate results. 
             auto result = lowerBoundInclusive + (n % d);
             return result;
         }
